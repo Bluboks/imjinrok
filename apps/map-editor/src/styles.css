@@ -1,0 +1,157 @@
+:root {
+  color: #f0eddc;
+  background:
+    radial-gradient(circle at top left, rgba(127, 161, 123, 0.22), transparent 28%),
+    radial-gradient(circle at bottom right, rgba(65, 107, 118, 0.25), transparent 24%),
+    #0d1719;
+  font-family: "Trebuchet MS", Verdana, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  min-height: 100vh;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+.editor-shell {
+  display: grid;
+  grid-template-columns: minmax(300px, 380px) minmax(0, 1fr);
+  min-height: 100vh;
+}
+
+.editor-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: rgba(8, 16, 17, 0.9);
+  border-right: 1px solid rgba(124, 161, 141, 0.16);
+}
+
+.editor-sidebar h1,
+.editor-sidebar h2,
+.preview-header h2 {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+.lede,
+.preview-header p,
+.panel-card li {
+  color: #b7c6bb;
+}
+
+.eyebrow {
+  margin: 0 0 0.35rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.72rem;
+  color: #8db09f;
+}
+
+.editor-sidebar label,
+.control-grid label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.editor-sidebar input {
+  padding: 0.75rem 0.9rem;
+  border: 1px solid rgba(141, 176, 159, 0.2);
+  border-radius: 0.75rem;
+  background: rgba(19, 36, 39, 0.95);
+  color: #f0eddc;
+}
+
+.control-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.button-row {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.button-row button {
+  padding: 0.8rem 1rem;
+  border: 0;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #7ea66b, #c6a96a);
+  color: #112023;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.panel-card {
+  padding: 1rem;
+  border-radius: 1rem;
+  background: rgba(18, 32, 35, 0.92);
+  border: 1px solid rgba(124, 161, 141, 0.18);
+}
+
+.panel-card ul {
+  margin: 0.75rem 0 0;
+  padding-left: 1.1rem;
+}
+
+.compact-card pre {
+  margin: 0.75rem 0 0;
+  overflow: auto;
+  padding: 0.75rem;
+  border-radius: 0.75rem;
+  background: rgba(7, 14, 15, 0.95);
+  color: #d8d7c9;
+}
+
+.editor-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.5rem;
+}
+
+.preview-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 1rem;
+}
+
+.editor-canvas-host {
+  min-height: 640px;
+  border-radius: 1.25rem;
+  overflow: hidden;
+  border: 1px solid rgba(124, 161, 141, 0.18);
+  box-shadow: 0 22px 60px rgba(0, 0, 0, 0.28);
+}
+
+@media (max-width: 960px) {
+  .editor-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .editor-preview {
+    padding-top: 0;
+  }
+
+  .editor-canvas-host {
+    min-height: 420px;
+  }
+}
