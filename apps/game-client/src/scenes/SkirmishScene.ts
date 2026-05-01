@@ -58,7 +58,7 @@ import {
 } from "../hud.js";
 import { createSessionTransport, type SessionTransport } from "../net/SessionTransport.js";
 import { placeStaticVisual } from "../render/placeStaticVisual.js";
-import { getAssetScale, getFrameOrigin, REFERENCE_PX_PER_WU, RENDER_DEPTH_BIAS } from "../render/visualScale.js";
+import { getAssetScale, getFrameOrigin, getFramePivot, REFERENCE_PX_PER_WU, RENDER_DEPTH_BIAS } from "../render/visualScale.js";
 import type { GameLaunchContext } from "../session.js";
 
 const DRAG_THRESHOLD_SQ = 36;
@@ -114,6 +114,7 @@ export class SkirmishScene extends Phaser.Scene {
   private mapOrigin = new Phaser.Math.Vector2(0, 0);
   private readonly terrainChunks: Phaser.GameObjects.RenderTexture[] = [];
   private readonly terrainRenderStamps = new Map<string, Phaser.GameObjects.Image>();
+  private readonly elevationFogStamps = new Map<string, Phaser.GameObjects.Image>();
   private readonly elevationOverlays: Phaser.GameObjects.Image[] = [];
   private readonly fogChunks: (Phaser.GameObjects.RenderTexture | null)[] = [];
   private readonly unitRenderables = new Map<string, UnitRenderable>();
@@ -125,6 +126,7 @@ export class SkirmishScene extends Phaser.Scene {
   private fogChunkDirtyMask = new Uint8Array(0);
   private fogChunksPerRow = 0;
   private fogChunksPerColumn = 0;
+  private terrainFogLiftPaddingPx = 0;
   private perfEnabled = false;
   private perfText: Phaser.GameObjects.Text | null = null;
   private rollingFrameMs = 0;
@@ -165,6 +167,7 @@ export class SkirmishScene extends Phaser.Scene {
     this.worldState = this.sessionTransport.getSnapshot();
     this.lastSyncedTick = this.worldState.tick;
     this.playerVisibility = createPlayerVisibility(this.map);
+    this.terrainFogLiftPaddingPx = this.computeTerrainFogLiftPaddingPx();
     this.configureFogChunkGrid();
     this.mapOrigin.set(this.scale.width / 2, 160);
     this.virtualCursorScreen.set(this.scale.width / 2, this.scale.height / 2);
@@ -332,6 +335,7 @@ export class SkirmishScene extends Phaser.Scene {
     this.terrainChunks.forEach((chunk) => chunk.destroy());
     this.terrainChunks.length = 0;
     this.disposeTerrainRenderStamps();
+    this.disposeElevationFogStamps();
     this.disposeElevationOverlay();
     this.disposeFogOverlay();
     this.fogChunkDirtyMask = new Uint8Array(0);
@@ -1366,8 +1370,6 @@ export class SkirmishScene extends Phaser.Scene {
     const bounds = this.getFogChunkBounds(chunkIndex);
     const renderTexture = this.ensureFogChunkRenderTexture(chunkIndex, bounds);
 
-    const halfWidth = this.map.tileWidth / 2;
-    const halfHeight = this.map.tileHeight / 2;
     let hasFog = false;
     let tileDrawCount = 0;
 
@@ -1390,7 +1392,15 @@ export class SkirmishScene extends Phaser.Scene {
         const iso = cartToIso({ x, y }, this.map.tileWidth, this.map.tileHeight);
         const worldX = this.mapOrigin.x + iso.x;
         const worldY = this.mapOrigin.y + iso.y;
-        renderTexture.draw(textureKey, worldX - bounds.minX - halfWidth - 1, worldY - bounds.minY - halfHeight - 1);
+        const tile = getTileAt(this.map, x, y);
+        const drewElevationFog = this.drawElevationFogTile(renderTexture, bounds, visibility, x, y, worldX, worldY);
+
+        if (tile.elevation <= 0) {
+          this.drawBaseFogTile(renderTexture, bounds, textureKey, visibility, x, y, worldX, worldY);
+        } else if (!drewElevationFog) {
+          this.drawFallbackFogTile(renderTexture, bounds, textureKey, worldX, worldY);
+        }
+
         hasFog = true;
         tileDrawCount += 1;
       }
@@ -1398,6 +1408,110 @@ export class SkirmishScene extends Phaser.Scene {
 
     renderTexture.setVisible(hasFog);
     return tileDrawCount;
+  }
+
+  private drawBaseFogTile(
+    renderTexture: Phaser.GameObjects.RenderTexture,
+    bounds: FogChunkBounds,
+    fallbackTextureKey: string,
+    visibility: TileVisibility,
+    x: number,
+    y: number,
+    worldX: number,
+    worldY: number,
+  ): void {
+    const tile = getTileAt(this.map, x, y);
+    const flatVisual = this.getFlatTerrainVisualForTerrain(tile.terrain);
+    const flatFrame = flatVisual ? this.pickTerrainFrame(flatVisual, "base", x, y) : null;
+
+    if (flatVisual && flatFrame && this.textures.exists(flatFrame.textureKey)) {
+      this.drawVisualFogFrame(renderTexture, bounds, flatVisual, flatFrame, visibility, worldX, worldY, 0);
+      return;
+    }
+
+    this.drawFallbackFogTile(renderTexture, bounds, fallbackTextureKey, worldX, worldY);
+  }
+
+  private drawFallbackFogTile(
+    renderTexture: Phaser.GameObjects.RenderTexture,
+    bounds: FogChunkBounds,
+    textureKey: string,
+    worldX: number,
+    worldY: number,
+  ): void {
+    const halfWidth = this.map.tileWidth / 2;
+    const halfHeight = this.map.tileHeight / 2;
+
+    renderTexture.draw(textureKey, worldX - bounds.minX - halfWidth - 1, worldY - bounds.minY - halfHeight - 1);
+  }
+
+  private drawElevationFogTile(
+    renderTexture: Phaser.GameObjects.RenderTexture,
+    bounds: FogChunkBounds,
+    visibility: TileVisibility,
+    x: number,
+    y: number,
+    worldX: number,
+    worldY: number,
+  ): boolean {
+    const tile = getTileAt(this.map, x, y);
+    const neighbors = this.getElevationNeighbors(x, y);
+    const slot = resolveElevationTerrainSlot(tile.elevation, neighbors);
+
+    if (!slot) {
+      return false;
+    }
+
+    const visualTerrain = this.resolveElevationVisualTerrain(tile.terrain, tile.elevation, neighbors);
+    const terrainVisual = this.getTerrainVisualForTerrain(visualTerrain);
+    const frame = terrainVisual ? this.pickTerrainFrame(terrainVisual, slot, x, y) : null;
+
+    if (!terrainVisual || !frame || !this.textures.exists(frame.textureKey)) {
+      return false;
+    }
+
+    let drewFog = false;
+
+    if (tile.elevation > 0 && slot !== "plateauTop") {
+      const lowerFrame = this.pickTerrainFrame(terrainVisual, "plateauTop", x, y);
+
+      if (lowerFrame && this.textures.exists(lowerFrame.textureKey)) {
+        this.drawVisualFogFrame(renderTexture, bounds, terrainVisual, lowerFrame, visibility, worldX, worldY, tile.elevation);
+        drewFog = true;
+      }
+    }
+
+    this.drawVisualFogFrame(
+      renderTexture,
+      bounds,
+      terrainVisual,
+      frame,
+      visibility,
+      worldX,
+      worldY,
+      slot === "plateauTop" ? tile.elevation : tile.elevation + 1,
+    );
+    drewFog = true;
+
+    return drewFog;
+  }
+
+  private drawVisualFogFrame(
+    renderTexture: Phaser.GameObjects.RenderTexture,
+    bounds: FogChunkBounds,
+    visual: TerrainVisual,
+    frame: FrameRef,
+    visibility: TileVisibility,
+    worldX: number,
+    worldY: number,
+    liftSteps: number,
+  ): void {
+    const stamp = this.getElevationFogStamp(visual, frame, visibility);
+    const scale = getAssetScale(visual, this.activeTheme.display.defaultPxPerWu ?? REFERENCE_PX_PER_WU);
+    const pivot = getFramePivot(visual, frame);
+    const liftPx = (pivot.liftPx ?? 0) * scale * liftSteps;
+
+    renderTexture.draw(stamp, worldX - bounds.minX, worldY - bounds.minY - liftPx);
   }
 
   private ensureFogChunkRenderTexture(chunkIndex: number, bounds: FogChunkBounds): Phaser.GameObjects.RenderTexture {
@@ -1430,7 +1544,8 @@ export class SkirmishScene extends Phaser.Scene {
       this.getTileWorldDiamondBounds(chunkX, maxY),
     ];
     const minX = Math.min(...corners.map((corner) => corner.left)) - 2;
-    const minY = Math.min(...corners.map((corner) => corner.top)) - 2;
+    const flatMinY = Math.min(...corners.map((corner) => corner.top)) - 2;
+    const minY = flatMinY - this.terrainFogLiftPaddingPx;
     const maxRight = Math.max(...corners.map((corner) => corner.right)) + 2;
     const maxBottom = Math.max(...corners.map((corner) => corner.bottom)) + 2;
 
@@ -1443,7 +1558,7 @@ export class SkirmishScene extends Phaser.Scene {
       minY,
       width: Math.ceil(maxRight - minX),
       height: Math.ceil(maxBottom - minY),
-      depth: minY + 1,
+      depth: flatMinY + 1,
     };
   }
 
@@ -1647,9 +1762,41 @@ export class SkirmishScene extends Phaser.Scene {
     return stamp;
   }
 
+  private getElevationFogStamp(visual: TerrainVisual, frame: FrameRef, visibility: TileVisibility): Phaser.GameObjects.Image {
+    const stampKey = `${visibility}:${visual.id}:${frame.textureKey}:${frame.frameName ?? ""}`;
+    const existingStamp = this.elevationFogStamps.get(stampKey);
+
+    if (existingStamp) {
+      return existingStamp;
+    }
+
+    const stamp = frame.frameName
+      ? this.make.image({ x: 0, y: 0, key: frame.textureKey, frame: frame.frameName, add: false })
+      : this.make.image({ x: 0, y: 0, key: frame.textureKey, add: false });
+    const origin = getFrameOrigin(visual, frame);
+    const scale = getAssetScale(visual, this.activeTheme.display.defaultPxPerWu ?? REFERENCE_PX_PER_WU);
+    const alpha = visibility === TileVisibility.Unexplored ? FOG_UNEXPLORED_ALPHA : FOG_EXPLORED_ALPHA;
+
+    this.applyVisualTextureFilter(visual, frame);
+    stamp
+      .setOrigin(origin.x, origin.y)
+      .setScale(scale)
+      .setAlpha(alpha)
+      .setTint(0x020608);
+
+    this.elevationFogStamps.set(stampKey, stamp);
+
+    return stamp;
+  }
+
   private disposeTerrainRenderStamps(): void {
     this.terrainRenderStamps.forEach((stamp) => stamp.destroy());
     this.terrainRenderStamps.clear();
+  }
+
+  private disposeElevationFogStamps(): void {
+    this.elevationFogStamps.forEach((stamp) => stamp.destroy());
+    this.elevationFogStamps.clear();
   }
 
   private applyVisualTextureFilter(visual: TerrainVisual, frame: FrameRef): void {
@@ -1659,6 +1806,19 @@ export class SkirmishScene extends Phaser.Scene {
       : Phaser.Textures.FilterMode.NEAREST;
 
     texture.setFilter(filterMode);
+  }
+
+  private computeTerrainFogLiftPaddingPx(): number {
+    const layer = this.map.layers[0];
+
+    if (!layer) {
+      return 0;
+    }
+
+    const maxElevation = layer.tiles.reduce((max, tile) => Math.max(max, tile.elevation), 0);
+    const elevationStepPx = this.map.tileHeight / 2;
+
+    return maxElevation * elevationStepPx + 2;
   }
 
   private getElevationNeighbors(x: number, y: number): Array<ElevationNeighbor & { terrain: TerrainType }> {
