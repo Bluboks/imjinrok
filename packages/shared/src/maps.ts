@@ -118,43 +118,43 @@ export function getTileAt(map: MapDefinition, x: number, y: number): TileCell {
 }
 
 export const defaultMap: MapDefinition = (() => {
+  const demoMapSize = 256;
   const map = createBlankMap({
     id: "river-crossing",
     name: "River Crossing",
-    description: "Two major lanes with a contested center ridge.",
-    width: 24,
-    height: 24,
+    description: "Massive 256x256 river-crossing battlefield with multiple lanes and contested ridges.",
+    width: demoMapSize,
+    height: demoMapSize,
     tags: ["skirmish", "1v1", "custom-lobby", "automatch"],
   });
 
-  for (let y = 9; y <= 14; y += 1) {
-    for (let x = 0; x < map.width; x += 1) {
-      setTerrain(map, x, y, "water");
+  const fillRect = (fromX: number, fromY: number, toX: number, toY: number, terrain: TerrainType): void => {
+    for (let y = fromY; y <= toY; y += 1) {
+      for (let x = fromX; x <= toX; x += 1) {
+        setTerrain(map, x, y, terrain);
+      }
     }
-  }
+  };
 
-  for (let x = 8; x <= 15; x += 1) {
-    setTerrain(map, x, 11, "grass");
-    setTerrain(map, x, 12, "grass");
-  }
+  fillRect(0, 96, map.width - 1, 159, "water");
 
-  for (let y = 3; y <= 7; y += 1) {
-    for (let x = 16; x <= 20; x += 1) {
-      setTerrain(map, x, y, "forest");
-    }
-  }
+  fillRect(48, 120, 88, 136, "grass");
+  fillRect(108, 124, 148, 132, "grass");
+  fillRect(168, 120, 208, 136, "grass");
 
-  for (let y = 16; y <= 20; y += 1) {
-    for (let x = 3; x <= 7; x += 1) {
-      setTerrain(map, x, y, "forest");
-    }
-  }
+  fillRect(178, 22, 232, 78, "forest");
+  fillRect(22, 176, 78, 232, "forest");
+  fillRect(18, 20, 62, 76, "forest");
+  fillRect(194, 188, 238, 238, "forest");
+  fillRect(92, 190, 132, 224, "forest");
+  fillRect(134, 24, 164, 58, "forest");
 
-  for (let y = 5; y <= 8; y += 1) {
-    for (let x = 9; x <= 14; x += 1) {
-      setTerrain(map, x, y, "cliff");
-    }
-  }
+  fillRect(88, 32, 160, 80, "cliff");
+  fillRect(96, 178, 168, 224, "cliff");
+  fillRect(112, 86, 152, 94, "cliff");
+  fillRect(104, 162, 160, 170, "cliff");
+  fillRect(34, 84, 78, 92, "cliff");
+  fillRect(178, 164, 222, 172, "cliff");
 
   return map;
 })();

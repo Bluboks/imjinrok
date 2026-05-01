@@ -10,10 +10,20 @@ import {
   type WorldState,
 } from "@simulation";
 import {
+  DRAG_SELECTION_CHANGED_EVENT,
+  MINIMAP_NAVIGATE_EVENT,
+  MINIMAP_ENTITIES_CHANGED_EVENT,
+  MINIMAP_ENTITIES_REGISTRY_KEY,
+  MINIMAP_MAP_CHANGED_EVENT,
+  MINIMAP_MAP_REGISTRY_KEY,
+  MINIMAP_VIEWPORT_CHANGED_EVENT,
+  MINIMAP_VIEWPORT_REGISTRY_KEY,
   SELECTED_ENTITY_CHANGED_EVENT,
   SELECTED_ENTITY_REGISTRY_KEY,
   VIRTUAL_CURSOR_CHANGED_EVENT,
   VIRTUAL_CURSOR_REGISTRY_KEY,
+  type DragSelectionView,
+  type MinimapPoint,
   toSelectedEntityView,
 } from "../hud.js";
 import type { GameLaunchContext } from "../session.js";
@@ -21,15 +31,30 @@ import type { GameLaunchContext } from "../session.js";
 const DRAG_THRESHOLD_SQ = 36;
 const EDGE_PAN_SIZE = 28;
 const EDGE_PAN_SPEED = 520;
+const TERRAIN_CHUNK_SIZE = 16;
+const VIEWPORT_EVENT_INTERVAL_MS = 1000 / 30;
+const SCREEN_OVERLAY_DEPTH = 1_000_000;
+
+interface UnitRenderable {
+  container: Phaser.GameObjects.Container;
+  body: Phaser.GameObjects.Graphics;
+  selectionRing: Phaser.GameObjects.Graphics;
+}
 
 export class SkirmishScene extends Phaser.Scene {
   private map: MapDefinition = defaultMap;
   private worldState: WorldState = createInitialWorldState(defaultMap, ["local-player", "cpu-1"]);
   private lastTickAt = 0;
   private mapOrigin = new Phaser.Math.Vector2(0, 0);
-  private terrainGraphics?: Phaser.GameObjects.Graphics;
-  private unitGraphics?: Phaser.GameObjects.Graphics;
-  private selectionGraphics?: Phaser.GameObjects.Graphics;
+  private readonly terrainChunks: Phaser.GameObjects.RenderTexture[] = [];
+  private readonly unitRenderables = new Map<string, UnitRenderable>();
+  private readonly terrainTextureKeys = new Map<TerrainType, string>();
+  private perfEnabled = false;
+  private perfText: Phaser.GameObjects.Text | null = null;
+  private rollingFrameMs = 0;
+  private lastViewportEmitAt = 0;
+  private viewportDirty = false;
+  private cursorKeys: Phaser.Types.Input.Keyboard.CursorKeys | null = null;
   private dragStartScreen: Phaser.Math.Vector2 | null = null;
   private dragCurrentScreen: Phaser.Math.Vector2 | null = null;
   private isDragSelecting = false;
@@ -47,6 +72,7 @@ export class SkirmishScene extends Phaser.Scene {
     const players = data.session?.playerIds.length ? data.session.playerIds : ["local-player", "cpu-1"];
 
     this.launchContext = data;
+    this.perfEnabled = new URLSearchParams(globalThis.location?.search ?? "").get("perf") === "1";
     this.map = defaultMap;
     this.worldState = createInitialWorldState(this.map, players);
     this.mapOrigin.set(this.scale.width / 2, 160);
@@ -56,21 +82,24 @@ export class SkirmishScene extends Phaser.Scene {
     this.cameras.main.centerOn(this.mapOrigin.x, this.mapOrigin.y + (this.map.height * this.map.tileHeight) / 2);
     this.clampCameraToWorld();
 
-    this.terrainGraphics = this.add.graphics();
-    this.unitGraphics = this.add.graphics();
-    this.selectionGraphics = this.add.graphics().setScrollFactor(0).setDepth(900);
+    this.setupPerfOverlay();
 
     this.setupCameraControls();
     this.setupMouseControls();
     this.setupPointerLockLifecycle();
     this.redrawTerrain();
-    this.redrawUnits();
+    this.syncUnitRenderables();
     this.publishVirtualCursor();
     this.selectInitialUnit(players[0] ?? "local-player");
+    this.publishMinimapMap();
+    this.publishMinimapEntities();
+    this.publishMinimapViewport(true);
   }
 
   override update(time: number, delta: number): void {
-    this.handleEdgePan(delta);
+    this.handleCameraPan(delta);
+    this.updatePerfOverlay(delta);
+    this.flushViewportIfDirty(time);
 
     if (time - this.lastTickAt < 100) {
       return;
@@ -78,11 +107,13 @@ export class SkirmishScene extends Phaser.Scene {
 
     advanceWorldTick(this.worldState);
     this.lastTickAt = time;
-    this.redrawUnits();
+    this.syncUnitRenderables();
+    this.publishMinimapEntities();
   }
 
   private setupCameraControls(): void {
     this.input.mouse?.disableContextMenu();
+    this.cursorKeys = this.input.keyboard?.createCursorKeys() ?? null;
 
     this.input.on(
       "wheel",
@@ -95,6 +126,7 @@ export class SkirmishScene extends Phaser.Scene {
         const nextZoom = Phaser.Math.Clamp(this.cameras.main.zoom - deltaY * 0.001, 0.55, 1.8);
         this.cameras.main.setZoom(nextZoom);
         this.clampCameraToWorld();
+        this.publishMinimapViewport(true);
       },
     );
   }
@@ -150,8 +182,14 @@ export class SkirmishScene extends Phaser.Scene {
 
   private setupPointerLockLifecycle(): void {
     this.input.manager.events.on(Phaser.Input.Events.POINTERLOCK_CHANGE, this.handlePointerLockChanged, this);
+    this.game.events.on(MINIMAP_NAVIGATE_EVENT, this.handleMinimapNavigate, this);
     this.scale.on(Phaser.Scale.Events.RESIZE, this.handleResize, this);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, this.handleShutdown, this);
+  }
+
+  private handleMinimapNavigate(target: MinimapPoint): void {
+    this.centerCameraOnWorldPoint(target);
+    this.publishMinimapViewport(true);
   }
 
   private handlePointerLockChanged(_event: Event, locked: boolean): void {
@@ -167,11 +205,40 @@ export class SkirmishScene extends Phaser.Scene {
     this.clampVirtualCursorToScreen();
     this.clampCameraToWorld();
     this.publishVirtualCursor();
+    this.publishMinimapMap();
+    this.publishMinimapViewport(true);
   }
 
   private handleShutdown(): void {
     this.input.manager.events.off(Phaser.Input.Events.POINTERLOCK_CHANGE, this.handlePointerLockChanged, this);
+    this.game.events.off(MINIMAP_NAVIGATE_EVENT, this.handleMinimapNavigate, this);
     this.scale.off(Phaser.Scale.Events.RESIZE, this.handleResize, this);
+    this.terrainChunks.forEach((chunk) => chunk.destroy());
+    this.terrainChunks.length = 0;
+    this.unitRenderables.forEach((renderable) => renderable.container.destroy(true));
+    this.unitRenderables.clear();
+    this.perfText?.destroy();
+    this.perfText = null;
+  }
+
+  private setupPerfOverlay(): void {
+    if (!this.perfEnabled) {
+      return;
+    }
+
+    this.perfText = this.add
+      .text(12, 12, "", { fontFamily: "monospace", fontSize: "12px", color: "#9fffa2", backgroundColor: "#0008" })
+      .setScrollFactor(0)
+      .setDepth(SCREEN_OVERLAY_DEPTH + 10);
+  }
+
+  private updatePerfOverlay(delta: number): void {
+    if (!this.perfText) {
+      return;
+    }
+
+    this.rollingFrameMs = this.rollingFrameMs === 0 ? delta : this.rollingFrameMs * 0.92 + delta * 0.08;
+    this.perfText.setText(`fps ${this.game.loop.actualFps.toFixed(1)} | frame ${this.rollingFrameMs.toFixed(1)}ms`);
   }
 
   private requestPointerLock(): void {
@@ -212,8 +279,9 @@ export class SkirmishScene extends Phaser.Scene {
     this.game.events.emit(VIRTUAL_CURSOR_CHANGED_EVENT, cursor);
   }
 
-  private handleEdgePan(delta: number): void {
+  private handleCameraPan(delta: number): void {
     const panDirection = this.getEdgePanDirection(this.virtualCursorScreen);
+    panDirection.add(this.getKeyboardPanDirection());
 
     if (panDirection.lengthSq() === 0) {
       return;
@@ -226,6 +294,30 @@ export class SkirmishScene extends Phaser.Scene {
     this.cameras.main.scrollX += panDirection.x * distance;
     this.cameras.main.scrollY += panDirection.y * distance;
     this.clampCameraToWorld();
+    this.viewportDirty = true;
+  }
+
+  private getKeyboardPanDirection(): Phaser.Math.Vector2 {
+    const direction = new Phaser.Math.Vector2(0, 0);
+
+    if (!this.cursorKeys) {
+      return direction;
+    }
+
+    if (this.cursorKeys.left.isDown) {
+      direction.x -= 1;
+    }
+    if (this.cursorKeys.right.isDown) {
+      direction.x += 1;
+    }
+    if (this.cursorKeys.up.isDown) {
+      direction.y -= 1;
+    }
+    if (this.cursorKeys.down.isDown) {
+      direction.y += 1;
+    }
+
+    return direction;
   }
 
   private getEdgePanDirection(point: Phaser.Math.Vector2): Phaser.Math.Vector2 {
@@ -256,7 +348,7 @@ export class SkirmishScene extends Phaser.Scene {
     this.dragStartScreen = start;
     this.dragCurrentScreen = start.clone();
     this.isDragSelecting = false;
-    this.selectionGraphics?.clear();
+    this.publishDragSelection(null);
   }
 
   private updateDragSelection(): void {
@@ -274,11 +366,15 @@ export class SkirmishScene extends Phaser.Scene {
     );
 
     if (dragDistanceSq < DRAG_THRESHOLD_SQ) {
+      if (this.isDragSelecting) {
+        this.isDragSelecting = false;
+        this.publishDragSelection(null);
+      }
       return;
     }
 
     this.isDragSelecting = true;
-    this.drawDragSelectionBox();
+    this.publishDragSelection(this.getScreenRectangle(this.dragStartScreen, this.dragCurrentScreen));
   }
 
   private finishDragSelection(): void {
@@ -296,28 +392,22 @@ export class SkirmishScene extends Phaser.Scene {
     this.dragStartScreen = null;
     this.dragCurrentScreen = null;
     this.isDragSelecting = false;
-    this.selectionGraphics?.clear();
+    this.publishDragSelection(null);
   }
 
   private cancelDragSelection(): void {
     this.dragStartScreen = null;
     this.dragCurrentScreen = null;
     this.isDragSelecting = false;
-    this.selectionGraphics?.clear();
+    this.publishDragSelection(null);
   }
 
-  private drawDragSelectionBox(): void {
-    if (!this.selectionGraphics || !this.dragStartScreen || !this.dragCurrentScreen) {
-      return;
-    }
+  private publishDragSelection(rectangle: Phaser.Geom.Rectangle | null): void {
+    const selection: DragSelectionView | null = rectangle
+      ? { x: rectangle.x, y: rectangle.y, width: rectangle.width, height: rectangle.height }
+      : null;
 
-    const rectangle = this.getScreenRectangle(this.dragStartScreen, this.dragCurrentScreen);
-
-    this.selectionGraphics.clear();
-    this.selectionGraphics.fillStyle(0xd0b46a, 0.12);
-    this.selectionGraphics.fillRect(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
-    this.selectionGraphics.lineStyle(1, 0xf4df8e, 0.95);
-    this.selectionGraphics.strokeRect(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
+    this.game.events.emit(DRAG_SELECTION_CHANGED_EVENT, selection);
   }
 
   private selectSingleUnitAtScreenPoint(point: Phaser.Math.Vector2): void {
@@ -339,9 +429,9 @@ export class SkirmishScene extends Phaser.Scene {
 
     const rectangle = this.getScreenRectangle(this.dragStartScreen, this.dragCurrentScreen);
     const selectedUnits = Object.values(this.worldState.units).filter((unit) => {
-      const unitScreenPosition = this.getUnitScreenPosition(unit);
+      const unitSelectionBounds = this.getUnitSelectionScreenBounds(unit);
 
-      return Phaser.Geom.Rectangle.Contains(rectangle, unitScreenPosition.x, unitScreenPosition.y);
+      return Phaser.Geom.Intersects.RectangleToRectangle(rectangle, unitSelectionBounds);
     });
 
     this.selectUnits(selectedUnits);
@@ -372,8 +462,68 @@ export class SkirmishScene extends Phaser.Scene {
     });
 
     this.emitSelectionChanged();
-    this.redrawUnits();
+    this.syncUnitRenderables();
     this.showMoveTargetMarker(target);
+    this.publishMinimapEntities();
+  }
+
+  private publishMinimapMap(): void {
+    const bounds = this.getWorldFieldBounds();
+    const view = { map: this.map, worldBounds: { x: bounds.x, y: bounds.y, width: bounds.width, height: bounds.height } };
+
+    this.registry.set(MINIMAP_MAP_REGISTRY_KEY, view);
+    this.game.events.emit(MINIMAP_MAP_CHANGED_EVENT, view);
+  }
+
+  private publishMinimapEntities(): void {
+    const view = {
+      entities: Object.values(this.worldState.units).map((unit) => ({
+        id: unit.id,
+        playerId: unit.playerId,
+        kind: unit.kind,
+        position: { ...unit.position },
+        selected: this.selectedUnitIds.has(unit.id),
+      })),
+    };
+
+    this.registry.set(MINIMAP_ENTITIES_REGISTRY_KEY, view);
+    this.game.events.emit(MINIMAP_ENTITIES_CHANGED_EVENT, view);
+  }
+
+  private publishMinimapViewport(force = false): void {
+    if (!force && this.time.now - this.lastViewportEmitAt < VIEWPORT_EVENT_INTERVAL_MS) {
+      this.viewportDirty = true;
+      return;
+    }
+
+    const camera = this.cameras.main;
+    const bounds = this.getWorldFieldBounds();
+    const view = {
+      viewportWorldCorners: [
+        this.screenToWorldPoint(new Phaser.Math.Vector2(0, 0)),
+        this.screenToWorldPoint(new Phaser.Math.Vector2(this.scale.width, 0)),
+        this.screenToWorldPoint(new Phaser.Math.Vector2(this.scale.width, this.scale.height)),
+        this.screenToWorldPoint(new Phaser.Math.Vector2(0, this.scale.height)),
+      ].map((point) => ({ x: point.x, y: point.y })),
+      worldBounds: {
+        x: bounds.x,
+        y: bounds.y,
+        width: bounds.width,
+        height: bounds.height,
+      },
+      zoom: camera.zoom,
+    };
+
+    this.lastViewportEmitAt = this.time.now;
+    this.viewportDirty = false;
+    this.registry.set(MINIMAP_VIEWPORT_REGISTRY_KEY, view);
+    this.game.events.emit(MINIMAP_VIEWPORT_CHANGED_EVENT, view);
+  }
+
+  private flushViewportIfDirty(time: number): void {
+    if (this.viewportDirty && time - this.lastViewportEmitAt >= VIEWPORT_EVENT_INTERVAL_MS) {
+      this.publishMinimapViewport(true);
+    }
   }
 
   private getGridPointFromScreenPoint(point: Phaser.Math.Vector2): GridPoint {
@@ -424,6 +574,7 @@ export class SkirmishScene extends Phaser.Scene {
     const halfWidth = this.map.tileWidth / 4;
     const halfHeight = this.map.tileHeight / 4;
 
+    marker.setDepth(worldY + 30);
     marker.lineStyle(2, 0xf4df8e, 0.95);
     marker.strokePoints(
       [
@@ -446,10 +597,23 @@ export class SkirmishScene extends Phaser.Scene {
 
   private screenToWorldPoint(point: Phaser.Math.Vector2): Phaser.Math.Vector2 {
     const camera = this.cameras.main;
+    const originX = camera.width * camera.originX;
+    const originY = camera.height * camera.originY;
 
     return new Phaser.Math.Vector2(
-      camera.scrollX + (point.x - camera.x) / camera.zoom,
-      camera.scrollY + (point.y - camera.y) / camera.zoom,
+      camera.scrollX + originX + (point.x - camera.x - originX) / camera.zoom,
+      camera.scrollY + originY + (point.y - camera.y - originY) / camera.zoom,
+    );
+  }
+
+  private worldToScreenPoint(point: Phaser.Math.Vector2): Phaser.Math.Vector2 {
+    const camera = this.cameras.main;
+    const originX = camera.width * camera.originX;
+    const originY = camera.height * camera.originY;
+
+    return new Phaser.Math.Vector2(
+      camera.x + originX + (point.x - camera.scrollX - originX) * camera.zoom,
+      camera.y + originY + (point.y - camera.scrollY - originY) * camera.zoom,
     );
   }
 
@@ -472,13 +636,19 @@ export class SkirmishScene extends Phaser.Scene {
   }
 
   private getUnitScreenPosition(unit: UnitState): Phaser.Math.Vector2 {
-    const camera = this.cameras.main;
-    const worldPosition = this.getUnitWorldPosition(unit);
+    return this.worldToScreenPoint(this.getUnitWorldPosition(unit));
+  }
 
-    return new Phaser.Math.Vector2(
-      camera.x + (worldPosition.x - camera.scrollX) * camera.zoom,
-      camera.y + (worldPosition.y - camera.scrollY) * camera.zoom,
-    );
+  private getUnitSelectionScreenBounds(unit: UnitState): Phaser.Geom.Rectangle {
+    const position = this.getUnitScreenPosition(unit);
+    const radius = unit.kind === "town-center" ? 12 : 6;
+    const zoom = this.cameras.main.zoom;
+    const padding = 4;
+    const halfWidth = radius * 1.6 * zoom + padding;
+    const top = radius * zoom + padding;
+    const bottom = radius * 1.3 * zoom + padding;
+
+    return new Phaser.Geom.Rectangle(position.x - halfWidth, position.y - top, halfWidth * 2, top + bottom);
   }
 
   private getHudTop(): number {
@@ -490,15 +660,25 @@ export class SkirmishScene extends Phaser.Scene {
   private clampCameraToWorld(): void {
     const bounds = this.getWorldFieldBounds();
     const camera = this.cameras.main;
-    const halfViewWidth = this.scale.width / 2 / camera.zoom;
-    const halfViewHeight = this.scale.height / 2 / camera.zoom;
-    const centerX = camera.scrollX + halfViewWidth;
-    const centerY = camera.scrollY + halfViewHeight;
+    const originX = camera.width * camera.originX;
+    const originY = camera.height * camera.originY;
+    const centerX = camera.scrollX + originX;
+    const centerY = camera.scrollY + originY;
     const clampedCenterX = Phaser.Math.Clamp(centerX, bounds.left, bounds.right);
     const clampedCenterY = Phaser.Math.Clamp(centerY, bounds.top, bounds.bottom);
 
-    camera.scrollX = clampedCenterX - halfViewWidth;
-    camera.scrollY = clampedCenterY - halfViewHeight;
+    camera.scrollX = clampedCenterX - originX;
+    camera.scrollY = clampedCenterY - originY;
+  }
+
+  private centerCameraOnWorldPoint(point: MinimapPoint): void {
+    const camera = this.cameras.main;
+    const originX = camera.width * camera.originX;
+    const originY = camera.height * camera.originY;
+
+    camera.scrollX = point.x - originX;
+    camera.scrollY = point.y - originY;
+    this.clampCameraToWorld();
   }
 
   private getWorldFieldBounds(): Phaser.Geom.Rectangle {
@@ -553,13 +733,15 @@ export class SkirmishScene extends Phaser.Scene {
     }
 
     this.emitSelectionChanged();
-    this.redrawUnits();
+    this.syncUnitRenderables();
+    this.publishMinimapEntities();
   }
 
   private clearSelection(): void {
     this.selectedUnitIds.clear();
     this.emitSelectionChanged();
-    this.redrawUnits();
+    this.syncUnitRenderables();
+    this.publishMinimapEntities();
   }
 
   private emitSelectionChanged(): void {
@@ -574,6 +756,7 @@ export class SkirmishScene extends Phaser.Scene {
   }
 
   private findUnitAtWorldPoint(worldX: number, worldY: number): UnitState | null {
+    // TODO: Add a grid/chunk spatial index if entity counts grow or profiling shows selection scans matter.
     let selectedUnit: UnitState | null = null;
     let selectedDistanceSq = Number.POSITIVE_INFINITY;
 
@@ -600,62 +783,124 @@ export class SkirmishScene extends Phaser.Scene {
   }
 
   private redrawTerrain(): void {
-    if (!this.terrainGraphics) {
-      return;
-    }
-
-    this.terrainGraphics.clear();
+    if (this.perfEnabled) console.time("terrain chunk bake");
+    this.terrainChunks.forEach((chunk) => chunk.destroy());
+    this.terrainChunks.length = 0;
+    this.ensureTerrainTextures();
 
     const halfWidth = this.map.tileWidth / 2;
     const halfHeight = this.map.tileHeight / 2;
 
-    for (let y = 0; y < this.map.height; y += 1) {
-      for (let x = 0; x < this.map.width; x += 1) {
-        const tile = getTileAt(this.map, x, y);
-        const iso = cartToIso({ x, y }, this.map.tileWidth, this.map.tileHeight);
-        const worldX = this.mapOrigin.x + iso.x;
-        const worldY = this.mapOrigin.y + iso.y;
-        const points = [
-          new Phaser.Geom.Point(worldX, worldY - halfHeight),
-          new Phaser.Geom.Point(worldX + halfWidth, worldY),
-          new Phaser.Geom.Point(worldX, worldY + halfHeight),
-          new Phaser.Geom.Point(worldX - halfWidth, worldY),
+    for (let chunkY = 0; chunkY < this.map.height; chunkY += TERRAIN_CHUNK_SIZE) {
+      for (let chunkX = 0; chunkX < this.map.width; chunkX += TERRAIN_CHUNK_SIZE) {
+        const maxX = Math.min(this.map.width - 1, chunkX + TERRAIN_CHUNK_SIZE - 1);
+        const maxY = Math.min(this.map.height - 1, chunkY + TERRAIN_CHUNK_SIZE - 1);
+        const corners = [
+          this.getTileWorldDiamondBounds(chunkX, chunkY),
+          this.getTileWorldDiamondBounds(maxX, chunkY),
+          this.getTileWorldDiamondBounds(maxX, maxY),
+          this.getTileWorldDiamondBounds(chunkX, maxY),
         ];
+        const minX = Math.min(...corners.map((corner) => corner.left)) - 2;
+        const minY = Math.min(...corners.map((corner) => corner.top)) - 2;
+        const maxRight = Math.max(...corners.map((corner) => corner.right)) + 2;
+        const maxBottom = Math.max(...corners.map((corner) => corner.bottom)) + 2;
+        const renderTexture = this.add
+          .renderTexture(minX, minY, Math.ceil(maxRight - minX), Math.ceil(maxBottom - minY))
+          .setOrigin(0, 0)
+          .setDepth(minY);
 
-        this.terrainGraphics.fillStyle(this.getTerrainColor(tile.terrain), 1);
-        this.terrainGraphics.fillPoints(points, true);
-        this.terrainGraphics.lineStyle(1, 0x203037, 0.6);
-        this.terrainGraphics.strokePoints(points, true);
+        for (let y = chunkY; y <= maxY; y += 1) {
+          for (let x = chunkX; x <= maxX; x += 1) {
+            const tile = getTileAt(this.map, x, y);
+            const iso = cartToIso({ x, y }, this.map.tileWidth, this.map.tileHeight);
+            const worldX = this.mapOrigin.x + iso.x;
+            const worldY = this.mapOrigin.y + iso.y;
+            renderTexture.draw(this.terrainTextureKeys.get(tile.terrain)!, worldX - minX - halfWidth - 1, worldY - minY - halfHeight - 1);
+          }
+        }
+
+        this.terrainChunks.push(renderTexture);
       }
     }
+    if (this.perfEnabled) console.timeEnd("terrain chunk bake");
   }
 
-  private redrawUnits(): void {
-    if (!this.unitGraphics) {
-      return;
+  private ensureTerrainTextures(): void {
+    (["forest", "water", "cliff", "grass"] as TerrainType[]).forEach((terrain) => {
+      const key = `terrain-diamond-${terrain}`;
+      if (this.textures.exists(key)) {
+        this.terrainTextureKeys.set(terrain, key);
+        return;
+      }
+      const g = this.add.graphics();
+      const halfWidth = this.map.tileWidth / 2;
+      const halfHeight = this.map.tileHeight / 2;
+      g.fillStyle(this.getTerrainColor(terrain), 1);
+      g.fillPoints([
+        new Phaser.Geom.Point(halfWidth + 1, 1),
+        new Phaser.Geom.Point(this.map.tileWidth + 1, halfHeight + 1),
+        new Phaser.Geom.Point(halfWidth + 1, this.map.tileHeight + 1),
+        new Phaser.Geom.Point(1, halfHeight + 1),
+      ], true);
+      g.lineStyle(1, 0x203037, 0.6);
+      g.strokePoints([
+        new Phaser.Geom.Point(halfWidth + 1, 1),
+        new Phaser.Geom.Point(this.map.tileWidth + 1, halfHeight + 1),
+        new Phaser.Geom.Point(halfWidth + 1, this.map.tileHeight + 1),
+        new Phaser.Geom.Point(1, halfHeight + 1),
+      ], true);
+      g.generateTexture(key, this.map.tileWidth + 2, this.map.tileHeight + 2);
+      g.destroy();
+      this.terrainTextureKeys.set(terrain, key);
+    });
+  }
+
+  private getTileWorldDiamondBounds(x: number, y: number): Phaser.Geom.Rectangle {
+    const iso = cartToIso({ x, y }, this.map.tileWidth, this.map.tileHeight);
+    return new Phaser.Geom.Rectangle(
+      this.mapOrigin.x + iso.x - this.map.tileWidth / 2,
+      this.mapOrigin.y + iso.y - this.map.tileHeight / 2,
+      this.map.tileWidth,
+      this.map.tileHeight,
+    );
+  }
+
+  private syncUnitRenderables(): void {
+    const liveIds = new Set(Object.keys(this.worldState.units));
+    for (const [id, renderable] of this.unitRenderables) {
+      if (!liveIds.has(id)) {
+        renderable.container.destroy(true);
+        this.unitRenderables.delete(id);
+      }
     }
 
-    const unitGraphics = this.unitGraphics;
-
-    unitGraphics.clear();
-
     Object.values(this.worldState.units).forEach((unit) => {
-      const unitPosition = this.getUnitWorldPosition(unit);
-      const worldX = unitPosition.x;
-      const worldY = unitPosition.y;
-      const color = unit.playerId === "local-player" ? 0xe8d77d : 0xd36454;
-      const radius = unit.kind === "town-center" ? 12 : 6;
-
-      if (this.selectedUnitIds.has(unit.id)) {
-        unitGraphics.lineStyle(2, 0xf3dd8f, 1);
-        unitGraphics.strokeEllipse(worldX, worldY + radius * 0.4, radius * 3.2, radius * 1.8);
+      let renderable = this.unitRenderables.get(unit.id);
+      if (!renderable) {
+        renderable = this.createUnitRenderable(unit);
+        this.unitRenderables.set(unit.id, renderable);
       }
-
-      unitGraphics.fillStyle(color, 1);
-      unitGraphics.fillCircle(worldX, worldY, radius);
-      unitGraphics.lineStyle(2, 0x102125, 0.9);
-      unitGraphics.strokeCircle(worldX, worldY, radius);
+      const unitPosition = this.getUnitWorldPosition(unit);
+      renderable.container.setPosition(unitPosition.x, unitPosition.y).setDepth(unitPosition.y + 20);
+      renderable.selectionRing.setVisible(this.selectedUnitIds.has(unit.id));
     });
+  }
+
+  private createUnitRenderable(unit: UnitState): UnitRenderable {
+    const radius = unit.kind === "town-center" ? 12 : 6;
+    const color = unit.playerId === "local-player" ? 0xe8d77d : 0xd36454;
+    const container = this.add.container(0, 0);
+    const selectionRing = this.add.graphics();
+    const body = this.add.graphics();
+    selectionRing.lineStyle(2, 0xf3dd8f, 1);
+    selectionRing.strokeEllipse(0, radius * 0.4, radius * 3.2, radius * 1.8);
+    body.fillStyle(color, 1);
+    body.fillCircle(0, 0, radius);
+    body.lineStyle(2, 0x102125, 0.9);
+    body.strokeCircle(0, 0, radius);
+    container.add([selectionRing, body]);
+    return { container, body, selectionRing };
   }
 
   private getTerrainColor(terrain: TerrainType): number {
