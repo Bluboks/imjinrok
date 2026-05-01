@@ -1,14 +1,9 @@
 import type { GridPoint } from "./commands.js";
-
-export const terrainTypes = ["grass", "forest", "water", "cliff"] as const;
-export type TerrainType = (typeof terrainTypes)[number];
-
-export const factions = ["blue", "red", "green", "yellow"] as const;
-export type FactionId = (typeof factions)[number];
+import type { FactionId, ResourceDefinitionId, TerrainType } from "./content.js";
 
 export interface ResourceNode {
   id: string;
-  kind: "tree" | "gold" | "stone" | "berry";
+  kind: ResourceDefinitionId;
   amount: number;
 }
 

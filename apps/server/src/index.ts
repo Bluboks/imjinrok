@@ -1,12 +1,23 @@
 import cors from "@fastify/cors";
 import Fastify from "fastify";
 import { Server as SocketIOServer } from "socket.io";
-import { type CommandEnvelope, defaultMap } from "../../../packages/shared/src/index.js";
+import { type CommandEnvelope, defaultMap, defaultSkirmishScenario } from "../../../packages/shared/src/index.js";
+import type { WorldState } from "../../../packages/simulation/src/index.js";
 import { config } from "./config.js";
 import { GameSessionService } from "./game/GameSessionService.js";
 import { registerRoutes } from "./http/registerRoutes.js";
 import { MatchmakingService } from "./matchmaking/MatchmakingService.js";
 import { RoomService } from "./rooms/RoomService.js";
+
+interface ClientToServerEvents {
+  "session:join": (sessionId: string) => void;
+  "command:issue": (envelope: CommandEnvelope) => void;
+}
+
+interface ServerToClientEvents {
+  "session:snapshot": (snapshot: WorldState) => void;
+  "session:commandAccepted": (command: CommandEnvelope) => void;
+}
 
 async function bootstrap(): Promise<void> {
   const fastify = Fastify({ logger: true });
@@ -16,7 +27,9 @@ async function bootstrap(): Promise<void> {
   const gameSessionService = new GameSessionService(config.tickRate);
   const matchmakingService = new MatchmakingService((tickets) =>
     gameSessionService.createSession({
-      mode: "matchmaking",
+      entryMode: "matchmaking",
+      connectionMode: "dedicated-server",
+      scenario: defaultSkirmishScenario,
       map: defaultMap,
       playerIds: tickets.map((ticket) => ticket.playerId),
     }),
@@ -28,7 +41,7 @@ async function bootstrap(): Promise<void> {
     gameSessionService,
   });
 
-  const io = new SocketIOServer(fastify.server, {
+  const io = new SocketIOServer<ClientToServerEvents, ServerToClientEvents>(fastify.server, {
     cors: {
       origin: "*",
     },

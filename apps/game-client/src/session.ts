@@ -1,7 +1,9 @@
-import type { GameMode, SessionSummary } from "@shared";
+import type { ConnectionMode, EntryMode, ScenarioType, SessionSummary } from "@shared";
 
 export interface GameLaunchContext {
-  mode: GameMode;
+  entryMode: EntryMode;
+  connectionMode: ConnectionMode;
+  scenarioType: ScenarioType;
   session: SessionSummary | null;
   serverOnline: boolean;
 }

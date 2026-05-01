@@ -1,3 +1,5 @@
+import type { BuildingDefinitionId } from "./content.js";
+
 export interface GridPoint {
   x: number;
   y: number;
@@ -18,7 +20,7 @@ export interface AttackMoveCommand {
 export interface BuildCommand {
   type: "build";
   builderUnitId: string;
-  building: "town-center" | "house" | "barracks";
+  building: BuildingDefinitionId;
   target: GridPoint;
 }
 

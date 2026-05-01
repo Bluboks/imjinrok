@@ -8,6 +8,14 @@ interface MatchmakingResponse {
   session: SessionSummary | null;
 }
 
+interface CreateLobbyResponse {
+  id: string;
+}
+
+interface StartLobbyResponse {
+  session: SessionSummary;
+}
+
 export class NetworkClient {
   constructor(private readonly baseUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:5174") {}
 
@@ -33,23 +41,32 @@ export class NetworkClient {
         throw new Error(`Failed to create lobby: ${response.status}`);
       }
 
-      const lobby = (await response.json()) as { id: string };
+      const lobby = (await response.json()) as CreateLobbyResponse;
+
+      const startResponse = await fetch(`${this.baseUrl}/api/lobbies/${lobby.id}/start`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!startResponse.ok) {
+        throw new Error(`Failed to start lobby: ${startResponse.status}`);
+      }
+
+      const startedLobby = (await startResponse.json()) as StartLobbyResponse;
 
       return {
-        session: {
-          id: lobby.id,
-          mode: "custom-lobby",
-          mapId: payload.mapId,
-          playerIds: [playerId],
-          tickRate: 10,
-        },
+        session: startedLobby.session,
         serverOnline: true,
       };
     } catch {
       return {
         session: {
           id: "offline-custom-preview",
-          mode: "custom-lobby",
+          entryMode: "custom-lobby",
+          connectionMode: "local",
+          scenarioType: "skirmish",
           mapId: payload.mapId,
           playerIds: [playerId],
           tickRate: 10,

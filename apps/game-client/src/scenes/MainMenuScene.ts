@@ -84,7 +84,9 @@ export class MainMenuScene extends Phaser.Scene {
 
   private startSingleplayer(): void {
     this.launchGame({
-      mode: "singleplayer",
+      entryMode: "singleplayer",
+      connectionMode: "local",
+      scenarioType: "skirmish",
       session: null,
       serverOnline: false,
     });
@@ -94,7 +96,9 @@ export class MainMenuScene extends Phaser.Scene {
     const result = await this.networkClient.createCustomLobby("local-player");
 
     this.launchGame({
-      mode: "custom-lobby",
+      entryMode: result.session?.entryMode ?? "custom-lobby",
+      connectionMode: result.session?.connectionMode ?? "local",
+      scenarioType: result.session?.scenarioType ?? "skirmish",
       session: result.session,
       serverOnline: result.serverOnline,
     });
@@ -104,7 +108,9 @@ export class MainMenuScene extends Phaser.Scene {
     const result = await this.networkClient.joinAutomatch("local-player");
 
     this.launchGame({
-      mode: "matchmaking",
+      entryMode: result.session?.entryMode ?? "matchmaking",
+      connectionMode: result.session?.connectionMode ?? (result.serverOnline ? "dedicated-server" : "local"),
+      scenarioType: result.session?.scenarioType ?? "skirmish",
       session: result.session,
       serverOnline: result.serverOnline,
     });

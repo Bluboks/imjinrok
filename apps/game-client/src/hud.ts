@@ -1,4 +1,4 @@
-import type { GridPoint, MapDefinition } from "@shared";
+import { unitDefinitions, type FactionId, type GridPoint, type MapDefinition, type UnitDefinitionId } from "@shared";
 import type { UnitState } from "@simulation";
 
 export const SELECTED_ENTITY_CHANGED_EVENT = "selected-entity:changed";
@@ -6,8 +6,6 @@ export const SELECTED_ENTITY_REGISTRY_KEY = "selected-entity";
 export const DRAG_SELECTION_CHANGED_EVENT = "drag-selection:changed";
 export const VIRTUAL_CURSOR_CHANGED_EVENT = "virtual-cursor:changed";
 export const VIRTUAL_CURSOR_REGISTRY_KEY = "virtual-cursor";
-export const MINIMAP_STATE_CHANGED_EVENT = "minimap:state-changed";
-export const MINIMAP_STATE_REGISTRY_KEY = "minimap-state";
 export const MINIMAP_NAVIGATE_EVENT = "minimap:navigate";
 export const MINIMAP_MAP_CHANGED_EVENT = "minimap:map-changed";
 export const MINIMAP_MAP_REGISTRY_KEY = "minimap-map";
@@ -20,10 +18,14 @@ export interface SelectedEntityView {
   id: string;
   playerId: string;
   label: string;
-  kind: UnitState["kind"];
+  kind: UnitDefinitionId;
   position: GridPoint;
   hp: number;
   maxHp: number;
+  mana: number;
+  maxMana: number;
+  movementSpeed: number;
+  movementTarget?: GridPoint;
 }
 
 export type SelectedEntitiesView = SelectedEntityView[];
@@ -54,7 +56,8 @@ export interface MinimapBounds extends MinimapPoint {
 export interface MinimapEntityView {
   id: string;
   playerId: string;
-  kind: UnitState["kind"];
+  faction: FactionId;
+  kind: UnitDefinitionId;
   position: GridPoint;
   selected: boolean;
 }
@@ -74,42 +77,29 @@ export interface MinimapEntitiesView {
   entities: MinimapEntityView[];
 }
 
-export interface MinimapStateView {
-  map: MapDefinition;
-  entities: MinimapEntityView[];
-  viewportWorldCorners: MinimapPoint[];
-  worldBounds: MinimapBounds;
-  zoom: number;
-}
-
-function getUnitLabel(kind: UnitState["kind"]): string {
-  switch (kind) {
-    case "town-center":
-      return "Town Center";
-    case "villager":
-      return "Villager";
-  }
-}
-
-function getUnitMaxHp(kind: UnitState["kind"]): number {
-  switch (kind) {
-    case "town-center":
-      return 2400;
-    case "villager":
-      return 25;
-  }
+function getUnitLabel(kind: UnitDefinitionId): string {
+  return unitDefinitions[kind].displayName;
 }
 
 export function toSelectedEntityView(unit: UnitState): SelectedEntityView {
-  return {
+  const view: SelectedEntityView = {
     id: unit.id,
     playerId: unit.playerId,
     label: getUnitLabel(unit.kind),
     kind: unit.kind,
     position: { ...unit.position },
-    hp: unit.hp,
-    maxHp: getUnitMaxHp(unit.kind),
+    hp: unit.health.current,
+    maxHp: unit.health.max,
+    mana: unit.mana.current,
+    maxMana: unit.mana.max,
+    movementSpeed: unit.movementSpeed,
   };
+
+  if (unit.movementTarget) {
+    view.movementTarget = { ...unit.movementTarget };
+  }
+
+  return view;
 }
 
 export function toSelectedEntitiesView(units: UnitState[]): SelectedEntitiesView {

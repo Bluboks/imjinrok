@@ -1,6 +1,6 @@
 import Phaser from "phaser";
 import { cartToIso } from "@simulation";
-import { getTileAt, type MapDefinition, type TerrainType } from "@shared";
+import { getTileAt, terrainDefinitions, type MapDefinition } from "@shared";
 
 class EditorPreviewScene extends Phaser.Scene {
   constructor(private readonly mapDefinition: MapDefinition) {
@@ -29,7 +29,7 @@ class EditorPreviewScene extends Phaser.Scene {
           new Phaser.Geom.Point(worldX - halfWidth, worldY),
         ];
 
-        graphics.fillStyle(this.getTerrainColor(tile.terrain), 1);
+        graphics.fillStyle(terrainDefinitions[tile.terrain].editorColor, 1);
         graphics.fillPoints(points, true);
         graphics.lineStyle(1, 0x264147, 0.5);
         graphics.strokePoints(points, true);
@@ -41,19 +41,6 @@ class EditorPreviewScene extends Phaser.Scene {
       graphics.fillStyle(0xf3dd8f, 1);
       graphics.fillCircle(originX + iso.x, originY + iso.y - halfHeight, 6);
     });
-  }
-
-  private getTerrainColor(terrain: TerrainType): number {
-    switch (terrain) {
-      case "forest":
-        return 0x49784c;
-      case "water":
-        return 0x3c7895;
-      case "cliff":
-        return 0x7d6f62;
-      case "grass":
-        return 0x82ae63;
-    }
   }
 }
 

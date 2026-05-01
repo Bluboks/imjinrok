@@ -1,7 +1,11 @@
-import type { CommandEnvelope } from "./commands.js";
+export const entryModes = ["singleplayer", "custom-lobby", "matchmaking"] as const;
+export type EntryMode = (typeof entryModes)[number];
 
-export const gameModes = ["singleplayer", "custom-lobby", "matchmaking"] as const;
-export type GameMode = (typeof gameModes)[number];
+export const connectionModes = ["local", "hosted", "dedicated-server"] as const;
+export type ConnectionMode = (typeof connectionModes)[number];
+
+export const scenarioTypes = ["skirmish", "campaign", "custom-scenario"] as const;
+export type ScenarioType = (typeof scenarioTypes)[number];
 
 export interface CreateLobbyRequest {
   hostPlayerId: string;
@@ -47,18 +51,10 @@ export interface MatchmakingTicket extends MatchmakingJoinRequest {
 
 export interface SessionSummary {
   id: string;
-  mode: GameMode;
+  entryMode: EntryMode;
+  connectionMode: ConnectionMode;
+  scenarioType: ScenarioType;
   mapId: string;
   playerIds: string[];
   tickRate: number;
-}
-
-export interface SessionSnapshotResponse {
-  sessionId: string;
-  tick: number;
-}
-
-export interface SocketEnvelope {
-  type: "command:issue" | "session:join";
-  payload: CommandEnvelope | { sessionId: string };
 }

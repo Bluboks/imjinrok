@@ -1,6 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import {
   defaultMap,
+  defaultSkirmishScenario,
   type CreateLobbyRequest,
   type JoinLobbyRequest,
   type MatchmakingJoinRequest,
@@ -59,7 +60,9 @@ export async function registerRoutes(
     }
 
     const session = gameSessionService.createSession({
-      mode: "custom-lobby",
+      entryMode: "custom-lobby",
+      connectionMode: "hosted",
+      scenario: defaultSkirmishScenario,
       map: defaultMap,
       playerIds: lobby.playerIds,
     });

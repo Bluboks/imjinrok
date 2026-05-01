@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import { defaultMap, getTileAt, type GridPoint, type MapDefinition, type TerrainType } from "@shared";
+import { defaultMap, factionDefinitions, getTileAt, terrainDefinitions, terrainTypes, unitDefinitions, type FactionId, type GridPoint, type MapDefinition, type TerrainType } from "@shared";
 import {
   advanceWorldTick,
   applyCommand,
@@ -105,7 +105,7 @@ export class SkirmishScene extends Phaser.Scene {
       return;
     }
 
-    advanceWorldTick(this.worldState);
+    advanceWorldTick(this.worldState, this.lastTickAt === 0 ? 0.1 : (time - this.lastTickAt) / 1000);
     this.lastTickAt = time;
     this.syncUnitRenderables();
     this.publishMinimapEntities();
@@ -438,7 +438,7 @@ export class SkirmishScene extends Phaser.Scene {
   }
 
   private issueDefaultActionAtScreenPoint(point: Phaser.Math.Vector2): void {
-    const commandableUnits = this.getSelectedUnits().filter((unit) => unit.kind === "villager");
+    const commandableUnits = this.getSelectedUnits().filter((unit) => unitDefinitions[unit.kind].category === "worker");
 
     if (commandableUnits.length === 0) {
       return;
@@ -480,6 +480,7 @@ export class SkirmishScene extends Phaser.Scene {
       entities: Object.values(this.worldState.units).map((unit) => ({
         id: unit.id,
         playerId: unit.playerId,
+        faction: this.getPlayerFaction(unit.playerId),
         kind: unit.kind,
         position: { ...unit.position },
         selected: this.selectedUnitIds.has(unit.id),
@@ -641,7 +642,7 @@ export class SkirmishScene extends Phaser.Scene {
 
   private getUnitSelectionScreenBounds(unit: UnitState): Phaser.Geom.Rectangle {
     const position = this.getUnitScreenPosition(unit);
-    const radius = unit.kind === "town-center" ? 12 : 6;
+    const radius = unitDefinitions[unit.kind].selectionRadius;
     const zoom = this.cameras.main.zoom;
     const padding = 4;
     const halfWidth = radius * 1.6 * zoom + padding;
@@ -718,7 +719,7 @@ export class SkirmishScene extends Phaser.Scene {
   private selectInitialUnit(playerId: string): void {
     const units = Object.values(this.worldState.units);
     const preferredUnit =
-      units.find((unit) => unit.playerId === playerId && unit.kind === "town-center") ?? units[0];
+      units.find((unit) => unit.playerId === playerId && unitDefinitions[unit.kind].category === "building") ?? units[0];
 
     if (preferredUnit) {
       this.selectUnits([preferredUnit]);
@@ -762,7 +763,7 @@ export class SkirmishScene extends Phaser.Scene {
 
     for (const unit of Object.values(this.worldState.units)) {
       const unitPosition = this.getUnitWorldPosition(unit);
-      const radius = unit.kind === "town-center" ? 24 : 16;
+      const radius = unitDefinitions[unit.kind].hitRadius;
       const deltaX = worldX - unitPosition.x;
       const deltaY = worldY - unitPosition.y;
       const distanceSq = deltaX * deltaX + deltaY * deltaY;
@@ -827,7 +828,7 @@ export class SkirmishScene extends Phaser.Scene {
   }
 
   private ensureTerrainTextures(): void {
-    (["forest", "water", "cliff", "grass"] as TerrainType[]).forEach((terrain) => {
+    terrainTypes.forEach((terrain) => {
       const key = `terrain-diamond-${terrain}`;
       if (this.textures.exists(key)) {
         this.terrainTextureKeys.set(terrain, key);
@@ -888,8 +889,8 @@ export class SkirmishScene extends Phaser.Scene {
   }
 
   private createUnitRenderable(unit: UnitState): UnitRenderable {
-    const radius = unit.kind === "town-center" ? 12 : 6;
-    const color = unit.playerId === "local-player" ? 0xe8d77d : 0xd36454;
+    const radius = unitDefinitions[unit.kind].renderRadius;
+    const color = factionDefinitions[this.getPlayerFaction(unit.playerId)].unitColor;
     const container = this.add.container(0, 0);
     const selectionRing = this.add.graphics();
     const body = this.add.graphics();
@@ -904,15 +905,10 @@ export class SkirmishScene extends Phaser.Scene {
   }
 
   private getTerrainColor(terrain: TerrainType): number {
-    switch (terrain) {
-      case "forest":
-        return 0x3f6f48;
-      case "water":
-        return 0x346c88;
-      case "cliff":
-        return 0x837362;
-      case "grass":
-        return 0x7aa35a;
-    }
+    return terrainDefinitions[terrain].worldColor;
+  }
+
+  private getPlayerFaction(playerId: string): FactionId {
+    return this.worldState.players[playerId]?.faction ?? "blue";
   }
 }

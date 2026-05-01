@@ -1,81 +1,33 @@
-import type { CommandEnvelope, GridPoint, MapDefinition } from "../../shared/src/index.js";
+import { defaultSkirmishScenario, factions, type MapDefinition, type ScenarioDefinition } from "../../shared/src/index.js";
+import { createPlayerUnits } from "./entities.js";
+import type { PlayerState, ResourceBank, UnitState, WorldState } from "./types.js";
 
-export interface ResourceBank {
-  food: number;
-  wood: number;
-  gold: number;
-  stone: number;
-}
+export type { AttributePool, PlayerState, ResourceBank, UnitState, WorldState } from "./types.js";
+export { applyCommand } from "./commands.js";
+export { advanceWorldTick } from "./tick.js";
 
-export interface UnitState {
-  id: string;
-  playerId: string;
-  kind: "villager" | "town-center";
-  position: GridPoint;
-  hp: number;
-}
-
-export interface WorldState {
-  tick: number;
-  map: MapDefinition;
-  units: Record<string, UnitState>;
-  playerResources: Record<string, ResourceBank>;
-  lastAcceptedCommand: CommandEnvelope | null;
-}
-
-function createPlayerUnits(playerId: string, position: GridPoint): UnitState[] {
-  return [
-    {
-      id: `${playerId}-town-center`,
-      playerId,
-      kind: "town-center",
-      position,
-      hp: 2400,
-    },
-    {
-      id: `${playerId}-villager-1`,
-      playerId,
-      kind: "villager",
-      position: { x: position.x + 1, y: position.y },
-      hp: 25,
-    },
-    {
-      id: `${playerId}-villager-2`,
-      playerId,
-      kind: "villager",
-      position: { x: position.x, y: position.y + 1 },
-      hp: 25,
-    },
-    {
-      id: `${playerId}-villager-3`,
-      playerId,
-      kind: "villager",
-      position: { x: position.x + 1, y: position.y + 1 },
-      hp: 25,
-    },
-  ];
-}
-
-export function createInitialWorldState(map: MapDefinition, playerIds: string[]): WorldState {
+export function createInitialWorldState(
+  map: MapDefinition,
+  playerIds: string[],
+  scenario: ScenarioDefinition = defaultSkirmishScenario,
+): WorldState {
   const units: Record<string, UnitState> = {};
+  const players: Record<string, PlayerState> = {};
   const playerResources: Record<string, ResourceBank> = {};
 
   playerIds.forEach((playerId, index) => {
+    const fallbackFaction = factions[index % factions.length] ?? "blue";
     const spawn = map.spawnPoints[index] ?? {
       id: `fallback-${index}`,
       x: 2 + index,
       y: 2 + index,
-      faction: "blue",
+      faction: fallbackFaction,
     };
 
-    playerResources[playerId] = {
-      food: 200,
-      wood: 200,
-      gold: 100,
-      stone: 100,
-    };
+    players[playerId] = { id: playerId, faction: spawn.faction };
+    playerResources[playerId] = { ...scenario.startingResources };
 
-    for (const unit of createPlayerUnits(playerId, { x: spawn.x, y: spawn.y })) {
+    for (const unit of createPlayerUnits(playerId, { x: spawn.x, y: spawn.y }, scenario.startingUnits)) {
       units[unit.id] = unit;
     }
   });
@@ -83,34 +35,9 @@ export function createInitialWorldState(map: MapDefinition, playerIds: string[])
   return {
     tick: 0,
     map,
+    players,
     units,
     playerResources,
     lastAcceptedCommand: null,
   };
-}
-
-export function applyCommand(state: WorldState, envelope: CommandEnvelope): void {
-  state.lastAcceptedCommand = envelope;
-
-  switch (envelope.command.type) {
-    case "move":
-    case "attack-move": {
-      const unit = state.units[envelope.command.unitId];
-
-      if (!unit) {
-        return;
-      }
-
-      unit.position = { ...envelope.command.target };
-      return;
-    }
-    case "build":
-    case "gather":
-    case "stop":
-      return;
-  }
-}
-
-export function advanceWorldTick(state: WorldState): void {
-  state.tick += 1;
 }
