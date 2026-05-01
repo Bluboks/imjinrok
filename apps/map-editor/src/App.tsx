@@ -1,18 +1,27 @@
 import { useMemo, useState } from "react";
-import { createBlankMap } from "@shared";
+import { createBlankMap, defaultSkirmishScenario, type ScenarioDefinition } from "@shared";
 import { PhaserEditorCanvas } from "./components/PhaserEditorCanvas.js";
+
+interface EditorExportBundle {
+  map: ReturnType<typeof createBlankMap>;
+  scenario: ScenarioDefinition;
+}
 
 export function App() {
   const [name, setName] = useState("Foundry Basin");
+  const [scenarioName, setScenarioName] = useState("Foundry Basin Skirmish");
+  const [objectiveLabel, setObjectiveLabel] = useState("Defeat Opponents");
+  const [objectiveDescription, setObjectiveDescription] = useState("Eliminate all opposing players on this map.");
   const [width, setWidth] = useState(32);
   const [height, setHeight] = useState(32);
   const [tileWidth, setTileWidth] = useState(64);
   const [tileHeight, setTileHeight] = useState(32);
+  const mapId = useMemo(() => slugify(name) || "custom-map", [name]);
 
   const mapDefinition = useMemo(
     () =>
       createBlankMap({
-        id: "foundry-basin",
+        id: mapId,
         name,
         description: "Map editor scaffold preview for future RTS custom scenarios.",
         width,
@@ -21,21 +30,39 @@ export function App() {
         tileHeight,
         tags: ["editor", "prototype", "custom-scenario"],
       }),
-    [height, name, tileHeight, tileWidth, width],
+    [height, mapId, name, tileHeight, tileWidth, width],
   );
 
-  const exportMap = (): void => {
-    const file = new Blob([JSON.stringify(mapDefinition, null, 2)], {
-      type: "application/json",
-    });
+  const scenarioDefinition = useMemo<ScenarioDefinition>(
+    () => ({
+      id: `${mapDefinition.id}-scenario`,
+      name: scenarioName,
+      description: `Custom scenario authored for ${mapDefinition.name}.`,
+      scenarioType: "custom-scenario",
+      mapId: mapDefinition.id,
+      startingResources: { ...defaultSkirmishScenario.startingResources },
+      startingUnits: [...defaultSkirmishScenario.startingUnits],
+      objectives: [
+        {
+          id: "primary-objective",
+          label: objectiveLabel,
+          description: objectiveDescription,
+          type: "defeat-opponents",
+          required: true,
+        },
+      ],
+      tags: ["editor", "custom-scenario"],
+    }),
+    [mapDefinition.id, mapDefinition.name, objectiveDescription, objectiveLabel, scenarioName],
+  );
 
-    const url = URL.createObjectURL(file);
-    const anchor = document.createElement("a");
+  const exportBundle = (): void => {
+    const bundle: EditorExportBundle = {
+      map: mapDefinition,
+      scenario: scenarioDefinition,
+    };
 
-    anchor.href = url;
-    anchor.download = `${mapDefinition.id}.json`;
-    anchor.click();
-    URL.revokeObjectURL(url);
+    exportJson(`${mapDefinition.id}.scenario-bundle.json`, bundle);
   };
 
   return (
@@ -54,6 +81,22 @@ export function App() {
           <span>Map Name</span>
           <input value={name} onChange={(event) => setName(event.target.value)} />
         </label>
+
+        <div className="panel-card form-card">
+          <h2>Scenario</h2>
+          <label>
+            <span>Scenario Name</span>
+            <input value={scenarioName} onChange={(event) => setScenarioName(event.target.value)} />
+          </label>
+          <label>
+            <span>Primary Objective</span>
+            <input value={objectiveLabel} onChange={(event) => setObjectiveLabel(event.target.value)} />
+          </label>
+          <label>
+            <span>Objective Description</span>
+            <textarea value={objectiveDescription} onChange={(event) => setObjectiveDescription(event.target.value)} />
+          </label>
+        </div>
 
         <div className="control-grid">
           <label>
@@ -104,7 +147,8 @@ export function App() {
         </div>
 
         <div className="button-row">
-          <button onClick={exportMap}>Export JSON</button>
+          <button onClick={() => exportJson(`${mapDefinition.id}.map.json`, mapDefinition)}>Export Map</button>
+          <button className="secondary-button" onClick={exportBundle}>Export Bundle</button>
         </div>
 
         <div className="panel-card">
@@ -127,6 +171,8 @@ export function App() {
     size: `${mapDefinition.width}x${mapDefinition.height}`,
     tile: `${mapDefinition.tileWidth}x${mapDefinition.tileHeight}`,
     spawnPoints: mapDefinition.spawnPoints.length,
+    scenario: scenarioDefinition.name,
+    objectives: scenarioDefinition.objectives.map((objective) => objective.label),
     tags: mapDefinition.tags,
   },
   null,
@@ -148,4 +194,26 @@ export function App() {
       </section>
     </main>
   );
+}
+
+function exportJson(filename: string, data: unknown): void {
+  const file = new Blob([JSON.stringify(data, null, 2)], {
+    type: "application/json",
+  });
+
+  const url = URL.createObjectURL(file);
+  const anchor = document.createElement("a");
+
+  anchor.href = url;
+  anchor.download = filename;
+  anchor.click();
+  URL.revokeObjectURL(url);
+}
+
+function slugify(value: string): string {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
 }

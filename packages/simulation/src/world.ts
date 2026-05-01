@@ -1,9 +1,13 @@
 import { defaultSkirmishScenario, factions, type MapDefinition, type ScenarioDefinition } from "../../shared/src/index.js";
 import { createPlayerUnits } from "./entities.js";
-import type { PlayerState, ResourceBank, UnitState, WorldState } from "./types.js";
+import { createScenarioRuntimeState } from "./scenario.js";
+import type { PlayerState, ResourceBank, UnitState, WorldSnapshot, WorldState } from "./types.js";
 
-export type { AttributePool, PlayerState, ResourceBank, UnitState, WorldState } from "./types.js";
-export { applyCommand } from "./commands.js";
+export type { AttributePool, ObjectiveRuntimeState, ObjectiveStatus, PlayerState, ResourceBank, ScenarioRuntimeEvent, ScenarioRuntimeState, ScenarioStatus, UnitState, WorldSnapshot, WorldState } from "./types.js";
+export { applyCommand, issueCommand, validateCommand, type CommandValidationResult, type IssueCommandResult } from "./commands.js";
+export { findPathForUnit, isTerrainWalkable } from "./navigation.js";
+export { getFootprintTiles, validateBuildingPlacement, type BuildingPlacementValidationResult } from "./placement.js";
+export { createScenarioRuntimeState, evaluateScenarioRuntime } from "./scenario.js";
 export { advanceWorldTick } from "./tick.js";
 
 export function createInitialWorldState(
@@ -35,9 +39,16 @@ export function createInitialWorldState(
   return {
     tick: 0,
     map,
+    scenario: createScenarioRuntimeState(scenario),
     players,
     units,
     playerResources,
     lastAcceptedCommand: null,
   };
+}
+
+export function toWorldSnapshot(state: WorldState): WorldSnapshot {
+  const { map: _map, ...snapshot } = state;
+
+  return structuredClone(snapshot);
 }

@@ -1,14 +1,17 @@
 import Phaser from "phaser";
-import { unitDefinitions } from "@shared";
+import { actionDefinitions, unitCanPerformAction, unitDefinitions, type ActionDefinitionId } from "@shared";
 import type { SelectedEntitiesView } from "../hud.js";
 import { drawPanelFrame, HUD_TEXT_STYLE, type PanelBounds } from "./hudPanel.js";
 
 interface HudActionSlot {
+  actionId?: ActionDefinitionId;
   icon: string;
   hotkey: string;
   label: string;
   enabled: boolean;
 }
+
+export type HudActionHandler = (actionId: ActionDefinitionId) => void;
 
 export function drawActionGrid(
   scene: Phaser.Scene,
@@ -16,6 +19,7 @@ export function drawActionGrid(
   graphics: Phaser.GameObjects.Graphics,
   bounds: PanelBounds,
   selectedEntities: SelectedEntitiesView,
+  onAction?: HudActionHandler,
 ): void {
   const { x, y, width, height } = bounds;
   drawPanelFrame(scene, container, graphics, bounds, "ACTIONS");
@@ -54,6 +58,16 @@ export function drawActionGrid(
         continue;
       }
 
+      if (action.actionId && onAction) {
+        const hitZone = scene.add
+          .zone(slotX, slotY, slotWidth, slotHeight)
+          .setOrigin(0, 0)
+          .setInteractive({ useHandCursor: true })
+          .on("pointerup", () => onAction(action.actionId as ActionDefinitionId));
+
+        container.add(hitZone);
+      }
+
       container.add(scene.add
         .text(slotX + slotWidth / 2, slotY + 10, action.icon, {
           fontFamily: "Georgia, Times New Roman, serif",
@@ -88,30 +102,31 @@ function getActionSlots(selectedEntities: SelectedEntitiesView): HudActionSlot[]
     return slots;
   }
 
-  const hasVillager = selectedEntities.some((selection) => unitDefinitions[selection.kind].category === "worker");
-  const actions: HudActionSlot[] = hasVillager
-    ? [
-        { icon: "M", hotkey: "M", label: "Move", enabled: true },
-        { icon: "G", hotkey: "G", label: "Gather", enabled: true },
-        { icon: "B", hotkey: "B", label: "Build", enabled: true },
-        { icon: "S", hotkey: "S", label: "Stop", enabled: true },
-        { icon: "A", hotkey: "A", label: "Attack Move", enabled: true },
-        { icon: "P", hotkey: "P", label: "Patrol", enabled: true },
-        { icon: "R", hotkey: "R", label: "Repair", enabled: true },
-        { icon: "H", hotkey: "H", label: "Hold", enabled: true },
-      ]
-    : [
-        { icon: "V", hotkey: "V", label: "Train Villager", enabled: true },
-        { icon: "R", hotkey: "R", label: "Rally Point", enabled: true },
-        { icon: "L", hotkey: "L", label: "Research Loom", enabled: true },
-        { icon: "S", hotkey: "S", label: "Stop", enabled: true },
-        { icon: "B", hotkey: "B", label: "Town Bell", enabled: true },
-        { icon: "G", hotkey: "G", label: "Set Gather", enabled: true },
-      ];
+  const actionIds = getSelectionActionIds(selectedEntities);
+  const actions = actionIds.map((actionId) => toHudActionSlot(actionId));
 
   actions.forEach((action, index) => {
     slots[index] = action;
   });
 
   return slots;
+}
+
+function getSelectionActionIds(selectedEntities: SelectedEntitiesView): readonly ActionDefinitionId[] {
+  const workerSelection = selectedEntities.find((selection) => unitCanPerformAction(selection.kind, "move"));
+  const actionSource = workerSelection ?? selectedEntities[0];
+
+  return actionSource ? unitDefinitions[actionSource.kind].actionIds : [];
+}
+
+function toHudActionSlot(actionId: ActionDefinitionId): HudActionSlot {
+  const action = actionDefinitions[actionId];
+
+  return {
+    actionId,
+    icon: action.icon,
+    hotkey: action.hotkey,
+    label: action.label,
+    enabled: true,
+  };
 }

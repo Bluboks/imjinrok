@@ -13,7 +13,8 @@
     "build:game": "vite build --config apps/game-client/vite.config.ts",
     "build:editor": "vite build --config apps/map-editor/vite.config.ts",
     "build:server": "tsc -p apps/server/tsconfig.json",
-    "typecheck": "tsc -p apps/game-client/tsconfig.json --noEmit && tsc -p apps/map-editor/tsconfig.json --noEmit && tsc -p apps/server/tsconfig.json --noEmit"
+    "typecheck": "tsc -p apps/game-client/tsconfig.json --noEmit && tsc -p apps/map-editor/tsconfig.json --noEmit && tsc -p apps/server/tsconfig.json --noEmit",
+    "test": "node --import tsx --test \"packages/**/*.test.ts\""
   },
   "dependencies": {
     "@fastify/cors": "^11.0.0",

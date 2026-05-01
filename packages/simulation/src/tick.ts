@@ -1,3 +1,4 @@
+import { evaluateScenarioRuntime } from "./scenario.js";
 import type { UnitState, WorldState } from "./types.js";
 
 const DEFAULT_TICK_SECONDS = 0.1;
@@ -9,6 +10,8 @@ export function advanceWorldTick(state: WorldState, deltaSeconds = DEFAULT_TICK_
   for (const unit of Object.values(state.units)) {
     advanceUnitMovement(unit, deltaSeconds);
   }
+
+  evaluateScenarioRuntime(state);
 }
 
 function advanceUnitMovement(unit: UnitState, deltaSeconds: number): void {
@@ -24,7 +27,7 @@ function advanceUnitMovement(unit: UnitState, deltaSeconds: number): void {
 
   if (distance <= TARGET_EPSILON) {
     unit.position = { ...target };
-    delete unit.movementTarget;
+    advanceMovementWaypoint(unit);
     return;
   }
 
@@ -32,7 +35,7 @@ function advanceUnitMovement(unit: UnitState, deltaSeconds: number): void {
 
   if (step >= distance) {
     unit.position = { ...target };
-    delete unit.movementTarget;
+    advanceMovementWaypoint(unit);
     return;
   }
 
@@ -40,4 +43,20 @@ function advanceUnitMovement(unit: UnitState, deltaSeconds: number): void {
     x: unit.position.x + (deltaX / distance) * step,
     y: unit.position.y + (deltaY / distance) * step,
   };
+}
+
+function advanceMovementWaypoint(unit: UnitState): void {
+  if (unit.movementPath && unit.movementPath.length > 0) {
+    unit.movementPath.shift();
+  }
+
+  const nextTarget = unit.movementPath?.[0];
+
+  if (nextTarget) {
+    unit.movementTarget = { ...nextTarget };
+    return;
+  }
+
+  delete unit.movementTarget;
+  delete unit.movementPath;
 }

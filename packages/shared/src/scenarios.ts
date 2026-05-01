@@ -49,9 +49,9 @@ export const defaultSkirmishScenario = {
   },
   startingUnits: [
     { kind: "town-center", idSuffix: "town-center", offset: { x: 0, y: 0 } },
-    { kind: "villager", idSuffix: "villager-1", offset: { x: 1, y: 0 } },
-    { kind: "villager", idSuffix: "villager-2", offset: { x: 0, y: 1 } },
-    { kind: "villager", idSuffix: "villager-3", offset: { x: 1, y: 1 } },
+    { kind: "villager", idSuffix: "villager-1", offset: { x: 3, y: 0 } },
+    { kind: "villager", idSuffix: "villager-2", offset: { x: 0, y: 3 } },
+    { kind: "villager", idSuffix: "villager-3", offset: { x: 3, y: 3 } },
   ],
   objectives: [
     {

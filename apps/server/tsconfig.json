@@ -12,5 +12,8 @@
     "src/**/*.ts",
     "../../packages/shared/src/**/*.ts",
     "../../packages/simulation/src/**/*.ts"
+  ],
+  "exclude": [
+    "../../packages/**/*.test.ts"
   ]
 }

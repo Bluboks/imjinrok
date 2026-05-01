@@ -1,8 +1,10 @@
 import type {
+  CommandEnvelope,
   CreateLobbyRequest,
   MatchmakingJoinRequest,
   SessionSummary,
 } from "@shared";
+import type { WorldSnapshot } from "@simulation";
 
 interface MatchmakingResponse {
   session: SessionSummary | null;
@@ -15,6 +17,15 @@ interface CreateLobbyResponse {
 interface StartLobbyResponse {
   session: SessionSummary;
 }
+
+interface CommandErrorResponse {
+  message?: string;
+  reason?: string;
+}
+
+export type RemoteCommandIssueResult =
+  | { ok: true; command: CommandEnvelope }
+  | { ok: false; reason: string };
 
 export class NetworkClient {
   constructor(private readonly baseUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:5174") {}
@@ -108,5 +119,45 @@ export class NetworkClient {
         serverOnline: false,
       };
     }
+  }
+
+  async getSessionSnapshot(sessionId: string): Promise<WorldSnapshot> {
+    const response = await fetch(`${this.baseUrl}/api/sessions/${sessionId}/snapshot`);
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch session snapshot: ${response.status}`);
+    }
+
+    return (await response.json()) as WorldSnapshot;
+  }
+
+  async issueCommand(envelope: CommandEnvelope): Promise<RemoteCommandIssueResult> {
+    const response = await fetch(`${this.baseUrl}/api/sessions/${envelope.sessionId}/commands`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(envelope),
+    });
+
+    if (response.status === 400 || response.status === 404) {
+      return { ok: false, reason: await readCommandIssueError(response) };
+    }
+
+    if (!response.ok) {
+      throw new Error(`Failed to issue command: ${response.status}`);
+    }
+
+    return { ok: true, command: (await response.json()) as CommandEnvelope };
+  }
+}
+
+async function readCommandIssueError(response: Response): Promise<string> {
+  try {
+    const error = (await response.json()) as CommandErrorResponse;
+
+    return error.reason ?? error.message ?? `Command rejected with status ${response.status}`;
+  } catch {
+    return `Command rejected with status ${response.status}`;
   }
 }

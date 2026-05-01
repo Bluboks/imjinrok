@@ -1,4 +1,4 @@
-import { unitDefinitions, type FactionId, type GridPoint, type MapDefinition, type UnitDefinitionId } from "@shared";
+import { unitDefinitions, type ActionDefinitionId, type FactionId, type GridPoint, type MapDefinition, type UnitDefinitionId } from "@shared";
 import type { UnitState } from "@simulation";
 
 export const SELECTED_ENTITY_CHANGED_EVENT = "selected-entity:changed";
@@ -6,6 +6,7 @@ export const SELECTED_ENTITY_REGISTRY_KEY = "selected-entity";
 export const DRAG_SELECTION_CHANGED_EVENT = "drag-selection:changed";
 export const VIRTUAL_CURSOR_CHANGED_EVENT = "virtual-cursor:changed";
 export const VIRTUAL_CURSOR_REGISTRY_KEY = "virtual-cursor";
+export const ACTION_TRIGGERED_EVENT = "action:triggered";
 export const MINIMAP_NAVIGATE_EVENT = "minimap:navigate";
 export const MINIMAP_MAP_CHANGED_EVENT = "minimap:map-changed";
 export const MINIMAP_MAP_REGISTRY_KEY = "minimap-map";
@@ -34,6 +35,11 @@ export interface VirtualCursorView {
   x: number;
   y: number;
   locked: boolean;
+}
+
+export interface ActionTriggeredView {
+  actionId: ActionDefinitionId;
+  selectedEntityIds: string[];
 }
 
 export interface DragSelectionView {

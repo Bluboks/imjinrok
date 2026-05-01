@@ -2,7 +2,7 @@ import type {
   MatchmakingJoinRequest,
   MatchmakingTicket,
   SessionSummary,
-} from "../../../../packages/shared/src/index.js";
+} from "../shared.js";
 
 type MatchFoundHandler = (tickets: MatchmakingTicket[]) => SessionSummary;
 

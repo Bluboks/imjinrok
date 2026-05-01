@@ -1,8 +1,6 @@
 import Phaser from "phaser";
-import { defaultMap, factionDefinitions, getTileAt, terrainDefinitions, terrainTypes, unitDefinitions, type FactionId, type GridPoint, type MapDefinition, type TerrainType } from "@shared";
+import { defaultMap, factionDefinitions, getTileAt, terrainDefinitions, terrainTypes, unitCanPerformAction, unitDefinitions, type CommandEnvelope, type FactionId, type GridPoint, type MapDefinition, type TerrainType } from "@shared";
 import {
-  advanceWorldTick,
-  applyCommand,
   cartToIso,
   createInitialWorldState,
   isoToCart,
@@ -10,6 +8,7 @@ import {
   type WorldState,
 } from "@simulation";
 import {
+  ACTION_TRIGGERED_EVENT,
   DRAG_SELECTION_CHANGED_EVENT,
   MINIMAP_NAVIGATE_EVENT,
   MINIMAP_ENTITIES_CHANGED_EVENT,
@@ -22,10 +21,12 @@ import {
   SELECTED_ENTITY_REGISTRY_KEY,
   VIRTUAL_CURSOR_CHANGED_EVENT,
   VIRTUAL_CURSOR_REGISTRY_KEY,
+  type ActionTriggeredView,
   type DragSelectionView,
   type MinimapPoint,
   toSelectedEntityView,
 } from "../hud.js";
+import { createSessionTransport, type SessionTransport } from "../net/SessionTransport.js";
 import type { GameLaunchContext } from "../session.js";
 
 const DRAG_THRESHOLD_SQ = 36;
@@ -44,7 +45,8 @@ interface UnitRenderable {
 export class SkirmishScene extends Phaser.Scene {
   private map: MapDefinition = defaultMap;
   private worldState: WorldState = createInitialWorldState(defaultMap, ["local-player", "cpu-1"]);
-  private lastTickAt = 0;
+  private sessionTransport: SessionTransport | null = null;
+  private lastSyncedTick = Number.NEGATIVE_INFINITY;
   private mapOrigin = new Phaser.Math.Vector2(0, 0);
   private readonly terrainChunks: Phaser.GameObjects.RenderTexture[] = [];
   private readonly unitRenderables = new Map<string, UnitRenderable>();
@@ -74,7 +76,9 @@ export class SkirmishScene extends Phaser.Scene {
     this.launchContext = data;
     this.perfEnabled = new URLSearchParams(globalThis.location?.search ?? "").get("perf") === "1";
     this.map = defaultMap;
-    this.worldState = createInitialWorldState(this.map, players);
+    this.sessionTransport = createSessionTransport(data, this.map, players);
+    this.worldState = this.sessionTransport.getSnapshot();
+    this.lastSyncedTick = this.worldState.tick;
     this.mapOrigin.set(this.scale.width / 2, 160);
     this.virtualCursorScreen.set(this.scale.width / 2, this.scale.height / 2);
 
@@ -101,13 +105,18 @@ export class SkirmishScene extends Phaser.Scene {
     this.updatePerfOverlay(delta);
     this.flushViewportIfDirty(time);
 
-    if (time - this.lastTickAt < 100) {
+    this.sessionTransport?.update(time, delta);
+    const nextSnapshot = this.sessionTransport?.getSnapshot() ?? this.worldState;
+
+    if (nextSnapshot === this.worldState && nextSnapshot.tick === this.lastSyncedTick) {
       return;
     }
 
-    advanceWorldTick(this.worldState, this.lastTickAt === 0 ? 0.1 : (time - this.lastTickAt) / 1000);
-    this.lastTickAt = time;
+    this.worldState = nextSnapshot;
+    this.lastSyncedTick = nextSnapshot.tick;
+    this.pruneMissingSelections();
     this.syncUnitRenderables();
+    this.emitSelectionChanged();
     this.publishMinimapEntities();
   }
 
@@ -183,6 +192,7 @@ export class SkirmishScene extends Phaser.Scene {
   private setupPointerLockLifecycle(): void {
     this.input.manager.events.on(Phaser.Input.Events.POINTERLOCK_CHANGE, this.handlePointerLockChanged, this);
     this.game.events.on(MINIMAP_NAVIGATE_EVENT, this.handleMinimapNavigate, this);
+    this.game.events.on(ACTION_TRIGGERED_EVENT, this.handleActionTriggered, this);
     this.scale.on(Phaser.Scale.Events.RESIZE, this.handleResize, this);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, this.handleShutdown, this);
   }
@@ -190,6 +200,15 @@ export class SkirmishScene extends Phaser.Scene {
   private handleMinimapNavigate(target: MinimapPoint): void {
     this.centerCameraOnWorldPoint(target);
     this.publishMinimapViewport(true);
+  }
+
+  private handleActionTriggered(action: ActionTriggeredView): void {
+    if (action.actionId === "stop") {
+      this.issueStopCommands(action.selectedEntityIds);
+      return;
+    }
+
+    console.info("Action selected", action.actionId);
   }
 
   private handlePointerLockChanged(_event: Event, locked: boolean): void {
@@ -212,11 +231,14 @@ export class SkirmishScene extends Phaser.Scene {
   private handleShutdown(): void {
     this.input.manager.events.off(Phaser.Input.Events.POINTERLOCK_CHANGE, this.handlePointerLockChanged, this);
     this.game.events.off(MINIMAP_NAVIGATE_EVENT, this.handleMinimapNavigate, this);
+    this.game.events.off(ACTION_TRIGGERED_EVENT, this.handleActionTriggered, this);
     this.scale.off(Phaser.Scale.Events.RESIZE, this.handleResize, this);
     this.terrainChunks.forEach((chunk) => chunk.destroy());
     this.terrainChunks.length = 0;
     this.unitRenderables.forEach((renderable) => renderable.container.destroy(true));
     this.unitRenderables.clear();
+    this.sessionTransport?.dispose();
+    this.sessionTransport = null;
     this.perfText?.destroy();
     this.perfText = null;
   }
@@ -438,7 +460,7 @@ export class SkirmishScene extends Phaser.Scene {
   }
 
   private issueDefaultActionAtScreenPoint(point: Phaser.Math.Vector2): void {
-    const commandableUnits = this.getSelectedUnits().filter((unit) => unitDefinitions[unit.kind].category === "worker");
+    const commandableUnits = this.getSelectedUnits().filter((unit) => unitCanPerformAction(unit.kind, "move"));
 
     if (commandableUnits.length === 0) {
       return;
@@ -449,7 +471,7 @@ export class SkirmishScene extends Phaser.Scene {
     commandableUnits.forEach((unit, index) => {
       const targetWithOffset = this.getFormationTarget(target, index);
 
-      applyCommand(this.worldState, {
+      const envelope: CommandEnvelope = {
         sessionId: this.launchContext?.session?.id ?? "offline-skirmish",
         playerId: unit.playerId,
         issuedAtTick: this.worldState.tick,
@@ -458,6 +480,10 @@ export class SkirmishScene extends Phaser.Scene {
           unitId: unit.id,
           target: targetWithOffset,
         },
+      };
+
+      void Promise.resolve(this.sessionTransport?.issueCommand(envelope)).then(() => {
+        this.syncWorldFromTransport(true);
       });
     });
 
@@ -465,6 +491,43 @@ export class SkirmishScene extends Phaser.Scene {
     this.syncUnitRenderables();
     this.showMoveTargetMarker(target);
     this.publishMinimapEntities();
+  }
+
+  private issueStopCommands(unitIds: readonly string[]): void {
+    const commandableUnits: UnitState[] = [];
+
+    for (const unitId of unitIds) {
+      const unit = this.worldState.units[unitId];
+
+      if (unit && unitCanPerformAction(unit.kind, "stop")) {
+        commandableUnits.push(unit);
+      }
+    }
+
+    if (commandableUnits.length === 0) {
+      return;
+    }
+
+    const commandPromises = commandableUnits.map((unit) => {
+      const envelope: CommandEnvelope = {
+        sessionId: this.launchContext?.session?.id ?? "offline-skirmish",
+        playerId: unit.playerId,
+        issuedAtTick: this.worldState.tick,
+        command: {
+          type: "stop",
+          unitId: unit.id,
+        },
+      };
+
+      return Promise.resolve(this.sessionTransport?.issueCommand(envelope));
+    });
+
+    void Promise.all(commandPromises).then(() => {
+      this.syncWorldFromTransport(true);
+      this.emitSelectionChanged();
+      this.syncUnitRenderables();
+      this.publishMinimapEntities();
+    });
   }
 
   private publishMinimapMap(): void {
@@ -754,6 +817,33 @@ export class SkirmishScene extends Phaser.Scene {
 
   private getSelectedUnits(): UnitState[] {
     return Object.values(this.worldState.units).filter((unit) => this.selectedUnitIds.has(unit.id));
+  }
+
+  private syncWorldFromTransport(force = false): void {
+    const snapshot = this.sessionTransport?.getSnapshot();
+
+    if (!snapshot) {
+      return;
+    }
+
+    if (!force && snapshot === this.worldState && snapshot.tick === this.lastSyncedTick) {
+      return;
+    }
+
+    this.worldState = snapshot;
+    this.lastSyncedTick = snapshot.tick;
+    this.pruneMissingSelections();
+    this.syncUnitRenderables();
+    this.emitSelectionChanged();
+    this.publishMinimapEntities();
+  }
+
+  private pruneMissingSelections(): void {
+    for (const selectedUnitId of this.selectedUnitIds) {
+      if (!this.worldState.units[selectedUnitId]) {
+        this.selectedUnitIds.delete(selectedUnitId);
+      }
+    }
   }
 
   private findUnitAtWorldPoint(worldX: number, worldY: number): UnitState | null {

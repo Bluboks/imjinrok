@@ -2,10 +2,11 @@ import type { FastifyInstance } from "fastify";
 import {
   defaultMap,
   defaultSkirmishScenario,
+  type CommandEnvelope,
   type CreateLobbyRequest,
   type JoinLobbyRequest,
   type MatchmakingJoinRequest,
-} from "../../../../packages/shared/src/index.js";
+} from "../shared.js";
 import type { GameSessionService } from "../game/GameSessionService.js";
 import type { MatchmakingService } from "../matchmaking/MatchmakingService.js";
 import type { RoomService } from "../rooms/RoomService.js";
@@ -94,5 +95,29 @@ export async function registerRoutes(
     }
 
     return snapshot;
+  });
+
+  fastify.post("/api/sessions/:sessionId/commands", async (request, reply) => {
+    const params = request.params as { sessionId: string };
+    const envelope = request.body as CommandEnvelope;
+
+    if (envelope.sessionId !== params.sessionId) {
+      reply.code(400);
+      return { message: "Command sessionId does not match route sessionId." };
+    }
+
+    const result = gameSessionService.issueCommand(envelope);
+
+    if (result.status === "not-found") {
+      reply.code(404);
+      return { message: "Session not found." };
+    }
+
+    if (result.status === "rejected") {
+      reply.code(400);
+      return { message: "Command rejected.", reason: result.reason };
+    }
+
+    return result.command;
   });
 }

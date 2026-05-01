@@ -23,7 +23,8 @@ body {
 }
 
 button,
-input {
+input,
+textarea {
   font: inherit;
 }
 
@@ -70,12 +71,18 @@ input {
   gap: 0.4rem;
 }
 
-.editor-sidebar input {
+.editor-sidebar input,
+.editor-sidebar textarea {
   padding: 0.75rem 0.9rem;
   border: 1px solid rgba(141, 176, 159, 0.2);
   border-radius: 0.75rem;
   background: rgba(19, 36, 39, 0.95);
   color: #f0eddc;
+}
+
+.editor-sidebar textarea {
+  min-height: 5rem;
+  resize: vertical;
 }
 
 .control-grid {
@@ -99,6 +106,12 @@ input {
   cursor: pointer;
 }
 
+.button-row .secondary-button {
+  background: rgba(24, 48, 52, 0.95);
+  color: #e6d9ad;
+  border: 1px solid rgba(198, 169, 106, 0.35);
+}
+
 .panel-card {
   padding: 1rem;
   border-radius: 1rem;
@@ -109,6 +122,12 @@ input {
 .panel-card ul {
   margin: 0.75rem 0 0;
   padding-left: 1.1rem;
+}
+
+.form-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
 }
 
 .compact-card pre {

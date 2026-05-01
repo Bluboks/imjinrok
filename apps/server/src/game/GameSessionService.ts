@@ -5,13 +5,15 @@ import type {
   MapDefinition,
   ScenarioDefinition,
   SessionSummary,
-} from "../../../../packages/shared/src/index.js";
+} from "../shared.js";
 import {
   advanceWorldTick,
-  applyCommand,
   createInitialWorldState,
+  issueCommand as issueWorldCommand,
+  toWorldSnapshot,
+  type WorldSnapshot,
   type WorldState,
-} from "../../../../packages/simulation/src/index.js";
+} from "../simulation.js";
 import { nanoid } from "nanoid";
 
 interface CreateSessionOptions {
@@ -27,6 +29,11 @@ interface ActiveSession {
   worldState: WorldState;
   loop: ReturnType<typeof setInterval>;
 }
+
+export type GameSessionIssueCommandResult =
+  | { status: "accepted"; command: CommandEnvelope }
+  | { status: "not-found" }
+  | { status: "rejected"; reason: string };
 
 export class GameSessionService {
   private readonly sessions = new Map<string, ActiveSession>();
@@ -66,21 +73,32 @@ export class GameSessionService {
     return Array.from(this.sessions.values()).map((session) => session.summary);
   }
 
-  issueCommand(envelope: CommandEnvelope): CommandEnvelope | null {
+  issueCommand(envelope: CommandEnvelope): GameSessionIssueCommandResult {
     const session = this.sessions.get(envelope.sessionId);
 
     if (!session) {
-      return null;
+      return { status: "not-found" };
     }
 
-    applyCommand(session.worldState, envelope);
-    return envelope;
+    if (!session.summary.playerIds.includes(envelope.playerId)) {
+      return { status: "rejected", reason: "player is not in session" };
+    }
+
+    // TODO: replace the client-supplied playerId with an authenticated session player once auth/session tokens exist.
+
+    const result = issueWorldCommand(session.worldState, envelope);
+
+    if (!result.ok) {
+      return { status: "rejected", reason: result.reason };
+    }
+
+    return { status: "accepted", command: result.envelope };
   }
 
-  getSnapshot(sessionId: string): WorldState | null {
+  getSnapshot(sessionId: string): WorldSnapshot | null {
     const session = this.sessions.get(sessionId);
 
-    return session ? structuredClone(session.worldState) : null;
+    return session ? toWorldSnapshot(session.worldState) : null;
   }
 
   dispose(): void {

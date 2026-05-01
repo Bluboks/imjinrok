@@ -1,8 +1,8 @@
 import cors from "@fastify/cors";
 import Fastify from "fastify";
 import { Server as SocketIOServer } from "socket.io";
-import { type CommandEnvelope, defaultMap, defaultSkirmishScenario } from "../../../packages/shared/src/index.js";
-import type { WorldState } from "../../../packages/simulation/src/index.js";
+import { type CommandEnvelope, defaultMap, defaultSkirmishScenario } from "./shared.js";
+import type { WorldSnapshot } from "./simulation.js";
 import { config } from "./config.js";
 import { GameSessionService } from "./game/GameSessionService.js";
 import { registerRoutes } from "./http/registerRoutes.js";
@@ -15,8 +15,9 @@ interface ClientToServerEvents {
 }
 
 interface ServerToClientEvents {
-  "session:snapshot": (snapshot: WorldState) => void;
+  "session:snapshot": (snapshot: WorldSnapshot) => void;
   "session:commandAccepted": (command: CommandEnvelope) => void;
+  "session:commandRejected": (rejection: { command: CommandEnvelope; reason: string }) => void;
 }
 
 async function bootstrap(): Promise<void> {
@@ -59,13 +60,19 @@ async function bootstrap(): Promise<void> {
     });
 
     socket.on("command:issue", (envelope: CommandEnvelope) => {
-      const acceptedCommand = gameSessionService.issueCommand(envelope);
+      const result = gameSessionService.issueCommand(envelope);
 
-      if (!acceptedCommand) {
+      if (result.status === "not-found") {
+        socket.emit("session:commandRejected", { command: envelope, reason: "session not found" });
         return;
       }
 
-      io.to(envelope.sessionId).emit("session:commandAccepted", acceptedCommand);
+      if (result.status === "rejected") {
+        socket.emit("session:commandRejected", { command: envelope, reason: result.reason });
+        return;
+      }
+
+      io.to(envelope.sessionId).emit("session:commandAccepted", result.command);
 
       const snapshot = gameSessionService.getSnapshot(envelope.sessionId);
 

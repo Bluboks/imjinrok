@@ -1,6 +1,7 @@
 import Phaser from "phaser";
-import { defaultMap } from "@shared";
+import { defaultMap, type ActionDefinitionId } from "@shared";
 import {
+  ACTION_TRIGGERED_EVENT,
   DRAG_SELECTION_CHANGED_EVENT,
   MINIMAP_NAVIGATE_EVENT,
   MINIMAP_ENTITIES_CHANGED_EVENT,
@@ -322,9 +323,18 @@ export class UIScene extends Phaser.Scene {
     this.actionGridContainer = panelContainer;
     this.hudContainer.add(panelContainer);
     panelContainer.add(graphics);
-    drawActionGrid(this, panelContainer, graphics, this.actionGridBounds, this.selectedEntities);
+    drawActionGrid(this, panelContainer, graphics, this.actionGridBounds, this.selectedEntities, (actionId) => {
+      this.emitActionTriggered(actionId);
+    });
 
     return true;
+  }
+
+  private emitActionTriggered(actionId: ActionDefinitionId): void {
+    this.game.events.emit(ACTION_TRIGGERED_EVENT, {
+      actionId,
+      selectedEntityIds: this.selectedEntities.map((selection) => selection.id),
+    });
   }
 
   private getHudHeight(): number {

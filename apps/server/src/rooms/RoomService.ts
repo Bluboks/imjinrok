@@ -3,7 +3,7 @@ import type {
   CreateLobbyRequest,
   LobbyRecord,
   LobbySummary,
-} from "../../../../packages/shared/src/index.js";
+} from "../shared.js";
 
 export class RoomService {
   private readonly lobbies = new Map<string, LobbyRecord>();

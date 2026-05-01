@@ -1,15 +1,16 @@
 export interface TerrainDefinition {
   id: string;
+  blocksMovement: boolean;
   worldColor: number;
   minimapColor: number;
   editorColor: number;
 }
 
 export const terrainDefinitions = {
-  grass: { id: "grass", worldColor: 0x7aa35a, minimapColor: 0x6f9b54, editorColor: 0x82ae63 },
-  forest: { id: "forest", worldColor: 0x3f6f48, minimapColor: 0x355f3d, editorColor: 0x49784c },
-  water: { id: "water", worldColor: 0x346c88, minimapColor: 0x2f6680, editorColor: 0x3c7895 },
-  cliff: { id: "cliff", worldColor: 0x837362, minimapColor: 0x756858, editorColor: 0x7d6f62 },
+  grass: { id: "grass", blocksMovement: false, worldColor: 0x7aa35a, minimapColor: 0x6f9b54, editorColor: 0x82ae63 },
+  forest: { id: "forest", blocksMovement: true, worldColor: 0x3f6f48, minimapColor: 0x355f3d, editorColor: 0x49784c },
+  water: { id: "water", blocksMovement: true, worldColor: 0x346c88, minimapColor: 0x2f6680, editorColor: 0x3c7895 },
+  cliff: { id: "cliff", blocksMovement: true, worldColor: 0x837362, minimapColor: 0x756858, editorColor: 0x7d6f62 },
 } as const satisfies Record<string, TerrainDefinition>;
 
 export type TerrainType = keyof typeof terrainDefinitions;
@@ -45,10 +46,53 @@ export const resourceDefinitions = {
 
 export type ResourceDefinitionId = keyof typeof resourceDefinitions;
 
+export interface ActionDefinition {
+  id: string;
+  icon: string;
+  hotkey: string;
+  label: string;
+}
+
+export const actionDefinitions = {
+  move: { id: "move", icon: "M", hotkey: "M", label: "Move" },
+  gather: { id: "gather", icon: "G", hotkey: "G", label: "Gather" },
+  build: { id: "build", icon: "B", hotkey: "B", label: "Build" },
+  stop: { id: "stop", icon: "S", hotkey: "S", label: "Stop" },
+  "attack-move": { id: "attack-move", icon: "A", hotkey: "A", label: "Attack Move" },
+  patrol: { id: "patrol", icon: "P", hotkey: "P", label: "Patrol" },
+  repair: { id: "repair", icon: "R", hotkey: "R", label: "Repair" },
+  hold: { id: "hold", icon: "H", hotkey: "H", label: "Hold" },
+  "train-villager": { id: "train-villager", icon: "V", hotkey: "V", label: "Train Villager" },
+  "rally-point": { id: "rally-point", icon: "R", hotkey: "R", label: "Rally Point" },
+  "research-loom": { id: "research-loom", icon: "L", hotkey: "L", label: "Research Loom" },
+  "town-bell": { id: "town-bell", icon: "B", hotkey: "B", label: "Town Bell" },
+  "set-gather": { id: "set-gather", icon: "G", hotkey: "G", label: "Set Gather" },
+} as const satisfies Record<string, ActionDefinition>;
+
+export type ActionDefinitionId = keyof typeof actionDefinitions;
+
+const workerActionIds = ["move", "gather", "build", "stop", "attack-move", "patrol", "repair", "hold"] as const satisfies readonly ActionDefinitionId[];
+const buildingActionIds = ["train-villager", "rally-point", "research-loom", "stop", "town-bell", "set-gather"] as const satisfies readonly ActionDefinitionId[];
+
+export interface FootprintDefinition {
+  width: number;
+  height: number;
+  blocksMovement: boolean;
+}
+
+export interface PlacementDefinition {
+  allowedTerrain: readonly TerrainType[];
+}
+
+const grassPlacement = { allowedTerrain: ["grass"] } as const satisfies PlacementDefinition;
+
 export interface UnitDefinition {
   id: string;
   displayName: string;
   category: "building" | "worker";
+  actionIds: readonly ActionDefinitionId[];
+  footprint: FootprintDefinition;
+  placement?: PlacementDefinition;
   baseAttributes: {
     health: number;
     mana: number;
@@ -70,6 +114,9 @@ export const unitDefinitions = {
     id: "town-center",
     displayName: "Town Center",
     category: "building",
+    actionIds: buildingActionIds,
+    footprint: { width: 4, height: 4, blocksMovement: true },
+    placement: grassPlacement,
     baseAttributes: { health: 2400, mana: 0, movementSpeed: 0 },
     portraitGlyph: "TC",
     portraitColor: 0xc2a95e,
@@ -85,6 +132,9 @@ export const unitDefinitions = {
     id: "house",
     displayName: "House",
     category: "building",
+    actionIds: buildingActionIds,
+    footprint: { width: 2, height: 2, blocksMovement: true },
+    placement: grassPlacement,
     baseAttributes: { health: 550, mana: 0, movementSpeed: 0 },
     portraitGlyph: "H",
     portraitColor: 0xb99a6a,
@@ -100,6 +150,9 @@ export const unitDefinitions = {
     id: "barracks",
     displayName: "Barracks",
     category: "building",
+    actionIds: buildingActionIds,
+    footprint: { width: 3, height: 3, blocksMovement: true },
+    placement: grassPlacement,
     baseAttributes: { health: 1200, mana: 0, movementSpeed: 0 },
     portraitGlyph: "B",
     portraitColor: 0xa77855,
@@ -115,6 +168,8 @@ export const unitDefinitions = {
     id: "villager",
     displayName: "Villager",
     category: "worker",
+    actionIds: workerActionIds,
+    footprint: { width: 1, height: 1, blocksMovement: true },
     baseAttributes: { health: 25, mana: 0, movementSpeed: 4.2 },
     portraitGlyph: "V",
     portraitColor: 0x77a78a,
@@ -129,6 +184,12 @@ export const unitDefinitions = {
 } as const satisfies Record<string, UnitDefinition>;
 
 export type UnitDefinitionId = keyof typeof unitDefinitions;
+
+export function unitCanPerformAction(kind: UnitDefinitionId, actionId: ActionDefinitionId): boolean {
+  const actionIds: readonly ActionDefinitionId[] = unitDefinitions[kind].actionIds;
+
+  return actionIds.includes(actionId);
+}
 
 export const buildingDefinitionIds = ["town-center", "house", "barracks"] as const satisfies readonly UnitDefinitionId[];
 export type BuildingDefinitionId = (typeof buildingDefinitionIds)[number];
