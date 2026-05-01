@@ -1,5 +1,5 @@
 import { unitDefinitions, type ActionDefinitionId, type FactionId, type GridPoint, type MapDefinition, type UnitDefinitionId } from "@shared";
-import type { UnitState } from "@simulation";
+import type { PlayerVisibilityState, UnitState } from "@simulation";
 
 export const SELECTED_ENTITY_CHANGED_EVENT = "selected-entity:changed";
 export const SELECTED_ENTITY_REGISTRY_KEY = "selected-entity";
@@ -14,6 +14,8 @@ export const MINIMAP_VIEWPORT_CHANGED_EVENT = "minimap:viewport-changed";
 export const MINIMAP_VIEWPORT_REGISTRY_KEY = "minimap-viewport";
 export const MINIMAP_ENTITIES_CHANGED_EVENT = "minimap:entities-changed";
 export const MINIMAP_ENTITIES_REGISTRY_KEY = "minimap-entities";
+export const MINIMAP_VISIBILITY_CHANGED_EVENT = "minimap:visibility-changed";
+export const MINIMAP_VISIBILITY_REGISTRY_KEY = "minimap-visibility";
 
 export interface SelectedEntityView {
   id: string;
@@ -82,6 +84,8 @@ export interface MinimapViewportView {
 export interface MinimapEntitiesView {
   entities: MinimapEntityView[];
 }
+
+export type MinimapVisibilityView = PlayerVisibilityState;
 
 function getUnitLabel(kind: UnitDefinitionId): string {
   return unitDefinitions[kind].displayName;

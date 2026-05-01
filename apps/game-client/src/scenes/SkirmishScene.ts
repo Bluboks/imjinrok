@@ -45,6 +45,8 @@ import {
   MINIMAP_ENTITIES_REGISTRY_KEY,
   MINIMAP_MAP_CHANGED_EVENT,
   MINIMAP_MAP_REGISTRY_KEY,
+  MINIMAP_VISIBILITY_CHANGED_EVENT,
+  MINIMAP_VISIBILITY_REGISTRY_KEY,
   MINIMAP_VIEWPORT_CHANGED_EVENT,
   MINIMAP_VIEWPORT_REGISTRY_KEY,
   SELECTED_ENTITY_CHANGED_EVENT,
@@ -192,6 +194,7 @@ export class SkirmishScene extends Phaser.Scene {
     this.publishVirtualCursor();
     this.selectInitialUnit(this.localPlayerId);
     this.publishMinimapMap();
+    this.publishMinimapVisibility();
     this.publishMinimapEntities();
     this.publishMinimapViewport(true);
   }
@@ -216,6 +219,9 @@ export class SkirmishScene extends Phaser.Scene {
     this.pruneMissingSelections();
     this.syncUnitRenderables();
     this.emitSelectionChanged();
+    if (dirtyFogChunkCount > 0) {
+      this.publishMinimapVisibility();
+    }
     this.publishMinimapEntities();
   }
 
@@ -752,6 +758,11 @@ export class SkirmishScene extends Phaser.Scene {
     this.game.events.emit(MINIMAP_ENTITIES_CHANGED_EVENT, view);
   }
 
+  private publishMinimapVisibility(): void {
+    this.registry.set(MINIMAP_VISIBILITY_REGISTRY_KEY, this.playerVisibility);
+    this.game.events.emit(MINIMAP_VISIBILITY_CHANGED_EVENT, this.playerVisibility);
+  }
+
   private publishMinimapViewport(force = false): void {
     if (!force && this.time.now - this.lastViewportEmitAt < VIEWPORT_EVENT_INTERVAL_MS) {
       this.viewportDirty = true;
@@ -1224,6 +1235,9 @@ export class SkirmishScene extends Phaser.Scene {
     this.pruneMissingSelections();
     this.syncUnitRenderables();
     this.emitSelectionChanged();
+    if (dirtyFogChunkCount > 0) {
+      this.publishMinimapVisibility();
+    }
     this.publishMinimapEntities();
   }
 

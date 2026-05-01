@@ -8,6 +8,8 @@ import {
   MINIMAP_ENTITIES_REGISTRY_KEY,
   MINIMAP_MAP_CHANGED_EVENT,
   MINIMAP_MAP_REGISTRY_KEY,
+  MINIMAP_VISIBILITY_CHANGED_EVENT,
+  MINIMAP_VISIBILITY_REGISTRY_KEY,
   MINIMAP_VIEWPORT_CHANGED_EVENT,
   MINIMAP_VIEWPORT_REGISTRY_KEY,
   SELECTED_ENTITY_CHANGED_EVENT,
@@ -18,6 +20,7 @@ import {
   type MinimapMapView,
   type MinimapViewportView,
   type MinimapEntitiesView,
+  type MinimapVisibilityView,
   type SelectedEntitiesView,
   type SelectedEntityView,
   type VirtualCursorView,
@@ -25,12 +28,14 @@ import {
 import type { GameLaunchContext } from "../session.js";
 import {
   createMinimapGeometry,
+  createMinimapFogTexture,
   drawMinimapEntityMarker,
   drawMinimapTerrainCache,
   getMinimapDiamondPoints,
   getMinimapWorldPoint,
   gridToMinimap,
   worldToMinimap,
+  type MinimapFogTexture,
   type MinimapGeometry,
 } from "../ui/minimap.js";
 import { drawActionGrid } from "../ui/actionGrid.js";
@@ -53,8 +58,10 @@ export class UIScene extends Phaser.Scene {
   private minimapMap: MinimapMapView | null = null;
   private minimapViewport: MinimapViewportView | null = null;
   private minimapEntities: MinimapEntitiesView = { entities: [] };
+  private minimapVisibility: MinimapVisibilityView | null = null;
   private minimapGeometry: MinimapGeometry | null = null;
   private minimapTerrainGraphics: Phaser.GameObjects.RenderTexture | null = null;
+  private minimapFog: MinimapFogTexture | null = null;
   private minimapEntityGraphics: Phaser.GameObjects.Graphics | null = null;
   private minimapViewportGraphics: Phaser.GameObjects.Graphics | null = null;
   private minimapBorderGraphics: Phaser.GameObjects.Graphics | null = null;
@@ -76,6 +83,8 @@ export class UIScene extends Phaser.Scene {
     this.minimapViewport = (this.registry.get(MINIMAP_VIEWPORT_REGISTRY_KEY) as MinimapViewportView | null | undefined) ?? null;
     this.minimapEntities =
       (this.registry.get(MINIMAP_ENTITIES_REGISTRY_KEY) as MinimapEntitiesView | null | undefined) ?? this.minimapEntities;
+    this.minimapVisibility =
+      (this.registry.get(MINIMAP_VISIBILITY_REGISTRY_KEY) as MinimapVisibilityView | null | undefined) ?? null;
 
     this.drawHud();
     this.dragSelectionGraphics = this.add.graphics().setScrollFactor(0).setDepth(1500);
@@ -87,6 +96,7 @@ export class UIScene extends Phaser.Scene {
     this.game.events.on(MINIMAP_MAP_CHANGED_EVENT, this.handleMinimapMapChanged, this);
     this.game.events.on(MINIMAP_VIEWPORT_CHANGED_EVENT, this.handleMinimapViewportChanged, this);
     this.game.events.on(MINIMAP_ENTITIES_CHANGED_EVENT, this.handleMinimapEntitiesChanged, this);
+    this.game.events.on(MINIMAP_VISIBILITY_CHANGED_EVENT, this.handleMinimapVisibilityChanged, this);
     this.input.on("pointerdown", this.handlePointerDown, this);
     this.input.on("pointermove", this.handlePointerMove, this);
     this.input.on("pointerup", this.handlePointerUp, this);
@@ -133,6 +143,11 @@ export class UIScene extends Phaser.Scene {
   private handleMinimapEntitiesChanged(view: MinimapEntitiesView): void {
     this.minimapEntities = view;
     this.drawMinimapEntitiesOverlay();
+  }
+
+  private handleMinimapVisibilityChanged(view: MinimapVisibilityView): void {
+    this.minimapVisibility = view;
+    this.updateMinimapFogOverlay();
   }
 
   private handlePointerDown(pointer: Phaser.Input.Pointer): void {
@@ -186,10 +201,13 @@ export class UIScene extends Phaser.Scene {
     this.game.events.off(MINIMAP_MAP_CHANGED_EVENT, this.handleMinimapMapChanged, this);
     this.game.events.off(MINIMAP_VIEWPORT_CHANGED_EVENT, this.handleMinimapViewportChanged, this);
     this.game.events.off(MINIMAP_ENTITIES_CHANGED_EVENT, this.handleMinimapEntitiesChanged, this);
+    this.game.events.off(MINIMAP_VISIBILITY_CHANGED_EVENT, this.handleMinimapVisibilityChanged, this);
     this.input.off("pointerdown", this.handlePointerDown, this);
     this.input.off("pointermove", this.handlePointerMove, this);
     this.input.off("pointerup", this.handlePointerUp, this);
     this.scale.off(Phaser.Scale.Events.RESIZE, this.handleResize, this);
+    this.minimapFog?.destroy();
+    this.minimapFog = null;
     this.hudContainer?.destroy(true);
     this.hudContainer = null;
     this.selectionPanelContainer = null;
@@ -249,6 +267,8 @@ export class UIScene extends Phaser.Scene {
   }
 
   private drawHud(): void {
+    this.minimapFog?.destroy();
+    this.minimapFog = null;
     this.hudContainer?.destroy(true);
     this.selectionPanelContainer = null;
     this.actionGridContainer = null;
@@ -352,6 +372,7 @@ export class UIScene extends Phaser.Scene {
     drawPanelFrame(this, container, graphics, { x, y, width, height }, "MINIMAP");
 
     this.minimapTerrainGraphics?.destroy();
+    this.minimapFog?.destroy();
     this.minimapEntityGraphics?.destroy();
     this.minimapViewportGraphics?.destroy();
     this.minimapBorderGraphics?.destroy();
@@ -364,10 +385,11 @@ export class UIScene extends Phaser.Scene {
       .setOrigin(0, 0)
       .setScrollFactor(0)
       .setDepth(1002);
-    this.minimapEntityGraphics = this.add.graphics().setScrollFactor(0).setDepth(1003);
-    this.minimapViewportGraphics = this.add.graphics().setScrollFactor(0).setDepth(1004);
-    this.minimapBorderGraphics = this.add.graphics().setScrollFactor(0).setDepth(1005);
-    container.add([this.minimapTerrainGraphics, this.minimapEntityGraphics, this.minimapViewportGraphics, this.minimapBorderGraphics]);
+    this.minimapFog = createMinimapFogTexture(this, "minimap-fog", mapDefinition, geometry);
+    this.minimapEntityGraphics = this.add.graphics().setScrollFactor(0).setDepth(1004);
+    this.minimapViewportGraphics = this.add.graphics().setScrollFactor(0).setDepth(1005);
+    this.minimapBorderGraphics = this.add.graphics().setScrollFactor(0).setDepth(1006);
+    container.add([this.minimapTerrainGraphics, this.minimapFog.image, this.minimapEntityGraphics, this.minimapViewportGraphics, this.minimapBorderGraphics]);
     this.minimapZoomText = this.add.text(x + 18, y + height - 24, "", { ...HUD_TEXT_STYLE, fontSize: "11px", color: "#7f9b91" });
     container.add(this.minimapZoomText);
 
@@ -377,11 +399,16 @@ export class UIScene extends Phaser.Scene {
     this.minimapTerrainGraphics.draw(terrainGraphics, 0, 0);
     terrainGraphics.destroy();
     if (this.perfEnabled()) console.timeEnd("minimap terrain cache");
+    this.updateMinimapFogOverlay();
     this.drawMinimapEntitiesOverlay();
     this.drawMinimapViewportOverlay();
     this.minimapBorderGraphics.lineStyle(2, 0xd0b46a, 0.85);
     this.minimapBorderGraphics.strokePoints(getMinimapDiamondPoints(geometry), true);
 
+  }
+
+  private updateMinimapFogOverlay(): void {
+    this.minimapFog?.update(this.minimapVisibility);
   }
 
   private drawMinimapViewportOverlay(): void {

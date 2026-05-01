@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 import { factionDefinitions, getTileAt, terrainDefinitions, unitDefinitions, type MapDefinition } from "@shared";
-import type { MinimapEntityView, MinimapPoint, MinimapViewportView } from "../hud.js";
+import { TileVisibility } from "@simulation";
+import type { MinimapEntityView, MinimapPoint, MinimapViewportView, MinimapVisibilityView } from "../hud.js";
 
 export interface MinimapGeometry {
   centerX: number;
@@ -9,6 +10,12 @@ export interface MinimapGeometry {
   leftX: number;
   diamondWidth: number;
   diamondHeight: number;
+}
+
+export interface MinimapFogTexture {
+  image: Phaser.GameObjects.Image;
+  update(visibility: MinimapVisibilityView | null): void;
+  destroy(): void;
 }
 
 export function createMinimapGeometry(x: number, y: number, width: number, height: number): MinimapGeometry {
@@ -158,6 +165,98 @@ export function drawMinimapTerrainCache(
       );
     }
   }
+}
+
+export function createMinimapFogTexture(
+  scene: Phaser.Scene,
+  textureKey: string,
+  mapDefinition: Pick<MapDefinition, "width" | "height">,
+  geometry: MinimapGeometry,
+): MinimapFogTexture {
+  if (scene.textures.exists(textureKey)) {
+    scene.textures.remove(textureKey);
+  }
+
+  const canvasWidth = Math.max(1, Math.ceil(geometry.diamondWidth));
+  const canvasHeight = Math.max(1, Math.ceil(geometry.diamondHeight));
+  const texture = scene.textures.createCanvas(textureKey, canvasWidth, canvasHeight);
+
+  if (!texture) {
+    throw new Error(`Failed to create minimap fog texture: ${textureKey}`);
+  }
+
+  const canvasTexture = texture;
+  const image = scene.add
+    .image(geometry.leftX, geometry.topY, textureKey)
+    .setOrigin(0, 0)
+    .setScrollFactor(0)
+    .setDepth(1003)
+    .setDisplaySize(geometry.diamondWidth, geometry.diamondHeight);
+  const imageData = canvasTexture.context.createImageData(canvasWidth, canvasHeight);
+  const data = imageData.data;
+  const tileHalfWidth = geometry.diamondWidth / (mapDefinition.width + mapDefinition.height);
+  const tileHalfHeight = geometry.diamondHeight / (mapDefinition.width + mapDefinition.height);
+  const halfDiamondWidth = geometry.diamondWidth / 2;
+  const halfDiamondHeight = geometry.diamondHeight / 2;
+
+  canvasTexture.setFilter(Phaser.Textures.FilterMode.NEAREST);
+
+  for (let index = 0; index < data.length; index += 4) {
+    data[index] = 0x02;
+    data[index + 1] = 0x07;
+    data[index + 2] = 0x08;
+  }
+
+  function update(visibility: MinimapVisibilityView | null): void {
+    for (let py = 0; py < canvasHeight; py += 1) {
+      const localY = py + 0.5;
+      const ny = (localY - halfDiamondHeight) / halfDiamondHeight;
+
+      for (let px = 0; px < canvasWidth; px += 1) {
+        const alphaIndex = (py * canvasWidth + px) * 4 + 3;
+
+        if (!visibility) {
+          data[alphaIndex] = 0;
+          continue;
+        }
+
+        const localX = px + 0.5 - halfDiamondWidth;
+        const nx = localX / halfDiamondWidth;
+
+        if (Math.abs(nx) + Math.abs(ny) > 1) {
+          data[alphaIndex] = 0;
+          continue;
+        }
+
+        const sum = localY / tileHalfHeight;
+        const diff = localX / tileHalfWidth;
+        const gx = Math.floor((sum + diff) * 0.5);
+        const gy = Math.floor((sum - diff) * 0.5);
+
+        if (gx < 0 || gy < 0 || gx >= mapDefinition.width || gy >= mapDefinition.height || gx >= visibility.width || gy >= visibility.height) {
+          data[alphaIndex] = 0;
+          continue;
+        }
+
+        const tileVisibility = visibility.tiles[gy * visibility.width + gx] ?? TileVisibility.Unexplored;
+        data[alphaIndex] = tileVisibility === TileVisibility.Visible ? 0 : tileVisibility === TileVisibility.Explored ? 115 : 217;
+      }
+    }
+
+    canvasTexture.context.putImageData(imageData, 0, 0);
+    canvasTexture.refresh();
+  }
+
+  return {
+    image,
+    update,
+    destroy() {
+      image.destroy();
+      if (scene.textures.exists(textureKey)) {
+        scene.textures.remove(textureKey);
+      }
+    },
+  };
 }
 
 export function drawMinimapEntityMarker(
