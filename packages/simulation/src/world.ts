@@ -8,7 +8,10 @@ export { applyCommand, issueCommand, validateCommand, type CommandValidationResu
 export { findPathForUnit, isTerrainWalkable } from "./navigation.js";
 export { getFootprintTiles, validateBuildingPlacement, type BuildingPlacementValidationResult } from "./placement.js";
 export { createScenarioRuntimeState, evaluateScenarioRuntime } from "./scenario.js";
+export { SIM_TICK_SECONDS, SIM_TICKS_PER_SECOND } from "./constants.js";
 export { advanceWorldTick } from "./tick.js";
+export { iterateUnitsOrdered } from "./units.js";
+export { createPlayerVisibility, getTileVisibility, updatePlayerVisibility, updatePlayerVisibilityWithChanges, TileVisibility, type PlayerVisibilityChangeOptions, type PlayerVisibilityState, type PlayerVisibilityUpdate } from "./visibility.js";
 
 export function createInitialWorldState(
   map: MapDefinition,

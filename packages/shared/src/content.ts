@@ -104,6 +104,7 @@ export interface UnitDefinition {
   renderRadius: number;
   selectionRadius: number;
   hitRadius: number;
+  sightRadius: number;
   minimapShape: "square" | "circle";
   minimapRadius: number;
   selectedMinimapRadius: number;
@@ -124,6 +125,7 @@ export const unitDefinitions = {
     renderRadius: 12,
     selectionRadius: 12,
     hitRadius: 24,
+    sightRadius: 10,
     minimapShape: "square",
     minimapRadius: 4,
     selectedMinimapRadius: 5,
@@ -142,6 +144,7 @@ export const unitDefinitions = {
     renderRadius: 8,
     selectionRadius: 8,
     hitRadius: 18,
+    sightRadius: 4,
     minimapShape: "square",
     minimapRadius: 3,
     selectedMinimapRadius: 4,
@@ -160,6 +163,7 @@ export const unitDefinitions = {
     renderRadius: 10,
     selectionRadius: 10,
     hitRadius: 22,
+    sightRadius: 6,
     minimapShape: "square",
     minimapRadius: 3.5,
     selectedMinimapRadius: 4.5,
@@ -177,6 +181,7 @@ export const unitDefinitions = {
     renderRadius: 6,
     selectionRadius: 6,
     hitRadius: 16,
+    sightRadius: 6,
     minimapShape: "circle",
     minimapRadius: 2.8,
     selectedMinimapRadius: 4,

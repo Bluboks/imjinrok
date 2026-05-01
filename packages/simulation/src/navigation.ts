@@ -6,6 +6,7 @@ import {
   type MapDefinition,
 } from "../../shared/src/index.js";
 import { getFootprintTiles } from "./placement.js";
+import { iterateUnitsOrdered } from "./units.js";
 import type { UnitState, WorldState } from "./types.js";
 
 const NEIGHBORS: readonly GridPoint[] = [
@@ -113,7 +114,7 @@ export function isTerrainWalkable(map: MapDefinition, point: GridPoint): boolean
 function getStaticBlockingTiles(state: WorldState): Set<string> {
   const blockedTiles = new Set<string>();
 
-  for (const unit of Object.values(state.units)) {
+  for (const unit of iterateUnitsOrdered(state)) {
     const definition = unitDefinitions[unit.kind];
 
     if (definition.category !== "building" || !definition.footprint.blocksMovement) {

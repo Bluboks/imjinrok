@@ -10,6 +10,8 @@ import {
   advanceWorldTick,
   createInitialWorldState,
   issueCommand as issueWorldCommand,
+  SIM_TICK_SECONDS,
+  SIM_TICKS_PER_SECOND,
   toWorldSnapshot,
   type WorldSnapshot,
   type WorldState,
@@ -52,13 +54,13 @@ export class GameSessionService {
       scenarioType: options.scenario.scenarioType,
       mapId: options.map.id,
       playerIds: options.playerIds,
-      tickRate: this.tickRate,
+      tickRate: SIM_TICKS_PER_SECOND,
     };
 
     const worldState = createInitialWorldState(options.map, options.playerIds, options.scenario);
     const loop = setInterval(() => {
-      advanceWorldTick(worldState, 1 / this.tickRate);
-    }, 1000 / this.tickRate);
+      advanceWorldTick(worldState);
+    }, SIM_TICK_SECONDS * 1000);
 
     this.sessions.set(summary.id, {
       summary,

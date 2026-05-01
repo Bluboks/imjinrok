@@ -2,8 +2,13 @@ import Phaser from "phaser";
 import { defaultMap, factionDefinitions, getTileAt, terrainDefinitions, terrainTypes, unitCanPerformAction, unitDefinitions, type CommandEnvelope, type FactionId, type GridPoint, type MapDefinition, type TerrainType } from "@shared";
 import {
   cartToIso,
+  createPlayerVisibility,
   createInitialWorldState,
+  getTileVisibility,
   isoToCart,
+  TileVisibility,
+  updatePlayerVisibilityWithChanges,
+  type PlayerVisibilityState,
   type UnitState,
   type WorldState,
 } from "@simulation";
@@ -35,11 +40,25 @@ const EDGE_PAN_SPEED = 520;
 const TERRAIN_CHUNK_SIZE = 16;
 const VIEWPORT_EVENT_INTERVAL_MS = 1000 / 30;
 const SCREEN_OVERLAY_DEPTH = 1_000_000;
+const FOG_UNEXPLORED_ALPHA = 0.9;
+const FOG_EXPLORED_ALPHA = 0.48;
 
 interface UnitRenderable {
   container: Phaser.GameObjects.Container;
   body: Phaser.GameObjects.Graphics;
   selectionRing: Phaser.GameObjects.Graphics;
+}
+
+interface FogChunkBounds {
+  chunkX: number;
+  chunkY: number;
+  maxX: number;
+  maxY: number;
+  minX: number;
+  minY: number;
+  width: number;
+  height: number;
+  depth: number;
 }
 
 export class SkirmishScene extends Phaser.Scene {
@@ -49,11 +68,22 @@ export class SkirmishScene extends Phaser.Scene {
   private lastSyncedTick = Number.NEGATIVE_INFINITY;
   private mapOrigin = new Phaser.Math.Vector2(0, 0);
   private readonly terrainChunks: Phaser.GameObjects.RenderTexture[] = [];
+  private readonly fogChunks: (Phaser.GameObjects.RenderTexture | null)[] = [];
   private readonly unitRenderables = new Map<string, UnitRenderable>();
   private readonly terrainTextureKeys = new Map<TerrainType, string>();
+  private readonly fogTextureKeys = new Map<TileVisibility, string>();
+  private localPlayerId = "local-player";
+  private playerVisibility: PlayerVisibilityState = createPlayerVisibility(defaultMap);
+  private fogChunkDirtyMask = new Uint8Array(0);
+  private fogChunksPerRow = 0;
+  private fogChunksPerColumn = 0;
   private perfEnabled = false;
   private perfText: Phaser.GameObjects.Text | null = null;
   private rollingFrameMs = 0;
+  private lastVisibilityDeltaMs = 0;
+  private lastFogRedrawMs = 0;
+  private lastFogDirtyChunkCount = 0;
+  private lastFogTileDrawCount = 0;
   private lastViewportEmitAt = 0;
   private viewportDirty = false;
   private cursorKeys: Phaser.Types.Input.Keyboard.CursorKeys | null = null;
@@ -74,13 +104,17 @@ export class SkirmishScene extends Phaser.Scene {
     const players = data.session?.playerIds.length ? data.session.playerIds : ["local-player", "cpu-1"];
 
     this.launchContext = data;
+    this.localPlayerId = players[0] ?? "local-player";
     this.perfEnabled = new URLSearchParams(globalThis.location?.search ?? "").get("perf") === "1";
     this.map = defaultMap;
     this.sessionTransport = createSessionTransport(data, this.map, players);
     this.worldState = this.sessionTransport.getSnapshot();
     this.lastSyncedTick = this.worldState.tick;
+    this.playerVisibility = createPlayerVisibility(this.map);
+    this.configureFogChunkGrid();
     this.mapOrigin.set(this.scale.width / 2, 160);
     this.virtualCursorScreen.set(this.scale.width / 2, this.scale.height / 2);
+    this.refreshLocalVisibility();
 
     this.cameras.main.setBackgroundColor("#143137");
     this.cameras.main.centerOn(this.mapOrigin.x, this.mapOrigin.y + (this.map.height * this.map.tileHeight) / 2);
@@ -92,9 +126,10 @@ export class SkirmishScene extends Phaser.Scene {
     this.setupMouseControls();
     this.setupPointerLockLifecycle();
     this.redrawTerrain();
+    this.redrawAllFogOverlay();
     this.syncUnitRenderables();
     this.publishVirtualCursor();
-    this.selectInitialUnit(players[0] ?? "local-player");
+    this.selectInitialUnit(this.localPlayerId);
     this.publishMinimapMap();
     this.publishMinimapEntities();
     this.publishMinimapViewport(true);
@@ -114,6 +149,8 @@ export class SkirmishScene extends Phaser.Scene {
 
     this.worldState = nextSnapshot;
     this.lastSyncedTick = nextSnapshot.tick;
+    const dirtyFogChunkCount = this.refreshLocalVisibility();
+    this.redrawDirtyFogOverlay(dirtyFogChunkCount);
     this.pruneMissingSelections();
     this.syncUnitRenderables();
     this.emitSelectionChanged();
@@ -235,6 +272,10 @@ export class SkirmishScene extends Phaser.Scene {
     this.scale.off(Phaser.Scale.Events.RESIZE, this.handleResize, this);
     this.terrainChunks.forEach((chunk) => chunk.destroy());
     this.terrainChunks.length = 0;
+    this.disposeFogOverlay();
+    this.fogChunkDirtyMask = new Uint8Array(0);
+    this.fogChunksPerRow = 0;
+    this.fogChunksPerColumn = 0;
     this.unitRenderables.forEach((renderable) => renderable.container.destroy(true));
     this.unitRenderables.clear();
     this.sessionTransport?.dispose();
@@ -260,7 +301,11 @@ export class SkirmishScene extends Phaser.Scene {
     }
 
     this.rollingFrameMs = this.rollingFrameMs === 0 ? delta : this.rollingFrameMs * 0.92 + delta * 0.08;
-    this.perfText.setText(`fps ${this.game.loop.actualFps.toFixed(1)} | frame ${this.rollingFrameMs.toFixed(1)}ms`);
+    this.perfText.setText(
+      `fps ${this.game.loop.actualFps.toFixed(1)} | frame ${this.rollingFrameMs.toFixed(1)}ms | ` +
+        `vis ${this.lastVisibilityDeltaMs.toFixed(2)}ms | fog ${this.lastFogRedrawMs.toFixed(2)}ms ` +
+        `dirty ${this.lastFogDirtyChunkCount}/${this.fogChunks.length} draws ${this.lastFogTileDrawCount}`,
+    );
   }
 
   private requestPointerLock(): void {
@@ -451,6 +496,10 @@ export class SkirmishScene extends Phaser.Scene {
 
     const rectangle = this.getScreenRectangle(this.dragStartScreen, this.dragCurrentScreen);
     const selectedUnits = Object.values(this.worldState.units).filter((unit) => {
+      if (!this.isUnitSelectable(unit)) {
+        return false;
+      }
+
       const unitSelectionBounds = this.getUnitSelectionScreenBounds(unit);
 
       return Phaser.Geom.Intersects.RectangleToRectangle(rectangle, unitSelectionBounds);
@@ -473,7 +522,7 @@ export class SkirmishScene extends Phaser.Scene {
 
       const envelope: CommandEnvelope = {
         sessionId: this.launchContext?.session?.id ?? "offline-skirmish",
-        playerId: unit.playerId,
+        playerId: this.localPlayerId,
         issuedAtTick: this.worldState.tick,
         command: {
           type: "move",
@@ -511,7 +560,7 @@ export class SkirmishScene extends Phaser.Scene {
     const commandPromises = commandableUnits.map((unit) => {
       const envelope: CommandEnvelope = {
         sessionId: this.launchContext?.session?.id ?? "offline-skirmish",
-        playerId: unit.playerId,
+        playerId: this.localPlayerId,
         issuedAtTick: this.worldState.tick,
         command: {
           type: "stop",
@@ -540,14 +589,16 @@ export class SkirmishScene extends Phaser.Scene {
 
   private publishMinimapEntities(): void {
     const view = {
-      entities: Object.values(this.worldState.units).map((unit) => ({
-        id: unit.id,
-        playerId: unit.playerId,
-        faction: this.getPlayerFaction(unit.playerId),
-        kind: unit.kind,
-        position: { ...unit.position },
-        selected: this.selectedUnitIds.has(unit.id),
-      })),
+      entities: Object.values(this.worldState.units)
+        .filter((unit) => this.isUnitVisibleToLocalPlayer(unit))
+        .map((unit) => ({
+          id: unit.id,
+          playerId: unit.playerId,
+          faction: this.getPlayerFaction(unit.playerId),
+          kind: unit.kind,
+          position: { ...unit.position },
+          selected: this.selectedUnitIds.has(unit.id),
+        })),
     };
 
     this.registry.set(MINIMAP_ENTITIES_REGISTRY_KEY, view);
@@ -780,9 +831,9 @@ export class SkirmishScene extends Phaser.Scene {
   }
 
   private selectInitialUnit(playerId: string): void {
-    const units = Object.values(this.worldState.units);
+    const units = Object.values(this.worldState.units).filter((unit) => unit.playerId === playerId);
     const preferredUnit =
-      units.find((unit) => unit.playerId === playerId && unitDefinitions[unit.kind].category === "building") ?? units[0];
+      units.find((unit) => unitDefinitions[unit.kind].category === "building") ?? units[0];
 
     if (preferredUnit) {
       this.selectUnits([preferredUnit]);
@@ -793,7 +844,9 @@ export class SkirmishScene extends Phaser.Scene {
     this.selectedUnitIds.clear();
 
     for (const unit of units) {
-      this.selectedUnitIds.add(unit.id);
+      if (this.isUnitSelectable(unit)) {
+        this.selectedUnitIds.add(unit.id);
+      }
     }
 
     this.emitSelectionChanged();
@@ -816,7 +869,7 @@ export class SkirmishScene extends Phaser.Scene {
   }
 
   private getSelectedUnits(): UnitState[] {
-    return Object.values(this.worldState.units).filter((unit) => this.selectedUnitIds.has(unit.id));
+    return Object.values(this.worldState.units).filter((unit) => this.selectedUnitIds.has(unit.id) && this.isUnitSelectable(unit));
   }
 
   private syncWorldFromTransport(force = false): void {
@@ -832,6 +885,8 @@ export class SkirmishScene extends Phaser.Scene {
 
     this.worldState = snapshot;
     this.lastSyncedTick = snapshot.tick;
+    const dirtyFogChunkCount = this.refreshLocalVisibility();
+    this.redrawDirtyFogOverlay(dirtyFogChunkCount);
     this.pruneMissingSelections();
     this.syncUnitRenderables();
     this.emitSelectionChanged();
@@ -840,7 +895,9 @@ export class SkirmishScene extends Phaser.Scene {
 
   private pruneMissingSelections(): void {
     for (const selectedUnitId of this.selectedUnitIds) {
-      if (!this.worldState.units[selectedUnitId]) {
+      const unit = this.worldState.units[selectedUnitId];
+
+      if (!unit || !this.isUnitSelectable(unit)) {
         this.selectedUnitIds.delete(selectedUnitId);
       }
     }
@@ -852,6 +909,10 @@ export class SkirmishScene extends Phaser.Scene {
     let selectedDistanceSq = Number.POSITIVE_INFINITY;
 
     for (const unit of Object.values(this.worldState.units)) {
+      if (!this.isUnitSelectable(unit)) {
+        continue;
+      }
+
       const unitPosition = this.getUnitWorldPosition(unit);
       const radius = unitDefinitions[unit.kind].hitRadius;
       const deltaX = worldX - unitPosition.x;
@@ -871,6 +932,218 @@ export class SkirmishScene extends Phaser.Scene {
     const iso = cartToIso(unit.position, this.map.tileWidth, this.map.tileHeight);
 
     return new Phaser.Math.Vector2(this.mapOrigin.x + iso.x, this.mapOrigin.y + iso.y - this.map.tileHeight / 2);
+  }
+
+  private refreshLocalVisibility(): number {
+    const startedAt = this.perfEnabled ? performance.now() : 0;
+    const update = updatePlayerVisibilityWithChanges(this.playerVisibility, this.worldState, this.localPlayerId, {
+      dirtyChunks: this.fogChunkDirtyMask,
+      chunkSize: TERRAIN_CHUNK_SIZE,
+    });
+
+    this.playerVisibility = update.visibility;
+
+    if (this.perfEnabled) {
+      this.lastVisibilityDeltaMs = performance.now() - startedAt;
+    }
+
+    return update.dirtyChunkCount;
+  }
+
+  private isUnitVisibleToLocalPlayer(unit: UnitState): boolean {
+    if (unit.playerId === this.localPlayerId) {
+      return true;
+    }
+
+    return getTileVisibility(this.playerVisibility, unit.position) === TileVisibility.Visible;
+  }
+
+  private isUnitSelectable(unit: UnitState): boolean {
+    return unit.playerId === this.localPlayerId && this.isUnitVisibleToLocalPlayer(unit);
+  }
+
+  private configureFogChunkGrid(): void {
+    this.disposeFogOverlay();
+    this.fogChunksPerRow = Math.ceil(this.map.width / TERRAIN_CHUNK_SIZE);
+    this.fogChunksPerColumn = Math.ceil(this.map.height / TERRAIN_CHUNK_SIZE);
+    this.fogChunkDirtyMask = new Uint8Array(this.fogChunksPerRow * this.fogChunksPerColumn);
+    this.fogChunks.length = this.fogChunkDirtyMask.length;
+    this.fogChunks.fill(null);
+  }
+
+  private disposeFogOverlay(): void {
+    this.fogChunks.forEach((chunk) => chunk?.destroy());
+    this.fogChunks.length = 0;
+  }
+
+  private redrawAllFogOverlay(): void {
+    const startedAt = this.perfEnabled ? performance.now() : 0;
+
+    if (this.perfEnabled) console.time("fog full bake");
+    this.ensureFogTextures();
+
+    let tileDrawCount = 0;
+
+    for (let chunkIndex = 0; chunkIndex < this.fogChunks.length; chunkIndex += 1) {
+      tileDrawCount += this.redrawFogChunk(chunkIndex);
+    }
+
+    this.lastFogDirtyChunkCount = this.fogChunks.length;
+    this.lastFogTileDrawCount = tileDrawCount;
+    this.fogChunkDirtyMask.fill(0);
+
+    if (this.perfEnabled) {
+      this.lastFogRedrawMs = performance.now() - startedAt;
+      console.timeEnd("fog full bake");
+    }
+  }
+
+  private redrawDirtyFogOverlay(dirtyChunkCount: number): void {
+    if (dirtyChunkCount === 0) {
+      this.lastFogDirtyChunkCount = 0;
+      this.lastFogTileDrawCount = 0;
+      this.lastFogRedrawMs = 0;
+      return;
+    }
+
+    const startedAt = this.perfEnabled ? performance.now() : 0;
+
+    if (this.perfEnabled) console.time("fog dirty bake");
+    this.ensureFogTextures();
+
+    let redrawnChunkCount = 0;
+    let tileDrawCount = 0;
+
+    for (let chunkIndex = 0; chunkIndex < this.fogChunkDirtyMask.length; chunkIndex += 1) {
+      if (this.fogChunkDirtyMask[chunkIndex] !== 1) {
+        continue;
+      }
+
+      tileDrawCount += this.redrawFogChunk(chunkIndex);
+      redrawnChunkCount += 1;
+    }
+
+    this.lastFogDirtyChunkCount = redrawnChunkCount;
+    this.lastFogTileDrawCount = tileDrawCount;
+
+    if (this.perfEnabled) {
+      this.lastFogRedrawMs = performance.now() - startedAt;
+      console.timeEnd("fog dirty bake");
+    }
+  }
+
+  private redrawFogChunk(chunkIndex: number): number {
+    const bounds = this.getFogChunkBounds(chunkIndex);
+    const renderTexture = this.ensureFogChunkRenderTexture(chunkIndex, bounds);
+
+    const halfWidth = this.map.tileWidth / 2;
+    const halfHeight = this.map.tileHeight / 2;
+    let hasFog = false;
+    let tileDrawCount = 0;
+
+    renderTexture.clear();
+
+    for (let y = bounds.chunkY; y <= bounds.maxY; y += 1) {
+      for (let x = bounds.chunkX; x <= bounds.maxX; x += 1) {
+        const visibility = (this.playerVisibility.tiles[y * this.playerVisibility.width + x] ?? TileVisibility.Unexplored) as TileVisibility;
+
+        if (visibility === TileVisibility.Visible) {
+          continue;
+        }
+
+        const textureKey = this.fogTextureKeys.get(visibility);
+
+        if (!textureKey) {
+          continue;
+        }
+
+        const iso = cartToIso({ x, y }, this.map.tileWidth, this.map.tileHeight);
+        const worldX = this.mapOrigin.x + iso.x;
+        const worldY = this.mapOrigin.y + iso.y;
+        renderTexture.draw(textureKey, worldX - bounds.minX - halfWidth - 1, worldY - bounds.minY - halfHeight - 1);
+        hasFog = true;
+        tileDrawCount += 1;
+      }
+    }
+
+    renderTexture.setVisible(hasFog);
+    return tileDrawCount;
+  }
+
+  private ensureFogChunkRenderTexture(chunkIndex: number, bounds: FogChunkBounds): Phaser.GameObjects.RenderTexture {
+    const existing = this.fogChunks[chunkIndex];
+
+    if (existing) {
+      return existing;
+    }
+
+    const renderTexture = this.add
+      .renderTexture(bounds.minX, bounds.minY, bounds.width, bounds.height)
+      .setOrigin(0, 0)
+      .setDepth(bounds.depth);
+
+    this.fogChunks[chunkIndex] = renderTexture;
+    return renderTexture;
+  }
+
+  private getFogChunkBounds(chunkIndex: number): FogChunkBounds {
+    const chunkColumn = chunkIndex % this.fogChunksPerRow;
+    const chunkRow = Math.floor(chunkIndex / this.fogChunksPerRow);
+    const chunkX = chunkColumn * TERRAIN_CHUNK_SIZE;
+    const chunkY = chunkRow * TERRAIN_CHUNK_SIZE;
+    const maxX = Math.min(this.map.width - 1, chunkX + TERRAIN_CHUNK_SIZE - 1);
+    const maxY = Math.min(this.map.height - 1, chunkY + TERRAIN_CHUNK_SIZE - 1);
+    const corners = [
+      this.getTileWorldDiamondBounds(chunkX, chunkY),
+      this.getTileWorldDiamondBounds(maxX, chunkY),
+      this.getTileWorldDiamondBounds(maxX, maxY),
+      this.getTileWorldDiamondBounds(chunkX, maxY),
+    ];
+    const minX = Math.min(...corners.map((corner) => corner.left)) - 2;
+    const minY = Math.min(...corners.map((corner) => corner.top)) - 2;
+    const maxRight = Math.max(...corners.map((corner) => corner.right)) + 2;
+    const maxBottom = Math.max(...corners.map((corner) => corner.bottom)) + 2;
+
+    return {
+      chunkX,
+      chunkY,
+      maxX,
+      maxY,
+      minX,
+      minY,
+      width: Math.ceil(maxRight - minX),
+      height: Math.ceil(maxBottom - minY),
+      depth: minY + 1,
+    };
+  }
+
+  private ensureFogTextures(): void {
+    const fogStyles = [
+      { visibility: TileVisibility.Unexplored, alpha: FOG_UNEXPLORED_ALPHA },
+      { visibility: TileVisibility.Explored, alpha: FOG_EXPLORED_ALPHA },
+    ];
+
+    for (const style of fogStyles) {
+      const key = `fog-diamond-${style.visibility}`;
+      if (this.textures.exists(key)) {
+        this.fogTextureKeys.set(style.visibility, key);
+        continue;
+      }
+
+      const g = this.add.graphics();
+      const halfWidth = this.map.tileWidth / 2;
+      const halfHeight = this.map.tileHeight / 2;
+      g.fillStyle(0x020608, style.alpha);
+      g.fillPoints([
+        new Phaser.Geom.Point(halfWidth + 1, 1),
+        new Phaser.Geom.Point(this.map.tileWidth + 1, halfHeight + 1),
+        new Phaser.Geom.Point(halfWidth + 1, this.map.tileHeight + 1),
+        new Phaser.Geom.Point(1, halfHeight + 1),
+      ], true);
+      g.generateTexture(key, this.map.tileWidth + 2, this.map.tileHeight + 2);
+      g.destroy();
+      this.fogTextureKeys.set(style.visibility, key);
+    }
   }
 
   private redrawTerrain(): void {
@@ -958,7 +1231,7 @@ export class SkirmishScene extends Phaser.Scene {
   }
 
   private syncUnitRenderables(): void {
-    const liveIds = new Set(Object.keys(this.worldState.units));
+    const liveIds = new Set(Object.values(this.worldState.units).filter((unit) => this.isUnitVisibleToLocalPlayer(unit)).map((unit) => unit.id));
     for (const [id, renderable] of this.unitRenderables) {
       if (!liveIds.has(id)) {
         renderable.container.destroy(true);
@@ -966,7 +1239,7 @@ export class SkirmishScene extends Phaser.Scene {
       }
     }
 
-    Object.values(this.worldState.units).forEach((unit) => {
+    Object.values(this.worldState.units).filter((unit) => this.isUnitVisibleToLocalPlayer(unit)).forEach((unit) => {
       let renderable = this.unitRenderables.get(unit.id);
       if (!renderable) {
         renderable = this.createUnitRenderable(unit);

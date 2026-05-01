@@ -1,14 +1,15 @@
 import { evaluateScenarioRuntime } from "./scenario.js";
+import { SIM_TICK_SECONDS } from "./constants.js";
+import { iterateUnitsOrdered } from "./units.js";
 import type { UnitState, WorldState } from "./types.js";
 
-const DEFAULT_TICK_SECONDS = 0.1;
 const TARGET_EPSILON = 0.001;
 
-export function advanceWorldTick(state: WorldState, deltaSeconds = DEFAULT_TICK_SECONDS): void {
+export function advanceWorldTick(state: WorldState): void {
   state.tick += 1;
 
-  for (const unit of Object.values(state.units)) {
-    advanceUnitMovement(unit, deltaSeconds);
+  for (const unit of iterateUnitsOrdered(state)) {
+    advanceUnitMovement(unit, SIM_TICK_SECONDS);
   }
 
   evaluateScenarioRuntime(state);

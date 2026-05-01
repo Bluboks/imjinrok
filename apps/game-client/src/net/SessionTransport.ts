@@ -1,10 +1,10 @@
 import type { CommandEnvelope, MapDefinition } from "@shared";
-import { advanceWorldTick, createInitialWorldState, issueCommand as issueWorldCommand, type WorldSnapshot, type WorldState } from "@simulation";
+import { advanceWorldTick, createInitialWorldState, issueCommand as issueWorldCommand, SIM_TICK_SECONDS, type WorldSnapshot, type WorldState } from "@simulation";
 import type { GameLaunchContext } from "../session.js";
 import { NetworkClient } from "./NetworkClient.js";
 
-const LOCAL_TICK_INTERVAL_MS = 100;
 const REMOTE_POLL_INTERVAL_MS = 200;
+const SIM_TICK_MILLISECONDS = SIM_TICK_SECONDS * 1000;
 
 export interface SessionTransport {
   readonly isRemote: boolean;
@@ -17,6 +17,7 @@ export interface SessionTransport {
 export class LocalSessionTransport implements SessionTransport {
   readonly isRemote = false;
   private lastTickAt = 0;
+  private tickAccumulatorMs = 0;
 
   constructor(private readonly worldState: WorldState) {}
 
@@ -24,13 +25,20 @@ export class LocalSessionTransport implements SessionTransport {
     return this.worldState;
   }
 
-  update(time: number): void {
-    if (time - this.lastTickAt < LOCAL_TICK_INTERVAL_MS) {
+  update(time: number, delta = 0): void {
+    const elapsedMs = this.lastTickAt === 0 ? delta : time - this.lastTickAt;
+
+    this.lastTickAt = time;
+    this.tickAccumulatorMs += Math.max(0, elapsedMs);
+
+    if (this.tickAccumulatorMs < SIM_TICK_MILLISECONDS) {
       return;
     }
 
-    advanceWorldTick(this.worldState, this.lastTickAt === 0 ? 0.1 : (time - this.lastTickAt) / 1000);
-    this.lastTickAt = time;
+    while (this.tickAccumulatorMs >= SIM_TICK_MILLISECONDS) {
+      advanceWorldTick(this.worldState);
+      this.tickAccumulatorMs -= SIM_TICK_MILLISECONDS;
+    }
   }
 
   issueCommand(envelope: CommandEnvelope): void {
@@ -104,6 +112,10 @@ export class RemoteSessionTransport implements SessionTransport {
   }
 
   private mergeSnapshot(snapshot: WorldSnapshot): WorldState {
+    if (snapshot.tick === this.latestSnapshot.tick) {
+      return this.latestSnapshot;
+    }
+
     return {
       ...snapshot,
       map: this.latestSnapshot.map,

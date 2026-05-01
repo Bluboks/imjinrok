@@ -1,5 +1,6 @@
 import type { ScenarioDefinition } from "../../shared/src/index.js";
 import type { ObjectiveRuntimeState, ScenarioRuntimeEvent, ScenarioRuntimeState, WorldState } from "./types.js";
+import { iterateUnitsOrdered } from "./units.js";
 
 export function createScenarioRuntimeState(scenario: ScenarioDefinition): ScenarioRuntimeState {
   const objectives: Record<string, ObjectiveRuntimeState> = {};
@@ -63,7 +64,7 @@ function areOpponentsDefeated(state: WorldState): boolean {
     return false;
   }
 
-  const playersWithUnits = new Set(Object.values(state.units).map((unit) => unit.playerId));
+  const playersWithUnits = new Set(iterateUnitsOrdered(state).map((unit) => unit.playerId));
 
   return playerIds.filter((playerId) => playersWithUnits.has(playerId)).length <= 1;
 }

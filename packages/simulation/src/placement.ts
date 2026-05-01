@@ -7,6 +7,7 @@ import {
   type TerrainType,
 } from "../../shared/src/index.js";
 import type { WorldState } from "./types.js";
+import { iterateUnitsOrdered } from "./units.js";
 
 export type BuildingPlacementValidationResult =
   | { ok: true; tiles: GridPoint[] }
@@ -80,7 +81,7 @@ export function getFootprintTiles(center: GridPoint, footprint: FootprintDefinit
 function getBlockingTileSet(state: WorldState): Set<string> {
   const occupiedTiles = new Set<string>();
 
-  for (const unit of Object.values(state.units)) {
+  for (const unit of iterateUnitsOrdered(state)) {
     const footprint = unitDefinitions[unit.kind].footprint;
 
     if (!footprint.blocksMovement) {
