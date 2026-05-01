@@ -14,7 +14,10 @@ export default defineConfig({
     },
   },
   server: {
+    host: "0.0.0.0",
     port: 5173,
+    strictPort: true,
+    allowedHosts: ["5173.dev.bluboks.cc"],
   },
   build: {
     outDir: path.resolve(workspaceRoot, "dist/game-client"),

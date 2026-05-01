@@ -105,6 +105,27 @@ function setTerrain(map: MapDefinition, x: number, y: number, terrain: TerrainTy
   };
 }
 
+function setTerrainAndElevation(map: MapDefinition, x: number, y: number, terrain: TerrainType, elevation: number): void {
+  const groundLayer = map.layers[0];
+
+  if (!groundLayer || x < 0 || x >= map.width || y < 0 || y >= map.height) {
+    return;
+  }
+
+  const index = getTileIndex(map.width, x, y);
+  const currentTile = groundLayer.tiles[index];
+
+  if (!currentTile) {
+    return;
+  }
+
+  groundLayer.tiles[index] = {
+    ...currentTile,
+    terrain,
+    elevation,
+  };
+}
+
 export function getTileAt(map: MapDefinition, x: number, y: number): TileCell {
   const layer = map.layers[0];
   const index = getTileIndex(map.width, x, y);
@@ -150,6 +171,31 @@ export const defaultMap: MapDefinition = (() => {
   fillRect(104, 162, 160, 170, "cliff");
   fillRect(34, 84, 78, 92, "cliff");
   fillRect(178, 164, 222, 172, "cliff");
+
+  const addTwoStepHillDemo = (center: GridPoint): void => {
+    for (let y = center.y - 4; y <= center.y + 4; y += 1) {
+      for (let x = center.x - 4; x <= center.x + 4; x += 1) {
+        setTerrainAndElevation(map, x, y, "grass", 0);
+      }
+    }
+
+    for (let y = center.y - 3; y <= center.y + 3; y += 1) {
+      for (let x = center.x - 3; x <= center.x + 3; x += 1) {
+        setTerrainAndElevation(map, x, y, "grass", 1);
+      }
+    }
+
+    for (let y = center.y - 1; y <= center.y + 1; y += 1) {
+      for (let x = center.x - 1; x <= center.x + 1; x += 1) {
+        setTerrainAndElevation(map, x, y, "grass", 2);
+      }
+    }
+  };
+
+  // Terrain visual MVP: a wider two-step hill: 7x7 level-1 plateau, 3x3 level-2 top.
+  addTwoStepHillDemo({ x: 128, y: 128 });
+  // Same test hill near the north/local starting area for quick in-game inspection.
+  addTwoStepHillDemo({ x: 12, y: 12 });
 
   return map;
 })();

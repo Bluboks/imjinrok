@@ -1,5 +1,30 @@
 import Phaser from "phaser";
-import { defaultMap, factionDefinitions, getTileAt, terrainDefinitions, terrainTypes, unitCanPerformAction, unitDefinitions, type CommandEnvelope, type FactionId, type GridPoint, type MapDefinition, type TerrainType } from "@shared";
+import {
+  defaultMap,
+  defaultTheme,
+  ELEVATION_NEIGHBOR_OFFSETS,
+  factionDefinitions,
+  getThemeAssetUrl,
+  getThemeFrameRefs,
+  getTerrainVisual,
+  getTileAt,
+  resolveElevationTerrainSlot,
+  terrainDefinitions,
+  terrainTypes,
+  unitCanPerformAction,
+  unitDefinitions,
+  type CommandEnvelope,
+  type ElevationNeighbor,
+  type FactionId,
+  type FrameRef,
+  type GridPoint,
+  type MapDefinition,
+  type ThemeDefinition,
+  type TerrainKindSlot,
+  type TerrainType,
+  type TerrainVisual,
+  type ThemeFrameRef,
+} from "@shared";
 import {
   cartToIso,
   createPlayerVisibility,
@@ -32,6 +57,8 @@ import {
   toSelectedEntityView,
 } from "../hud.js";
 import { createSessionTransport, type SessionTransport } from "../net/SessionTransport.js";
+import { placeStaticVisual } from "../render/placeStaticVisual.js";
+import { getAssetScale, getFrameOrigin, REFERENCE_PX_PER_WU, RENDER_DEPTH_BIAS } from "../render/visualScale.js";
 import type { GameLaunchContext } from "../session.js";
 
 const DRAG_THRESHOLD_SQ = 36;
@@ -42,6 +69,7 @@ const VIEWPORT_EVENT_INTERVAL_MS = 1000 / 30;
 const SCREEN_OVERLAY_DEPTH = 1_000_000;
 const FOG_UNEXPLORED_ALPHA = 0.9;
 const FOG_EXPLORED_ALPHA = 0.48;
+const TERRAIN_DEBUG_DETAILS_STORAGE_KEY = "isorts.debug.terrainDetails";
 
 interface UnitRenderable {
   container: Phaser.GameObjects.Container;
@@ -61,6 +89,23 @@ interface FogChunkBounds {
   depth: number;
 }
 
+interface TerrainDebugAssetInfo {
+  label: string;
+  visualId: string | null;
+  slot: TerrainKindSlot | "base" | null;
+  fileName: string | null;
+  textureKey: string | null;
+  loaded: boolean;
+}
+
+interface TerrainDebugTileInfo {
+  point: GridPoint;
+  terrain: TerrainType;
+  elevation: number;
+  transitionSlot: TerrainKindSlot | null;
+  assets: TerrainDebugAssetInfo[];
+}
+
 export class SkirmishScene extends Phaser.Scene {
   private map: MapDefinition = defaultMap;
   private worldState: WorldState = createInitialWorldState(defaultMap, ["local-player", "cpu-1"]);
@@ -68,10 +113,13 @@ export class SkirmishScene extends Phaser.Scene {
   private lastSyncedTick = Number.NEGATIVE_INFINITY;
   private mapOrigin = new Phaser.Math.Vector2(0, 0);
   private readonly terrainChunks: Phaser.GameObjects.RenderTexture[] = [];
+  private readonly terrainRenderStamps = new Map<string, Phaser.GameObjects.Image>();
+  private readonly elevationOverlays: Phaser.GameObjects.Image[] = [];
   private readonly fogChunks: (Phaser.GameObjects.RenderTexture | null)[] = [];
   private readonly unitRenderables = new Map<string, UnitRenderable>();
   private readonly terrainTextureKeys = new Map<TerrainType, string>();
   private readonly fogTextureKeys = new Map<TileVisibility, string>();
+  private readonly activeTheme: ThemeDefinition = defaultTheme;
   private localPlayerId = "local-player";
   private playerVisibility: PlayerVisibilityState = createPlayerVisibility(defaultMap);
   private fogChunkDirtyMask = new Uint8Array(0);
@@ -95,6 +143,12 @@ export class SkirmishScene extends Phaser.Scene {
   private isPointerLocked = false;
   private readonly virtualCursorScreen = new Phaser.Math.Vector2(0, 0);
   private readonly selectedUnitIds = new Set<string>();
+  private terrainDebugEnabled = false;
+  private terrainDebugPanel: HTMLDivElement | null = null;
+  private terrainDebugCheckbox: HTMLInputElement | null = null;
+  private terrainDebugTooltip: HTMLDivElement | null = null;
+  private terrainDebugHighlight: Phaser.GameObjects.Graphics | null = null;
+  private hoveredTerrainDebugTile: GridPoint | null = null;
 
   constructor() {
     super("skirmish");
@@ -121,11 +175,15 @@ export class SkirmishScene extends Phaser.Scene {
     this.clampCameraToWorld();
 
     this.setupPerfOverlay();
+    this.setupTerrainDebugOverlay();
 
     this.setupCameraControls();
     this.setupMouseControls();
     this.setupPointerLockLifecycle();
-    this.redrawTerrain();
+    this.ensureActiveThemeTexturesLoaded(() => {
+      this.redrawTerrain();
+      this.redrawElevationOverlay();
+    });
     this.redrawAllFogOverlay();
     this.syncUnitRenderables();
     this.publishVirtualCursor();
@@ -137,6 +195,7 @@ export class SkirmishScene extends Phaser.Scene {
 
   override update(time: number, delta: number): void {
     this.handleCameraPan(delta);
+    this.updateTerrainDebugHover();
     this.updatePerfOverlay(delta);
     this.flushViewportIfDirty(time);
 
@@ -272,12 +331,15 @@ export class SkirmishScene extends Phaser.Scene {
     this.scale.off(Phaser.Scale.Events.RESIZE, this.handleResize, this);
     this.terrainChunks.forEach((chunk) => chunk.destroy());
     this.terrainChunks.length = 0;
+    this.disposeTerrainRenderStamps();
+    this.disposeElevationOverlay();
     this.disposeFogOverlay();
     this.fogChunkDirtyMask = new Uint8Array(0);
     this.fogChunksPerRow = 0;
     this.fogChunksPerColumn = 0;
     this.unitRenderables.forEach((renderable) => renderable.container.destroy(true));
     this.unitRenderables.clear();
+    this.disposeTerrainDebugOverlay();
     this.sessionTransport?.dispose();
     this.sessionTransport = null;
     this.perfText?.destroy();
@@ -306,6 +368,87 @@ export class SkirmishScene extends Phaser.Scene {
         `vis ${this.lastVisibilityDeltaMs.toFixed(2)}ms | fog ${this.lastFogRedrawMs.toFixed(2)}ms ` +
         `dirty ${this.lastFogDirtyChunkCount}/${this.fogChunks.length} draws ${this.lastFogTileDrawCount}`,
     );
+  }
+
+  private setupTerrainDebugOverlay(): void {
+    this.terrainDebugEnabled = this.readTerrainDebugEnabled();
+    this.terrainDebugHighlight = this.add.graphics().setDepth(SCREEN_OVERLAY_DEPTH - 50).setVisible(false);
+
+    const panel = document.createElement("div");
+    panel.className = "terrain-debug-panel";
+    panel.setAttribute("data-debug-panel", "terrain");
+
+    const title = document.createElement("div");
+    title.className = "terrain-debug-panel__title";
+    title.textContent = "DEBUG TERRAIN";
+
+    const row = document.createElement("label");
+    row.className = "terrain-debug-panel__row";
+
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.checked = this.terrainDebugEnabled;
+    checkbox.addEventListener("change", () => this.setTerrainDebugEnabled(checkbox.checked));
+
+    const label = document.createElement("span");
+    label.textContent = "지형 세부사안 tooltip 표시";
+
+    row.append(checkbox, label);
+    panel.append(title, row);
+
+    const tooltip = document.createElement("div");
+    tooltip.className = "terrain-debug-tooltip";
+    tooltip.hidden = true;
+
+    document.body.append(panel, tooltip);
+
+    this.terrainDebugPanel = panel;
+    this.terrainDebugCheckbox = checkbox;
+    this.terrainDebugTooltip = tooltip;
+  }
+
+  private setTerrainDebugEnabled(enabled: boolean): void {
+    this.terrainDebugEnabled = enabled;
+    this.writeTerrainDebugEnabled(enabled);
+
+    if (this.terrainDebugCheckbox && this.terrainDebugCheckbox.checked !== enabled) {
+      this.terrainDebugCheckbox.checked = enabled;
+    }
+
+    if (!enabled) {
+      this.hideTerrainDebugHover();
+      return;
+    }
+
+    this.hoveredTerrainDebugTile = null;
+    this.updateTerrainDebugHover();
+  }
+
+  private disposeTerrainDebugOverlay(): void {
+    this.terrainDebugPanel?.remove();
+    this.terrainDebugTooltip?.remove();
+    this.terrainDebugHighlight?.destroy();
+    this.terrainDebugPanel = null;
+    this.terrainDebugCheckbox = null;
+    this.terrainDebugTooltip = null;
+    this.terrainDebugHighlight = null;
+    this.hoveredTerrainDebugTile = null;
+  }
+
+  private readTerrainDebugEnabled(): boolean {
+    try {
+      return globalThis.localStorage?.getItem(TERRAIN_DEBUG_DETAILS_STORAGE_KEY) === "1";
+    } catch {
+      return false;
+    }
+  }
+
+  private writeTerrainDebugEnabled(enabled: boolean): void {
+    try {
+      globalThis.localStorage?.setItem(TERRAIN_DEBUG_DETAILS_STORAGE_KEY, enabled ? "1" : "0");
+    } catch {
+      // Local storage may be unavailable in privacy-restricted browser modes.
+    }
   }
 
   private requestPointerLock(): void {
@@ -656,6 +799,193 @@ export class SkirmishScene extends Phaser.Scene {
       x: Math.round(cartPoint.x),
       y: Math.round(cartPoint.y),
     });
+  }
+
+  private updateTerrainDebugHover(): void {
+    if (!this.terrainDebugEnabled || !this.isScreenPointInWorldField(this.virtualCursorScreen) || this.isPointerOverTerrainDebugPanel()) {
+      this.hideTerrainDebugHover();
+      return;
+    }
+
+    const point = this.getGridPointFromScreenPoint(this.virtualCursorScreen);
+    const isSameTile = this.hoveredTerrainDebugTile?.x === point.x && this.hoveredTerrainDebugTile.y === point.y;
+
+    if (!isSameTile) {
+      this.hoveredTerrainDebugTile = point;
+      this.drawTerrainDebugHighlight(point);
+      this.renderTerrainDebugTooltip(this.getTerrainDebugTileInfo(point));
+    }
+
+    this.positionTerrainDebugTooltip();
+  }
+
+  private hideTerrainDebugHover(): void {
+    this.hoveredTerrainDebugTile = null;
+    this.terrainDebugHighlight?.clear().setVisible(false);
+
+    if (this.terrainDebugTooltip) {
+      this.terrainDebugTooltip.hidden = true;
+    }
+  }
+
+  private isPointerOverTerrainDebugPanel(): boolean {
+    if (!this.terrainDebugPanel) {
+      return false;
+    }
+
+    const hoveredElement = document.elementFromPoint(this.virtualCursorScreen.x, this.virtualCursorScreen.y);
+
+    return hoveredElement ? this.terrainDebugPanel.contains(hoveredElement) : false;
+  }
+
+  private drawTerrainDebugHighlight(point: GridPoint): void {
+    if (!this.terrainDebugHighlight) {
+      return;
+    }
+
+    const iso = cartToIso(point, this.map.tileWidth, this.map.tileHeight);
+    const worldX = this.mapOrigin.x + iso.x;
+    const worldY = this.mapOrigin.y + iso.y;
+    const halfWidth = this.map.tileWidth / 2;
+    const halfHeight = this.map.tileHeight / 2;
+    const diamond = [
+      new Phaser.Geom.Point(worldX, worldY - halfHeight),
+      new Phaser.Geom.Point(worldX + halfWidth, worldY),
+      new Phaser.Geom.Point(worldX, worldY + halfHeight),
+      new Phaser.Geom.Point(worldX - halfWidth, worldY),
+    ];
+
+    this.terrainDebugHighlight
+      .clear()
+      .setVisible(true)
+      .fillStyle(0x9fffa2, 0.12)
+      .fillPoints(diamond, true)
+      .lineStyle(2, 0xcfff7a, 0.95)
+      .strokePoints(diamond, true);
+  }
+
+  private getTerrainDebugTileInfo(point: GridPoint): TerrainDebugTileInfo {
+    const tile = getTileAt(this.map, point.x, point.y);
+    const neighbors = this.getElevationNeighbors(point.x, point.y);
+    const transitionSlot = resolveElevationTerrainSlot(tile.elevation, neighbors);
+    const assets: TerrainDebugAssetInfo[] = [];
+    const flatVisual = this.getFlatTerrainVisualForTerrain(tile.terrain);
+    const flatFrame = flatVisual ? this.pickTerrainFrame(flatVisual, "base", point.x, point.y) : null;
+
+    if (tile.elevation <= 0) {
+      assets.push(this.createTerrainDebugAssetInfo("base", flatVisual, "base", flatFrame));
+    }
+
+    if (transitionSlot) {
+      const visualTerrain = this.resolveElevationVisualTerrain(tile.terrain, tile.elevation, neighbors);
+      const terrainVisual = this.getTerrainVisualForTerrain(visualTerrain);
+      const frame = terrainVisual ? this.pickTerrainFrame(terrainVisual, transitionSlot, point.x, point.y) : null;
+
+      if (tile.elevation > 0 && transitionSlot !== "plateauTop") {
+        const lowerFrame = terrainVisual ? this.pickTerrainFrame(terrainVisual, "plateauTop", point.x, point.y) : null;
+
+        assets.push(this.createTerrainDebugAssetInfo(`lower plateau L${tile.elevation}`, terrainVisual, "plateauTop", lowerFrame));
+      }
+
+      assets.push(this.createTerrainDebugAssetInfo(`elevation L${transitionSlot === "plateauTop" ? tile.elevation : tile.elevation + 1}`, terrainVisual, transitionSlot, frame));
+    }
+
+    return {
+      point,
+      terrain: tile.terrain,
+      elevation: tile.elevation,
+      transitionSlot,
+      assets,
+    };
+  }
+
+  private createTerrainDebugAssetInfo(
+    label: string,
+    visual: TerrainVisual | null,
+    slot: TerrainKindSlot | "base" | null,
+    frame: FrameRef | null,
+  ): TerrainDebugAssetInfo {
+    return {
+      label,
+      visualId: visual?.id ?? null,
+      slot,
+      fileName: frame?.fileName ?? null,
+      textureKey: frame?.textureKey ?? null,
+      loaded: frame ? this.textures.exists(frame.textureKey) : false,
+    };
+  }
+
+  private renderTerrainDebugTooltip(info: TerrainDebugTileInfo): void {
+    if (!this.terrainDebugTooltip) {
+      return;
+    }
+
+    const title = document.createElement("div");
+    title.className = "terrain-debug-tooltip__title";
+    title.textContent = `Tile ${info.point.x}, ${info.point.y}`;
+
+    const rows = document.createElement("div");
+    rows.className = "terrain-debug-tooltip__rows";
+    this.appendTerrainDebugRow(rows, "terrain", info.terrain);
+    this.appendTerrainDebugRow(rows, "elevation", String(info.elevation));
+    this.appendTerrainDebugRow(rows, "slot", info.transitionSlot ?? "flat");
+    this.appendTerrainDebugRow(rows, "theme", this.activeTheme.id);
+
+    const assets = document.createElement("div");
+    assets.className = "terrain-debug-tooltip__assets";
+    for (const asset of info.assets) {
+      const row = document.createElement("div");
+      row.className = "terrain-debug-tooltip__asset";
+
+      const label = document.createElement("span");
+      label.className = "terrain-debug-tooltip__asset-label";
+      label.textContent = asset.label;
+
+      const file = document.createElement("code");
+      file.textContent = asset.fileName ?? "no themed asset";
+
+      const meta = document.createElement("span");
+      meta.className = asset.loaded ? "terrain-debug-tooltip__asset-meta" : "terrain-debug-tooltip__asset-meta terrain-debug-tooltip__asset-meta--missing";
+      meta.textContent = `${asset.visualId ?? "fallback"} / ${asset.slot ?? "—"}${asset.loaded ? "" : " / missing"}`;
+
+      row.append(label, file, meta);
+      assets.append(row);
+    }
+
+    this.terrainDebugTooltip.replaceChildren(title, rows, assets);
+    this.terrainDebugTooltip.hidden = false;
+  }
+
+  private appendTerrainDebugRow(parent: HTMLElement, labelText: string, valueText: string): void {
+    const row = document.createElement("div");
+    row.className = "terrain-debug-tooltip__row";
+
+    const label = document.createElement("span");
+    label.textContent = labelText;
+
+    const value = document.createElement("strong");
+    value.textContent = valueText;
+
+    row.append(label, value);
+    parent.append(row);
+  }
+
+  private positionTerrainDebugTooltip(): void {
+    if (!this.terrainDebugTooltip || this.terrainDebugTooltip.hidden) {
+      return;
+    }
+
+    const margin = 14;
+    const offset = 18;
+    const tooltipWidth = this.terrainDebugTooltip.offsetWidth;
+    const tooltipHeight = this.terrainDebugTooltip.offsetHeight;
+    const maxLeft = Math.max(margin, globalThis.innerWidth - tooltipWidth - margin);
+    const maxTop = Math.max(margin, globalThis.innerHeight - tooltipHeight - margin);
+    const left = Phaser.Math.Clamp(this.virtualCursorScreen.x + offset, margin, maxLeft);
+    const top = Phaser.Math.Clamp(this.virtualCursorScreen.y + offset, margin, maxTop);
+
+    this.terrainDebugTooltip.style.left = `${left}px`;
+    this.terrainDebugTooltip.style.top = `${top}px`;
   }
 
   private getFormationTarget(origin: GridPoint, index: number): GridPoint {
@@ -1177,10 +1507,21 @@ export class SkirmishScene extends Phaser.Scene {
         for (let y = chunkY; y <= maxY; y += 1) {
           for (let x = chunkX; x <= maxX; x += 1) {
             const tile = getTileAt(this.map, x, y);
+            if (tile.elevation > 0) {
+              continue;
+            }
+
             const iso = cartToIso({ x, y }, this.map.tileWidth, this.map.tileHeight);
             const worldX = this.mapOrigin.x + iso.x;
             const worldY = this.mapOrigin.y + iso.y;
-            renderTexture.draw(this.terrainTextureKeys.get(tile.terrain)!, worldX - minX - halfWidth - 1, worldY - minY - halfHeight - 1);
+            const flatVisual = this.getFlatTerrainVisualForTerrain(tile.terrain);
+            const flatFrame = flatVisual ? this.pickTerrainFrame(flatVisual, "base", x, y) : null;
+
+            if (flatVisual && flatFrame && this.textures.exists(flatFrame.textureKey)) {
+              renderTexture.draw(this.getTerrainRenderStamp(flatVisual, flatFrame), worldX - minX, worldY - minY);
+            } else {
+              renderTexture.draw(this.terrainTextureKeys.get(tile.terrain)!, worldX - minX - halfWidth - 1, worldY - minY - halfHeight - 1);
+            }
           }
         }
 
@@ -1188,6 +1529,199 @@ export class SkirmishScene extends Phaser.Scene {
       }
     }
     if (this.perfEnabled) console.timeEnd("terrain chunk bake");
+  }
+
+  private redrawElevationOverlay(): void {
+    this.disposeElevationOverlay();
+
+    for (let y = 0; y < this.map.height; y += 1) {
+      for (let x = 0; x < this.map.width; x += 1) {
+        const tile = getTileAt(this.map, x, y);
+        const neighbors = this.getElevationNeighbors(x, y);
+        const slot = resolveElevationTerrainSlot(tile.elevation, neighbors);
+
+        if (!slot) {
+          continue;
+        }
+
+        const visualTerrain = this.resolveElevationVisualTerrain(tile.terrain, tile.elevation, neighbors);
+        const terrainVisual = this.getTerrainVisualForTerrain(visualTerrain);
+        const frame = terrainVisual ? this.pickTerrainFrame(terrainVisual, slot, x, y) : null;
+
+        if (!terrainVisual || !frame || !this.textures.exists(frame.textureKey)) {
+          continue;
+        }
+
+        const iso = cartToIso({ x, y }, this.map.tileWidth, this.map.tileHeight);
+        const worldX = this.mapOrigin.x + iso.x;
+        const worldY = this.mapOrigin.y + iso.y;
+        if (tile.elevation > 0 && slot !== "plateauTop") {
+          const lowerFrame = this.pickTerrainFrame(terrainVisual, "plateauTop", x, y);
+
+          if (lowerFrame && this.textures.exists(lowerFrame.textureKey)) {
+            const lowerOverlay = placeStaticVisual(
+              this,
+              terrainVisual,
+              lowerFrame,
+              { x: worldX, y: worldY },
+              {
+                depth: this.getTerrainChunkDepthForTile(x, y),
+                depthBias: RENDER_DEPTH_BIAS.elevation,
+                liftSteps: tile.elevation,
+                pxPerWu: this.activeTheme.display.defaultPxPerWu ?? REFERENCE_PX_PER_WU,
+              },
+            );
+
+            this.elevationOverlays.push(lowerOverlay);
+          }
+        }
+
+        const overlay = placeStaticVisual(
+          this,
+          terrainVisual,
+          frame,
+          { x: worldX, y: worldY },
+          {
+            depth: this.getTerrainChunkDepthForTile(x, y),
+            depthBias: RENDER_DEPTH_BIAS.elevation,
+            liftSteps: slot === "plateauTop" ? tile.elevation : tile.elevation + 1,
+            pxPerWu: this.activeTheme.display.defaultPxPerWu ?? REFERENCE_PX_PER_WU,
+          },
+        );
+
+        this.elevationOverlays.push(overlay);
+      }
+    }
+  }
+
+  private disposeElevationOverlay(): void {
+    this.elevationOverlays.forEach((overlay) => overlay.destroy());
+    this.elevationOverlays.length = 0;
+  }
+
+  private getFlatTerrainVisualForTerrain(terrain: TerrainType): TerrainVisual | null {
+    const visualId = this.activeTheme.terrainBindings[terrain]?.flat;
+
+    return visualId ? getTerrainVisual(this.activeTheme, visualId) : null;
+  }
+
+  private pickTerrainFrame(visual: TerrainVisual, slot: TerrainKindSlot, x: number, y: number): FrameRef | null {
+    const frames = visual.slots[slot];
+
+    if (!frames?.length) {
+      return null;
+    }
+
+    const hash = this.hashTile(x, y, slot);
+    return frames[hash % frames.length] ?? frames[0] ?? null;
+  }
+
+  private hashTile(x: number, y: number, salt: string): number {
+    let hash = Math.imul(x + 0x9e3779b9, 0x85ebca6b) ^ Math.imul(y + 0xc2b2ae35, 0x27d4eb2f);
+
+    for (let index = 0; index < salt.length; index += 1) {
+      hash = Math.imul(hash ^ salt.charCodeAt(index), 0x165667b1);
+    }
+
+    return hash >>> 0;
+  }
+
+  private getTerrainRenderStamp(visual: TerrainVisual, frame: FrameRef): Phaser.GameObjects.Image {
+    const stampKey = `${visual.id}:${frame.textureKey}:${frame.frameName ?? ""}`;
+    const existingStamp = this.terrainRenderStamps.get(stampKey);
+
+    if (existingStamp) {
+      return existingStamp;
+    }
+
+    const stamp = frame.frameName
+      ? this.make.image({ x: 0, y: 0, key: frame.textureKey, frame: frame.frameName, add: false })
+      : this.make.image({ x: 0, y: 0, key: frame.textureKey, add: false });
+    const origin = getFrameOrigin(visual, frame);
+    const scale = getAssetScale(visual, this.activeTheme.display.defaultPxPerWu ?? REFERENCE_PX_PER_WU);
+
+    this.applyVisualTextureFilter(visual, frame);
+    stamp.setOrigin(origin.x, origin.y).setScale(scale);
+    this.terrainRenderStamps.set(stampKey, stamp);
+
+    return stamp;
+  }
+
+  private disposeTerrainRenderStamps(): void {
+    this.terrainRenderStamps.forEach((stamp) => stamp.destroy());
+    this.terrainRenderStamps.clear();
+  }
+
+  private applyVisualTextureFilter(visual: TerrainVisual, frame: FrameRef): void {
+    const texture = this.textures.get(frame.textureKey);
+    const filterMode = visual.render.filtering === "linear"
+      ? Phaser.Textures.FilterMode.LINEAR
+      : Phaser.Textures.FilterMode.NEAREST;
+
+    texture.setFilter(filterMode);
+  }
+
+  private getElevationNeighbors(x: number, y: number): Array<ElevationNeighbor & { terrain: TerrainType }> {
+    const neighbors: Array<ElevationNeighbor & { terrain: TerrainType }> = [];
+
+    for (const offset of ELEVATION_NEIGHBOR_OFFSETS) {
+      const neighborTile = getTileAt(this.map, x + offset.dx, y + offset.dy);
+
+      neighbors.push({
+        dx: offset.dx,
+        dy: offset.dy,
+        elevation: neighborTile.elevation,
+        terrain: neighborTile.terrain,
+      });
+    }
+
+    return neighbors;
+  }
+
+  private resolveElevationVisualTerrain(
+    terrain: TerrainType,
+    elevation: number,
+    neighbors: readonly (ElevationNeighbor & { terrain: TerrainType })[],
+  ): TerrainType {
+    if (elevation > 0) {
+      return terrain;
+    }
+
+    let selectedTerrain = terrain;
+    let selectedElevation = elevation;
+
+    for (const neighbor of neighbors) {
+      if (neighbor.elevation <= selectedElevation) {
+        continue;
+      }
+
+      selectedTerrain = neighbor.terrain;
+      selectedElevation = neighbor.elevation;
+    }
+
+    return selectedTerrain;
+  }
+
+  private getTerrainVisualForTerrain(terrain: TerrainType): TerrainVisual | null {
+    const binding = this.activeTheme.terrainBindings[terrain];
+    const visualId = binding?.elevated ?? binding?.flat;
+
+    return visualId ? getTerrainVisual(this.activeTheme, visualId) : null;
+  }
+
+  private getTerrainChunkDepthForTile(x: number, y: number): number {
+    const chunkX = Math.floor(x / TERRAIN_CHUNK_SIZE) * TERRAIN_CHUNK_SIZE;
+    const chunkY = Math.floor(y / TERRAIN_CHUNK_SIZE) * TERRAIN_CHUNK_SIZE;
+    const maxX = Math.min(this.map.width - 1, chunkX + TERRAIN_CHUNK_SIZE - 1);
+    const maxY = Math.min(this.map.height - 1, chunkY + TERRAIN_CHUNK_SIZE - 1);
+    const corners = [
+      this.getTileWorldDiamondBounds(chunkX, chunkY),
+      this.getTileWorldDiamondBounds(maxX, chunkY),
+      this.getTileWorldDiamondBounds(maxX, maxY),
+      this.getTileWorldDiamondBounds(chunkX, maxY),
+    ];
+
+    return Math.min(...corners.map((corner) => corner.top)) - 2;
   }
 
   private ensureTerrainTextures(): void {
@@ -1218,6 +1752,36 @@ export class SkirmishScene extends Phaser.Scene {
       g.destroy();
       this.terrainTextureKeys.set(terrain, key);
     });
+  }
+
+  private ensureActiveThemeTexturesLoaded(onComplete: () => void): void {
+    const missingFrames = getThemeFrameRefs(this.activeTheme).filter(({ frame }) => !this.textures.exists(frame.textureKey));
+
+    if (missingFrames.length === 0) {
+      onComplete();
+      return;
+    }
+
+    console.warn(
+      "Missing theme textures detected; retrying load:",
+      missingFrames.map(({ frame }) => frame.fileName ?? frame.textureKey),
+    );
+
+    const handleLoadError = (file: { key?: string; src?: string }) => {
+      console.warn("Theme texture failed to load", { key: file.key, src: file.src });
+    };
+
+    this.load.on(Phaser.Loader.Events.FILE_LOAD_ERROR, handleLoadError);
+    this.load.once(Phaser.Loader.Events.COMPLETE, () => {
+      this.load.off(Phaser.Loader.Events.FILE_LOAD_ERROR, handleLoadError);
+      onComplete();
+    });
+
+    for (const { visual, frame } of missingFrames) {
+      this.load.image(frame.textureKey, getThemeAssetUrl(this.activeTheme, visual, frame));
+    }
+
+    this.load.start();
   }
 
   private getTileWorldDiamondBounds(x: number, y: number): Phaser.Geom.Rectangle {

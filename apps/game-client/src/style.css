@@ -16,3 +16,134 @@ body,
 canvas {
   display: block;
 }
+
+.terrain-debug-panel,
+.terrain-debug-tooltip {
+  box-sizing: border-box;
+  color: #efffca;
+  font-family: "Trebuchet MS", Verdana, sans-serif;
+  letter-spacing: 0.02em;
+  pointer-events: auto;
+  position: fixed;
+  z-index: 20;
+}
+
+.terrain-debug-panel {
+  backdrop-filter: blur(10px);
+  background:
+    linear-gradient(135deg, rgb(11 22 20 / 92%), rgb(24 42 35 / 84%)),
+    repeating-linear-gradient(135deg, rgb(202 255 122 / 8%) 0 1px, transparent 1px 9px);
+  border: 1px solid rgb(197 255 115 / 45%);
+  border-left: 4px solid #cfff7a;
+  border-radius: 10px;
+  box-shadow: 0 14px 44px rgb(0 0 0 / 36%), inset 0 0 0 1px rgb(255 255 255 / 5%);
+  left: 12px;
+  min-width: 238px;
+  padding: 12px 13px 13px;
+  top: 12px;
+}
+
+.terrain-debug-panel__title {
+  color: #cfff7a;
+  font-size: 11px;
+  font-weight: 800;
+  margin-bottom: 9px;
+  text-shadow: 0 0 14px rgb(207 255 122 / 32%);
+}
+
+.terrain-debug-panel__row {
+  align-items: center;
+  cursor: pointer;
+  display: flex;
+  font-size: 13px;
+  gap: 9px;
+  line-height: 1.2;
+  user-select: none;
+}
+
+.terrain-debug-panel__row input {
+  accent-color: #cfff7a;
+  height: 16px;
+  margin: 0;
+  width: 16px;
+}
+
+.terrain-debug-tooltip {
+  background: rgb(4 9 8 / 94%);
+  border: 1px solid rgb(159 255 162 / 48%);
+  border-radius: 8px;
+  box-shadow: 0 12px 36px rgb(0 0 0 / 42%);
+  max-width: 340px;
+  min-width: 250px;
+  padding: 10px 11px;
+  pointer-events: none;
+  top: 0;
+}
+
+.terrain-debug-tooltip[hidden] {
+  display: none;
+}
+
+.terrain-debug-tooltip__title {
+  color: #cfff7a;
+  font-size: 12px;
+  font-weight: 800;
+  margin-bottom: 7px;
+}
+
+.terrain-debug-tooltip__rows {
+  border-bottom: 1px solid rgb(159 255 162 / 16%);
+  display: grid;
+  gap: 3px;
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+}
+
+.terrain-debug-tooltip__row {
+  display: flex;
+  font-size: 12px;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.terrain-debug-tooltip__row span,
+.terrain-debug-tooltip__asset-label,
+.terrain-debug-tooltip__asset-meta {
+  color: #9fb59b;
+}
+
+.terrain-debug-tooltip__row strong {
+  color: #f2ffd7;
+  font-weight: 700;
+}
+
+.terrain-debug-tooltip__assets {
+  display: grid;
+  gap: 7px;
+}
+
+.terrain-debug-tooltip__asset {
+  display: grid;
+  gap: 2px;
+}
+
+.terrain-debug-tooltip__asset-label {
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.terrain-debug-tooltip__asset code {
+  color: #ffffff;
+  font-family: "Courier New", monospace;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.terrain-debug-tooltip__asset-meta {
+  font-size: 10px;
+}
+
+.terrain-debug-tooltip__asset-meta--missing {
+  color: #ff9c72;
+}
