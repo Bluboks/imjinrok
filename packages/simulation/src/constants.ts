@@ -1,2 +1,2 @@
-export const SIM_TICK_SECONDS = 0.1;
-export const SIM_TICKS_PER_SECOND = 1 / SIM_TICK_SECONDS;
+export const SIM_TICKS_PER_SECOND = 24;
+export const SIM_TICK_SECONDS = 1 / SIM_TICKS_PER_SECOND;
