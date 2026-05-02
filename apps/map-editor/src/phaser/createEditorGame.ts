@@ -1,6 +1,8 @@
 import Phaser from "phaser";
 import { cartToIso } from "@simulation";
-import { getTileAt, terrainDefinitions, type MapDefinition } from "@shared";
+import { getTileAt, resourceDefinitions, terrainDefinitions, type MapDefinition, type ResourceDefinition } from "@shared";
+
+const RESOURCE_DEFINITIONS = resourceDefinitions as Readonly<Record<string, ResourceDefinition>>;
 
 class EditorPreviewScene extends Phaser.Scene {
   constructor(private readonly mapDefinition: MapDefinition) {
@@ -33,6 +35,18 @@ class EditorPreviewScene extends Phaser.Scene {
         graphics.fillPoints(points, true);
         graphics.lineStyle(1, 0x264147, 0.5);
         graphics.strokePoints(points, true);
+
+        if (tile.resource) {
+          const resourceDefinition = RESOURCE_DEFINITIONS[tile.resource.kind];
+
+          if (resourceDefinition) {
+            graphics
+              .fillStyle(resourceDefinition.placeholderVisual.worldColor, 0.95)
+              .fillCircle(worldX, worldY - halfHeight * 0.45, 6)
+              .lineStyle(2, resourceDefinition.placeholderVisual.outlineColor, 0.9)
+              .strokeCircle(worldX, worldY - halfHeight * 0.45, 6);
+          }
+        }
       }
     }
 

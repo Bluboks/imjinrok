@@ -1,7 +1,9 @@
 import Phaser from "phaser";
-import { factionDefinitions, getTileAt, terrainDefinitions, unitDefinitions, type MapDefinition } from "@shared";
+import { factionDefinitions, getTileAt, resourceDefinitions, terrainDefinitions, unitDefinitions, type MapDefinition, type ResourceDefinition } from "@shared";
 import { TileVisibility } from "@simulation";
 import type { MinimapEntityView, MinimapPoint, MinimapViewportView, MinimapVisibilityView } from "../hud.js";
+
+const RESOURCE_DEFINITIONS = resourceDefinitions as Readonly<Record<string, ResourceDefinition>>;
 
 export interface MinimapGeometry {
   centerX: number;
@@ -163,6 +165,38 @@ export function drawMinimapTerrainCache(
         ],
         true,
       );
+    }
+  }
+
+  const resourceRadius = Math.max(1.25, Math.min(3, tileHalfWidth * 2));
+  for (const layer of mapDefinition.layers) {
+    for (let tileIndex = 0; tileIndex < layer.tiles.length; tileIndex += 1) {
+      const resource = layer.tiles[tileIndex]?.resource;
+
+      if (!resource) {
+        continue;
+      }
+
+      const definition = RESOURCE_DEFINITIONS[resource.kind];
+
+      if (!definition) {
+        continue;
+      }
+
+      const point = gridToMinimap(
+        {
+          x: tileIndex % mapDefinition.width,
+          y: Math.floor(tileIndex / mapDefinition.width),
+        },
+        geometry,
+        mapDefinition,
+      );
+
+      graphics
+        .fillStyle(definition.placeholderVisual.minimapColor, 0.95)
+        .fillCircle(point.x, point.y, resourceRadius)
+        .lineStyle(1, definition.placeholderVisual.outlineColor, 0.8)
+        .strokeCircle(point.x, point.y, resourceRadius);
     }
   }
 }

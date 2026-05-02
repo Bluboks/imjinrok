@@ -1,11 +1,15 @@
 import type { GridPoint } from "./commands.js";
-import type { FactionId, ResourceDefinitionId, TerrainType } from "./content.js";
+import { resourceDefinitions, type BuiltInResourceDefinitionId, type FactionId, type ResourceDefinitionId, type TerrainType } from "./content.js";
 import type { EnvironmentPreset } from "./environment.js";
+
+export type ResourceNodeState = "active" | "depleted";
 
 export interface ResourceNode {
   id: string;
   kind: ResourceDefinitionId;
   amount: number;
+  state?: ResourceNodeState;
+  regrowTicks?: number;
 }
 
 export interface TileCell {
@@ -128,6 +132,40 @@ function setTerrainAndElevation(map: MapDefinition, x: number, y: number, terrai
   };
 }
 
+function placeResource(
+  map: MapDefinition,
+  x: number,
+  y: number,
+  kind: BuiltInResourceDefinitionId,
+  options?: Partial<Pick<ResourceNode, "amount" | "state" | "regrowTicks">>,
+): void {
+  const groundLayer = map.layers[0];
+
+  if (!groundLayer || x < 0 || x >= map.width || y < 0 || y >= map.height) {
+    return;
+  }
+
+  const index = getTileIndex(map.width, x, y);
+  const currentTile = groundLayer.tiles[index];
+
+  if (!currentTile) {
+    return;
+  }
+
+  groundLayer.tiles[index] = {
+    ...currentTile,
+    terrain: "grass",
+    elevation: 0,
+    resource: {
+      id: `demo-${kind}-${x}-${y}`,
+      kind,
+      amount: options?.amount ?? resourceDefinitions[kind].capacity,
+      ...(options?.state ? { state: options.state } : {}),
+      ...(options?.regrowTicks !== undefined ? { regrowTicks: options.regrowTicks } : {}),
+    },
+  };
+}
+
 export function getTileAt(map: MapDefinition, x: number, y: number): TileCell {
   const layer = map.layers[0];
   const index = getTileIndex(map.width, x, y);
@@ -194,10 +232,33 @@ export const defaultMap: MapDefinition = (() => {
     }
   };
 
+  const addStarterResourceDemo = (anchor: GridPoint, directionX: -1 | 1, directionY: -1 | 1): void => {
+    const resourceOffsets = [
+      { kind: "rice", dx: 6 * directionX, dy: 0 },
+      { kind: "rice", dx: 7 * directionX, dy: 0 },
+      { kind: "rice", dx: 6 * directionX, dy: 1 * directionY },
+      { kind: "potato", dx: 3 * directionX, dy: 6 * directionY },
+      { kind: "potato", dx: 4 * directionX, dy: 6 * directionY },
+      { kind: "tree", dx: 8 * directionX, dy: 3 * directionY },
+      { kind: "tree", dx: 9 * directionX, dy: 3 * directionY },
+      { kind: "bamboo", dx: 7 * directionX, dy: 6 * directionY },
+      { kind: "bamboo", dx: 8 * directionX, dy: 6 * directionY },
+    ] as const;
+
+    for (const resource of resourceOffsets) {
+      placeResource(map, anchor.x + resource.dx, anchor.y + resource.dy, resource.kind);
+    }
+  };
+
   // Terrain visual MVP: a wider two-step hill: 7x7 level-1 plateau, 3x3 level-2 top.
   addTwoStepHillDemo({ x: 128, y: 128 });
   // Same test hill near the north/local starting area for quick in-game inspection.
   addTwoStepHillDemo({ x: 12, y: 12 });
+
+  addStarterResourceDemo({ x: 3, y: 3 }, 1, 1);
+  addStarterResourceDemo({ x: map.width - 4, y: map.height - 4 }, -1, -1);
+  addStarterResourceDemo({ x: map.width - 4, y: 3 }, -1, 1);
+  addStarterResourceDemo({ x: 3, y: map.height - 4 }, 1, -1);
 
   return map;
 })();

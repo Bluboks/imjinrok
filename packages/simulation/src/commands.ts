@@ -8,6 +8,7 @@ import {
 } from "../../shared/src/index.js";
 import { findPathForUnit } from "./navigation.js";
 import { validateBuildingPlacement } from "./placement.js";
+import { findHarvestableResourceTile } from "./resources.js";
 import type { UnitState, WorldState } from "./types.js";
 
 export type CommandValidationResult = { ok: true } | { ok: false; reason: string };
@@ -79,8 +80,14 @@ export function validateCommand(state: WorldState, envelope: CommandEnvelope): C
         return actor;
       }
 
-      if (!findResourceTile(state.map, envelope.command.resourceId)) {
+      const resourceTarget = findHarvestableResourceTile(state.map, envelope.command.resourceId);
+
+      if (!resourceTarget) {
         return { ok: false, reason: "resource node not found" };
+      }
+
+      if (!findPathForUnit(state, actor.unit, resourceTarget)) {
+        return { ok: false, reason: "no path to resource" };
       }
 
       return { ok: true };
@@ -153,13 +160,27 @@ export function applyCommand(state: WorldState, envelope: CommandEnvelope): void
     }
     case "gather": {
       const unit = state.units[envelope.command.unitId];
-      const resourceTarget = findResourceTile(state.map, envelope.command.resourceId);
+      const resourceTarget = findHarvestableResourceTile(state.map, envelope.command.resourceId);
 
       if (!unit || !resourceTarget) {
         return;
       }
 
-      unit.movementTarget = resourceTarget;
+      const path = findPathForUnit(state, unit, resourceTarget);
+
+      if (!path) {
+        return;
+      }
+
+      unit.movementPath = path;
+      const nextTarget = path[0];
+
+      if (nextTarget) {
+        unit.movementTarget = nextTarget;
+      } else {
+        delete unit.movementTarget;
+      }
+
       unit.currentOrder = { type: "gather", resourceId: envelope.command.resourceId, target: { ...resourceTarget } };
       return;
     }
@@ -199,21 +220,6 @@ function isKnownBuilding(building: string): boolean {
 
 function isFinitePoint(point: GridPoint): boolean {
   return Number.isFinite(point.x) && Number.isFinite(point.y);
-}
-
-function findResourceTile(map: MapDefinition, resourceId: string): GridPoint | null {
-  for (const layer of map.layers) {
-    const tileIndex = layer.tiles.findIndex((tile) => tile.resource?.id === resourceId && tile.resource.amount > 0);
-
-    if (tileIndex >= 0) {
-      return {
-        x: tileIndex % map.width,
-        y: Math.floor(tileIndex / map.width),
-      };
-    }
-  }
-
-  return null;
 }
 
 function clampMapPoint(map: MapDefinition, point: GridPoint): GridPoint {

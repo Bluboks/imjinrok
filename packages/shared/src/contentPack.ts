@@ -76,6 +76,7 @@ export function validateContentRegistry(registry: ContentRegistry): ContentValid
   validateDefinitionIds(registry.resources, "resources", issues);
   validateDefinitionIds(registry.actions, "actions", issues);
   validateDefinitionIds(registry.units, "units", issues);
+  validateResourceDefinitions(registry, issues);
   validateUnitDefinitions(registry, issues);
 
   return toValidationResult(issues);
@@ -121,6 +122,97 @@ function validateDefinitionIds(
     if (definition.id !== key) {
       issues.push(createIssue(`${path}.${key}.id`, `Definition id '${definition.id}' must match key '${key}'.`));
     }
+  }
+}
+
+const knownBankResourceKinds = new Set(["food", "wood", "gold", "stone"]);
+
+function validateResourceDefinitions(registry: ContentRegistry, issues: ContentValidationIssue[]): void {
+  for (const [resourceId, definition] of Object.entries(registry.resources)) {
+    if (!definition.displayName.trim()) {
+      issues.push(createIssue(`resources.${resourceId}.displayName`, "Resource display name is required."));
+    }
+
+    if (!definition.category.trim()) {
+      issues.push(createIssue(`resources.${resourceId}.category`, "Resource category is required."));
+    }
+
+    if (!knownBankResourceKinds.has(definition.yieldResource)) {
+      issues.push(createIssue(`resources.${resourceId}.yieldResource`, `Unknown bank resource '${definition.yieldResource}'.`));
+    }
+
+    if (!Number.isFinite(definition.capacity) || definition.capacity <= 0) {
+      issues.push(createIssue(`resources.${resourceId}.capacity`, "Resource capacity must be a positive number."));
+    }
+
+    if (!Number.isFinite(definition.gatherAmountPerTick) || definition.gatherAmountPerTick <= 0) {
+      issues.push(createIssue(`resources.${resourceId}.gatherAmountPerTick`, "Gather amount per tick must be a positive number."));
+    }
+
+    validateResourcePlaceholderVisual(definition, resourceId, issues);
+    validateResourceOccupancy(definition.activeOccupancy, `resources.${resourceId}.activeOccupancy`, issues);
+
+    if (definition.depletion.mode === "stay" && !definition.depletion.depletedOccupancy) {
+      issues.push(createIssue(`resources.${resourceId}.depletion.depletedOccupancy`, "Persistent depleted resources must define depleted occupancy."));
+    }
+
+    if (definition.depletion.depletedOccupancy) {
+      validateResourceOccupancy(definition.depletion.depletedOccupancy, `resources.${resourceId}.depletion.depletedOccupancy`, issues);
+    }
+
+    if (!definition.regrowth) {
+      continue;
+    }
+
+    if (definition.depletion.mode !== "stay") {
+      issues.push(createIssue(`resources.${resourceId}.regrowth`, "Regrowing resources must stay on the tile when depleted."));
+    }
+
+    if (definition.regrowth.trigger !== "rain") {
+      issues.push(createIssue(`resources.${resourceId}.regrowth.trigger`, `Unknown regrowth trigger '${definition.regrowth.trigger}'.`));
+    }
+
+    if (!Number.isFinite(definition.regrowth.requiredTicks) || definition.regrowth.requiredTicks <= 0) {
+      issues.push(createIssue(`resources.${resourceId}.regrowth.requiredTicks`, "Regrowth ticks must be a positive number."));
+    }
+
+    if (typeof definition.regrowth.restoreAmount === "number" && (!Number.isFinite(definition.regrowth.restoreAmount) || definition.regrowth.restoreAmount <= 0)) {
+      issues.push(createIssue(`resources.${resourceId}.regrowth.restoreAmount`, "Numeric restore amount must be a positive number."));
+    }
+  }
+}
+
+function validateResourcePlaceholderVisual(
+  definition: ResourceDefinition,
+  resourceId: string,
+  issues: ContentValidationIssue[],
+): void {
+  const visual = definition.placeholderVisual;
+
+  if (!visual.glyph.trim()) {
+    issues.push(createIssue(`resources.${resourceId}.placeholderVisual.glyph`, "Resource placeholder glyph is required."));
+  }
+
+  for (const colorKey of ["worldColor", "outlineColor", "minimapColor"] as const) {
+    const color = visual[colorKey];
+
+    if (!Number.isInteger(color) || color < 0x000000 || color > 0xffffff) {
+      issues.push(createIssue(`resources.${resourceId}.placeholderVisual.${colorKey}`, "Resource placeholder color must be a 24-bit integer."));
+    }
+  }
+}
+
+function validateResourceOccupancy(
+  occupancy: ResourceDefinition["activeOccupancy"],
+  path: string,
+  issues: ContentValidationIssue[],
+): void {
+  if (typeof occupancy.blocksMovement !== "boolean") {
+    issues.push(createIssue(`${path}.blocksMovement`, "Resource movement blocking must be boolean."));
+  }
+
+  if (typeof occupancy.blocksBuilding !== "boolean") {
+    issues.push(createIssue(`${path}.blocksBuilding`, "Resource building blocking must be boolean."));
   }
 }
 

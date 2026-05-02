@@ -1,4 +1,5 @@
 import { getTileAt, terrainDefinitions, unitDefinitions, type GridPoint, type TerrainDefinition } from "../../shared/src/index.js";
+import { resourceBlocksMovement } from "./resources.js";
 import type { UnitState, WorldState } from "./types.js";
 import { iterateUnitsOrdered } from "./units.js";
 
@@ -20,7 +21,7 @@ export function isTilePassableForUnit(state: WorldState, _unit: UnitState, point
 
   const tile = getTileAt(state.map, point.x, point.y);
 
-  return !terrainDefinitions[tile.terrain].blocksMovement;
+  return !terrainDefinitions[tile.terrain].blocksMovement && !resourceBlocksMovement(tile.resource);
 }
 
 export function resolveFloodDrowning(state: WorldState): void {

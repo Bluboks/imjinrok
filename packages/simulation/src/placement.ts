@@ -6,6 +6,7 @@ import {
   type GridPoint,
   type TerrainType,
 } from "../../shared/src/index.js";
+import { resourceBlocksBuilding } from "./resources.js";
 import type { WorldState } from "./types.js";
 import { iterateUnitsOrdered } from "./units.js";
 
@@ -45,7 +46,7 @@ export function validateBuildingPlacement(
       return { ok: false, reason: `cannot build on ${mapTile.terrain}` };
     }
 
-    if (mapTile.resource) {
+    if (resourceBlocksBuilding(mapTile.resource)) {
       return { ok: false, reason: "building footprint overlaps a resource" };
     }
 

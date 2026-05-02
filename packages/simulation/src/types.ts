@@ -81,4 +81,4 @@ export interface WorldState {
   lastAcceptedCommand: CommandEnvelope | null;
 }
 
-export type WorldSnapshot = Omit<WorldState, "map">;
+export type WorldSnapshot = WorldState;

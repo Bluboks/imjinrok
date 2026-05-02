@@ -10,6 +10,7 @@ export { resolveDamageAmount, type DamagePacket } from "./damage.js";
 export type { EnvironmentState } from "./environment.js";
 export { findPathForUnit, isTerrainWalkable } from "./navigation.js";
 export { getFootprintTiles, validateBuildingPlacement, type BuildingPlacementValidationResult } from "./placement.js";
+export { findHarvestableResourceTile, findResourceTile, getResourceNodeState, isResourceHarvestable, resourceBlocksBuilding, resourceBlocksMovement, updateResourceRegrowth } from "./resources.js";
 export { createScenarioRuntimeState, evaluateScenarioRuntime } from "./scenario.js";
 export { SIM_TICK_SECONDS, SIM_TICKS_PER_SECOND } from "./constants.js";
 export { isTileFlooded, isTilePassableForUnit } from "./terrain.js";
@@ -22,13 +23,14 @@ export function createInitialWorldState(
   playerIds: string[],
   scenario: ScenarioDefinition = defaultSkirmishScenario,
 ): WorldState {
+  const worldMap = structuredClone(map);
   const units: Record<string, UnitState> = {};
   const players: Record<string, PlayerState> = {};
   const playerResources: Record<string, ResourceBank> = {};
 
   playerIds.forEach((playerId, index) => {
     const fallbackFaction = factions[index % factions.length] ?? "blue";
-    const spawn = map.spawnPoints[index] ?? {
+    const spawn = worldMap.spawnPoints[index] ?? {
       id: `fallback-${index}`,
       x: 2 + index,
       y: 2 + index,
@@ -45,8 +47,8 @@ export function createInitialWorldState(
 
   return {
     tick: 0,
-    map,
-    environment: createInitialEnvironmentState(map),
+    map: worldMap,
+    environment: createInitialEnvironmentState(worldMap),
     scenario: createScenarioRuntimeState(scenario),
     players,
     units,
@@ -56,7 +58,5 @@ export function createInitialWorldState(
 }
 
 export function toWorldSnapshot(state: WorldState): WorldSnapshot {
-  const { map: _map, ...snapshot } = state;
-
-  return structuredClone(snapshot);
+  return structuredClone(state);
 }

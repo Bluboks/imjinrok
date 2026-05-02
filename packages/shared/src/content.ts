@@ -35,18 +35,133 @@ export const factionDefinitions = {
 export type FactionId = keyof typeof factionDefinitions;
 export const factions = Object.keys(factionDefinitions) as FactionId[];
 
-export interface ResourceDefinition {
-  id: string;
+export type BankResourceKind = "food" | "wood" | "gold" | "stone";
+export type ResourceCategory = "wood" | "grain" | "mineral" | (string & {});
+export type ResourceRegrowthTrigger = "rain";
+
+export interface ResourceOccupancyDefinition {
+  blocksMovement: boolean;
+  blocksBuilding: boolean;
 }
 
+export interface ResourceDepletionDefinition {
+  mode: "remove" | "stay";
+  depletedOccupancy?: ResourceOccupancyDefinition;
+}
+
+export interface ResourceRegrowthDefinition {
+  trigger: ResourceRegrowthTrigger;
+  requiredTicks: number;
+  restoreAmount: "full" | number;
+}
+
+export interface ResourcePlaceholderVisualDefinition {
+  glyph: string;
+  worldColor: number;
+  outlineColor: number;
+  minimapColor: number;
+}
+
+export interface ResourceDefinition {
+  id: string;
+  displayName: string;
+  category: ResourceCategory;
+  yieldResource: BankResourceKind;
+  capacity: number;
+  gatherAmountPerTick: number;
+  activeOccupancy: ResourceOccupancyDefinition;
+  depletion: ResourceDepletionDefinition;
+  regrowth?: ResourceRegrowthDefinition;
+  placeholderVisual: ResourcePlaceholderVisualDefinition;
+}
+
+const passableNoBuild = { blocksMovement: false, blocksBuilding: true } as const satisfies ResourceOccupancyDefinition;
+const blockingNoBuild = { blocksMovement: true, blocksBuilding: true } as const satisfies ResourceOccupancyDefinition;
+
 export const resourceDefinitions = {
-  tree: { id: "tree" },
-  gold: { id: "gold" },
-  stone: { id: "stone" },
-  berry: { id: "berry" },
+  rice: {
+    id: "rice",
+    displayName: "Rice Patch",
+    category: "grain",
+    yieldResource: "food",
+    capacity: 100,
+    gatherAmountPerTick: 1,
+    activeOccupancy: passableNoBuild,
+    depletion: { mode: "remove" },
+    placeholderVisual: { glyph: "R", worldColor: 0xe7d47a, outlineColor: 0x6f6a33, minimapColor: 0xe7d47a },
+  },
+  potato: {
+    id: "potato",
+    displayName: "Potato Patch",
+    category: "grain",
+    yieldResource: "food",
+    capacity: 100,
+    gatherAmountPerTick: 1,
+    activeOccupancy: passableNoBuild,
+    depletion: { mode: "stay", depletedOccupancy: passableNoBuild },
+    regrowth: { trigger: "rain", requiredTicks: 600, restoreAmount: "full" },
+    placeholderVisual: { glyph: "P", worldColor: 0xc4864a, outlineColor: 0x5f3b24, minimapColor: 0xc4864a },
+  },
+  tree: {
+    id: "tree",
+    displayName: "Tree",
+    category: "wood",
+    yieldResource: "wood",
+    capacity: 100,
+    gatherAmountPerTick: 1,
+    activeOccupancy: blockingNoBuild,
+    depletion: { mode: "remove" },
+    placeholderVisual: { glyph: "T", worldColor: 0x3f8f4b, outlineColor: 0x183722, minimapColor: 0x3f8f4b },
+  },
+  bamboo: {
+    id: "bamboo",
+    displayName: "Bamboo",
+    category: "wood",
+    yieldResource: "wood",
+    capacity: 100,
+    gatherAmountPerTick: 1,
+    activeOccupancy: blockingNoBuild,
+    depletion: { mode: "stay", depletedOccupancy: passableNoBuild },
+    regrowth: { trigger: "rain", requiredTicks: 600, restoreAmount: "full" },
+    placeholderVisual: { glyph: "B", worldColor: 0x84c96d, outlineColor: 0x2f5a2a, minimapColor: 0x84c96d },
+  },
+  gold: {
+    id: "gold",
+    displayName: "Gold",
+    category: "mineral",
+    yieldResource: "gold",
+    capacity: 800,
+    gatherAmountPerTick: 1,
+    activeOccupancy: blockingNoBuild,
+    depletion: { mode: "remove" },
+    placeholderVisual: { glyph: "G", worldColor: 0xd8b852, outlineColor: 0x6d581e, minimapColor: 0xd8b852 },
+  },
+  stone: {
+    id: "stone",
+    displayName: "Stone",
+    category: "mineral",
+    yieldResource: "stone",
+    capacity: 800,
+    gatherAmountPerTick: 1,
+    activeOccupancy: blockingNoBuild,
+    depletion: { mode: "remove" },
+    placeholderVisual: { glyph: "S", worldColor: 0x9a9c9f, outlineColor: 0x44484d, minimapColor: 0x9a9c9f },
+  },
+  berry: {
+    id: "berry",
+    displayName: "Berry Patch",
+    category: "grain",
+    yieldResource: "food",
+    capacity: 100,
+    gatherAmountPerTick: 1,
+    activeOccupancy: passableNoBuild,
+    depletion: { mode: "remove" },
+    placeholderVisual: { glyph: "Be", worldColor: 0xad4f6f, outlineColor: 0x582638, minimapColor: 0xad4f6f },
+  },
 } as const satisfies Record<string, ResourceDefinition>;
 
-export type ResourceDefinitionId = keyof typeof resourceDefinitions;
+export type BuiltInResourceDefinitionId = keyof typeof resourceDefinitions;
+export type ResourceDefinitionId = BuiltInResourceDefinitionId | (string & {});
 
 export interface ActionDefinition {
   id: string;

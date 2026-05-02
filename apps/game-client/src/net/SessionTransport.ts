@@ -116,10 +116,7 @@ export class RemoteSessionTransport implements SessionTransport {
       return this.latestSnapshot;
     }
 
-    return {
-      ...snapshot,
-      map: this.latestSnapshot.map,
-    };
+    return snapshot;
   }
 }
 

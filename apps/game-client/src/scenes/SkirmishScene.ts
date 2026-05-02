@@ -8,6 +8,7 @@ import {
   getThemeFrameRefs,
   getTerrainVisual,
   getTileAt,
+  resourceDefinitions,
   resolveElevationTerrainSlot,
   terrainDefinitions,
   terrainTypes,
@@ -19,6 +20,8 @@ import {
   type FrameRef,
   type GridPoint,
   type MapDefinition,
+  type ResourceDefinition,
+  type ResourceNode,
   type ThemeDefinition,
   type TerrainKindSlot,
   type TerrainType,
@@ -29,6 +32,7 @@ import {
   cartToIso,
   createPlayerVisibility,
   createInitialWorldState,
+  getResourceNodeState,
   getTileVisibility,
   isoToCart,
   TileVisibility,
@@ -72,11 +76,20 @@ const SCREEN_OVERLAY_DEPTH = 1_000_000;
 const FOG_UNEXPLORED_ALPHA = 0.9;
 const FOG_EXPLORED_ALPHA = 0.48;
 const TERRAIN_DEBUG_DETAILS_STORAGE_KEY = "isorts.debug.terrainDetails";
+const RESOURCE_DEFINITIONS = resourceDefinitions as Readonly<Record<string, ResourceDefinition>>;
 
 interface UnitRenderable {
   container: Phaser.GameObjects.Container;
   body: Phaser.GameObjects.Graphics;
   selectionRing: Phaser.GameObjects.Graphics;
+}
+
+interface ResourceRenderable {
+  container: Phaser.GameObjects.Container;
+  shadow: Phaser.GameObjects.Graphics;
+  marker: Phaser.GameObjects.Graphics;
+  glyph: Phaser.GameObjects.Text;
+  stateKey: string;
 }
 
 interface FogChunkBounds {
@@ -119,6 +132,7 @@ export class SkirmishScene extends Phaser.Scene {
   private readonly elevationFogStamps = new Map<string, Phaser.GameObjects.Image>();
   private readonly elevationOverlays: Phaser.GameObjects.Image[] = [];
   private readonly fogChunks: (Phaser.GameObjects.RenderTexture | null)[] = [];
+  private readonly resourceRenderables = new Map<string, ResourceRenderable>();
   private readonly unitRenderables = new Map<string, UnitRenderable>();
   private readonly terrainTextureKeys = new Map<TerrainType, string>();
   private readonly fogTextureKeys = new Map<TileVisibility, string>();
@@ -167,6 +181,7 @@ export class SkirmishScene extends Phaser.Scene {
     this.map = defaultMap;
     this.sessionTransport = createSessionTransport(data, this.map, players);
     this.worldState = this.sessionTransport.getSnapshot();
+    this.map = this.worldState.map;
     this.lastSyncedTick = this.worldState.tick;
     this.playerVisibility = createPlayerVisibility(this.map);
     this.terrainFogLiftPaddingPx = this.computeTerrainFogLiftPaddingPx();
@@ -190,6 +205,7 @@ export class SkirmishScene extends Phaser.Scene {
       this.redrawElevationOverlay();
     });
     this.redrawAllFogOverlay();
+    this.syncResourceRenderables();
     this.syncUnitRenderables();
     this.publishVirtualCursor();
     this.selectInitialUnit(this.localPlayerId);
@@ -213,10 +229,12 @@ export class SkirmishScene extends Phaser.Scene {
     }
 
     this.worldState = nextSnapshot;
+    this.map = nextSnapshot.map;
     this.lastSyncedTick = nextSnapshot.tick;
     const dirtyFogChunkCount = this.refreshLocalVisibility();
     this.redrawDirtyFogOverlay(dirtyFogChunkCount);
     this.pruneMissingSelections();
+    this.syncResourceRenderables();
     this.syncUnitRenderables();
     this.emitSelectionChanged();
     if (dirtyFogChunkCount > 0) {
@@ -347,6 +365,8 @@ export class SkirmishScene extends Phaser.Scene {
     this.fogChunkDirtyMask = new Uint8Array(0);
     this.fogChunksPerRow = 0;
     this.fogChunksPerColumn = 0;
+    this.resourceRenderables.forEach((renderable) => renderable.container.destroy(true));
+    this.resourceRenderables.clear();
     this.unitRenderables.forEach((renderable) => renderable.container.destroy(true));
     this.unitRenderables.clear();
     this.disposeTerrainDebugOverlay();
@@ -1229,10 +1249,12 @@ export class SkirmishScene extends Phaser.Scene {
     }
 
     this.worldState = snapshot;
+    this.map = snapshot.map;
     this.lastSyncedTick = snapshot.tick;
     const dirtyFogChunkCount = this.refreshLocalVisibility();
     this.redrawDirtyFogOverlay(dirtyFogChunkCount);
     this.pruneMissingSelections();
+    this.syncResourceRenderables();
     this.syncUnitRenderables();
     this.emitSelectionChanged();
     if (dirtyFogChunkCount > 0) {
@@ -1968,6 +1990,205 @@ export class SkirmishScene extends Phaser.Scene {
       this.map.tileWidth,
       this.map.tileHeight,
     );
+  }
+
+  private syncResourceRenderables(): void {
+    const liveIds = new Set<string>();
+
+    for (const resourceView of this.iterateVisibleResourceViews()) {
+      const definition = RESOURCE_DEFINITIONS[resourceView.resource.kind];
+
+      if (!definition) {
+        continue;
+      }
+
+      liveIds.add(resourceView.resource.id);
+      let renderable = this.resourceRenderables.get(resourceView.resource.id);
+
+      if (!renderable) {
+        renderable = this.createResourceRenderable();
+        this.resourceRenderables.set(resourceView.resource.id, renderable);
+      }
+
+      const state = getResourceNodeState(resourceView.resource);
+      const stateKey = `${resourceView.resource.kind}:${state}`;
+
+      if (renderable.stateKey !== stateKey) {
+        this.redrawResourceRenderable(renderable, definition, resourceView.resource);
+        renderable.stateKey = stateKey;
+      }
+
+      const position = this.getResourceWorldPosition(resourceView.point);
+      renderable.container
+        .setPosition(position.x, position.y)
+        .setAlpha(resourceView.visibility === TileVisibility.Visible ? 1 : 0.38)
+        .setDepth(position.depth);
+    }
+
+    for (const [resourceId, renderable] of this.resourceRenderables) {
+      if (!liveIds.has(resourceId)) {
+        renderable.container.destroy(true);
+        this.resourceRenderables.delete(resourceId);
+      }
+    }
+  }
+
+  private *iterateVisibleResourceViews(): IterableIterator<{
+    resource: ResourceNode;
+    point: GridPoint;
+    visibility: TileVisibility;
+  }> {
+    for (const layer of this.worldState.map.layers) {
+      for (let tileIndex = 0; tileIndex < layer.tiles.length; tileIndex += 1) {
+        const resource = layer.tiles[tileIndex]?.resource;
+
+        if (!resource) {
+          continue;
+        }
+
+        const point = {
+          x: tileIndex % this.worldState.map.width,
+          y: Math.floor(tileIndex / this.worldState.map.width),
+        };
+        const visibility = getTileVisibility(this.playerVisibility, point);
+
+        if (visibility === TileVisibility.Unexplored) {
+          continue;
+        }
+
+        yield { resource, point, visibility };
+      }
+    }
+  }
+
+  private createResourceRenderable(): ResourceRenderable {
+    const container = this.add.container(0, 0);
+    const shadow = this.add.graphics();
+    const marker = this.add.graphics();
+    const glyph = this.add
+      .text(0, -15, "", {
+        color: "#102125",
+        fontFamily: "monospace",
+        fontSize: "11px",
+        fontStyle: "bold",
+      })
+      .setOrigin(0.5);
+
+    container.add([shadow, marker, glyph]);
+
+    return { container, shadow, marker, glyph, stateKey: "" };
+  }
+
+  private redrawResourceRenderable(
+    renderable: ResourceRenderable,
+    definition: ResourceDefinition,
+    resource: ResourceNode,
+  ): void {
+    const state = getResourceNodeState(resource);
+    const depleted = state === "depleted";
+    const visual = definition.placeholderVisual;
+    const fillColor = depleted ? 0x77725f : visual.worldColor;
+    const outlineColor = depleted ? 0x3a3932 : visual.outlineColor;
+    const alpha = depleted ? 0.68 : 1;
+
+    renderable.shadow
+      .clear()
+      .fillStyle(0x061012, depleted ? 0.24 : 0.42)
+      .fillEllipse(0, 8, 34, 14);
+
+    renderable.marker.clear();
+
+    if (definition.category === "wood") {
+      this.drawWoodPlaceholder(renderable.marker, resource.kind, fillColor, outlineColor, alpha, depleted);
+    } else {
+      this.drawPatchPlaceholder(renderable.marker, fillColor, outlineColor, alpha, depleted);
+    }
+
+    renderable.glyph
+      .setText(visual.glyph)
+      .setColor(depleted ? "#e8dfbf" : "#102125")
+      .setAlpha(depleted ? 0.72 : 0.95)
+      .setY(definition.category === "wood" && !depleted ? -24 : -12);
+  }
+
+  private drawPatchPlaceholder(
+    graphics: Phaser.GameObjects.Graphics,
+    fillColor: number,
+    outlineColor: number,
+    alpha: number,
+    depleted: boolean,
+  ): void {
+    graphics
+      .fillStyle(fillColor, alpha)
+      .fillEllipse(0, 0, 28, 15)
+      .lineStyle(2, outlineColor, alpha)
+      .strokeEllipse(0, 0, 28, 15);
+
+    if (depleted) {
+      graphics
+        .lineStyle(2, 0x3a3932, 0.65)
+        .lineBetween(-8, -3, 8, 3)
+        .lineBetween(-8, 3, 8, -3);
+      return;
+    }
+
+    graphics
+      .lineStyle(2, 0xf5efbd, 0.85)
+      .lineBetween(-6, 1, -8, -7)
+      .lineBetween(0, 2, 0, -8)
+      .lineBetween(6, 1, 8, -7);
+  }
+
+  private drawWoodPlaceholder(
+    graphics: Phaser.GameObjects.Graphics,
+    kind: string,
+    fillColor: number,
+    outlineColor: number,
+    alpha: number,
+    depleted: boolean,
+  ): void {
+    if (kind === "bamboo") {
+      const height = depleted ? 14 : 32;
+      graphics.lineStyle(4, outlineColor, alpha).lineBetween(-7, 4, -7, 4 - height);
+      graphics.lineStyle(4, fillColor, alpha).lineBetween(0, 5, 0, 5 - height);
+      graphics.lineStyle(4, outlineColor, alpha).lineBetween(7, 4, 7, 4 - height);
+
+      if (!depleted) {
+        graphics
+          .fillStyle(fillColor, 0.9)
+          .fillEllipse(-13, -18, 14, 7)
+          .fillEllipse(12, -23, 14, 7);
+      }
+
+      return;
+    }
+
+    graphics
+      .fillStyle(0x8b5a32, alpha)
+      .fillRoundedRect(-5, -4, 10, depleted ? 13 : 25, 3)
+      .lineStyle(2, 0x4a2d1c, alpha)
+      .strokeRoundedRect(-5, -4, 10, depleted ? 13 : 25, 3);
+
+    if (!depleted) {
+      graphics
+        .fillStyle(fillColor, alpha)
+        .fillCircle(0, -24, 17)
+        .lineStyle(2, outlineColor, alpha)
+        .strokeCircle(0, -24, 17);
+    }
+  }
+
+  private getResourceWorldPosition(point: GridPoint): { x: number; y: number; depth: number } {
+    const iso = cartToIso(point, this.map.tileWidth, this.map.tileHeight);
+    const worldX = this.mapOrigin.x + iso.x;
+    const worldY = this.mapOrigin.y + iso.y;
+    const y = worldY - this.map.tileHeight / 3;
+
+    return {
+      x: worldX,
+      y,
+      depth: worldY + 8,
+    };
   }
 
   private syncUnitRenderables(): void {
