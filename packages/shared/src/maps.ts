@@ -1,5 +1,6 @@
 import type { GridPoint } from "./commands.js";
 import type { FactionId, ResourceDefinitionId, TerrainType } from "./content.js";
+import type { EnvironmentPreset } from "./environment.js";
 
 export interface ResourceNode {
   id: string;
@@ -35,6 +36,7 @@ export interface MapDefinition {
   layers: TileLayer[];
   spawnPoints: SpawnPoint[];
   tags: string[];
+  environment?: EnvironmentPreset;
 }
 
 export function getTileIndex(width: number, x: number, y: number): number {

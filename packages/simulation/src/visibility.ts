@@ -1,4 +1,5 @@
 import { getTileIndex, unitDefinitions, type GridPoint, type MapDefinition } from "../../shared/src/index.js";
+import { getEnvironmentSightMultiplier } from "./environment.js";
 import type { WorldState } from "./types.js";
 import { iterateUnitsOrdered } from "./units.js";
 
@@ -66,14 +67,17 @@ export function updatePlayerVisibilityWithChanges(
     tiles,
   };
 
+  const sightMultiplier = getEnvironmentSightMultiplier(state.environment, state.map.environment);
+
   for (const unit of iterateUnitsOrdered(state)) {
     if (unit.playerId !== playerId) {
       continue;
     }
 
     const definition = unitDefinitions[unit.kind];
+    const sightRadius = Math.max(0, Math.floor(definition.sightRadius * sightMultiplier));
     const origin = toVisionTile(unit.position);
-    for (const offset of getCircularTileOffsets(definition.sightRadius)) {
+    for (const offset of getCircularTileOffsets(sightRadius)) {
       const x = origin.x + offset.dx;
       const y = origin.y + offset.dy;
 

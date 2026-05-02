@@ -1409,10 +1409,12 @@ export class SkirmishScene extends Phaser.Scene {
         const tile = getTileAt(this.map, x, y);
         const drewElevationFog = this.drawElevationFogTile(renderTexture, bounds, visibility, x, y, worldX, worldY);
 
-        if (tile.elevation <= 0) {
-          this.drawBaseFogTile(renderTexture, bounds, textureKey, visibility, x, y, worldX, worldY);
-        } else if (!drewElevationFog) {
-          this.drawFallbackFogTile(renderTexture, bounds, textureKey, worldX, worldY);
+        if (!drewElevationFog) {
+          if (tile.elevation <= 0) {
+            this.drawBaseFogTile(renderTexture, bounds, textureKey, visibility, x, y, worldX, worldY);
+          } else {
+            this.drawFallbackFogTile(renderTexture, bounds, textureKey, worldX, worldY);
+          }
         }
 
         hasFog = true;

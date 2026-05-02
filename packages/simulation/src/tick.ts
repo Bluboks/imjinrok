@@ -1,5 +1,7 @@
 import { evaluateScenarioRuntime } from "./scenario.js";
 import { SIM_TICK_SECONDS } from "./constants.js";
+import { updateEnvironment } from "./environment.js";
+import { isTilePassableForUnit, resolveFloodDrowning } from "./terrain.js";
 import { iterateUnitsOrdered } from "./units.js";
 import type { UnitState, WorldState } from "./types.js";
 
@@ -7,18 +9,32 @@ const TARGET_EPSILON = 0.001;
 
 export function advanceWorldTick(state: WorldState): void {
   state.tick += 1;
+  // Environment updates first so future systems read this tick's state.
+  updateEnvironment(state);
+  resolveFloodDrowning(state);
 
   for (const unit of iterateUnitsOrdered(state)) {
-    advanceUnitMovement(unit, SIM_TICK_SECONDS);
+    if (state.units[unit.id]) {
+      advanceUnitMovement(state, unit, SIM_TICK_SECONDS);
+    }
   }
+
+  resolveFloodDrowning(state);
 
   evaluateScenarioRuntime(state);
 }
 
-function advanceUnitMovement(unit: UnitState, deltaSeconds: number): void {
+function advanceUnitMovement(state: WorldState, unit: UnitState, deltaSeconds: number): void {
   const target = unit.movementTarget;
 
   if (!target || unit.movementSpeed <= 0) {
+    return;
+  }
+
+  if (!isTilePassableForUnit(state, unit, { x: Math.round(target.x), y: Math.round(target.y) })) {
+    delete unit.movementTarget;
+    delete unit.movementPath;
+    delete unit.currentOrder;
     return;
   }
 

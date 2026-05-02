@@ -1,14 +1,18 @@
 import { defaultSkirmishScenario, factions, type MapDefinition, type ScenarioDefinition } from "../../shared/src/index.js";
 import { createPlayerUnits } from "./entities.js";
+import { createInitialEnvironmentState } from "./environment.js";
 import { createScenarioRuntimeState } from "./scenario.js";
 import type { PlayerState, ResourceBank, UnitState, WorldSnapshot, WorldState } from "./types.js";
 
 export type { AttributePool, ObjectiveRuntimeState, ObjectiveStatus, PlayerState, ResourceBank, ScenarioRuntimeEvent, ScenarioRuntimeState, ScenarioStatus, UnitState, WorldSnapshot, WorldState } from "./types.js";
 export { applyCommand, issueCommand, validateCommand, type CommandValidationResult, type IssueCommandResult } from "./commands.js";
+export { resolveDamageAmount, type DamagePacket } from "./damage.js";
+export type { EnvironmentState } from "./environment.js";
 export { findPathForUnit, isTerrainWalkable } from "./navigation.js";
 export { getFootprintTiles, validateBuildingPlacement, type BuildingPlacementValidationResult } from "./placement.js";
 export { createScenarioRuntimeState, evaluateScenarioRuntime } from "./scenario.js";
 export { SIM_TICK_SECONDS, SIM_TICKS_PER_SECOND } from "./constants.js";
+export { isTileFlooded, isTilePassableForUnit } from "./terrain.js";
 export { advanceWorldTick } from "./tick.js";
 export { iterateUnitsOrdered } from "./units.js";
 export { createPlayerVisibility, getTileVisibility, updatePlayerVisibility, updatePlayerVisibilityWithChanges, TileVisibility, type PlayerVisibilityChangeOptions, type PlayerVisibilityState, type PlayerVisibilityUpdate } from "./visibility.js";
@@ -42,6 +46,7 @@ export function createInitialWorldState(
   return {
     tick: 0,
     map,
+    environment: createInitialEnvironmentState(map),
     scenario: createScenarioRuntimeState(scenario),
     players,
     units,

@@ -4,11 +4,13 @@ export interface TerrainDefinition {
   worldColor: number;
   minimapColor: number;
   editorColor: number;
+  floodsInRain?: boolean;
 }
 
 export const terrainDefinitions = {
   grass: { id: "grass", blocksMovement: false, worldColor: 0x7aa35a, minimapColor: 0x6f9b54, editorColor: 0x82ae63 },
   forest: { id: "forest", blocksMovement: true, worldColor: 0x3f6f48, minimapColor: 0x355f3d, editorColor: 0x49784c },
+  shallowWater: { id: "shallowWater", blocksMovement: false, worldColor: 0x4f8fa6, minimapColor: 0x467f99, editorColor: 0x5a9fba, floodsInRain: true },
   water: { id: "water", blocksMovement: true, worldColor: 0x346c88, minimapColor: 0x2f6680, editorColor: 0x3c7895 },
   cliff: { id: "cliff", blocksMovement: true, worldColor: 0x837362, minimapColor: 0x756858, editorColor: 0x7d6f62 },
 } as const satisfies Record<string, TerrainDefinition>;

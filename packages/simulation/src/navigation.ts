@@ -6,6 +6,7 @@ import {
   type MapDefinition,
 } from "../../shared/src/index.js";
 import { getFootprintTiles } from "./placement.js";
+import { isTilePassableForUnit } from "./terrain.js";
 import { iterateUnitsOrdered } from "./units.js";
 import type { UnitState, WorldState } from "./types.js";
 
@@ -31,7 +32,7 @@ export function findPathForUnit(state: WorldState, unit: UnitState, target: Grid
 
   blockedTiles.delete(startKey);
 
-  const goal = resolveWalkableGoal(state.map, requestedGoal, blockedTiles);
+  const goal = resolveWalkableGoal(state, unit, requestedGoal, blockedTiles);
 
   if (!goal) {
     return null;
@@ -70,11 +71,11 @@ export function findPathForUnit(state: WorldState, unit: UnitState, target: Grid
     for (const neighborOffset of NEIGHBORS) {
       const neighbor = { x: current.x + neighborOffset.x, y: current.y + neighborOffset.y };
 
-      if (!isWalkable(state.map, neighbor, blockedTiles)) {
+      if (!isWalkable(state, unit, neighbor, blockedTiles)) {
         continue;
       }
 
-      if (isDiagonal(neighborOffset) && !canMoveDiagonally(state.map, current, neighborOffset, blockedTiles)) {
+      if (isDiagonal(neighborOffset) && !canMoveDiagonally(state, unit, current, neighborOffset, blockedTiles)) {
         continue;
       }
 
@@ -131,8 +132,8 @@ function getStaticBlockingTiles(state: WorldState): Set<string> {
   return blockedTiles;
 }
 
-function resolveWalkableGoal(map: MapDefinition, requestedGoal: GridPoint, blockedTiles: ReadonlySet<string>): GridPoint | null {
-  if (isWalkable(map, requestedGoal, blockedTiles)) {
+function resolveWalkableGoal(state: WorldState, unit: UnitState, requestedGoal: GridPoint, blockedTiles: ReadonlySet<string>): GridPoint | null {
+  if (isWalkable(state, unit, requestedGoal, blockedTiles)) {
     return requestedGoal;
   }
 
@@ -149,7 +150,7 @@ function resolveWalkableGoal(map: MapDefinition, requestedGoal: GridPoint, block
     for (const offset of NEIGHBORS) {
       const neighbor = { x: current.x + offset.x, y: current.y + offset.y };
 
-      if (!isPointInMap(map, neighbor)) {
+      if (!isPointInMap(state.map, neighbor)) {
         continue;
       }
 
@@ -159,7 +160,7 @@ function resolveWalkableGoal(map: MapDefinition, requestedGoal: GridPoint, block
         continue;
       }
 
-      if (isWalkable(map, neighbor, blockedTiles)) {
+      if (isWalkable(state, unit, neighbor, blockedTiles)) {
         return neighbor;
       }
 
@@ -171,19 +172,20 @@ function resolveWalkableGoal(map: MapDefinition, requestedGoal: GridPoint, block
   return null;
 }
 
-function isWalkable(map: MapDefinition, point: GridPoint, blockedTiles: ReadonlySet<string>): boolean {
-  return isTerrainWalkable(map, point) && !blockedTiles.has(toTileKey(point));
+function isWalkable(state: WorldState, unit: UnitState, point: GridPoint, blockedTiles: ReadonlySet<string>): boolean {
+  return isTilePassableForUnit(state, unit, point) && !blockedTiles.has(toTileKey(point));
 }
 
 function canMoveDiagonally(
-  map: MapDefinition,
+  state: WorldState,
+  unit: UnitState,
   current: GridPoint,
   offset: GridPoint,
   blockedTiles: ReadonlySet<string>,
 ): boolean {
   return (
-    isWalkable(map, { x: current.x + offset.x, y: current.y }, blockedTiles) &&
-    isWalkable(map, { x: current.x, y: current.y + offset.y }, blockedTiles)
+    isWalkable(state, unit, { x: current.x + offset.x, y: current.y }, blockedTiles) &&
+    isWalkable(state, unit, { x: current.x, y: current.y + offset.y }, blockedTiles)
   );
 }
 

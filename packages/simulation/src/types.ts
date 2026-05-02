@@ -8,6 +8,7 @@ import type {
   ScenarioObjectiveDefinition,
   UnitDefinitionId,
 } from "../../shared/src/index.js";
+import type { EnvironmentState } from "./environment.js";
 
 export type ResourceBank = ResourceAmountSet;
 
@@ -72,6 +73,7 @@ export interface ScenarioRuntimeState {
 export interface WorldState {
   tick: number;
   map: MapDefinition;
+  environment: EnvironmentState;
   scenario: ScenarioRuntimeState;
   players: Record<string, PlayerState>;
   units: Record<string, UnitState>;
