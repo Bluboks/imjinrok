@@ -1,0 +1,137 @@
+{
+  "source": "original/imjinrok2/char/barrackk.spr",
+  "layout": "spr",
+  "width": 128,
+  "height": 117,
+  "frameCount": 32,
+  "exportedFrames": [
+    {
+      "index": 0,
+      "fileName": "barrackk_0000.png"
+    },
+    {
+      "index": 1,
+      "fileName": "barrackk_0001.png"
+    },
+    {
+      "index": 2,
+      "fileName": "barrackk_0002.png"
+    },
+    {
+      "index": 3,
+      "fileName": "barrackk_0003.png"
+    },
+    {
+      "index": 4,
+      "fileName": "barrackk_0004.png"
+    },
+    {
+      "index": 5,
+      "fileName": "barrackk_0005.png"
+    },
+    {
+      "index": 6,
+      "fileName": "barrackk_0006.png"
+    },
+    {
+      "index": 7,
+      "fileName": "barrackk_0007.png"
+    },
+    {
+      "index": 8,
+      "fileName": "barrackk_0008.png"
+    },
+    {
+      "index": 9,
+      "fileName": "barrackk_0009.png"
+    },
+    {
+      "index": 10,
+      "fileName": "barrackk_0010.png"
+    },
+    {
+      "index": 11,
+      "fileName": "barrackk_0011.png"
+    },
+    {
+      "index": 12,
+      "fileName": "barrackk_0012.png"
+    },
+    {
+      "index": 13,
+      "fileName": "barrackk_0013.png"
+    },
+    {
+      "index": 14,
+      "fileName": "barrackk_0014.png"
+    },
+    {
+      "index": 15,
+      "fileName": "barrackk_0015.png"
+    },
+    {
+      "index": 16,
+      "fileName": "barrackk_0016.png"
+    },
+    {
+      "index": 17,
+      "fileName": "barrackk_0017.png"
+    },
+    {
+      "index": 18,
+      "fileName": "barrackk_0018.png"
+    },
+    {
+      "index": 19,
+      "fileName": "barrackk_0019.png"
+    },
+    {
+      "index": 20,
+      "fileName": "barrackk_0020.png"
+    },
+    {
+      "index": 21,
+      "fileName": "barrackk_0021.png"
+    },
+    {
+      "index": 22,
+      "fileName": "barrackk_0022.png"
+    },
+    {
+      "index": 23,
+      "fileName": "barrackk_0023.png"
+    },
+    {
+      "index": 24,
+      "fileName": "barrackk_0024.png"
+    },
+    {
+      "index": 25,
+      "fileName": "barrackk_0025.png"
+    },
+    {
+      "index": 26,
+      "fileName": "barrackk_0026.png"
+    },
+    {
+      "index": 27,
+      "fileName": "barrackk_0027.png"
+    },
+    {
+      "index": 28,
+      "fileName": "barrackk_0028.png"
+    },
+    {
+      "index": 29,
+      "fileName": "barrackk_0029.png"
+    },
+    {
+      "index": 30,
+      "fileName": "barrackk_0030.png"
+    },
+    {
+      "index": 31,
+      "fileName": "barrackk_0031.png"
+    }
+  ]
+}

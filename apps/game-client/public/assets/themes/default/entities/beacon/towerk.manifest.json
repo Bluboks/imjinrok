@@ -1,0 +1,105 @@
+{
+  "source": "original/imjinrok2/char/towerk.spr",
+  "layout": "spr",
+  "width": 80,
+  "height": 96,
+  "frameCount": 24,
+  "exportedFrames": [
+    {
+      "index": 0,
+      "fileName": "towerk_0000.png"
+    },
+    {
+      "index": 1,
+      "fileName": "towerk_0001.png"
+    },
+    {
+      "index": 2,
+      "fileName": "towerk_0002.png"
+    },
+    {
+      "index": 3,
+      "fileName": "towerk_0003.png"
+    },
+    {
+      "index": 4,
+      "fileName": "towerk_0004.png"
+    },
+    {
+      "index": 5,
+      "fileName": "towerk_0005.png"
+    },
+    {
+      "index": 6,
+      "fileName": "towerk_0006.png"
+    },
+    {
+      "index": 7,
+      "fileName": "towerk_0007.png"
+    },
+    {
+      "index": 8,
+      "fileName": "towerk_0008.png"
+    },
+    {
+      "index": 9,
+      "fileName": "towerk_0009.png"
+    },
+    {
+      "index": 10,
+      "fileName": "towerk_0010.png"
+    },
+    {
+      "index": 11,
+      "fileName": "towerk_0011.png"
+    },
+    {
+      "index": 12,
+      "fileName": "towerk_0012.png"
+    },
+    {
+      "index": 13,
+      "fileName": "towerk_0013.png"
+    },
+    {
+      "index": 14,
+      "fileName": "towerk_0014.png"
+    },
+    {
+      "index": 15,
+      "fileName": "towerk_0015.png"
+    },
+    {
+      "index": 16,
+      "fileName": "towerk_0016.png"
+    },
+    {
+      "index": 17,
+      "fileName": "towerk_0017.png"
+    },
+    {
+      "index": 18,
+      "fileName": "towerk_0018.png"
+    },
+    {
+      "index": 19,
+      "fileName": "towerk_0019.png"
+    },
+    {
+      "index": 20,
+      "fileName": "towerk_0020.png"
+    },
+    {
+      "index": 21,
+      "fileName": "towerk_0021.png"
+    },
+    {
+      "index": 22,
+      "fileName": "towerk_0022.png"
+    },
+    {
+      "index": 23,
+      "fileName": "towerk_0023.png"
+    }
+  ]
+}

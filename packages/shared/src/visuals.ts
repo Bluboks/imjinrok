@@ -73,6 +73,8 @@ export interface AnimationClip {
   frames: readonly FrameRef[];
   fps: number;
   loop?: boolean;
+  /** Draw this clip mirrored horizontally. Used by source sprites that only store five facings. */
+  mirrorX?: boolean;
 }
 
 export interface EntityVisualState {
@@ -80,9 +82,15 @@ export interface EntityVisualState {
   clips: Partial<Record<Facing | "default", AnimationClip>>;
 }
 
+export interface EntityVisualLayer {
+  id: string;
+  states: Record<string, EntityVisualState>;
+}
+
 export interface EntityVisual extends VisualBase {
   kind: "entity";
   states: Record<string, EntityVisualState>;
+  layers?: readonly EntityVisualLayer[];
   shadow?: FrameRef;
   teamColorMask?: FrameRef;
   portrait?: FrameRef;
