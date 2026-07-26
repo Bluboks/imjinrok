@@ -7,26 +7,28 @@
 
 과거 분석에는 서로 다른 엔티티 표현이 등장한다. 현재는 이를 하나의 구조체로 합치지 않는다.
 
-## K01 스캔 레코드 후보
+## K01 봉화대 scan의 런타임 엔티티 필드
 
 K01의 봉화대 검색과 영웅 생존 확인에서 사용되는 레코드 관점이다.
 
 | 오프셋 | 크기 | 현재 해석 | 근거 상태 |
 | ---: | ---: | --- | --- |
-| `+0x00` | byte | 유닛 타입 후보 | K0120 비교값 `0x34` |
-| `+0x01` | byte | 소유자 후보 | 현재 플레이어와 비교 |
-| `+0x55` | byte | 건설 진행도 후보 | 완성값 `0x64` 비교 |
+| `+0x37` | byte | 내부 엔티티 클래스 | K0120 비교값 `0x34` |
+| `+0x38` | signed byte | owner/relation index raw 입력 | signed current-player WORD와 비교 |
+| `+0x8c` | byte | 건설 진행 정수 백분율 | 완성값 `0x64` 비교 |
 
 관련 전역과 코드:
 
-- 레코드 스캔 시작 후보: `0x0063528f`
-- 최대 스캔 수: `0x4b0`
-- 현재 플레이어 후보: `0x00bccc44`
+- runtime entity base: `0x00635258`
+- 첫 class-field pointer: `0x0063528f` (`base + 0x37`)
+- stride / 최대 scan 수: `0x558` / `0x4b0`
+- signed current-player WORD: `0x00bccc44`
 - 클래스 76·78 alive lookup: `0x004885e0` → `0x00441db0`/`0x00441de0`
 
-K0120 scan 관점의 stride와 베이스 포인터 의미는 별도 분석이 필요하다. 반면 보호 영웅 alive
-검사는 아래 `0x558`-byte 런타임 entity record의 slot table, signed health `+0x3e`, full
-reference `+0x1b6/+0x1b8`을 사용함을 정적 확정했다.
+K0120 scan의 base·stride·세 필드와 `0x00441e40(index)` active gate는
+[K01 봉화대·K0120 trigger](../mechanics/k01-beacon-k0120-trigger.md) 범위에서 정적
+확정했다. 보호 영웅 alive 검사는 같은 `0x558`-byte runtime entity record의 slot table,
+signed health `+0x3e`, full reference `+0x1b6/+0x1b8`을 사용한다.
 
 ## 렌더링 엔티티 객체 후보
 
@@ -43,7 +45,7 @@ reference `+0x1b6/+0x1b8`을 사용함을 정적 확정했다.
 | `+0x20` | word | 그리기 Y 후보 | 의미 미확인 |
 | `+0x34` | word | 애니메이션 frame phase | 건설 상태 12 범위 `정적 확정` |
 | `+0x37` | byte | 내부 엔티티 클래스 | 클래스 switch·타입 정의 인덱스 범위 `정적 확정` |
-| `+0x38` | signed byte | health-application table raw index | subtype `0x0c` 적용 gate 소비는 `정적 확정`, 사람용 의미·범위 보장은 미확정 |
+| `+0x38` | signed byte | owner/relation index 및 health-application table 선택 raw index | K0120 owner 비교와 subtype `0x0c` 적용 gate 소비는 각각 `정적 확정`; 두 용도의 통합된 사람용 의미·범위 보장은 미확정 |
 | `+0x3c` | word | 최대 체력 | 클래스 49·52 체력 분기 범위 `정적 확정` |
 | `+0x3e` | signed word | 현재 체력 | 피해 clamp, 클래스 76·78 사망·참조 validity와 49·52 체력 분기 범위 `정적 확정` |
 | `+0x44`, `+0x50` | word | effect kind 9 defense base·modifier raw 입력 | WORD wrap·signed cap 범위 `정적 확정`, 사람용 명칭은 미확정 |
@@ -116,11 +118,13 @@ word와 렌더 전용 필드의 사람용 의미는 아직 raw 상태다. 전체
 
 ## 확인해야 할 사항
 
+다음은 위 K01 subsection에서 확정한 계약을 되돌리는 항목이 아니라, 모든 엔티티 종류와 표현에
+공통인 일반 구조체 계약으로 확장하기 전에 남은 사항이다.
+
 - 두 관점이 같은 객체의 서로 다른 하위 구조인지, 별도 테이블인지
-- 레코드 stride와 최대 개수
-- 타입·소유자 필드의 signedness
+- K01 scan 밖의 모든 엔티티 표현에 공통인 레코드 stride와 최대 개수
+- K01 `+0x38` 소비 범위 밖의 타입·소유자 필드에 공통인 signedness
 - `+0x07`의 단위와 생명력·활성 상태 관계
-- K01 스캔 레코드 `+0x55`와 렌더링 엔티티 객체 `+0x8c` 사이의 변환·소유 관계
 - 좌표 필드의 좌표계와 화면 변환
 - 클래스 2 상태 1 특수 분기의 미설정 base와 런타임 flags 변경 가능성
 - 타입 정의 표의 나머지 필드와 모든 클래스에서의 공통성

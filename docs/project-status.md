@@ -1,6 +1,6 @@
 # 프로젝트 상태
 
-기준일: 2026-07-26
+기준일: 2026-07-27
 
 ## 요약
 
@@ -28,7 +28,11 @@ incoming cadence 0/1의 timeline을 확정했으며, 확인한 사망·해제 �
 대상 참조 direct eager clear가 없다. runtime flag writer의 K01 도달 가능성과 alias write는
 범위 밖이다. accepted original entity-update 단위를 프로젝트
 24 Hz·identity 모델로 옮기는 exact mapping이 없어 현재 시뮬레이션의 제거 시점은 아직 원본
-기반이 아니다.
+기반이 아니다. K01 봉화대 경로는 raw-relation blocker와 flag가 모두 0일 때의 1,200-slot
+완성 record scan, flag 선행 write, K0120 busy·loader `0/1` 무검사·void start, 같은 scan 복수 match,
+signed-WORD native 증원과 raw post-effect, exact post-state 반환 gate까지 정적 복원·재현했다.
+다만 원본 class 12·13·14·82와 현재 scenario identity가 정확히 일치하지 않아 runtime에는
+연결하지 않았다.
 
 ## 단기 목표
 
@@ -50,7 +54,7 @@ K02는 이 단기 MVP의 완료 조건이 아니다. 기존 K02 프로토타입�
 | 원본 PE·주소 변환 | 고정 Ghidra 파이프라인 존재 | 일반 참조·점프 테이블 포함 | 2회 생성 해시 일치 | 정적 분석 1단계 완료 |
 | 스크립트·맵·SPR·YAV 파서 | 도구 존재 | 원본 파일 기반 | 파서별 편차 있음 | 재감사 후 유지 |
 | 엔티티 정체·자원 | 고유 연결 표시 이름 반영, 봉화대·K01 영웅 자원 수정 | 클래스 1~95 명칭·슬롯·기본 프레임·flags·경로 전수 확정 | 연속성·대표 타입·공유 경로·입력 해시 테스트 | 타입 정체 정적 확정, 행동·수치 의미는 별도 |
-| K01 캠페인 | 처음부터 결과까지 프로토타입 존재 | 브리핑 일부 확정, 봉화대·승패 부분 분석 | 구현 테스트와 일부 정적 벡터 | 단기 팬 리마스터 MVP, 아직 미완료 |
+| K01 캠페인 | 처음부터 결과까지 프로토타입 존재 | 브리핑 일부와 봉화대→K0120 trigger 확정, 승패 결과는 추정 | 봉화대 blocker·scan·script·native effect·return 재현 | 단기 팬 리마스터 MVP, identity mapping·승리 timer/result 미완료 |
 | K02 캠페인 | 프로토타입 존재 | 제한적 | 원본 재현 없음 | K01 이후로 연기 |
 | 전투 | 프로토타입, 유성룡 좌표 accepted subset `0..32767` 독립 계산 부분 이식 | K01 영웅 phase·피해·대상·사거리·투사체와 signed-health 사망·slot/reference 수명주기 확정 | 대상·투사체·scheduler 및 사망 phase·delay·stale reference 경계 재현 | 독립 단위 부분 이식; identity/좌표/24 Hz exact mapping과 opt-in 사망 정책 대기 |
 | 이동·경로 탐색 | 구현 존재 | 후보 함수 존재 | 원본 재현 없음 | 미검증 |
@@ -87,8 +91,8 @@ K02는 이 단기 MVP의 완료 조건이 아니다. 기존 K02 프로토타입�
 
 ## 현재 최우선 작업
 
-1. K01 봉화대 완성→K0120 일회성 실행 조건과 상태 전이를 정적으로 복원
-2. K01 증원·영웅 보호·승패 경로를 합성 입력으로 재현
+1. K01 승리 timer/result와 영웅 보호 결과 경로를 독립 정적 분석·합성 입력으로 재현
+2. K01 봉화대 native 증원 class를 프로젝트 identity·map 좌표에 exact mapping
 3. 원본 entity-update 단위와 24 Hz·identity의 exact opt-in integration policy를 별도 설계
 4. K01 HUD, 선택 패널, 목표·진행 표시와 미션 대화 전체 레이아웃을 정적으로 복원
 5. K01에 등장하는 나머지 건물·유닛의 정체·상태·방향 매핑을 독립 복원

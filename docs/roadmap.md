@@ -34,7 +34,10 @@ VM에서 원본 게임을 플레이하며 화면 변화를 따라가는 방식�
   `0..32767` 비행·도착 충돌·effect kind `9` WORD 피해·raw 적용 gate·실패 경로까지 재현했다.
   원본 caller 전체 signed-WORD 좌표 범위와 원본 좌표·틱의 프로젝트 변환은 다음 전투 통합
   경계에 남아 있다.
-- 3단계: 시작 전. 자동 함수 경계와 후보 주소가 있으며 메커니즘 역할은 아직 `추정`이다.
+- 3단계: 진행 중. K01 raw-relation blocker→1,200-slot 완성 봉화대 scan→flag·K0120
+  busy·loader `0/1` 무검사·void start→native 증원·raw post-effect→조건부 post-state 반환
+  범위를 정적 확정·재현했다.
+  flag reset, 원본 class/identity의 프로젝트 mapping과 승리 timer/result는 남아 있다.
 - 4단계: 부분 진행. K01 영웅의 대상 검색·사거리, 공격 phase·피해·투사체와 signed-health
   사망·slot/reference 정리는 정적 확정·재현했다. 원본 identity·좌표·accepted update 단위의
   프로젝트 변환과 실제 opt-in 연결은 미확정이다.
@@ -126,6 +129,20 @@ VM에서 원본 게임을 플레이하며 화면 변화를 따라가는 방식�
 - 원샷 플래그와 후속 효과
 - 보호 영웅 생존 조건
 - 승리·패배 타이머와 결과 전환
+
+현재 완료한 하위 단위:
+
+- 봉화대 trigger의 blocker·flag scan gate, active/owner/class/progress match
+- match 선행 flag write, script busy와 무검사 loader `0/1`·void start
+- 같은 scan 복수 match의 native block 반복
+- signed-WORD descriptor 증원, selector 5 raw byte-grid와 두 raw global write
+- flag exact 1과 script context `+8 == 0`의 caller 전달 return 1
+
+아직 포함하지 않은 하위 단위:
+
+- flag reset lifecycle
+- 원본 class 12·13·14·82와 프로젝트 identity/map의 exact mapping
+- 승리 timer/result와 영웅 손실 결과 해석
 
 통과 조건:
 

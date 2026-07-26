@@ -73,12 +73,16 @@
 | `0x00441de0` | `FUN_00441de0`, `0x00441de0-0x00441e36` | 8 / 30 | slot·signed health·full DWORD reference alive 검사 | K01 클래스 76·78 health-zero 즉시 실패 정적 확정 |
 | `0x00441e40` | `FUN_00441e40`, `0x00441e40-0x00441e7a` | 5 / 19 | slot·signed health·raw `+0x1f0` active 검사 | health-zero와 slot-release 실패 순서 정적 확정 |
 | `0x00441e80` | `FUN_00441e80`, `0x00441e80-0x00441ee4` | 10 / 36 | 위 active 조건 + full DWORD reference 검사 | generation mismatch 실패 정적 확정 |
+| `0x00442ca0` | `FUN_00442ca0`, `0x00442ca0-0x00442d95` | 25 / 82 | selector별 raw byte-grid 변경 | K01 selector 5 table·경계·두 grid write 정적 확정; 사람용 의미 미확정 |
 | `0x004517a0` | `FUN_004517a0`, `0x004517a0-0x00451905` | 10 / 104 | 스프라이트 프레임 blit | 호출 규약과 좌표계 |
 | `0x0045bd00` | `FUN_0045bd00`, `0x0045bd00-0x0045bef8` | 1 / 103 | stride `0x14c` 타입 정의 레코드 writer | slot·base frame·이름 필드 정적 확정 |
 | `0x0045bf50` | `FUN_0045bf50`, `0x0045bf50-0x0045efb9` | 1 / 5,100 | 전체 엔티티 타입 정의 초기화 | class 1~95 슬롯·기본 프레임·flags·이름 포인터 정적 확정 |
 | `0x0045f9c0` | `FUN_0045f9c0`, `0x0045f9c0-0x004607ac` | 209 / 801 | main Windows message loop와 state switch | message drain, millisecond sample, scheduler 두 callsite 정적 확정 |
-| `0x00482180` | `FUN_00482180`, `0x00482180-0x004822f4` | 16 / 114 | 스크립트 적재 또는 큐 등록 | 인수, 반환값과 오류 경로 |
-| `0x00482340` | `FUN_00482340`, `0x00482340-0x0048238c` | 4 / 22 | 스크립트 시작 또는 commit | 엔진 상태 변화 |
+| `0x00461570` | `FUN_00461570`, `0x00461570-0x00461590` | 1 / 6 | raw enable·좌표 DWORD writer | K01 call의 `0x00843674/78/7c = 1/55/53` 정적 확정; consumer 의미 미확정 |
+| `0x004648d0` | `FUN_004648d0`, `0x004648d0-0x004648d9` | 1 / 3 | stack BYTE→`ECX+2` writer | K01 call의 `BYTE 0x00abfff2=1` 정적 확정; consumer 의미 미확정 |
+| `0x00482180` | `FUN_00482180`, `0x00482180-0x004822f4` | 16 / 114 | `0/1` 반환 script loader 계약 정적 확정 | 반환값의 내부 의미·오류 원인은 미확정 |
+| `0x00482340` | `FUN_00482340`, `0x00482340-0x0048238c` | 4 / 22 | void script start 계약 정적 확정 | 내부 상태 변화는 미확정 |
+| `0x00482390` | `FUN_00482390`, `0x00482390-0x00482393` | 1 / 2 | script context `+8` raw accessor | K01 flag exact 1 뒤 zero early-return gate 정적 확정 |
 | `0x004823a0` | `FUN_004823a0`, `0x004823a0-0x004823a3` | 1 / 2 | 스크립트 엔진 busy 확인 | 반환값을 읽는 모든 호출자 |
 | `0x004824c0` | `FUN_004824c0`, `0x004824c0-0x0048258b` | 16 / 62 | 스크립트 큐 소비와 레코드 전달 | `SPEECH` 경로는 정적 확정 |
 | `0x00482590` | `FUN_00482590`, `0x00482590-0x0048285c` | 169 명령어 | 11개 스크립트 명령 lookup | 명령 번호와 디스패처 분기 연결 |
@@ -87,8 +91,10 @@
 | `0x00483a60` | `FUN_00483a60`, `0x00483a60-0x00483a9c` | 7 / 25 | inactive slot 1..1199 signed reuse-age 선택 | active table 0 후보와 WORD 증가 경계 정적 확정 |
 | `0x00483aa0` | `FUN_00483aa0`, `0x00483aa0-0x00483c2e` | 12 / 95 | active-list swap-last 제거와 active/reuse WORD clear | dispatcher가 0을 반환한 class 76·78 state-7 경로의 release 순서 정적 확정 |
 | `0x00483c50` | `FUN_00483c50`, `0x00483c50-0x00483c9f` | 1 / 26 | generation WORD 증가와 entity create wrapper | 16-bit wrap·initializer 전달 정적 확정 |
+| `0x00487fa0` | `FUN_00487fa0`, `0x00487fa0-0x0048800f` | 7 / 37 | active list의 `+0x74` mask와 raw relation-table 차이 blocker | K01 scan 전 first-difference return 정적 확정; 관계의 사람용 의미 미확정 |
+| `0x00488420` | `FUN_00488420`, `0x00488420-0x004884b5` | 11 / 59 | signed-WORD descriptor entity creator | class-zero 종료, slot-zero failure, 좌표 skip와 prior creation 유지 정적 확정 |
 | `0x004885e0` | `FUN_004885e0`, `0x004885e0-0x0048866f` | 7 / 53 | owner/class 목록의 positive-record full reference 선택 | K01 76·78 alive-check 연결 정적 확정 |
-| `0x0048a731` | `FUN_0048a5c0`, `0x0048a5c0-0x0048a878` | 32 / 181 | K01 K0120 조건 검사 지점 | 선행 guard와 전체 분기 |
+| `0x0048a731` | `FUN_0048a5c0`, `0x0048a5c0-0x0048a878` | 32 / 181 | K01 raw-relation/flag gate→봉화대 scan→K0120/native effect→post-state 반환 | 같은 scan 복수 match·loader 0/1 무검사·void start·ignored descriptor-helper failure 포함 범위 정적 확정 |
 | `0x0048a812` | `FUN_0048a5c0`, `0x0048a5c0-0x0048a878` | 32 / 181 | K01 보호 영웅 클래스 76·78 alive 검사 지점 | health 0 즉시 false 연결 정적 확정; 후속 결과 상태 전체는 별도 |
 | `0x0048d6f0` | `FUN_0048d6f0`, `0x0048d6f0-0x0048d73a` | 7 / 31 | 공통 미션 결과 타이머 판정 | 모든 반환 경로와 시간 단위 |
 | `0x0048dde0` | `FUN_0048ddb0`, `0x0048ddb0-0x0048deca` | 36 / 105 | 미션 결과 소비·전환 | 호출 주기와 후속 함수 |

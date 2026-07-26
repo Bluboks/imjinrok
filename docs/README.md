@@ -39,6 +39,7 @@
 - [K01 투사체 풀 갱신 cadence](reverse-engineering/mechanics/k01-projectile-pool-cadence.md)
 - [K01 권율·유성룡 대상 선택과 사거리](reverse-engineering/mechanics/k01-hero-targeting-range.md)
 - [K01 권율·유성룡 사망·슬롯·대상 참조 수명주기](reverse-engineering/mechanics/k01-hero-death-lifecycle.md)
+- [K01 봉화대 완성·K0120 native trigger](reverse-engineering/mechanics/k01-beacon-k0120-trigger.md)
 - [조선 본영 건설·체력 프레임 파일럿](reverse-engineering/mechanics/building-state-pilot.md)
 - [조선 봉화대 건설·체력 프레임 파일럿](reverse-engineering/mechanics/beacon-state-pilot.md)
 - [엔티티 자료구조](reverse-engineering/data-structures/entity-record.md)

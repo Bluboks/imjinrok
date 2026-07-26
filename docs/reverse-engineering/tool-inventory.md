@@ -1,6 +1,6 @@
 # 분석 도구 인벤토리
 
-기준일: 2026-07-26
+기준일: 2026-07-27
 
 이 문서는 `tools/imjinrok/`의 도구를 현재 정적 분석 계획에 맞게 분류한다. 분류는 도구의 존재나
 테스트 통과 여부가 아니라, 원본 동작의 근거로 사용할 수 있는 범위를 뜻한다.
@@ -34,6 +34,7 @@
 | `extract-k01-projectile-pool-cadence.mjs`, `k01-projectile-pool-cadence.test.mjs` | 유지 | main message loop→scheduler→투사체 풀의 유일 call chain, scheduler의 13개 resolved direct call raw 조건·pre-clock/post-pool 순서, selector·feedback·DWORD millisecond gate와 거부 경로 재현; callee 의미·fixed FPS·24 Hz exact mapping은 확정하지 않음 |
 | `extract-k01-hero-targeting-range.mjs`, `k01-hero-targeting-range.test.mjs` | 유지 | K01 두 영웅의 full DWORD 대상 writer, low-WORD 검사, raw relation 필터, Y-major 자동 scan, WORD/DWORD wrap 사거리와 취소·이동·재검사 전이 추출·재현; 프로젝트 참조·좌표·footprint mapping은 미확정 |
 | `extract-k01-hero-death-lifecycle.mjs`, `k01-hero-death-lifecycle.test.mjs` | 유지 | K01 두 영웅의 signed-health 행동 6 진입, incoming cadence/runtime flags별 phase·행동 7/`0x16`·조건부 release, health→slot→generation 무효화와 확인한 경로의 direct eager-clear 부재를 정적 추출·재현; runtime flag 도달·alias write·24 Hz mapping은 미확정 |
+| `extract-k01-beacon-k0120-trigger.mjs`, `k01-beacon-k0120-trigger.test.mjs` | 유지 | K01 raw-relation blocker, 1,200-slot 봉화대 세 active gate·match, flag·script busy·loader 0/1·void start, 같은 scan 반복, signed-WORD 증원 descriptor, selector 5 raw grid, 조건부 post-state 반환을 정적 추출·재현; 승리 결과와 runtime mapping은 포함하지 않음 |
 | `extract-building-state-pilot.mjs`, `building-state-pilot.test.mjs` | 유지 | 조선 본영·클래스 49·슬롯 141의 건설 진행도와 정상·반파 본체 프레임 정적 파일럿 |
 | `extract-entity-type-catalog.mjs`, `entity-type-catalog.test.mjs` | 유지 | 클래스 1~95의 원본 이름·슬롯·기본 프레임·flags·SPR 경로 전수 추출과 결정론 검증 |
 | `extract-beacon-state-pilot.mjs`, `beacon-state-pilot.test.mjs` | 유지 | 조선 봉화대·클래스 52·`firehousek.spr` 정체와 건설·정상·반파 본체 프레임 정적 파일럿 |
