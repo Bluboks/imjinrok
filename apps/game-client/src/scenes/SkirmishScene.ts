@@ -37,6 +37,7 @@ import {
   type FrameRef,
   type GridPoint,
   type MapDefinition,
+  type OriginalSpeechSlot,
   type ResourceAmountSet,
   type ResourceDefinition,
   type ResourceNode,
@@ -81,6 +82,14 @@ import {
   normalizeMissionPortraitId,
   type MissionPortraitImageDefinition,
 } from "../missionPortraits";
+import {
+  getOriginalSpeechSlot,
+  resolveOriginalSpeechLayout,
+} from "../originalSpeechLayout";
+import {
+  isBelowOriginalBuildingDamageThreshold,
+  selectConstructionFrameIndex,
+} from "../originalBuildingVisualState";
 import {
   ACTION_TRIGGERED_EVENT,
   BATTLEFIELD_SUMMARY_ACTION_EVENT,
@@ -453,9 +462,8 @@ interface ActiveMissionDialogue {
 }
 
 interface MissionDialogueParticipant {
-  speaker: string;
   portraitId: string;
-  side?: "left" | "right";
+  speechSlot: OriginalSpeechSlot;
 }
 
 interface PendingBuildPlacement {
@@ -1869,192 +1877,52 @@ export class SkirmishScene extends Phaser.Scene {
 
     const width = this.scale.width;
     const height = this.scale.height;
-    const panelWidth = Math.min(Math.max(300, width - 48), Phaser.Math.Clamp(width * 0.72, 520, 820));
-    const panelHeight = Math.min(Math.max(360, height - 48), Phaser.Math.Clamp(height * 0.72, 420, 560));
-    const panelX = (width - panelWidth) / 2;
-    const panelY = Math.max(24, (height - panelHeight) / 2);
-    const compact = panelWidth < 560 || panelHeight < 440;
-    const objectiveY = panelY + panelHeight - 122;
-    const lineIndex = Phaser.Math.Clamp(this.missionBriefingLineIndex, 0, Math.max(0, briefing.lines.length - 1));
+    const lineIndex = Phaser.Math.Clamp(
+      this.missionBriefingLineIndex,
+      0,
+      Math.max(0, briefing.lines.length - 1),
+    );
+
     if (this.missionBriefingLineRevealAt === null && this.missionBriefingNextLineAt === null) {
       this.scheduleMissionBriefingLine(briefing, lineIndex, this.time.now);
     }
-    const lineRevealPending = this.missionBriefingLineRevealAt !== null && this.time.now < this.missionBriefingLineRevealAt;
-    const activeLine = lineRevealPending ? undefined : briefing.lines[lineIndex];
-    const lineCounter = briefing.lines.length > 0 ? `${lineIndex + 1}/${briefing.lines.length}` : briefing.sourceScript;
-    const briefingLineSide = activeLine?.side ?? "left";
-    const centerPortrait = !compact && briefingLineSide === "center";
-    const portraitBoxWidth = compact || !activeLine ? 0 : 148;
-    const portraitBoxX = centerPortrait
-      ? panelX + (panelWidth - portraitBoxWidth) / 2
-      : briefingLineSide === "right"
-        ? panelX + panelWidth - 24 - portraitBoxWidth
-        : panelX + 24;
-    const portraitBoxY = centerPortrait ? panelY + 98 : panelY + 74;
-    const portraitBoxHeight = centerPortrait ? 88 : Math.max(210, panelHeight - 188);
-    const contentX = compact || centerPortrait
-      ? panelX + 24
-      : briefingLineSide === "right"
-        ? panelX + 24
-        : portraitBoxX + portraitBoxWidth + 30;
-    const contentRight = compact || centerPortrait
-      ? panelX + panelWidth - 24
-      : briefingLineSide === "right"
-        ? portraitBoxX - 30
-        : panelX + panelWidth - 24;
-    const contentWidth = Math.max(180, contentRight - contentX);
-    const contentPanelY = centerPortrait ? portraitBoxY + portraitBoxHeight + 12 : panelY + 74;
-    const contentPanelHeight = centerPortrait
-      ? Math.max(72, objectiveY - contentPanelY - 14)
-      : Math.max(168, panelHeight - 198);
-    const speakerY = centerPortrait ? contentPanelY + 12 : panelY + 104;
-    const bodyTextY = centerPortrait ? contentPanelY + 42 : panelY + 158;
-    const textStyle: Phaser.Types.GameObjects.Text.TextStyle = {
-      fontFamily: "Noto Sans KR, Malgun Gothic, Apple SD Gothic Neo, Trebuchet MS, sans-serif",
-      color: "#d8e4d7",
-      fontSize: "13px",
-      lineSpacing: 4,
-      wordWrap: { width: contentWidth },
-    };
 
+    const lineRevealPending =
+      this.missionBriefingLineRevealAt !== null &&
+      this.time.now < this.missionBriefingLineRevealAt;
+    const activeLine = lineRevealPending ? undefined : briefing.lines[lineIndex];
     const container = this.addScreenOverlayContainer(SCREEN_OVERLAY_DEPTH + 24);
     const hasBackdrop = this.addMissionBriefingBackdrop(container, width, height);
     const graphics = this.add.graphics();
 
     graphics
-      .fillStyle(0x020708, hasBackdrop ? 0.58 : 1)
-      .fillRect(0, 0, width, height)
-      .fillStyle(0x23180f, 0.94)
-      .fillRect(panelX, panelY, panelWidth, panelHeight)
-      .lineStyle(2, 0xd0b46a, 0.86)
-      .strokeRect(panelX, panelY, panelWidth, panelHeight)
-      .lineStyle(1, 0x8fb4a2, 0.56)
-      .strokeRect(panelX + 6, panelY + 6, panelWidth - 12, panelHeight - 12)
-      .fillStyle(0x0d1515, 0.52)
-      .fillRect(contentX - 12, contentPanelY, contentWidth + 24, contentPanelHeight)
-      .lineStyle(1, 0xd0b46a, 0.48)
-      .strokeRect(contentX - 12, contentPanelY, contentWidth + 24, contentPanelHeight);
-
-    if (!compact && activeLine) {
-      graphics
-        .fillStyle(0x120d09, 0.72)
-        .fillRect(portraitBoxX, portraitBoxY, portraitBoxWidth, portraitBoxHeight)
-        .lineStyle(1, 0x8fb4a2, 0.56)
-        .strokeRect(portraitBoxX, portraitBoxY, portraitBoxWidth, portraitBoxHeight);
-    }
-
+      .fillStyle(0x000000, hasBackdrop ? 0.34 : 1)
+      .fillRect(0, 0, width, height);
     container.add(graphics);
-    container.add(
-      this.add.text(contentX, panelY + 28, briefing.title, {
-        ...textStyle,
-        fontSize: "24px",
-        color: "#f1dfaa",
-      }),
-    );
-    container.add(
-      this.add.text(panelX + panelWidth - 28, panelY + 34, lineCounter, {
-        ...textStyle,
-        fontSize: "12px",
-        color: "#8fb4a2",
-      }).setOrigin(1, 0),
-    );
-    const briefingHeaderLine = [briefing.location, briefing.battleType].filter(Boolean).join(" · ") || briefing.sourceScript;
-    const briefingCastLine = briefing.cast?.length ? `등장인물: ${briefing.cast.join(", ")}` : "";
-
-    container.add(
-      this.add.text(contentX, panelY + 58, briefingHeaderLine, {
-        ...textStyle,
-        fontSize: "12px",
-        color: "#8fb4a2",
-      }),
-    );
-    if (briefingCastLine) {
-      container.add(
-        this.add.text(contentX, panelY + 78, briefingCastLine, {
-          ...textStyle,
-          fontSize: "11px",
-          color: "#7fa0a5",
-          wordWrap: { width: contentWidth },
-        }),
-      );
-    }
 
     if (activeLine) {
-      const speakerColor = activeLine.portraitId.startsWith("J") ? "#ffb294" : "#d0b46a";
-
-      if (!compact) {
-        const portraitCenterX = portraitBoxX + portraitBoxWidth / 2;
-        const portraitImageSize = centerPortrait
-          ? Math.min(56, portraitBoxWidth - 44)
-          : Math.min(112, portraitBoxWidth - 36);
-        const portraitCenterY = centerPortrait
-          ? portraitBoxY + 12 + portraitImageSize / 2
-          : panelY + 138;
-        const portraitNameY = centerPortrait ? portraitBoxY + 62 : panelY + 206;
-
-        if (!this.addMissionPortraitArtwork(container, activeLine.portraitId, portraitCenterX, portraitCenterY, portraitImageSize, 0.98)) {
-          container.add(
-            this.add.text(portraitCenterX, portraitCenterY - portraitImageSize / 2 + 4, activeLine.portraitId, {
-              ...textStyle,
-              fontFamily: "Georgia, Times New Roman, serif",
-              fontSize: "34px",
-              color: speakerColor,
-              align: "center",
-            }).setOrigin(0.5, 0),
-          );
-        }
-        container.add(
-          this.add.text(portraitCenterX, portraitNameY, activeLine.speaker, {
-            ...textStyle,
-            fontSize: "15px",
-            color: "#f1dfaa",
-            align: "center",
-          }).setOrigin(0.5, 0),
-        );
-      }
-      container.add(
-        this.add.text(contentX, speakerY, activeLine.speaker, {
-          ...textStyle,
-          fontSize: "16px",
-          color: speakerColor,
-        }),
-      );
-      container.add(
-        this.add.text(contentX, bodyTextY, activeLine.text, {
-          ...textStyle,
-          color: "#cfe0d4",
-          fontSize: activeLine.text.length > 120 ? "15px" : "16px",
-          lineSpacing: 8,
-          wordWrap: { width: contentWidth },
-        }),
-      );
-    } else {
-      container.add(
-        this.add.text(contentX, panelY + 118, briefing.objective, {
-          ...textStyle,
-          color: "#cfe0d4",
-        }),
+      this.addOriginalSpeechPresentation(
+        container,
+        briefing.lines,
+        activeLine,
+        lineIndex,
+        width,
+        height,
       );
     }
 
-    graphics
-      .fillStyle(0x120d09, 0.86)
-      .fillRect(contentX - 12, objectiveY, contentWidth + 24, 58)
-      .lineStyle(1, 0xd0b46a, 0.44)
-      .strokeRect(contentX - 12, objectiveY, contentWidth + 24, 58);
     container.add(
-      this.add.text(contentX, objectiveY + 12, briefing.objective, {
-        ...textStyle,
-        color: "#f1dfaa",
-        fontSize: "14px",
-        wordWrap: { width: contentWidth },
-      }),
+      this.add
+        .zone(0, 0, width, height)
+        .setOrigin(0, 0)
+        .setInteractive({ useHandCursor: true })
+        .on("pointerup", () => this.advanceMissionBriefingLine(this.time.now)),
     );
 
-    const buttonY = panelY + panelHeight - 48;
-    const buttonWidth = 112;
-    const buttonGap = 18;
-    const startX = panelX + panelWidth - 24 - buttonWidth;
+    const buttonWidth = 104;
+    const buttonGap = 12;
+    const buttonY = Math.max(8, height - 40);
+    const startX = width - 12 - buttonWidth;
     const replayX = startX - buttonGap - buttonWidth;
 
     this.addMissionBriefingButton(container, graphics, replayX, buttonY, buttonWidth, "다시보기", () => {
@@ -2067,15 +1935,10 @@ export class SkirmishScene extends Phaser.Scene {
       this.hideMissionBriefingOverlay();
     });
 
-    const hitZone = this.add
-      .zone(contentX - 12, contentPanelY, contentWidth + 24, contentPanelHeight)
-      .setOrigin(0, 0)
-      .setInteractive({ useHandCursor: true })
-      .on("pointerup", () => this.advanceMissionBriefingLine(this.time.now));
-
-    container.add(hitZone);
     this.missionBriefingContainer = container;
-    this.missionBriefingHideAt = briefing.noEnd ? Number.POSITIVE_INFINITY : this.time.now + MISSION_BRIEFING_DURATION_MS;
+    this.missionBriefingHideAt = briefing.noEnd
+      ? Number.POSITIVE_INFINITY
+      : this.time.now + MISSION_BRIEFING_DURATION_MS;
     this.playMissionBriefingMusic();
     if (activeLine) {
       this.playMissionLineVoice(activeLine);
@@ -2104,7 +1967,7 @@ export class SkirmishScene extends Phaser.Scene {
       return false;
     }
     const frame = this.textures.exists(activeFrame.key) ? activeFrame : fallbackFrame;
-    const scale = Math.max(
+    const scale = Math.min(
       width / MISSION_BRIEFING_BACKDROP_SOURCE_WIDTH,
       height / MISSION_BRIEFING_BACKDROP_SOURCE_HEIGHT,
     );
@@ -2612,98 +2475,31 @@ export class SkirmishScene extends Phaser.Scene {
     this.hideMissionDialogueOverlay();
 
     const width = this.scale.width;
-    const compact = width < 700;
-    const availableWidth = Math.max(300, width - 24);
-    const panelWidth = Math.min(availableWidth, Phaser.Math.Clamp(width * 0.72, compact ? 320 : 560, 920));
-    const panelHeight = compact ? 118 : 128;
-    const panelX = (width - panelWidth) / 2;
-    const panelY = Math.max(52, this.getHudTop() - panelHeight - 16);
-    const participants = this.getMissionDialogueParticipants(dialogue);
-    const activeParticipantIndex = this.getMissionDialogueParticipantIndex(line, participants);
-    const hasSidePortraits = !compact && participants.length > 1;
-    const portraitWidth = compact ? 54 : 92;
-    const portraitHeight = compact ? 70 : 92;
-    const portraitY = panelY + Math.max(14, (panelHeight - portraitHeight) / 2);
-    const leftPortraitX = panelX + 18;
-    const rightPortraitX = panelX + panelWidth - portraitWidth - 18;
-    const textX = hasSidePortraits ? leftPortraitX + portraitWidth + 24 : leftPortraitX + portraitWidth + 18;
-    const textRight = hasSidePortraits ? rightPortraitX - 24 : panelX + panelWidth - 20;
-    const textWidth = Math.max(160, textRight - textX);
-    const activeAccentX = hasSidePortraits && activeParticipantIndex === 1 ? panelX + panelWidth - 4 : panelX;
+    const height = this.scale.height;
     const container = this.addScreenOverlayContainer(SCREEN_OVERLAY_DEPTH + 18);
-    const graphics = this.add.graphics();
 
-    graphics
-      .fillStyle(0x020708, 0.46)
-      .fillRect(panelX - 5, panelY - 5, panelWidth + 10, panelHeight + 10)
-      .fillStyle(0x071112, 0.95)
-      .fillRoundedRect(panelX, panelY, panelWidth, panelHeight, 8)
-      .lineStyle(1, 0xd0b46a, 0.86)
-      .strokeRoundedRect(panelX, panelY, panelWidth, panelHeight, 8)
-      .fillStyle(0x0b1515, 0.76)
-      .fillRoundedRect(textX - 12, panelY + 14, textWidth + 24, panelHeight - 28, 6)
-      .lineStyle(1, 0x315158, 0.72)
-      .strokeRoundedRect(textX - 12, panelY + 14, textWidth + 24, panelHeight - 28, 6)
-      .fillStyle(0xd0b46a, 0.88)
-      .fillRect(activeAccentX, panelY, 4, panelHeight);
-
-    for (let index = 0; index < dialogue.lines.length; index += 1) {
-      const dotX = panelX + panelWidth - 24 - (dialogue.lines.length - 1 - index) * 13;
-      graphics
-        .fillStyle(index === lineIndex ? 0xd0b46a : 0x315158, index === lineIndex ? 0.96 : 0.72)
-        .fillRoundedRect(dotX, panelY + panelHeight - 19, 8, 3, 1);
-    }
-
-    container.add(graphics);
-
-    const leftParticipant = participants[0] ?? { speaker: line.speaker, portraitId: line.portraitId };
-    this.addMissionDialoguePortrait(
+    this.addOriginalSpeechPresentation(
       container,
-      graphics,
-      leftParticipant,
-      activeParticipantIndex !== 1,
-      leftPortraitX,
-      portraitY,
-      portraitWidth,
-      portraitHeight,
+      dialogue.lines,
+      line,
+      lineIndex,
+      width,
+      height,
     );
-
-    if (hasSidePortraits) {
-      const rightParticipant = participants[1];
-
-      if (rightParticipant) {
-        this.addMissionDialoguePortrait(
-          container,
-          graphics,
-          rightParticipant,
-          activeParticipantIndex === 1,
-          rightPortraitX,
-          portraitY,
-          portraitWidth,
-          portraitHeight,
-        );
-      }
-    }
-
-    container.add(
-      this.add.text(textX, panelY + 18, line.speaker, {
-        fontFamily: "Noto Sans KR, Malgun Gothic, Apple SD Gothic Neo, Trebuchet MS, sans-serif",
-        fontSize: "15px",
-        color: this.getMissionDialogueSpeakerColor(line.portraitId),
-      }),
+    const activeLayout = resolveOriginalSpeechLayout(
+      width,
+      height,
+      getOriginalSpeechSlot(line),
     );
-    container.add(
-      this.add.text(textX, panelY + 46, line.text, {
-        fontFamily: "Noto Sans KR, Malgun Gothic, Apple SD Gothic Neo, Trebuchet MS, sans-serif",
-        fontSize: line.text.length > 110 ? "14px" : "15px",
-        color: "#d8e4d7",
-        lineSpacing: 5,
-        wordWrap: { width: textWidth },
-      }),
-    );
+    const advanceZoneHeight = 120 * activeLayout.scale;
     container.add(
       this.add
-        .zone(panelX, panelY, panelWidth, panelHeight)
+        .zone(
+          activeLayout.text.x,
+          activeLayout.text.centerY - advanceZoneHeight / 2,
+          activeLayout.text.maxWidth,
+          advanceZoneHeight,
+        )
         .setOrigin(0, 0)
         .setInteractive({ useHandCursor: true })
         .on("pointerup", () => this.advanceMissionDialogueLine()),
@@ -2722,70 +2518,81 @@ export class SkirmishScene extends Phaser.Scene {
     this.refreshScreenOverlayCameraOrder();
   }
 
-  private addMissionDialoguePortrait(
+  private addOriginalSpeechPresentation(
     container: Phaser.GameObjects.Container,
-    graphics: Phaser.GameObjects.Graphics,
-    participant: MissionDialogueParticipant,
-    active: boolean,
-    x: number,
-    y: number,
-    width: number,
-    height: number,
+    lines: readonly ScenarioBriefingLineDefinition[],
+    activeLine: ScenarioBriefingLineDefinition,
+    lineIndex: number,
+    viewportWidth: number,
+    viewportHeight: number,
   ): void {
-    const speakerColor = this.getMissionDialogueSpeakerColor(participant.portraitId);
-    const alpha = active ? 0.98 : 0.58;
+    const activeSlot = getOriginalSpeechSlot(activeLine);
+    const participants = this.getOriginalSpeechParticipants(lines, lineIndex);
 
-    graphics
-      .fillStyle(0x120d09, active ? 0.96 : 0.72)
-      .fillRoundedRect(x, y, width, height, 6)
-      .lineStyle(active ? 2 : 1, active ? 0xd0b46a : 0x315158, active ? 0.94 : 0.62)
-      .strokeRoundedRect(x, y, width, height, 6);
-
-    const portraitImageSize = Math.max(34, Math.min(width - 12, height - 38));
-    const portraitCenterX = x + width / 2;
-    const portraitCenterY = y + 6 + portraitImageSize / 2;
-
-    if (!this.addMissionPortraitArtwork(container, participant.portraitId, portraitCenterX, portraitCenterY, portraitImageSize, alpha)) {
-      container.add(
-        this.add.text(portraitCenterX, y + Math.max(12, height * 0.22), participant.portraitId, {
-          fontFamily: "Georgia, Times New Roman, serif",
-          fontSize: `${Math.max(20, Math.floor(width * 0.32))}px`,
-          color: speakerColor,
-          align: "center",
-        }).setOrigin(0.5, 0).setAlpha(alpha),
+    for (const participant of participants) {
+      this.addOriginalSpeechPortrait(
+        container,
+        participant,
+        participant.speechSlot === activeSlot,
+        viewportWidth,
+        viewportHeight,
       );
     }
+
+    const layout = resolveOriginalSpeechLayout(
+      viewportWidth,
+      viewportHeight,
+      activeSlot,
+    );
+    const fontSize = Math.max(1, Math.round(16 * layout.scale));
+    const lineSpacing = Math.max(0, Math.round(4 * layout.scale));
+
     container.add(
-      this.add.text(x + width / 2, y + height - 30, participant.speaker, {
-        fontFamily: "Noto Sans KR, Malgun Gothic, Apple SD Gothic Neo, Trebuchet MS, sans-serif",
-        fontSize: "13px",
-        color: active ? "#f1dfaa" : "#8fb4a2",
-        align: "center",
-        wordWrap: { width: width - 10 },
-      }).setOrigin(0.5, 0).setAlpha(active ? 1 : 0.72),
+      this.add
+        .text(layout.text.x, layout.text.centerY, activeLine.text, {
+          fontFamily: "Noto Sans KR, Malgun Gothic, Apple SD Gothic Neo, sans-serif",
+          fontSize: String(fontSize) + "px",
+          color: "#ffffff",
+          lineSpacing,
+          stroke: "#000000",
+          strokeThickness: Math.max(2, Math.round(2 * layout.scale)),
+          wordWrap: { width: layout.text.maxWidth },
+        })
+        .setOrigin(0, 0.5),
     );
   }
 
-  private addMissionPortraitArtwork(
+  private addOriginalSpeechPortrait(
     container: Phaser.GameObjects.Container,
-    portraitId: string,
-    centerX: number,
-    centerY: number,
-    size: number,
-    alpha: number,
-  ): boolean {
-    const cue = this.getMissionPortraitImageCue(portraitId);
+    participant: MissionDialogueParticipant,
+    active: boolean,
+    viewportWidth: number,
+    viewportHeight: number,
+  ): void {
+    const cue = this.getMissionPortraitImageCue(participant.portraitId);
 
     if (!cue) {
-      return false;
+      return;
     }
 
-    container.add(
-      this.add.image(centerX, centerY, cue.key)
-        .setDisplaySize(size, size)
-        .setAlpha(alpha),
+    const { portrait } = resolveOriginalSpeechLayout(
+      viewportWidth,
+      viewportHeight,
+      participant.speechSlot,
     );
-    return true;
+    const image = this.add
+      .image(
+        portrait.x + portrait.width / 2,
+        portrait.y + portrait.height / 2,
+        cue.key,
+      )
+      .setDisplaySize(portrait.width, portrait.height);
+
+    if (!active) {
+      image.setTint(0x534668);
+    }
+
+    container.add(image);
   }
 
   private getMissionPortraitImageCue(portraitId: string): MissionPortraitImageDefinition | null {
@@ -2794,75 +2601,28 @@ export class SkirmishScene extends Phaser.Scene {
     return cue && this.textures.exists(cue.key) ? cue : null;
   }
 
-  private getMissionDialogueParticipants(dialogue: ScenarioMissionDialogueDefinition): MissionDialogueParticipant[] {
-    const bySide: Partial<Record<"left" | "right", MissionDialogueParticipant>> = {};
-    const fallbackParticipants: MissionDialogueParticipant[] = [];
+  private getOriginalSpeechParticipants(
+    lines: readonly ScenarioBriefingLineDefinition[],
+    lineIndex: number,
+  ): MissionDialogueParticipant[] {
+    const bySlot = new Map<OriginalSpeechSlot, MissionDialogueParticipant>();
+    const lastIncludedIndex = Math.min(lineIndex, lines.length - 1);
 
-    for (const line of dialogue.lines) {
-      if (line.side === "left" || line.side === "right") {
-        bySide[line.side] ??= {
-          speaker: line.speaker,
-          portraitId: line.portraitId,
-          side: line.side,
-        };
+    for (let index = 0; index <= lastIncludedIndex; index += 1) {
+      const line = lines[index];
+
+      if (!line) {
         continue;
       }
 
-      if (!fallbackParticipants.some((participant) => this.isSameMissionDialogueParticipant(participant, line))) {
-        fallbackParticipants.push({
-          speaker: line.speaker,
-          portraitId: line.portraitId,
-        });
-      }
+      const speechSlot = getOriginalSpeechSlot(line);
+      bySlot.set(speechSlot, {
+        portraitId: line.portraitId,
+        speechSlot,
+      });
     }
 
-    const participants = [bySide.left, bySide.right].filter((participant): participant is MissionDialogueParticipant => Boolean(participant));
-
-    for (const participant of fallbackParticipants) {
-      if (participants.length >= 2) {
-        break;
-      }
-
-      if (!participants.some((existing) => existing.portraitId === participant.portraitId && existing.speaker === participant.speaker)) {
-        participants.push(participant);
-      }
-    }
-
-    return participants;
-  }
-
-  private getMissionDialogueParticipantIndex(
-    line: ScenarioBriefingLineDefinition,
-    participants: readonly MissionDialogueParticipant[],
-  ): number {
-    if (line.side === "left" || line.side === "right") {
-      const sideIndex = participants.findIndex((participant) => participant.side === line.side);
-
-      if (sideIndex >= 0) {
-        return sideIndex;
-      }
-    }
-
-    const exactIndex = participants.findIndex((participant) => this.isSameMissionDialogueParticipant(participant, line));
-
-    if (exactIndex >= 0) {
-      return exactIndex;
-    }
-
-    const portraitIndex = participants.findIndex((participant) => participant.portraitId === line.portraitId);
-
-    return portraitIndex >= 0 ? portraitIndex : 0;
-  }
-
-  private isSameMissionDialogueParticipant(
-    participant: MissionDialogueParticipant,
-    line: ScenarioBriefingLineDefinition,
-  ): boolean {
-    return participant.portraitId === line.portraitId && participant.speaker === line.speaker;
-  }
-
-  private getMissionDialogueSpeakerColor(portraitId: string): string {
-    return portraitId.startsWith("J") ? "#ffb294" : "#f1dfaa";
+    return [...bySlot.values()].sort((left, right) => left.speechSlot - right.speechSlot);
   }
 
   private redrawMissionDialogueOverlay(): void {
@@ -8874,7 +8634,7 @@ export class SkirmishScene extends Phaser.Scene {
     }
 
     const progress = getConstructionProgress(unit);
-    const frameIndex = Math.min(clip.frames.length - 1, Math.max(0, Math.floor(progress * clip.frames.length)));
+    const frameIndex = selectConstructionFrameIndex(progress, clip);
     const frame = clip.frames[frameIndex];
 
     if (!frame) {
@@ -8892,6 +8652,10 @@ export class SkirmishScene extends Phaser.Scene {
 
     if (unit.construction) {
       candidates.push("construction");
+    }
+
+    if (visual.states.damaged && isBelowOriginalBuildingDamageThreshold(unit.health)) {
+      candidates.push("damaged");
     }
 
     if ((unit.attackCooldownTicks ?? 0) > 0) {

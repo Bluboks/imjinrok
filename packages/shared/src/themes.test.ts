@@ -181,7 +181,8 @@ test("default theme maps source-exported building construction frames", () => {
       manifestPath: "entities/town-center/hqk.manifest.json",
       source: "original/imjinrok2/char/hqk.spr",
       frameCount: 20,
-      idleFrame: "hqk_0008.png",
+      idleFrame: "hqk_0007.png",
+      constructionFrameCount: 8,
     },
     {
       binding: "house",
@@ -258,6 +259,17 @@ test("default theme maps source-exported building construction frames", () => {
     assert.equal(visual.states.construction?.clips.default?.frames[0]?.fileName.endsWith("_0000.png"), true);
     assert.equal(visual.states.construction?.clips.default?.frames.at(-1)?.fileName, expectation.completeFrame ?? expectation.idleFrame);
   }
+});
+
+test("default theme applies the statically recovered Korean HQ body states", () => {
+  const visual = defaultTheme.visuals[defaultTheme.entityBindings["town-center"]] as EntityVisual;
+
+  assert.deepEqual(
+    visual.states.construction?.clips.default?.progressFrameThresholds,
+    [0, 10, 20, 30, 40, 50, 70, 100],
+  );
+  assert.equal(visual.states.idle?.clips.default?.frames[0]?.fileName, "hqk_0007.png");
+  assert.equal(visual.states.damaged?.clips.default?.frames[0]?.fileName, "hqk_0008.png");
 });
 
 test("default theme animates Japanese camp building idle frames from source sprites", () => {

@@ -87,15 +87,15 @@ export const CLIENT_UI_LAYOUT_AUDIT_PROBES = [
     id: "campaign-dialogue-layout",
     sourcePath: "apps/game-client/src/scenes/SkirmishScene.ts",
     patterns: [
-      "const panelWidth = Math.min(availableWidth, Phaser.Math.Clamp(width * 0.72, compact ? 320 : 560, 920));",
-      ".fillRoundedRect(panelX, panelY, panelWidth, panelHeight, 8)",
-      "fontSize: line.text.length > 110 ? \"14px\" : \"15px\",",
+      "this.addOriginalSpeechPresentation(",
+      "const layout = resolveOriginalSpeechLayout(",
+      ".setDisplaySize(portrait.width, portrait.height);",
     ],
-    currentBasis: "client-dialogue-overlay-design",
-    originalEvidenceStatus: "unproven-as-original-dialogue-layout",
-    originalTraceTargets: ["YOKCANCEL", "YSELECTSTAGE", "briefing-resource-xrefs"],
+    currentBasis: "static-original-speech-layout-with-client-scaling",
+    originalEvidenceStatus: "static-proven-for-speech-slots-and-text",
+    originalTraceTargets: ["FUN_0048311e", "FUN_004a7a50", "FUN_004a8410"],
     followUp:
-      "Recover original briefing/dialogue resource and control layout before treating campaign overlays as UI parity.",
+      "Recover title, objective, button, font, and hit-test layout separately; they are outside the proven SPEECH geometry.",
   },
 ];
 

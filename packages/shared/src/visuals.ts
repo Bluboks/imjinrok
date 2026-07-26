@@ -75,6 +75,11 @@ export interface AnimationClip {
   loop?: boolean;
   /** Draw this clip mirrored horizontally. Used by source sprites that only store five facings. */
   mirrorX?: boolean;
+  /**
+   * Optional integer progress percentages at which construction selects each frame.
+   * The list must align one-to-one with `frames`; clips without it use uniform spacing.
+   */
+  progressFrameThresholds?: readonly number[];
 }
 
 export interface EntityVisualState {

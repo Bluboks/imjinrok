@@ -13,7 +13,9 @@ import { fileURLToPath } from "node:url";
 
 import { MISSION_PORTRAIT_IMAGE_CUES } from "../../apps/game-client/src/missionPortraits.ts";
 import { defaultTheme } from "../../packages/shared/src/themes.ts";
+import { extractBuildingStatePilot } from "./extract-building-state-pilot.mjs";
 import { extractMissionPortraitMapping } from "./extract-mission-portrait-mapping.mjs";
+import { extractUnitAnimationPilot } from "./extract-unit-animation-pilot.mjs";
 
 const repositoryRoot = resolve(fileURLToPath(new URL("../..", import.meta.url)));
 const publicThemeRoot = join(
@@ -38,6 +40,14 @@ const missionPortraitExtractorPath = join(
   repositoryRoot,
   "tools/imjinrok/extract-mission-portrait-mapping.mjs",
 );
+const unitAnimationPilotPath = join(
+  repositoryRoot,
+  "tools/imjinrok/extract-unit-animation-pilot.mjs",
+);
+const buildingStatePilotPath = join(
+  repositoryRoot,
+  "tools/imjinrok/extract-building-state-pilot.mjs",
+);
 const portraitManifestPath = join(
   publicThemeRoot,
   "ui/mission-portraits/hero.manifest.json",
@@ -46,6 +56,8 @@ const outputPath = resolve(
   repositoryRoot,
   process.argv[2] ?? "analysis/generated/sprite-mapping-audit.json",
 );
+const unitAnimationPilot = extractUnitAnimationPilot();
+const buildingStatePilot = extractBuildingStatePilot();
 
 const visualRecords = [];
 const findings = [];
@@ -83,11 +95,13 @@ for (const visual of Object.values(defaultTheme.visuals)
   }
 
   const sourcePath = resolve(repositoryRoot, manifest.source);
+  const staticEvidence = buildVisualStaticEvidence(visual);
   const visualRecord = {
     visualId: visual.id,
     category,
     assetPath: visual.assetPath,
-    evidenceStatus: "unverified",
+    evidenceStatus: staticEvidence.status,
+    staticEvidence,
     source: {
       path: toRepositoryPath(sourcePath),
       sha256: sha256File(sourcePath),
@@ -110,9 +124,9 @@ const report = {
   policy: {
     semanticStatus: "mixed",
     acceptedEvidence:
-      "SPEECH portrait identity is statically proven; entity direction, action, and damage-state semantics remain unverified.",
+      "SPEECH portraits, Korean HQ construction/healthy/damaged body frames, and the class-2 Korean spearman identity are statically proven in their documented scopes.",
     parityUse:
-      "Only portrait mappings may be used as parity evidence; entity mappings remain quarantined until promoted by static binary/data proof.",
+      "Only explicitly listed staticEvidence scopes may be used for parity; all other entity direction, action, layer, and body mappings remain quarantined.",
   },
   sourceFiles: [
     sourceFileRecord(themesPath),
@@ -120,6 +134,8 @@ const report = {
     sourceFileRecord(skirmishScenePath),
     sourceFileRecord(missionPortraitsPath),
     sourceFileRecord(missionPortraitExtractorPath),
+    sourceFileRecord(unitAnimationPilotPath),
+    sourceFileRecord(buildingStatePilotPath),
     sourceFileRecord(generatorPath),
     sourceFileRecord(portraitManifestPath),
   ],
@@ -133,7 +149,11 @@ const report = {
     clipCount,
     frameReferenceCount,
     missingFrameReferenceCount,
-    unverifiedVisualCount: visualRecords.length,
+    unverifiedVisualCount: visualRecords.filter((visual) => visual.evidenceStatus === "unverified").length,
+    mixedVisualCount: visualRecords.filter((visual) => visual.evidenceStatus === "mixed").length,
+    scopedStaticProvenVisualCount: visualRecords.filter(
+      (visual) => visual.evidenceStatus === "scoped-static-proven",
+    ).length,
     portraitCueCount: portraitAudit.cues.length,
     unverifiedPortraitCueCount: portraitAudit.cues.filter(
       (cue) => cue.evidenceStatus === "unverified",
@@ -219,15 +239,17 @@ function appendVisualFindings(visual) {
     const constructionMappings = visual.mappings.filter(
       (mapping) => mapping.state === "construction",
     );
-    findings.push({
-      severity: "blocking",
-      code: "building-health-frame-unverified",
-      visualId: visual.visualId,
-      detail:
-        "Idle/full-health and construction/damage semantics are inferred from frame positions.",
-      idleFrameIndexes: uniqueFrameIndexes(idleMappings),
-      constructionFrameIndexes: uniqueFrameIndexes(constructionMappings),
-    });
+    if (visual.staticEvidence.bodyStateMapping !== "static-proven") {
+      findings.push({
+        severity: "blocking",
+        code: "building-health-frame-unverified",
+        visualId: visual.visualId,
+        detail:
+          "Idle/full-health and construction/damage semantics are inferred from frame positions.",
+        idleFrameIndexes: uniqueFrameIndexes(idleMappings),
+        constructionFrameIndexes: uniqueFrameIndexes(constructionMappings),
+      });
+    }
   }
 
   const baseMappings = visual.mappings.filter((mapping) => mapping.scope === "base");
@@ -254,6 +276,44 @@ function appendVisualFindings(visual) {
       });
     }
   }
+}
+
+function buildVisualStaticEvidence(visual) {
+  if (visual.id === "korean-swordsman") {
+    return {
+      status: "mixed",
+      identity: "static-proven",
+      originalGameplayName: unitAnimationPilot.identity.originalGameplayName,
+      internalClass: unitAnimationPilot.identity.internalClass,
+      spriteSlot: unitAnimationPilot.identity.spriteSlot,
+      sourcePath: unitAnimationPilot.identity.sourcePath,
+      animationStateMapping: "unverified-action-meaning",
+      confirmedAnimationScope: "states 1 and 2 frame formulas only; state 1 requires flags mask 0x80000008 to be clear",
+    };
+  }
+
+  if (visual.id === "korean-hq") {
+    return {
+      status: "scoped-static-proven",
+      identity: "static-proven",
+      originalGameplayName: buildingStatePilot.identity.originalGameplayName,
+      internalClass: buildingStatePilot.identity.internalClass,
+      spriteSlot: buildingStatePilot.identity.spriteSlot,
+      sourcePath: buildingStatePilot.identity.sourcePath,
+      bodyStateMapping: "static-proven",
+      constructionFrames: buildingStatePilot.construction.phaseFrames.map((phase) => phase.frameIndex),
+      healthyFrame: buildingStatePilot.completedBody.healthyFrame,
+      damagedFrame: buildingStatePilot.completedBody.damagedFrame,
+      unresolvedScope: "frames 9..19, pivot, overlays, and non-body effects",
+    };
+  }
+
+  return {
+    status: "unverified",
+    identity: "unverified",
+    bodyStateMapping: visual.states.construction === undefined ? undefined : "unverified",
+    animationStateMapping: visual.states.construction === undefined ? "unverified" : undefined,
+  };
 }
 
 function buildPortraitAudit() {

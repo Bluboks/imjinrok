@@ -2,21 +2,21 @@
   "schemaVersion": 1,
   "policy": {
     "semanticStatus": "mixed",
-    "acceptedEvidence": "SPEECH portrait identity is statically proven; entity direction, action, and damage-state semantics remain unverified.",
-    "parityUse": "Only portrait mappings may be used as parity evidence; entity mappings remain quarantined until promoted by static binary/data proof."
+    "acceptedEvidence": "SPEECH portraits, Korean HQ construction/healthy/damaged body frames, and the class-2 Korean spearman identity are statically proven in their documented scopes.",
+    "parityUse": "Only explicitly listed staticEvidence scopes may be used for parity; all other entity direction, action, layer, and body mappings remain quarantined."
   },
   "sourceFiles": [
     {
       "path": "packages/shared/src/themes.ts",
-      "sha256": "18db910441343cb011732298b74ae753d1c31d4707d2fe7d3fd7bfc8e9664824"
+      "sha256": "ee5fa7d4b41c24d1756522a594fa4d188d39a46c7e407265bb01e9a185e28f69"
     },
     {
       "path": "packages/shared/src/scenarios.ts",
-      "sha256": "4977b10272ae7e1d07e12117593200aa1a989e2cfc87a7d4abe2500e0043536c"
+      "sha256": "dac919d89140cf9d48108b2f5b974768e302853058436056fdce94c2026d4f0b"
     },
     {
       "path": "apps/game-client/src/scenes/SkirmishScene.ts",
-      "sha256": "a2be81f2d501ef2bca319c7de2b6321cbf0d14c4cdb9c0b1d8e2e3c9f7ee7985"
+      "sha256": "52d61c72108ece373e681241aa242d6e54b7b5bc34eb4c3ae9db888024290313"
     },
     {
       "path": "apps/game-client/src/missionPortraits.ts",
@@ -27,8 +27,16 @@
       "sha256": "16ff933bb511a5ef16fdfdc006fe91f49b120468af2b95c44cb9488614adea70"
     },
     {
+      "path": "tools/imjinrok/extract-unit-animation-pilot.mjs",
+      "sha256": "220b2ad8fe403a592adbd12c43c109075f61597cb5f7f551411fc92441c9fd6c"
+    },
+    {
+      "path": "tools/imjinrok/extract-building-state-pilot.mjs",
+      "sha256": "2c83ef919b7f79c201cdfb35ddaa6f7384a41b51b038920655d89335387ad1c4"
+    },
+    {
       "path": "tools/imjinrok/audit-sprite-mappings.mjs",
-      "sha256": "7d229b9505e9802252f82425951d9df3a42a37636cc2ad9d997580df0399052f"
+      "sha256": "44dfb3a5b2f1608ea212317e8705e4085aecdf4555312edd3dcb5a0cc7fa9c07"
     },
     {
       "path": "apps/game-client/public/assets/themes/default/ui/mission-portraits/hero.manifest.json",
@@ -39,14 +47,16 @@
     "visualCount": 16,
     "unitVisualCount": 7,
     "buildingVisualCount": 9,
-    "stateMappingCount": 50,
-    "clipCount": 290,
+    "stateMappingCount": 51,
+    "clipCount": 291,
     "frameReferenceCount": 1878,
     "missingFrameReferenceCount": 0,
-    "unverifiedVisualCount": 16,
+    "unverifiedVisualCount": 14,
+    "mixedVisualCount": 1,
+    "scopedStaticProvenVisualCount": 1,
     "portraitCueCount": 17,
     "unverifiedPortraitCueCount": 0,
-    "findingCount": 71
+    "findingCount": 70
   },
   "visuals": [
     {
@@ -54,6 +64,11 @@
       "category": "building",
       "assetPath": "entities/japanese-camp-advanced-tower",
       "evidenceStatus": "unverified",
+      "staticEvidence": {
+        "status": "unverified",
+        "identity": "unverified",
+        "bodyStateMapping": "unverified"
+      },
       "source": {
         "path": "original/imjinrok2/char/advtowerj.spr",
         "sha256": "9d453f7a8ed68a23af73ff61db26c9c8b09ea512e1195263f36cdad57b6a1116",
@@ -111,6 +126,11 @@
       "category": "building",
       "assetPath": "entities/japanese-camp-barracks",
       "evidenceStatus": "unverified",
+      "staticEvidence": {
+        "status": "unverified",
+        "identity": "unverified",
+        "bodyStateMapping": "unverified"
+      },
       "source": {
         "path": "original/imjinrok2/char/barrackj.spr",
         "sha256": "f71072d74f7fbe1e2646c9ae13ca2f2172f5c096749262a77f477ae8dcb4038d",
@@ -175,6 +195,11 @@
       "category": "building",
       "assetPath": "entities/japanese-camp-firehouse",
       "evidenceStatus": "unverified",
+      "staticEvidence": {
+        "status": "unverified",
+        "identity": "unverified",
+        "bodyStateMapping": "unverified"
+      },
       "source": {
         "path": "original/imjinrok2/char/firehousej.spr",
         "sha256": "387078391680b46fccfd7d99b8fefdeda8dcd2977d60ac6abdc77f956d571869",
@@ -242,6 +267,11 @@
       "category": "building",
       "assetPath": "entities/japanese-camp-house",
       "evidenceStatus": "unverified",
+      "staticEvidence": {
+        "status": "unverified",
+        "identity": "unverified",
+        "bodyStateMapping": "unverified"
+      },
       "source": {
         "path": "original/imjinrok2/char/millj.spr",
         "sha256": "3cc154a328da81b514fe7b86f178562e3d6db99bcc69e1cbe5904be86d4fbf6c",
@@ -323,6 +353,11 @@
       "category": "building",
       "assetPath": "entities/japanese-camp-tower",
       "evidenceStatus": "unverified",
+      "staticEvidence": {
+        "status": "unverified",
+        "identity": "unverified",
+        "bodyStateMapping": "unverified"
+      },
       "source": {
         "path": "original/imjinrok2/char/towerj.spr",
         "sha256": "bbaa6ec6390d1f1d4c48bccc9787e7d1dcabc729fc290dd92a76673426674693",
@@ -380,6 +415,11 @@
       "category": "unit",
       "assetPath": "entities/japanese-gunner",
       "evidenceStatus": "unverified",
+      "staticEvidence": {
+        "status": "unverified",
+        "identity": "unverified",
+        "animationStateMapping": "unverified"
+      },
       "source": {
         "path": "original/imjinrok2/char/gunj1.spr",
         "sha256": "e35c3dddfc4860d3e8ccbb7d86ecb006b11230e269d04091dcfa320dc116a7a8",
@@ -940,6 +980,11 @@
       "category": "unit",
       "assetPath": "entities/japanese-swordsman",
       "evidenceStatus": "unverified",
+      "staticEvidence": {
+        "status": "unverified",
+        "identity": "unverified",
+        "animationStateMapping": "unverified"
+      },
       "source": {
         "path": "original/imjinrok2/char/swordj.spr",
         "sha256": "f3dc53b8606b09e7c65f6a9dabefcf8f6ffef4ec281ff38fb59bc9b2cf8de17e",
@@ -1500,6 +1545,11 @@
       "category": "unit",
       "assetPath": "entities/archer",
       "evidenceStatus": "unverified",
+      "staticEvidence": {
+        "status": "unverified",
+        "identity": "unverified",
+        "animationStateMapping": "unverified"
+      },
       "source": {
         "path": "original/imjinrok2/char/archerk.spr",
         "sha256": "5f3cf34ed44a2b011e8d4d7e51ff3974b461f903ce7d8dc37589ea1bc5af4df4",
@@ -2060,6 +2110,11 @@
       "category": "building",
       "assetPath": "entities/barracks",
       "evidenceStatus": "unverified",
+      "staticEvidence": {
+        "status": "unverified",
+        "identity": "unverified",
+        "bodyStateMapping": "unverified"
+      },
       "source": {
         "path": "original/imjinrok2/char/barrackk.spr",
         "sha256": "076f727dd2d35125a0acbe7ce02d89440d93873e8fd83699bdd4813f7895bc48",
@@ -2137,6 +2192,11 @@
       "category": "unit",
       "assetPath": "entities/general-k4",
       "evidenceStatus": "unverified",
+      "staticEvidence": {
+        "status": "unverified",
+        "identity": "unverified",
+        "animationStateMapping": "unverified"
+      },
       "source": {
         "path": "original/imjinrok2/char/generalk4.spr",
         "sha256": "69c67359e01a2d90301cadb054e892c61b4138ea3dcbec06473496c704416331",
@@ -2696,7 +2756,29 @@
       "visualId": "korean-hq",
       "category": "building",
       "assetPath": "entities/town-center",
-      "evidenceStatus": "unverified",
+      "evidenceStatus": "scoped-static-proven",
+      "staticEvidence": {
+        "status": "scoped-static-proven",
+        "identity": "static-proven",
+        "originalGameplayName": "조선 본영",
+        "internalClass": 49,
+        "spriteSlot": 141,
+        "sourcePath": "char\\hqk.spr",
+        "bodyStateMapping": "static-proven",
+        "constructionFrames": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "healthyFrame": 7,
+        "damagedFrame": 8,
+        "unresolvedScope": "frames 9..19, pivot, overlays, and non-body effects"
+      },
       "source": {
         "path": "original/imjinrok2/char/hqk.spr",
         "sha256": "17e5640a7b34f8aaf1063d210bd087b8ba59d769e194f5025e92941e422c2d4e",
@@ -2724,7 +2806,21 @@
                 4,
                 5,
                 6,
-                7,
+                7
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            }
+          ]
+        },
+        {
+          "scope": "base",
+          "state": "damaged",
+          "declaredFacings": [],
+          "clips": [
+            {
+              "facing": "default",
+              "frameIndexes": [
                 8
               ],
               "mirrorX": false,
@@ -2740,7 +2836,7 @@
             {
               "facing": "default",
               "frameIndexes": [
-                8
+                7
               ],
               "mirrorX": false,
               "missingFrames": []
@@ -2754,6 +2850,11 @@
       "category": "building",
       "assetPath": "entities/house",
       "evidenceStatus": "unverified",
+      "staticEvidence": {
+        "status": "unverified",
+        "identity": "unverified",
+        "bodyStateMapping": "unverified"
+      },
       "source": {
         "path": "original/imjinrok2/char/millk.spr",
         "sha256": "bb393d9a34cf7ae752c124a077cb4333bc0151f1a171f76a1e74201bbc57ac29",
@@ -2811,6 +2912,11 @@
       "category": "unit",
       "assetPath": "entities/royal-cart",
       "evidenceStatus": "unverified",
+      "staticEvidence": {
+        "status": "unverified",
+        "identity": "unverified",
+        "animationStateMapping": "unverified"
+      },
       "source": {
         "path": "original/imjinrok2/char/koreanking.spr",
         "sha256": "727e2f120f333be01413df7715d03671c9ca1090d9d8469bcdf18f5cd975d35c",
@@ -3256,6 +3362,11 @@
       "category": "building",
       "assetPath": "entities/beacon",
       "evidenceStatus": "unverified",
+      "staticEvidence": {
+        "status": "unverified",
+        "identity": "unverified",
+        "bodyStateMapping": "unverified"
+      },
       "source": {
         "path": "original/imjinrok2/char/towerk.spr",
         "sha256": "44114f2bbfaa0ece06ddfaa474b0b6f69c2e97f153108975a74d609c611edff6",
@@ -3312,7 +3423,17 @@
       "visualId": "korean-swordsman",
       "category": "unit",
       "assetPath": "entities/swordsman",
-      "evidenceStatus": "unverified",
+      "evidenceStatus": "mixed",
+      "staticEvidence": {
+        "status": "mixed",
+        "identity": "static-proven",
+        "originalGameplayName": "조선 창병",
+        "internalClass": 2,
+        "spriteSlot": 100,
+        "sourcePath": "char\\swordk.spr",
+        "animationStateMapping": "unverified-action-meaning",
+        "confirmedAnimationScope": "states 1 and 2 frame formulas only; state 1 requires flags mask 0x80000008 to be clear"
+      },
       "source": {
         "path": "original/imjinrok2/char/swordk.spr",
         "sha256": "414d285b207ba12afdd856a0f16ddde615381cf491fe493d6ededf91681b55eb",
@@ -3873,6 +3994,11 @@
       "category": "unit",
       "assetPath": "entities/villager",
       "evidenceStatus": "unverified",
+      "staticEvidence": {
+        "status": "unverified",
+        "identity": "unverified",
+        "animationStateMapping": "unverified"
+      },
       "source": {
         "path": "original/imjinrok2/char/farmerk.spr",
         "sha256": "98e370f4dec6f147a2556340bf93d293d23c3ee3a5367bc22fd3984e7209e5ca",
@@ -5448,26 +5574,6 @@
         5,
         6,
         7
-      ]
-    },
-    {
-      "severity": "blocking",
-      "code": "building-health-frame-unverified",
-      "visualId": "korean-hq",
-      "detail": "Idle/full-health and construction/damage semantics are inferred from frame positions.",
-      "idleFrameIndexes": [
-        8
-      ],
-      "constructionFrameIndexes": [
-        0,
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8
       ]
     },
     {

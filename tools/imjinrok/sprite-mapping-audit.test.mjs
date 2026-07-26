@@ -42,23 +42,34 @@ test("sprite mapping audit is deterministic and current", (t) => {
   );
 });
 
-test("entity mappings stay quarantined while portraits are statically proven", () => {
+test("entity mappings stay quarantined outside the statically proven pilot scopes", () => {
   assert.deepEqual(report.summary, {
     visualCount: 16,
     unitVisualCount: 7,
     buildingVisualCount: 9,
-    stateMappingCount: 50,
-    clipCount: 290,
+    stateMappingCount: 51,
+    clipCount: 291,
     frameReferenceCount: 1_878,
     missingFrameReferenceCount: 0,
-    unverifiedVisualCount: 16,
+    unverifiedVisualCount: 14,
+    mixedVisualCount: 1,
+    scopedStaticProvenVisualCount: 1,
     portraitCueCount: 17,
     unverifiedPortraitCueCount: 0,
-    findingCount: 71,
+    findingCount: 70,
   });
-  assert.ok(
-    report.visuals.every((visual) => visual.evidenceStatus === "unverified"),
+  assert.equal(
+    report.visuals.filter((visual) => visual.evidenceStatus === "unverified").length,
+    14,
   );
+  const koreanSpearman = report.visuals.find((visual) => visual.visualId === "korean-swordsman");
+  assert.equal(koreanSpearman?.evidenceStatus, "mixed");
+  assert.equal(koreanSpearman?.staticEvidence.originalGameplayName, "조선 창병");
+  const koreanHeadquarters = report.visuals.find((visual) => visual.visualId === "korean-hq");
+  assert.equal(koreanHeadquarters?.evidenceStatus, "scoped-static-proven");
+  assert.deepEqual(koreanHeadquarters?.staticEvidence.constructionFrames, [0, 1, 2, 3, 4, 5, 6, 7]);
+  assert.equal(koreanHeadquarters?.staticEvidence.healthyFrame, 7);
+  assert.equal(koreanHeadquarters?.staticEvidence.damagedFrame, 8);
   assert.ok(
     report.portraits.cues.every(
       (cue) => cue.evidenceStatus === "static-proven",
@@ -134,7 +145,7 @@ test("entity mappings stay quarantined while portraits are statically proven", (
     report.findings.filter(
       (finding) => finding.code === "building-health-frame-unverified",
     ).length,
-    9,
+    8,
   );
   assert.deepEqual(report.portraits.currentScenarioPortraitIds, [
     "J1",

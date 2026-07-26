@@ -118,7 +118,7 @@ function auditScenarioImplementation(context) {
       "sourceScript === \"script/K0120\"",
       "protect-ryu-seong-ryong",
       "defeatDelayTicks, imjinrokOriginalMissionResultDelayTicks",
-      "readSourceSpeechLines(\"K0110\", { includeSide: true, includeDelayBefore: true })",
+      "readSourceSpeechLines(\"K0110\", { includeSpeechSlot: true, includeDelayBefore: true })",
       "readSourceBriefingMetadata(\"K0110\")",
     ]),
   ];

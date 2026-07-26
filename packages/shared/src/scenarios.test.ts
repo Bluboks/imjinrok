@@ -378,11 +378,11 @@ test("imjinrok K01 and K02 player starts cover every active source map entity", 
 test("imjinrok K01 and K02 briefings cover every source script speech", () => {
   assert.deepEqual(
     imjinrokK01Scenario.briefing?.lines.map(toSourceComparableSpeech),
-    readSourceSpeechLines("K0110", { includeSide: true, includeDelayBefore: true }),
+    readSourceSpeechLines("K0110", { includeSpeechSlot: true, includeDelayBefore: true }),
   );
   assert.deepEqual(
     imjinrokK02Scenario.briefing?.lines.map(toSourceComparableSpeech),
-    readSourceSpeechLines("K0210", { includeSide: true, includeDelayBefore: true }),
+    readSourceSpeechLines("K0210", { includeSpeechSlot: true, includeDelayBefore: true }),
   );
 });
 
@@ -440,12 +440,12 @@ test("imjinrok K01 and K02 briefing title frames resolve to converted client ass
   assert.equal(framePaths.size, 12);
 });
 
-test("imjinrok K01 and K02 mission dialogues preserve source speech sides", () => {
+test("imjinrok K01 and K02 mission dialogues preserve source numeric speech slots", () => {
   for (const scenario of [imjinrokK01Scenario, imjinrokK02Scenario]) {
     for (const dialogue of scenario.missionDialogues ?? []) {
       assert.deepEqual(
         dialogue.lines.map(toSourceComparableSpeech),
-        readSourceSpeechLines(dialogue.sourceScript.replace(/^script\//, ""), { includeSide: true }),
+        readSourceSpeechLines(dialogue.sourceScript.replace(/^script\//, ""), { includeSpeechSlot: true }),
         dialogue.sourceScript,
       );
     }
@@ -491,7 +491,10 @@ test("imjinrok K01 and K02 portrait ids resolve to converted client artwork", ()
   }
 });
 
-function readSourceSpeechLines(scriptName: string, options: { includeSide?: boolean; includeDelayBefore?: boolean } = {}): SourceComparableSpeech[] {
+function readSourceSpeechLines(
+  scriptName: string,
+  options: { includeSpeechSlot?: boolean; includeDelayBefore?: boolean } = {},
+): SourceComparableSpeech[] {
   const scriptPath = resolve(sharedSrcDirectory, "../../../original/imjinrok2/script", scriptName);
   const script = new TextDecoder("windows-949").decode(readFileSync(scriptPath));
   const lines: SourceComparableSpeech[] = [];
@@ -503,10 +506,10 @@ function readSourceSpeechLines(scriptName: string, options: { includeSide?: bool
       voiceId: match[3] ?? "",
       text: normalizeSpeechText(match[4] ?? ""),
     };
-    const side = toSpeechSide(match[2] ?? "");
+    const speechSlot = toSpeechSlot(match[2] ?? "");
 
-    if (options.includeSide && side) {
-      speech.side = side;
+    if (options.includeSpeechSlot && speechSlot !== undefined) {
+      speech.speechSlot = speechSlot;
     }
 
     if (options.includeDelayBefore && match.index !== undefined) {
@@ -570,7 +573,7 @@ interface SourceComparableSpeech {
   portraitId: string;
   voiceId: string;
   text: string;
-  side?: "left" | "right" | "center";
+  speechSlot?: 0 | 1 | 2 | 3;
   delayBeforeMs?: number;
 }
 
@@ -586,8 +589,8 @@ function toSourceComparableSpeech(line: SourceComparableSpeech): SourceComparabl
     text: normalizeSpeechText(line.text),
   };
 
-  if (line.side) {
-    speech.side = line.side;
+  if (line.speechSlot !== undefined) {
+    speech.speechSlot = line.speechSlot;
   }
 
   if (line.delayBeforeMs !== undefined) {
@@ -693,14 +696,16 @@ function readWavFormat(path: string): { channels: number; sampleRate: number; bi
   };
 }
 
-function toSpeechSide(value: string): SourceComparableSpeech["side"] {
+function toSpeechSlot(value: string): SourceComparableSpeech["speechSlot"] {
   switch (value.trim()) {
     case "0":
-      return "left";
+      return 0;
     case "1":
-      return "right";
+      return 1;
     case "2":
-      return "center";
+      return 2;
+    case "3":
+      return 3;
     default:
       return undefined;
   }

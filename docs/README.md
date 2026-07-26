@@ -30,6 +30,9 @@
 - [함수 지도](reverse-engineering/function-map.md)
 - [스프라이트 매핑 감사](reverse-engineering/sprite-mapping-audit.md)
 - [브리핑 `SPEECH` 초상화 매핑](reverse-engineering/mechanics/briefing-portraits.md)
+- [`SPEECH` 대화 레이아웃](reverse-engineering/mechanics/speech-layout.md)
+- [조선 창병·내부 클래스 2 애니메이션 파일럿](reverse-engineering/mechanics/unit-animation-pilot.md)
+- [조선 본영 건설·체력 프레임 파일럿](reverse-engineering/mechanics/building-state-pilot.md)
 - [엔티티 자료구조](reverse-engineering/data-structures/entity-record.md)
 - [K01 정적 분석 파일럿](reverse-engineering/mechanics/campaign/k01.md)
 
@@ -39,6 +42,7 @@
 - [문서 작성 규칙](development/documentation.md)
 - [정적 분석 에이전트 지침](agent-guides/reverse-engineering.md)
 - [스프라이트·애니메이션 매핑 지침](agent-guides/sprite-animation-mapping.md)
+- [UI 레이아웃 매핑 지침](agent-guides/ui-layout-mapping.md)
 - [동적 검증 예외 지침](agent-guides/dynamic-validation.md)
 
 ## 현재 문서와 보관 문서

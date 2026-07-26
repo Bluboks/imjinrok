@@ -26,6 +26,9 @@
 | `pe-image.mjs` | 유지 | PE 헤더, VA와 파일 오프셋의 독립 교차 검사. 함수 의미 분석에는 사용하지 않음 |
 | `extract-executable-refs.mjs`, `executable-refs.test.mjs` | 유지 | ASCII 문자열과 PE 위치를 탐색점으로 수집. 문자열 존재는 동작 증거가 아님 |
 | `extract-mission-portrait-mapping.mjs`, `mission-portrait-mapping.test.mjs` | 유지 | `SPEECH` 소비자·ID 조회·`hero.spr` 프레임 표의 정적 확정 결과 추출과 회귀 검사 |
+| `extract-speech-layout-evidence.mjs`, `speech-layout-evidence.test.mjs` | 유지 | `SPEECH` 숫자 슬롯·초상화 사각형·대사 좌표의 정적 확정 결과 추출과 회귀 검사 |
+| `extract-unit-animation-pilot.mjs`, `unit-animation-pilot.test.mjs` | 유지 | 조선 창병·내부 클래스 2·슬롯 100 식별과 상태 1·2 제한 방향·phase→frame·mirror 정적 파일럿 |
+| `extract-building-state-pilot.mjs`, `building-state-pilot.test.mjs` | 유지 | 조선 본영·클래스 49·슬롯 141의 건설 진행도와 정상·반파 본체 프레임 정적 파일럿 |
 | `audit-sprite-mappings.mjs`, `sprite-mapping-audit.test.mjs` | 유지 | 확정된 초상화와 미검증 엔티티 매핑을 분리해 감사 |
 
 ## 원본 데이터 파서와 변환기
@@ -46,9 +49,9 @@
 
 | 파일 | 상태 | 허용 용도와 제한 |
 | --- | --- | --- |
-| `extract-animation-evidence.mjs`, `animation-evidence.test.mjs` | 재검증 | 기존 주소와 바이트를 Ghidra seed로 옮기는 탐색점 |
+| `extract-animation-evidence.mjs`, `animation-evidence.test.mjs` | 재검증 | 작은 draw 레코드와 main entity 구조를 구분한 기존 주소 탐색점. 의미 확정에는 파일럿 추출기를 사용 |
 | `extract-ui-layout-evidence.mjs`, `ui-layout-evidence.test.mjs` | 재검증 | UI 관련 코드 범위와 문자열의 탐색점 |
-| `extract-client-ui-layout-audit.mjs`, `client-ui-layout-audit.test.mjs` | 유지 | 현재 웹 구현의 임시 좌표·레이아웃 감사. 원본 증거가 아님 |
+| `extract-client-ui-layout-audit.mjs`, `client-ui-layout-audit.test.mjs` | 유지 | 정적 확정한 `SPEECH` 배치와 나머지 임시 웹 UI 레이아웃을 분리해 감사 |
 | `extract-campaign-mvp-audit.mjs`, `campaign-mvp-audit.test.mjs` | 보관 | 구현·문자열 존재 중심의 과거 MVP 판정. 현행 원작 일치 상태에 반영하지 않음 |
 
 고정 주소의 바이트가 남아 있는지만 검사하는 테스트는 코드 변조 탐지에는 유용하지만, 사람이 붙인

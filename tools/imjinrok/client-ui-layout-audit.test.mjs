@@ -6,12 +6,12 @@ import { extractClientUiLayoutAudit } from "./extract-client-ui-layout-audit.mjs
 
 const repositoryRoot = join(dirname(fileURLToPath(import.meta.url)), "../..");
 
-test("client UI layout audit identifies current provisional hard-coded layout surfaces", () => {
+test("client UI layout audit separates provisional surfaces from the proven SPEECH layout", () => {
   const report = extractClientUiLayoutAudit(repositoryRoot);
 
   assert.equal(report.summary.probeCount, 6);
   assert.equal(report.summary.allPatternsPresent, true);
-  assert.equal(report.summary.unprovenOriginalParityCount, 6);
+  assert.equal(report.summary.unprovenOriginalParityCount, 5);
   assert.deepEqual(
     report.probes.map((probe) => probe.id),
     [
@@ -50,11 +50,23 @@ test("client UI layout audit routes provisional surfaces to original binary trac
     "mouse-interface-primary",
     "mouse-interface-secondary",
   ]);
-  assertTraceTargets(probesById.get("campaign-dialogue-layout"), [
-    "YOKCANCEL",
-    "YSELECTSTAGE",
-    "briefing-resource-xrefs",
+  const dialogueLayout = probesById.get("campaign-dialogue-layout");
+  assert.ok(dialogueLayout);
+  assert.deepEqual(dialogueLayout.originalTraceTargets, [
+    "FUN_0048311e",
+    "FUN_004a7a50",
+    "FUN_004a8410",
   ]);
+  assert.equal(
+    dialogueLayout.originalEvidenceStatus,
+    "static-proven-for-speech-slots-and-text",
+  );
+  assert.equal(
+    dialogueLayout.patterns.every(
+      (pattern) => pattern.present && Number.isInteger(pattern.line),
+    ),
+    true,
+  );
 });
 
 function assertTraceTargets(probe, expectedTargets) {

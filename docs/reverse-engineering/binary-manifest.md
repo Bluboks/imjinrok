@@ -49,7 +49,7 @@ objdump -x original/imjinrok2/imjinrok2.exe
 | compiler spec | `windows` |
 | 자동 분석 함수 | `2448` |
 | 정의된 문자열 | `1545` |
-| seed 주소 / 포함 함수 | `25` / `24` |
+| seed 주소 / 포함 함수 | `45` / `44` |
 | 구조화 산출물 | `analysis/generated/imjinrok2/` |
 
 도구 배포 URL과 SHA-256은 `tools/imjinrok/static-analysis-versions.env`에 고정했다. 원본 EXE 해시가

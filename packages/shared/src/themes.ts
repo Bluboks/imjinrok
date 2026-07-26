@@ -68,8 +68,8 @@ const entityFrame = (
 };
 
 /**
- * PROVISIONAL ONLY: direction order, state blocks, mirroring, and building health semantics are unverified.
- * Do not treat these constants as original-game evidence; see analysis/generated/sprite-mapping-audit.json.
+ * PROVISIONAL BY DEFAULT: direction order, state blocks, mirroring, and building health semantics are unverified
+ * unless a visual has narrower static evidence recorded in analysis/generated/sprite-mapping-audit.json.
  */
 const ENTITY_FACING_ORDER = ["s", "sw", "w", "nw", "n", "ne", "e", "se"] as const satisfies readonly Facing[];
 const FIVE_FACING_SOURCE_ORDER = ["n", "ne", "e", "se", "s"] as const satisfies readonly Facing[];
@@ -195,10 +195,16 @@ const sourceFiveFacingStillClips = (
   return clips;
 };
 
-const buildingConstructionClip = (visualId: string, stem: string, completeFrameIndex = 8): AnimationClip => ({
+const buildingConstructionClip = (
+  visualId: string,
+  stem: string,
+  completeFrameIndex = 8,
+  progressFrameThresholds?: readonly number[],
+): AnimationClip => ({
   frames: entityFrameRange(visualId, stem, 0, completeFrameIndex + 1),
   fps: 8,
   loop: false,
+  ...(progressFrameThresholds ? { progressFrameThresholds } : {}),
 });
 
 const buildingOverlayClip = (visualId: string, stem: string, startFrame: number, frameCount: number, fps: number): AnimationClip => ({
@@ -531,12 +537,17 @@ export const townCenterEntityVisual = {
   states: {
     idle: {
       clips: {
+        default: { frames: [entityFrame("town_center", "hqk", 7)], fps: 1, loop: true },
+      },
+    },
+    damaged: {
+      clips: {
         default: { frames: [entityFrame("town_center", "hqk", 8)], fps: 1, loop: true },
       },
     },
     construction: {
       clips: {
-        default: buildingConstructionClip("town_center", "hqk"),
+        default: buildingConstructionClip("town_center", "hqk", 7, [0, 10, 20, 30, 40, 50, 70, 100]),
       },
     },
   },

@@ -12,7 +12,10 @@
 6. [함수 지도](function-map.md)
 7. [스프라이트 매핑 감사](sprite-mapping-audit.md)
 8. [브리핑 `SPEECH` 초상화 매핑](mechanics/briefing-portraits.md)
-9. 분석할 자료구조와 나머지 메커니즘 문서
+9. [`SPEECH` 대화 레이아웃](mechanics/speech-layout.md)
+10. [조선 창병·내부 클래스 2 애니메이션 파일럿](mechanics/unit-animation-pilot.md)
+11. [조선 본영 건설·체력 프레임 파일럿](mechanics/building-state-pilot.md)
+12. 분석할 자료구조와 나머지 메커니즘 문서
 
 ## 문서 역할
 
