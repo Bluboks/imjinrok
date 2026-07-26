@@ -29,6 +29,7 @@
 | `extract-speech-layout-evidence.mjs`, `speech-layout-evidence.test.mjs` | 유지 | `SPEECH` 숫자 슬롯·초상화 사각형·대사 좌표의 정적 확정 결과 추출과 회귀 검사 |
 | `extract-unit-animation-pilot.mjs`, `unit-animation-pilot.test.mjs` | 유지 | 조선 창병·클래스 2 식별, 상태 1·2 이동 의미·방향·phase→frame·mirror와 특수 분기 격리 |
 | `extract-k01-hero-movement-pilot.mjs`, `k01-hero-movement-pilot.test.mjs` | 유지 | K01 권율·유성룡의 클래스, 주·보조 SPR, 상태 8/1/4/7 대기·이동·공격·사망 방향·phase→frame·mirror 정적 추출 |
+| `extract-k01-hero-basic-attack-pilot.mjs`, `k01-hero-basic-attack-pilot.test.mjs` | 유지 | K01 두 영웅의 일반 공격 상태·효과 phase·회복 카운터·payload, 권율 직접 피해와 유성룡 투사체 생성 정적 추출·재현 |
 | `extract-building-state-pilot.mjs`, `building-state-pilot.test.mjs` | 유지 | 조선 본영·클래스 49·슬롯 141의 건설 진행도와 정상·반파 본체 프레임 정적 파일럿 |
 | `extract-entity-type-catalog.mjs`, `entity-type-catalog.test.mjs` | 유지 | 클래스 1~95의 원본 이름·슬롯·기본 프레임·flags·SPR 경로 전수 추출과 결정론 검증 |
 | `extract-beacon-state-pilot.mjs`, `beacon-state-pilot.test.mjs` | 유지 | 조선 봉화대·클래스 52·`firehousek.spr` 정체와 건설·정상·반파 본체 프레임 정적 파일럿 |

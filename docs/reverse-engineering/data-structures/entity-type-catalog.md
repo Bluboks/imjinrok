@@ -93,7 +93,9 @@ EXE와 Ghidra 산출물의 입력 SHA-256이 다르면 추출을 거부한다.
 - 원본 권율은 클래스 76 `generalk11.spr`, 유성룡은 클래스 78 `generalk31.spr`다. 주 자원
   정체뿐 아니라 보조 슬롯 `generalk12`·`generalk13`·`generalk32`와 대기·이동·공격·사망
   프레임을 [K01 영웅 파일럿](../mechanics/k01-hero-animation-pilot.md)에서 정적 확정했다.
-  피격·초 단위 재생 속도·사망 표시 수명주기는 아직 미확정이다.
+  두 영웅의 효과 phase 7과 공격 payload·회복은
+  [일반 공격 파일럿](../mechanics/k01-hero-basic-attack-pilot.md)에서 별도 확정했다. 피격·
+  초 단위 재생 속도·사망 표시 수명주기는 아직 미확정이다.
 
 ## 재생성과 검증
 
