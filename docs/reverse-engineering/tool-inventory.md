@@ -27,6 +27,7 @@
 | `extract-executable-refs.mjs`, `executable-refs.test.mjs` | 유지 | ASCII 문자열과 PE 위치를 탐색점으로 수집. 문자열 존재는 동작 증거가 아님 |
 | `extract-mission-portrait-mapping.mjs`, `mission-portrait-mapping.test.mjs` | 유지 | `SPEECH` 소비자·ID 조회·`hero.spr` 프레임 표의 정적 확정 결과 추출과 회귀 검사 |
 | `extract-speech-layout-evidence.mjs`, `speech-layout-evidence.test.mjs` | 유지 | `SPEECH` 숫자 슬롯·초상화 사각형·대사 좌표의 정적 확정 결과 추출과 회귀 검사 |
+| `extract-objective-panel-layout-evidence.mjs`, `objective-panel-layout-evidence.test.mjs` | 유지 | 임무 목표 모달 전체 흐름·원본 SPR·사각형·hit test·실패 경로는 함수 해시·CFG로 정적 검증하고, 갱신 결과와 정상 로드 자원의 종료 clear-lock 성공·실패만 원본 입력 벡터로 재현 |
 | `extract-unit-animation-pilot.mjs`, `unit-animation-pilot.test.mjs` | 유지 | 조선 창병·클래스 2 식별, 상태 1·2 이동 의미·방향·phase→frame·mirror와 특수 분기 격리 |
 | `extract-k01-hero-movement-pilot.mjs`, `k01-hero-movement-pilot.test.mjs` | 유지 | K01 권율·유성룡의 클래스, 주·보조 SPR, 상태 8/1/4/7 대기·이동·공격·사망 방향·phase→frame·mirror 정적 추출 |
 | `extract-k01-hero-basic-attack-pilot.mjs`, `k01-hero-basic-attack-pilot.test.mjs` | 유지 | K01 두 영웅의 일반 공격 상태·효과 phase·회복 카운터·payload, 권율 직접 피해와 유성룡 투사체 생성 정적 추출·재현 |
@@ -54,7 +55,7 @@
 | 파일 | 상태 | 허용 용도와 제한 |
 | --- | --- | --- |
 | `extract-animation-evidence.mjs`, `animation-evidence.test.mjs` | 재검증 | 작은 draw 레코드와 main entity 구조를 구분한 기존 주소 탐색점. 의미 확정에는 파일럿 추출기를 사용 |
-| `extract-ui-layout-evidence.mjs`, `ui-layout-evidence.test.mjs` | 재검증 | UI 관련 코드 범위와 문자열의 탐색점 |
+| `extract-ui-layout-evidence.mjs`, `ui-layout-evidence.test.mjs` | 재검증 | UI 관련 코드 범위와 문자열의 탐색점. 기존 objective 의미는 내부 내용 RECT를 전체 패널로 오인하고 닫기 hit test를 놓쳤다. [목표 모달 파일럿](mechanics/objective-panel-layout.md)이 전체 경계와 호출 흐름으로 교정했다 |
 | `extract-client-ui-layout-audit.mjs`, `client-ui-layout-audit.test.mjs` | 유지 | 정적 확정한 `SPEECH` 배치와 나머지 임시 웹 UI 레이아웃을 분리해 감사 |
 | `extract-campaign-mvp-audit.mjs`, `campaign-mvp-audit.test.mjs` | 보관 | 구현·문자열 존재 중심의 과거 MVP 판정. 현행 원작 일치 상태에 반영하지 않음 |
 

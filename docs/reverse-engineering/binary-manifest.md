@@ -49,7 +49,7 @@ objdump -x original/imjinrok2/imjinrok2.exe
 | compiler spec | `windows` |
 | 자동 분석 함수 | `2448` |
 | 정의된 문자열 | `1545` |
-| seed 주소 / 포함 함수 | `64` / `63` |
+| seed 주소 / 포함 함수 | `84` / `83` |
 | 구조화 산출물 | `analysis/generated/imjinrok2/` |
 
 도구 배포 URL과 SHA-256은 `tools/imjinrok/static-analysis-versions.env`에 고정했다. 원본 EXE 해시가
@@ -87,6 +87,7 @@ Ghidra의 메모리 지도에는 PE 네 섹션 외에 헤더와 분석용 `tdb` 
 | `char/hqk.spr` | `17e5640a7b34f8aaf1063d210bd087b8ba59d769e194f5025e92941e422c2d4e` | 조선 본영 본체 frame 0~8 |
 | `char/firehousek.spr` | `ac6621124bbf2106a5d9309499da7701a5c4e5223692dd2f4f51e2e9c1ab97aa` | 조선 봉화대 본체 frame 0~8 |
 | `yfnt/hero.spr` | `a701bd0a66ec30dfd0bbc33ad7e78b937e725292fd37e9cae983ca28ad6af853` | `SPEECH` 초상화 17개 |
+| `yfnt/objectiveborder.spr` | `62552fecc34139e6729b84d4e15dcbe6ea3622eb76b7f443af29fa5322813ea5` | 임무 목표 모달 frame 0, 416×236 |
 
 향후 매니페스트에는 다음을 포함한다.
 
