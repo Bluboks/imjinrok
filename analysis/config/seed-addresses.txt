@@ -39,6 +39,8 @@
 0x0041efa0 animation-state-1-frame-selector
 0x0041f380 animation-state-2-frame-selector
 0x0041fdb0 main-entity-render-path
+0x004233f0 action-state-six-handler
+0x00423740 action-state-seven-handler
 0x004237d0 targeted-ability-validity-check
 0x00423830 target-driven-combat-update
 0x00423b00 targeted-ability-action-update
@@ -49,6 +51,7 @@
 0x00425b20 normal-entity-movement-update
 0x00426630 action-state-3-update
 0x00426740 raw-action-command-queue-writer-candidate
+0x00426bf0 entity-current-target-reference-clear-helper
 0x004291d0 entity-animation-initializer
 0x00437650 entity-initializer
 0x00438130 attack-outcome-roll-candidate
@@ -66,6 +69,7 @@
 0x00439770 automatic-target-scan-candidate
 0x00439d70 automatic-target-command-candidate
 0x0043a410 automatic-target-scan-gate-candidate
+0x0043aa80 entity-active-registration-candidate
 0x0043b4d0 entity-health-state-update-candidate
 0x0043c300 action-state-1-update
 0x0043c9c0 entity-action-state-dispatcher
@@ -84,6 +88,9 @@
 0x00478320 raw-action-command-writer-candidate
 0x004783b0 raw-action-command-one-candidate
 0x00478400 raw-target-action-command-candidate
+0x00483a60 inactive-entity-slot-selector
+0x00483aa0 active-entity-slot-release
+0x00483c50 entity-record-create-wrapper
 0x00443360 sprite-resource-loader
 0x00441de0 entity-alive-check-candidate
 0x00441e40 active-entity-record-lookup-candidate
@@ -118,5 +125,6 @@
 0x004ae539 executable-entry-point
 0x0048a731 k01-k0120-condition-site
 0x0048a812 k01-hero-loss-condition-site
+0x004885e0 k01-owner-class-reference-lookup
 0x0048d6f0 mission-result-gate-candidate
 0x0048dde0 mission-result-consumer-candidate
