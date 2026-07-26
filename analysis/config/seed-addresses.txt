@@ -1,7 +1,20 @@
 # address label
 0x00401710 entity-draw-function-candidate
 0x0040c6c0 movement-record-initializer-candidate
+0x0040c970 projectile-record-post-initializer-candidate
+0x0040c470 projectile-subtype-table-initializer
+0x0040df10 projectile-subtype-dispatcher
+0x0040e270 projectile-subtype-0x0c-impact-handler
 0x0040f320 projectile-trajectory-candidate
+0x0040f0e0 projectile-active-table-write
+0x0040f9b0 projectile-position-update-candidate
+0x0040fd50 projectile-visual-position-update
+0x004107a0 projectile-render-update-candidate
+0x00410ab0 projectile-route-initializer-candidate
+0x00410cc0 projectile-record-update-candidate
+0x00411160 projectile-record-slot-allocation
+0x00411180 projectile-record-release
+0x004111b0 projectile-record-spawn-candidate
 0x00413070 attack-outcome-calculation-candidate
 0x00413700 attack-effect-application-candidate
 0x00413b30 defender-damage-resolution-candidate
@@ -9,6 +22,8 @@
 0x00416c60 basic-attack-validity-candidate
 0x00416c70 basic-attack-action-update
 0x00417430 basic-attack-resolution
+0x0041a880 pre-projectile-spawn-side-effect-candidate
+0x0041a990 projectile-target-coordinate-setup-candidate
 0x0041aa90 construction-state-update-candidate
 0x0041a9e0 construction-frame-render-selector
 0x0041d210 frame-state-dispatch-candidate
@@ -26,6 +41,8 @@
 0x004291d0 entity-animation-initializer
 0x00437650 entity-initializer
 0x00438130 attack-outcome-roll-candidate
+0x0043e1e0 health-application-mode-producer-candidate
+0x00438c50 target-validity-before-projectile-spawn
 0x004381a0 normal-direction-field-writer
 0x00438ed0 state-1-frame-base-writer
 0x00438f50 state-2-frame-base-writer
@@ -34,9 +51,11 @@
 0x0043c300 action-state-1-update
 0x0043c9c0 entity-action-state-dispatcher
 0x00442b10 defender-damage-application-candidate
+0x00447360 projectile-pool-update
 0x00443360 sprite-resource-loader
 0x00441de0 entity-alive-check-candidate
 0x00441e40 active-entity-record-lookup-candidate
+0x00441db0 entity-reference-generation-lookup-candidate
 0x004517a0 sprite-frame-blit-candidate
 0x0045bd00 entity-type-definition-writer
 0x0045bf30 attack-stat-selector
