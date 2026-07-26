@@ -55,7 +55,7 @@ const FUNCTION_ENTRIES = {
   healthSubtraction: 0x00438130,
   targetValidityBeforeSpawn: 0x00438c50,
   healthApplicationModeProducer: 0x0043e1e0,
-  activeRecordGenerationLookup: 0x00441db0,
+  lowWordSlotRecordPositiveCheck: 0x00441db0,
   activeRecordLookup: 0x00441e40,
   poolUpdate: 0x00447360,
 };
