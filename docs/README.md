@@ -28,13 +28,15 @@
 - [분석 도구 인벤토리](reverse-engineering/tool-inventory.md)
 - [분석 상태표](reverse-engineering/status-matrix.md)
 - [함수 지도](reverse-engineering/function-map.md)
+- [원본 엔티티 타입 카탈로그](reverse-engineering/data-structures/entity-type-catalog.md)
 - [스프라이트 매핑 감사](reverse-engineering/sprite-mapping-audit.md)
 - [브리핑 `SPEECH` 초상화 매핑](reverse-engineering/mechanics/briefing-portraits.md)
 - [`SPEECH` 대화 레이아웃](reverse-engineering/mechanics/speech-layout.md)
 - [조선 창병·내부 클래스 2 애니메이션 파일럿](reverse-engineering/mechanics/unit-animation-pilot.md)
 - [조선 본영 건설·체력 프레임 파일럿](reverse-engineering/mechanics/building-state-pilot.md)
+- [조선 봉화대 건설·체력 프레임 파일럿](reverse-engineering/mechanics/beacon-state-pilot.md)
 - [엔티티 자료구조](reverse-engineering/data-structures/entity-record.md)
-- [K01 정적 분석 파일럿](reverse-engineering/mechanics/campaign/k01.md)
+- [K01 팬 리마스터 MVP 정적 분석 계획](reverse-engineering/mechanics/campaign/k01.md)
 
 ### 의사결정과 작업 규칙
 

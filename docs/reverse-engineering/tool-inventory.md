@@ -27,9 +27,12 @@
 | `extract-executable-refs.mjs`, `executable-refs.test.mjs` | 유지 | ASCII 문자열과 PE 위치를 탐색점으로 수집. 문자열 존재는 동작 증거가 아님 |
 | `extract-mission-portrait-mapping.mjs`, `mission-portrait-mapping.test.mjs` | 유지 | `SPEECH` 소비자·ID 조회·`hero.spr` 프레임 표의 정적 확정 결과 추출과 회귀 검사 |
 | `extract-speech-layout-evidence.mjs`, `speech-layout-evidence.test.mjs` | 유지 | `SPEECH` 숫자 슬롯·초상화 사각형·대사 좌표의 정적 확정 결과 추출과 회귀 검사 |
-| `extract-unit-animation-pilot.mjs`, `unit-animation-pilot.test.mjs` | 유지 | 조선 창병·내부 클래스 2·슬롯 100 식별과 상태 1·2 제한 방향·phase→frame·mirror 정적 파일럿 |
+| `extract-unit-animation-pilot.mjs`, `unit-animation-pilot.test.mjs` | 유지 | 조선 창병·클래스 2 식별, 상태 1·2 이동 의미·방향·phase→frame·mirror와 특수 분기 격리 |
+| `extract-k01-hero-movement-pilot.mjs`, `k01-hero-movement-pilot.test.mjs` | 유지 | K01 권율·유성룡의 클래스, 주·보조 SPR, 상태 8/1/4/7 대기·이동·공격·사망 방향·phase→frame·mirror 정적 추출 |
 | `extract-building-state-pilot.mjs`, `building-state-pilot.test.mjs` | 유지 | 조선 본영·클래스 49·슬롯 141의 건설 진행도와 정상·반파 본체 프레임 정적 파일럿 |
-| `audit-sprite-mappings.mjs`, `sprite-mapping-audit.test.mjs` | 유지 | 확정된 초상화와 미검증 엔티티 매핑을 분리해 감사 |
+| `extract-entity-type-catalog.mjs`, `entity-type-catalog.test.mjs` | 유지 | 클래스 1~95의 원본 이름·슬롯·기본 프레임·flags·SPR 경로 전수 추출과 결정론 검증 |
+| `extract-beacon-state-pilot.mjs`, `beacon-state-pilot.test.mjs` | 유지 | 조선 봉화대·클래스 52·`firehousek.spr` 정체와 건설·정상·반파 본체 프레임 정적 파일럿 |
+| `audit-sprite-mappings.mjs`, `sprite-mapping-audit.test.mjs` | 유지 | 타입 정체, 확정된 본체·초상화 범위와 미검증 프레임 매핑을 분리해 감사 |
 
 ## 원본 데이터 파서와 변환기
 
@@ -43,7 +46,7 @@
 | `inspect-maps.mjs`, `inspect-map-records.mjs` | 재검증 | 지도 후보 구조와 분포 조사 |
 | `extract-map-terrain-mask.mjs` | 재검증 | 지형 마스크 후보 탐색. 휴리스틱 결과는 원본 형식 확정 근거가 아님 |
 | `export-map-definition.mjs` | 재검증 | 포팅용 지도 생성. placeholder와 추론 필드는 원본 사실로 승격하지 않음 |
-| `extract-sprite-table.mjs` | 재검증 | EXE의 스프라이트 테이블 후보 조사 |
+| `extract-sprite-table.mjs` | 유지 | EXE의 연속 `char\*.spr` 포인터 표를 독립 추출. 타입 정체는 타입 카탈로그와 교차 확인 |
 
 ## 기존 정적 probe와 구현 감사
 

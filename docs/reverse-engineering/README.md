@@ -10,12 +10,16 @@
 4. [분석 도구 인벤토리](tool-inventory.md)
 5. [분석 상태표](status-matrix.md)
 6. [함수 지도](function-map.md)
-7. [스프라이트 매핑 감사](sprite-mapping-audit.md)
-8. [브리핑 `SPEECH` 초상화 매핑](mechanics/briefing-portraits.md)
-9. [`SPEECH` 대화 레이아웃](mechanics/speech-layout.md)
-10. [조선 창병·내부 클래스 2 애니메이션 파일럿](mechanics/unit-animation-pilot.md)
-11. [조선 본영 건설·체력 프레임 파일럿](mechanics/building-state-pilot.md)
-12. 분석할 자료구조와 나머지 메커니즘 문서
+7. [원본 엔티티 타입 카탈로그](data-structures/entity-type-catalog.md)
+8. [스프라이트 매핑 감사](sprite-mapping-audit.md)
+9. [브리핑 `SPEECH` 초상화 매핑](mechanics/briefing-portraits.md)
+10. [`SPEECH` 대화 레이아웃](mechanics/speech-layout.md)
+11. [조선 창병·내부 클래스 2 애니메이션 파일럿](mechanics/unit-animation-pilot.md)
+12. [K01 권율·유성룡 핵심 애니메이션 파일럿](mechanics/k01-hero-animation-pilot.md)
+13. [조선 본영 건설·체력 프레임 파일럿](mechanics/building-state-pilot.md)
+14. [조선 봉화대 건설·체력 프레임 파일럿](mechanics/beacon-state-pilot.md)
+15. [K01 팬 리마스터 MVP 정적 분석 계획](mechanics/campaign/k01.md)
+16. 분석할 나머지 자료구조와 메커니즘 문서
 
 ## 문서 역할
 
@@ -25,6 +29,7 @@
 - `tool-inventory.md`: 기존 도구의 유지·재검증·보관 분류
 - `status-matrix.md`: 영역별 분석·재현·이식 상태
 - `function-map.md`: 함수와 주요 코드 지점의 주소·역할·신뢰도
+- `data-structures/entity-type-catalog.md`: 내부 클래스 1~95의 원본 이름과 SPR 자원 연결
 - `sprite-mapping-audit.md`: 유닛·건물 매핑의 미검증 가정과 초상화 복원 결과
 - `data-structures/`: 구조체와 전역 상태
 - `mechanics/`: 캠페인·전투·이동·AI·애니메이션·UI 동작

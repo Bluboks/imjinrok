@@ -8,12 +8,17 @@
 ## 현재 기준선
 
 - 현행 매핑 감사: [`analysis/generated/sprite-mapping-audit.json`](../../analysis/generated/sprite-mapping-audit.json)
+- 원본 타입 카탈로그: [`analysis/generated/entity-type-catalog.json`](../../analysis/generated/entity-type-catalog.json)
 - 사람이 작성한 판정: [스프라이트 매핑 감사](../reverse-engineering/sprite-mapping-audit.md)
 - 원본 분석 방법: [정적 분석 방법론](../reverse-engineering/methodology.md)
 - 상태 승격 조건: [증거 및 상태 기준](../reverse-engineering/evidence-levels.md)
 
 감사 보고서에서 `unverified`인 매핑은 파일 경로와 프레임 존재만 확인된 것이다. 방향, 행동, 체력 상태,
 인물 정체가 확인됐다는 뜻이 아니며 원작 일치 근거로 사용할 수 없다.
+
+타입 카탈로그의 고유 연결은 원본 이름·스프라이트 슬롯·기본 프레임·자원 경로만 확정한다. 해당 자원의
+행동·방향·건설·체력 프레임 의미가 함께 확정됐다는 뜻은 아니다. 한 자원을 여러 타입이 공유하면
+프로젝트 정체를 임의로 하나 선택하지 않는다.
 
 ## 필수 규칙
 
@@ -48,9 +53,10 @@
 다를 수 있다.
 
 현재 [내부 클래스 2 애니메이션 파일럿](../reverse-engineering/mechanics/unit-animation-pilot.md)은
-원본 이름 `조선 창병`, 슬롯 100, `swordk.spr`와 상태 1·2의 제한된 방향·미러 식을 정적 확정했다.
-상태 1 표는 flags `0x80000008`이 없는 일반 분기에만 적용한다. 원본 이름을 프로젝트 표시 문자열에
-반영할 수 있지만, 행동 의미가 연결되기 전에는 상태 1·2를 임의로 `move`·`attack`으로 번역하지 않는다.
+원본 이름 `조선 창병`, 슬롯 100, `swordk.spr`, 상태 1 일반 이동과 상태 2 별도 이동 비주얼의
+방향·미러 식을 정적 확정했다. 상태 1 일반 이동은 프로젝트 `move`·`walk`에 이식했다. 상태 1
+특수 `+0x1e8` 분기는 구조를 복원했지만 클래스 2가 필요한 모든 frame base를 초기화하지 않으므로
+격리한다. 상태 2의 사람용 환경 명칭, idle과 공격·타격 프레임은 임의로 번역하거나 확정하지 않는다.
 
 ## 건물
 
@@ -62,9 +68,11 @@
 - 상태별 분기 경계
 - 기본 본체 프레임과 별도 오버레이 선택
 
-현재 [조선 본영 파일럿](../reverse-engineering/mechanics/building-state-pilot.md)은 클래스 49의
+현재 [조선 본영 파일럿](../reverse-engineering/mechanics/building-state-pilot.md)과
+[조선 봉화대 파일럿](../reverse-engineering/mechanics/beacon-state-pilot.md)은 각각 클래스 49·52의
 건설 프레임 0~7, 정상 프레임 7, 반파 프레임 8과 엄격한 50% 미만 경계를 정적 확정했다. 이 규칙은
-`korean-hq`에만 적용하며 다른 건물이나 `hqk.spr` 프레임 9~19로 일반화하지 않는다.
+`korean-hq`와 `korean-signal-beacon`에만 적용하며 다른 건물이나 각 자원의 나머지 프레임으로
+일반화하지 않는다.
 
 ## 브리핑 초상화
 

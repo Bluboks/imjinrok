@@ -74,6 +74,20 @@ Ghidra의 메모리 지도에는 PE 네 섹션 외에 헤더와 분석용 `tdb` 
 맵, 스크립트, SPR, YTL, YAV와 팔레트 파일이 `original/imjinrok2/` 아래에 있다. 전체 자원 해시
 매니페스트는 아직 생성되지 않았다.
 
+현재 정적 파일럿이 입력 해시를 강제하는 자원은 다음과 같다.
+
+| 경로 | SHA-256 | 확정 범위 |
+| --- | --- | --- |
+| `char/swordk.spr` | `414d285b207ba12afdd856a0f16ddde615381cf491fe493d6ededf91681b55eb` | 조선 창병 정체와 상태 1 일반 이동·상태 2 별도 이동 프레임 식 |
+| `char/generalk11.spr` | `658617ea4c762e85ff4e47167f6ed2f8cf1b37e8daea69338ed3e2c61c5bd829` | 조선 권율 상태 1 이동 0~39, 상태 7 사망 40~47 |
+| `char/generalk12.spr` | `9ae22b6fb4e4218b7625b6d73aaaf44a2696822d1ff4e518e396a1128c95a72b` | 조선 권율 상태 4 공격 방향 block, phase 8 |
+| `char/generalk13.spr` | `2576233295024781ab5c83da38116ac43ce24a2a2a7b0203876126b480bcdcf9` | 조선 권율 상태 8 대기 0~39 |
+| `char/generalk31.spr` | `11d3877f31e196d46b39d90f7153ccb931af9b92225b64ad334e9e6c031611e2` | 조선 유성룡 상태 8 대기 0~39, 상태 1 이동 40~79 |
+| `char/generalk32.spr` | `475c60db795407a4fba38f498c466e49d19b53cf83c31da63769aed8021af4bb` | 조선 유성룡 상태 4 공격 0~49, 상태 7 사망 50~57 |
+| `char/hqk.spr` | `17e5640a7b34f8aaf1063d210bd087b8ba59d769e194f5025e92941e422c2d4e` | 조선 본영 본체 frame 0~8 |
+| `char/firehousek.spr` | `ac6621124bbf2106a5d9309499da7701a5c4e5223692dd2f4f51e2e9c1ab97aa` | 조선 봉화대 본체 frame 0~8 |
+| `yfnt/hero.spr` | `a701bd0a66ec30dfd0bbc33ad7e78b937e725292fd37e9cae983ca28ad6af853` | `SPEECH` 초상화 17개 |
+
 향후 매니페스트에는 다음을 포함한다.
 
 - 상대 경로

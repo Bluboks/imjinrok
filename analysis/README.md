@@ -12,6 +12,7 @@
 - `generated/imjinrok2/jump-tables.json`: 간접 분기 후보와 디컴파일러가 복원한 점프 테이블
 - `generated/imjinrok2/seeds.json`: seed 주소가 포함된 함수, CFG, 명령어와 디컴파일 결과
 - `generated/imjinrok2/SHA256SUMS`: 생성 파일별 해시
+- `generated/entity-type-catalog.json`: 클래스 1~95의 원본 이름·슬롯·기본 프레임·flags·SPR 경로
 - `generated/sprite-mapping-audit.json`: 현행 엔티티·초상화 매핑과 원본 자원 해시의 의미 검증 상태
 
 `generated/`는 사람이 직접 편집하지 않는다.
@@ -27,6 +28,8 @@
 pnpm imjinrok:setup-static-analysis
 pnpm imjinrok:analyze-exe
 pnpm imjinrok:verify-static-analysis
+pnpm imjinrok:extract-entity-type-catalog
+pnpm imjinrok:extract-k01-hero-movement-pilot
 pnpm imjinrok:audit-sprite-mappings
 ```
 
