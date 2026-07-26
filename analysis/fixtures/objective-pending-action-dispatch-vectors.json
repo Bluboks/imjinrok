@@ -1,0 +1,374 @@
+{
+  "sourceExecutableSha256": "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e",
+  "sourceObjectiveSpriteSha256": "62552fecc34139e6729b84d4e15dcbe6ea3622eb76b7f443af29fa5322813ea5",
+  "structuredPendingReferenceSha256": "03f85a3c6b1e963d57c400a9c66f6e89eeb30f9d303c9681ad665f6fa2ace5ef",
+  "structuredDispatcherCallReferenceSha256": "eb7ec417de72ada68bc72a20857c3b25ad706768d563365748670be71ba09509",
+  "producerVectors": [
+    {
+      "id": "no-control-release",
+      "input": {
+        "objectiveControlReleased": false,
+        "state3eeControlReleased": false,
+        "state3ecControlReleased": false,
+        "state3eaControlReleased": false,
+        "surfaceLockSucceeded": true,
+        "commonUiResourcePresent": true
+      },
+      "expected": {
+        "handlerReturn": 0,
+        "ownerWrite": null,
+        "candidateSemanticAction": null,
+        "events": ["draw-common-ui-surface"]
+      }
+    },
+    {
+      "id": "objective-release-produces-open-candidate",
+      "input": {
+        "objectiveControlReleased": true,
+        "state3eeControlReleased": false,
+        "state3ecControlReleased": false,
+        "state3eaControlReleased": false,
+        "surfaceLockSucceeded": true,
+        "commonUiResourcePresent": true
+      },
+      "expected": {
+        "handlerReturn": 1008,
+        "ownerWrite": 1008,
+        "candidateSemanticAction": {
+          "type": "open-objective-modal",
+          "metadata": { "profile": "original-parity" }
+        },
+        "events": [
+          "select-pending-objective-open",
+          "draw-common-ui-surface",
+          "release-common-ui-resource",
+          "write-pending-owner-state"
+        ]
+      }
+    },
+    {
+      "id": "surface-failure-preserves-objective-candidate",
+      "input": {
+        "objectiveControlReleased": true,
+        "state3eeControlReleased": false,
+        "state3ecControlReleased": false,
+        "state3eaControlReleased": false,
+        "surfaceLockSucceeded": false,
+        "commonUiResourcePresent": false
+      },
+      "expected": {
+        "handlerReturn": 1008,
+        "ownerWrite": 1008,
+        "candidateSemanticAction": {
+          "type": "open-objective-modal",
+          "metadata": { "profile": "original-parity" }
+        },
+        "events": [
+          "select-pending-objective-open",
+          "skip-common-ui-draw-surface-lock-failed",
+          "write-pending-owner-state"
+        ]
+      }
+    },
+    {
+      "id": "later-0x3ee-overwrites-objective",
+      "input": {
+        "objectiveControlReleased": true,
+        "state3eeControlReleased": true,
+        "state3ecControlReleased": false,
+        "state3eaControlReleased": false,
+        "surfaceLockSucceeded": true,
+        "commonUiResourcePresent": true
+      },
+      "expected": {
+        "handlerReturn": 1006,
+        "ownerWrite": 1006,
+        "candidateSemanticAction": null,
+        "events": [
+          "select-pending-objective-open",
+          "overwrite-pending-0x3f0-with-unresolved-0x3ee",
+          "draw-common-ui-surface",
+          "release-common-ui-resource",
+          "write-pending-owner-state"
+        ]
+      }
+    },
+    {
+      "id": "later-0x3ec-overwrites-0x3ee",
+      "input": {
+        "objectiveControlReleased": true,
+        "state3eeControlReleased": true,
+        "state3ecControlReleased": true,
+        "state3eaControlReleased": false,
+        "surfaceLockSucceeded": true,
+        "commonUiResourcePresent": true
+      },
+      "expected": {
+        "handlerReturn": 1004,
+        "ownerWrite": 1004,
+        "candidateSemanticAction": null,
+        "events": [
+          "select-pending-objective-open",
+          "overwrite-pending-0x3f0-with-unresolved-0x3ee",
+          "overwrite-pending-0x3ee-with-unresolved-0x3ec",
+          "draw-common-ui-surface",
+          "release-common-ui-resource",
+          "write-pending-owner-state"
+        ]
+      }
+    },
+    {
+      "id": "all-later-controls-leave-0x3ea",
+      "input": {
+        "objectiveControlReleased": true,
+        "state3eeControlReleased": true,
+        "state3ecControlReleased": true,
+        "state3eaControlReleased": true,
+        "surfaceLockSucceeded": true,
+        "commonUiResourcePresent": true
+      },
+      "expected": {
+        "handlerReturn": 1002,
+        "ownerWrite": 1002,
+        "candidateSemanticAction": null,
+        "events": [
+          "select-pending-objective-open",
+          "overwrite-pending-0x3f0-with-unresolved-0x3ee",
+          "overwrite-pending-0x3ee-with-unresolved-0x3ec",
+          "overwrite-pending-0x3ec-with-unresolved-0x3ea",
+          "draw-common-ui-surface",
+          "release-common-ui-resource",
+          "write-pending-owner-state"
+        ]
+      }
+    }
+  ],
+  "dispatcherVectors": [
+    {
+      "id": "owner-disabled-retains-objective-pending",
+      "input": { "ownerEnabled": false, "pendingState": 1008 },
+      "expected": {
+        "phase": "owner-disabled",
+        "nextPendingState": 1008,
+        "consumedActions": [],
+        "events": []
+      }
+    },
+    {
+      "id": "objective-pending-opens-modal",
+      "input": {
+        "ownerEnabled": true,
+        "pendingState": 1008,
+        "objectiveResourceLoadSucceeded": true
+      },
+      "expected": {
+        "phase": "objective-initialize",
+        "nextPendingState": 1009,
+        "consumedActions": [
+          {
+            "type": "open-objective-modal",
+            "metadata": { "profile": "original-parity" }
+          }
+        ],
+        "events": [
+          "consume-open-objective-modal",
+          "initialize-objective-modal",
+          "load-objective-resource",
+          "set-objective-modal-active",
+          "draw-shared-ui",
+          "present-shared-ui",
+          "normalize-owner-previous-button"
+        ]
+      }
+    },
+    {
+      "id": "resource-load-failure-still-activates-modal-state",
+      "input": {
+        "ownerEnabled": true,
+        "pendingState": 1008,
+        "objectiveResourceLoadSucceeded": false
+      },
+      "expected": {
+        "phase": "objective-initialize",
+        "nextPendingState": 1009,
+        "consumedActions": [
+          {
+            "type": "open-objective-modal",
+            "metadata": { "profile": "original-parity" }
+          }
+        ],
+        "events": [
+          "consume-open-objective-modal",
+          "initialize-objective-modal",
+          "report-objective-resource-load-failure-and-continue",
+          "set-objective-modal-active",
+          "draw-shared-ui",
+          "present-shared-ui",
+          "normalize-owner-previous-button"
+        ]
+      }
+    },
+    {
+      "id": "active-modal-display",
+      "input": {
+        "ownerEnabled": true,
+        "pendingState": 1009,
+        "objectiveUpdate": {
+          "dismissed": false,
+          "surfaceLockSucceeded": true
+        }
+      },
+      "expected": {
+        "phase": "objective-active",
+        "nextPendingState": 1009,
+        "consumedActions": [],
+        "events": [
+          "update-objective-modal",
+          "draw-objective-modal",
+          "present-objective-content",
+          "normalize-objective-previous-button",
+          "draw-shared-ui",
+          "present-shared-ui",
+          "normalize-owner-previous-button"
+        ]
+      }
+    },
+    {
+      "id": "active-modal-surface-failure-retains-state",
+      "input": {
+        "ownerEnabled": true,
+        "pendingState": 1009,
+        "objectiveUpdate": {
+          "dismissed": false,
+          "surfaceLockSucceeded": false
+        }
+      },
+      "expected": {
+        "phase": "objective-active",
+        "nextPendingState": 1009,
+        "consumedActions": [],
+        "events": [
+          "update-objective-modal",
+          "skip-objective-draw-surface-lock-failed",
+          "present-objective-content",
+          "normalize-objective-previous-button",
+          "draw-shared-ui",
+          "present-shared-ui",
+          "normalize-owner-previous-button"
+        ]
+      }
+    },
+    {
+      "id": "dismiss-loaded-resource-and-clear",
+      "input": {
+        "ownerEnabled": true,
+        "pendingState": 1009,
+        "objectiveUpdate": {
+          "dismissed": true,
+          "objectiveResourcePresent": true,
+          "cleanupSurfaceLockSucceeded": true
+        }
+      },
+      "expected": {
+        "phase": "objective-dismiss",
+        "nextPendingState": 1000,
+        "consumedActions": [],
+        "events": [
+          "update-objective-modal",
+          "reset-to-common-ui-root",
+          "release-objective-resource",
+          "attempt-clear-objective-content",
+          "clear-objective-content",
+          "unlock-objective-clear-surface",
+          "draw-shared-ui",
+          "present-shared-ui",
+          "normalize-owner-previous-button"
+        ]
+      }
+    },
+    {
+      "id": "dismiss-after-resource-failure-and-clear-lock-failure",
+      "input": {
+        "ownerEnabled": true,
+        "pendingState": 1009,
+        "objectiveUpdate": {
+          "dismissed": true,
+          "objectiveResourcePresent": false,
+          "cleanupSurfaceLockSucceeded": false
+        }
+      },
+      "expected": {
+        "phase": "objective-dismiss",
+        "nextPendingState": 1000,
+        "consumedActions": [],
+        "events": [
+          "update-objective-modal",
+          "reset-to-common-ui-root",
+          "attempt-clear-objective-content",
+          "draw-shared-ui",
+          "present-shared-ui",
+          "normalize-owner-previous-button"
+        ]
+      }
+    },
+    {
+      "id": "common-root-reset-initializes-next-frame",
+      "input": { "ownerEnabled": true, "pendingState": 1000 },
+      "expected": {
+        "phase": "common-ui-initialize",
+        "nextPendingState": 1001,
+        "consumedActions": [],
+        "events": [
+          "initialize-common-ui",
+          "set-common-ui-active",
+          "draw-shared-ui",
+          "present-shared-ui",
+          "normalize-owner-previous-button"
+        ]
+      }
+    },
+    {
+      "id": "competing-0x3ec-dispatches-without-objective-action",
+      "input": { "ownerEnabled": true, "pendingState": 1004 },
+      "expected": {
+        "phase": "competing-state-dispatch",
+        "nextPendingState": 1005,
+        "consumedActions": [],
+        "events": [
+          "dispatch-unresolved-0x3ec",
+          "draw-shared-ui",
+          "present-shared-ui",
+          "normalize-owner-previous-button"
+        ]
+      }
+    },
+    {
+      "id": "signed-word-lower-bound-is-unmatched",
+      "input": { "ownerEnabled": true, "pendingState": -32768 },
+      "expected": {
+        "phase": "unmatched-state",
+        "nextPendingState": -32768,
+        "consumedActions": [],
+        "events": [
+          "draw-shared-ui",
+          "present-shared-ui",
+          "normalize-owner-previous-button"
+        ]
+      }
+    },
+    {
+      "id": "signed-word-upper-bound-is-unmatched",
+      "input": { "ownerEnabled": true, "pendingState": 32767 },
+      "expected": {
+        "phase": "unmatched-state",
+        "nextPendingState": 32767,
+        "consumedActions": [],
+        "events": [
+          "draw-shared-ui",
+          "present-shared-ui",
+          "normalize-owner-previous-button"
+        ]
+      }
+    }
+  ]
+}
