@@ -15,6 +15,10 @@ export type GatherResourceResult =
   | { ok: true; gathered: number; depleted: boolean; removed: boolean }
   | { ok: false; reason: string };
 
+export type HarvestResourceResult =
+  | { ok: true; kind: ResourceDefinition["yieldResource"]; gathered: number; depleted: boolean; removed: boolean }
+  | { ok: false; reason: string };
+
 interface ResourceTileLocation {
   tile: TileCell;
   resource: ResourceNode;
@@ -73,6 +77,10 @@ export function findResourceTile(map: MapDefinition, resourceId: string): GridPo
   return location ? { ...location.point } : null;
 }
 
+export function findResourceNode(map: MapDefinition, resourceId: string): ResourceNode | null {
+  return findResourceTileLocation(map, resourceId)?.resource ?? null;
+}
+
 export function findHarvestableResourceTile(map: MapDefinition, resourceId: string): GridPoint | null {
   const location = findResourceTileLocation(map, resourceId);
 
@@ -83,7 +91,63 @@ export function findHarvestableResourceTile(map: MapDefinition, resourceId: stri
   return { ...location.point };
 }
 
+export function findNearestHarvestableResource(
+  map: MapDefinition,
+  position: GridPoint,
+  yieldResource: ResourceDefinition["yieldResource"],
+): { id: string; point: GridPoint } | null {
+  let nearestResource: { id: string; point: GridPoint } | null = null;
+  let nearestDistanceSq = Number.POSITIVE_INFINITY;
+
+  for (const layer of map.layers) {
+    for (let tileIndex = 0; tileIndex < layer.tiles.length; tileIndex += 1) {
+      const resource = layer.tiles[tileIndex]?.resource;
+      const definition = resource ? getResourceDefinition(resource) : undefined;
+
+      if (!resource || !definition || definition.yieldResource !== yieldResource || !isResourceHarvestable(resource)) {
+        continue;
+      }
+
+      const point = {
+        x: tileIndex % map.width,
+        y: Math.floor(tileIndex / map.width),
+      };
+      const distanceSq = getDistanceSq(position, point);
+
+      if (distanceSq < nearestDistanceSq || (distanceSq === nearestDistanceSq && resource.id.localeCompare(nearestResource?.id ?? "") < 0)) {
+        nearestResource = { id: resource.id, point };
+        nearestDistanceSq = distanceSq;
+      }
+    }
+  }
+
+  return nearestResource;
+}
+
 export function gatherResourceForPlayer(state: WorldState, playerId: string, resourceId: string): GatherResourceResult {
+  const bank = state.playerResources[playerId];
+
+  if (!bank) {
+    return { ok: false, reason: "player resource bank not found" };
+  }
+
+  const result = harvestResource(state, resourceId, Number.POSITIVE_INFINITY);
+
+  if (!result.ok) {
+    return result;
+  }
+
+  bank[result.kind] += result.gathered;
+
+  return {
+    ok: true,
+    gathered: result.gathered,
+    depleted: result.depleted,
+    removed: result.removed,
+  };
+}
+
+export function harvestResource(state: WorldState, resourceId: string, maxAmount: number): HarvestResourceResult {
   const location = findResourceTileLocation(state.map, resourceId);
 
   if (!location) {
@@ -96,26 +160,23 @@ export function gatherResourceForPlayer(state: WorldState, playerId: string, res
     return { ok: false, reason: "resource node is not harvestable" };
   }
 
-  const bank = state.playerResources[playerId];
+  const gathered = Math.min(definition.gatherAmountPerTick, Math.max(0, maxAmount), location.resource.amount);
 
-  if (!bank) {
-    return { ok: false, reason: "player resource bank not found" };
+  if (gathered <= 0) {
+    return { ok: false, reason: "resource gather capacity is full" };
   }
 
-  const gathered = Math.min(definition.gatherAmountPerTick, location.resource.amount);
-
   location.resource.amount -= gathered;
-  bank[definition.yieldResource] += gathered;
 
   if (location.resource.amount > 0) {
     location.resource.state = "active";
     delete location.resource.regrowTicks;
-    return { ok: true, gathered, depleted: false, removed: false };
+    return { ok: true, kind: definition.yieldResource, gathered, depleted: false, removed: false };
   }
 
   if (definition.depletion.mode === "remove") {
     delete location.tile.resource;
-    return { ok: true, gathered, depleted: true, removed: true };
+    return { ok: true, kind: definition.yieldResource, gathered, depleted: true, removed: true };
   }
 
   location.resource.amount = 0;
@@ -127,7 +188,7 @@ export function gatherResourceForPlayer(state: WorldState, playerId: string, res
     delete location.resource.regrowTicks;
   }
 
-  return { ok: true, gathered, depleted: true, removed: false };
+  return { ok: true, kind: definition.yieldResource, gathered, depleted: true, removed: false };
 }
 
 export function updateResourceRegrowth(state: WorldState): void {
@@ -198,4 +259,11 @@ function findResourceTileLocation(map: MapDefinition, resourceId: string): Resou
   }
 
   return null;
+}
+
+function getDistanceSq(a: GridPoint, b: GridPoint): number {
+  const dx = a.x - b.x;
+  const dy = a.y - b.y;
+
+  return dx * dx + dy * dy;
 }

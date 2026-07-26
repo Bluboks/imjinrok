@@ -1,0 +1,26 @@
+# address label
+0x00401710 entity-draw-function-candidate
+0x0040c6c0 movement-record-initializer-candidate
+0x0040f320 projectile-trajectory-candidate
+0x0041d210 frame-state-dispatch-candidate
+0x0041d470 animation-frame-setter-primary-candidate
+0x0041d560 animation-frame-setter-secondary-candidate
+0x00441de0 entity-alive-check-candidate
+0x00441e40 active-entity-record-lookup-candidate
+0x004517a0 sprite-frame-blit-candidate
+0x00482180 script-load-candidate
+0x00482340 script-start-candidate
+0x004823a0 script-busy-check-candidate
+0x00482590 script-command-lookup-candidate
+0x00482860 script-command-dispatch-candidate
+0x004824c0 script-queue-consumer-candidate
+0x004830f0 script-record-dispatch-candidate
+0x0048ea90 speaker-id-storage-initializer-candidate
+0x004a7410 hero-panel-resource-initializer-candidate
+0x004a7690 speech-portrait-draw-candidate
+0x004a7b10 speech-display-orchestrator-candidate
+0x004a8870 speaker-id-lookup-candidate
+0x0048a731 k01-k0120-condition-site
+0x0048a812 k01-hero-loss-condition-site
+0x0048d6f0 mission-result-gate-candidate
+0x0048dde0 mission-result-consumer-candidate

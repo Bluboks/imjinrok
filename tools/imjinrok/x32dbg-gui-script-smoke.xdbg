@@ -1,0 +1,6 @@
+// Smoke script for interactive x32dbg command automation.
+// It proves command execution by dumping the loaded imjinrok2.exe PE header.
+log "IMJINROK_X32DBG_GUI_SCRIPT_SMOKE_STARTED"
+scriptcmd savedata C:\rev\logs\codex-imjinrok-x32dbg-scriptexec-smoke-20260602-0830-peheader.bin, 0x00400000, 0x40
+log "IMJINROK_X32DBG_GUI_SCRIPT_SMOKE_SAVEDATA_DONE"
+ret

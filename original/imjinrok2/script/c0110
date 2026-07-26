@@ -1,0 +1,32 @@
+제목 		: 1. 출병
+
+-------------------------------------스크립트----------------------------------
+[CHANGEMUSIC][music\briefmusicc.yav]
+[CHANGETITLE][ybriefingfnt\c01\c01.spr][SETDELAYTIME][500]
+
+[CHANGETITLE][ybriefingfnt\c01\c0101.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\c01\c0102.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\c01\c0103.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\c01\c0104.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\c01\c0105.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\c01\c0106.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\c01\c0107.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\c01\c0108.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\c01\c0109.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\c01\c0110.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\c01\c0111.spr][SETDELAYTIME][15]
+
+[TITLE][1. 출병]
+[OBJECTIVE][1. 여진족을 섬멸하라. (이여송과 심유경은 살아남아야 한다.)][]
+
+
+[SETDELAYTIME][100]
+[SPEECH][C1][0][C01010][무엄하게도 대명나라에 반기를 든 여진족들이 바로 저 앞에 진을 치고 있다. 천자의 명을 받들어 이들을 섬멸하여 나라의 근심을 없애는데 그대들은 최선을 다하라.]
+[SPEECH][C2][1][C01020][여부가 있겠습니까? 저들의 세력이 많이 약화되어 쉽게 정벌할 수 있을 것입니다.]
+[SPEECH][C3][2][C01030][장군, 천자의 어명이 도착했습니다. ]
+[SPEECH][C1][0][C01040][천자의 어명?]
+[SPEECH][C3][2][C01050][왜가 조선을 침범했다고 합니다. 의리를 숭상하고 자비로우신 천자께서 장군을 총사령관으로 임명하시어 여진족 토벌이 끝나는대로 조선을 도우라는 명령입니다.]
+[SPEECH][C2][1][C01060][여진족 정벌도 채 끝나기 전인데 또 출병 명령이라니 ...]
+[SPEECH][C1][0][C01070][천자의 어명을 거역할 수는 없는 일, 서둘러 여진의 잔당을 소탕하고 조선으로 출발한다. 그대들은 서둘러 전투 준비를 하라. ]
+[NOEND]
+-------------------------------------스크립트----------------------------------

@@ -1,32 +1,54 @@
-import { defaultSkirmishScenario, factions, type MapDefinition, type ScenarioDefinition } from "../../shared/src/index.js";
-import { createPlayerUnits } from "./entities.js";
+import {
+  defaultSkirmishScenario,
+  factions,
+  getTileAt,
+  terrainDefinitions,
+  unitDefinitions,
+  type GridPoint,
+  type MapDefinition,
+  type ScenarioDefinition,
+  type StartingUnitDefinition,
+} from "../../shared/src/index.js";
+import { createUnitState } from "./entities.js";
 import { createInitialEnvironmentState } from "./environment.js";
-import { createScenarioRuntimeState } from "./scenario.js";
-import type { PlayerState, ResourceBank, UnitState, WorldSnapshot, WorldState } from "./types.js";
+import { getFootprintTiles } from "./placement.js";
+import { createPlayerResearchState } from "./research.js";
+import { resourceBlocksBuilding, resourceBlocksMovement } from "./resources.js";
+import { applyScenarioScriptedEvents, createScenarioRuntimeState } from "./scenario.js";
+import type { PlayerCheatState, PlayerState, ResourceBank, UnitState, WorldSnapshot, WorldState } from "./types.js";
 
-export type { AttributePool, ObjectiveRuntimeState, ObjectiveStatus, PlayerState, ResourceBank, ScenarioRuntimeEvent, ScenarioRuntimeState, ScenarioStatus, UnitState, WorldSnapshot, WorldState } from "./types.js";
-export { applyCommand, issueCommand, validateCommand, type CommandValidationResult, type IssueCommandResult } from "./commands.js";
+const STARTING_PLACEMENT_SEARCH_RADIUS = 12;
+
+export type { AttributePool, CarriedResourceState, CombatEventState, ConstructionState, ObjectiveRuntimeState, ObjectiveStatus, PlayerCheatState, PlayerResearchState, PlayerState, PlayerTeamId, ProductionQueueItemState, RallyPointState, ResearchQueueItemState, ResourceBank, ScenarioRuntimeEvent, ScenarioRuntimeState, ScenarioStatus, ScriptedEventRuntimeState, ScriptedEventStatus, UnitOrderState, UnitScriptedBehaviorState, UnitState, WorldSnapshot, WorldState } from "./types.js";
+export { getBuildTimeTicks, getConstructionProgress, isUnitUnderConstruction } from "./construction.js";
+export { applyCommand, findBuildWorkPath, issueCommand, validateCommand, type CommandValidationResult, type IssueCommandResult } from "./commands.js";
+export { arePlayersAllied, arePlayersEnemies, getPlayerTeamId } from "./diplomacy.js";
 export { resolveDamageAmount, type DamagePacket } from "./damage.js";
 export type { EnvironmentState } from "./environment.js";
 export { findPathForUnit, isTerrainWalkable } from "./navigation.js";
 export { getFootprintTiles, validateBuildingPlacement, type BuildingPlacementValidationResult } from "./placement.js";
-export { findHarvestableResourceTile, findResourceTile, getResourceNodeState, isResourceHarvestable, resourceBlocksBuilding, resourceBlocksMovement, updateResourceRegrowth } from "./resources.js";
-export { createScenarioRuntimeState, evaluateScenarioRuntime } from "./scenario.js";
+export { canQueuePopulation, DEFAULT_POPULATION_LIMIT, getPlayerPopulationState, getPopulationCost, getPopulationProvided, type PlayerPopulationState } from "./population.js";
+export { applyCompletedResearchToUnit, completeResearch, createPlayerResearchState, isResearchCompleted, isResearchPending } from "./research.js";
+export { findHarvestableResourceTile, findNearestHarvestableResource, findResourceNode, findResourceTile, getResourceNodeState, harvestResource, isResourceHarvestable, resourceBlocksBuilding, resourceBlocksMovement, updateResourceRegrowth } from "./resources.js";
+export { applyScenarioScriptedEvents, completeScenarioRuntime, createScenarioRuntimeState, evaluateScenarioRuntime } from "./scenario.js";
 export { SIM_TICK_SECONDS, SIM_TICKS_PER_SECOND } from "./constants.js";
 export { isTileFlooded, isTilePassableForUnit } from "./terrain.js";
 export { advanceWorldTick } from "./tick.js";
 export { iterateUnitsOrdered } from "./units.js";
-export { createPlayerVisibility, getTileVisibility, updatePlayerVisibility, updatePlayerVisibilityWithChanges, TileVisibility, type PlayerVisibilityChangeOptions, type PlayerVisibilityState, type PlayerVisibilityUpdate } from "./visibility.js";
+export { areTilesVisible, createPlayerVisibility, getTileVisibility, updatePlayerVisibility, updatePlayerVisibilityWithChanges, TileVisibility, type PlayerVisibilityChangeOptions, type PlayerVisibilityState, type PlayerVisibilityUpdate } from "./visibility.js";
 
 export function createInitialWorldState(
   map: MapDefinition,
   playerIds: string[],
   scenario: ScenarioDefinition = defaultSkirmishScenario,
+  playerTeams: Partial<Record<string, string>> = {},
 ): WorldState {
   const worldMap = structuredClone(map);
   const units: Record<string, UnitState> = {};
   const players: Record<string, PlayerState> = {};
   const playerResources: Record<string, ResourceBank> = {};
+  const playerResearch: WorldState["playerResearch"] = {};
+  const playerCheats: Record<string, PlayerCheatState> = {};
 
   playerIds.forEach((playerId, index) => {
     const fallbackFaction = factions[index % factions.length] ?? "blue";
@@ -36,16 +58,31 @@ export function createInitialWorldState(
       y: 2 + index,
       faction: fallbackFaction,
     };
+    const playerStart = scenario.playerStarts?.[playerId] ?? scenario.playerStarts?.[`player-${index + 1}`];
+    const startingResources = {
+      ...scenario.startingResources,
+      ...(playerStart?.startingResources ?? {}),
+    };
+    const startingUnits = playerStart?.startingUnits ?? scenario.startingUnits;
 
-    players[playerId] = { id: playerId, faction: spawn.faction };
-    playerResources[playerId] = { ...scenario.startingResources };
+    const player: PlayerState = { id: playerId, faction: spawn.faction };
+    const teamId = playerTeams[playerId];
 
-    for (const unit of createPlayerUnits(playerId, { x: spawn.x, y: spawn.y }, scenario.startingUnits)) {
+    if (teamId) {
+      player.teamId = teamId;
+    }
+
+    players[playerId] = player;
+    playerResources[playerId] = startingResources;
+    playerResearch[playerId] = createPlayerResearchState();
+    playerCheats[playerId] = {};
+
+    for (const unit of createPlacedStartingUnits(playerId, { x: spawn.x, y: spawn.y }, startingUnits, worldMap, units)) {
       units[unit.id] = unit;
     }
   });
 
-  return {
+  const state: WorldState = {
     tick: 0,
     map: worldMap,
     environment: createInitialEnvironmentState(worldMap),
@@ -53,10 +90,159 @@ export function createInitialWorldState(
     players,
     units,
     playerResources,
+    playerResearch,
+    playerCheats,
+    combatEvents: [],
     lastAcceptedCommand: null,
   };
+
+  applyScenarioScriptedEvents(state, { tickTriggersOnly: true });
+
+  return state;
 }
 
 export function toWorldSnapshot(state: WorldState): WorldSnapshot {
   return structuredClone(state);
+}
+
+function createPlacedStartingUnits(
+  playerId: string,
+  spawn: GridPoint,
+  startingUnits: readonly StartingUnitDefinition[],
+  map: MapDefinition,
+  placedUnits: Readonly<Record<string, UnitState>>,
+): UnitState[] {
+  const units: UnitState[] = [];
+  const occupiedUnits: Record<string, UnitState> = { ...placedUnits };
+
+  for (const definition of startingUnits) {
+    const requestedPosition = {
+      x: spawn.x + definition.offset.x,
+      y: spawn.y + definition.offset.y,
+    };
+    const unit = createUnitState(`${playerId}-${definition.idSuffix}`, playerId, definition.kind, requestedPosition);
+    const placement = findStartingPlacement(map, occupiedUnits, unit, requestedPosition);
+
+    unit.position = placement ?? clampMapPoint(map, requestedPosition);
+    units.push(unit);
+    occupiedUnits[unit.id] = unit;
+  }
+
+  return units;
+}
+
+function findStartingPlacement(
+  map: MapDefinition,
+  placedUnits: Readonly<Record<string, UnitState>>,
+  unit: UnitState,
+  requestedPosition: GridPoint,
+): GridPoint | null {
+  const origin = clampMapPoint(map, requestedPosition);
+  const visited = new Set<string>();
+
+  for (let distance = 0; distance <= STARTING_PLACEMENT_SEARCH_RADIUS; distance += 1) {
+    for (let y = origin.y - distance; y <= origin.y + distance; y += 1) {
+      for (let x = origin.x - distance; x <= origin.x + distance; x += 1) {
+        if (Math.max(Math.abs(x - origin.x), Math.abs(y - origin.y)) !== distance) {
+          continue;
+        }
+
+        const point = clampMapPoint(map, { x, y });
+        const key = toTileKey(point);
+
+        if (visited.has(key)) {
+          continue;
+        }
+
+        visited.add(key);
+
+        if (isStartingPlacementValid(map, placedUnits, unit, point)) {
+          return point;
+        }
+      }
+    }
+  }
+
+  return null;
+}
+
+function isStartingPlacementValid(
+  map: MapDefinition,
+  placedUnits: Readonly<Record<string, UnitState>>,
+  unit: UnitState,
+  point: GridPoint,
+): boolean {
+  const definition = unitDefinitions[unit.kind];
+  const occupiedTiles = getOccupiedStartingTiles(placedUnits);
+
+  if (definition.category === "building") {
+    const placement = definition.placement;
+
+    if (!placement) {
+      return false;
+    }
+
+    for (const tile of getFootprintTiles(point, definition.footprint)) {
+      if (!isPointInMap(map, tile) || occupiedTiles.has(toTileKey(tile))) {
+        return false;
+      }
+
+      const mapTile = getTileAt(map, tile.x, tile.y);
+
+      const allowedTerrain: readonly string[] = placement.allowedTerrain;
+
+      if (!allowedTerrain.includes(mapTile.terrain) || resourceBlocksBuilding(mapTile.resource)) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  for (const footprintTile of getFootprintTiles(point, definition.footprint)) {
+    if (!isPointInMap(map, footprintTile) || occupiedTiles.has(toTileKey(footprintTile))) {
+      return false;
+    }
+
+    const tile = getTileAt(map, footprintTile.x, footprintTile.y);
+
+    if (terrainDefinitions[tile.terrain].blocksMovement || resourceBlocksMovement(tile.resource)) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+function getOccupiedStartingTiles(units: Readonly<Record<string, UnitState>>): Set<string> {
+  const occupiedTiles = new Set<string>();
+
+  for (const unit of Object.values(units)) {
+    const footprint = unitDefinitions[unit.kind].footprint;
+
+    if (!footprint.blocksMovement) {
+      continue;
+    }
+
+    for (const tile of getFootprintTiles(unit.position, footprint)) {
+      occupiedTiles.add(toTileKey(tile));
+    }
+  }
+
+  return occupiedTiles;
+}
+
+function clampMapPoint(map: MapDefinition, point: GridPoint): GridPoint {
+  return {
+    x: Math.max(0, Math.min(map.width - 1, Math.round(point.x))),
+    y: Math.max(0, Math.min(map.height - 1, Math.round(point.y))),
+  };
+}
+
+function isPointInMap(map: MapDefinition, point: GridPoint): boolean {
+  return point.x >= 0 && point.x < map.width && point.y >= 0 && point.y < map.height;
+}
+
+function toTileKey(point: GridPoint): string {
+  return `${point.x},${point.y}`;
 }

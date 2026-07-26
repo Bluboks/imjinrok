@@ -1,0 +1,2 @@
+log "codex x64dbg headless smoke"
+ret

@@ -1,0 +1,33 @@
+제목 		: 7. 왜성 전투
+
+-------------------------------------스크립트----------------------------------
+[CHANGEMUSIC][music\briefmusicc.yav]
+[CHANGETITLE][ybriefingfnt\c01\c01.spr][SETDELAYTIME][500]
+
+[CHANGETITLE][ybriefingfnt\c01\c0101.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\c01\c0102.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\c01\c0103.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\c01\c0104.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\c01\c0105.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\c01\c0106.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\c01\c0107.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\c01\c0108.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\c01\c0109.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\c01\c0110.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\c01\c0111.spr][SETDELAYTIME][15]
+
+[TITLE][7. 육상전]
+[OBJECTIVE][1. 왜성을 함락하고 적군을 섬멸하라.][]
+
+[SETDELAYTIME][100]
+[SPEECH][C1][0][C07010][전쟁이 막바지에 이르렀다.]
+[SPEECH][C3][1][C07020][예, 왜군이 곧 철수할 것이라는 소문이 무성합니다.]
+[SPEECH][C1][0][C07030][전쟁이 끝나기 전에 왜군을 몰아붙여 큰 공을 세워야 돌아가서 위신이 설 것이다.]
+[SPEECH][C2][2][C07040][그렇습니다. 대 명군이 참전하여 큰 공을 세우지 못하고 돌아간대서야 말이 되지 않습니다.]
+[SPEECH][C3][1][C07050][그렇다면 왜성을 공격하는 것이 어떻습니까?]
+[SPEECH][C1][0][C07060][왜성?]
+[SPEECH][C3][1][C07070][예, 왜군이 남해안 근처에 성을 쌓고 은거하고 있습니다. 철군을 앞에 둔 마당에 그들이 적극적으로 싸움에 나설 이유가 없지 않습니까? 우리가 공격해 가면 틀림없이 성을 버리고 달아날 것 입니다.]
+[SPEECH][C2][2][C07080][그렇게만 된다면 우리는 힘 안들이고 큰 승리를 거둘 것입니다.]
+[SPEECH][C1][0][C07090][좋은 생각이다. 당장 왜성을 향해 출발하라.]
+[NOEND]
+-------------------------------------스크립트----------------------------------

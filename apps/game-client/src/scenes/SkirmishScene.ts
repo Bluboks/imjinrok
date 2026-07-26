@@ -26,6 +26,7 @@ import {
   type AnimationClip,
   type BankResourceKind,
   type BuildingDefinitionId,
+  type CheatCodeId,
   type CommandEnvelope,
   type ActionDefinitionId,
   type ElevationNeighbor,
@@ -39,8 +40,11 @@ import {
   type ResourceAmountSet,
   type ResourceDefinition,
   type ResourceNode,
+  type ScenarioBriefingDefinition,
   type ResearchDefinitionId,
   type ScenarioBriefingLineDefinition,
+  type ScenarioBriefingTitleFrameDefinition,
+  type ScenarioDefinition,
   type ScenarioMissionDialogueDefinition,
   type ThemeDefinition,
   type TerrainKindSlot,
@@ -72,6 +76,11 @@ import {
   type UnitState,
   type WorldState,
 } from "@simulation";
+import {
+  MISSION_PORTRAIT_IMAGE_CUES,
+  normalizeMissionPortraitId,
+  type MissionPortraitImageDefinition,
+} from "../missionPortraits";
 import {
   ACTION_TRIGGERED_EVENT,
   BATTLEFIELD_SUMMARY_ACTION_EVENT,
@@ -112,14 +121,17 @@ import {
   toSelectedEntityView,
 } from "../hud.js";
 import { createSessionTransport, type SessionTransport } from "../net/SessionTransport.js";
+import { getMissionLineDurationMs, normalizeMissionVoiceId } from "../missionVoiceTiming.js";
 import { placeStaticVisual } from "../render/placeStaticVisual.js";
 import { getAssetScale, getFrameOrigin, getFramePivot, REFERENCE_PX_PER_WU, RENDER_DEPTH_BIAS } from "../render/visualScale.js";
 import {
+  createCampaignMissionLaunchContext,
   deserializePlayerVisibilityState,
   createFreshLaunchContext,
   isOptionalStringArray,
   isSupportedQuickSaveVersion,
   LATEST_QUICK_SAVE_STORAGE_KEY,
+  normalizeOptionalMissionDialogueState,
   normalizeSavedWorldSnapshot,
   normalizeSerializedControlGroups,
   normalizeSerializedKnownResources,
@@ -129,9 +141,27 @@ import {
   type QuickSavePayload,
   type SerializedControlGroups,
   type SerializedKnownResourceView,
+  type SerializedMissionDialogueState,
   type SerializedPlayerVisibilityState,
 } from "../session.js";
 import { createFormationTargets } from "../formation.js";
+import {
+  BUILD_DONE_AUDIO_CUE_KEY,
+  COMMAND_REJECTED_AUDIO_CUE_KEY,
+  GAMEPLAY_AUDIO_CUES,
+  GAMEPLAY_AUDIO_CUE_BY_KEY,
+  MISSION_BRIEFING_MUSIC_AUDIO_CUE_BY_SOURCE,
+  MISSION_BRIEFING_MUSIC_AUDIO_CUE_KEY,
+  MISSION_DEFEAT_AUDIO_CUE_KEY,
+  MISSION_VICTORY_AUDIO_CUE_KEY,
+  TRAINING_DONE_AUDIO_CUE_KEY,
+  UNDER_ATTACK_ALERT_COOLDOWN_MS,
+  UNDER_ATTACK_AUDIO_CUE_KEY,
+  UNIT_AUDIO_CUES,
+  UPGRADE_DONE_AUDIO_CUE_KEY,
+  type GameplayAudioCueKey,
+  type UnitAudioAction,
+} from "../gameplayAudio.js";
 
 const DRAG_THRESHOLD_SQ = 36;
 const EDGE_PAN_SIZE = 28;
@@ -145,10 +175,14 @@ const FOG_EXPLORED_ALPHA = 0.48;
 const TERRAIN_DEBUG_DETAILS_STORAGE_KEY = "isorts.debug.terrainDetails";
 const RESOURCE_DEFINITIONS = resourceDefinitions as Readonly<Record<string, ResourceDefinition>>;
 const MISSION_BRIEFING_DURATION_MS = 60_000;
+const MISSION_BRIEFING_LINE_DURATION_MS = 5_500;
+const MISSION_BRIEFING_BACKDROP_IMAGE_PREFIX = "image:mission-briefing-backdrop:";
+const MISSION_BRIEFING_BACKDROP_ASSET_ROOT_URL = "assets/themes/default/ui/briefing";
+const MISSION_BRIEFING_BACKDROP_SOURCE_WIDTH = 640;
+const MISSION_BRIEFING_BACKDROP_SOURCE_HEIGHT = 480;
 const MISSION_DIALOGUE_LINE_DURATION_MS = 5_500;
 const COMMAND_FEEDBACK_DURATION_MS = 2_200;
 const UNDER_ATTACK_ALERT_DURATION_MS = 2_800;
-const UNDER_ATTACK_ALERT_COOLDOWN_MS = 3_500;
 const CONTROL_GROUP_DOUBLE_TAP_MS = 450;
 const UNIT_DOUBLE_CLICK_SELECT_MS = 420;
 const ENVIRONMENT_OVERLAY_DEPTH = SCREEN_OVERLAY_DEPTH - 140;
@@ -156,89 +190,162 @@ const MIN_CAMERA_ZOOM = 0.55;
 const MAX_CAMERA_ZOOM = 1.8;
 const PLAYBACK_SPEEDS = [0.5, 1, 1.5, 2, 3] as const;
 const MAX_CLIENT_PRODUCTION_QUEUE_SIZE = 5;
-const BUILD_DONE_AUDIO_CUE_KEY = "audio:ui:build-done";
-const COMMAND_REJECTED_AUDIO_CUE_KEY = "audio:ui:cannot-make-there";
-const MISSION_DEFEAT_AUDIO_CUE_KEY = "audio:music:mission-defeat";
-const MISSION_VICTORY_AUDIO_CUE_KEY = "audio:music:mission-victory";
-const TRAINING_DONE_AUDIO_CUE_KEY = "audio:ui:training-done";
-const UNDER_ATTACK_AUDIO_CUE_KEY = "audio:ui:be-attacked";
-const UPGRADE_DONE_AUDIO_CUE_KEY = "audio:ui:upgrade-done";
+const CHEAT_INPUT_MAX_LENGTH = 32;
+
+type ClientCheatAction =
+  | { type: "simulation"; code: CheatCodeId; label: string }
+  | { type: "reveal-map"; label: string }
+  | { type: "instant-victory"; label: string }
+  | { type: "unsupported"; label: string };
+
+const IMJINROK_CHEAT_CODES: Record<string, ClientCheatAction> = {
+  "돈을갖고튀어라": { type: "simulation", code: "grant-resources", label: "자원 증가" },
+  "총알탄사나이": { type: "simulation", code: "fast-production", label: "생산/건설 가속" },
+  "보이지않는위험": { type: "reveal-map", label: "지도 밝힘" },
+  "인정사정볼것없다": { type: "simulation", code: "invincible", label: "무적" },
+  "이보다더좋을수는없다": { type: "instant-victory", label: "즉시 승리" },
+  "열세번째전사": { type: "unsupported", label: "장수 레벨" },
+  "주유소습격사건": { type: "unsupported", label: "상점 아이템" },
+  "비오는날의수채화": { type: "simulation", code: "force-rain", label: "비" },
+};
 
 function getCancellableQueueLength(unit: UnitState): number {
   return (unit.productionQueue?.length ?? 0) + (unit.researchQueue?.length ?? 0);
 }
 
-type UnitAudioAction = "attack" | "die" | "move" | "select";
-
-interface GameplayAudioCueDefinition {
+interface MissionVoiceAudioCueDefinition {
   key: string;
+  voiceId: string;
   url: string;
   volume: number;
-  cooldownMs: number;
 }
 
-const GAMEPLAY_AUDIO_CUES = [
-  { key: "audio:voice:select-farmer-k1", url: "assets/audio/voice/select_farmerk1.wav", volume: 0.72, cooldownMs: 650 },
-  { key: "audio:voice:move-farmer-k1", url: "assets/audio/voice/move_farmerk1.wav", volume: 0.72, cooldownMs: 750 },
-  { key: "audio:voice:attack-farmer-k1", url: "assets/audio/voice/attack_farmerk1.wav", volume: 0.72, cooldownMs: 850 },
-  { key: "audio:voice:die-farmer-k1", url: "assets/audio/voice/die_farmerk1.wav", volume: 0.76, cooldownMs: 700 },
-  { key: "audio:voice:select-sword-k1", url: "assets/audio/voice/select_swordk1.wav", volume: 0.72, cooldownMs: 650 },
-  { key: "audio:voice:move-sword-k1", url: "assets/audio/voice/move_swordk1.wav", volume: 0.72, cooldownMs: 750 },
-  { key: "audio:voice:attack-sword-k1", url: "assets/audio/voice/attack_swordk1.wav", volume: 0.76, cooldownMs: 850 },
-  { key: "audio:voice:die-sword-k1", url: "assets/audio/voice/die_swordk1.wav", volume: 0.78, cooldownMs: 700 },
-  { key: "audio:voice:select-archer-k1", url: "assets/audio/voice/select_archerk1.wav", volume: 0.72, cooldownMs: 650 },
-  { key: "audio:voice:move-archer-k1", url: "assets/audio/voice/move_archerk1.wav", volume: 0.72, cooldownMs: 750 },
-  { key: "audio:voice:attack-archer-k1", url: "assets/audio/voice/attack_archerk1.wav", volume: 0.76, cooldownMs: 850 },
-  { key: "audio:voice:die-archer-k1", url: "assets/audio/voice/die_archerk1.wav", volume: 0.78, cooldownMs: 700 },
-  { key: "audio:voice:hq-k1", url: "assets/audio/voice/hqk1.wav", volume: 0.7, cooldownMs: 650 },
-  { key: "audio:voice:mill-k1", url: "assets/audio/voice/millk1.wav", volume: 0.7, cooldownMs: 650 },
-  { key: "audio:voice:barrack-k1", url: "assets/audio/voice/barrackk1.wav", volume: 0.7, cooldownMs: 650 },
-  { key: "audio:voice:firehouse-k1", url: "assets/audio/voice/firehousek1.wav", volume: 0.7, cooldownMs: 650 },
-  { key: "audio:voice:select-general-k42", url: "assets/audio/voice/select_generalk42.wav", volume: 0.72, cooldownMs: 650 },
-  { key: "audio:voice:move-general-k42", url: "assets/audio/voice/move_generalk42.wav", volume: 0.72, cooldownMs: 750 },
-  { key: BUILD_DONE_AUDIO_CUE_KEY, url: "assets/audio/ui/builddone.wav", volume: 0.76, cooldownMs: 900 },
-  { key: COMMAND_REJECTED_AUDIO_CUE_KEY, url: "assets/audio/ui/cannotmakethere.wav", volume: 0.76, cooldownMs: 1_000 },
-  { key: MISSION_DEFEAT_AUDIO_CUE_KEY, url: "assets/audio/music/lose.wav", volume: 0.68, cooldownMs: 6_000 },
-  { key: MISSION_VICTORY_AUDIO_CUE_KEY, url: "assets/audio/music/win.wav", volume: 0.72, cooldownMs: 6_000 },
-  { key: TRAINING_DONE_AUDIO_CUE_KEY, url: "assets/audio/ui/trainspotdonemessage.wav", volume: 0.74, cooldownMs: 900 },
-  { key: UNDER_ATTACK_AUDIO_CUE_KEY, url: "assets/audio/ui/beattackedmessage.wav", volume: 0.82, cooldownMs: UNDER_ATTACK_ALERT_COOLDOWN_MS },
-  { key: UPGRADE_DONE_AUDIO_CUE_KEY, url: "assets/audio/ui/upgradedone.wav", volume: 0.76, cooldownMs: 900 },
-] as const satisfies readonly GameplayAudioCueDefinition[];
+interface MissionBriefingBackdropFrameDefinition {
+  key: string;
+  url: string;
+  durationMs: number;
+}
 
-type GameplayAudioCueKey = (typeof GAMEPLAY_AUDIO_CUES)[number]["key"];
+interface MissionResultLogoFrameDefinition {
+  key: string;
+  url: string;
+}
 
-const GAMEPLAY_AUDIO_CUE_BY_KEY: ReadonlyMap<GameplayAudioCueKey, GameplayAudioCueDefinition> = new Map(
-  GAMEPLAY_AUDIO_CUES.map((cue) => [cue.key, cue] as const),
+interface MissionResultLogoDefinition {
+  source: string;
+  width: number;
+  height: number;
+  frames: readonly MissionResultLogoFrameDefinition[];
+}
+
+const MISSION_VOICE_AUDIO_PREFIX = "audio:mission-voice:";
+const MISSION_VOICE_AUDIO_VOLUME = 0.86;
+const MISSION_RESULT_LOGO_IMAGE_PREFIX = "image:mission-result-logo:";
+const MISSION_RESULT_LOGO_ASSET_ROOT_URL = "assets/themes/default/ui/result";
+const MISSION_RESULT_LOGO_FRAME_MS = 80;
+const MISSION_RESULT_BACKDROP_IMAGE_KEY = "image:mission-result-backdrop:titleresult";
+const MISSION_RESULT_BACKDROP_URL = "assets/themes/default/ui/result/titleresult/titleresult_0000.png";
+const MISSION_RESULT_BACKDROP_SOURCE_WIDTH = 640;
+const MISSION_RESULT_BACKDROP_SOURCE_HEIGHT = 480;
+
+const MISSION_BRIEFING_BACKDROP_PRELOAD_FRAMES = collectMissionBriefingBackdropFrames(imjinrokCampaignScenarios);
+
+const MISSION_VOICE_AUDIO_CUES = collectMissionVoiceAudioCues(imjinrokCampaignScenarios);
+const MISSION_VOICE_AUDIO_CUE_BY_ID: ReadonlyMap<string, MissionVoiceAudioCueDefinition> = new Map(
+  MISSION_VOICE_AUDIO_CUES.map((cue) => [cue.voiceId, cue] as const),
+);
+const MISSION_PORTRAIT_IMAGE_CUE_BY_ID: ReadonlyMap<string, MissionPortraitImageDefinition> = new Map(
+  MISSION_PORTRAIT_IMAGE_CUES.map((cue) => [normalizeMissionPortraitId(cue.portraitId), cue] as const),
 );
 
-const UNIT_AUDIO_CUES: Partial<Record<UnitDefinitionId, Partial<Record<UnitAudioAction, GameplayAudioCueKey>>>> = {
-  "town-center": { select: "audio:voice:hq-k1" },
-  house: { select: "audio:voice:mill-k1" },
-  barracks: { select: "audio:voice:barrack-k1" },
-  beacon: { select: "audio:voice:firehouse-k1" },
-  villager: {
-    attack: "audio:voice:attack-farmer-k1",
-    die: "audio:voice:die-farmer-k1",
-    move: "audio:voice:move-farmer-k1",
-    select: "audio:voice:select-farmer-k1",
-  },
-  swordsman: {
-    attack: "audio:voice:attack-sword-k1",
-    die: "audio:voice:die-sword-k1",
-    move: "audio:voice:move-sword-k1",
-    select: "audio:voice:select-sword-k1",
-  },
-  archer: {
-    attack: "audio:voice:attack-archer-k1",
-    die: "audio:voice:die-archer-k1",
-    move: "audio:voice:move-archer-k1",
-    select: "audio:voice:select-archer-k1",
-  },
-  "royal-cart": {
-    move: "audio:voice:move-general-k42",
-    select: "audio:voice:select-general-k42",
-  },
-};
+const MISSION_RESULT_LOGO_BY_STATUS = {
+  victory: createMissionResultLogoDefinition("winlogo", "original/imjinrok2/yfnt/winlogo.spr"),
+  defeat: createMissionResultLogoDefinition("loselogo", "original/imjinrok2/yfnt/loselogo.spr"),
+} as const satisfies Record<"victory" | "defeat", MissionResultLogoDefinition>;
+
+function createMissionResultLogoDefinition(stem: string, source: string): MissionResultLogoDefinition {
+  return {
+    source,
+    width: 250,
+    height: 100,
+    frames: Array.from({ length: 28 }, (_value, index) => ({
+      key: `${MISSION_RESULT_LOGO_IMAGE_PREFIX}${stem}:${index}`,
+      url: `${MISSION_RESULT_LOGO_ASSET_ROOT_URL}/${stem}/${stem}_${String(index).padStart(4, "0")}.png`,
+    })),
+  };
+}
+
+function collectMissionBriefingBackdropFrames(
+  scenarios: readonly ScenarioDefinition[],
+): MissionBriefingBackdropFrameDefinition[] {
+  const frames = new Map<string, MissionBriefingBackdropFrameDefinition>();
+
+  for (const scenario of scenarios) {
+    for (const frame of collectMissionBriefingBackdropFramesForBriefing(scenario.briefing)) {
+      frames.set(frame.key, frame);
+    }
+  }
+
+  return [...frames.values()];
+}
+
+function collectMissionBriefingBackdropFramesForBriefing(
+  briefing: ScenarioBriefingDefinition | undefined,
+): MissionBriefingBackdropFrameDefinition[] {
+  return (briefing?.titleSequence ?? []).map(createMissionBriefingBackdropFrame);
+}
+
+function createMissionBriefingBackdropFrame(
+  frame: ScenarioBriefingTitleFrameDefinition,
+): MissionBriefingBackdropFrameDefinition {
+  const sourceAsset = normalizeMissionBriefingBackdropSourceAsset(frame.sourceAsset);
+  const sourceWithoutExtension = sourceAsset.replace(/\.[^/.]+$/, "");
+  const publicAssetPath = sourceWithoutExtension.replace(/^ybriefingfnt\//, "");
+  const key = publicAssetPath.replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+
+  return {
+    key: `${MISSION_BRIEFING_BACKDROP_IMAGE_PREFIX}${key}`,
+    url: `${MISSION_BRIEFING_BACKDROP_ASSET_ROOT_URL}/${publicAssetPath}_0000.png`,
+    durationMs: frame.durationMs,
+  };
+}
+
+function normalizeMissionBriefingBackdropSourceAsset(sourceAsset: string): string {
+  return sourceAsset.trim().replaceAll("\\", "/").replace(/^\/+/, "").toLowerCase();
+}
+
+function collectMissionVoiceAudioCues(
+  scenarios: readonly ScenarioDefinition[],
+): MissionVoiceAudioCueDefinition[] {
+  const voiceIds = new Set<string>();
+
+  for (const scenario of scenarios) {
+    for (const line of scenario.briefing?.lines ?? []) {
+      addMissionVoiceId(voiceIds, line.voiceId);
+    }
+
+    for (const dialogue of scenario.missionDialogues ?? []) {
+      for (const line of dialogue.lines) {
+        addMissionVoiceId(voiceIds, line.voiceId);
+      }
+    }
+  }
+
+  return [...voiceIds].sort().map((voiceId) => ({
+    key: `${MISSION_VOICE_AUDIO_PREFIX}${voiceId}`,
+    voiceId,
+    url: `assets/audio/mission/${voiceId}.wav`,
+    volume: MISSION_VOICE_AUDIO_VOLUME,
+  }));
+}
+
+function addMissionVoiceId(voiceIds: Set<string>, voiceId: string): void {
+  const normalizedVoiceId = normalizeMissionVoiceId(voiceId);
+
+  if (normalizedVoiceId) {
+    voiceIds.add(normalizedVoiceId);
+  }
+}
 
 const POINT_TARGET_ACTION_IDS = new Set<ActionDefinitionId>(["move", "gather", "rally-point", "repair", "attack-move", "patrol"]);
 
@@ -332,10 +439,23 @@ interface ObjectiveTrackerEntry {
   focusWorldPoint: Phaser.Math.Vector2 | null;
 }
 
+interface ObjectiveAreaLabelDefinition {
+  x: number;
+  y: number;
+  text: string;
+  color: string;
+}
+
 interface ActiveMissionDialogue {
   dialogue: ScenarioMissionDialogueDefinition;
   lineIndex: number;
   nextLineAt: number;
+}
+
+interface MissionDialogueParticipant {
+  speaker: string;
+  portraitId: string;
+  side?: "left" | "right";
 }
 
 interface PendingBuildPlacement {
@@ -400,13 +520,23 @@ export class SkirmishScene extends Phaser.Scene {
   private scenarioStatusText: Phaser.GameObjects.Text | null = null;
   private commandFeedbackText: Phaser.GameObjects.Text | null = null;
   private commandFeedbackHideAt = 0;
+  private cheatInputElement: HTMLInputElement | null = null;
+  private revealMapCheatActive = false;
   private underAttackText: Phaser.GameObjects.Text | null = null;
   private underAttackHideAt = 0;
   private lastUnderAttackAlertAt = Number.NEGATIVE_INFINITY;
   private underAttackFocusPoint: Phaser.Math.Vector2 | null = null;
   private missionBriefingContainer: Phaser.GameObjects.Container | null = null;
+  private missionBriefingBackdropImage: Phaser.GameObjects.Image | null = null;
+  private missionBriefingBackdropStartedAt: number | null = null;
   private missionBriefingHideAt: number | null = null;
   private missionBriefingPausedAt: number | null = null;
+  private missionBriefingLineIndex = 0;
+  private missionBriefingLineRevealAt: number | null = null;
+  private missionBriefingNextLineAt: number | null = null;
+  private missionBriefingWasPlaybackPaused: boolean | null = null;
+  private missionBriefingWasUiVisible: boolean | null = null;
+  private missionBriefingMusicPlaying = false;
   private missionDialogueContainer: Phaser.GameObjects.Container | null = null;
   private missionResultContainer: Phaser.GameObjects.Container | null = null;
   private missionResultAudioStatus: "victory" | "defeat" | null = null;
@@ -414,6 +544,8 @@ export class SkirmishScene extends Phaser.Scene {
   private pauseMenuContainer: Phaser.GameObjects.Container | null = null;
   private pauseMenuMessageText: Phaser.GameObjects.Text | null = null;
   private objectiveAreaGraphics: Phaser.GameObjects.Graphics | null = null;
+  private readonly objectiveAreaLabels: Phaser.GameObjects.Text[] = [];
+  private objectiveAreaLabelSignature = "";
   private environmentOverlay: Phaser.GameObjects.Graphics | null = null;
   private environmentOverlaySignature = "";
   private objectiveTrackerContainer: Phaser.GameObjects.Container | null = null;
@@ -457,6 +589,25 @@ export class SkirmishScene extends Phaser.Scene {
   private terrainDebugTooltip: HTMLDivElement | null = null;
   private terrainDebugHighlight: Phaser.GameObjects.Graphics | null = null;
   private hoveredTerrainDebugTile: GridPoint | null = null;
+  private readonly handleCheatInputKeyDown = (event: KeyboardEvent): void => {
+    event.stopPropagation();
+
+    if (event.key === "Escape") {
+      this.closeCheatInput();
+      event.preventDefault();
+      return;
+    }
+
+    if (event.key !== "Enter") {
+      return;
+    }
+
+    const cheatCode = this.cheatInputElement?.value ?? "";
+
+    this.closeCheatInput();
+    this.submitCheatCode(cheatCode);
+    event.preventDefault();
+  };
 
   constructor() {
     super("skirmish");
@@ -468,17 +619,59 @@ export class SkirmishScene extends Phaser.Scene {
         this.load.audio(cue.key, cue.url);
       }
     }
+
+    for (const cue of MISSION_VOICE_AUDIO_CUES) {
+      if (!this.cache.audio.exists(cue.key)) {
+        this.load.audio(cue.key, cue.url);
+      }
+    }
+
+    for (const cue of MISSION_PORTRAIT_IMAGE_CUES) {
+      if (!this.textures.exists(cue.key)) {
+        this.load.image(cue.key, cue.url);
+      }
+    }
+
+    for (const frame of MISSION_BRIEFING_BACKDROP_PRELOAD_FRAMES) {
+      if (!this.textures.exists(frame.key)) {
+        this.load.image(frame.key, frame.url);
+      }
+    }
+
+    for (const logo of Object.values(MISSION_RESULT_LOGO_BY_STATUS)) {
+      for (const frame of logo.frames) {
+        if (!this.textures.exists(frame.key)) {
+          this.load.image(frame.key, frame.url);
+        }
+      }
+    }
+
+    if (!this.textures.exists(MISSION_RESULT_BACKDROP_IMAGE_KEY)) {
+      this.load.image(MISSION_RESULT_BACKDROP_IMAGE_KEY, MISSION_RESULT_BACKDROP_URL);
+    }
   }
 
   create(data: GameLaunchContext): void {
+    this.closeCheatInput();
+    this.revealMapCheatActive = false;
     this.activeMissionDialogue = null;
     this.missionResultAudioStatus = null;
     this.recordedCampaignVictoryScenarioId = null;
+    this.missionBriefingBackdropImage = null;
+    this.missionBriefingBackdropStartedAt = null;
+    this.missionBriefingHideAt = null;
+    this.missionBriefingPausedAt = null;
+    this.missionBriefingLineIndex = 0;
+    this.missionBriefingLineRevealAt = null;
+    this.missionBriefingNextLineAt = null;
+    this.missionBriefingWasPlaybackPaused = null;
+    this.missionBriefingWasUiVisible = null;
     this.triggeredMissionDialogueIds.clear();
     this.processedCombatEventIds.clear();
     this.trackedConstructionUnitIds.clear();
     this.trackedCompletedResearchKeys.clear();
     this.trackedUnitIds.clear();
+    this.missionBriefingMusicPlaying = false;
     this.knownResourceViews.clear();
     this.lastAudioCuePlayedAt.clear();
     this.controlGroups.clear();
@@ -529,6 +722,9 @@ export class SkirmishScene extends Phaser.Scene {
     this.setupCommandFeedbackOverlay();
     this.setupUnderAttackAlertOverlay();
     this.setupMissionBriefingOverlay();
+    if (data.resumeSnapshot) {
+      this.restoreActiveMissionDialogue(data.resumeMissionDialogue);
+    }
     this.setupObjectiveAreaOverlay();
     this.setupObjectiveTrackerOverlay();
     this.setupTerrainDebugOverlay();
@@ -561,7 +757,7 @@ export class SkirmishScene extends Phaser.Scene {
   }
 
   override update(time: number, delta: number): void {
-    if (!this.pauseMenuContainer) {
+    if (!this.isBlockingModalOpen()) {
       this.handleCameraPan(delta);
     }
 
@@ -572,6 +768,8 @@ export class SkirmishScene extends Phaser.Scene {
     this.updateMissionBriefingOverlay(time);
     this.updateBuildPlacementPreview();
     this.flushViewportIfDirty(time);
+
+    const previousScenarioStatus = this.worldState.scenario.status;
 
     this.sessionTransport?.update(time, delta);
     const nextSnapshot = this.sessionTransport?.getSnapshot() ?? this.worldState;
@@ -609,6 +807,9 @@ export class SkirmishScene extends Phaser.Scene {
     this.updateObjectiveTrackerOverlay();
     this.updateMissionDialogueOverlay(time);
     this.updateMissionResultOverlay();
+    if (previousScenarioStatus !== nextSnapshot.scenario.status) {
+      this.publishGamePlayback();
+    }
   }
 
   private getWorldAnimationDeltaMs(deltaMs: number): number {
@@ -764,7 +965,7 @@ export class SkirmishScene extends Phaser.Scene {
   }
 
   private isBlockingModalOpen(): boolean {
-    return Boolean(this.missionResultContainer || this.pauseMenuContainer);
+    return Boolean(this.missionBriefingContainer || this.missionResultContainer || this.pauseMenuContainer);
   }
 
   private setupPointerLockLifecycle(): void {
@@ -916,10 +1117,13 @@ export class SkirmishScene extends Phaser.Scene {
   }
 
   private handleShutdown(): void {
+    this.closeCheatInput();
     this.stopGameplayAudio();
     this.input.manager.events.off(Phaser.Input.Events.POINTERLOCK_CHANGE, this.handlePointerLockChanged, this);
     this.input.keyboard?.off("keydown", this.handleControlGroupKeyDown, this);
     this.input.keyboard?.off("keydown", this.handlePlaybackKeyDown, this);
+    this.events.off(Phaser.Scenes.Events.ADDED_TO_SCENE, this.handleGameObjectAddedToScene, this);
+    this.events.off(Phaser.Scenes.Events.REMOVED_FROM_SCENE, this.handleGameObjectRemovedFromScene, this);
     this.game.events.off(MINIMAP_NAVIGATE_EVENT, this.handleMinimapNavigate, this);
     this.game.events.off(ACTION_TRIGGERED_EVENT, this.handleActionTriggered, this);
     this.game.events.off(BATTLEFIELD_SUMMARY_ACTION_EVENT, this.handleBattlefieldSummaryAction, this);
@@ -971,6 +1175,7 @@ export class SkirmishScene extends Phaser.Scene {
     this.cancelPendingTargetAction();
     this.objectiveAreaGraphics?.destroy();
     this.objectiveAreaGraphics = null;
+    this.disposeObjectiveAreaLabels();
   }
 
   private clearHudRegistryState(): void {
@@ -994,7 +1199,77 @@ export class SkirmishScene extends Phaser.Scene {
       .setBackgroundColor("rgba(0,0,0,0)")
       .setScroll(0, 0)
       .setZoom(1);
-    this.screenOverlayCamera.ignore([...this.children.list]);
+    this.events.on(Phaser.Scenes.Events.ADDED_TO_SCENE, this.handleGameObjectAddedToScene, this);
+    this.events.on(Phaser.Scenes.Events.REMOVED_FROM_SCENE, this.handleGameObjectRemovedFromScene, this);
+
+    for (const gameObject of this.children.list) {
+      this.applyScreenOverlayCameraFilter(gameObject);
+    }
+  }
+
+  private handleGameObjectAddedToScene(gameObject: Phaser.GameObjects.GameObject): void {
+    this.applyScreenOverlayCameraFilter(gameObject);
+  }
+
+  private handleGameObjectRemovedFromScene(gameObject: Phaser.GameObjects.GameObject): void {
+    if (this.screenOverlayRoots.delete(gameObject as ScreenOverlayGameObject)) {
+      return;
+    }
+
+    if (this.isScreenOverlayTreeObject(gameObject)) {
+      this.allowGameObjectOnScreenOverlayCamera(gameObject);
+    }
+  }
+
+  private handleScreenOverlayRootDestroyed(gameObject: Phaser.GameObjects.GameObject): void {
+    this.screenOverlayRoots.delete(gameObject as ScreenOverlayGameObject);
+  }
+
+  private applyScreenOverlayCameraFilter(gameObject: Phaser.GameObjects.GameObject): void {
+    const screenOverlayCamera = this.screenOverlayCamera;
+
+    if (!screenOverlayCamera) {
+      return;
+    }
+
+    if (this.isScreenOverlayTreeObject(gameObject)) {
+      this.allowGameObjectOnScreenOverlayCamera(gameObject);
+      return;
+    }
+
+    gameObject.cameraFilter &= ~this.cameras.main.id;
+    screenOverlayCamera.ignore(gameObject);
+  }
+
+  private allowGameObjectOnScreenOverlayCamera(gameObject: Phaser.GameObjects.GameObject): void {
+    const screenOverlayCamera = this.screenOverlayCamera;
+
+    if (!screenOverlayCamera) {
+      return;
+    }
+
+    this.cameras.main.ignore(gameObject);
+    gameObject.cameraFilter &= ~screenOverlayCamera.id;
+
+    if (gameObject instanceof Phaser.GameObjects.Container) {
+      for (const child of gameObject.list) {
+        this.allowGameObjectOnScreenOverlayCamera(child);
+      }
+    }
+  }
+
+  private isScreenOverlayTreeObject(gameObject: Phaser.GameObjects.GameObject): boolean {
+    let current: Phaser.GameObjects.GameObject | null = gameObject;
+
+    while (current) {
+      if (this.screenOverlayRoots.has(current as ScreenOverlayGameObject)) {
+        return true;
+      }
+
+      current = current.parentContainer ?? null;
+    }
+
+    return false;
   }
 
   private addScreenOverlayGraphics(depth: number): Phaser.GameObjects.Graphics {
@@ -1023,15 +1298,16 @@ export class SkirmishScene extends Phaser.Scene {
     }
 
     gameObject.setScrollFactor(0).setDepth(depth);
-    this.cameras.main.ignore(gameObject);
-    gameObject.cameraFilter &= ~screenOverlayCamera.id;
     this.screenOverlayRoots.add(gameObject);
+    this.allowGameObjectOnScreenOverlayCamera(gameObject);
+    gameObject.once(Phaser.GameObjects.Events.DESTROY, this.handleScreenOverlayRootDestroyed, this);
 
     return gameObject;
   }
 
   private refreshScreenOverlayCameraOrder(): void {
     for (const gameObject of this.screenOverlayRoots) {
+      this.allowGameObjectOnScreenOverlayCamera(gameObject as Phaser.GameObjects.GameObject);
       this.children.bringToTop(gameObject as Phaser.GameObjects.GameObject);
     }
   }
@@ -1197,6 +1473,134 @@ export class SkirmishScene extends Phaser.Scene {
       .setVisible(true);
     this.commandFeedbackHideAt = this.time.now + COMMAND_FEEDBACK_DURATION_MS;
     this.layoutCommandFeedbackOverlay();
+  }
+
+  private showCheatFeedback(label: string): void {
+    this.showTransientFeedback(`치트키 적용: ${label}`, "#dff6b2", "#0b2118dd");
+  }
+
+  private openCheatInput(): void {
+    if (this.cheatInputElement || typeof document === "undefined") {
+      return;
+    }
+
+    const input = document.createElement("input");
+    input.type = "text";
+    input.lang = "ko";
+    input.spellcheck = false;
+    input.autocomplete = "off";
+    input.maxLength = CHEAT_INPUT_MAX_LENGTH;
+    input.setAttribute("aria-label", "chat");
+    Object.assign(input.style, {
+      position: "fixed",
+      left: "50%",
+      bottom: "34px",
+      transform: "translateX(-50%)",
+      width: "min(420px, calc(100vw - 48px))",
+      zIndex: "2147483647",
+      boxSizing: "border-box",
+      border: "1px solid rgba(233, 214, 157, 0.85)",
+      borderRadius: "2px",
+      background: "rgba(13, 17, 18, 0.92)",
+      color: "#f2e7c1",
+      outline: "none",
+      padding: "8px 10px",
+      font: "15px Noto Sans KR, Malgun Gothic, Apple SD Gothic Neo, sans-serif",
+      boxShadow: "0 6px 18px rgba(0, 0, 0, 0.35)",
+    });
+
+    input.addEventListener("keydown", this.handleCheatInputKeyDown, true);
+    document.body.append(input);
+    this.cheatInputElement = input;
+    input.focus();
+  }
+
+  private closeCheatInput(): void {
+    const input = this.cheatInputElement;
+
+    if (!input) {
+      return;
+    }
+
+    input.removeEventListener("keydown", this.handleCheatInputKeyDown, true);
+    input.remove();
+    this.cheatInputElement = null;
+  }
+
+  private submitCheatCode(rawCode: string): void {
+    const normalizedCode = rawCode.trim().replace(/\s+/g, "");
+
+    if (!normalizedCode) {
+      return;
+    }
+
+    const action = IMJINROK_CHEAT_CODES[normalizedCode];
+
+    if (!action) {
+      this.showTransientFeedback("치트키가 적용되지 않았습니다.", "#ffd1c8", "#190b09dd");
+      return;
+    }
+
+    if (!this.sessionTransport || this.sessionTransport.isRemote) {
+      this.showTransientFeedback("치트키는 싱글플레이에서만 사용할 수 있습니다.", "#ffd1c8", "#190b09dd");
+      return;
+    }
+
+    if (this.worldState.scenario.status !== "running") {
+      return;
+    }
+
+    switch (action.type) {
+      case "simulation":
+        this.applySimulationCheat(action.code, action.label);
+        return;
+      case "reveal-map":
+        this.revealMapCheatActive = true;
+        this.applyRevealMapCheat();
+        this.showCheatFeedback(action.label);
+        return;
+      case "instant-victory":
+        if (this.sessionTransport.forceScenarioResult("victory")) {
+          this.syncWorldFromTransport(true);
+          this.publishGamePlayback();
+          this.showCheatFeedback(action.label);
+        }
+        return;
+      case "unsupported":
+        this.showTransientFeedback(`${action.label} 치트키는 현재 MVP 시스템이 없습니다.`, "#f1dfaa", "#071112dd");
+        return;
+    }
+  }
+
+  private applySimulationCheat(code: CheatCodeId, label: string): void {
+    void this.issueCommandEnvelopeWithOptions(
+      {
+        sessionId: this.launchContext?.session?.id ?? "offline-skirmish",
+        playerId: this.localPlayerId,
+        issuedAtTick: this.worldState.tick,
+        command: { type: "cheat", code },
+      },
+      { suppressFeedback: true },
+    ).then((result) => {
+      if (!result?.ok) {
+        this.showCommandFeedback(result?.reason ?? "command request failed");
+        return;
+      }
+
+      this.syncWorldFromTransport(true);
+      this.updateEnvironmentOverlay(true);
+      this.showCheatFeedback(label);
+    });
+  }
+
+  private applyRevealMapCheat(): void {
+    const dirtyFogChunkCount = this.refreshLocalVisibility();
+
+    this.redrawDirtyFogOverlay(dirtyFogChunkCount);
+    this.syncResourceRenderables();
+    this.syncUnitRenderables();
+    this.publishMinimapVisibility();
+    this.publishMinimapEntities();
   }
 
   private updateCommandFeedbackOverlay(time: number): void {
@@ -1447,81 +1851,372 @@ export class SkirmishScene extends Phaser.Scene {
   private setupMissionBriefingOverlay(): void {
     const briefing = this.launchContext?.scenario?.briefing;
 
-    if (!briefing) {
+    if (!briefing || this.launchContext?.resumeSnapshot) {
       return;
     }
 
-    const panelWidth = Phaser.Math.Clamp(this.scale.width * 0.42, 360, 580);
-    const panelHeight = 190;
-    const panelX = this.scale.width - panelWidth - 24;
-    const panelY = 72;
-    const textWidth = panelWidth - 32;
+    if (this.missionBriefingWasPlaybackPaused === null) {
+      const playback = this.sessionTransport?.getPlaybackState();
+
+      this.missionBriefingWasPlaybackPaused = Boolean(playback?.paused);
+      this.setPlaybackPaused(true);
+    }
+
+    if (this.missionBriefingWasUiVisible === null) {
+      this.missionBriefingWasUiVisible = this.scene.isVisible("ui");
+      this.scene.setVisible(false, "ui");
+    }
+
+    const width = this.scale.width;
+    const height = this.scale.height;
+    const panelWidth = Math.min(Math.max(300, width - 48), Phaser.Math.Clamp(width * 0.72, 520, 820));
+    const panelHeight = Math.min(Math.max(360, height - 48), Phaser.Math.Clamp(height * 0.72, 420, 560));
+    const panelX = (width - panelWidth) / 2;
+    const panelY = Math.max(24, (height - panelHeight) / 2);
+    const compact = panelWidth < 560 || panelHeight < 440;
+    const objectiveY = panelY + panelHeight - 122;
+    const lineIndex = Phaser.Math.Clamp(this.missionBriefingLineIndex, 0, Math.max(0, briefing.lines.length - 1));
+    if (this.missionBriefingLineRevealAt === null && this.missionBriefingNextLineAt === null) {
+      this.scheduleMissionBriefingLine(briefing, lineIndex, this.time.now);
+    }
+    const lineRevealPending = this.missionBriefingLineRevealAt !== null && this.time.now < this.missionBriefingLineRevealAt;
+    const activeLine = lineRevealPending ? undefined : briefing.lines[lineIndex];
+    const lineCounter = briefing.lines.length > 0 ? `${lineIndex + 1}/${briefing.lines.length}` : briefing.sourceScript;
+    const briefingLineSide = activeLine?.side ?? "left";
+    const centerPortrait = !compact && briefingLineSide === "center";
+    const portraitBoxWidth = compact || !activeLine ? 0 : 148;
+    const portraitBoxX = centerPortrait
+      ? panelX + (panelWidth - portraitBoxWidth) / 2
+      : briefingLineSide === "right"
+        ? panelX + panelWidth - 24 - portraitBoxWidth
+        : panelX + 24;
+    const portraitBoxY = centerPortrait ? panelY + 98 : panelY + 74;
+    const portraitBoxHeight = centerPortrait ? 88 : Math.max(210, panelHeight - 188);
+    const contentX = compact || centerPortrait
+      ? panelX + 24
+      : briefingLineSide === "right"
+        ? panelX + 24
+        : portraitBoxX + portraitBoxWidth + 30;
+    const contentRight = compact || centerPortrait
+      ? panelX + panelWidth - 24
+      : briefingLineSide === "right"
+        ? portraitBoxX - 30
+        : panelX + panelWidth - 24;
+    const contentWidth = Math.max(180, contentRight - contentX);
+    const contentPanelY = centerPortrait ? portraitBoxY + portraitBoxHeight + 12 : panelY + 74;
+    const contentPanelHeight = centerPortrait
+      ? Math.max(72, objectiveY - contentPanelY - 14)
+      : Math.max(168, panelHeight - 198);
+    const speakerY = centerPortrait ? contentPanelY + 12 : panelY + 104;
+    const bodyTextY = centerPortrait ? contentPanelY + 42 : panelY + 158;
     const textStyle: Phaser.Types.GameObjects.Text.TextStyle = {
       fontFamily: "Noto Sans KR, Malgun Gothic, Apple SD Gothic Neo, Trebuchet MS, sans-serif",
       color: "#d8e4d7",
       fontSize: "13px",
       lineSpacing: 4,
-      wordWrap: { width: textWidth },
+      wordWrap: { width: contentWidth },
     };
-    const firstLine = briefing.lines[0];
 
-    const container = this.addScreenOverlayContainer(SCREEN_OVERLAY_DEPTH + 10);
+    const container = this.addScreenOverlayContainer(SCREEN_OVERLAY_DEPTH + 24);
+    const hasBackdrop = this.addMissionBriefingBackdrop(container, width, height);
     const graphics = this.add.graphics();
-    graphics.fillStyle(0x071112, 0.92);
-    graphics.fillRoundedRect(panelX, panelY, panelWidth, panelHeight, 8);
-    graphics.lineStyle(1, 0xd0b46a, 0.78);
-    graphics.strokeRoundedRect(panelX, panelY, panelWidth, panelHeight, 8);
-    graphics.fillStyle(0x102428, 0.96);
-    graphics.fillRoundedRect(panelX + 12, panelY + 12, panelWidth - 24, 26, 4);
+
+    graphics
+      .fillStyle(0x020708, hasBackdrop ? 0.58 : 1)
+      .fillRect(0, 0, width, height)
+      .fillStyle(0x23180f, 0.94)
+      .fillRect(panelX, panelY, panelWidth, panelHeight)
+      .lineStyle(2, 0xd0b46a, 0.86)
+      .strokeRect(panelX, panelY, panelWidth, panelHeight)
+      .lineStyle(1, 0x8fb4a2, 0.56)
+      .strokeRect(panelX + 6, panelY + 6, panelWidth - 12, panelHeight - 12)
+      .fillStyle(0x0d1515, 0.52)
+      .fillRect(contentX - 12, contentPanelY, contentWidth + 24, contentPanelHeight)
+      .lineStyle(1, 0xd0b46a, 0.48)
+      .strokeRect(contentX - 12, contentPanelY, contentWidth + 24, contentPanelHeight);
+
+    if (!compact && activeLine) {
+      graphics
+        .fillStyle(0x120d09, 0.72)
+        .fillRect(portraitBoxX, portraitBoxY, portraitBoxWidth, portraitBoxHeight)
+        .lineStyle(1, 0x8fb4a2, 0.56)
+        .strokeRect(portraitBoxX, portraitBoxY, portraitBoxWidth, portraitBoxHeight);
+    }
 
     container.add(graphics);
     container.add(
-      this.add.text(panelX + 20, panelY + 17, briefing.title, {
+      this.add.text(contentX, panelY + 28, briefing.title, {
         ...textStyle,
-        fontSize: "15px",
+        fontSize: "24px",
         color: "#f1dfaa",
       }),
     );
     container.add(
-      this.add.text(panelX + 20, panelY + 48, briefing.location ?? briefing.sourceScript, {
+      this.add.text(panelX + panelWidth - 28, panelY + 34, lineCounter, {
+        ...textStyle,
+        fontSize: "12px",
+        color: "#8fb4a2",
+      }).setOrigin(1, 0),
+    );
+    const briefingHeaderLine = [briefing.location, briefing.battleType].filter(Boolean).join(" · ") || briefing.sourceScript;
+    const briefingCastLine = briefing.cast?.length ? `등장인물: ${briefing.cast.join(", ")}` : "";
+
+    container.add(
+      this.add.text(contentX, panelY + 58, briefingHeaderLine, {
         ...textStyle,
         fontSize: "12px",
         color: "#8fb4a2",
       }),
     );
-    container.add(
-      this.add.text(panelX + 20, panelY + 72, briefing.objective, {
-        ...textStyle,
-        color: "#f1dfaa",
-      }),
-    );
-
-    if (firstLine) {
+    if (briefingCastLine) {
       container.add(
-        this.add.text(panelX + 20, panelY + 118, `${firstLine.speaker}: ${firstLine.text}`, {
+        this.add.text(contentX, panelY + 78, briefingCastLine, {
+          ...textStyle,
+          fontSize: "11px",
+          color: "#7fa0a5",
+          wordWrap: { width: contentWidth },
+        }),
+      );
+    }
+
+    if (activeLine) {
+      const speakerColor = activeLine.portraitId.startsWith("J") ? "#ffb294" : "#d0b46a";
+
+      if (!compact) {
+        const portraitCenterX = portraitBoxX + portraitBoxWidth / 2;
+        const portraitImageSize = centerPortrait
+          ? Math.min(56, portraitBoxWidth - 44)
+          : Math.min(112, portraitBoxWidth - 36);
+        const portraitCenterY = centerPortrait
+          ? portraitBoxY + 12 + portraitImageSize / 2
+          : panelY + 138;
+        const portraitNameY = centerPortrait ? portraitBoxY + 62 : panelY + 206;
+
+        if (!this.addMissionPortraitArtwork(container, activeLine.portraitId, portraitCenterX, portraitCenterY, portraitImageSize, 0.98)) {
+          container.add(
+            this.add.text(portraitCenterX, portraitCenterY - portraitImageSize / 2 + 4, activeLine.portraitId, {
+              ...textStyle,
+              fontFamily: "Georgia, Times New Roman, serif",
+              fontSize: "34px",
+              color: speakerColor,
+              align: "center",
+            }).setOrigin(0.5, 0),
+          );
+        }
+        container.add(
+          this.add.text(portraitCenterX, portraitNameY, activeLine.speaker, {
+            ...textStyle,
+            fontSize: "15px",
+            color: "#f1dfaa",
+            align: "center",
+          }).setOrigin(0.5, 0),
+        );
+      }
+      container.add(
+        this.add.text(contentX, speakerY, activeLine.speaker, {
+          ...textStyle,
+          fontSize: "16px",
+          color: speakerColor,
+        }),
+      );
+      container.add(
+        this.add.text(contentX, bodyTextY, activeLine.text, {
+          ...textStyle,
+          color: "#cfe0d4",
+          fontSize: activeLine.text.length > 120 ? "15px" : "16px",
+          lineSpacing: 8,
+          wordWrap: { width: contentWidth },
+        }),
+      );
+    } else {
+      container.add(
+        this.add.text(contentX, panelY + 118, briefing.objective, {
           ...textStyle,
           color: "#cfe0d4",
         }),
       );
     }
 
+    graphics
+      .fillStyle(0x120d09, 0.86)
+      .fillRect(contentX - 12, objectiveY, contentWidth + 24, 58)
+      .lineStyle(1, 0xd0b46a, 0.44)
+      .strokeRect(contentX - 12, objectiveY, contentWidth + 24, 58);
+    container.add(
+      this.add.text(contentX, objectiveY + 12, briefing.objective, {
+        ...textStyle,
+        color: "#f1dfaa",
+        fontSize: "14px",
+        wordWrap: { width: contentWidth },
+      }),
+    );
+
+    const buttonY = panelY + panelHeight - 48;
+    const buttonWidth = 112;
+    const buttonGap = 18;
+    const startX = panelX + panelWidth - 24 - buttonWidth;
+    const replayX = startX - buttonGap - buttonWidth;
+
+    this.addMissionBriefingButton(container, graphics, replayX, buttonY, buttonWidth, "다시보기", () => {
+      this.missionBriefingLineIndex = 0;
+      this.scheduleMissionBriefingLine(briefing, 0, this.time.now);
+      this.missionBriefingBackdropStartedAt = this.time.now;
+      this.redrawMissionBriefingOverlay();
+    });
+    this.addMissionBriefingButton(container, graphics, startX, buttonY, buttonWidth, "게임 시작", () => {
+      this.hideMissionBriefingOverlay();
+    });
+
     const hitZone = this.add
-      .zone(panelX, panelY, panelWidth, panelHeight)
+      .zone(contentX - 12, contentPanelY, contentWidth + 24, contentPanelHeight)
       .setOrigin(0, 0)
       .setInteractive({ useHandCursor: true })
-      .on("pointerup", () => this.hideMissionBriefingOverlay());
+      .on("pointerup", () => this.advanceMissionBriefingLine(this.time.now));
 
     container.add(hitZone);
     this.missionBriefingContainer = container;
-    this.missionBriefingHideAt = this.time.now + MISSION_BRIEFING_DURATION_MS;
+    this.missionBriefingHideAt = briefing.noEnd ? Number.POSITIVE_INFINITY : this.time.now + MISSION_BRIEFING_DURATION_MS;
+    this.playMissionBriefingMusic();
+    if (activeLine) {
+      this.playMissionLineVoice(activeLine);
+    }
     this.refreshScreenOverlayCameraOrder();
   }
 
+  private addMissionBriefingBackdrop(
+    container: Phaser.GameObjects.Container,
+    width: number,
+    height: number,
+  ): boolean {
+    const frames = this.getMissionBriefingBackdropFrames();
+    const fallbackFrame = frames.find((frame) => this.textures.exists(frame.key));
+
+    if (!fallbackFrame) {
+      return false;
+    }
+
+    if (this.missionBriefingBackdropStartedAt === null) {
+      this.missionBriefingBackdropStartedAt = this.time.now;
+    }
+
+    const activeFrame = this.getMissionBriefingBackdropFrame(this.time.now, frames);
+    if (!activeFrame) {
+      return false;
+    }
+    const frame = this.textures.exists(activeFrame.key) ? activeFrame : fallbackFrame;
+    const scale = Math.max(
+      width / MISSION_BRIEFING_BACKDROP_SOURCE_WIDTH,
+      height / MISSION_BRIEFING_BACKDROP_SOURCE_HEIGHT,
+    );
+    const image = this.add.image(width / 2, height / 2, frame.key)
+      .setScale(scale)
+      .setAlpha(0.92);
+
+    this.missionBriefingBackdropImage = image;
+    container.add(image);
+    this.updateMissionBriefingBackdrop(this.time.now);
+    return true;
+  }
+
+  private getMissionBriefingBackdropFrames(): MissionBriefingBackdropFrameDefinition[] {
+    const briefing = this.launchContext?.scenario?.briefing;
+
+    return collectMissionBriefingBackdropFramesForBriefing(briefing);
+  }
+
+  private getMissionBriefingBackdropFrame(
+    time: number,
+    frames: readonly MissionBriefingBackdropFrameDefinition[],
+  ): MissionBriefingBackdropFrameDefinition | null {
+    if (frames.length === 0) {
+      return null;
+    }
+
+    const startedAt = this.missionBriefingBackdropStartedAt ?? time;
+    let elapsedMs = Math.max(0, time - startedAt);
+
+    for (const frame of frames) {
+      if (elapsedMs < frame.durationMs) {
+        return frame;
+      }
+      elapsedMs -= frame.durationMs;
+    }
+
+    return frames[frames.length - 1]!;
+  }
+
+  private updateMissionBriefingBackdrop(time: number): void {
+    if (!this.missionBriefingBackdropImage || this.missionBriefingBackdropStartedAt === null) {
+      return;
+    }
+
+    const frames = this.getMissionBriefingBackdropFrames();
+    const frame = this.getMissionBriefingBackdropFrame(time, frames);
+
+    if (!frame || !this.textures.exists(frame.key) || this.missionBriefingBackdropImage.texture.key === frame.key) {
+      return;
+    }
+
+    this.missionBriefingBackdropImage.setTexture(frame.key);
+  }
+
+  private addMissionBriefingButton(
+    container: Phaser.GameObjects.Container,
+    graphics: Phaser.GameObjects.Graphics,
+    x: number,
+    y: number,
+    width: number,
+    label: string,
+    onClick: () => void,
+  ): void {
+    const height = 32;
+
+    graphics
+      .fillStyle(0x102428, 0.94)
+      .fillRect(x, y, width, height)
+      .lineStyle(1, 0xd0b46a, 0.72)
+      .strokeRect(x, y, width, height);
+    container.add(
+      this.add.text(x + width / 2, y + 7, label, {
+        fontFamily: "Noto Sans KR, Malgun Gothic, Apple SD Gothic Neo, Trebuchet MS, sans-serif",
+        fontSize: "13px",
+        color: "#f1dfaa",
+      }).setOrigin(0.5, 0),
+    );
+    container.add(
+      this.add
+        .zone(x, y, width, height)
+        .setOrigin(0, 0)
+        .setInteractive({ useHandCursor: true })
+        .on("pointerup", onClick),
+    );
+  }
+
   private hideMissionBriefingOverlay(): void {
+    const shouldResumePlayback = this.missionBriefingWasPlaybackPaused === false;
+    const shouldRestoreUi = this.missionBriefingWasUiVisible === true;
+
     this.missionBriefingContainer?.destroy(true);
     this.missionBriefingContainer = null;
+    this.missionBriefingBackdropImage = null;
+    this.missionBriefingBackdropStartedAt = null;
     this.missionBriefingHideAt = null;
     this.missionBriefingPausedAt = null;
+    this.missionBriefingLineIndex = 0;
+    this.missionBriefingLineRevealAt = null;
+    this.missionBriefingNextLineAt = null;
+    this.missionBriefingWasPlaybackPaused = null;
+    this.missionBriefingWasUiVisible = null;
+    this.stopMissionBriefingMusic();
+    this.stopMissionVoiceAudio();
+
+    if (shouldResumePlayback && this.worldState.scenario.status === "running") {
+      this.setPlaybackPaused(false);
+    }
+
+    if (shouldRestoreUi) {
+      this.scene.setVisible(true, "ui");
+    }
   }
 
   private redrawMissionBriefingOverlay(): void {
@@ -1531,12 +2226,23 @@ export class SkirmishScene extends Phaser.Scene {
 
     const hideAt = this.missionBriefingHideAt;
     const pausedAt = this.missionBriefingPausedAt;
+    const lineIndex = this.missionBriefingLineIndex;
+    const lineRevealAt = this.missionBriefingLineRevealAt;
+    const nextLineAt = this.missionBriefingNextLineAt;
+    const backdropStartedAt = this.missionBriefingBackdropStartedAt;
 
     this.missionBriefingContainer.destroy(true);
     this.missionBriefingContainer = null;
+    this.missionBriefingBackdropImage = null;
+    this.missionBriefingBackdropStartedAt = backdropStartedAt;
+    this.missionBriefingLineIndex = lineIndex;
+    this.missionBriefingLineRevealAt = lineRevealAt;
     this.setupMissionBriefingOverlay();
     this.missionBriefingHideAt = hideAt;
     this.missionBriefingPausedAt = pausedAt;
+    this.missionBriefingLineRevealAt = lineRevealAt;
+    this.missionBriefingNextLineAt = nextLineAt;
+    this.updateMissionBriefingBackdrop(this.time.now);
   }
 
   private updateMissionBriefingOverlay(time: number): void {
@@ -1552,13 +2258,110 @@ export class SkirmishScene extends Phaser.Scene {
     }
 
     if (this.missionBriefingPausedAt !== null) {
-      this.missionBriefingHideAt += Math.max(0, time - this.missionBriefingPausedAt);
+      const pausedDuration = Math.max(0, time - this.missionBriefingPausedAt);
+
+      this.missionBriefingHideAt += pausedDuration;
+      if (this.missionBriefingLineRevealAt !== null) {
+        this.missionBriefingLineRevealAt += pausedDuration;
+      }
+      if (this.missionBriefingNextLineAt !== null) {
+        this.missionBriefingNextLineAt += pausedDuration;
+      }
+      if (this.missionBriefingBackdropStartedAt !== null) {
+        this.missionBriefingBackdropStartedAt += pausedDuration;
+      }
       this.missionBriefingPausedAt = null;
+    }
+
+    this.updateMissionBriefingBackdrop(time);
+
+    if (this.missionBriefingLineRevealAt !== null && time >= this.missionBriefingLineRevealAt) {
+      this.revealMissionBriefingLine(time);
+      return;
+    }
+
+    if (this.missionBriefingNextLineAt !== null && time >= this.missionBriefingNextLineAt) {
+      this.advanceMissionBriefingLine(time);
+      return;
     }
 
     if (time >= this.missionBriefingHideAt) {
       this.hideMissionBriefingOverlay();
     }
+  }
+
+  private advanceMissionBriefingLine(time = this.time.now): void {
+    const briefing = this.launchContext?.scenario?.briefing;
+
+    if (!briefing || !this.missionBriefingContainer) {
+      return;
+    }
+
+    if (this.missionBriefingLineRevealAt !== null && time < this.missionBriefingLineRevealAt) {
+      this.revealMissionBriefingLine(time);
+      return;
+    }
+
+    if (this.missionBriefingLineIndex + 1 >= briefing.lines.length) {
+      this.missionBriefingNextLineAt = null;
+      this.redrawMissionBriefingOverlay();
+      return;
+    }
+
+    this.missionBriefingLineIndex += 1;
+    this.scheduleMissionBriefingLine(briefing, this.missionBriefingLineIndex, time);
+    this.redrawMissionBriefingOverlay();
+  }
+
+  private revealMissionBriefingLine(time: number): void {
+    const briefing = this.launchContext?.scenario?.briefing;
+
+    if (!briefing || !this.missionBriefingContainer) {
+      return;
+    }
+
+    this.scheduleMissionBriefingLine(briefing, this.missionBriefingLineIndex, time, false);
+    this.redrawMissionBriefingOverlay();
+  }
+
+  private scheduleMissionBriefingLine(
+    briefing: ScenarioBriefingDefinition,
+    lineIndex: number,
+    time: number,
+    respectDelay = true,
+  ): void {
+    const line = briefing.lines[lineIndex];
+
+    if (!line) {
+      this.missionBriefingLineRevealAt = null;
+      this.missionBriefingNextLineAt = null;
+      return;
+    }
+
+    const delayBeforeMs = respectDelay ? this.getMissionBriefingDelayBeforeMs(line) : 0;
+
+    if (delayBeforeMs > 0) {
+      this.missionBriefingLineRevealAt = time + delayBeforeMs;
+      this.missionBriefingNextLineAt = null;
+      return;
+    }
+
+    this.missionBriefingLineRevealAt = null;
+    this.missionBriefingNextLineAt = lineIndex + 1 < briefing.lines.length
+      ? time + this.getMissionBriefingLineDurationMs(line)
+      : null;
+  }
+
+  private getMissionBriefingLineDurationMs(line: ScenarioBriefingLineDefinition): number {
+    return getMissionLineDurationMs(line, MISSION_BRIEFING_LINE_DURATION_MS);
+  }
+
+  private getMissionBriefingDelayBeforeMs(line: ScenarioBriefingLineDefinition | undefined): number {
+    return Math.max(0, Math.floor(line?.delayBeforeMs ?? 0));
+  }
+
+  private getMissionDialogueLineDurationMs(line: ScenarioBriefingLineDefinition): number {
+    return getMissionLineDurationMs(line, MISSION_DIALOGUE_LINE_DURATION_MS);
   }
 
   private updateMissionDialogueOverlay(time: number): void {
@@ -1591,8 +2394,9 @@ export class SkirmishScene extends Phaser.Scene {
     this.activeMissionDialogue = {
       dialogue,
       lineIndex: 0,
-      nextLineAt: time + MISSION_DIALOGUE_LINE_DURATION_MS,
+      nextLineAt: time + this.getMissionDialogueLineDurationMs(firstLine),
     };
+    this.focusMissionDialogueCamera(dialogue);
     this.showMissionDialogueLine(dialogue, firstLine, 0);
   }
 
@@ -1661,11 +2465,14 @@ export class SkirmishScene extends Phaser.Scene {
     const nextLine = active.dialogue.lines[active.lineIndex];
 
     if (!nextLine) {
+      const completedDialogue = active.dialogue;
+
       this.clearMissionDialogueOverlay();
+      this.completeScenarioAfterMissionDialogue(completedDialogue);
       return;
     }
 
-    active.nextLineAt = time + MISSION_DIALOGUE_LINE_DURATION_MS;
+    active.nextLineAt = time + this.getMissionDialogueLineDurationMs(nextLine);
     this.showMissionDialogueLine(active.dialogue, nextLine, active.lineIndex);
   }
 
@@ -1691,6 +2498,8 @@ export class SkirmishScene extends Phaser.Scene {
         return this.worldState.scenario.objectives[dialogue.trigger.objectiveId]?.status === dialogue.trigger.status;
       case "scenario-status":
         return this.worldState.scenario.status === dialogue.trigger.status;
+      case "unit-in-area":
+        return this.countMatchingUnitsForDialogueTrigger(dialogue.trigger) >= Math.max(1, dialogue.trigger.count ?? 1);
     }
   }
 
@@ -1710,6 +2519,40 @@ export class SkirmishScene extends Phaser.Scene {
     }
   }
 
+  private serializeActiveMissionDialogue(): SerializedMissionDialogueState | undefined {
+    if (!this.activeMissionDialogue) {
+      return undefined;
+    }
+
+    return {
+      dialogueId: this.activeMissionDialogue.dialogue.id,
+      lineIndex: this.activeMissionDialogue.lineIndex,
+    };
+  }
+
+  private restoreActiveMissionDialogue(savedDialogue: SerializedMissionDialogueState | undefined): void {
+    if (!savedDialogue) {
+      return;
+    }
+
+    const dialogue = this.launchContext?.scenario?.missionDialogues?.find((candidate) => candidate.id === savedDialogue.dialogueId);
+    const lineIndex = Phaser.Math.Clamp(savedDialogue.lineIndex, 0, Math.max(0, (dialogue?.lines.length ?? 1) - 1));
+    const line = dialogue?.lines[lineIndex];
+
+    if (!dialogue || !line) {
+      return;
+    }
+
+    this.triggeredMissionDialogueIds.add(dialogue.id);
+    this.activeMissionDialogue = {
+      dialogue,
+      lineIndex,
+      nextLineAt: this.time.now + this.getMissionDialogueLineDurationMs(line),
+    };
+    this.focusMissionDialogueCamera(dialogue);
+    this.showMissionDialogueLine(dialogue, line, lineIndex);
+  }
+
   private wasMissionDialogueTriggerAlreadyPassed(dialogue: ScenarioMissionDialogueDefinition): boolean {
     switch (dialogue.trigger.type) {
       case "tick":
@@ -1727,7 +2570,38 @@ export class SkirmishScene extends Phaser.Scene {
       }
       case "scenario-status":
         return this.worldState.scenario.status === dialogue.trigger.status && this.worldState.scenario.endedAtTick !== undefined;
+      case "unit-in-area":
+        return false;
     }
+  }
+
+  private countMatchingUnitsForDialogueTrigger(
+    trigger: Extract<ScenarioMissionDialogueDefinition["trigger"], { type: "unit-in-area" }>,
+  ): number {
+    const playerId = trigger.playerId ?? Object.keys(this.worldState.players)[0];
+
+    if (!playerId) {
+      return 0;
+    }
+
+    return Object.values(this.worldState.units).filter((unit) =>
+      unit.playerId === playerId &&
+      unit.kind === trigger.targetKind &&
+      !unit.construction &&
+      this.isPointInArea(unit.position, trigger.area),
+    ).length;
+  }
+
+  private focusMissionDialogueCamera(dialogue: ScenarioMissionDialogueDefinition): void {
+    if (!dialogue.focusPoint) {
+      return;
+    }
+
+    this.centerCameraOnGridPoint(dialogue.focusPoint);
+  }
+
+  private isPointInArea(point: GridPoint, area: { x: number; y: number; width: number; height: number }): boolean {
+    return point.x >= area.x && point.x < area.x + area.width && point.y >= area.y && point.y < area.y + area.height;
   }
 
   private showMissionDialogueLine(
@@ -1738,30 +2612,40 @@ export class SkirmishScene extends Phaser.Scene {
     this.hideMissionDialogueOverlay();
 
     const width = this.scale.width;
-    const availableWidth = Math.max(280, width - 24);
-    const panelWidth = Math.min(availableWidth, Phaser.Math.Clamp(width * 0.58, 320, 760));
-    const panelHeight = 106;
+    const compact = width < 700;
+    const availableWidth = Math.max(300, width - 24);
+    const panelWidth = Math.min(availableWidth, Phaser.Math.Clamp(width * 0.72, compact ? 320 : 560, 920));
+    const panelHeight = compact ? 118 : 128;
     const panelX = (width - panelWidth) / 2;
-    const panelY = Math.max(64, this.getHudTop() - panelHeight - 14);
-    const portraitSize = 48;
-    const textX = panelX + 86;
-    const textWidth = panelWidth - 112;
+    const panelY = Math.max(52, this.getHudTop() - panelHeight - 16);
+    const participants = this.getMissionDialogueParticipants(dialogue);
+    const activeParticipantIndex = this.getMissionDialogueParticipantIndex(line, participants);
+    const hasSidePortraits = !compact && participants.length > 1;
+    const portraitWidth = compact ? 54 : 92;
+    const portraitHeight = compact ? 70 : 92;
+    const portraitY = panelY + Math.max(14, (panelHeight - portraitHeight) / 2);
+    const leftPortraitX = panelX + 18;
+    const rightPortraitX = panelX + panelWidth - portraitWidth - 18;
+    const textX = hasSidePortraits ? leftPortraitX + portraitWidth + 24 : leftPortraitX + portraitWidth + 18;
+    const textRight = hasSidePortraits ? rightPortraitX - 24 : panelX + panelWidth - 20;
+    const textWidth = Math.max(160, textRight - textX);
+    const activeAccentX = hasSidePortraits && activeParticipantIndex === 1 ? panelX + panelWidth - 4 : panelX;
     const container = this.addScreenOverlayContainer(SCREEN_OVERLAY_DEPTH + 18);
     const graphics = this.add.graphics();
 
     graphics
-      .fillStyle(0x020708, 0.34)
-      .fillRect(panelX - 4, panelY - 4, panelWidth + 8, panelHeight + 8)
+      .fillStyle(0x020708, 0.46)
+      .fillRect(panelX - 5, panelY - 5, panelWidth + 10, panelHeight + 10)
       .fillStyle(0x071112, 0.95)
       .fillRoundedRect(panelX, panelY, panelWidth, panelHeight, 8)
       .lineStyle(1, 0xd0b46a, 0.86)
       .strokeRoundedRect(panelX, panelY, panelWidth, panelHeight, 8)
-      .fillStyle(0x102428, 0.98)
-      .fillRoundedRect(panelX + 18, panelY + 18, portraitSize, portraitSize, 6)
-      .lineStyle(1, 0x8fb4a2, 0.68)
-      .strokeRoundedRect(panelX + 18, panelY + 18, portraitSize, portraitSize, 6)
+      .fillStyle(0x0b1515, 0.76)
+      .fillRoundedRect(textX - 12, panelY + 14, textWidth + 24, panelHeight - 28, 6)
+      .lineStyle(1, 0x315158, 0.72)
+      .strokeRoundedRect(textX - 12, panelY + 14, textWidth + 24, panelHeight - 28, 6)
       .fillStyle(0xd0b46a, 0.88)
-      .fillRect(panelX, panelY, 4, panelHeight);
+      .fillRect(activeAccentX, panelY, 4, panelHeight);
 
     for (let index = 0; index < dialogue.lines.length; index += 1) {
       const dotX = panelX + panelWidth - 24 - (dialogue.lines.length - 1 - index) * 13;
@@ -1771,24 +2655,47 @@ export class SkirmishScene extends Phaser.Scene {
     }
 
     container.add(graphics);
-    container.add(
-      this.add.text(panelX + 18 + portraitSize / 2, panelY + 28, line.portraitId, {
-        fontFamily: "Georgia, Times New Roman, serif",
-        fontSize: "17px",
-        color: "#f1dfaa",
-      }).setOrigin(0.5, 0),
+
+    const leftParticipant = participants[0] ?? { speaker: line.speaker, portraitId: line.portraitId };
+    this.addMissionDialoguePortrait(
+      container,
+      graphics,
+      leftParticipant,
+      activeParticipantIndex !== 1,
+      leftPortraitX,
+      portraitY,
+      portraitWidth,
+      portraitHeight,
     );
+
+    if (hasSidePortraits) {
+      const rightParticipant = participants[1];
+
+      if (rightParticipant) {
+        this.addMissionDialoguePortrait(
+          container,
+          graphics,
+          rightParticipant,
+          activeParticipantIndex === 1,
+          rightPortraitX,
+          portraitY,
+          portraitWidth,
+          portraitHeight,
+        );
+      }
+    }
+
     container.add(
       this.add.text(textX, panelY + 18, line.speaker, {
         fontFamily: "Noto Sans KR, Malgun Gothic, Apple SD Gothic Neo, Trebuchet MS, sans-serif",
         fontSize: "15px",
-        color: "#f1dfaa",
+        color: this.getMissionDialogueSpeakerColor(line.portraitId),
       }),
     );
     container.add(
-      this.add.text(textX, panelY + 44, line.text, {
+      this.add.text(textX, panelY + 46, line.text, {
         fontFamily: "Noto Sans KR, Malgun Gothic, Apple SD Gothic Neo, Trebuchet MS, sans-serif",
-        fontSize: "15px",
+        fontSize: line.text.length > 110 ? "14px" : "15px",
         color: "#d8e4d7",
         lineSpacing: 5,
         wordWrap: { width: textWidth },
@@ -1811,7 +2718,151 @@ export class SkirmishScene extends Phaser.Scene {
     });
 
     this.missionDialogueContainer = container;
+    this.playMissionLineVoice(line);
     this.refreshScreenOverlayCameraOrder();
+  }
+
+  private addMissionDialoguePortrait(
+    container: Phaser.GameObjects.Container,
+    graphics: Phaser.GameObjects.Graphics,
+    participant: MissionDialogueParticipant,
+    active: boolean,
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+  ): void {
+    const speakerColor = this.getMissionDialogueSpeakerColor(participant.portraitId);
+    const alpha = active ? 0.98 : 0.58;
+
+    graphics
+      .fillStyle(0x120d09, active ? 0.96 : 0.72)
+      .fillRoundedRect(x, y, width, height, 6)
+      .lineStyle(active ? 2 : 1, active ? 0xd0b46a : 0x315158, active ? 0.94 : 0.62)
+      .strokeRoundedRect(x, y, width, height, 6);
+
+    const portraitImageSize = Math.max(34, Math.min(width - 12, height - 38));
+    const portraitCenterX = x + width / 2;
+    const portraitCenterY = y + 6 + portraitImageSize / 2;
+
+    if (!this.addMissionPortraitArtwork(container, participant.portraitId, portraitCenterX, portraitCenterY, portraitImageSize, alpha)) {
+      container.add(
+        this.add.text(portraitCenterX, y + Math.max(12, height * 0.22), participant.portraitId, {
+          fontFamily: "Georgia, Times New Roman, serif",
+          fontSize: `${Math.max(20, Math.floor(width * 0.32))}px`,
+          color: speakerColor,
+          align: "center",
+        }).setOrigin(0.5, 0).setAlpha(alpha),
+      );
+    }
+    container.add(
+      this.add.text(x + width / 2, y + height - 30, participant.speaker, {
+        fontFamily: "Noto Sans KR, Malgun Gothic, Apple SD Gothic Neo, Trebuchet MS, sans-serif",
+        fontSize: "13px",
+        color: active ? "#f1dfaa" : "#8fb4a2",
+        align: "center",
+        wordWrap: { width: width - 10 },
+      }).setOrigin(0.5, 0).setAlpha(active ? 1 : 0.72),
+    );
+  }
+
+  private addMissionPortraitArtwork(
+    container: Phaser.GameObjects.Container,
+    portraitId: string,
+    centerX: number,
+    centerY: number,
+    size: number,
+    alpha: number,
+  ): boolean {
+    const cue = this.getMissionPortraitImageCue(portraitId);
+
+    if (!cue) {
+      return false;
+    }
+
+    container.add(
+      this.add.image(centerX, centerY, cue.key)
+        .setDisplaySize(size, size)
+        .setAlpha(alpha),
+    );
+    return true;
+  }
+
+  private getMissionPortraitImageCue(portraitId: string): MissionPortraitImageDefinition | null {
+    const cue = MISSION_PORTRAIT_IMAGE_CUE_BY_ID.get(normalizeMissionPortraitId(portraitId));
+
+    return cue && this.textures.exists(cue.key) ? cue : null;
+  }
+
+  private getMissionDialogueParticipants(dialogue: ScenarioMissionDialogueDefinition): MissionDialogueParticipant[] {
+    const bySide: Partial<Record<"left" | "right", MissionDialogueParticipant>> = {};
+    const fallbackParticipants: MissionDialogueParticipant[] = [];
+
+    for (const line of dialogue.lines) {
+      if (line.side === "left" || line.side === "right") {
+        bySide[line.side] ??= {
+          speaker: line.speaker,
+          portraitId: line.portraitId,
+          side: line.side,
+        };
+        continue;
+      }
+
+      if (!fallbackParticipants.some((participant) => this.isSameMissionDialogueParticipant(participant, line))) {
+        fallbackParticipants.push({
+          speaker: line.speaker,
+          portraitId: line.portraitId,
+        });
+      }
+    }
+
+    const participants = [bySide.left, bySide.right].filter((participant): participant is MissionDialogueParticipant => Boolean(participant));
+
+    for (const participant of fallbackParticipants) {
+      if (participants.length >= 2) {
+        break;
+      }
+
+      if (!participants.some((existing) => existing.portraitId === participant.portraitId && existing.speaker === participant.speaker)) {
+        participants.push(participant);
+      }
+    }
+
+    return participants;
+  }
+
+  private getMissionDialogueParticipantIndex(
+    line: ScenarioBriefingLineDefinition,
+    participants: readonly MissionDialogueParticipant[],
+  ): number {
+    if (line.side === "left" || line.side === "right") {
+      const sideIndex = participants.findIndex((participant) => participant.side === line.side);
+
+      if (sideIndex >= 0) {
+        return sideIndex;
+      }
+    }
+
+    const exactIndex = participants.findIndex((participant) => this.isSameMissionDialogueParticipant(participant, line));
+
+    if (exactIndex >= 0) {
+      return exactIndex;
+    }
+
+    const portraitIndex = participants.findIndex((participant) => participant.portraitId === line.portraitId);
+
+    return portraitIndex >= 0 ? portraitIndex : 0;
+  }
+
+  private isSameMissionDialogueParticipant(
+    participant: MissionDialogueParticipant,
+    line: ScenarioBriefingLineDefinition,
+  ): boolean {
+    return participant.portraitId === line.portraitId && participant.speaker === line.speaker;
+  }
+
+  private getMissionDialogueSpeakerColor(portraitId: string): string {
+    return portraitId.startsWith("J") ? "#ffb294" : "#f1dfaa";
   }
 
   private redrawMissionDialogueOverlay(): void {
@@ -1834,12 +2885,26 @@ export class SkirmishScene extends Phaser.Scene {
   private hideMissionDialogueOverlay(): void {
     this.missionDialogueContainer?.destroy(true);
     this.missionDialogueContainer = null;
+    this.stopMissionVoiceAudio();
   }
 
   private clearMissionDialogueOverlay(): void {
     this.activeMissionDialogue = null;
     this.missionDialoguePausedAt = null;
     this.hideMissionDialogueOverlay();
+  }
+
+  private completeScenarioAfterMissionDialogue(dialogue: ScenarioMissionDialogueDefinition): void {
+    const status = dialogue.completeScenarioOnEnd;
+
+    if (!status || !this.sessionTransport || this.sessionTransport.isRemote || this.worldState.scenario.status !== "running") {
+      return;
+    }
+
+    if (this.sessionTransport.forceScenarioResult(status)) {
+      this.syncWorldFromTransport(true);
+      this.publishGamePlayback();
+    }
   }
 
   private updateMissionResultOverlay(): void {
@@ -1855,12 +2920,12 @@ export class SkirmishScene extends Phaser.Scene {
       return;
     }
 
-    if (status === "victory") {
-      this.recordCampaignVictory();
-    }
-
     if (this.activeMissionDialogue || this.hasPendingTriggeredMissionDialogue()) {
       return;
+    }
+
+    if (status === "victory") {
+      this.recordCampaignVictory();
     }
 
     this.hideMissionBriefingOverlay();
@@ -2017,6 +3082,7 @@ export class SkirmishScene extends Phaser.Scene {
       return;
     }
 
+    const activeMissionDialogue = this.serializeActiveMissionDialogue();
     const payload: QuickSavePayload = {
       version: QUICK_SAVE_VERSION,
       contextKey: this.getQuickSaveContextKey(),
@@ -2026,6 +3092,7 @@ export class SkirmishScene extends Phaser.Scene {
       playerVisibility: serializePlayerVisibilityState(this.playerVisibility),
       controlGroups: this.serializeControlGroups(),
       knownResources: this.serializeKnownResourceViews(),
+      ...(activeMissionDialogue ? { activeMissionDialogue } : {}),
       triggeredMissionDialogueIds: [...this.triggeredMissionDialogueIds],
     };
 
@@ -2066,7 +3133,7 @@ export class SkirmishScene extends Phaser.Scene {
       return;
     }
 
-    if (!this.sessionTransport.replaceSnapshot(payload.snapshot)) {
+    if (!this.sessionTransport.replaceSnapshot(payload.snapshot, this.launchContext?.scenario)) {
       this.showQuickSaveFeedback("불러오기에 실패했습니다.", false);
       return;
     }
@@ -2075,6 +3142,7 @@ export class SkirmishScene extends Phaser.Scene {
     this.restoreControlGroups(payload.controlGroups);
     this.syncWorldFromTransport(true);
     this.restoreTriggeredMissionDialogues(payload.triggeredMissionDialogueIds);
+    this.restoreActiveMissionDialogue(payload.activeMissionDialogue);
     this.setPlaybackPaused(true);
     this.showQuickSaveFeedback("불러오기 완료", true);
   }
@@ -2107,6 +3175,7 @@ export class SkirmishScene extends Phaser.Scene {
     this.worldState = snapshot;
     this.lastSyncedTick = snapshot.tick;
     this.map = snapshot.map;
+    this.revealMapCheatActive = false;
     this.syncConstructionAudioState(false);
     this.syncProgressAudioState(false);
     this.playerVisibility = this.resolveLaunchPlayerVisibility(savedVisibility, snapshot.map);
@@ -2155,6 +3224,7 @@ export class SkirmishScene extends Phaser.Scene {
       const payload = JSON.parse(rawPayload) as Partial<QuickSavePayload>;
 
       const snapshot = normalizeSavedWorldSnapshot(payload.snapshot);
+      const activeMissionDialogue = normalizeOptionalMissionDialogueState(payload.activeMissionDialogue);
       const controlGroups = payload.controlGroups === undefined
         ? undefined
         : normalizeSerializedControlGroups(payload.controlGroups);
@@ -2168,6 +3238,7 @@ export class SkirmishScene extends Phaser.Scene {
         !snapshot ||
         !payload.savedAt ||
         !payload.launchContext ||
+        activeMissionDialogue === null ||
         (payload.playerVisibility !== undefined && !deserializePlayerVisibilityState(payload.playerVisibility)) ||
         (payload.controlGroups !== undefined && !controlGroups) ||
         (payload.knownResources !== undefined && !knownResources) ||
@@ -2179,6 +3250,7 @@ export class SkirmishScene extends Phaser.Scene {
       return {
         ...payload,
         snapshot,
+        ...(activeMissionDialogue ? { activeMissionDialogue } : {}),
         ...(controlGroups ? { controlGroups } : {}),
         ...(knownResources ? { knownResources } : {}),
       } as QuickSavePayload;
@@ -2206,6 +3278,7 @@ export class SkirmishScene extends Phaser.Scene {
     delete context.resumePlayerVisibility;
     delete context.resumeControlGroups;
     delete context.resumeKnownResources;
+    delete context.resumeMissionDialogue;
 
     const restartMapDefinition =
       context.mapDefinition ??
@@ -2295,49 +3368,53 @@ export class SkirmishScene extends Phaser.Scene {
   private createMissionResultOverlay(status: "victory" | "defeat"): Phaser.GameObjects.Container {
     const width = this.scale.width;
     const height = this.scale.height;
-    const panelWidth = Phaser.Math.Clamp(width * 0.44, 420, 620);
+    const panelWidth = Phaser.Math.Clamp(width * 0.5, 460, 660);
     const nextCampaignContext = status === "victory" ? this.createNextCampaignMissionContext() : null;
-    const panelHeight = nextCampaignContext ? 358 : 322;
+    const hasSourceLogo = this.hasMissionResultLogo(status);
+    const panelHeight = nextCampaignContext ? 420 : 384;
     const panelX = (width - panelWidth) / 2;
     const panelY = Math.max(76, (height - panelHeight) / 2 - 40);
     const resultColor = status === "victory" ? 0xbfff8f : 0xff9b86;
     const resultTitle = status === "victory" ? "승리" : "패배";
     const scenarioName = this.launchContext?.scenario?.name ?? this.worldState.scenario.id;
-    const objectiveLines = Object.values(this.worldState.scenario.objectives)
-      .filter((objective) => objective.required || objective.defeatOnFailure)
+    const objectiveLines = this.getScenarioUiObjectives()
       .map((objective) => `${objective.status === "completed" ? "완료" : objective.status === "failed" ? "실패" : "미완료"}: ${objective.label}`);
     const resultSummaryLines = this.getMissionResultSummaryLines();
 
     const container = this.addScreenOverlayContainer(SCREEN_OVERLAY_DEPTH + 30);
+    const hasSourceBackdrop = this.addMissionResultBackdrop(container, width, height);
     const graphics = this.add.graphics();
 
     graphics
-      .fillStyle(0x020708, 0.58)
+      .fillStyle(0x020708, hasSourceBackdrop ? 0.28 : 0.58)
       .fillRect(0, 0, width, height)
       .fillStyle(0x071112, 0.96)
       .fillRoundedRect(panelX, panelY, panelWidth, panelHeight, 8)
       .lineStyle(2, resultColor, 0.85)
       .strokeRoundedRect(panelX, panelY, panelWidth, panelHeight, 8)
       .lineStyle(1, 0xd0b46a, 0.55)
-      .lineBetween(panelX + 26, panelY + 72, panelX + panelWidth - 26, panelY + 72);
+      .lineBetween(panelX + 26, panelY + 138, panelX + panelWidth - 26, panelY + 138);
 
     container.add(graphics);
+
+    if (!hasSourceLogo || !this.addMissionResultLogo(container, status, panelX + panelWidth / 2, panelY + 68, Math.min(250, panelWidth - 80))) {
+      container.add(
+        this.add.text(panelX + panelWidth / 2, panelY + 50, resultTitle, {
+          fontFamily: "Georgia, Times New Roman, serif",
+          fontSize: "34px",
+          color: status === "victory" ? "#d9ffba" : "#ffd1c8",
+        }).setOrigin(0.5, 0),
+      );
+    }
     container.add(
-      this.add.text(panelX + panelWidth / 2, panelY + 26, resultTitle, {
-        fontFamily: "Georgia, Times New Roman, serif",
-        fontSize: "34px",
-        color: status === "victory" ? "#d9ffba" : "#ffd1c8",
-      }).setOrigin(0.5, 0),
-    );
-    container.add(
-      this.add.text(panelX + panelWidth / 2, panelY + 82, scenarioName, {
+      this.add.text(panelX + panelWidth / 2, panelY + 150, scenarioName, {
         fontFamily: "Noto Sans KR, Malgun Gothic, Apple SD Gothic Neo, Trebuchet MS, sans-serif",
         fontSize: "16px",
         color: "#f1dfaa",
       }).setOrigin(0.5, 0),
     );
     container.add(
-      this.add.text(panelX + 34, panelY + 116, objectiveLines.join("\n"), {
+      this.add.text(panelX + 34, panelY + 184, objectiveLines.join("\n"), {
         fontFamily: "Noto Sans KR, Malgun Gothic, Apple SD Gothic Neo, Trebuchet MS, sans-serif",
         fontSize: "14px",
         color: "#cfe0d4",
@@ -2346,7 +3423,7 @@ export class SkirmishScene extends Phaser.Scene {
       }),
     );
     container.add(
-      this.add.text(panelX + 34, panelY + 188, resultSummaryLines.join("\n"), {
+      this.add.text(panelX + 34, panelY + 256, resultSummaryLines.join("\n"), {
         fontFamily: "Noto Sans KR, Malgun Gothic, Apple SD Gothic Neo, Trebuchet MS, sans-serif",
         fontSize: "13px",
         color: "#8fb4a2",
@@ -2384,6 +3461,68 @@ export class SkirmishScene extends Phaser.Scene {
     });
 
     return container;
+  }
+
+  private addMissionResultBackdrop(
+    container: Phaser.GameObjects.Container,
+    width: number,
+    height: number,
+  ): boolean {
+    if (!this.textures.exists(MISSION_RESULT_BACKDROP_IMAGE_KEY)) {
+      return false;
+    }
+
+    const scale = Math.max(
+      width / MISSION_RESULT_BACKDROP_SOURCE_WIDTH,
+      height / MISSION_RESULT_BACKDROP_SOURCE_HEIGHT,
+    );
+    const image = this.add.image(width / 2, height / 2, MISSION_RESULT_BACKDROP_IMAGE_KEY)
+      .setScale(scale)
+      .setAlpha(0.94);
+
+    container.add(image);
+    return true;
+  }
+
+  private hasMissionResultLogo(status: "victory" | "defeat"): boolean {
+    return MISSION_RESULT_LOGO_BY_STATUS[status].frames.some((frame) => this.textures.exists(frame.key));
+  }
+
+  private addMissionResultLogo(
+    container: Phaser.GameObjects.Container,
+    status: "victory" | "defeat",
+    centerX: number,
+    centerY: number,
+    maxWidth: number,
+  ): boolean {
+    const logo = MISSION_RESULT_LOGO_BY_STATUS[status];
+    const frames = logo.frames.filter((frame) => this.textures.exists(frame.key));
+
+    if (frames.length === 0) {
+      return false;
+    }
+
+    const scale = Math.min(1, maxWidth / logo.width);
+    const image = this.add.image(centerX, centerY, frames[0]!.key)
+      .setDisplaySize(logo.width * scale, logo.height * scale);
+
+    container.add(image);
+
+    if (frames.length > 1) {
+      let frameIndex = 0;
+      const timer = this.time.addEvent({
+        delay: MISSION_RESULT_LOGO_FRAME_MS,
+        loop: true,
+        callback: () => {
+          frameIndex = (frameIndex + 1) % frames.length;
+          image.setTexture(frames[frameIndex]!.key);
+        },
+      });
+
+      container.once(Phaser.GameObjects.Events.DESTROY, () => timer.remove(false));
+    }
+
+    return true;
   }
 
   private getMissionResultSummaryLines(): string[] {
@@ -2525,23 +3664,7 @@ export class SkirmishScene extends Phaser.Scene {
 
     const map = createImjinrokMapScaffold(nextScenario.mapId) ?? defaultMap;
 
-    return {
-      entryMode: "singleplayer",
-      connectionMode: "local",
-      scenarioType: "campaign",
-      session: null,
-      serverOnline: false,
-      mapId: map.id,
-      mapDefinition: map,
-      scenario: nextScenario,
-      playerIds: ["local-player", "cpu-1"],
-      playerTeams: {
-        "local-player": "local",
-        "cpu-1": "cpu",
-      },
-      aiPlayerIds: ["cpu-1"],
-      ...(this.launchContext?.aiDifficulty ? { aiDifficulty: this.launchContext.aiDifficulty } : {}),
-    };
+    return createCampaignMissionLaunchContext(nextScenario, map);
   }
 
   private returnToMainMenu(): void {
@@ -2652,8 +3775,7 @@ export class SkirmishScene extends Phaser.Scene {
   }
 
   private getObjectiveTrackerEntries(): ObjectiveTrackerEntry[] {
-    return Object.values(this.worldState.scenario.objectives)
-      .filter((objective) => objective.required || objective.defeatOnFailure)
+    return this.getScenarioUiObjectives()
       .map((objective) => ({
         id: objective.id,
         label: objective.label,
@@ -2662,6 +3784,23 @@ export class SkirmishScene extends Phaser.Scene {
         focusUnitIds: this.getObjectiveFocusUnitIds(objective),
         focusWorldPoint: this.getObjectiveFocusWorldPoint(objective),
       }));
+  }
+
+  private getScenarioUiObjectives(): Array<WorldState["scenario"]["objectives"][string]> {
+    return Object.values(this.worldState.scenario.objectives)
+      .filter((objective) => (objective.required || objective.defeatOnFailure) && this.isObjectiveVisibleInScenarioUi(objective));
+  }
+
+  private isObjectiveVisibleInScenarioUi(objective: WorldState["scenario"]["objectives"][string]): boolean {
+    if (objective.status !== "pending") {
+      return true;
+    }
+
+    if (objective.visibleAfterObjectiveId === undefined) {
+      return true;
+    }
+
+    return this.worldState.scenario.objectives[objective.visibleAfterObjectiveId]?.status === "completed";
   }
 
   private getObjectiveProgressText(objective: WorldState["scenario"]["objectives"][string]): string {
@@ -2683,13 +3822,21 @@ export class SkirmishScene extends Phaser.Scene {
 
         const reached = area ? units.filter((unit) => this.isUnitInObjectiveArea(unit, area)).length : 0;
         if (reached >= required) {
+          const unmetRequirementLabel = this.getFirstUnmetObjectiveCompletionRequirementLabel(objective);
+          if (unmetRequirementLabel) {
+            return `${unmetRequirementLabel} 필요`;
+          }
+
           return `도착 ${reached} / ${required}`;
         }
 
         const unit = units[0];
+        const routeProgress = unit ? this.getObjectiveRouteProgressText(unit, objective) : null;
         const distance = unit && area ? this.getGridDistanceToAreaCenter(unit.position, area) : 0;
 
-        return unit ? `HP ${unit.health.current} / ${unit.health.max} · 거리 ${distance}` : `도착 ${reached} / ${required}`;
+        return unit
+          ? `HP ${unit.health.current} / ${unit.health.max} · ${routeProgress ?? `거리 ${distance}`}`
+          : `도착 ${reached} / ${required}`;
       }
       case "protect-units": {
         const units = this.getObjectiveMatchingUnits(objective);
@@ -2721,7 +3868,7 @@ export class SkirmishScene extends Phaser.Scene {
       case "collect-resources":
         return this.getResourceObjectiveProgressText(objective);
       case "custom":
-        return objective.status === "pending" ? "진행 중" : objective.status === "completed" ? "완료" : "실패";
+        return objective.status === "pending" ? objective.description : objective.status === "completed" ? "완료" : "실패";
     }
   }
 
@@ -2850,6 +3997,41 @@ export class SkirmishScene extends Phaser.Scene {
     return Math.max(1, objective.count ?? 1);
   }
 
+  private getFirstUnmetObjectiveCompletionRequirementLabel(objective: WorldState["scenario"]["objectives"][string]): string | null {
+    for (const requiredObjectiveId of objective.completionRequiresObjectiveIds ?? []) {
+      const requiredObjective = this.worldState.scenario.objectives[requiredObjectiveId];
+
+      if (requiredObjective?.status !== "completed") {
+        return requiredObjective?.label ?? "선행 목표";
+      }
+    }
+
+    return null;
+  }
+
+  private getObjectiveRouteProgressText(
+    unit: UnitState,
+    objective: WorldState["scenario"]["objectives"][string],
+  ): string | null {
+    const waypoints = objective.routeWaypoints;
+
+    if (!waypoints || waypoints.length < 2) {
+      return null;
+    }
+
+    const nextWaypointIndex = waypoints.slice(1).findIndex((waypoint) => this.getGridDistanceToPoint(unit.position, waypoint) > 4);
+
+    if (nextWaypointIndex < 0) {
+      return null;
+    }
+
+    const waypoint = waypoints[nextWaypointIndex + 1]!;
+    const distance = this.getGridDistanceToPoint(unit.position, waypoint);
+    const label = objective.routeWaypointLabels?.[nextWaypointIndex + 1] ?? "다음 지점";
+
+    return `${label} ${nextWaypointIndex + 1} / ${waypoints.length - 1} · 거리 ${distance}`;
+  }
+
   private getBankResourceLabel(resourceKind: BankResourceKind): string {
     switch (resourceKind) {
       case "food":
@@ -2879,6 +4061,10 @@ export class SkirmishScene extends Phaser.Scene {
     return Math.round(Math.hypot(point.x - centerX, point.y - centerY));
   }
 
+  private getGridDistanceToPoint(from: GridPoint, to: GridPoint): number {
+    return Math.round(Math.hypot(from.x - to.x, from.y - to.y));
+  }
+
   private setupObjectiveAreaOverlay(): void {
     this.objectiveAreaGraphics = this.add.graphics().setDepth(SCREEN_OVERLAY_DEPTH - 100);
     this.redrawObjectiveAreaOverlay();
@@ -2892,15 +4078,56 @@ export class SkirmishScene extends Phaser.Scene {
     }
 
     graphics.clear();
+    const labelDefinitions: ObjectiveAreaLabelDefinition[] = [];
 
     for (const objective of Object.values(this.worldState.scenario.objectives)) {
+      if (!objective.required && !objective.defeatOnFailure) {
+        continue;
+      }
+
       if (objective.type !== "move-unit-to-area" || !objective.area) {
         continue;
       }
 
+      if (!this.isObjectiveVisibleInScenarioUi(objective)) {
+        continue;
+      }
+
       const points = this.getObjectiveAreaWorldPoints(objective.area);
+      const routePoints = this.getObjectiveRouteWorldPoints(objective.routeWaypoints);
       const color = objective.status === "completed" ? 0x8bd59b : objective.status === "failed" ? 0xff8c73 : 0xf4df8e;
       const alpha = objective.status === "pending" ? 0.13 : 0.18;
+
+      if (routePoints.length >= 2) {
+        graphics
+          .lineStyle(7, 0x071112, 0.58)
+          .strokePoints(routePoints, false)
+          .lineStyle(3, color, 0.76)
+          .strokePoints(routePoints, false);
+
+        for (const point of routePoints.slice(1, -1)) {
+          graphics
+            .lineStyle(2, 0x071112, 0.9)
+            .strokeCircle(point.x, point.y, 10)
+            .fillStyle(color, 0.78)
+            .fillCircle(point.x, point.y, 5);
+        }
+
+        routePoints.slice(1).forEach((point, index) => {
+          const label = objective.routeWaypointLabels?.[index + 1];
+
+          if (!label) {
+            return;
+          }
+
+          labelDefinitions.push({
+            x: point.x,
+            y: point.y,
+            text: label,
+            color: this.getObjectiveAreaLabelColor(objective.status),
+          });
+        });
+      }
 
       graphics
         .fillStyle(color, alpha)
@@ -2918,6 +4145,55 @@ export class SkirmishScene extends Phaser.Scene {
         .strokeCircle(center.x, center.y, 12)
         .fillStyle(color, 0.88)
         .fillCircle(center.x, center.y, 6);
+    }
+
+    this.syncObjectiveAreaLabels(labelDefinitions);
+  }
+
+  private getObjectiveRouteWorldPoints(routeWaypoints: readonly GridPoint[] | undefined): Phaser.Geom.Point[] {
+    return (routeWaypoints ?? []).map((point) => this.getGridWorldPoint(point));
+  }
+
+  private syncObjectiveAreaLabels(labelDefinitions: readonly ObjectiveAreaLabelDefinition[]): void {
+    const signature = labelDefinitions
+      .map((label) => `${label.text}:${label.x.toFixed(1)},${label.y.toFixed(1)}:${label.color}`)
+      .join("|");
+
+    if (signature === this.objectiveAreaLabelSignature) {
+      return;
+    }
+
+    this.disposeObjectiveAreaLabels();
+    this.objectiveAreaLabelSignature = signature;
+
+    for (const label of labelDefinitions) {
+      const text = this.add.text(label.x + 12, label.y - 18, label.text, {
+        fontFamily: "Noto Sans KR, Malgun Gothic, Apple SD Gothic Neo, Trebuchet MS, sans-serif",
+        fontSize: "12px",
+        color: label.color,
+      })
+        .setDepth(SCREEN_OVERLAY_DEPTH - 99)
+        .setOrigin(0, 0.5)
+        .setStroke("#071112", 4);
+
+      this.objectiveAreaLabels.push(text);
+    }
+  }
+
+  private disposeObjectiveAreaLabels(): void {
+    this.objectiveAreaLabels.forEach((label) => label.destroy());
+    this.objectiveAreaLabels.length = 0;
+    this.objectiveAreaLabelSignature = "";
+  }
+
+  private getObjectiveAreaLabelColor(status: WorldState["scenario"]["objectives"][string]["status"]): string {
+    switch (status) {
+      case "completed":
+        return "#d9ffba";
+      case "failed":
+        return "#ffbdaf";
+      case "pending":
+        return "#f1dfaa";
     }
   }
 
@@ -2941,7 +4217,7 @@ export class SkirmishScene extends Phaser.Scene {
       return;
     }
 
-    const objectives = Object.values(this.worldState.scenario.objectives).filter((entry) => entry.required || entry.defeatOnFailure);
+    const objectives = this.getScenarioUiObjectives();
     const status = this.worldState.scenario.status;
 
     if (status === "victory" || status === "defeat") {
@@ -3207,6 +4483,18 @@ export class SkirmishScene extends Phaser.Scene {
       return;
     }
 
+    if ((event.code === "Space" || event.code === "Enter") && this.advanceMissionPresentation()) {
+      event.preventDefault();
+      event.stopPropagation();
+      return;
+    }
+
+    if (this.cheatInputElement) {
+      event.preventDefault();
+      event.stopPropagation();
+      return;
+    }
+
     if (event.code === "Escape") {
       if (this.activeMissionDialogue) {
         this.advanceMissionDialogueLine();
@@ -3256,6 +4544,13 @@ export class SkirmishScene extends Phaser.Scene {
       return;
     }
 
+    if (event.code === "Enter") {
+      this.openCheatInput();
+      event.preventDefault();
+      event.stopPropagation();
+      return;
+    }
+
     if (event.code === "Space") {
       this.togglePlaybackPause();
       event.preventDefault();
@@ -3293,6 +4588,27 @@ export class SkirmishScene extends Phaser.Scene {
       event.preventDefault();
       event.stopPropagation();
     }
+  }
+
+  private advanceMissionPresentation(): boolean {
+    if (this.activeMissionDialogue) {
+      this.advanceMissionDialogueLine();
+      return true;
+    }
+
+    if (!this.missionBriefingContainer) {
+      return false;
+    }
+
+    const briefing = this.launchContext?.scenario?.briefing;
+
+    if (!briefing || this.missionBriefingLineIndex + 1 >= briefing.lines.length) {
+      this.hideMissionBriefingOverlay();
+      return true;
+    }
+
+    this.advanceMissionBriefingLine();
+    return true;
   }
 
   private handlePlaybackControl(control: GamePlaybackControlView): void {
@@ -3370,6 +4686,10 @@ export class SkirmishScene extends Phaser.Scene {
       }
     }
 
+    if (!muted && this.missionBriefingContainer) {
+      this.playMissionBriefingMusic();
+    }
+
     this.publishGamePlayback();
   }
 
@@ -3396,6 +4716,70 @@ export class SkirmishScene extends Phaser.Scene {
   private stopGameplayAudio(): void {
     for (const cue of GAMEPLAY_AUDIO_CUES) {
       this.sound.stopByKey(cue.key);
+    }
+
+    this.stopMissionVoiceAudio();
+    this.stopMissionBriefingMusic();
+  }
+
+  private stopMissionVoiceAudio(): void {
+    for (const cue of MISSION_VOICE_AUDIO_CUES) {
+      this.sound.stopByKey(cue.key);
+    }
+  }
+
+  private stopMissionBriefingMusic(): void {
+    this.sound.stopByKey(MISSION_BRIEFING_MUSIC_AUDIO_CUE_KEY);
+    this.missionBriefingMusicPlaying = false;
+  }
+
+  private playMissionBriefingMusic(): void {
+    if (this.missionBriefingMusicPlaying || this.audioMuted || this.sound.mute) {
+      return;
+    }
+
+    const cue = GAMEPLAY_AUDIO_CUE_BY_KEY.get(this.getMissionBriefingMusicCueKey());
+
+    if (!cue || !this.cache.audio.exists(cue.key)) {
+      return;
+    }
+
+    try {
+      if (this.sound.play(cue.key, { volume: cue.volume, loop: cue.loop ?? false })) {
+        this.missionBriefingMusicPlaying = true;
+      }
+    } catch (error) {
+      console.warn("Failed to play mission briefing music", { error });
+    }
+  }
+
+  private getMissionBriefingMusicCueKey(): GameplayAudioCueKey {
+    const musicSource = this.launchContext?.scenario?.briefing?.musicSource?.trim().replaceAll("\\", "/").toLowerCase();
+
+    if (!musicSource) {
+      return MISSION_BRIEFING_MUSIC_AUDIO_CUE_KEY;
+    }
+
+    return MISSION_BRIEFING_MUSIC_AUDIO_CUE_BY_SOURCE.get(musicSource) ?? MISSION_BRIEFING_MUSIC_AUDIO_CUE_KEY;
+  }
+
+  private playMissionLineVoice(line: ScenarioBriefingLineDefinition): void {
+    this.stopMissionVoiceAudio();
+
+    if (this.audioMuted || this.sound.mute) {
+      return;
+    }
+
+    const cue = MISSION_VOICE_AUDIO_CUE_BY_ID.get(normalizeMissionVoiceId(line.voiceId));
+
+    if (!cue || !this.cache.audio.exists(cue.key)) {
+      return;
+    }
+
+    try {
+      this.sound.play(cue.key, { volume: cue.volume });
+    } catch (error) {
+      console.warn("Failed to play mission voice audio cue", { voiceId: line.voiceId, error });
     }
   }
 
@@ -3456,7 +4840,7 @@ export class SkirmishScene extends Phaser.Scene {
   }
 
   private handleControlGroupKeyDown(event: KeyboardEvent): void {
-    if (event.repeat || event.altKey || this.isBlockingModalOpen()) {
+    if (event.repeat || event.altKey || this.cheatInputElement || this.isBlockingModalOpen()) {
       return;
     }
 
@@ -5319,7 +6703,19 @@ export class SkirmishScene extends Phaser.Scene {
     this.clampCameraToWorld();
   }
 
+  private centerCameraOnGridPoint(point: GridPoint): void {
+    const worldPoint = this.getGridWorldPoint(point);
+
+    this.centerCameraOnWorldPoint(worldPoint);
+    this.publishMinimapViewport(true);
+  }
+
   private centerCameraOnLocalStart(): void {
+    if (this.map.sourceInitialView) {
+      this.centerCameraOnGridPoint(this.map.sourceInitialView);
+      return;
+    }
+
     const localUnits = Object.values(this.worldState.units).filter((unit) => unit.playerId === this.localPlayerId);
     const anchor = localUnits.find((unit) => unitDefinitions[unit.kind].category === "building") ?? localUnits[0];
 
@@ -5418,7 +6814,7 @@ export class SkirmishScene extends Phaser.Scene {
     }
 
     try {
-      if (this.sound.play(cue.key, { volume: cue.volume })) {
+      if (this.sound.play(cue.key, { volume: cue.volume, loop: cue.loop ?? false })) {
         this.lastAudioCuePlayedAt.set(cueKey, now);
       }
     } catch (error) {
@@ -5951,6 +7347,17 @@ export class SkirmishScene extends Phaser.Scene {
 
   private refreshLocalVisibility(): number {
     const startedAt = this.perfEnabled ? performance.now() : 0;
+
+    if (this.revealMapCheatActive) {
+      const dirtyChunkCount = this.revealAllLocalVisibility();
+
+      if (this.perfEnabled) {
+        this.lastVisibilityDeltaMs = performance.now() - startedAt;
+      }
+
+      return dirtyChunkCount;
+    }
+
     const update = updatePlayerVisibilityWithChanges(this.playerVisibility, this.worldState, this.localPlayerId, {
       dirtyChunks: this.fogChunkDirtyMask,
       chunkSize: TERRAIN_CHUNK_SIZE,
@@ -5963,6 +7370,38 @@ export class SkirmishScene extends Phaser.Scene {
     }
 
     return update.dirtyChunkCount;
+  }
+
+  private revealAllLocalVisibility(): number {
+    const tileCount = this.map.width * this.map.height;
+    let changed = this.playerVisibility.width !== this.map.width ||
+      this.playerVisibility.height !== this.map.height ||
+      this.playerVisibility.tiles.length !== tileCount;
+
+    if (!changed) {
+      for (let index = 0; index < this.playerVisibility.tiles.length; index += 1) {
+        if (this.playerVisibility.tiles[index] !== TileVisibility.Visible) {
+          changed = true;
+          break;
+        }
+      }
+    }
+
+    const tiles = new Uint8Array(tileCount);
+    tiles.fill(TileVisibility.Visible);
+    this.playerVisibility = {
+      width: this.map.width,
+      height: this.map.height,
+      tiles,
+    };
+
+    if (!changed) {
+      this.fogChunkDirtyMask.fill(0);
+      return 0;
+    }
+
+    this.fogChunkDirtyMask.fill(1);
+    return this.fogChunkDirtyMask.length;
   }
 
   private isUnitVisibleToLocalPlayer(unit: UnitState): boolean {

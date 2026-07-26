@@ -1,0 +1,6014 @@
+{
+  "schemaVersion": 1,
+  "policy": {
+    "semanticStatus": "mixed",
+    "acceptedEvidence": "SPEECH portrait identity is statically proven; entity direction, action, and damage-state semantics remain unverified.",
+    "parityUse": "Only portrait mappings may be used as parity evidence; entity mappings remain quarantined until promoted by static binary/data proof."
+  },
+  "sourceFiles": [
+    {
+      "path": "packages/shared/src/themes.ts",
+      "sha256": "18db910441343cb011732298b74ae753d1c31d4707d2fe7d3fd7bfc8e9664824"
+    },
+    {
+      "path": "packages/shared/src/scenarios.ts",
+      "sha256": "4977b10272ae7e1d07e12117593200aa1a989e2cfc87a7d4abe2500e0043536c"
+    },
+    {
+      "path": "apps/game-client/src/scenes/SkirmishScene.ts",
+      "sha256": "a2be81f2d501ef2bca319c7de2b6321cbf0d14c4cdb9c0b1d8e2e3c9f7ee7985"
+    },
+    {
+      "path": "apps/game-client/src/missionPortraits.ts",
+      "sha256": "0b57cba2993f23e215e41336a449d84bb87cb36ced4c052cec75ef352caf9246"
+    },
+    {
+      "path": "tools/imjinrok/extract-mission-portrait-mapping.mjs",
+      "sha256": "16ff933bb511a5ef16fdfdc006fe91f49b120468af2b95c44cb9488614adea70"
+    },
+    {
+      "path": "tools/imjinrok/audit-sprite-mappings.mjs",
+      "sha256": "7d229b9505e9802252f82425951d9df3a42a37636cc2ad9d997580df0399052f"
+    },
+    {
+      "path": "apps/game-client/public/assets/themes/default/ui/mission-portraits/hero.manifest.json",
+      "sha256": "923e22c48f1804a709ae548de95ca5decf9fe498cb5392382961fafedd260d5e"
+    }
+  ],
+  "summary": {
+    "visualCount": 16,
+    "unitVisualCount": 7,
+    "buildingVisualCount": 9,
+    "stateMappingCount": 50,
+    "clipCount": 290,
+    "frameReferenceCount": 1878,
+    "missingFrameReferenceCount": 0,
+    "unverifiedVisualCount": 16,
+    "portraitCueCount": 17,
+    "unverifiedPortraitCueCount": 0,
+    "findingCount": 71
+  },
+  "visuals": [
+    {
+      "visualId": "japanese-camp-advanced-tower",
+      "category": "building",
+      "assetPath": "entities/japanese-camp-advanced-tower",
+      "evidenceStatus": "unverified",
+      "source": {
+        "path": "original/imjinrok2/char/advtowerj.spr",
+        "sha256": "9d453f7a8ed68a23af73ff61db26c9c8b09ea512e1195263f36cdad57b6a1116",
+        "frameCount": 10,
+        "width": 75,
+        "height": 98
+      },
+      "conversionManifest": {
+        "path": "apps/game-client/public/assets/themes/default/entities/japanese-camp-advanced-tower/advtowerj.manifest.json",
+        "sha256": "603a0d76349d9049a58bd7d11d6cc6dd1b96f623328eb9a4909d20e1d61877b9"
+      },
+      "mappings": [
+        {
+          "scope": "base",
+          "state": "construction",
+          "declaredFacings": [],
+          "clips": [
+            {
+              "facing": "default",
+              "frameIndexes": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            }
+          ]
+        },
+        {
+          "scope": "base",
+          "state": "idle",
+          "declaredFacings": [],
+          "clips": [
+            {
+              "facing": "default",
+              "frameIndexes": [
+                8
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "visualId": "japanese-camp-barracks",
+      "category": "building",
+      "assetPath": "entities/japanese-camp-barracks",
+      "evidenceStatus": "unverified",
+      "source": {
+        "path": "original/imjinrok2/char/barrackj.spr",
+        "sha256": "f71072d74f7fbe1e2646c9ae13ca2f2172f5c096749262a77f477ae8dcb4038d",
+        "frameCount": 24,
+        "width": 125,
+        "height": 110
+      },
+      "conversionManifest": {
+        "path": "apps/game-client/public/assets/themes/default/entities/japanese-camp-barracks/barrackj.manifest.json",
+        "sha256": "1a66756fe354f685a9e6f5aa1ad9f1e5d6869160092ed7f121f3aeb4cb2475e2"
+      },
+      "mappings": [
+        {
+          "scope": "base",
+          "state": "construction",
+          "declaredFacings": [],
+          "clips": [
+            {
+              "facing": "default",
+              "frameIndexes": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            }
+          ]
+        },
+        {
+          "scope": "base",
+          "state": "idle",
+          "declaredFacings": [],
+          "clips": [
+            {
+              "facing": "default",
+              "frameIndexes": [
+                9,
+                10,
+                11,
+                12,
+                13,
+                14,
+                15,
+                16,
+                17
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "visualId": "japanese-camp-firehouse",
+      "category": "building",
+      "assetPath": "entities/japanese-camp-firehouse",
+      "evidenceStatus": "unverified",
+      "source": {
+        "path": "original/imjinrok2/char/firehousej.spr",
+        "sha256": "387078391680b46fccfd7d99b8fefdeda8dcd2977d60ac6abdc77f956d571869",
+        "frameCount": 40,
+        "width": 113,
+        "height": 123
+      },
+      "conversionManifest": {
+        "path": "apps/game-client/public/assets/themes/default/entities/japanese-camp-firehouse/firehousej.manifest.json",
+        "sha256": "cdaa2fabed81c11c00d9ffe47a96a682bedf6083740bd83575bc1d48cd2509c3"
+      },
+      "mappings": [
+        {
+          "scope": "base",
+          "state": "construction",
+          "declaredFacings": [],
+          "clips": [
+            {
+              "facing": "default",
+              "frameIndexes": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            }
+          ]
+        },
+        {
+          "scope": "base",
+          "state": "idle",
+          "declaredFacings": [],
+          "clips": [
+            {
+              "facing": "default",
+              "frameIndexes": [
+                9,
+                10,
+                11,
+                12,
+                13,
+                14,
+                15,
+                16,
+                17,
+                18,
+                19
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "visualId": "japanese-camp-house",
+      "category": "building",
+      "assetPath": "entities/japanese-camp-house",
+      "evidenceStatus": "unverified",
+      "source": {
+        "path": "original/imjinrok2/char/millj.spr",
+        "sha256": "3cc154a328da81b514fe7b86f178562e3d6db99bcc69e1cbe5904be86d4fbf6c",
+        "frameCount": 36,
+        "width": 109,
+        "height": 117
+      },
+      "conversionManifest": {
+        "path": "apps/game-client/public/assets/themes/default/entities/japanese-camp-house/millj.manifest.json",
+        "sha256": "c1b34665a60a71c04a1ee7e4f373df9e7042905a8657fbbc74fe20a128c5095b"
+      },
+      "mappings": [
+        {
+          "scope": "base",
+          "state": "construction",
+          "declaredFacings": [],
+          "clips": [
+            {
+              "facing": "default",
+              "frameIndexes": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            }
+          ]
+        },
+        {
+          "scope": "base",
+          "state": "idle",
+          "declaredFacings": [],
+          "clips": [
+            {
+              "facing": "default",
+              "frameIndexes": [
+                8
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            }
+          ]
+        },
+        {
+          "scope": "layer:idle-overlay",
+          "state": "idle",
+          "declaredFacings": [],
+          "clips": [
+            {
+              "facing": "default",
+              "frameIndexes": [
+                9,
+                10,
+                11,
+                12,
+                13,
+                14,
+                15,
+                16,
+                17,
+                18
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "visualId": "japanese-camp-tower",
+      "category": "building",
+      "assetPath": "entities/japanese-camp-tower",
+      "evidenceStatus": "unverified",
+      "source": {
+        "path": "original/imjinrok2/char/towerj.spr",
+        "sha256": "bbaa6ec6390d1f1d4c48bccc9787e7d1dcabc729fc290dd92a76673426674693",
+        "frameCount": 40,
+        "width": 71,
+        "height": 98
+      },
+      "conversionManifest": {
+        "path": "apps/game-client/public/assets/themes/default/entities/japanese-camp-tower/towerj.manifest.json",
+        "sha256": "af8edb43fa55c2818813ebf010e70aaf45c83062a1368bde3f4343a295d9ebf2"
+      },
+      "mappings": [
+        {
+          "scope": "base",
+          "state": "construction",
+          "declaredFacings": [],
+          "clips": [
+            {
+              "facing": "default",
+              "frameIndexes": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            }
+          ]
+        },
+        {
+          "scope": "base",
+          "state": "idle",
+          "declaredFacings": [],
+          "clips": [
+            {
+              "facing": "default",
+              "frameIndexes": [
+                8
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "visualId": "japanese-gunner",
+      "category": "unit",
+      "assetPath": "entities/japanese-gunner",
+      "evidenceStatus": "unverified",
+      "source": {
+        "path": "original/imjinrok2/char/gunj1.spr",
+        "sha256": "e35c3dddfc4860d3e8ccbb7d86ecb006b11230e269d04091dcfa320dc116a7a8",
+        "frameCount": 80,
+        "width": 60,
+        "height": 60
+      },
+      "conversionManifest": {
+        "path": "apps/game-client/public/assets/themes/default/entities/japanese-gunner/gunj1.manifest.json",
+        "sha256": "f156fab6f775bcf0df46a3f52356dcdbb86634447d9a674d6d9a39476178cae5"
+      },
+      "mappings": [
+        {
+          "scope": "base",
+          "state": "attack",
+          "declaredFacings": [
+            "s",
+            "sw",
+            "w",
+            "nw",
+            "n",
+            "ne",
+            "e",
+            "se"
+          ],
+          "clips": [
+            {
+              "facing": "default",
+              "frameIndexes": [
+                72,
+                73,
+                74,
+                75,
+                76,
+                77,
+                78,
+                79
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "e",
+              "frameIndexes": [
+                56,
+                57,
+                58,
+                59,
+                60,
+                61,
+                62,
+                63
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "n",
+              "frameIndexes": [
+                40,
+                41,
+                42,
+                43,
+                44,
+                45,
+                46,
+                47
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "ne",
+              "frameIndexes": [
+                48,
+                49,
+                50,
+                51,
+                52,
+                53,
+                54,
+                55
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "nw",
+              "frameIndexes": [
+                48,
+                49,
+                50,
+                51,
+                52,
+                53,
+                54,
+                55
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            },
+            {
+              "facing": "s",
+              "frameIndexes": [
+                72,
+                73,
+                74,
+                75,
+                76,
+                77,
+                78,
+                79
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "se",
+              "frameIndexes": [
+                64,
+                65,
+                66,
+                67,
+                68,
+                69,
+                70,
+                71
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "sw",
+              "frameIndexes": [
+                64,
+                65,
+                66,
+                67,
+                68,
+                69,
+                70,
+                71
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            },
+            {
+              "facing": "w",
+              "frameIndexes": [
+                56,
+                57,
+                58,
+                59,
+                60,
+                61,
+                62,
+                63
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            }
+          ]
+        },
+        {
+          "scope": "base",
+          "state": "idle",
+          "declaredFacings": [
+            "s",
+            "sw",
+            "w",
+            "nw",
+            "n",
+            "ne",
+            "e",
+            "se"
+          ],
+          "clips": [
+            {
+              "facing": "default",
+              "frameIndexes": [
+                32
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "e",
+              "frameIndexes": [
+                16
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "n",
+              "frameIndexes": [
+                0
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "ne",
+              "frameIndexes": [
+                8
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "nw",
+              "frameIndexes": [
+                8
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            },
+            {
+              "facing": "s",
+              "frameIndexes": [
+                32
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "se",
+              "frameIndexes": [
+                24
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "sw",
+              "frameIndexes": [
+                24
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            },
+            {
+              "facing": "w",
+              "frameIndexes": [
+                16
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            }
+          ]
+        },
+        {
+          "scope": "base",
+          "state": "move",
+          "declaredFacings": [
+            "s",
+            "sw",
+            "w",
+            "nw",
+            "n",
+            "ne",
+            "e",
+            "se"
+          ],
+          "clips": [
+            {
+              "facing": "default",
+              "frameIndexes": [
+                72,
+                73,
+                74,
+                75,
+                76,
+                77,
+                78,
+                79
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "e",
+              "frameIndexes": [
+                56,
+                57,
+                58,
+                59,
+                60,
+                61,
+                62,
+                63
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "n",
+              "frameIndexes": [
+                40,
+                41,
+                42,
+                43,
+                44,
+                45,
+                46,
+                47
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "ne",
+              "frameIndexes": [
+                48,
+                49,
+                50,
+                51,
+                52,
+                53,
+                54,
+                55
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "nw",
+              "frameIndexes": [
+                48,
+                49,
+                50,
+                51,
+                52,
+                53,
+                54,
+                55
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            },
+            {
+              "facing": "s",
+              "frameIndexes": [
+                72,
+                73,
+                74,
+                75,
+                76,
+                77,
+                78,
+                79
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "se",
+              "frameIndexes": [
+                64,
+                65,
+                66,
+                67,
+                68,
+                69,
+                70,
+                71
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "sw",
+              "frameIndexes": [
+                64,
+                65,
+                66,
+                67,
+                68,
+                69,
+                70,
+                71
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            },
+            {
+              "facing": "w",
+              "frameIndexes": [
+                56,
+                57,
+                58,
+                59,
+                60,
+                61,
+                62,
+                63
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            }
+          ]
+        },
+        {
+          "scope": "base",
+          "state": "walk",
+          "declaredFacings": [
+            "s",
+            "sw",
+            "w",
+            "nw",
+            "n",
+            "ne",
+            "e",
+            "se"
+          ],
+          "clips": [
+            {
+              "facing": "default",
+              "frameIndexes": [
+                72,
+                73,
+                74,
+                75,
+                76,
+                77,
+                78,
+                79
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "e",
+              "frameIndexes": [
+                56,
+                57,
+                58,
+                59,
+                60,
+                61,
+                62,
+                63
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "n",
+              "frameIndexes": [
+                40,
+                41,
+                42,
+                43,
+                44,
+                45,
+                46,
+                47
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "ne",
+              "frameIndexes": [
+                48,
+                49,
+                50,
+                51,
+                52,
+                53,
+                54,
+                55
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "nw",
+              "frameIndexes": [
+                48,
+                49,
+                50,
+                51,
+                52,
+                53,
+                54,
+                55
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            },
+            {
+              "facing": "s",
+              "frameIndexes": [
+                72,
+                73,
+                74,
+                75,
+                76,
+                77,
+                78,
+                79
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "se",
+              "frameIndexes": [
+                64,
+                65,
+                66,
+                67,
+                68,
+                69,
+                70,
+                71
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "sw",
+              "frameIndexes": [
+                64,
+                65,
+                66,
+                67,
+                68,
+                69,
+                70,
+                71
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            },
+            {
+              "facing": "w",
+              "frameIndexes": [
+                56,
+                57,
+                58,
+                59,
+                60,
+                61,
+                62,
+                63
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "visualId": "japanese-swordsman",
+      "category": "unit",
+      "assetPath": "entities/japanese-swordsman",
+      "evidenceStatus": "unverified",
+      "source": {
+        "path": "original/imjinrok2/char/swordj.spr",
+        "sha256": "f3dc53b8606b09e7c65f6a9dabefcf8f6ffef4ec281ff38fb59bc9b2cf8de17e",
+        "frameCount": 192,
+        "width": 60,
+        "height": 50
+      },
+      "conversionManifest": {
+        "path": "apps/game-client/public/assets/themes/default/entities/japanese-swordsman/swordj.manifest.json",
+        "sha256": "6b86c9ab1207a7f5062b8e3c09aa45f8a4c521ae48208313eb3db1e1d3279009"
+      },
+      "mappings": [
+        {
+          "scope": "base",
+          "state": "attack",
+          "declaredFacings": [
+            "s",
+            "sw",
+            "w",
+            "nw",
+            "n",
+            "ne",
+            "e",
+            "se"
+          ],
+          "clips": [
+            {
+              "facing": "default",
+              "frameIndexes": [
+                160,
+                161,
+                162,
+                163,
+                164,
+                165,
+                166,
+                167
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "e",
+              "frameIndexes": [
+                144,
+                145,
+                146,
+                147,
+                148,
+                149,
+                150,
+                151
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "n",
+              "frameIndexes": [
+                128,
+                129,
+                130,
+                131,
+                132,
+                133,
+                134,
+                135
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "ne",
+              "frameIndexes": [
+                136,
+                137,
+                138,
+                139,
+                140,
+                141,
+                142,
+                143
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "nw",
+              "frameIndexes": [
+                136,
+                137,
+                138,
+                139,
+                140,
+                141,
+                142,
+                143
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            },
+            {
+              "facing": "s",
+              "frameIndexes": [
+                160,
+                161,
+                162,
+                163,
+                164,
+                165,
+                166,
+                167
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "se",
+              "frameIndexes": [
+                152,
+                153,
+                154,
+                155,
+                156,
+                157,
+                158,
+                159
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "sw",
+              "frameIndexes": [
+                152,
+                153,
+                154,
+                155,
+                156,
+                157,
+                158,
+                159
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            },
+            {
+              "facing": "w",
+              "frameIndexes": [
+                144,
+                145,
+                146,
+                147,
+                148,
+                149,
+                150,
+                151
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            }
+          ]
+        },
+        {
+          "scope": "base",
+          "state": "idle",
+          "declaredFacings": [
+            "s",
+            "sw",
+            "w",
+            "nw",
+            "n",
+            "ne",
+            "e",
+            "se"
+          ],
+          "clips": [
+            {
+              "facing": "default",
+              "frameIndexes": [
+                32
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "e",
+              "frameIndexes": [
+                16
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "n",
+              "frameIndexes": [
+                0
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "ne",
+              "frameIndexes": [
+                8
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "nw",
+              "frameIndexes": [
+                8
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            },
+            {
+              "facing": "s",
+              "frameIndexes": [
+                32
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "se",
+              "frameIndexes": [
+                24
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "sw",
+              "frameIndexes": [
+                24
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            },
+            {
+              "facing": "w",
+              "frameIndexes": [
+                16
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            }
+          ]
+        },
+        {
+          "scope": "base",
+          "state": "move",
+          "declaredFacings": [
+            "s",
+            "sw",
+            "w",
+            "nw",
+            "n",
+            "ne",
+            "e",
+            "se"
+          ],
+          "clips": [
+            {
+              "facing": "default",
+              "frameIndexes": [
+                72,
+                73,
+                74,
+                75,
+                76,
+                77,
+                78,
+                79
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "e",
+              "frameIndexes": [
+                56,
+                57,
+                58,
+                59,
+                60,
+                61,
+                62,
+                63
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "n",
+              "frameIndexes": [
+                40,
+                41,
+                42,
+                43,
+                44,
+                45,
+                46,
+                47
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "ne",
+              "frameIndexes": [
+                48,
+                49,
+                50,
+                51,
+                52,
+                53,
+                54,
+                55
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "nw",
+              "frameIndexes": [
+                48,
+                49,
+                50,
+                51,
+                52,
+                53,
+                54,
+                55
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            },
+            {
+              "facing": "s",
+              "frameIndexes": [
+                72,
+                73,
+                74,
+                75,
+                76,
+                77,
+                78,
+                79
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "se",
+              "frameIndexes": [
+                64,
+                65,
+                66,
+                67,
+                68,
+                69,
+                70,
+                71
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "sw",
+              "frameIndexes": [
+                64,
+                65,
+                66,
+                67,
+                68,
+                69,
+                70,
+                71
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            },
+            {
+              "facing": "w",
+              "frameIndexes": [
+                56,
+                57,
+                58,
+                59,
+                60,
+                61,
+                62,
+                63
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            }
+          ]
+        },
+        {
+          "scope": "base",
+          "state": "walk",
+          "declaredFacings": [
+            "s",
+            "sw",
+            "w",
+            "nw",
+            "n",
+            "ne",
+            "e",
+            "se"
+          ],
+          "clips": [
+            {
+              "facing": "default",
+              "frameIndexes": [
+                72,
+                73,
+                74,
+                75,
+                76,
+                77,
+                78,
+                79
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "e",
+              "frameIndexes": [
+                56,
+                57,
+                58,
+                59,
+                60,
+                61,
+                62,
+                63
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "n",
+              "frameIndexes": [
+                40,
+                41,
+                42,
+                43,
+                44,
+                45,
+                46,
+                47
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "ne",
+              "frameIndexes": [
+                48,
+                49,
+                50,
+                51,
+                52,
+                53,
+                54,
+                55
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "nw",
+              "frameIndexes": [
+                48,
+                49,
+                50,
+                51,
+                52,
+                53,
+                54,
+                55
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            },
+            {
+              "facing": "s",
+              "frameIndexes": [
+                72,
+                73,
+                74,
+                75,
+                76,
+                77,
+                78,
+                79
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "se",
+              "frameIndexes": [
+                64,
+                65,
+                66,
+                67,
+                68,
+                69,
+                70,
+                71
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "sw",
+              "frameIndexes": [
+                64,
+                65,
+                66,
+                67,
+                68,
+                69,
+                70,
+                71
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            },
+            {
+              "facing": "w",
+              "frameIndexes": [
+                56,
+                57,
+                58,
+                59,
+                60,
+                61,
+                62,
+                63
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "visualId": "korean-archer",
+      "category": "unit",
+      "assetPath": "entities/archer",
+      "evidenceStatus": "unverified",
+      "source": {
+        "path": "original/imjinrok2/char/archerk.spr",
+        "sha256": "5f3cf34ed44a2b011e8d4d7e51ff3974b461f903ce7d8dc37589ea1bc5af4df4",
+        "frameCount": 176,
+        "width": 56,
+        "height": 46
+      },
+      "conversionManifest": {
+        "path": "apps/game-client/public/assets/themes/default/entities/archer/archerk.manifest.json",
+        "sha256": "b389d6f76a1aa6b6453c158435f0205835504d747b2f278301779c68a22d9ff9"
+      },
+      "mappings": [
+        {
+          "scope": "base",
+          "state": "attack",
+          "declaredFacings": [
+            "s",
+            "sw",
+            "w",
+            "nw",
+            "n",
+            "ne",
+            "e",
+            "se"
+          ],
+          "clips": [
+            {
+              "facing": "default",
+              "frameIndexes": [
+                32,
+                33,
+                34,
+                35,
+                36,
+                37,
+                38,
+                39
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "e",
+              "frameIndexes": [
+                16,
+                17,
+                18,
+                19,
+                20,
+                21,
+                22,
+                23
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "n",
+              "frameIndexes": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "ne",
+              "frameIndexes": [
+                8,
+                9,
+                10,
+                11,
+                12,
+                13,
+                14,
+                15
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "nw",
+              "frameIndexes": [
+                8,
+                9,
+                10,
+                11,
+                12,
+                13,
+                14,
+                15
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            },
+            {
+              "facing": "s",
+              "frameIndexes": [
+                32,
+                33,
+                34,
+                35,
+                36,
+                37,
+                38,
+                39
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "se",
+              "frameIndexes": [
+                24,
+                25,
+                26,
+                27,
+                28,
+                29,
+                30,
+                31
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "sw",
+              "frameIndexes": [
+                24,
+                25,
+                26,
+                27,
+                28,
+                29,
+                30,
+                31
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            },
+            {
+              "facing": "w",
+              "frameIndexes": [
+                16,
+                17,
+                18,
+                19,
+                20,
+                21,
+                22,
+                23
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            }
+          ]
+        },
+        {
+          "scope": "base",
+          "state": "idle",
+          "declaredFacings": [
+            "s",
+            "sw",
+            "w",
+            "nw",
+            "n",
+            "ne",
+            "e",
+            "se"
+          ],
+          "clips": [
+            {
+              "facing": "default",
+              "frameIndexes": [
+                152
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "e",
+              "frameIndexes": [
+                136
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "n",
+              "frameIndexes": [
+                120
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "ne",
+              "frameIndexes": [
+                128
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "nw",
+              "frameIndexes": [
+                128
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            },
+            {
+              "facing": "s",
+              "frameIndexes": [
+                152
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "se",
+              "frameIndexes": [
+                144
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "sw",
+              "frameIndexes": [
+                144
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            },
+            {
+              "facing": "w",
+              "frameIndexes": [
+                136
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            }
+          ]
+        },
+        {
+          "scope": "base",
+          "state": "move",
+          "declaredFacings": [
+            "s",
+            "sw",
+            "w",
+            "nw",
+            "n",
+            "ne",
+            "e",
+            "se"
+          ],
+          "clips": [
+            {
+              "facing": "default",
+              "frameIndexes": [
+                112,
+                113,
+                114,
+                115,
+                116,
+                117,
+                118,
+                119
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "e",
+              "frameIndexes": [
+                96,
+                97,
+                98,
+                99,
+                100,
+                101,
+                102,
+                103
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "n",
+              "frameIndexes": [
+                80,
+                81,
+                82,
+                83,
+                84,
+                85,
+                86,
+                87
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "ne",
+              "frameIndexes": [
+                88,
+                89,
+                90,
+                91,
+                92,
+                93,
+                94,
+                95
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "nw",
+              "frameIndexes": [
+                88,
+                89,
+                90,
+                91,
+                92,
+                93,
+                94,
+                95
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            },
+            {
+              "facing": "s",
+              "frameIndexes": [
+                112,
+                113,
+                114,
+                115,
+                116,
+                117,
+                118,
+                119
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "se",
+              "frameIndexes": [
+                104,
+                105,
+                106,
+                107,
+                108,
+                109,
+                110,
+                111
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "sw",
+              "frameIndexes": [
+                104,
+                105,
+                106,
+                107,
+                108,
+                109,
+                110,
+                111
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            },
+            {
+              "facing": "w",
+              "frameIndexes": [
+                96,
+                97,
+                98,
+                99,
+                100,
+                101,
+                102,
+                103
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            }
+          ]
+        },
+        {
+          "scope": "base",
+          "state": "walk",
+          "declaredFacings": [
+            "s",
+            "sw",
+            "w",
+            "nw",
+            "n",
+            "ne",
+            "e",
+            "se"
+          ],
+          "clips": [
+            {
+              "facing": "default",
+              "frameIndexes": [
+                112,
+                113,
+                114,
+                115,
+                116,
+                117,
+                118,
+                119
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "e",
+              "frameIndexes": [
+                96,
+                97,
+                98,
+                99,
+                100,
+                101,
+                102,
+                103
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "n",
+              "frameIndexes": [
+                80,
+                81,
+                82,
+                83,
+                84,
+                85,
+                86,
+                87
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "ne",
+              "frameIndexes": [
+                88,
+                89,
+                90,
+                91,
+                92,
+                93,
+                94,
+                95
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "nw",
+              "frameIndexes": [
+                88,
+                89,
+                90,
+                91,
+                92,
+                93,
+                94,
+                95
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            },
+            {
+              "facing": "s",
+              "frameIndexes": [
+                112,
+                113,
+                114,
+                115,
+                116,
+                117,
+                118,
+                119
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "se",
+              "frameIndexes": [
+                104,
+                105,
+                106,
+                107,
+                108,
+                109,
+                110,
+                111
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "sw",
+              "frameIndexes": [
+                104,
+                105,
+                106,
+                107,
+                108,
+                109,
+                110,
+                111
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            },
+            {
+              "facing": "w",
+              "frameIndexes": [
+                96,
+                97,
+                98,
+                99,
+                100,
+                101,
+                102,
+                103
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "visualId": "korean-barracks",
+      "category": "building",
+      "assetPath": "entities/barracks",
+      "evidenceStatus": "unverified",
+      "source": {
+        "path": "original/imjinrok2/char/barrackk.spr",
+        "sha256": "076f727dd2d35125a0acbe7ce02d89440d93873e8fd83699bdd4813f7895bc48",
+        "frameCount": 32,
+        "width": 128,
+        "height": 117
+      },
+      "conversionManifest": {
+        "path": "apps/game-client/public/assets/themes/default/entities/barracks/barrackk.manifest.json",
+        "sha256": "a13ca5d4ae45415f224e4fc345baaac061dcd42201926ebc811db7760353065e"
+      },
+      "mappings": [
+        {
+          "scope": "base",
+          "state": "construction",
+          "declaredFacings": [],
+          "clips": [
+            {
+              "facing": "default",
+              "frameIndexes": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            }
+          ]
+        },
+        {
+          "scope": "base",
+          "state": "idle",
+          "declaredFacings": [],
+          "clips": [
+            {
+              "facing": "default",
+              "frameIndexes": [
+                7
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            }
+          ]
+        },
+        {
+          "scope": "layer:flag",
+          "state": "idle",
+          "declaredFacings": [],
+          "clips": [
+            {
+              "facing": "default",
+              "frameIndexes": [
+                9,
+                10,
+                11,
+                12,
+                13,
+                14,
+                15
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "visualId": "korean-general-k4",
+      "category": "unit",
+      "assetPath": "entities/general-k4",
+      "evidenceStatus": "unverified",
+      "source": {
+        "path": "original/imjinrok2/char/generalk4.spr",
+        "sha256": "69c67359e01a2d90301cadb054e892c61b4138ea3dcbec06473496c704416331",
+        "frameCount": 208,
+        "width": 84,
+        "height": 76
+      },
+      "conversionManifest": {
+        "path": "apps/game-client/public/assets/themes/default/entities/general-k4/generalk4.manifest.json",
+        "sha256": "bd6e9a09687d0c4bc2b42808599031b106c6621c02d0ab3a3a23018c1fd0e9b2"
+      },
+      "mappings": [
+        {
+          "scope": "base",
+          "state": "attack",
+          "declaredFacings": [
+            "s",
+            "sw",
+            "w",
+            "nw",
+            "n",
+            "ne",
+            "e",
+            "se"
+          ],
+          "clips": [
+            {
+              "facing": "default",
+              "frameIndexes": [
+                128,
+                129,
+                130,
+                131,
+                132,
+                133,
+                134,
+                135
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "e",
+              "frameIndexes": [
+                112,
+                113,
+                114,
+                115,
+                116,
+                117,
+                118,
+                119
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "n",
+              "frameIndexes": [
+                96,
+                97,
+                98,
+                99,
+                100,
+                101,
+                102,
+                103
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "ne",
+              "frameIndexes": [
+                104,
+                105,
+                106,
+                107,
+                108,
+                109,
+                110,
+                111
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "nw",
+              "frameIndexes": [
+                104,
+                105,
+                106,
+                107,
+                108,
+                109,
+                110,
+                111
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            },
+            {
+              "facing": "s",
+              "frameIndexes": [
+                128,
+                129,
+                130,
+                131,
+                132,
+                133,
+                134,
+                135
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "se",
+              "frameIndexes": [
+                120,
+                121,
+                122,
+                123,
+                124,
+                125,
+                126,
+                127
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "sw",
+              "frameIndexes": [
+                120,
+                121,
+                122,
+                123,
+                124,
+                125,
+                126,
+                127
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            },
+            {
+              "facing": "w",
+              "frameIndexes": [
+                112,
+                113,
+                114,
+                115,
+                116,
+                117,
+                118,
+                119
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            }
+          ]
+        },
+        {
+          "scope": "base",
+          "state": "idle",
+          "declaredFacings": [
+            "s",
+            "sw",
+            "w",
+            "nw",
+            "n",
+            "ne",
+            "e",
+            "se"
+          ],
+          "clips": [
+            {
+              "facing": "default",
+              "frameIndexes": [
+                32
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "e",
+              "frameIndexes": [
+                16
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "n",
+              "frameIndexes": [
+                0
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "ne",
+              "frameIndexes": [
+                8
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "nw",
+              "frameIndexes": [
+                8
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            },
+            {
+              "facing": "s",
+              "frameIndexes": [
+                32
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "se",
+              "frameIndexes": [
+                24
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "sw",
+              "frameIndexes": [
+                24
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            },
+            {
+              "facing": "w",
+              "frameIndexes": [
+                16
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            }
+          ]
+        },
+        {
+          "scope": "base",
+          "state": "move",
+          "declaredFacings": [
+            "s",
+            "sw",
+            "w",
+            "nw",
+            "n",
+            "ne",
+            "e",
+            "se"
+          ],
+          "clips": [
+            {
+              "facing": "default",
+              "frameIndexes": [
+                72,
+                73,
+                74,
+                75,
+                76,
+                77,
+                78,
+                79
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "e",
+              "frameIndexes": [
+                56,
+                57,
+                58,
+                59,
+                60,
+                61,
+                62,
+                63
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "n",
+              "frameIndexes": [
+                40,
+                41,
+                42,
+                43,
+                44,
+                45,
+                46,
+                47
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "ne",
+              "frameIndexes": [
+                48,
+                49,
+                50,
+                51,
+                52,
+                53,
+                54,
+                55
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "nw",
+              "frameIndexes": [
+                48,
+                49,
+                50,
+                51,
+                52,
+                53,
+                54,
+                55
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            },
+            {
+              "facing": "s",
+              "frameIndexes": [
+                72,
+                73,
+                74,
+                75,
+                76,
+                77,
+                78,
+                79
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "se",
+              "frameIndexes": [
+                64,
+                65,
+                66,
+                67,
+                68,
+                69,
+                70,
+                71
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "sw",
+              "frameIndexes": [
+                64,
+                65,
+                66,
+                67,
+                68,
+                69,
+                70,
+                71
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            },
+            {
+              "facing": "w",
+              "frameIndexes": [
+                56,
+                57,
+                58,
+                59,
+                60,
+                61,
+                62,
+                63
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            }
+          ]
+        },
+        {
+          "scope": "base",
+          "state": "walk",
+          "declaredFacings": [
+            "s",
+            "sw",
+            "w",
+            "nw",
+            "n",
+            "ne",
+            "e",
+            "se"
+          ],
+          "clips": [
+            {
+              "facing": "default",
+              "frameIndexes": [
+                72,
+                73,
+                74,
+                75,
+                76,
+                77,
+                78,
+                79
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "e",
+              "frameIndexes": [
+                56,
+                57,
+                58,
+                59,
+                60,
+                61,
+                62,
+                63
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "n",
+              "frameIndexes": [
+                40,
+                41,
+                42,
+                43,
+                44,
+                45,
+                46,
+                47
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "ne",
+              "frameIndexes": [
+                48,
+                49,
+                50,
+                51,
+                52,
+                53,
+                54,
+                55
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "nw",
+              "frameIndexes": [
+                48,
+                49,
+                50,
+                51,
+                52,
+                53,
+                54,
+                55
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            },
+            {
+              "facing": "s",
+              "frameIndexes": [
+                72,
+                73,
+                74,
+                75,
+                76,
+                77,
+                78,
+                79
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "se",
+              "frameIndexes": [
+                64,
+                65,
+                66,
+                67,
+                68,
+                69,
+                70,
+                71
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "sw",
+              "frameIndexes": [
+                64,
+                65,
+                66,
+                67,
+                68,
+                69,
+                70,
+                71
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            },
+            {
+              "facing": "w",
+              "frameIndexes": [
+                56,
+                57,
+                58,
+                59,
+                60,
+                61,
+                62,
+                63
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "visualId": "korean-hq",
+      "category": "building",
+      "assetPath": "entities/town-center",
+      "evidenceStatus": "unverified",
+      "source": {
+        "path": "original/imjinrok2/char/hqk.spr",
+        "sha256": "17e5640a7b34f8aaf1063d210bd087b8ba59d769e194f5025e92941e422c2d4e",
+        "frameCount": 20,
+        "width": 131,
+        "height": 131
+      },
+      "conversionManifest": {
+        "path": "apps/game-client/public/assets/themes/default/entities/town-center/hqk.manifest.json",
+        "sha256": "4f92da15a992d446697d796178c2f5d75fde5b966770e86e3a57ab24e5ff1cc9"
+      },
+      "mappings": [
+        {
+          "scope": "base",
+          "state": "construction",
+          "declaredFacings": [],
+          "clips": [
+            {
+              "facing": "default",
+              "frameIndexes": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            }
+          ]
+        },
+        {
+          "scope": "base",
+          "state": "idle",
+          "declaredFacings": [],
+          "clips": [
+            {
+              "facing": "default",
+              "frameIndexes": [
+                8
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "visualId": "korean-mill-house-proxy",
+      "category": "building",
+      "assetPath": "entities/house",
+      "evidenceStatus": "unverified",
+      "source": {
+        "path": "original/imjinrok2/char/millk.spr",
+        "sha256": "bb393d9a34cf7ae752c124a077cb4333bc0151f1a171f76a1e74201bbc57ac29",
+        "frameCount": 16,
+        "width": 114,
+        "height": 107
+      },
+      "conversionManifest": {
+        "path": "apps/game-client/public/assets/themes/default/entities/house/millk.manifest.json",
+        "sha256": "f9098f749a36ee54d9e8642bb879480442ef4afd08c2153b6a337dd233b39eea"
+      },
+      "mappings": [
+        {
+          "scope": "base",
+          "state": "construction",
+          "declaredFacings": [],
+          "clips": [
+            {
+              "facing": "default",
+              "frameIndexes": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            }
+          ]
+        },
+        {
+          "scope": "base",
+          "state": "idle",
+          "declaredFacings": [],
+          "clips": [
+            {
+              "facing": "default",
+              "frameIndexes": [
+                8
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "visualId": "korean-royal-cart",
+      "category": "unit",
+      "assetPath": "entities/royal-cart",
+      "evidenceStatus": "unverified",
+      "source": {
+        "path": "original/imjinrok2/char/koreanking.spr",
+        "sha256": "727e2f120f333be01413df7715d03671c9ca1090d9d8469bcdf18f5cd975d35c",
+        "frameCount": 50,
+        "width": 80,
+        "height": 80
+      },
+      "conversionManifest": {
+        "path": "apps/game-client/public/assets/themes/default/entities/royal-cart/koreanking.manifest.json",
+        "sha256": "01d6e4e145bff6adc9ea2c79511cfa138a5885eb1b4b4727a3f3607d61a2e784"
+      },
+      "mappings": [
+        {
+          "scope": "base",
+          "state": "idle",
+          "declaredFacings": [
+            "s",
+            "sw",
+            "w",
+            "nw",
+            "n",
+            "ne",
+            "e",
+            "se"
+          ],
+          "clips": [
+            {
+              "facing": "default",
+              "frameIndexes": [
+                40
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "e",
+              "frameIndexes": [
+                20
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "n",
+              "frameIndexes": [
+                0
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "ne",
+              "frameIndexes": [
+                10
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "nw",
+              "frameIndexes": [
+                10
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            },
+            {
+              "facing": "s",
+              "frameIndexes": [
+                40
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "se",
+              "frameIndexes": [
+                30
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "sw",
+              "frameIndexes": [
+                30
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            },
+            {
+              "facing": "w",
+              "frameIndexes": [
+                20
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            }
+          ]
+        },
+        {
+          "scope": "base",
+          "state": "move",
+          "declaredFacings": [
+            "s",
+            "sw",
+            "w",
+            "nw",
+            "n",
+            "ne",
+            "e",
+            "se"
+          ],
+          "clips": [
+            {
+              "facing": "default",
+              "frameIndexes": [
+                40,
+                41,
+                42,
+                43,
+                44,
+                45,
+                46,
+                47,
+                48,
+                49
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "e",
+              "frameIndexes": [
+                20,
+                21,
+                22,
+                23,
+                24,
+                25,
+                26,
+                27,
+                28,
+                29
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "n",
+              "frameIndexes": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "ne",
+              "frameIndexes": [
+                10,
+                11,
+                12,
+                13,
+                14,
+                15,
+                16,
+                17,
+                18,
+                19
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "nw",
+              "frameIndexes": [
+                10,
+                11,
+                12,
+                13,
+                14,
+                15,
+                16,
+                17,
+                18,
+                19
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            },
+            {
+              "facing": "s",
+              "frameIndexes": [
+                40,
+                41,
+                42,
+                43,
+                44,
+                45,
+                46,
+                47,
+                48,
+                49
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "se",
+              "frameIndexes": [
+                30,
+                31,
+                32,
+                33,
+                34,
+                35,
+                36,
+                37,
+                38,
+                39
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "sw",
+              "frameIndexes": [
+                30,
+                31,
+                32,
+                33,
+                34,
+                35,
+                36,
+                37,
+                38,
+                39
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            },
+            {
+              "facing": "w",
+              "frameIndexes": [
+                20,
+                21,
+                22,
+                23,
+                24,
+                25,
+                26,
+                27,
+                28,
+                29
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            }
+          ]
+        },
+        {
+          "scope": "base",
+          "state": "walk",
+          "declaredFacings": [
+            "s",
+            "sw",
+            "w",
+            "nw",
+            "n",
+            "ne",
+            "e",
+            "se"
+          ],
+          "clips": [
+            {
+              "facing": "default",
+              "frameIndexes": [
+                40,
+                41,
+                42,
+                43,
+                44,
+                45,
+                46,
+                47,
+                48,
+                49
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "e",
+              "frameIndexes": [
+                20,
+                21,
+                22,
+                23,
+                24,
+                25,
+                26,
+                27,
+                28,
+                29
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "n",
+              "frameIndexes": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "ne",
+              "frameIndexes": [
+                10,
+                11,
+                12,
+                13,
+                14,
+                15,
+                16,
+                17,
+                18,
+                19
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "nw",
+              "frameIndexes": [
+                10,
+                11,
+                12,
+                13,
+                14,
+                15,
+                16,
+                17,
+                18,
+                19
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            },
+            {
+              "facing": "s",
+              "frameIndexes": [
+                40,
+                41,
+                42,
+                43,
+                44,
+                45,
+                46,
+                47,
+                48,
+                49
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "se",
+              "frameIndexes": [
+                30,
+                31,
+                32,
+                33,
+                34,
+                35,
+                36,
+                37,
+                38,
+                39
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "sw",
+              "frameIndexes": [
+                30,
+                31,
+                32,
+                33,
+                34,
+                35,
+                36,
+                37,
+                38,
+                39
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            },
+            {
+              "facing": "w",
+              "frameIndexes": [
+                20,
+                21,
+                22,
+                23,
+                24,
+                25,
+                26,
+                27,
+                28,
+                29
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "visualId": "korean-signal-beacon",
+      "category": "building",
+      "assetPath": "entities/beacon",
+      "evidenceStatus": "unverified",
+      "source": {
+        "path": "original/imjinrok2/char/towerk.spr",
+        "sha256": "44114f2bbfaa0ece06ddfaa474b0b6f69c2e97f153108975a74d609c611edff6",
+        "frameCount": 24,
+        "width": 80,
+        "height": 96
+      },
+      "conversionManifest": {
+        "path": "apps/game-client/public/assets/themes/default/entities/beacon/towerk.manifest.json",
+        "sha256": "ee344acbc86453b9740312dd34a8ab01b6d2d7192a9ee870a96e4aeab0eabc0e"
+      },
+      "mappings": [
+        {
+          "scope": "base",
+          "state": "construction",
+          "declaredFacings": [],
+          "clips": [
+            {
+              "facing": "default",
+              "frameIndexes": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            }
+          ]
+        },
+        {
+          "scope": "base",
+          "state": "idle",
+          "declaredFacings": [],
+          "clips": [
+            {
+              "facing": "default",
+              "frameIndexes": [
+                8
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "visualId": "korean-swordsman",
+      "category": "unit",
+      "assetPath": "entities/swordsman",
+      "evidenceStatus": "unverified",
+      "source": {
+        "path": "original/imjinrok2/char/swordk.spr",
+        "sha256": "414d285b207ba12afdd856a0f16ddde615381cf491fe493d6ededf91681b55eb",
+        "frameCount": 192,
+        "width": 60,
+        "height": 60
+      },
+      "conversionManifest": {
+        "path": "apps/game-client/public/assets/themes/default/entities/swordsman/swordk.manifest.json",
+        "sha256": "0fad8a83912ed9f2f033a2310c77d86abf58fe50f8b3024fa265f1bf346cf7a9"
+      },
+      "mappings": [
+        {
+          "scope": "base",
+          "state": "attack",
+          "declaredFacings": [
+            "s",
+            "sw",
+            "w",
+            "nw",
+            "n",
+            "ne",
+            "e",
+            "se"
+          ],
+          "clips": [
+            {
+              "facing": "default",
+              "frameIndexes": [
+                80,
+                81,
+                82,
+                83,
+                84,
+                85,
+                86,
+                87
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "e",
+              "frameIndexes": [
+                64,
+                65,
+                66,
+                67,
+                68,
+                69,
+                70,
+                71
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "n",
+              "frameIndexes": [
+                48,
+                49,
+                50,
+                51,
+                52,
+                53,
+                54,
+                55
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "ne",
+              "frameIndexes": [
+                56,
+                57,
+                58,
+                59,
+                60,
+                61,
+                62,
+                63
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "nw",
+              "frameIndexes": [
+                56,
+                57,
+                58,
+                59,
+                60,
+                61,
+                62,
+                63
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            },
+            {
+              "facing": "s",
+              "frameIndexes": [
+                80,
+                81,
+                82,
+                83,
+                84,
+                85,
+                86,
+                87
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "se",
+              "frameIndexes": [
+                72,
+                73,
+                74,
+                75,
+                76,
+                77,
+                78,
+                79
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "sw",
+              "frameIndexes": [
+                72,
+                73,
+                74,
+                75,
+                76,
+                77,
+                78,
+                79
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            },
+            {
+              "facing": "w",
+              "frameIndexes": [
+                64,
+                65,
+                66,
+                67,
+                68,
+                69,
+                70,
+                71
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            }
+          ]
+        },
+        {
+          "scope": "base",
+          "state": "idle",
+          "declaredFacings": [
+            "s",
+            "sw",
+            "w",
+            "nw",
+            "n",
+            "ne",
+            "e",
+            "se"
+          ],
+          "clips": [
+            {
+              "facing": "default",
+              "frameIndexes": [
+                32
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "e",
+              "frameIndexes": [
+                16
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "n",
+              "frameIndexes": [
+                0
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "ne",
+              "frameIndexes": [
+                8
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "nw",
+              "frameIndexes": [
+                8
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            },
+            {
+              "facing": "s",
+              "frameIndexes": [
+                32
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "se",
+              "frameIndexes": [
+                24
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "sw",
+              "frameIndexes": [
+                24
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            },
+            {
+              "facing": "w",
+              "frameIndexes": [
+                16
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            }
+          ]
+        },
+        {
+          "scope": "base",
+          "state": "move",
+          "declaredFacings": [
+            "s",
+            "sw",
+            "w",
+            "nw",
+            "n",
+            "ne",
+            "e",
+            "se"
+          ],
+          "clips": [
+            {
+              "facing": "default",
+              "frameIndexes": [
+                32,
+                33,
+                34,
+                35,
+                36,
+                37,
+                38,
+                39
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "e",
+              "frameIndexes": [
+                16,
+                17,
+                18,
+                19,
+                20,
+                21,
+                22,
+                23
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "n",
+              "frameIndexes": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "ne",
+              "frameIndexes": [
+                8,
+                9,
+                10,
+                11,
+                12,
+                13,
+                14,
+                15
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "nw",
+              "frameIndexes": [
+                8,
+                9,
+                10,
+                11,
+                12,
+                13,
+                14,
+                15
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            },
+            {
+              "facing": "s",
+              "frameIndexes": [
+                32,
+                33,
+                34,
+                35,
+                36,
+                37,
+                38,
+                39
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "se",
+              "frameIndexes": [
+                24,
+                25,
+                26,
+                27,
+                28,
+                29,
+                30,
+                31
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "sw",
+              "frameIndexes": [
+                24,
+                25,
+                26,
+                27,
+                28,
+                29,
+                30,
+                31
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            },
+            {
+              "facing": "w",
+              "frameIndexes": [
+                16,
+                17,
+                18,
+                19,
+                20,
+                21,
+                22,
+                23
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            }
+          ]
+        },
+        {
+          "scope": "base",
+          "state": "walk",
+          "declaredFacings": [
+            "s",
+            "sw",
+            "w",
+            "nw",
+            "n",
+            "ne",
+            "e",
+            "se"
+          ],
+          "clips": [
+            {
+              "facing": "default",
+              "frameIndexes": [
+                32,
+                33,
+                34,
+                35,
+                36,
+                37,
+                38,
+                39
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "e",
+              "frameIndexes": [
+                16,
+                17,
+                18,
+                19,
+                20,
+                21,
+                22,
+                23
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "n",
+              "frameIndexes": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "ne",
+              "frameIndexes": [
+                8,
+                9,
+                10,
+                11,
+                12,
+                13,
+                14,
+                15
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "nw",
+              "frameIndexes": [
+                8,
+                9,
+                10,
+                11,
+                12,
+                13,
+                14,
+                15
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            },
+            {
+              "facing": "s",
+              "frameIndexes": [
+                32,
+                33,
+                34,
+                35,
+                36,
+                37,
+                38,
+                39
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "se",
+              "frameIndexes": [
+                24,
+                25,
+                26,
+                27,
+                28,
+                29,
+                30,
+                31
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "sw",
+              "frameIndexes": [
+                24,
+                25,
+                26,
+                27,
+                28,
+                29,
+                30,
+                31
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            },
+            {
+              "facing": "w",
+              "frameIndexes": [
+                16,
+                17,
+                18,
+                19,
+                20,
+                21,
+                22,
+                23
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "visualId": "villager-korean-farmer",
+      "category": "unit",
+      "assetPath": "entities/villager",
+      "evidenceStatus": "unverified",
+      "source": {
+        "path": "original/imjinrok2/char/farmerk.spr",
+        "sha256": "98e370f4dec6f147a2556340bf93d293d23c3ee3a5367bc22fd3984e7209e5ca",
+        "frameCount": 248,
+        "width": 60,
+        "height": 60
+      },
+      "conversionManifest": {
+        "path": "apps/game-client/public/assets/themes/default/entities/villager/farmerk.manifest.json",
+        "sha256": "7b9fa8d7e17d81ca92b16acef7a16535b1a12f261cccc83e3f7e54fcb53e6592"
+      },
+      "mappings": [
+        {
+          "scope": "base",
+          "state": "build",
+          "declaredFacings": [
+            "s",
+            "sw",
+            "w",
+            "nw",
+            "n",
+            "ne",
+            "e",
+            "se"
+          ],
+          "clips": [
+            {
+              "facing": "default",
+              "frameIndexes": [
+                192,
+                193,
+                194,
+                195,
+                196,
+                197,
+                198,
+                199
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "e",
+              "frameIndexes": [
+                176,
+                177,
+                178,
+                179,
+                180,
+                181,
+                182,
+                183
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "n",
+              "frameIndexes": [
+                160,
+                161,
+                162,
+                163,
+                164,
+                165,
+                166,
+                167
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "ne",
+              "frameIndexes": [
+                168,
+                169,
+                170,
+                171,
+                172,
+                173,
+                174,
+                175
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "nw",
+              "frameIndexes": [
+                168,
+                169,
+                170,
+                171,
+                172,
+                173,
+                174,
+                175
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            },
+            {
+              "facing": "s",
+              "frameIndexes": [
+                192,
+                193,
+                194,
+                195,
+                196,
+                197,
+                198,
+                199
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "se",
+              "frameIndexes": [
+                184,
+                185,
+                186,
+                187,
+                188,
+                189,
+                190,
+                191
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "sw",
+              "frameIndexes": [
+                184,
+                185,
+                186,
+                187,
+                188,
+                189,
+                190,
+                191
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            },
+            {
+              "facing": "w",
+              "frameIndexes": [
+                176,
+                177,
+                178,
+                179,
+                180,
+                181,
+                182,
+                183
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            }
+          ]
+        },
+        {
+          "scope": "base",
+          "state": "carry",
+          "declaredFacings": [
+            "s",
+            "sw",
+            "w",
+            "nw",
+            "n",
+            "ne",
+            "e",
+            "se"
+          ],
+          "clips": [
+            {
+              "facing": "default",
+              "frameIndexes": [
+                112,
+                113,
+                114,
+                115,
+                116,
+                117,
+                118,
+                119
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "e",
+              "frameIndexes": [
+                96,
+                97,
+                98,
+                99,
+                100,
+                101,
+                102,
+                103
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "n",
+              "frameIndexes": [
+                80,
+                81,
+                82,
+                83,
+                84,
+                85,
+                86,
+                87
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "ne",
+              "frameIndexes": [
+                88,
+                89,
+                90,
+                91,
+                92,
+                93,
+                94,
+                95
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "nw",
+              "frameIndexes": [
+                88,
+                89,
+                90,
+                91,
+                92,
+                93,
+                94,
+                95
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            },
+            {
+              "facing": "s",
+              "frameIndexes": [
+                112,
+                113,
+                114,
+                115,
+                116,
+                117,
+                118,
+                119
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "se",
+              "frameIndexes": [
+                104,
+                105,
+                106,
+                107,
+                108,
+                109,
+                110,
+                111
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "sw",
+              "frameIndexes": [
+                104,
+                105,
+                106,
+                107,
+                108,
+                109,
+                110,
+                111
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            },
+            {
+              "facing": "w",
+              "frameIndexes": [
+                96,
+                97,
+                98,
+                99,
+                100,
+                101,
+                102,
+                103
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            }
+          ]
+        },
+        {
+          "scope": "base",
+          "state": "gather",
+          "declaredFacings": [
+            "s",
+            "sw",
+            "w",
+            "nw",
+            "n",
+            "ne",
+            "e",
+            "se"
+          ],
+          "clips": [
+            {
+              "facing": "default",
+              "frameIndexes": [
+                152,
+                153,
+                154,
+                155,
+                156,
+                157,
+                158,
+                159
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "e",
+              "frameIndexes": [
+                136,
+                137,
+                138,
+                139,
+                140,
+                141,
+                142,
+                143
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "n",
+              "frameIndexes": [
+                120,
+                121,
+                122,
+                123,
+                124,
+                125,
+                126,
+                127
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "ne",
+              "frameIndexes": [
+                128,
+                129,
+                130,
+                131,
+                132,
+                133,
+                134,
+                135
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "nw",
+              "frameIndexes": [
+                128,
+                129,
+                130,
+                131,
+                132,
+                133,
+                134,
+                135
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            },
+            {
+              "facing": "s",
+              "frameIndexes": [
+                152,
+                153,
+                154,
+                155,
+                156,
+                157,
+                158,
+                159
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "se",
+              "frameIndexes": [
+                144,
+                145,
+                146,
+                147,
+                148,
+                149,
+                150,
+                151
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "sw",
+              "frameIndexes": [
+                144,
+                145,
+                146,
+                147,
+                148,
+                149,
+                150,
+                151
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            },
+            {
+              "facing": "w",
+              "frameIndexes": [
+                136,
+                137,
+                138,
+                139,
+                140,
+                141,
+                142,
+                143
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            }
+          ]
+        },
+        {
+          "scope": "base",
+          "state": "idle",
+          "declaredFacings": [
+            "s",
+            "sw",
+            "w",
+            "nw",
+            "n",
+            "ne",
+            "e",
+            "se"
+          ],
+          "clips": [
+            {
+              "facing": "default",
+              "frameIndexes": [
+                32
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "e",
+              "frameIndexes": [
+                16
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "n",
+              "frameIndexes": [
+                0
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "ne",
+              "frameIndexes": [
+                8
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "nw",
+              "frameIndexes": [
+                8
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            },
+            {
+              "facing": "s",
+              "frameIndexes": [
+                32
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "se",
+              "frameIndexes": [
+                24
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "sw",
+              "frameIndexes": [
+                24
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            },
+            {
+              "facing": "w",
+              "frameIndexes": [
+                16
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            }
+          ]
+        },
+        {
+          "scope": "base",
+          "state": "move",
+          "declaredFacings": [
+            "s",
+            "sw",
+            "w",
+            "nw",
+            "n",
+            "ne",
+            "e",
+            "se"
+          ],
+          "clips": [
+            {
+              "facing": "default",
+              "frameIndexes": [
+                72,
+                73,
+                74,
+                75,
+                76,
+                77,
+                78,
+                79
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "e",
+              "frameIndexes": [
+                56,
+                57,
+                58,
+                59,
+                60,
+                61,
+                62,
+                63
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "n",
+              "frameIndexes": [
+                40,
+                41,
+                42,
+                43,
+                44,
+                45,
+                46,
+                47
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "ne",
+              "frameIndexes": [
+                48,
+                49,
+                50,
+                51,
+                52,
+                53,
+                54,
+                55
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "nw",
+              "frameIndexes": [
+                48,
+                49,
+                50,
+                51,
+                52,
+                53,
+                54,
+                55
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            },
+            {
+              "facing": "s",
+              "frameIndexes": [
+                72,
+                73,
+                74,
+                75,
+                76,
+                77,
+                78,
+                79
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "se",
+              "frameIndexes": [
+                64,
+                65,
+                66,
+                67,
+                68,
+                69,
+                70,
+                71
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "sw",
+              "frameIndexes": [
+                64,
+                65,
+                66,
+                67,
+                68,
+                69,
+                70,
+                71
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            },
+            {
+              "facing": "w",
+              "frameIndexes": [
+                56,
+                57,
+                58,
+                59,
+                60,
+                61,
+                62,
+                63
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            }
+          ]
+        },
+        {
+          "scope": "base",
+          "state": "repair",
+          "declaredFacings": [
+            "s",
+            "sw",
+            "w",
+            "nw",
+            "n",
+            "ne",
+            "e",
+            "se"
+          ],
+          "clips": [
+            {
+              "facing": "default",
+              "frameIndexes": [
+                192,
+                193,
+                194,
+                195,
+                196,
+                197,
+                198,
+                199
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "e",
+              "frameIndexes": [
+                176,
+                177,
+                178,
+                179,
+                180,
+                181,
+                182,
+                183
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "n",
+              "frameIndexes": [
+                160,
+                161,
+                162,
+                163,
+                164,
+                165,
+                166,
+                167
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "ne",
+              "frameIndexes": [
+                168,
+                169,
+                170,
+                171,
+                172,
+                173,
+                174,
+                175
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "nw",
+              "frameIndexes": [
+                168,
+                169,
+                170,
+                171,
+                172,
+                173,
+                174,
+                175
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            },
+            {
+              "facing": "s",
+              "frameIndexes": [
+                192,
+                193,
+                194,
+                195,
+                196,
+                197,
+                198,
+                199
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "se",
+              "frameIndexes": [
+                184,
+                185,
+                186,
+                187,
+                188,
+                189,
+                190,
+                191
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "sw",
+              "frameIndexes": [
+                184,
+                185,
+                186,
+                187,
+                188,
+                189,
+                190,
+                191
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            },
+            {
+              "facing": "w",
+              "frameIndexes": [
+                176,
+                177,
+                178,
+                179,
+                180,
+                181,
+                182,
+                183
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            }
+          ]
+        },
+        {
+          "scope": "base",
+          "state": "walk",
+          "declaredFacings": [
+            "s",
+            "sw",
+            "w",
+            "nw",
+            "n",
+            "ne",
+            "e",
+            "se"
+          ],
+          "clips": [
+            {
+              "facing": "default",
+              "frameIndexes": [
+                72,
+                73,
+                74,
+                75,
+                76,
+                77,
+                78,
+                79
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "e",
+              "frameIndexes": [
+                56,
+                57,
+                58,
+                59,
+                60,
+                61,
+                62,
+                63
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "n",
+              "frameIndexes": [
+                40,
+                41,
+                42,
+                43,
+                44,
+                45,
+                46,
+                47
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "ne",
+              "frameIndexes": [
+                48,
+                49,
+                50,
+                51,
+                52,
+                53,
+                54,
+                55
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "nw",
+              "frameIndexes": [
+                48,
+                49,
+                50,
+                51,
+                52,
+                53,
+                54,
+                55
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            },
+            {
+              "facing": "s",
+              "frameIndexes": [
+                72,
+                73,
+                74,
+                75,
+                76,
+                77,
+                78,
+                79
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "se",
+              "frameIndexes": [
+                64,
+                65,
+                66,
+                67,
+                68,
+                69,
+                70,
+                71
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "sw",
+              "frameIndexes": [
+                64,
+                65,
+                66,
+                67,
+                68,
+                69,
+                70,
+                71
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            },
+            {
+              "facing": "w",
+              "frameIndexes": [
+                56,
+                57,
+                58,
+                59,
+                60,
+                61,
+                62,
+                63
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "portraits": {
+    "evidenceStatus": "static-proven",
+    "source": {
+      "path": "original/imjinrok2/yfnt/hero.spr",
+      "sha256": "a701bd0a66ec30dfd0bbc33ad7e78b937e725292fd37e9cae983ca28ad6af853",
+      "conversionManifest": {
+        "path": "apps/game-client/public/assets/themes/default/ui/mission-portraits/hero.manifest.json",
+        "sha256": "923e22c48f1804a709ae548de95ca5decf9fe498cb5392382961fafedd260d5e"
+      },
+      "frameCount": 20,
+      "width": 130,
+      "height": 120,
+      "evidence": {
+        "executableSha256": "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e",
+        "resourcePath": "yfnt\\hero.spr",
+        "lookupFailureIndex": -1
+      }
+    },
+    "currentScenarioPortraitIds": [
+      "J1",
+      "K1",
+      "K10",
+      "K3"
+    ],
+    "registeredSpeakerIds": [
+      "K1",
+      "K2",
+      "K3",
+      "K4",
+      "K5",
+      "J1",
+      "J2",
+      "J3",
+      "J4",
+      "J5",
+      "C1",
+      "C2",
+      "C3",
+      "C4",
+      "C5",
+      "K10",
+      "K6"
+    ],
+    "originalScriptSpeakerTokens": [
+      {
+        "speakerToken": "C1",
+        "sourceFiles": [
+          "original/imjinrok2/script/c0110",
+          "original/imjinrok2/script/C0120",
+          "original/imjinrok2/script/c0210",
+          "original/imjinrok2/script/c0310",
+          "original/imjinrok2/script/C0320",
+          "original/imjinrok2/script/c0410",
+          "original/imjinrok2/script/C0420",
+          "original/imjinrok2/script/C0440",
+          "original/imjinrok2/script/c0510",
+          "original/imjinrok2/script/C0530",
+          "original/imjinrok2/script/c0610",
+          "original/imjinrok2/script/C0620",
+          "original/imjinrok2/script/c0710",
+          "original/imjinrok2/script/C0720"
+        ]
+      },
+      {
+        "speakerToken": "C2",
+        "sourceFiles": [
+          "original/imjinrok2/script/c0110",
+          "original/imjinrok2/script/c0210",
+          "original/imjinrok2/script/c0310",
+          "original/imjinrok2/script/c0510",
+          "original/imjinrok2/script/c0610",
+          "original/imjinrok2/script/C0620",
+          "original/imjinrok2/script/c0710",
+          "original/imjinrok2/script/C0720"
+        ]
+      },
+      {
+        "speakerToken": "C3",
+        "sourceFiles": [
+          "original/imjinrok2/script/c0110",
+          "original/imjinrok2/script/C0120",
+          "original/imjinrok2/script/c0210",
+          "original/imjinrok2/script/c0310",
+          "original/imjinrok2/script/c0410",
+          "original/imjinrok2/script/C0420",
+          "original/imjinrok2/script/C0430",
+          "original/imjinrok2/script/C0440",
+          "original/imjinrok2/script/c0510",
+          "original/imjinrok2/script/c0610",
+          "original/imjinrok2/script/C0620",
+          "original/imjinrok2/script/c0710"
+        ]
+      },
+      {
+        "speakerToken": "C5",
+        "sourceFiles": [
+          "original/imjinrok2/script/C0520",
+          "original/imjinrok2/script/C0525",
+          "original/imjinrok2/script/C0530"
+        ]
+      },
+      {
+        "speakerToken": "J1",
+        "sourceFiles": [
+          "original/imjinrok2/script/C0430",
+          "original/imjinrok2/script/C0440",
+          "original/imjinrok2/script/J0110",
+          "original/imjinrok2/script/J0115",
+          "original/imjinrok2/script/J0120",
+          "original/imjinrok2/script/J0210",
+          "original/imjinrok2/script/J0220",
+          "original/imjinrok2/script/J0230",
+          "original/imjinrok2/script/J0310",
+          "original/imjinrok2/script/J0410",
+          "original/imjinrok2/script/J0510",
+          "original/imjinrok2/script/J0520",
+          "original/imjinrok2/script/J0710",
+          "original/imjinrok2/script/J0720",
+          "original/imjinrok2/script/J0730",
+          "original/imjinrok2/script/J0740",
+          "original/imjinrok2/script/J0810",
+          "original/imjinrok2/script/K0225"
+        ]
+      },
+      {
+        "speakerToken": "J2",
+        "sourceFiles": [
+          "original/imjinrok2/script/J0110",
+          "original/imjinrok2/script/J0120",
+          "original/imjinrok2/script/J0210",
+          "original/imjinrok2/script/J0230",
+          "original/imjinrok2/script/J0310",
+          "original/imjinrok2/script/J0410",
+          "original/imjinrok2/script/J0420",
+          "original/imjinrok2/script/J0510",
+          "original/imjinrok2/script/J0810"
+        ]
+      },
+      {
+        "speakerToken": "J3",
+        "sourceFiles": [
+          "original/imjinrok2/script/J0110",
+          "original/imjinrok2/script/J0610",
+          "original/imjinrok2/script/J0620"
+        ]
+      },
+      {
+        "speakerToken": "J4",
+        "sourceFiles": [
+          "original/imjinrok2/script/J0310",
+          "original/imjinrok2/script/J0320",
+          "original/imjinrok2/script/J0410",
+          "original/imjinrok2/script/J0510",
+          "original/imjinrok2/script/J0520",
+          "original/imjinrok2/script/J0610",
+          "original/imjinrok2/script/J0630",
+          "original/imjinrok2/script/J0810"
+        ]
+      },
+      {
+        "speakerToken": "J5",
+        "sourceFiles": [
+          "original/imjinrok2/script/J0110",
+          "original/imjinrok2/script/J0210",
+          "original/imjinrok2/script/J0310",
+          "original/imjinrok2/script/J0410",
+          "original/imjinrok2/script/J0420",
+          "original/imjinrok2/script/J0430",
+          "original/imjinrok2/script/J0510",
+          "original/imjinrok2/script/J0520",
+          "original/imjinrok2/script/J0610",
+          "original/imjinrok2/script/J0620",
+          "original/imjinrok2/script/J0710",
+          "original/imjinrok2/script/J0810"
+        ]
+      },
+      {
+        "speakerToken": "K1",
+        "sourceFiles": [
+          "original/imjinrok2/script/K0110",
+          "original/imjinrok2/script/K0115",
+          "original/imjinrok2/script/K0120",
+          "original/imjinrok2/script/K0210",
+          "original/imjinrok2/script/K0227",
+          "original/imjinrok2/script/K0620",
+          "original/imjinrok2/script/K0640",
+          "original/imjinrok2/script/K0750"
+        ]
+      },
+      {
+        "speakerToken": "K10",
+        "sourceFiles": [
+          "original/imjinrok2/script/K0110",
+          "original/imjinrok2/script/K0210",
+          "original/imjinrok2/script/K0220",
+          "original/imjinrok2/script/K0227",
+          "original/imjinrok2/script/K0230",
+          "original/imjinrok2/script/K0720"
+        ]
+      },
+      {
+        "speakerToken": "K2",
+        "sourceFiles": [
+          "original/imjinrok2/script/K0310",
+          "original/imjinrok2/script/K0320",
+          "original/imjinrok2/script/K0330",
+          "original/imjinrok2/script/K0510",
+          "original/imjinrok2/script/K0530",
+          "original/imjinrok2/script/K0540",
+          "original/imjinrok2/script/K0720",
+          "original/imjinrok2/script/K0730",
+          "original/imjinrok2/script/K0740",
+          "original/imjinrok2/script/K0750",
+          "original/imjinrok2/script/K0820",
+          "original/imjinrok2/script/K0830",
+          "original/imjinrok2/script/K0840"
+        ]
+      },
+      {
+        "speakerToken": "K3",
+        "sourceFiles": [
+          "original/imjinrok2/script/c0210",
+          "original/imjinrok2/script/K0110",
+          "original/imjinrok2/script/K0115",
+          "original/imjinrok2/script/K0120",
+          "original/imjinrok2/script/K0210",
+          "original/imjinrok2/script/K0220",
+          "original/imjinrok2/script/K0230",
+          "original/imjinrok2/script/K0310",
+          "original/imjinrok2/script/K0430",
+          "original/imjinrok2/script/K0720",
+          "original/imjinrok2/script/K0730",
+          "original/imjinrok2/script/K0820",
+          "original/imjinrok2/script/K0840"
+        ]
+      },
+      {
+        "speakerToken": "K4",
+        "sourceFiles": [
+          "original/imjinrok2/script/K0420",
+          "original/imjinrok2/script/K0430",
+          "original/imjinrok2/script/K0510",
+          "original/imjinrok2/script/K0540",
+          "original/imjinrok2/script/K0620",
+          "original/imjinrok2/script/K0630"
+        ]
+      },
+      {
+        "speakerToken": "K5",
+        "sourceFiles": [
+          "original/imjinrok2/script/K0420",
+          "original/imjinrok2/script/K0430",
+          "original/imjinrok2/script/K0510",
+          "original/imjinrok2/script/K0540",
+          "original/imjinrok2/script/K0620",
+          "original/imjinrok2/script/K0640",
+          "original/imjinrok2/script/K0740",
+          "original/imjinrok2/script/K0750"
+        ]
+      },
+      {
+        "speakerToken": "원균",
+        "sourceFiles": [
+          "original/imjinrok2/script/K0340",
+          "original/imjinrok2/script/K0550"
+        ]
+      },
+      {
+        "speakerToken": "이순신",
+        "sourceFiles": [
+          "original/imjinrok2/script/K0340",
+          "original/imjinrok2/script/K0550"
+        ]
+      }
+    ],
+    "cues": [
+      {
+        "portraitId": "C1",
+        "lookupIndex": 10,
+        "frameIndex": 5,
+        "fileName": "hero_0005.png",
+        "frameExported": true,
+        "evidenceStatus": "static-proven"
+      },
+      {
+        "portraitId": "C2",
+        "lookupIndex": 11,
+        "frameIndex": 14,
+        "fileName": "hero_0014.png",
+        "frameExported": true,
+        "evidenceStatus": "static-proven"
+      },
+      {
+        "portraitId": "C3",
+        "lookupIndex": 12,
+        "frameIndex": 13,
+        "fileName": "hero_0013.png",
+        "frameExported": true,
+        "evidenceStatus": "static-proven"
+      },
+      {
+        "portraitId": "C4",
+        "lookupIndex": 13,
+        "frameIndex": 10,
+        "fileName": "hero_0010.png",
+        "frameExported": true,
+        "evidenceStatus": "static-proven"
+      },
+      {
+        "portraitId": "C5",
+        "lookupIndex": 14,
+        "frameIndex": 12,
+        "fileName": "hero_0012.png",
+        "frameExported": true,
+        "evidenceStatus": "static-proven"
+      },
+      {
+        "portraitId": "J1",
+        "lookupIndex": 5,
+        "frameIndex": 4,
+        "fileName": "hero_0004.png",
+        "frameExported": true,
+        "evidenceStatus": "static-proven"
+      },
+      {
+        "portraitId": "J2",
+        "lookupIndex": 6,
+        "frameIndex": 2,
+        "fileName": "hero_0002.png",
+        "frameExported": true,
+        "evidenceStatus": "static-proven"
+      },
+      {
+        "portraitId": "J3",
+        "lookupIndex": 7,
+        "frameIndex": 3,
+        "fileName": "hero_0003.png",
+        "frameExported": true,
+        "evidenceStatus": "static-proven"
+      },
+      {
+        "portraitId": "J4",
+        "lookupIndex": 8,
+        "frameIndex": 1,
+        "fileName": "hero_0001.png",
+        "frameExported": true,
+        "evidenceStatus": "static-proven"
+      },
+      {
+        "portraitId": "J5",
+        "lookupIndex": 9,
+        "frameIndex": 0,
+        "fileName": "hero_0000.png",
+        "frameExported": true,
+        "evidenceStatus": "static-proven"
+      },
+      {
+        "portraitId": "K1",
+        "lookupIndex": 0,
+        "frameIndex": 6,
+        "fileName": "hero_0006.png",
+        "frameExported": true,
+        "evidenceStatus": "static-proven"
+      },
+      {
+        "portraitId": "K10",
+        "lookupIndex": 15,
+        "frameIndex": 15,
+        "fileName": "hero_0015.png",
+        "frameExported": true,
+        "evidenceStatus": "static-proven"
+      },
+      {
+        "portraitId": "K2",
+        "lookupIndex": 1,
+        "frameIndex": 11,
+        "fileName": "hero_0011.png",
+        "frameExported": true,
+        "evidenceStatus": "static-proven"
+      },
+      {
+        "portraitId": "K3",
+        "lookupIndex": 2,
+        "frameIndex": 8,
+        "fileName": "hero_0008.png",
+        "frameExported": true,
+        "evidenceStatus": "static-proven"
+      },
+      {
+        "portraitId": "K4",
+        "lookupIndex": 3,
+        "frameIndex": 9,
+        "fileName": "hero_0009.png",
+        "frameExported": true,
+        "evidenceStatus": "static-proven"
+      },
+      {
+        "portraitId": "K5",
+        "lookupIndex": 4,
+        "frameIndex": 7,
+        "fileName": "hero_0007.png",
+        "frameExported": true,
+        "evidenceStatus": "static-proven"
+      },
+      {
+        "portraitId": "K6",
+        "lookupIndex": 16,
+        "frameIndex": 17,
+        "fileName": "hero_0017.png",
+        "frameExported": true,
+        "evidenceStatus": "static-proven"
+      }
+    ]
+  },
+  "findings": [
+    {
+      "severity": "blocking",
+      "code": "building-health-frame-unverified",
+      "visualId": "japanese-camp-advanced-tower",
+      "detail": "Idle/full-health and construction/damage semantics are inferred from frame positions.",
+      "idleFrameIndexes": [
+        8
+      ],
+      "constructionFrameIndexes": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ]
+    },
+    {
+      "severity": "blocking",
+      "code": "building-health-frame-unverified",
+      "visualId": "japanese-camp-barracks",
+      "detail": "Idle/full-health and construction/damage semantics are inferred from frame positions.",
+      "idleFrameIndexes": [
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17
+      ],
+      "constructionFrameIndexes": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ]
+    },
+    {
+      "severity": "blocking",
+      "code": "building-health-frame-unverified",
+      "visualId": "japanese-camp-firehouse",
+      "detail": "Idle/full-health and construction/damage semantics are inferred from frame positions.",
+      "idleFrameIndexes": [
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19
+      ],
+      "constructionFrameIndexes": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ]
+    },
+    {
+      "severity": "blocking",
+      "code": "building-health-frame-unverified",
+      "visualId": "japanese-camp-house",
+      "detail": "Idle/full-health and construction/damage semantics are inferred from frame positions.",
+      "idleFrameIndexes": [
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18
+      ],
+      "constructionFrameIndexes": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ]
+    },
+    {
+      "severity": "blocking",
+      "code": "building-health-frame-unverified",
+      "visualId": "japanese-camp-tower",
+      "detail": "Idle/full-health and construction/damage semantics are inferred from frame positions.",
+      "idleFrameIndexes": [
+        8
+      ],
+      "constructionFrameIndexes": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ]
+    },
+    {
+      "severity": "blocking",
+      "code": "building-health-frame-unverified",
+      "visualId": "korean-barracks",
+      "detail": "Idle/full-health and construction/damage semantics are inferred from frame positions.",
+      "idleFrameIndexes": [
+        7,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15
+      ],
+      "constructionFrameIndexes": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ]
+    },
+    {
+      "severity": "blocking",
+      "code": "building-health-frame-unverified",
+      "visualId": "korean-hq",
+      "detail": "Idle/full-health and construction/damage semantics are inferred from frame positions.",
+      "idleFrameIndexes": [
+        8
+      ],
+      "constructionFrameIndexes": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ]
+    },
+    {
+      "severity": "blocking",
+      "code": "building-health-frame-unverified",
+      "visualId": "korean-mill-house-proxy",
+      "detail": "Idle/full-health and construction/damage semantics are inferred from frame positions.",
+      "idleFrameIndexes": [
+        8
+      ],
+      "constructionFrameIndexes": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ]
+    },
+    {
+      "severity": "blocking",
+      "code": "building-health-frame-unverified",
+      "visualId": "korean-signal-beacon",
+      "detail": "Idle/full-health and construction/damage semantics are inferred from frame positions.",
+      "idleFrameIndexes": [
+        8
+      ],
+      "constructionFrameIndexes": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ]
+    },
+    {
+      "severity": "blocking",
+      "code": "direction-order-unverified",
+      "visualId": "japanese-gunner",
+      "scope": "base",
+      "state": "attack",
+      "detail": "Facing labels are assigned by a hard-coded source-frame order."
+    },
+    {
+      "severity": "blocking",
+      "code": "direction-order-unverified",
+      "visualId": "japanese-gunner",
+      "scope": "base",
+      "state": "idle",
+      "detail": "Facing labels are assigned by a hard-coded source-frame order."
+    },
+    {
+      "severity": "blocking",
+      "code": "direction-order-unverified",
+      "visualId": "japanese-gunner",
+      "scope": "base",
+      "state": "move",
+      "detail": "Facing labels are assigned by a hard-coded source-frame order."
+    },
+    {
+      "severity": "blocking",
+      "code": "direction-order-unverified",
+      "visualId": "japanese-gunner",
+      "scope": "base",
+      "state": "walk",
+      "detail": "Facing labels are assigned by a hard-coded source-frame order."
+    },
+    {
+      "severity": "blocking",
+      "code": "direction-order-unverified",
+      "visualId": "japanese-swordsman",
+      "scope": "base",
+      "state": "attack",
+      "detail": "Facing labels are assigned by a hard-coded source-frame order."
+    },
+    {
+      "severity": "blocking",
+      "code": "direction-order-unverified",
+      "visualId": "japanese-swordsman",
+      "scope": "base",
+      "state": "idle",
+      "detail": "Facing labels are assigned by a hard-coded source-frame order."
+    },
+    {
+      "severity": "blocking",
+      "code": "direction-order-unverified",
+      "visualId": "japanese-swordsman",
+      "scope": "base",
+      "state": "move",
+      "detail": "Facing labels are assigned by a hard-coded source-frame order."
+    },
+    {
+      "severity": "blocking",
+      "code": "direction-order-unverified",
+      "visualId": "japanese-swordsman",
+      "scope": "base",
+      "state": "walk",
+      "detail": "Facing labels are assigned by a hard-coded source-frame order."
+    },
+    {
+      "severity": "blocking",
+      "code": "direction-order-unverified",
+      "visualId": "korean-archer",
+      "scope": "base",
+      "state": "attack",
+      "detail": "Facing labels are assigned by a hard-coded source-frame order."
+    },
+    {
+      "severity": "blocking",
+      "code": "direction-order-unverified",
+      "visualId": "korean-archer",
+      "scope": "base",
+      "state": "idle",
+      "detail": "Facing labels are assigned by a hard-coded source-frame order."
+    },
+    {
+      "severity": "blocking",
+      "code": "direction-order-unverified",
+      "visualId": "korean-archer",
+      "scope": "base",
+      "state": "move",
+      "detail": "Facing labels are assigned by a hard-coded source-frame order."
+    },
+    {
+      "severity": "blocking",
+      "code": "direction-order-unverified",
+      "visualId": "korean-archer",
+      "scope": "base",
+      "state": "walk",
+      "detail": "Facing labels are assigned by a hard-coded source-frame order."
+    },
+    {
+      "severity": "blocking",
+      "code": "direction-order-unverified",
+      "visualId": "korean-general-k4",
+      "scope": "base",
+      "state": "attack",
+      "detail": "Facing labels are assigned by a hard-coded source-frame order."
+    },
+    {
+      "severity": "blocking",
+      "code": "direction-order-unverified",
+      "visualId": "korean-general-k4",
+      "scope": "base",
+      "state": "idle",
+      "detail": "Facing labels are assigned by a hard-coded source-frame order."
+    },
+    {
+      "severity": "blocking",
+      "code": "direction-order-unverified",
+      "visualId": "korean-general-k4",
+      "scope": "base",
+      "state": "move",
+      "detail": "Facing labels are assigned by a hard-coded source-frame order."
+    },
+    {
+      "severity": "blocking",
+      "code": "direction-order-unverified",
+      "visualId": "korean-general-k4",
+      "scope": "base",
+      "state": "walk",
+      "detail": "Facing labels are assigned by a hard-coded source-frame order."
+    },
+    {
+      "severity": "blocking",
+      "code": "direction-order-unverified",
+      "visualId": "korean-royal-cart",
+      "scope": "base",
+      "state": "idle",
+      "detail": "Facing labels are assigned by a hard-coded source-frame order."
+    },
+    {
+      "severity": "blocking",
+      "code": "direction-order-unverified",
+      "visualId": "korean-royal-cart",
+      "scope": "base",
+      "state": "move",
+      "detail": "Facing labels are assigned by a hard-coded source-frame order."
+    },
+    {
+      "severity": "blocking",
+      "code": "direction-order-unverified",
+      "visualId": "korean-royal-cart",
+      "scope": "base",
+      "state": "walk",
+      "detail": "Facing labels are assigned by a hard-coded source-frame order."
+    },
+    {
+      "severity": "blocking",
+      "code": "direction-order-unverified",
+      "visualId": "korean-swordsman",
+      "scope": "base",
+      "state": "attack",
+      "detail": "Facing labels are assigned by a hard-coded source-frame order."
+    },
+    {
+      "severity": "blocking",
+      "code": "direction-order-unverified",
+      "visualId": "korean-swordsman",
+      "scope": "base",
+      "state": "idle",
+      "detail": "Facing labels are assigned by a hard-coded source-frame order."
+    },
+    {
+      "severity": "blocking",
+      "code": "direction-order-unverified",
+      "visualId": "korean-swordsman",
+      "scope": "base",
+      "state": "move",
+      "detail": "Facing labels are assigned by a hard-coded source-frame order."
+    },
+    {
+      "severity": "blocking",
+      "code": "direction-order-unverified",
+      "visualId": "korean-swordsman",
+      "scope": "base",
+      "state": "walk",
+      "detail": "Facing labels are assigned by a hard-coded source-frame order."
+    },
+    {
+      "severity": "blocking",
+      "code": "direction-order-unverified",
+      "visualId": "villager-korean-farmer",
+      "scope": "base",
+      "state": "build",
+      "detail": "Facing labels are assigned by a hard-coded source-frame order."
+    },
+    {
+      "severity": "blocking",
+      "code": "direction-order-unverified",
+      "visualId": "villager-korean-farmer",
+      "scope": "base",
+      "state": "carry",
+      "detail": "Facing labels are assigned by a hard-coded source-frame order."
+    },
+    {
+      "severity": "blocking",
+      "code": "direction-order-unverified",
+      "visualId": "villager-korean-farmer",
+      "scope": "base",
+      "state": "gather",
+      "detail": "Facing labels are assigned by a hard-coded source-frame order."
+    },
+    {
+      "severity": "blocking",
+      "code": "direction-order-unverified",
+      "visualId": "villager-korean-farmer",
+      "scope": "base",
+      "state": "idle",
+      "detail": "Facing labels are assigned by a hard-coded source-frame order."
+    },
+    {
+      "severity": "blocking",
+      "code": "direction-order-unverified",
+      "visualId": "villager-korean-farmer",
+      "scope": "base",
+      "state": "move",
+      "detail": "Facing labels are assigned by a hard-coded source-frame order."
+    },
+    {
+      "severity": "blocking",
+      "code": "direction-order-unverified",
+      "visualId": "villager-korean-farmer",
+      "scope": "base",
+      "state": "repair",
+      "detail": "Facing labels are assigned by a hard-coded source-frame order."
+    },
+    {
+      "severity": "blocking",
+      "code": "direction-order-unverified",
+      "visualId": "villager-korean-farmer",
+      "scope": "base",
+      "state": "walk",
+      "detail": "Facing labels are assigned by a hard-coded source-frame order."
+    },
+    {
+      "severity": "blocking",
+      "code": "distinct-state-frame-collision",
+      "visualId": "japanese-gunner",
+      "states": [
+        "attack",
+        "move"
+      ],
+      "detail": "Distinct gameplay states currently resolve to identical frame clips."
+    },
+    {
+      "severity": "blocking",
+      "code": "distinct-state-frame-collision",
+      "visualId": "japanese-gunner",
+      "states": [
+        "attack",
+        "walk"
+      ],
+      "detail": "Distinct gameplay states currently resolve to identical frame clips."
+    },
+    {
+      "severity": "blocking",
+      "code": "mirrored-facing-unverified",
+      "visualId": "japanese-gunner",
+      "scope": "base",
+      "state": "attack",
+      "detail": "Three facings reuse mirrored source frames without binary/data proof."
+    },
+    {
+      "severity": "blocking",
+      "code": "mirrored-facing-unverified",
+      "visualId": "japanese-gunner",
+      "scope": "base",
+      "state": "idle",
+      "detail": "Three facings reuse mirrored source frames without binary/data proof."
+    },
+    {
+      "severity": "blocking",
+      "code": "mirrored-facing-unverified",
+      "visualId": "japanese-gunner",
+      "scope": "base",
+      "state": "move",
+      "detail": "Three facings reuse mirrored source frames without binary/data proof."
+    },
+    {
+      "severity": "blocking",
+      "code": "mirrored-facing-unverified",
+      "visualId": "japanese-gunner",
+      "scope": "base",
+      "state": "walk",
+      "detail": "Three facings reuse mirrored source frames without binary/data proof."
+    },
+    {
+      "severity": "blocking",
+      "code": "mirrored-facing-unverified",
+      "visualId": "japanese-swordsman",
+      "scope": "base",
+      "state": "attack",
+      "detail": "Three facings reuse mirrored source frames without binary/data proof."
+    },
+    {
+      "severity": "blocking",
+      "code": "mirrored-facing-unverified",
+      "visualId": "japanese-swordsman",
+      "scope": "base",
+      "state": "idle",
+      "detail": "Three facings reuse mirrored source frames without binary/data proof."
+    },
+    {
+      "severity": "blocking",
+      "code": "mirrored-facing-unverified",
+      "visualId": "japanese-swordsman",
+      "scope": "base",
+      "state": "move",
+      "detail": "Three facings reuse mirrored source frames without binary/data proof."
+    },
+    {
+      "severity": "blocking",
+      "code": "mirrored-facing-unverified",
+      "visualId": "japanese-swordsman",
+      "scope": "base",
+      "state": "walk",
+      "detail": "Three facings reuse mirrored source frames without binary/data proof."
+    },
+    {
+      "severity": "blocking",
+      "code": "mirrored-facing-unverified",
+      "visualId": "korean-archer",
+      "scope": "base",
+      "state": "attack",
+      "detail": "Three facings reuse mirrored source frames without binary/data proof."
+    },
+    {
+      "severity": "blocking",
+      "code": "mirrored-facing-unverified",
+      "visualId": "korean-archer",
+      "scope": "base",
+      "state": "idle",
+      "detail": "Three facings reuse mirrored source frames without binary/data proof."
+    },
+    {
+      "severity": "blocking",
+      "code": "mirrored-facing-unverified",
+      "visualId": "korean-archer",
+      "scope": "base",
+      "state": "move",
+      "detail": "Three facings reuse mirrored source frames without binary/data proof."
+    },
+    {
+      "severity": "blocking",
+      "code": "mirrored-facing-unverified",
+      "visualId": "korean-archer",
+      "scope": "base",
+      "state": "walk",
+      "detail": "Three facings reuse mirrored source frames without binary/data proof."
+    },
+    {
+      "severity": "blocking",
+      "code": "mirrored-facing-unverified",
+      "visualId": "korean-general-k4",
+      "scope": "base",
+      "state": "attack",
+      "detail": "Three facings reuse mirrored source frames without binary/data proof."
+    },
+    {
+      "severity": "blocking",
+      "code": "mirrored-facing-unverified",
+      "visualId": "korean-general-k4",
+      "scope": "base",
+      "state": "idle",
+      "detail": "Three facings reuse mirrored source frames without binary/data proof."
+    },
+    {
+      "severity": "blocking",
+      "code": "mirrored-facing-unverified",
+      "visualId": "korean-general-k4",
+      "scope": "base",
+      "state": "move",
+      "detail": "Three facings reuse mirrored source frames without binary/data proof."
+    },
+    {
+      "severity": "blocking",
+      "code": "mirrored-facing-unverified",
+      "visualId": "korean-general-k4",
+      "scope": "base",
+      "state": "walk",
+      "detail": "Three facings reuse mirrored source frames without binary/data proof."
+    },
+    {
+      "severity": "blocking",
+      "code": "mirrored-facing-unverified",
+      "visualId": "korean-royal-cart",
+      "scope": "base",
+      "state": "idle",
+      "detail": "Three facings reuse mirrored source frames without binary/data proof."
+    },
+    {
+      "severity": "blocking",
+      "code": "mirrored-facing-unverified",
+      "visualId": "korean-royal-cart",
+      "scope": "base",
+      "state": "move",
+      "detail": "Three facings reuse mirrored source frames without binary/data proof."
+    },
+    {
+      "severity": "blocking",
+      "code": "mirrored-facing-unverified",
+      "visualId": "korean-royal-cart",
+      "scope": "base",
+      "state": "walk",
+      "detail": "Three facings reuse mirrored source frames without binary/data proof."
+    },
+    {
+      "severity": "blocking",
+      "code": "mirrored-facing-unverified",
+      "visualId": "korean-swordsman",
+      "scope": "base",
+      "state": "attack",
+      "detail": "Three facings reuse mirrored source frames without binary/data proof."
+    },
+    {
+      "severity": "blocking",
+      "code": "mirrored-facing-unverified",
+      "visualId": "korean-swordsman",
+      "scope": "base",
+      "state": "idle",
+      "detail": "Three facings reuse mirrored source frames without binary/data proof."
+    },
+    {
+      "severity": "blocking",
+      "code": "mirrored-facing-unverified",
+      "visualId": "korean-swordsman",
+      "scope": "base",
+      "state": "move",
+      "detail": "Three facings reuse mirrored source frames without binary/data proof."
+    },
+    {
+      "severity": "blocking",
+      "code": "mirrored-facing-unverified",
+      "visualId": "korean-swordsman",
+      "scope": "base",
+      "state": "walk",
+      "detail": "Three facings reuse mirrored source frames without binary/data proof."
+    },
+    {
+      "severity": "blocking",
+      "code": "mirrored-facing-unverified",
+      "visualId": "villager-korean-farmer",
+      "scope": "base",
+      "state": "build",
+      "detail": "Three facings reuse mirrored source frames without binary/data proof."
+    },
+    {
+      "severity": "blocking",
+      "code": "mirrored-facing-unverified",
+      "visualId": "villager-korean-farmer",
+      "scope": "base",
+      "state": "carry",
+      "detail": "Three facings reuse mirrored source frames without binary/data proof."
+    },
+    {
+      "severity": "blocking",
+      "code": "mirrored-facing-unverified",
+      "visualId": "villager-korean-farmer",
+      "scope": "base",
+      "state": "gather",
+      "detail": "Three facings reuse mirrored source frames without binary/data proof."
+    },
+    {
+      "severity": "blocking",
+      "code": "mirrored-facing-unverified",
+      "visualId": "villager-korean-farmer",
+      "scope": "base",
+      "state": "idle",
+      "detail": "Three facings reuse mirrored source frames without binary/data proof."
+    },
+    {
+      "severity": "blocking",
+      "code": "mirrored-facing-unverified",
+      "visualId": "villager-korean-farmer",
+      "scope": "base",
+      "state": "move",
+      "detail": "Three facings reuse mirrored source frames without binary/data proof."
+    },
+    {
+      "severity": "blocking",
+      "code": "mirrored-facing-unverified",
+      "visualId": "villager-korean-farmer",
+      "scope": "base",
+      "state": "repair",
+      "detail": "Three facings reuse mirrored source frames without binary/data proof."
+    },
+    {
+      "severity": "blocking",
+      "code": "mirrored-facing-unverified",
+      "visualId": "villager-korean-farmer",
+      "scope": "base",
+      "state": "walk",
+      "detail": "Three facings reuse mirrored source frames without binary/data proof."
+    }
+  ]
+}

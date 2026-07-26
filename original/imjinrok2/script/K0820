@@ -1,0 +1,52 @@
+제목 		: 8. 마지막 전투-노량해전
+화일 		: K0820
+성격		: 해전, 철수하는 적의 수군 섬멸
+
+장소		: 조선 수군 막사
+등장인물 	: 유성룡, 이순신
+
+                  ID.             초상화위치
+유성룡  	: 3번			0번
+이순신		: 0번			1번
+
+-------------------------------------스크립트----------------------------------
+
+
+[CHANGEMUSIC][music\briefmusic.yav]
+[CHANGETITLE][ybriefingfnt\k01\k01.spr][SETDELAYTIME][500]
+
+[CHANGETITLE][ybriefingfnt\K01\k0101.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\K01\k0102.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\K01\k0103.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\K01\k0104.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\K01\k0105.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\K01\k0106.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\K01\k0107.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\K01\k0108.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\K01\k0109.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\K01\k0110.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\K01\k0111.spr][SETDELAYTIME][15]
+
+[TITLE][8. 노량해전]
+[OBJECTIVE][1. 일본의 관측소를 모두 파괴하라.][2. 적의 전선들이 탈출하기 전에 모두 격파하라.]
+
+[SETDELAYTIME][100]
+[NARATION][Script\eft\K08010.yav]
+[이순신이 파직된 후 원균이 지휘하던 조선 수군은 칠천량에서 일본군에게 대패하여 최대의 위기를 맞았다. 이에 조정은 다시 이순신으로 하여금 수군을 지휘하도록 하였는데 이순신은 명량 해협에서 적의 대함대를 격파함으로써 수군을 재건하였다. 한편 일본은 전쟁을 일으킨 도요토미 히데요시가 사망하자 조선에서의 철군을 결정하였다. 마침내 왜의 고니시가 이끄는 왜군 주력부대는 명의 진린을 통해 비밀리에 노량 해협으로 퇴각할 수 있는 길을 보장 받았다. 그러나 조선은 일본이 퇴각하는 것을 용납 하지 않았다.]
+[SETDELAYTIME][300]
+[SPEECH][K3][0][K08020][명이 왜의 본국 철수를 눈감아 주기로 한 것 같네.]
+[SPEECH][K2][1][K08030][예, 명의 수군은 왜군과의 전투를 피하며 멀리서 지켜만 보고 있는 형국이옵니다.]
+[SPEECH][K3][0][K08040][그러나 왜의 무리들이 무사히 돌아가도록 내버려 둘 수는 없는 일이 아닌가?]
+[SPEECH][K2][1][K08050][지당하신 말씀입니다. 제게 왜군을 무찌를 방법이 있사옵니다.]
+[SPEECH][K3][0][K08060][그것이 무엇인가?]
+[SPEECH][K2][1][K08070][왜군은 매우 조심스럽게 철군을 준비해왔습니다. 바다 한가운데서 우리를 만날까 두려워하여 해안선을 따라 퇴각하려고 할 것이 틀림없습니다.]
+[SPEECH][K3][0][K08080][어떻게 안단 말인가?]
+[SPEECH][K2][1][K08090][왜군은 해안선의 높은 지대에 여러개의 관측소를 건설하였사옵니다. 이는 퇴각시 안전한 시야를 확보하기 위함이 틀림없습니다.]
+[SPEECH][K3][0][K08100][그렇다면?]
+[SPEECH][K2][1][K08110][예, 저는 우선 그 관측소들을 모두 파괴하고 은밀히 전선을 적의 퇴각로에 매복시켜 둘 생각입니다.]
+[SPEECH][K3][0][K08120][적의 눈을 멀게 한 후 매복 공격을 한단 말인가?]
+[SPEECH][K2][1][K08130][그렇사옵니다.]
+[SPEECH][K3][0][K08140][좋은 계책일세. 그대의 무운을 비네.]
+[SPEECH][K2][1][K08150][전 장졸들이 죽기를 각오하고 단 한명의 왜군도 살아서 돌아가지 못하게 할 것이옵니다.]
+[NOEND]
+-------------------------------------스크립트----------------------------------

@@ -3,6 +3,8 @@ import type { WorldState } from "./types.js";
 
 export interface EnvironmentState {
   weather: WeatherKind;
+  weatherOverride?: WeatherKind;
+  weatherOverrideUntilTick?: number;
   timeOfDay01: number;
   dayPhase: DayPhase;
 }
@@ -14,7 +16,12 @@ export function createInitialEnvironmentState(map: MapDefinition): EnvironmentSt
 export function updateEnvironment(state: WorldState): void {
   const nextEnvironment = deriveEnvironmentState(state.map, state.tick);
 
-  state.environment.weather = nextEnvironment.weather;
+  if (state.environment.weatherOverrideUntilTick !== undefined && state.tick >= state.environment.weatherOverrideUntilTick) {
+    delete state.environment.weatherOverride;
+    delete state.environment.weatherOverrideUntilTick;
+  }
+
+  state.environment.weather = state.environment.weatherOverride ?? nextEnvironment.weather;
   state.environment.timeOfDay01 = nextEnvironment.timeOfDay01;
   state.environment.dayPhase = nextEnvironment.dayPhase;
 }

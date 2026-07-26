@@ -1,0 +1,38 @@
+제목 		: 3. 한성 공략
+
+-------------------------------------스크립트----------------------------------
+[CHANGEMUSIC][music\briefmusicj.yav]
+[CHANGETITLE][ybriefingfnt\j01\j01.spr][SETDELAYTIME][500]
+
+[CHANGETITLE][ybriefingfnt\j01\j0101.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\j01\j0102.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\j01\j0103.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\j01\j0104.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\j01\j0105.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\j01\j0106.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\j01\j0107.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\j01\j0108.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\j01\j0109.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\j01\j0110.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\j01\j0111.spr][SETDELAYTIME][15]
+
+[TITLE][3. 한성공략]
+[OBJECTIVE][1. 세이쇼오는 강 이북의 신기전 망루를 모두 파괴하라. (세이쇼오는 살아 남아야 한다.)][2. 적군 섬멸]
+
+
+[SETDELAYTIME][100]
+[SPEECH][J5][0][J03010][한성이 바로 눈앞에 있소. 한강을 넘어 한성을 단숨에 장악하여야 하오. 그러기위해서 수송기들에 병력과 물자를 싣고 한강을 넘을 계획이오. 그런데 문제가 있소.]
+[SPEECH][J4][1][J03020][문제라 하시면?]
+[SPEECH][J5][0][J03030][조선은 한강을 따라 신기전 망루로 방어망을 형성해 놓고 있소. 이들을 파괴하지 않으면 상당한 피해를 입고 작전도 실패할 가능성이 많소.]
+[SPEECH][J1][2][J03040][그렇다면 먼저 조선의 방공망을 무력화시켜야 합니다.]
+[SPEECH][J5][0][J03050][그렇소. 세이쇼오 장군은 일단의 병력을 이끌고 한강의 얕은 지점을 건너 강 이북으로 가서 적의 신기전 망루를 모두 파괴하시오. ]
+[SPEECH][J4][1][J03060][예]
+[SPEECH][J5][0][J03070][나와 고니시 장군, 가토 장군은 세이쇼오 장군이 적의 신기전 망루를 모두 파괴하면 수송기를 이용하여 강을 건너, 강 이북에서 합류하겠소.]
+[SPEECH][J2][3][J03080][일단 합류한 다음에는...]
+[SPEECH][J5][0][J03090][최대한 신속히 진영을 갖추고 한성을 점령해야 하오.]
+[SPEECH][J2][3][J03100][좋은 계획입니다.]
+[SPEECH][J1][2][J03110][세이쇼오 장군! 어려운 일을 맡았습니다.]
+[SPEECH][J4][1][J03120][문제 없소. 나중에 한성에서 봅시다.]
+[SPEECH][J5][0][J03130][자, 갑시다.]
+[NOEND]
+-------------------------------------스크립트----------------------------------

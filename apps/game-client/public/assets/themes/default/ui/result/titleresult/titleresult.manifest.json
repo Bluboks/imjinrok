@@ -1,0 +1,13 @@
+{
+  "source": "original/imjinrok2/yfnt/titleresult.spr",
+  "layout": "spr",
+  "width": 640,
+  "height": 480,
+  "frameCount": 1,
+  "exportedFrames": [
+    {
+      "index": 0,
+      "fileName": "titleresult_0000.png"
+    }
+  ]
+}

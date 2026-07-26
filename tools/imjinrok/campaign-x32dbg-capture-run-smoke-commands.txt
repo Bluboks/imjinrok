@@ -1,0 +1,5 @@
+scriptexec C:\rev\work\codex-imjinrok-campaign-capture-file.xdbg
+savedata C:\rev\logs\codex-imjinrok-x32dbg-capture-run-smoke-20260602-0845-after-setup-peheader.bin, 0x00400000, 0x40
+erun
+erun
+erun

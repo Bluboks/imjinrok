@@ -1,0 +1,44 @@
+제목 		: 7. 도자기 전쟁
+
+-------------------------------------스크립트----------------------------------
+[CHANGEMUSIC][music\briefmusicj.yav]
+[CHANGETITLE][ybriefingfnt\j01\j01.spr][SETDELAYTIME][500]
+
+[CHANGETITLE][ybriefingfnt\j01\j0101.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\j01\j0102.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\j01\j0103.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\j01\j0104.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\j01\j0105.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\j01\j0106.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\j01\j0107.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\j01\j0108.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\j01\j0109.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\j01\j0110.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\j01\j0111.spr][SETDELAYTIME][15]
+
+[TITLE][7. 도자기 전쟁]
+[OBJECTIVE][1. 조선의 도공을 찾아라.][2. 고니시와 도공(2명 이상)을 해안가로 보낸 후 배에 태워 동쪽바다로 이동시킨다.]
+
+[SETDELAYTIME][100]
+
+[NARATION][Script\eft\J07010.yav][전쟁 초기 승승장구하던 일본군은 조선 수군과 각지에서 일어난 의병들에게 보급이 차단당하여 더 이상의 진격이 어려워지고 명에서 대군을 파견하여 전쟁에 적극 참여하자 전의를 상실했다. 일본군은 철군할 명분과 기회를 기다리고 있었다.  전쟁은 사실상 끝난 것과 다름없었다.]
+[SPEECH][J1][0][J07020][부르셨습니까?]
+[SPEECH][J5][1][J07030][어서오시오. 고니시 장군. 긴히 할 말이 있어 오라고 했소.]
+[SPEECH][J1][0][J07040][말씀하십시오.]
+[SPEECH][J5][1][J07050][조만간 우리는 본국으로 철수하오.]
+[SPEECH][J1][0][J07060][예상은 했습니다만... 본국으로부터 퇴각명령이 떨어졌습니까?]
+[SPEECH][J5][1][J07070][아직은 아니오. 주군께서는 퇴각을 명하시기 전에 조선의 문물을 한가지라도 더 가져오길 바라고 계시오.]
+[SPEECH][J1][0][J07080][조선의 문물이라면...]
+[SPEECH][J5][1][J07090][주군께서는 특히 조선의 도공과 도자기에 관심이 많으시오. 장군이 주군을 위해 조선의 도공들을 데리고 와야겠소. 그러나 이 일은 은밀하게 추진되어야 하오.]
+[SPEECH][J1][0][J07100][왜 그렇습니까?]
+[SPEECH][J5][1][J07110][철군이 임박했다는 소문이 퍼지면 병사들이 동요하여 싸우기 힘들 것이기 때문이오. 그래서 이번일은 장군 단독으로 해야 하오.]
+[SPEECH][J1][0][J07120][어떻게 하면 되겠습니까?]
+[SPEECH][J5][1][J07130][이곳에서 멀지않은 곳에 조선의 진지가 있소. 소문에 의하면 그 진지에 도공들이 피해있다하오. 장군은 그 진지를 찾아 도공들을 데리고 해안가로 가면 내가 수송선을 보내겠소.] 
+[SPEECH][J1][0][J07140][알겠습니다.]
+[SPEECH][J5][1][J07150][이 일은 매우 은밀하게 이루어져야 하오. 그 배에는 도공들과 장군만 타시오.]
+[SPEECH][J1][0][J07160][그럼 나머지 병사들은 어떻게 합니까?]
+[SPEECH][J5][1][J07170][그들이 살아 남게 되면 소문이 퍼질 것이오. ]
+[SPEECH][J1][0][J07180][무슨 말씀인지 잘 알겠습니다. 바로 출발하겠습니다.]
+[SPEECH][J5][1][J07190][건투를 비오.]
+[NOEND]
+-------------------------------------스크립트----------------------------------

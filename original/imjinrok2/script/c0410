@@ -1,0 +1,37 @@
+제목 		: 4. 비밀회담
+
+-------------------------------------스크립트----------------------------------
+[CHANGEMUSIC][music\briefmusicc.yav]
+[CHANGETITLE][ybriefingfnt\c01\c01.spr][SETDELAYTIME][500]
+
+[CHANGETITLE][ybriefingfnt\c01\c0101.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\c01\c0102.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\c01\c0103.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\c01\c0104.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\c01\c0105.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\c01\c0106.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\c01\c0107.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\c01\c0108.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\c01\c0109.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\c01\c0110.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\c01\c0111.spr][SETDELAYTIME][15]
+
+[TITLE][4. 비밀회담]
+[OBJECTIVE][1. 심유경은 고니시의 진지로 가서 고니시를 찾아라. (심유경, 고니시는 살아 남아야 한다.)][2. 조선군을 섬멸하라. (생존자가 있어서는 안된다.)]
+
+[SETDELAYTIME][100]
+[SPEECH][C3][0][C04010][장군, 이렇게 지루한 소모전만 계속해서는 안됩니다. 먼 타국 땅에서 많은 병사들이 죽어가고 있습니다.]
+[SPEECH][C1][1][C04020][나 역시 바라는 바는 아니나, 지엄하신 천자의 명을 받았으니 물러설 수는 없지 않은가?]
+[SPEECH][C3][0][C04030][꼭 물러서는 방법 외에도 싸움을 피할 방도가 있습니다.]
+[SPEECH][C1][1][C04040][그것이 무엇인가?]
+[SPEECH][C3][0][C04050][강화를 하는 것입니다.]
+[SPEECH][C1][1][C04060][강화?]
+[SPEECH][C3][0][C04070][예, 천자께서 바라시는 것은 결국 왜를 조선에서 몰아내어 우리 대명국의 안전을 위협하지 못하게 하는 것이 아닙니까?]
+[SPEECH][C1][1][C04080][그렇지.]
+[SPEECH][C3][0][C04090][그렇다면 굳이 싸움만이 능사는 아닙니다.]
+[SPEECH][C1][1][C04100][음.. 그대의 말이 맞는 것 같네. 우리가 먼 이국 땅에서 피를 흘리며 고생할 필요는 없겠지. 그럼 왜에 강화를 제안해보게.]
+[SPEECH][C3][0][C04110][그러나 많은 피해를 입은 조선은 쉽게 응하려 들지 않을 것입니다.]
+[SPEECH][C1][1][C04120][조선은 반대할 만한 처지가 아니지. 그러고 싶다면 단독으로 전쟁을 치러야 할 것이야. 서둘러 강화를 준비해 보게.]
+[SPEECH][C3][0][C04130][예, 알겠습니다.]
+[NOEND]
+-------------------------------------스크립트----------------------------------

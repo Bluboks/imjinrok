@@ -1,0 +1,46 @@
+제목 		: 4. 깨어나는 한반도
+화일 		: K0420
+
+장소		: 의병들의 막사
+등장인물	: 홍의 장군, 사명대사
+
+		   ID.		초상화위치
+홍의 장군	:  0번		   0번
+사명대사	:  0번		   1번
+
+-------------------------------------스크립트----------------------------------
+
+[CHANGEMUSIC][music\briefmusic.yav]
+[CHANGETITLE][ybriefingfnt\k01\k01.spr][SETDELAYTIME][500]
+
+[CHANGETITLE][ybriefingfnt\K01\k0101.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\K01\k0102.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\K01\k0103.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\K01\k0104.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\K01\k0105.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\K01\k0106.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\K01\k0107.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\K01\k0108.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\K01\k0109.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\K01\k0110.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\K01\k0111.spr][SETDELAYTIME][15]
+
+[TITLE][4. 깨어나는 한반도]
+[OBJECTIVE][1. 왜군의 진로 표시를 모두 제거하라. (곽재우, 사명대사는 살아 남아야 한다.)][2. 적군 섬멸]
+
+[SETDELAYTIME][100]
+[NARATION][Script\eft\K04010.yav]
+[아는 것도 별로 없고 망령난 이 늙은 몸은 쏟아지는 눈물을 닦으며 마을 사람들에게 고한다. 우리들이 평소에 배운 것이 무엇이며, 이야기 하던 것이 무엇이었던가? 그것은 충성스러운 신하가 되고 효성스러운 자식이 되는 것이 아니었던가? 평소에 배우고 함께 이야기하던 것이 아직도 이 세상에 옳다면, 어찌 오늘에 한개 아니 반개라도 충에 죽고 효에 죽었다는 사람들을 볼 수 없단 말인가?                                                                                                             예안의 한 의병장]
+[SETDELAYTIME][200]
+[SPEECH][K5][0][K04020][우리는 전하의 교서에 따라 의병을 모아 왜군을 상대로 열심히 싸워왔소. 이제 왜군이 남강을 건너 북진하려는 것을 막으려고 하오.]
+[SPEECH][K4][1][k04030][상대는 왜군의 주력일 터인데, 쉽지 않은 일일 것입니다.]
+[SPEECH][K5][0][k04040][하지만 방도가 있소.]
+[SPEECH][K4][1][k04050][그것이 무엇입니까?]
+[SPEECH][K5][0][K04060][왜군은 조선의 지리에 어두워 진격에 어려움을 겪고 있소. 그래서 그들은 본대를 이동시키기 전에 선발대를 보내어 길을 찾고 이정표를 남겨두어 본대의 이동을 돕게 하고 있소.]
+[SPEECH][K4][1][K04070][그렇다면...]
+[SPEECH][K5][0][K04080][그렇소. 왜의 선발대가 남겨놓은 이정표를 모두 없앤다면 왜군은 쉽게 강을 건너지 못할 것이외다.]
+[SPEECH][K4][1][K04090][좋은 생각입니다. 그러나 오랫동안 그들을 강 남쪽에 묶어 둘 수는 없을 것입니다.]
+[SPEECH][K5][0][K04100][우리가 이정표를 모두 제거할 무렵이면 관군이 도착할 것이오. 그들과 힘을 합쳐 맞서 싸우면 발이 묶인 왜군을 무찌를 수 있소.]
+[SPEECH][K4][1][K04110][알겠소이다. 바로 출전합시다. 나무아미타불 관세음보살~]
+[NOEND]
+-------------------------------------스크립트----------------------------------

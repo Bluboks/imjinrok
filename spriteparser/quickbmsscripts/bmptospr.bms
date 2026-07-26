@@ -1,0 +1,218 @@
+IDString "\x48\x51\x54\x45\x41\x4D\x5F\x53\x50\x52\x5F\x42\x4D\x50\x5F\x49\x4E\x46\x4F\x0d\x0a" # info file validity check
+log MEMORY_FILE1 0 0
+log MEMORY_FILE2 0 0
+set DATBYTE byte 0xFE
+
+################################
+#GETTING THE INITIAL INFORMATION
+################################
+
+findloc COFFSET string "STRIPE_NAME|"
+getdstring sdummy 12
+getct SPRNAME string 0x0d   # getting the name of sprite group.
+get dummy byte
+
+findloc COFFSET string "TOTAL_FRAME_NUMBER|"
+getdstring sdummy 19
+getct SPRCOUNT string 0x0d  #getting the number of sprite group.
+
+findloc COFFSET string "WIDTH|"
+getdstring sdummy 7
+getct SPRWIDTH string 0x0d  #getting the width
+
+findloc COFFSET string "HEIGHT|"
+getdstring sdummy 8
+getct SPRHEIGHT string 0x0d  #getting the height
+
+findloc COFFSET string "FRAME_BITMAP_LIST:"
+getdstring sdummy 21
+
+###############################################################
+# PRELIMINARY MODULO TEST AND REVISING THE TOTAL RAW IMAGE SIZE
+###############################################################
+
+set MODULOTEST long
+math MODULOTEST == SPRWIDTH
+math MODULOTEST %= 4
+math MODULOREMAIN == 4
+math MODULOREMAIN -= MODULOTEST
+if MODULOREMAIN == 4
+    math MODULOREMAIN == 0
+endif
+
+xmath BYTESPERLINE "SPRWIDTH + MODULOREMAIN"
+
+
+#print "%MODULOREMAIN% %BYTESPERLINE% %REVISEDSIZE%"
+
+
+############################
+# WRITING HEADER IMPORMATION
+############################
+
+put 0x9 long MEMORY_FILE1
+put SPRWIDTH long MEMORY_FILE1
+put SPRHEIGHT long MEMORY_FILE1
+put SPRCOUNT long MEMORY_FILE1
+for PAC = 0 < 1200
+    put 0x00 byte MEMORY_FILE1
+next PAC
+put 0x long MEMORY_FILE1
+
+##########################
+#IMPORTING RAW BITMAP DATA
+##########################
+
+for i = 0 < SPRCOUNT
+    set RAWFRAMESIZEBEFORE == 0
+
+    getct BMPTARGETNAME string 0x0d  
+    print "starting %BMPTARGETNAME%"
+    get sdummy 1
+    savepos BTWAITHERE
+    #log 1 0 0
+    Open FDSE BMPTARGETNAME 1
+
+    #checking the validity of bmp file
+    idstring "BM" 1   
+    goto 0x12 1
+    get ACTUALWIDTH long 1
+    if ACTUALWIDTH <> SPRWIDTH
+        print "%ACTUALWIDTH% %SPRWIDTH%"
+        print "Error: The width of BMP doesn't match that of the info file! Process terminated..."
+        cleanexit
+    endif        
+    goto 0x16 1
+    get ACTUALHEIGHT long 1
+    if ACTUALHEIGHT < 0
+        math ACTUALHEIGHT2 n ACTUALHEIGHT
+        set NEGATIVEONE byte 1
+    else
+        math ACTUALHEIGHT2 == ACTUALHEIGHT
+        set NEGATIVEONE byte 0
+    endif
+    if ACTUALHEIGHT2 <> SPRHEIGHT
+        print "%ACTUALHEIGHT2% %SPRHEIGHT%"
+        print "Error: The height of BMP doesn't match that of the info file! Process terminated..."
+        cleanexit
+    endif        
+    goto 0x1c 1
+    get BITUSED long 1
+    if BITUSED <> 0x8
+        print "Error: The BMP isn't in 8 bit type! Process terminated..."
+        cleanexit
+    endif
+
+    # receiving the start offset.
+    goto 0x0a 1
+    get BIOFFSET long 1
+ 
+    xmath REVISEDSIZE "BIOFFSET + (BYTESPERLINE * SPRHEIGHT)"
+   
+    # getting the raw data
+    for HLINECOUNT = 0 <= SPRHEIGHT
+        set WHERETOGO long 0
+        get BMPSIZE asize 1
+        if NEGATIVEONE == 1
+            xmath WHERETOGO "BIOFFSET + (BYTESPERLINE * HLINECOUNT)"            
+            goto WHERETOGO 1
+        elif NEGATIVEONE == 0
+            xmath WHERETOGO "REVISEDSIZE - (BYTESPERLINE * HLINECOUNT)"
+            #print "bmpsize:%WHERETOGO% bytesperline:%BYTESPERLINE% hlinecount:%hlinecount%"
+            goto WHERETOGO 1
+        endif
+
+        set TRANSSWITCH byte 0
+        set TRANSCOUNT byte 0
+
+        if WHERETOGO < REVISEDSIZE
+            for BCNT = 0 < SPRWIDTH
+                get TMPBUFFER byte 1
+                if TMPBUFFER == DATBYTE
+                    if TRANSSWITCH == 0
+                        put TMPBUFFER byte MEMORY_FILE2
+                        math TRANSSWITCH == 1
+                        xmath PANDAN "BCNT + 1"
+                        math TRANSCOUNT += 1
+                        if PANDAN == SPRWIDTH
+                            put TRANSCOUNT byte MEMORY_FILE2
+                        endif
+                    else
+                        if TRANSCOUNT == 255
+                            put TRANSCOUNT byte MEMORY_FILE2
+                            put TMPBUFFER byte MEMORY_FILE2
+                            math TRANSSWITCH == 1
+                            math TRANSCOUNT == 1
+                            xmath PANDAN "BCNT + 1"
+                            if PANDAN == SPRWIDTH
+                                put TRANSCOUNT byte MEMORY_FILE2
+                            endif
+                        else
+                            math TRANSCOUNT += 1
+                            xmath PANDAN "BCNT + 1"
+                            if PANDAN == SPRWIDTH
+                                put TRANSCOUNT byte MEMORY_FILE2
+                            endif
+                        endif
+                    endif
+                else
+                    if TRANSSWITCH == 0
+                        put TMPBUFFER byte MEMORY_FILE2
+                    else
+                        put TRANSCOUNT byte MEMORY_FILE2
+                        put TMPBUFFER byte MEMORY_FILE2
+                        math TRANSSWITCH == 0
+                        math TRANSCOUNT == 0
+                    endif
+                endif
+            next BCNT
+        endif
+    next HLINECOUNT
+
+
+###############################
+# WRITING REMAINING HEADER INFO
+###############################
+    get RAWFRAMESIZE asize MEMORY_FILE2
+    xmath RAWOFFSET "RAWFRAMESIZE - RAWFRAMESIZEBEFORE"
+    math RAWFRAMESIZEBEFORE == RAWOFFSET
+    xmath INEXT "i + 1"
+    if INEXT < SPRCOUNT    
+        put RAWOFFSET long MEMORY_FILE1
+    endif
+    print "%BMPTARGETNAME% done."    
+    goto BTWAITHERE
+next i
+xmath CHAI "2416 - RAWDONESIZE"
+savepos PADOFFSET MEMORY_FILE1
+
+do
+    put 0x0 byte MEMORY_FILE1
+    savepos PADOFFSET MEMORY_FILE1
+while PADOFFSET < 2416
+
+do
+    put 0x0 short MEMORY_FILE1
+    savepos PADOFFSET MEMORY_FILE1
+while PADOFFSET < 3016
+
+get RAWDONESIZE asize MEMORY_FILE2
+put RAWDONESIZE long MEMORY_FILE1
+put 0x0 long MEMORY_FILE1   #sprite number per row
+put 0x0 byte MEMORY_FILE1   #sprite number per column
+for PAC = 0 < 35
+    put 0x0 byte MEMORY_FILE1
+next PAC
+
+string OUTPUTNAME == SPRNAME
+string OUTPUTNAME += ".spr" 
+get RAWDONESIZE asize MEMORY_FILE1
+log OUTPUTNAME 0 RAWDONESIZE MEMORY_FILE1
+get RAWDONESIZE asize MEMORY_FILE2
+append
+log OUTPUTNAME 0 RAWDONESIZE MEMORY_FILE2
+
+
+
+
+

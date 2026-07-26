@@ -1,0 +1,34 @@
+제목 		: 2. 배수진을 돌파하라.
+
+-------------------------------------스크립트----------------------------------
+[CHANGEMUSIC][music\briefmusicj.yav]
+[CHANGETITLE][ybriefingfnt\j01\j01.spr][SETDELAYTIME][500]
+
+[CHANGETITLE][ybriefingfnt\j01\j0101.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\j01\j0102.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\j01\j0103.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\j01\j0104.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\j01\j0105.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\j01\j0106.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\j01\j0107.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\j01\j0108.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\j01\j0109.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\j01\j0110.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\j01\j0111.spr][SETDELAYTIME][15]
+
+[TITLE][2. 배수진을 돌파하라.]
+[OBJECTIVE][1. 본영이 파괴되기 전에 고니시를 본영으로 보낸다. (고니시는 살아 남아야 한다.)][2. 적군 섬멸]
+
+[SETDELAYTIME][100]
+[SPEECH][J5][0][J02010][첫 전투를 승리로 이끈 그대들의 노고를 치하하오. 토요토미 주군께서, 점령한 땅은 약속대로 모두 영지로 나누어 주겠다는 서신을 보내셨소.]
+[SPEECH][J2][1][J02020][당초 계획대로 조선과 명을 모두 점령해 보이겠습니다.]
+[SPEECH][J5][0][J02030][장하오. 그런데... 정보에 따르면 조선은 탄금대에 배수진을 치고 기다리고 있다하오. 이들만 무찌른다면 조선 정벌은 끝난 것이나 다름 없을 것이오. ]
+[SPEECH][J2][1][J02040][하하핫, 조선군이 탄금대에 진을 치고 있다는 것은 참으로 다행스러운 일입니다. 어제 넘어온 문경새재에서 싸웠더라면 우리는 고전을 면치 못했을 것입니다. 이제 조선은 우리를 막을 힘이 없을 테니 한성에 들어갈 준비나 해야겠습니다.]
+[SPEECH][J1][2][J02050][가토 장군, 우리의 수가 많은 것은 사실이나 방심하지는 마시오. 조선군은 기병이 주력이기 때문에 평지에 진을 쳤을 것이오. 그리고 전력의 차이를 배수의 진으로 막으려고 하니, 이제까지의 조선군보다는 강할 것이오.]
+[SPEECH][J5][0][J02060][음, 두 분의 말이 모두 맞소. 적의 수가 적다고 방심하지 말고, 그렇다고 우리 대일본군의 힘을 못 믿어서도 아니되오.]
+[SPEECH][J2][1][J02070][그럼 저는 이만 공격 준비를 위해 물러가겠습니다. 이번 탄금대에서의 전투는 제가 책임지고 승리하겠습니다. ]
+[SPEECH][J1][2][J02080][아무래도 제가 함께 가야 할 것 같습니다.]
+[SPEECH][J5][0][J02090][고니시 장군은 뒤에서 지켜보다가 가토 장군이 어려움에 처하면 도와주시오.]
+[SPEECH][J1][2][J02100][분부대로 따르겠습니다.]
+[NOEND]
+-------------------------------------스크립트----------------------------------

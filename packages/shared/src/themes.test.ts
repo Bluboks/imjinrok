@@ -3,18 +3,27 @@ import assert from "node:assert/strict";
 import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { extractOriginalSpriteTable } from "../../../tools/imjinrok/extract-sprite-table.mjs";
 import { defaultTheme, getThemeFrameRefs } from "./index.js";
 import type { EntityVisual } from "./visuals.js";
 
 const repositoryRoot = join(dirname(fileURLToPath(import.meta.url)), "../../..");
 const defaultThemeAssetRoot = join(repositoryRoot, "apps/game-client/public/assets/themes/default");
+const originalExecutablePath = join(repositoryRoot, "original/imjinrok2/imjinrok2.exe");
 
 test("default theme entity bindings point to loadable source-converted assets", () => {
   assert.equal(defaultTheme.entityBindings.villager, "villager-korean-farmer");
   assert.equal(defaultTheme.entityBindings.swordsman, "korean-swordsman");
   assert.equal(defaultTheme.entityBindings.archer, "korean-archer");
-  assert.equal(defaultTheme.entityBindings["ryu-seong-ryong"], "korean-swordsman");
-  assert.equal(defaultTheme.entityBindings["gwon-yul"], "korean-swordsman");
+  assert.equal(defaultTheme.entityBindings["japanese-swordsman"], "japanese-swordsman");
+  assert.equal(defaultTheme.entityBindings["japanese-gunner"], "japanese-gunner");
+  assert.equal(defaultTheme.entityBindings["japanese-camp-house"], "japanese-camp-house");
+  assert.equal(defaultTheme.entityBindings["japanese-camp-barracks"], "japanese-camp-barracks");
+  assert.equal(defaultTheme.entityBindings["japanese-camp-tower"], "japanese-camp-tower");
+  assert.equal(defaultTheme.entityBindings["japanese-camp-firehouse"], "japanese-camp-firehouse");
+  assert.equal(defaultTheme.entityBindings["japanese-camp-advanced-tower"], "japanese-camp-advanced-tower");
+  assert.equal(defaultTheme.entityBindings["ryu-seong-ryong"], "korean-general-k4");
+  assert.equal(defaultTheme.entityBindings["gwon-yul"], "korean-general-k4");
   assert.equal(defaultTheme.entityBindings["town-center"], "korean-hq");
 
   const missing = getThemeFrameRefs(defaultTheme)
@@ -24,57 +33,148 @@ test("default theme entity bindings point to loadable source-converted assets", 
   assert.deepEqual(missing, []);
 });
 
-test("default theme uses source-exported multi-frame Korean unit clips", () => {
+test("original executable sprite pointer table backs K01/K02 theme source sprites", () => {
+  const spriteTable = extractOriginalSpriteTable(originalExecutablePath);
+  const tableEntriesByPath = new Map(spriteTable.entries.map((entry) => [entry.sourcePathNormalized, entry]));
+  const expectations = [
+    { manifestPath: "entities/swordsman/swordk.manifest.json", sourcePath: "char/swordk.spr", tableIndex: 0 },
+    { manifestPath: "entities/japanese-swordsman/swordj.manifest.json", sourcePath: "char/swordj.spr", tableIndex: 1 },
+    { manifestPath: "entities/archer/archerk.manifest.json", sourcePath: "char/archerk.spr", tableIndex: 2 },
+    { manifestPath: "entities/villager/farmerk.manifest.json", sourcePath: "char/farmerk.spr", tableIndex: 5 },
+    { manifestPath: "entities/barracks/barrackk.manifest.json", sourcePath: "char/barrackk.spr", tableIndex: 8 },
+    { manifestPath: "entities/japanese-camp-barracks/barrackj.manifest.json", sourcePath: "char/barrackj.spr", tableIndex: 10 },
+    { manifestPath: "entities/japanese-gunner/gunj1.manifest.json", sourcePath: "char/gunj1.spr", tableIndex: 14 },
+    { manifestPath: "entities/japanese-camp-house/millj.manifest.json", sourcePath: "char/millj.spr", tableIndex: 23 },
+    { manifestPath: "entities/beacon/towerk.manifest.json", sourcePath: "char/towerk.spr", tableIndex: 28 },
+    { manifestPath: "entities/town-center/hqk.manifest.json", sourcePath: "char/hqk.spr", tableIndex: 41 },
+    { manifestPath: "entities/house/millk.manifest.json", sourcePath: "char/millk.spr", tableIndex: 46 },
+    { manifestPath: "entities/general-k4/generalk4.manifest.json", sourcePath: "char/generalk4.spr", tableIndex: 60 },
+    { manifestPath: "entities/japanese-camp-tower/towerj.manifest.json", sourcePath: "char/towerj.spr", tableIndex: 119 },
+    { manifestPath: "entities/japanese-camp-advanced-tower/advtowerj.manifest.json", sourcePath: "char/advtowerj.spr", tableIndex: 120 },
+    { manifestPath: "entities/japanese-camp-firehouse/firehousej.manifest.json", sourcePath: "char/firehousej.spr", tableIndex: 121 },
+    { manifestPath: "entities/royal-cart/koreanking.manifest.json", sourcePath: "char/koreanking.spr", tableIndex: 124 },
+  ] as const;
+
+  assert.equal(spriteTable.tableVa, "0x004bc224");
+  assert.equal(spriteTable.entryCount, 126);
+
+  for (const expectation of expectations) {
+    const manifest = readManifest(expectation.manifestPath);
+    const sourcePath = normalizeManifestSourcePath(manifest.source);
+    const tableEntry = tableEntriesByPath.get(expectation.sourcePath);
+
+    assert.equal(sourcePath, expectation.sourcePath);
+    assert.ok(tableEntry, `missing original sprite table entry ${expectation.sourcePath}`);
+    assert.equal(tableEntry.index, expectation.tableIndex);
+  }
+});
+
+test("default theme unit frame blocks are source-exported provisional mappings", () => {
+  // Action frame starts are guarded as current wiring only; original parity still needs runtime frame-index evidence.
   const farmerManifest = readManifest("entities/villager/farmerk.manifest.json");
   const swordsmanManifest = readManifest("entities/swordsman/swordk.manifest.json");
   const archerManifest = readManifest("entities/archer/archerk.manifest.json");
+  const japaneseSwordsmanManifest = readManifest("entities/japanese-swordsman/swordj.manifest.json");
+  const japaneseGunnerManifest = readManifest("entities/japanese-gunner/gunj1.manifest.json");
+  const generalManifest = readManifest("entities/general-k4/generalk4.manifest.json");
   const royalCartManifest = readManifest("entities/royal-cart/koreanking.manifest.json");
   const villagerVisual = defaultTheme.visuals[defaultTheme.entityBindings.villager] as EntityVisual;
   const swordsmanVisual = defaultTheme.visuals[defaultTheme.entityBindings.swordsman] as EntityVisual;
   const archerVisual = defaultTheme.visuals[defaultTheme.entityBindings.archer] as EntityVisual;
+  const japaneseSwordsmanVisual = defaultTheme.visuals[defaultTheme.entityBindings["japanese-swordsman"]] as EntityVisual;
+  const japaneseGunnerVisual = defaultTheme.visuals[defaultTheme.entityBindings["japanese-gunner"]] as EntityVisual;
+  const generalVisual = defaultTheme.visuals[defaultTheme.entityBindings["gwon-yul"]] as EntityVisual;
   const royalCartVisual = defaultTheme.visuals[defaultTheme.entityBindings["royal-cart"]] as EntityVisual;
 
   assert.equal(farmerManifest.source, "original/imjinrok2/char/farmerk.spr");
   assert.equal(farmerManifest.frameCount, 248);
   assert.equal(farmerManifest.exportedFrames.length, 248);
   assert.equal(villagerVisual.states.move?.clips.s?.frames.length, 8);
-  assert.equal(villagerVisual.states.move?.clips.s?.frames[0]?.fileName, "farmerk_0000.png");
-  assert.equal(villagerVisual.states.move?.clips.sw?.frames[0]?.fileName, "farmerk_0008.png");
-  assert.equal(villagerVisual.states.move?.clips.e?.frames[0]?.fileName, "farmerk_0016.png");
-  assert.equal(villagerVisual.states.move?.clips.e?.mirrorX, true);
-  assert.equal(villagerVisual.states.gather?.clips.s?.frames[0]?.fileName, "farmerk_0064.png");
-  assert.equal(villagerVisual.states.build?.clips.s?.frames[0]?.fileName, "farmerk_0128.png");
-  assert.equal(villagerVisual.states.repair?.clips.s?.frames[0]?.fileName, "farmerk_0128.png");
+  assert.equal(villagerVisual.states.idle?.clips.n?.frames[0]?.fileName, "farmerk_0000.png");
+  assert.equal(villagerVisual.states.move?.clips.n?.frames[0]?.fileName, "farmerk_0040.png");
+  assert.equal(villagerVisual.states.move?.clips.ne?.frames[0]?.fileName, "farmerk_0048.png");
+  assert.equal(villagerVisual.states.move?.clips.e?.frames[0]?.fileName, "farmerk_0056.png");
+  assert.equal(villagerVisual.states.move?.clips.se?.frames[0]?.fileName, "farmerk_0064.png");
+  assert.equal(villagerVisual.states.move?.clips.s?.frames[0]?.fileName, "farmerk_0072.png");
+  assert.equal(villagerVisual.states.move?.clips.w?.frames[0]?.fileName, "farmerk_0056.png");
+  assert.equal(villagerVisual.states.move?.clips.w?.mirrorX, true);
+  assert.equal(villagerVisual.states.move?.clips.sw?.frames[0]?.fileName, "farmerk_0064.png");
+  assert.equal(villagerVisual.states.move?.clips.sw?.mirrorX, true);
+  assert.equal(villagerVisual.states.carry?.clips.s?.frames[0]?.fileName, "farmerk_0112.png");
+  assert.equal(villagerVisual.states.gather?.clips.s?.frames[0]?.fileName, "farmerk_0152.png");
+  assert.equal(villagerVisual.states.build?.clips.s?.frames[0]?.fileName, "farmerk_0192.png");
+  assert.equal(villagerVisual.states.repair?.clips.s?.frames[0]?.fileName, "farmerk_0192.png");
 
   assert.equal(swordsmanManifest.source, "original/imjinrok2/char/swordk.spr");
   assert.equal(swordsmanManifest.frameCount, 192);
   assert.equal(swordsmanManifest.exportedFrames.length, 192);
   assert.equal(swordsmanVisual.states.move?.clips.s?.frames.length, 8);
-  assert.equal(swordsmanVisual.states.attack?.clips.s?.frames[0]?.fileName, "swordk_0064.png");
-  assert.equal(swordsmanVisual.states.attack?.clips.e?.frames[0]?.fileName, "swordk_0080.png");
-  assert.equal(swordsmanVisual.states.attack?.clips.e?.mirrorX, true);
+  assert.equal(swordsmanVisual.states.move?.clips.n?.frames[0]?.fileName, "swordk_0000.png");
+  assert.equal(swordsmanVisual.states.move?.clips.s?.frames[0]?.fileName, "swordk_0032.png");
+  assert.equal(swordsmanVisual.states.attack?.clips.n?.frames[0]?.fileName, "swordk_0048.png");
+  assert.equal(swordsmanVisual.states.attack?.clips.s?.frames[0]?.fileName, "swordk_0080.png");
+  assert.equal(swordsmanVisual.states.attack?.clips.e?.frames[0]?.fileName, "swordk_0064.png");
+  assert.equal(swordsmanVisual.states.attack?.clips.w?.frames[0]?.fileName, "swordk_0064.png");
+  assert.equal(swordsmanVisual.states.attack?.clips.w?.mirrorX, true);
 
   assert.equal(archerManifest.source, "original/imjinrok2/char/archerk.spr");
   assert.equal(archerManifest.frameCount, 176);
   assert.equal(archerManifest.exportedFrames.length, 176);
   assert.equal(archerVisual.states.move?.clips.s?.frames.length, 8);
-  assert.equal(archerVisual.states.idle?.clips.s?.frames[0]?.fileName, "archerk_0080.png");
-  assert.equal(archerVisual.states.move?.clips.s?.frames[0]?.fileName, "archerk_0080.png");
-  assert.equal(archerVisual.states.attack?.clips.s?.frames[0]?.fileName, "archerk_0000.png");
+  assert.equal(archerVisual.states.idle?.clips.n?.frames[0]?.fileName, "archerk_0120.png");
+  assert.equal(archerVisual.states.idle?.clips.s?.frames[0]?.fileName, "archerk_0152.png");
+  assert.equal(archerVisual.states.move?.clips.s?.frames[0]?.fileName, "archerk_0112.png");
+  assert.equal(archerVisual.states.attack?.clips.s?.frames[0]?.fileName, "archerk_0032.png");
   assert.equal(archerVisual.states.attack?.clips.e?.frames[0]?.fileName, "archerk_0016.png");
-  assert.equal(archerVisual.states.attack?.clips.e?.mirrorX, true);
+  assert.equal(archerVisual.states.attack?.clips.w?.frames[0]?.fileName, "archerk_0016.png");
+  assert.equal(archerVisual.states.attack?.clips.w?.mirrorX, true);
+
+  assert.equal(japaneseSwordsmanManifest.source, "original/imjinrok2/char/swordj.spr");
+  assert.equal(japaneseSwordsmanManifest.frameCount, 192);
+  assert.equal(japaneseSwordsmanManifest.exportedFrames.length, 192);
+  assert.equal(japaneseSwordsmanVisual.states.idle?.clips.n?.frames[0]?.fileName, "swordj_0000.png");
+  assert.equal(japaneseSwordsmanVisual.states.move?.clips.n?.frames[0]?.fileName, "swordj_0040.png");
+  assert.equal(japaneseSwordsmanVisual.states.move?.clips.s?.frames[0]?.fileName, "swordj_0072.png");
+  assert.equal(japaneseSwordsmanVisual.states.attack?.clips.s?.frames[0]?.fileName, "swordj_0160.png");
+  assert.equal(japaneseSwordsmanVisual.states.attack?.clips.w?.frames[0]?.fileName, "swordj_0144.png");
+  assert.equal(japaneseSwordsmanVisual.states.attack?.clips.w?.mirrorX, true);
+
+  assert.equal(japaneseGunnerManifest.source, "original/imjinrok2/char/gunj1.spr");
+  assert.equal(japaneseGunnerManifest.frameCount, 80);
+  assert.equal(japaneseGunnerManifest.exportedFrames.length, 80);
+  assert.equal(japaneseGunnerVisual.states.idle?.clips.n?.frames[0]?.fileName, "gunj1_0000.png");
+  assert.equal(japaneseGunnerVisual.states.move?.clips.n?.frames[0]?.fileName, "gunj1_0040.png");
+  assert.equal(japaneseGunnerVisual.states.move?.clips.s?.frames[0]?.fileName, "gunj1_0072.png");
+  assert.equal(japaneseGunnerVisual.states.attack?.clips.s?.frames[0]?.fileName, "gunj1_0072.png");
+  assert.equal(japaneseGunnerVisual.states.attack?.clips.w?.frames[0]?.fileName, "gunj1_0056.png");
+  assert.equal(japaneseGunnerVisual.states.attack?.clips.w?.mirrorX, true);
+
+  assert.equal(generalManifest.source, "original/imjinrok2/char/generalk4.spr");
+  assert.equal(generalManifest.frameCount, 208);
+  assert.equal(generalManifest.exportedFrames.length, 208);
+  assert.equal(generalVisual.states.idle?.clips.n?.frames[0]?.fileName, "generalk4_0000.png");
+  assert.equal(generalVisual.states.idle?.clips.s?.frames[0]?.fileName, "generalk4_0032.png");
+  assert.equal(generalVisual.states.move?.clips.s?.frames[0]?.fileName, "generalk4_0072.png");
+  assert.equal(generalVisual.states.attack?.clips.n?.frames[0]?.fileName, "generalk4_0096.png");
+  assert.equal(generalVisual.states.attack?.clips.s?.frames[0]?.fileName, "generalk4_0128.png");
+  assert.equal(generalVisual.states.attack?.clips.e?.frames[0]?.fileName, "generalk4_0112.png");
+  assert.equal(generalVisual.states.attack?.clips.w?.frames[0]?.fileName, "generalk4_0112.png");
+  assert.equal(generalVisual.states.attack?.clips.w?.mirrorX, true);
 
   assert.equal(royalCartManifest.source, "original/imjinrok2/char/koreanking.spr");
   assert.equal(royalCartManifest.frameCount, 50);
   assert.equal(royalCartManifest.exportedFrames.length, 50);
-  assert.equal(royalCartVisual.states.idle?.clips.s?.frames[0]?.fileName, "koreanking_0000.png");
-  assert.equal(royalCartVisual.states.idle?.clips.sw?.frames[0]?.fileName, "koreanking_0006.png");
-  assert.equal(royalCartVisual.states.move?.clips.s?.frames.length, 6);
-  assert.equal(royalCartVisual.states.move?.clips.sw?.frames[0]?.fileName, "koreanking_0006.png");
-  assert.equal(royalCartVisual.states.move?.clips.se?.frames.at(-1)?.fileName, "koreanking_0047.png");
+  assert.equal(royalCartVisual.states.idle?.clips.n?.frames[0]?.fileName, "koreanking_0000.png");
+  assert.equal(royalCartVisual.states.idle?.clips.s?.frames[0]?.fileName, "koreanking_0040.png");
+  assert.equal(royalCartVisual.states.move?.clips.s?.frames.length, 10);
+  assert.equal(royalCartVisual.states.move?.clips.s?.frames[0]?.fileName, "koreanking_0040.png");
+  assert.equal(royalCartVisual.states.move?.clips.s?.frames.at(-1)?.fileName, "koreanking_0049.png");
+  assert.equal(royalCartVisual.states.move?.clips.sw?.frames[0]?.fileName, "koreanking_0030.png");
+  assert.equal(royalCartVisual.states.move?.clips.sw?.mirrorX, true);
+  assert.equal(royalCartVisual.states.move?.clips.se?.frames.at(-1)?.fileName, "koreanking_0039.png");
 });
 
-test("default theme maps Korean building construction frames from source sprites", () => {
+test("default theme maps source-exported building construction frames", () => {
   const buildingExpectations = [
     {
       binding: "town-center",
@@ -105,6 +205,44 @@ test("default theme maps Korean building construction frames from source sprites
       frameCount: 24,
       idleFrame: "towerk_0008.png",
     },
+    {
+      binding: "japanese-camp-house",
+      manifestPath: "entities/japanese-camp-house/millj.manifest.json",
+      source: "original/imjinrok2/char/millj.spr",
+      frameCount: 36,
+      idleFrame: "millj_0008.png",
+    },
+    {
+      binding: "japanese-camp-barracks",
+      manifestPath: "entities/japanese-camp-barracks/barrackj.manifest.json",
+      source: "original/imjinrok2/char/barrackj.spr",
+      frameCount: 24,
+      idleFrame: "barrackj_0009.png",
+      completeFrame: "barrackj_0007.png",
+      constructionFrameCount: 8,
+    },
+    {
+      binding: "japanese-camp-tower",
+      manifestPath: "entities/japanese-camp-tower/towerj.manifest.json",
+      source: "original/imjinrok2/char/towerj.spr",
+      frameCount: 40,
+      idleFrame: "towerj_0008.png",
+    },
+    {
+      binding: "japanese-camp-firehouse",
+      manifestPath: "entities/japanese-camp-firehouse/firehousej.manifest.json",
+      source: "original/imjinrok2/char/firehousej.spr",
+      frameCount: 40,
+      idleFrame: "firehousej_0009.png",
+      completeFrame: "firehousej_0008.png",
+    },
+    {
+      binding: "japanese-camp-advanced-tower",
+      manifestPath: "entities/japanese-camp-advanced-tower/advtowerj.manifest.json",
+      source: "original/imjinrok2/char/advtowerj.spr",
+      frameCount: 10,
+      idleFrame: "advtowerj_0008.png",
+    },
   ] as const;
 
   for (const expectation of buildingExpectations) {
@@ -118,8 +256,28 @@ test("default theme maps Korean building construction frames from source sprites
     assert.equal(visual.states.idle?.clips.default?.frames[0]?.fileName, expectation.idleFrame);
     assert.equal(visual.states.construction?.clips.default?.frames.length, expectation.constructionFrameCount ?? 9);
     assert.equal(visual.states.construction?.clips.default?.frames[0]?.fileName.endsWith("_0000.png"), true);
-    assert.equal(visual.states.construction?.clips.default?.frames.at(-1)?.fileName, expectation.idleFrame);
+    assert.equal(visual.states.construction?.clips.default?.frames.at(-1)?.fileName, expectation.completeFrame ?? expectation.idleFrame);
   }
+});
+
+test("default theme animates Japanese camp building idle frames from source sprites", () => {
+  const houseVisual = defaultTheme.visuals[defaultTheme.entityBindings["japanese-camp-house"]] as EntityVisual;
+  const barracksVisual = defaultTheme.visuals[defaultTheme.entityBindings["japanese-camp-barracks"]] as EntityVisual;
+  const firehouseVisual = defaultTheme.visuals[defaultTheme.entityBindings["japanese-camp-firehouse"]] as EntityVisual;
+  const houseOverlay = houseVisual.layers?.find((layer) => layer.id === "idle-overlay");
+
+  assert.deepEqual(
+    houseOverlay?.states.idle?.clips.default?.frames.map((frame) => frame.fileName),
+    frameNames("millj", 9, 18),
+  );
+  assert.deepEqual(
+    barracksVisual.states.idle?.clips.default?.frames.map((frame) => frame.fileName),
+    frameNames("barrackj", 9, 17),
+  );
+  assert.deepEqual(
+    firehouseVisual.states.idle?.clips.default?.frames.map((frame) => frame.fileName),
+    frameNames("firehousej", 9, 19),
+  );
 });
 
 test("default theme models Korean barracks flag as an idle overlay layer", () => {
@@ -151,4 +309,12 @@ function readManifest(relativePath: string): {
     frameCount: number;
     exportedFrames: readonly unknown[];
   };
+}
+
+function frameNames(stem: string, from: number, to: number): string[] {
+  return Array.from({ length: to - from + 1 }, (_value, offset) => `${stem}_${String(from + offset).padStart(4, "0")}.png`);
+}
+
+function normalizeManifestSourcePath(source: string): string {
+  return source.replace(/^original\/imjinrok2\//, "").replaceAll("\\", "/").toLowerCase();
 }

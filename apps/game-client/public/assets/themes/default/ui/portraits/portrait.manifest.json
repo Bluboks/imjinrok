@@ -1,0 +1,25 @@
+{
+  "source": "original/imjinrok2/fnt/portrait.spr",
+  "layout": "spr",
+  "width": 68,
+  "height": 68,
+  "frameCount": 150,
+  "exportedFrames": [
+    {
+      "index": 1,
+      "fileName": "portrait_0001.png"
+    },
+    {
+      "index": 3,
+      "fileName": "portrait_0003.png"
+    },
+    {
+      "index": 30,
+      "fileName": "portrait_0030.png"
+    },
+    {
+      "index": 75,
+      "fileName": "portrait_0075.png"
+    }
+  ]
+}

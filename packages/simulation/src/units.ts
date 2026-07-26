@@ -6,3 +6,33 @@ export function iterateUnitsOrdered(state: WorldState): UnitState[] {
     .map((unitId) => state.units[unitId])
     .filter((unit): unit is UnitState => unit !== undefined);
 }
+
+export function removeUnitFromWorld(state: WorldState, unitId: string): boolean {
+  if (!state.units[unitId]) {
+    return false;
+  }
+
+  delete state.units[unitId];
+  clearUnitReferences(state, unitId);
+  return true;
+}
+
+function clearUnitReferences(state: WorldState, unitId: string): void {
+  for (const unit of iterateUnitsOrdered(state)) {
+    const order = unit.currentOrder;
+
+    if (
+      (order?.type === "attack-unit" && order.targetUnitId === unitId) ||
+      (order?.type === "repair" && order.targetUnitId === unitId) ||
+      (order?.type === "build" && order.buildingUnitId === unitId)
+    ) {
+      delete unit.movementTarget;
+      delete unit.movementPath;
+      delete unit.currentOrder;
+    }
+
+    if (unit.construction?.builderUnitId === unitId) {
+      delete unit.construction.builderUnitId;
+    }
+  }
+}

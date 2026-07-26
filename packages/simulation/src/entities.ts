@@ -8,7 +8,7 @@ function createPool(max: number): AttributePool {
   };
 }
 
-function createUnit(
+export function createUnitState(
   id: string,
   playerId: string,
   kind: UnitDefinitionId,
@@ -33,7 +33,7 @@ export function createPlayerUnits(
   startingUnits: readonly StartingUnitDefinition[],
 ): UnitState[] {
   return startingUnits.map((unit) =>
-    createUnit(`${playerId}-${unit.idSuffix}`, playerId, unit.kind, {
+    createUnitState(`${playerId}-${unit.idSuffix}`, playerId, unit.kind, {
       x: position.x + unit.offset.x,
       y: position.y + unit.offset.y,
     }),

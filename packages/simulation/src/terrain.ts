@@ -1,7 +1,7 @@
 import { getTileAt, terrainDefinitions, unitDefinitions, type GridPoint, type TerrainDefinition } from "../../shared/src/index.js";
 import { resourceBlocksMovement } from "./resources.js";
 import type { UnitState, WorldState } from "./types.js";
-import { iterateUnitsOrdered } from "./units.js";
+import { iterateUnitsOrdered, removeUnitFromWorld } from "./units.js";
 
 export function isTileFlooded(state: WorldState, point: GridPoint): boolean {
   if (!isPointInMap(state, point) || state.environment.weather !== "rain") {
@@ -42,7 +42,7 @@ export function resolveFloodDrowning(state: WorldState): void {
   }
 
   for (const unitId of drownedUnitIds) {
-    delete state.units[unitId];
+    removeUnitFromWorld(state, unitId);
   }
 }
 

@@ -1,0 +1,31 @@
+제목 		: 3. 군량을 확보하라.
+
+-------------------------------------스크립트----------------------------------
+[CHANGEMUSIC][music\briefmusicc.yav]
+[CHANGETITLE][ybriefingfnt\c01\c01.spr][SETDELAYTIME][500]
+
+[CHANGETITLE][ybriefingfnt\c01\c0101.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\c01\c0102.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\c01\c0103.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\c01\c0104.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\c01\c0105.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\c01\c0106.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\c01\c0107.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\c01\c0108.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\c01\c0109.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\c01\c0110.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\c01\c0111.spr][SETDELAYTIME][15]
+
+[TITLE][3. 군량을 확보하라.]
+[OBJECTIVE][1. 밤이 되기 전에 이여송은 군량을 찾아라. (이여송은 살아 남아야 한다.)][2. 적군을 섬멸하라.]
+
+[SETDELAYTIME][100]
+[SPEECH][C3][0][C03010][장군, 군량 문제가 심각합니다.]
+[SPEECH][C2][1][C03020][여진족을 정벌하고 급히 조선으로 온 터라 충분한 양의 군량을 가져 오지 못했습니다.]
+[SPEECH][C1][2][C03030][군량 없이 싸울 수는 없지 않은가? 조선은 무엇을 하고 있단 말인가? 도우러 온 우리에게 군량이라도 지원해야 하지 않느냔 말이다.]
+[SPEECH][C3][0][C03040][조선도 사정은 넉넉치 않지만 그래도 최선을 다해서 군량을 가져다 주고 있습니다. 그런데 왜군이 조선의 군량 수송을 막고 있어 여의치 않은 모양입니다.]
+[SPEECH][C2][1][C03050][약한 조선군에 의지하지 말고 우리가 직접 가서 가져와야 합니다.]
+[SPEECH][C3][0][C03060][시간을 지체하면 왜군이 군량을 가로채 갈 수도 있으니 서둘러야 합니다.]
+[SPEECH][C1][2][C03070][좋다. 내가 직접 가서 가져오도록 하겠다.]
+[NOEND]
+-------------------------------------스크립트----------------------------------

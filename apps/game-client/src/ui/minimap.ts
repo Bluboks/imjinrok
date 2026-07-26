@@ -1,9 +1,13 @@
 import Phaser from "phaser";
 import { factionDefinitions, getTileAt, resourceDefinitions, terrainDefinitions, unitDefinitions, type MapDefinition, type ResourceDefinition } from "@shared";
 import { TileVisibility } from "@simulation";
-import type { MinimapEntityView, MinimapPoint, MinimapViewportView, MinimapVisibilityView } from "../hud.js";
+import type { MinimapEntityView, MinimapPoint, MinimapResourceView, MinimapViewportView, MinimapVisibilityView } from "../hud.js";
 
 const RESOURCE_DEFINITIONS = resourceDefinitions as Readonly<Record<string, ResourceDefinition>>;
+const MINIMAP_FOG_ALPHA = {
+  explored: 115,
+  unexplored: 255,
+} as const;
 
 export interface MinimapGeometry {
   centerX: number;
@@ -168,37 +172,6 @@ export function drawMinimapTerrainCache(
     }
   }
 
-  const resourceRadius = Math.max(1.25, Math.min(3, tileHalfWidth * 2));
-  for (const layer of mapDefinition.layers) {
-    for (let tileIndex = 0; tileIndex < layer.tiles.length; tileIndex += 1) {
-      const resource = layer.tiles[tileIndex]?.resource;
-
-      if (!resource) {
-        continue;
-      }
-
-      const definition = RESOURCE_DEFINITIONS[resource.kind];
-
-      if (!definition) {
-        continue;
-      }
-
-      const point = gridToMinimap(
-        {
-          x: tileIndex % mapDefinition.width,
-          y: Math.floor(tileIndex / mapDefinition.width),
-        },
-        geometry,
-        mapDefinition,
-      );
-
-      graphics
-        .fillStyle(definition.placeholderVisual.minimapColor, 0.95)
-        .fillCircle(point.x, point.y, resourceRadius)
-        .lineStyle(1, definition.placeholderVisual.outlineColor, 0.8)
-        .strokeCircle(point.x, point.y, resourceRadius);
-    }
-  }
 }
 
 export function createMinimapFogTexture(
@@ -273,7 +246,11 @@ export function createMinimapFogTexture(
         }
 
         const tileVisibility = visibility.tiles[gy * visibility.width + gx] ?? TileVisibility.Unexplored;
-        data[alphaIndex] = tileVisibility === TileVisibility.Visible ? 0 : tileVisibility === TileVisibility.Explored ? 115 : 217;
+        data[alphaIndex] = tileVisibility === TileVisibility.Visible
+          ? 0
+          : tileVisibility === TileVisibility.Explored
+            ? MINIMAP_FOG_ALPHA.explored
+            : MINIMAP_FOG_ALPHA.unexplored;
       }
     }
 
@@ -308,4 +285,25 @@ export function drawMinimapEntityMarker(
   graphics.lineStyle(entity.selected ? 2 : 1, entity.selected ? 0xf4df8e : 0x071214, 1);
   if (unitDefinition.minimapShape === "square") graphics.strokeRect(marker.x - radius, marker.y - radius, radius * 2, radius * 2);
   else graphics.strokeCircle(marker.x, marker.y, radius + (entity.selected ? 1.8 : 1));
+}
+
+export function drawMinimapResourceMarker(
+  graphics: Phaser.GameObjects.Graphics,
+  resource: MinimapResourceView,
+  marker: Phaser.Geom.Point,
+): void {
+  const definition = RESOURCE_DEFINITIONS[resource.kind];
+
+  if (!definition) {
+    return;
+  }
+
+  const radius = resource.visible ? 2.4 : 2;
+  const alpha = resource.visible ? 0.95 : 0.6;
+
+  graphics
+    .fillStyle(definition.placeholderVisual.minimapColor, alpha)
+    .fillCircle(marker.x, marker.y, radius)
+    .lineStyle(1, definition.placeholderVisual.outlineColor, alpha * 0.85)
+    .strokeCircle(marker.x, marker.y, radius);
 }

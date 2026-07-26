@@ -1,0 +1,33 @@
+제목 		: 5. 난공불락의 성- 2차 진주성 전투
+
+-------------------------------------스크립트----------------------------------
+[CHANGEMUSIC][music\briefmusicj.yav]
+[CHANGETITLE][ybriefingfnt\j01\j01.spr][SETDELAYTIME][500]
+
+[CHANGETITLE][ybriefingfnt\j01\j0101.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\j01\j0102.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\j01\j0103.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\j01\j0104.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\j01\j0105.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\j01\j0106.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\j01\j0107.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\j01\j0108.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\j01\j0109.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\j01\j0110.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\j01\j0111.spr][SETDELAYTIME][15]
+
+[TITLE][5. 2차 진주성 전투]
+[OBJECTIVE][1. 진주성을 함락하라. (생존자가 있어서는 안된다.)][]
+
+[SETDELAYTIME][100]
+[SPEECH][J5][0][J05010][비록 명을 벽제관에서 패퇴시키긴 했지만 우리도 상황이 좋지는 않소. 주군께서 남부지역으로 퇴각해도 좋다고 하셨소.]
+[SPEECH][J4][1][J05020][현재로서는 다른 대안이 없습니다. 날씨는 춥고 보급은 제대로 이루어지지 않아 병사들의 고통이 이만저만한 것이 아닙니다. ]
+[SPEECH][J1][2][J05030][그러나 조선과 명을 등지고 무조건 물러나는 것도 위험스러운 일입니다. 그들이 언제 우리 뒤를 칠지 모르지 않습니까?]
+[SPEECH][J5][0][J05040][좋은 지적이오. 그래서 철수하는 부대를 총동원하여 진주성을 공격할 생각이오.]
+[SPEECH][J2][3][J05050][그러나 진주성은 전쟁 초에 공격을 시도했다가 실패하지 않았습니까?]
+[SPEECH][J5][0][J05060][그래서 더욱 더 진주성을 공격해야 할 것이오. 우리가 진주성을 함락한다면 적은 우리의 군세를 얕보지 못할 것이고 전에 패한 설욕도 할 수 있을 것이오. ]
+[SPEECH][J4][1][J05070][맞습니다. 조선과 명이, 감히 원군을 보낼 엄두도 내지 못할 군세를 과시하며, 단숨에 성을 떨구어야 합니다.]
+[SPEECH][J5][0][J05080][그렇소. 자, 모두 출군 할 채비를 서두르시오. 조선과 명이 움직이기 전에 진주성을 함락시켜야 하오.]
+[NOEND]
+
+-------------------------------------스크립트----------------------------------

@@ -14,7 +14,20 @@
     "build:editor": "vite build --config apps/map-editor/vite.config.ts",
     "build:server": "tsc -p apps/server/tsconfig.json",
     "typecheck": "tsc -p apps/game-client/tsconfig.json --noEmit && tsc -p apps/map-editor/tsconfig.json --noEmit && tsc -p apps/server/tsconfig.json --noEmit",
-    "test": "node --import tsx --test \"packages/**/*.test.ts\""
+    "test": "node --import tsx --test \"packages/**/*.test.ts\" \"apps/**/*.test.ts\" \"tools/**/*.test.mjs\"",
+    "imjinrok:inventory": "node tools/imjinrok/asset-inventory.mjs",
+    "imjinrok:convert-sprites": "node tools/imjinrok/convert-sprites.mjs",
+    "imjinrok:convert-audio": "node tools/imjinrok/convert-audio.mjs",
+    "imjinrok:inspect-scripts": "node tools/imjinrok/inspect-scripts.mjs",
+    "imjinrok:inspect-maps": "node tools/imjinrok/inspect-maps.mjs",
+    "imjinrok:inspect-map-records": "node tools/imjinrok/inspect-map-records.mjs",
+    "imjinrok:export-map": "node tools/imjinrok/export-map-definition.mjs",
+    "imjinrok:extract-terrain-mask": "node tools/imjinrok/extract-map-terrain-mask.mjs",
+    "imjinrok:extract-mission-portraits": "node tools/imjinrok/extract-mission-portrait-mapping.mjs --json",
+    "imjinrok:audit-sprite-mappings": "node --import tsx tools/imjinrok/audit-sprite-mappings.mjs",
+    "imjinrok:setup-static-analysis": "bash tools/imjinrok/setup-static-analysis.sh",
+    "imjinrok:analyze-exe": "bash tools/imjinrok/run-static-analysis.sh",
+    "imjinrok:verify-static-analysis": "node tools/imjinrok/validate-static-analysis.mjs"
   },
   "dependencies": {
     "@fastify/cors": "^11.0.0",

@@ -1,0 +1,23 @@
+제목 		: 8. 전쟁의 끝
+
+-------------------------------------스크립트----------------------------------
+[CHANGEMUSIC][music\briefmusic.yav]
+[CHANGETITLE][ybriefingfnt\J01\J01.spr][SETDELAYTIME][500]
+
+[CHANGETITLE][ybriefingfnt\J01\J0101.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\J01\J0102.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\J01\J0103.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\J01\J0104.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\J01\J0105.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\J01\J0106.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\J01\J0107.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\J01\J0108.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\J01\J0109.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\J01\J0110.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\J01\J0111.spr][SETDELAYTIME][15]
+
+[SETDELAYTIME][100]
+
+[NARATION][SCRIPT\EFT\08170.WAV][7년간의 전쟁은 이로서 끝이 났다. 전쟁 후 도쿠가와 이에야스가 주변의 모든 영주들을 제압하고 전 국토를 통일하였다. 기나긴 전쟁을 통해 그 허무함을 느낀 도쿠가와 이에야스는 일본의 문화발전이 자신의 나라를 강하게 만드는 것이라 생각하였다. 그는 조선에 전쟁에 대한 사과와 함께 다시 통신사를 요구하여 조선의 앞선 문물을 배우고자 노력하였으며, 조선에서 납치해간 도공들과 유생들의 지위를 높여 일본인들로 하여금 그들을 따르게 했다. ]
+
+-------------------------------------스크립트----------------------------------

@@ -1,0 +1,33 @@
+제목 		: 6. 직산 전투
+
+-------------------------------------스크립트----------------------------------
+[CHANGEMUSIC][music\briefmusicc.yav]
+[CHANGETITLE][ybriefingfnt\c01\c01.spr][SETDELAYTIME][500]
+
+[CHANGETITLE][ybriefingfnt\c01\c0101.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\c01\c0102.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\c01\c0103.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\c01\c0104.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\c01\c0105.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\c01\c0106.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\c01\c0107.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\c01\c0108.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\c01\c0109.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\c01\c0110.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\c01\c0111.spr][SETDELAYTIME][15]
+
+[TITLE][6. 직산 전투]
+[OBJECTIVE][1. 적군을 섬멸하라.][]
+
+[SETDELAYTIME][100]
+[SPEECH][C1][0][C06010][왜와의 강화가 끝내 무산되었다. 이제 힘으로 몰아내는 수 밖에는 없다.]
+[SPEECH][C3][1][C06020][일단 우리 명의 힘을 보여주어야 왜가 다시 강화에 응할 것입니다.]
+[SPEECH][C2][2][C06030][단숨에 기선을 제압하기 위해서는 지체할 것 없이 서둘러 왜군을 공격하는 것이 좋겠습니다.]
+[SPEECH][C1][0][C06040][그 말이 옳다. 지금 왜군은 어디에 진을 치고 있느냐?]
+[SPEECH][C3][1][C06050][우리 진영의 남쪽 강 건너편에 진을 치고 있습니다만 지금까지 별다른 움직임을 보이고 있지 않습니다.]
+[SPEECH][C1][0][C06060][강을 마주보고 있다면 병력을 보내기가 쉽지 않겠군.]
+[SPEECH][C3][1][C06070][강건너에 진영을 하나 새로 만들어서 그곳을 근거지로 삼아 적을 공격하는 것이 좋을 것입니다. ]
+[SPEECH][C2][2][C06080][좋은 생각입니다.]
+[SPEECH][C1][0][C06090][좋다. 서둘러 강을 건너 진영을 건설하고 왜군을 쓸어버려라.]
+[NOEND]
+-------------------------------------스크립트----------------------------------

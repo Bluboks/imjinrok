@@ -46,6 +46,20 @@ test("pathfinding crosses shallowWater barrier in clear weather but not rain", (
   assert.equal(findPathForUnit(rainState, rainUnit, { x: 8, y: 5 }), null);
 });
 
+test("pathfinding picks a reachable fallback when a blocked target borders an unreachable candidate first", () => {
+  const map = createBarrierMap("water");
+  const state = createInitialWorldState(map, ["p1"]);
+  keepOnlyUnit(state, "p1-villager-1");
+  const unit = state.units["p1-villager-1"]!;
+
+  unit.position = { x: 2, y: 5 };
+
+  const path = findPathForUnit(state, unit, { x: 5, y: 5 });
+
+  assert.ok(path);
+  assert.deepEqual(path.at(-1), { x: 4, y: 5 });
+});
+
 test("mobile units standing on flooded shallowWater drown on tick", () => {
   const map = createBlankMap({ width: 10, height: 10 });
   map.environment = { weather: "rain" };

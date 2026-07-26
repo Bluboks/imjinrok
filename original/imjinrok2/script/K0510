@@ -1,0 +1,47 @@
+제목 		: 5. 영웅의 등장 - 한산대첩
+화일 		: K0510
+성격		: 해전, 적의 수군을 유인하고 적군 섬멸
+
+장소		: 조선 수군의 막사
+등장인물	: 이순신, 원균
+
+		   PORT
+이순신		:   0번
+원균		:   1번
+
+-------------------------------------스크립트----------------------------------
+
+[CHANGEMUSIC][music\briefmusic.yav]
+[CHANGETITLE][ybriefingfnt\k01\k01.spr][SETDELAYTIME][500]
+
+[CHANGETITLE][ybriefingfnt\K01\k0101.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\K01\k0102.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\K01\k0103.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\K01\k0104.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\K01\k0105.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\K01\k0106.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\K01\k0107.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\K01\k0108.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\K01\k0109.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\K01\k0110.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\K01\k0111.spr][SETDELAYTIME][15]
+
+[TITLE][5. 한산대첩]
+[OBJECTIVE][1. 이순신은 봉화대가 있는 지점까지 퇴각한다. (이순신은 살아 남아야 한다.)][2. 적군 섬멸]
+
+[SETDELAYTIME][100]
+[SPEECH][K2][0][K05010][그동안 우리 수군은 열심히 싸웠으나 적의 기세를 꺽기에는 부족한 것 같소. 한시라도 빨리 적의 보급로를 끊어 더 이상의 진격을 막아야 하오.]
+[SPEECH][K5][1][K05020][그러나 어떻게 적의 보급을 끊는단 말씀입니까?]
+[SPEECH][K2][0][K05030][적 수군의 대부대가 견내량에 정박한 채 출진 준비를 하고 있다는 전갈이 왔소. 아마 그들은 남해에서 우리를 몰아내고 전라도를 돌아 한성으로 가는 뱃길을 확보하려 들것이오. 이들을 격파한다면 적의 보급은 큰 차질을 빚게 될 것이오.]
+[SPEECH][K4][2][K05040][그렇다면 견내량을 공격할 계획이십니까?]
+[SPEECH][K2][0][K05050][아니오. 견내량은 폭이 좁고 암초가 많아 싸우기가 힘든 곳이오. 따라서 우리는 먼저 적을 넓은 바다로 유인하여야 할 것이외다. 내가 먼저 견내량으로 가서 적을 유인하여 넓은 바다로 나와 격퇴할 것이오. 두 분 의병장께서는 육지에 상륙하여 적의 잔당을 몰아내주시오.]
+[SPEECH][K5][1][K05060][좋은 생각이옵니다. 그럼 바로 출전 준비를 하겠습니다.]
+[SPEECH][K2][0][K05070][조심하도록 하시오. 만약 이번에 우리가 패한다면 왜군의 진격을 막을 방법이 없소.]
+[SPEECH][K4][2][K05080][명심하겠습니다.]
+
+[SETDELAYTIME][100]
+[NARATION][Script\eft\K05090.yav]
+[한산섬 달 밝은 밤에 수루에 홀로 앉아 큰 칼 옆에 차고 깊은 시름하던 차에 어디서 일성호가는 남의 애를 끊나니                               <난중일기 중>]
+[NOEND]
+
+-------------------------------------스크립트----------------------------------

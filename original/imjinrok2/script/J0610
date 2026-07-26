@@ -1,0 +1,39 @@
+제목 		: 6. 불타는 바다- 칠천량 해전
+
+-------------------------------------스크립트----------------------------------
+[CHANGEMUSIC][music\briefmusicj.yav]
+[CHANGETITLE][ybriefingfnt\j01\j01.spr][SETDELAYTIME][500]
+
+[CHANGETITLE][ybriefingfnt\j01\j0101.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\j01\j0102.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\j01\j0103.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\j01\j0104.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\j01\j0105.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\j01\j0106.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\j01\j0107.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\j01\j0108.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\j01\j0109.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\j01\j0110.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\j01\j0111.spr][SETDELAYTIME][15]
+
+[TITLE][6. 칠천량해전]
+[OBJECTIVE][1. 닌자를 이용하여 적의 기지를 점령하라.][2. 적군 섬멸]
+
+[SETDELAYTIME][100]
+[NARATION][Script\eft\j06010.yav][일본과 명은 강화를 추진하여 결국 전쟁을 끝내고 철수한다. 그러나 거짓으로 맺어진 강화회담은 곧 들통나고 토요토미는 다시 병력을 한반도로 보내 전쟁을 시작한다. 정유재란이 시작된 것이다.]
+[SPEECH][J3][0][j06020][조선의 수군이 이곳으로 오고 있습니다.]
+[SPEECH][J5][1][J06030][무엇이? 이순신이 온단 말이오?]
+[SPEECH][J3][0][J06040][아닙니다. 보고에 의하면 이순신은 파직되고 원균이 후임으로 수군 사령관이 되었는데, 지금 조정의 명령을 받고 우리를 공격하러 오는 중이라 합니다. ]
+[SPEECH][J4][2][J06070][우리의 계획대로 이순신이 제거된 모양입니다.]
+[SPEECH][J5][1][J06080][적에게는 이순신이 없고, 직접 이곳으로 오기까지 한다니 좋은 기회가 아니오?]
+[SPEECH][J3][0][J06090][그러나 얕보아서는 안됩니다. 적의 거북선과 판옥선은 여전히 위협적입니다. 우리가 지닌 전선으로는 당해낼 수 없습니다.]
+[SPEECH][J5][1][J06100][그렇다고 이 좋은 기회를 놓칠 수야 없지 않소?]
+[SPEECH][J4][2][J06110][제게 좋은 계책이 있습니다.]
+[SPEECH][J5][1][J06120][그것이 무엇이오?]
+[SPEECH][J4][2][J06130][이곳 칠천량에서 조선 수군과 대치하고 있는 사이에 제가 조선 진영의 후방에 침투한 후 닌자들을 불러 적의 건물들을 탈취하겠습니다.]
+[SPEECH][J5][1][J06140][적의 후방을 교란시킬 생각이오?]
+[SPEECH][J4][2][J06150][예, 그렇습니다.]
+[SPEECH][J5][1][J06160][좋은 생각이오. 닌자들은 대기시켜 놓을테니 수송기를 사용하여 적의 후방에 침투하시오. 나머지 장수들은 나와 함께 적의 공격을 막아내며 장군이 성공하기를 기다렸다가 앞뒤에서 조선을 공격한다면 승리할 수 있을 것이오.]
+[NOEND]
+
+-------------------------------------스크립트----------------------------------

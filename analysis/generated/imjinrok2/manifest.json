@@ -1,0 +1,84 @@
+{
+  "schemaVersion": 2,
+  "exporter": "ExportImjinrokAnalysis.java",
+  "ghidraVersion": "12.1.2",
+  "sourceId": "original/imjinrok2/imjinrok2.exe",
+  "sourceSha256": "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e",
+  "sourceSize": 843833,
+  "programName": "imjinrok2.exe",
+  "executableFormat": "Portable Executable (PE)",
+  "languageId": "x86:LE:32:default",
+  "compilerSpecId": "windows",
+  "imageBase": "0x00400000",
+  "minimumAddress": "0x00400000",
+  "maximumAddress": "0xffdfffff",
+  "functionCount": 2448,
+  "stringCount": 1545,
+  "referenceCount": 57572,
+  "computedJumpCount": 268,
+  "jumpTableCount": 234,
+  "seedCount": 25,
+  "seedFunctionCount": 24,
+  "memoryBlocks": [
+    {
+      "name": "Headers",
+      "start": "0x00400000",
+      "end": "0x00400fff",
+      "size": 4096,
+      "read": true,
+      "write": false,
+      "execute": false,
+      "initialized": true
+    },
+    {
+      "name": ".text",
+      "start": "0x00401000",
+      "end": "0x004b6fff",
+      "size": 745472,
+      "read": true,
+      "write": false,
+      "execute": true,
+      "initialized": true
+    },
+    {
+      "name": ".rdata",
+      "start": "0x004b7000",
+      "end": "0x004b9fff",
+      "size": 12288,
+      "read": true,
+      "write": false,
+      "execute": false,
+      "initialized": true
+    },
+    {
+      "name": ".data",
+      "start": "0x004ba000",
+      "end": "0x00cdb337",
+      "size": 8524600,
+      "read": true,
+      "write": true,
+      "execute": false,
+      "initialized": true
+    },
+    {
+      "name": ".rsrc",
+      "start": "0x00cdc000",
+      "end": "0x00cdefff",
+      "size": 12288,
+      "read": true,
+      "write": false,
+      "execute": false,
+      "initialized": true
+    },
+    {
+      "name": "tdb",
+      "start": "0xffdff000",
+      "end": "0xffdfffff",
+      "size": 4096,
+      "read": true,
+      "write": true,
+      "execute": false,
+      "initialized": true
+    }
+  ]
+}

@@ -1,5 +1,5 @@
-import { unitDefinitions, type ActionDefinitionId, type FactionId, type GridPoint, type MapDefinition, type UnitDefinitionId } from "@shared";
-import type { PlayerVisibilityState, UnitState } from "@simulation";
+import { unitDefinitions, type ActionDefinitionId, type DayPhase, type FactionId, type GridPoint, type MapDefinition, type ResearchDefinitionId, type ResourceAmountSet, type UnitDefinitionId, type WeatherKind } from "@shared";
+import type { CarriedResourceState, ConstructionState, PlayerPopulationState, PlayerVisibilityState, ProductionQueueItemState, RallyPointState, ResearchQueueItemState, UnitOrderState, UnitState } from "@simulation";
 
 export const SELECTED_ENTITY_CHANGED_EVENT = "selected-entity:changed";
 export const SELECTED_ENTITY_REGISTRY_KEY = "selected-entity";
@@ -14,8 +14,19 @@ export const MINIMAP_VIEWPORT_CHANGED_EVENT = "minimap:viewport-changed";
 export const MINIMAP_VIEWPORT_REGISTRY_KEY = "minimap-viewport";
 export const MINIMAP_ENTITIES_CHANGED_EVENT = "minimap:entities-changed";
 export const MINIMAP_ENTITIES_REGISTRY_KEY = "minimap-entities";
+export const MINIMAP_RESOURCES_CHANGED_EVENT = "minimap:resources-changed";
+export const MINIMAP_RESOURCES_REGISTRY_KEY = "minimap-resources";
 export const MINIMAP_VISIBILITY_CHANGED_EVENT = "minimap:visibility-changed";
 export const MINIMAP_VISIBILITY_REGISTRY_KEY = "minimap-visibility";
+export const MINIMAP_ALERT_EVENT = "minimap:alert";
+export const PLAYER_ECONOMY_CHANGED_EVENT = "player-economy:changed";
+export const PLAYER_ECONOMY_REGISTRY_KEY = "player-economy";
+export const BATTLEFIELD_SUMMARY_CHANGED_EVENT = "battlefield-summary:changed";
+export const BATTLEFIELD_SUMMARY_REGISTRY_KEY = "battlefield-summary";
+export const BATTLEFIELD_SUMMARY_ACTION_EVENT = "battlefield-summary:action";
+export const GAME_PLAYBACK_CHANGED_EVENT = "game-playback:changed";
+export const GAME_PLAYBACK_REGISTRY_KEY = "game-playback";
+export const GAME_PLAYBACK_CONTROL_EVENT = "game-playback:control";
 
 export interface SelectedEntityView {
   id: string;
@@ -29,7 +40,93 @@ export interface SelectedEntityView {
   maxMana: number;
   movementSpeed: number;
   movementTarget?: GridPoint;
+  currentOrder?: UnitOrderView;
+  productionQueue?: ProductionQueueItemView[];
+  researchQueue?: ResearchQueueItemView[];
+  construction?: ConstructionView;
+  carriedResource?: CarriedResourceView;
+  rallyPoint?: RallyPointView;
 }
+
+export interface ProductionQueueItemView {
+  id: string;
+  unit: ProductionQueueItemState["unit"];
+  remainingTicks: number;
+  totalTicks: number;
+}
+
+export interface ResearchQueueItemView {
+  id: string;
+  research: ResearchQueueItemState["research"];
+  remainingTicks: number;
+  totalTicks: number;
+}
+
+export interface CarriedResourceView {
+  kind: CarriedResourceState["kind"];
+  amount: number;
+}
+
+export interface ConstructionView {
+  remainingTicks: ConstructionState["remainingTicks"];
+  totalTicks: ConstructionState["totalTicks"];
+}
+
+export interface RallyPointView {
+  target: RallyPointState["target"];
+  mode?: RallyPointState["mode"];
+  resourceId?: string;
+}
+
+export type UnitOrderView = UnitOrderState;
+
+export interface PlayerEconomyView {
+  playerId: string;
+  resources: ResourceAmountSet;
+  population: PlayerPopulationState;
+  research: {
+    completed: ResearchDefinitionId[];
+    pending: ResearchDefinitionId[];
+  };
+}
+
+export interface BattlefieldSideSummaryView {
+  units: number;
+  workers: number;
+  idleWorkers: number;
+  fighters: number;
+  buildings: number;
+}
+
+export interface BattlefieldEnvironmentView {
+  weather: WeatherKind;
+  dayPhase: DayPhase;
+  timeOfDay01: number;
+}
+
+export interface BattlefieldSummaryView {
+  playerId: string;
+  local: BattlefieldSideSummaryView;
+  visibleEnemy: BattlefieldSideSummaryView;
+  environment: BattlefieldEnvironmentView;
+}
+
+export interface BattlefieldSummaryActionView {
+  type: "select-idle-worker";
+}
+
+export interface GamePlaybackView {
+  paused: boolean;
+  speed: number;
+  controllable: boolean;
+  audioMuted: boolean;
+}
+
+export interface GamePlaybackControlView {
+  type: "toggle-audio" | "toggle-pause" | "speed-down" | "speed-up";
+}
+
+export type ActionTriggerSource = "button" | "hotkey";
 
 export type SelectedEntitiesView = SelectedEntityView[];
 
@@ -42,6 +139,7 @@ export interface VirtualCursorView {
 export interface ActionTriggeredView {
   actionId: ActionDefinitionId;
   selectedEntityIds: string[];
+  source: ActionTriggerSource;
 }
 
 export interface DragSelectionView {
@@ -70,6 +168,13 @@ export interface MinimapEntityView {
   selected: boolean;
 }
 
+export interface MinimapResourceView {
+  id: string;
+  kind: string;
+  position: GridPoint;
+  visible: boolean;
+}
+
 export interface MinimapMapView {
   map: MapDefinition;
   worldBounds: MinimapBounds;
@@ -85,7 +190,18 @@ export interface MinimapEntitiesView {
   entities: MinimapEntityView[];
 }
 
+export interface MinimapResourcesView {
+  resources: MinimapResourceView[];
+}
+
 export type MinimapVisibilityView = PlayerVisibilityState;
+
+export interface MinimapAlertView {
+  id: string;
+  kind: "under-attack";
+  severity: "normal" | "critical";
+  position: GridPoint;
+}
 
 function getUnitLabel(kind: UnitDefinitionId): string {
   return unitDefinitions[kind].displayName;
@@ -107,6 +223,37 @@ export function toSelectedEntityView(unit: UnitState): SelectedEntityView {
 
   if (unit.movementTarget) {
     view.movementTarget = { ...unit.movementTarget };
+  }
+
+  if (unit.currentOrder) {
+    view.currentOrder = structuredClone(unit.currentOrder);
+  }
+
+  if (unit.productionQueue && unit.productionQueue.length > 0) {
+    view.productionQueue = unit.productionQueue.map((item) => ({ ...item }));
+  }
+
+  if (unit.researchQueue && unit.researchQueue.length > 0) {
+    view.researchQueue = unit.researchQueue.map((item) => ({ ...item }));
+  }
+
+  if (unit.construction) {
+    view.construction = {
+      remainingTicks: unit.construction.remainingTicks,
+      totalTicks: unit.construction.totalTicks,
+    };
+  }
+
+  if (unit.carriedResource && unit.carriedResource.amount > 0) {
+    view.carriedResource = { ...unit.carriedResource };
+  }
+
+  if (unit.rallyPoint) {
+    view.rallyPoint = {
+      target: { ...unit.rallyPoint.target },
+      ...(unit.rallyPoint.mode ? { mode: unit.rallyPoint.mode } : {}),
+      ...(unit.rallyPoint.resourceId ? { resourceId: unit.rallyPoint.resourceId } : {}),
+    };
   }
 
   return view;

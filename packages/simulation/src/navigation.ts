@@ -23,8 +23,18 @@ const NEIGHBORS: readonly GridPoint[] = [
 
 const MAX_PATHFINDING_ITERATIONS = 100_000;
 const MAX_GOAL_SEARCH_NODES = 8_192;
+const MAX_GOAL_CANDIDATES = 64;
 
-export function findPathForUnit(state: WorldState, unit: UnitState, target: GridPoint): GridPoint[] | null {
+export interface FindPathOptions {
+  allowPartial?: boolean;
+}
+
+export function findPathForUnit(
+  state: WorldState,
+  unit: UnitState,
+  target: GridPoint,
+  options: FindPathOptions = {},
+): GridPoint[] | null {
   const start = toTilePoint(unit.position);
   const requestedGoal = toTilePoint(target);
   const blockedTiles = getStaticBlockingTiles(state);
@@ -32,15 +42,30 @@ export function findPathForUnit(state: WorldState, unit: UnitState, target: Grid
 
   blockedTiles.delete(startKey);
 
-  const goal = resolveWalkableGoal(state, unit, requestedGoal, blockedTiles);
+  const goals = resolveWalkableGoals(state, unit, requestedGoal, blockedTiles);
 
-  if (!goal) {
+  if (goals.length === 0) {
     return null;
   }
 
-  const goalKey = toTileKey(goal);
+  return findPathToAnyGoal(state, unit, start, goals, blockedTiles, requestedGoal, options);
+}
 
-  if (startKey === goalKey) {
+function findPathToAnyGoal(
+  state: WorldState,
+  unit: UnitState,
+  start: GridPoint,
+  goals: readonly GridPoint[],
+  blockedTiles: ReadonlySet<string>,
+  requestedGoal: GridPoint,
+  options: FindPathOptions,
+): GridPoint[] | null {
+  const startKey = toTileKey(start);
+  const goalKeys = new Set(goals.map(toTileKey));
+  let closestReachableKey = startKey;
+  let closestReachableScore = heuristic(start, requestedGoal);
+
+  if (goalKeys.has(startKey)) {
     return [];
   }
 
@@ -49,7 +74,7 @@ export function findPathForUnit(state: WorldState, unit: UnitState, target: Grid
   const cameFrom = new Map<string, string>();
   const pointsByKey = new Map<string, GridPoint>([[startKey, start]]);
   const gScore = new Map<string, number>([[startKey, 0]]);
-  const fScore = new Map<string, number>([[startKey, heuristic(start, goal)]]);
+  const fScore = new Map<string, number>([[startKey, goalHeuristic(start, goals, requestedGoal)]]);
   let iterations = 0;
 
   while (openSet.length > 0 && iterations < MAX_PATHFINDING_ITERATIONS) {
@@ -64,8 +89,15 @@ export function findPathForUnit(state: WorldState, unit: UnitState, target: Grid
     const currentKey = toTileKey(current);
     openKeys.delete(currentKey);
 
-    if (currentKey === goalKey) {
+    if (goalKeys.has(currentKey)) {
       return reconstructPath(cameFrom, pointsByKey, currentKey);
+    }
+
+    const currentScore = heuristic(current, requestedGoal);
+
+    if (currentScore < closestReachableScore) {
+      closestReachableKey = currentKey;
+      closestReachableScore = currentScore;
     }
 
     for (const neighborOffset of NEIGHBORS) {
@@ -90,13 +122,17 @@ export function findPathForUnit(state: WorldState, unit: UnitState, target: Grid
       cameFrom.set(neighborKey, currentKey);
       pointsByKey.set(neighborKey, neighbor);
       gScore.set(neighborKey, tentativeGScore);
-      fScore.set(neighborKey, tentativeGScore + heuristic(neighbor, goal));
+      fScore.set(neighborKey, tentativeGScore + goalHeuristic(neighbor, goals, requestedGoal));
 
       if (!openKeys.has(neighborKey)) {
         openSet.push(neighbor);
         openKeys.add(neighborKey);
       }
     }
+  }
+
+  if (options.allowPartial === true && closestReachableKey !== startKey) {
+    return reconstructPath(cameFrom, pointsByKey, closestReachableKey);
   }
 
   return null;
@@ -132,15 +168,22 @@ function getStaticBlockingTiles(state: WorldState): Set<string> {
   return blockedTiles;
 }
 
-function resolveWalkableGoal(state: WorldState, unit: UnitState, requestedGoal: GridPoint, blockedTiles: ReadonlySet<string>): GridPoint | null {
+function resolveWalkableGoals(
+  state: WorldState,
+  unit: UnitState,
+  requestedGoal: GridPoint,
+  blockedTiles: ReadonlySet<string>,
+): GridPoint[] {
   if (isWalkable(state, unit, requestedGoal, blockedTiles)) {
-    return requestedGoal;
+    return [requestedGoal];
   }
 
+  const goals: GridPoint[] = [];
   const queue = [requestedGoal];
   const visited = new Set([toTileKey(requestedGoal)]);
+  const canTraverseBlockedTile = createBlockedGoalTraversal(state, requestedGoal, blockedTiles);
 
-  while (queue.length > 0 && visited.size < MAX_GOAL_SEARCH_NODES) {
+  while (queue.length > 0 && visited.size < MAX_GOAL_SEARCH_NODES && goals.length < MAX_GOAL_CANDIDATES) {
     const current = queue.shift();
 
     if (!current) {
@@ -160,16 +203,40 @@ function resolveWalkableGoal(state: WorldState, unit: UnitState, requestedGoal: 
         continue;
       }
 
+      visited.add(neighborKey);
+
       if (isWalkable(state, unit, neighbor, blockedTiles)) {
-        return neighbor;
+        goals.push(neighbor);
+        continue;
       }
 
-      visited.add(neighborKey);
-      queue.push(neighbor);
+      if (canTraverseBlockedTile(neighbor)) {
+        queue.push(neighbor);
+      }
     }
   }
 
-  return null;
+  return goals;
+}
+
+function createBlockedGoalTraversal(
+  state: WorldState,
+  requestedGoal: GridPoint,
+  blockedTiles: ReadonlySet<string>,
+): (point: GridPoint) => boolean {
+  const requestedKey = toTileKey(requestedGoal);
+
+  if (blockedTiles.has(requestedKey)) {
+    return (point) => blockedTiles.has(toTileKey(point));
+  }
+
+  const requestedTile = getTileAt(state.map, requestedGoal.x, requestedGoal.y);
+
+  if (terrainDefinitions[requestedTile.terrain].blocksMovement) {
+    return (point) => getTileAt(state.map, point.x, point.y).terrain === requestedTile.terrain;
+  }
+
+  return () => false;
 }
 
 function isWalkable(state: WorldState, unit: UnitState, point: GridPoint, blockedTiles: ReadonlySet<string>): boolean {
@@ -244,6 +311,16 @@ function isPointInMap(map: MapDefinition, point: GridPoint): boolean {
 
 function heuristic(from: GridPoint, to: GridPoint): number {
   return Math.hypot(to.x - from.x, to.y - from.y);
+}
+
+function goalHeuristic(from: GridPoint, goals: readonly GridPoint[], fallback: GridPoint): number {
+  let best = heuristic(from, fallback);
+
+  for (const goal of goals) {
+    best = Math.min(best, heuristic(from, goal));
+  }
+
+  return best;
 }
 
 function toTileKey(point: GridPoint): string {

@@ -1,0 +1,40 @@
+제목 		: 3. 조선의 바다-옥포해전
+화일 		: K0310
+
+장소		: 전장(게임화면)
+성격		: 해전, 원균을 찾고 적군을 섬멸
+등장인물 	: 유성룡, 이순신
+
+                  초상화위치
+유성룡		:  0번
+이순신		:  1번
+
+-------------------------------------스크립트----------------------------------
+
+[CHANGEMUSIC][music\briefmusic.yav]
+[CHANGETITLE][ybriefingfnt\k01\k01.spr][SETDELAYTIME][500]
+
+[CHANGETITLE][ybriefingfnt\K01\k0101.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\K01\k0102.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\K01\k0103.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\K01\k0104.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\K01\k0105.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\K01\k0106.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\K01\k0107.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\K01\k0108.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\K01\k0109.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\K01\k0110.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\K01\k0111.spr][SETDELAYTIME][15]
+
+[TITLE][3. 바다에서의 승리]
+[OBJECTIVE][1. 경상수군의 본영까지 이순신을 보낸다. (이순신은 살아 남아야 한다.)][2. 적군 섬멸]
+
+[SETDELAYTIME][100]
+[SPEECH][K3][0][K03010][이장군, 경상도 수군이 왜의 집중적인 공격으로 위기에 처해 있다고 하오. 한시라도 빨리 전열을 정비하여 경상도로 출동하도록 하시오. ]
+[SPEECH][K2][1][K03020][지금 출동준비를 완료해 놓고 조정의 명령만을 기다리고 있었사옵니다.]
+[SPEECH][K3][0][K03030][왜군은 벌써 한성을 점령했소. 그러나 전하께옵서는 명나라의 원군만을 기다리며 피난을 서두르시니, 이 나라의 백성이자 녹봉을 받는 신하로서 부끄럽기 그지 없소. 이장군이 적의 기세를 꺾어 주기 바라오.]
+[SPEECH][K2][1][K03040][예, 소신 목숨을 바칠 각오가 되어 있사옵니다. 왜군이 조선의 바다에 더이상 발붙일 수 없도록 하겠사옵니다.]
+[SPEECH][K3][0][K03050][그대만 믿겠소.]
+[NOEND]
+
+-------------------------------------스크립트----------------------------------

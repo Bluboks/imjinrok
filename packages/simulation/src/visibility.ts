@@ -1,4 +1,5 @@
 import { getTileIndex, unitDefinitions, type GridPoint, type MapDefinition } from "../../shared/src/index.js";
+import { isUnitUnderConstruction } from "./construction.js";
 import { getEnvironmentSightMultiplier } from "./environment.js";
 import type { WorldState } from "./types.js";
 import { iterateUnitsOrdered } from "./units.js";
@@ -70,7 +71,7 @@ export function updatePlayerVisibilityWithChanges(
   const sightMultiplier = getEnvironmentSightMultiplier(state.environment, state.map.environment);
 
   for (const unit of iterateUnitsOrdered(state)) {
-    if (unit.playerId !== playerId) {
+    if (unit.playerId !== playerId || isUnitUnderConstruction(unit)) {
       continue;
     }
 
@@ -103,6 +104,10 @@ export function getTileVisibility(visibility: PlayerVisibilityState, point: Grid
   }
 
   return visibility.tiles[getTileIndex(visibility.width, tile.x, tile.y)] ?? TileVisibility.Unexplored;
+}
+
+export function areTilesVisible(visibility: PlayerVisibilityState, points: readonly GridPoint[]): boolean {
+  return points.every((point) => getTileVisibility(visibility, point) === TileVisibility.Visible);
 }
 
 function toVisionTile(point: GridPoint): GridPoint {

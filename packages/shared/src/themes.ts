@@ -67,15 +67,19 @@ const entityFrame = (
   };
 };
 
+/**
+ * PROVISIONAL ONLY: direction order, state blocks, mirroring, and building health semantics are unverified.
+ * Do not treat these constants as original-game evidence; see analysis/generated/sprite-mapping-audit.json.
+ */
 const ENTITY_FACING_ORDER = ["s", "sw", "w", "nw", "n", "ne", "e", "se"] as const satisfies readonly Facing[];
-const FIVE_FACING_SOURCE_ORDER = ["s", "sw", "w", "nw", "se"] as const satisfies readonly Facing[];
+const FIVE_FACING_SOURCE_ORDER = ["n", "ne", "e", "se", "s"] as const satisfies readonly Facing[];
 const FIVE_FACING_MIRRORED_FACINGS = {
-  n: "w",
-  ne: "sw",
-  e: "w",
+  nw: "ne",
+  w: "e",
+  sw: "se",
 } as const satisfies Partial<Record<Facing, Facing>>;
 const SOURCE_FRAMES_PER_FACING = 8;
-const ROYAL_CART_FRAMES_PER_FACING = 6;
+const ROYAL_CART_FRAMES_PER_FACING = 10;
 
 const entityFrameRange = (
   visualId: string,
@@ -203,6 +207,78 @@ const buildingOverlayClip = (visualId: string, stem: string, startFrame: number,
   loop: true,
 });
 
+interface SourceBuildingVisualOptions {
+  id: string;
+  assetPath: string;
+  visualId: string;
+  stem: string;
+  size: { w: number; h: number };
+  pivot: { x: number; y: number };
+  completeFrameIndex?: number;
+  idleFrameStart?: number;
+  idleFrameCount?: number;
+  idleFps?: number;
+  idleOverlayFrameStart?: number;
+  idleOverlayFrameCount?: number;
+  idleOverlayFps?: number;
+}
+
+const sourceBuildingEntityVisual = ({
+  id,
+  assetPath,
+  visualId,
+  stem,
+  size,
+  pivot,
+  completeFrameIndex = 8,
+  idleFrameStart = completeFrameIndex,
+  idleFrameCount = 1,
+  idleFps = 1,
+  idleOverlayFrameStart,
+  idleOverlayFrameCount = 0,
+  idleOverlayFps = 8,
+}: SourceBuildingVisualOptions): EntityVisual => ({
+  id,
+  kind: "entity",
+  assetPath,
+  render: {
+    srcPxPerWu: 32,
+    filtering: "nearest",
+  },
+  defaults: {
+    size,
+    pivot: { anchor: pivot },
+  },
+  states: {
+    idle: {
+      clips: {
+        default: { frames: entityFrameRange(visualId, stem, idleFrameStart, idleFrameCount), fps: idleFps, loop: true },
+      },
+    },
+    construction: {
+      clips: {
+        default: buildingConstructionClip(visualId, stem, completeFrameIndex),
+      },
+    },
+  },
+  ...(idleOverlayFrameStart !== undefined && idleOverlayFrameCount > 0
+    ? {
+        layers: [
+          {
+            id: "idle-overlay",
+            states: {
+              idle: {
+                clips: {
+                  default: buildingOverlayClip(visualId, stem, idleOverlayFrameStart, idleOverlayFrameCount, idleOverlayFps),
+                },
+              },
+            },
+          },
+        ],
+      }
+    : {}),
+});
+
 /**
  * Provisional hill0 slot map from the source asset naming notes.
  * Direction names are screen-space around the raised tile.
@@ -255,23 +331,27 @@ export const villagerEntityVisual = {
     },
     move: {
       facings: ENTITY_FACING_ORDER,
-      clips: sourceFiveFacingClips("villager", "farmerk", 0, 8),
+      clips: sourceFiveFacingClips("villager", "farmerk", 40, 8),
     },
     walk: {
       facings: ENTITY_FACING_ORDER,
-      clips: sourceFiveFacingClips("villager", "farmerk", 0, 8),
+      clips: sourceFiveFacingClips("villager", "farmerk", 40, 8),
+    },
+    carry: {
+      facings: ENTITY_FACING_ORDER,
+      clips: sourceFiveFacingClips("villager", "farmerk", 80, 8),
     },
     gather: {
       facings: ENTITY_FACING_ORDER,
-      clips: sourceFiveFacingClips("villager", "farmerk", 64, 8),
+      clips: sourceFiveFacingClips("villager", "farmerk", 120, 8),
     },
     build: {
       facings: ENTITY_FACING_ORDER,
-      clips: sourceFiveFacingClips("villager", "farmerk", 128, 8),
+      clips: sourceFiveFacingClips("villager", "farmerk", 160, 8),
     },
     repair: {
       facings: ENTITY_FACING_ORDER,
-      clips: sourceFiveFacingClips("villager", "farmerk", 128, 8),
+      clips: sourceFiveFacingClips("villager", "farmerk", 160, 8),
     },
   },
 } as const satisfies EntityVisual;
@@ -303,7 +383,39 @@ export const swordsmanEntityVisual = {
     },
     attack: {
       facings: ENTITY_FACING_ORDER,
-      clips: sourceFiveFacingClips("swordsman", "swordk", 64, 8),
+      clips: sourceFiveFacingClips("swordsman", "swordk", 48, 8),
+    },
+  },
+} as const satisfies EntityVisual;
+
+export const japaneseSwordsmanEntityVisual = {
+  id: "japanese-swordsman",
+  kind: "entity",
+  assetPath: "entities/japanese-swordsman",
+  render: {
+    srcPxPerWu: 32,
+    filtering: "nearest",
+  },
+  defaults: {
+    size: { w: 60, h: 50 },
+    pivot: { anchor: { x: 30, y: 44 } },
+  },
+  states: {
+    idle: {
+      facings: ENTITY_FACING_ORDER,
+      clips: sourceFiveFacingStillClips("japanese_swordsman", "swordj", 0),
+    },
+    move: {
+      facings: ENTITY_FACING_ORDER,
+      clips: sourceFiveFacingClips("japanese_swordsman", "swordj", 40, 8),
+    },
+    walk: {
+      facings: ENTITY_FACING_ORDER,
+      clips: sourceFiveFacingClips("japanese_swordsman", "swordj", 40, 8),
+    },
+    attack: {
+      facings: ENTITY_FACING_ORDER,
+      clips: sourceFiveFacingClips("japanese_swordsman", "swordj", 128, 8),
     },
   },
 } as const satisfies EntityVisual;
@@ -323,7 +435,7 @@ export const archerEntityVisual = {
   states: {
     idle: {
       facings: ENTITY_FACING_ORDER,
-      clips: sourceFiveFacingStillClips("archer", "archerk", 80),
+      clips: sourceFiveFacingStillClips("archer", "archerk", 120),
     },
     move: {
       facings: ENTITY_FACING_ORDER,
@@ -336,6 +448,70 @@ export const archerEntityVisual = {
     attack: {
       facings: ENTITY_FACING_ORDER,
       clips: sourceFiveFacingClips("archer", "archerk", 0, 8),
+    },
+  },
+} as const satisfies EntityVisual;
+
+export const japaneseGunnerEntityVisual = {
+  id: "japanese-gunner",
+  kind: "entity",
+  assetPath: "entities/japanese-gunner",
+  render: {
+    srcPxPerWu: 32,
+    filtering: "nearest",
+  },
+  defaults: {
+    size: { w: 60, h: 60 },
+    pivot: { anchor: { x: 30, y: 52 } },
+  },
+  states: {
+    idle: {
+      facings: ENTITY_FACING_ORDER,
+      clips: sourceFiveFacingStillClips("japanese_gunner", "gunj1", 0),
+    },
+    move: {
+      facings: ENTITY_FACING_ORDER,
+      clips: sourceFiveFacingClips("japanese_gunner", "gunj1", 40, 8),
+    },
+    walk: {
+      facings: ENTITY_FACING_ORDER,
+      clips: sourceFiveFacingClips("japanese_gunner", "gunj1", 40, 8),
+    },
+    attack: {
+      facings: ENTITY_FACING_ORDER,
+      clips: sourceFiveFacingClips("japanese_gunner", "gunj1", 40, 8),
+    },
+  },
+} as const satisfies EntityVisual;
+
+export const generalK4EntityVisual = {
+  id: "korean-general-k4",
+  kind: "entity",
+  assetPath: "entities/general-k4",
+  render: {
+    srcPxPerWu: 32,
+    filtering: "nearest",
+  },
+  defaults: {
+    size: { w: 84, h: 76 },
+    pivot: { anchor: { x: 42, y: 66 } },
+  },
+  states: {
+    idle: {
+      facings: ENTITY_FACING_ORDER,
+      clips: sourceFiveFacingStillClips("general_k4", "generalk4", 0),
+    },
+    move: {
+      facings: ENTITY_FACING_ORDER,
+      clips: sourceFiveFacingClips("general_k4", "generalk4", 40, 8),
+    },
+    walk: {
+      facings: ENTITY_FACING_ORDER,
+      clips: sourceFiveFacingClips("general_k4", "generalk4", 40, 8),
+    },
+    attack: {
+      facings: ENTITY_FACING_ORDER,
+      clips: sourceFiveFacingClips("general_k4", "generalk4", 96, 8),
     },
   },
 } as const satisfies EntityVisual;
@@ -456,6 +632,60 @@ export const beaconEntityVisual = {
   },
 } as const satisfies EntityVisual;
 
+export const japaneseCampHouseEntityVisual = sourceBuildingEntityVisual({
+  id: "japanese-camp-house",
+  assetPath: "entities/japanese-camp-house",
+  visualId: "japanese_camp_house",
+  stem: "millj",
+  size: { w: 109, h: 117 },
+  pivot: { x: 55, y: 92 },
+  idleOverlayFrameStart: 9,
+  idleOverlayFrameCount: 10,
+});
+
+export const japaneseCampBarracksEntityVisual = sourceBuildingEntityVisual({
+  id: "japanese-camp-barracks",
+  assetPath: "entities/japanese-camp-barracks",
+  visualId: "japanese_camp_barracks",
+  stem: "barrackj",
+  size: { w: 125, h: 110 },
+  pivot: { x: 63, y: 86 },
+  completeFrameIndex: 7,
+  idleFrameStart: 9,
+  idleFrameCount: 9,
+  idleFps: 8,
+});
+
+export const japaneseCampTowerEntityVisual = sourceBuildingEntityVisual({
+  id: "japanese-camp-tower",
+  assetPath: "entities/japanese-camp-tower",
+  visualId: "japanese_camp_tower",
+  stem: "towerj",
+  size: { w: 71, h: 98 },
+  pivot: { x: 36, y: 74 },
+});
+
+export const japaneseCampFirehouseEntityVisual = sourceBuildingEntityVisual({
+  id: "japanese-camp-firehouse",
+  assetPath: "entities/japanese-camp-firehouse",
+  visualId: "japanese_camp_firehouse",
+  stem: "firehousej",
+  size: { w: 113, h: 123 },
+  pivot: { x: 57, y: 96 },
+  idleFrameStart: 9,
+  idleFrameCount: 11,
+  idleFps: 8,
+});
+
+export const japaneseCampAdvancedTowerEntityVisual = sourceBuildingEntityVisual({
+  id: "japanese-camp-advanced-tower",
+  assetPath: "entities/japanese-camp-advanced-tower",
+  visualId: "japanese_camp_advanced_tower",
+  stem: "advtowerj",
+  size: { w: 75, h: 98 },
+  pivot: { x: 38, y: 74 },
+});
+
 export const royalCartEntityVisual = {
   id: "korean-royal-cart",
   kind: "entity",
@@ -471,15 +701,15 @@ export const royalCartEntityVisual = {
   states: {
     idle: {
       facings: ENTITY_FACING_ORDER,
-      clips: sourceFacingStillClips("royal_cart", "koreanking", 0, ROYAL_CART_FRAMES_PER_FACING),
+      clips: sourceFiveFacingStillClips("royal_cart", "koreanking", 0, ROYAL_CART_FRAMES_PER_FACING),
     },
     move: {
       facings: ENTITY_FACING_ORDER,
-      clips: sourceFacingClips("royal_cart", "koreanking", 0, 6, ROYAL_CART_FRAMES_PER_FACING),
+      clips: sourceFiveFacingClips("royal_cart", "koreanking", 0, 6, ROYAL_CART_FRAMES_PER_FACING),
     },
     walk: {
       facings: ENTITY_FACING_ORDER,
-      clips: sourceFacingClips("royal_cart", "koreanking", 0, 6, ROYAL_CART_FRAMES_PER_FACING),
+      clips: sourceFiveFacingClips("royal_cart", "koreanking", 0, 6, ROYAL_CART_FRAMES_PER_FACING),
     },
   },
 } as const satisfies EntityVisual;
@@ -496,11 +726,19 @@ export const defaultTheme = {
     hill0: hill0TerrainVisual,
     "villager-korean-farmer": villagerEntityVisual,
     "korean-swordsman": swordsmanEntityVisual,
+    "japanese-swordsman": japaneseSwordsmanEntityVisual,
     "korean-archer": archerEntityVisual,
+    "japanese-gunner": japaneseGunnerEntityVisual,
+    "korean-general-k4": generalK4EntityVisual,
     "korean-hq": townCenterEntityVisual,
     "korean-mill-house-proxy": houseEntityVisual,
     "korean-barracks": barracksEntityVisual,
     "korean-signal-beacon": beaconEntityVisual,
+    "japanese-camp-house": japaneseCampHouseEntityVisual,
+    "japanese-camp-barracks": japaneseCampBarracksEntityVisual,
+    "japanese-camp-tower": japaneseCampTowerEntityVisual,
+    "japanese-camp-firehouse": japaneseCampFirehouseEntityVisual,
+    "japanese-camp-advanced-tower": japaneseCampAdvancedTowerEntityVisual,
     "korean-royal-cart": royalCartEntityVisual,
   },
   terrainBindings: {
@@ -510,12 +748,19 @@ export const defaultTheme = {
     villager: "villager-korean-farmer",
     swordsman: "korean-swordsman",
     archer: "korean-archer",
-    "ryu-seong-ryong": "korean-swordsman",
-    "gwon-yul": "korean-swordsman",
+    "japanese-swordsman": "japanese-swordsman",
+    "japanese-gunner": "japanese-gunner",
+    "ryu-seong-ryong": "korean-general-k4",
+    "gwon-yul": "korean-general-k4",
     "town-center": "korean-hq",
     house: "korean-mill-house-proxy",
     barracks: "korean-barracks",
     beacon: "korean-signal-beacon",
+    "japanese-camp-house": "japanese-camp-house",
+    "japanese-camp-barracks": "japanese-camp-barracks",
+    "japanese-camp-tower": "japanese-camp-tower",
+    "japanese-camp-firehouse": "japanese-camp-firehouse",
+    "japanese-camp-advanced-tower": "japanese-camp-advanced-tower",
     "royal-cart": "korean-royal-cart",
   },
 } as const satisfies ThemeDefinition;

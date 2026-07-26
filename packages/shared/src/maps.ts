@@ -40,6 +40,7 @@ export interface MapDefinition {
   layers: TileLayer[];
   spawnPoints: SpawnPoint[];
   tags: string[];
+  sourceInitialView?: GridPoint;
   environment?: EnvironmentPreset;
 }
 
@@ -177,8 +178,8 @@ export const defaultMap: MapDefinition = (() => {
   const demoMapSize = 256;
   const map = createBlankMap({
     id: "river-crossing",
-    name: "River Crossing",
-    description: "Massive 256x256 river-crossing battlefield with multiple lanes and contested ridges.",
+    name: "강변 격전지",
+    description: "여러 진입로와 쟁탈 능선을 갖춘 256x256 강변 전장.",
     width: demoMapSize,
     height: demoMapSize,
     tags: ["skirmish", "1v1", "custom-lobby", "automatch"],

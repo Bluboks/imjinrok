@@ -1,0 +1,13 @@
+{
+  "source": "original/imjinrok2/ybriefingfnt/k01/k0103.spr",
+  "layout": "spr",
+  "width": 640,
+  "height": 480,
+  "frameCount": 1,
+  "exportedFrames": [
+    {
+      "index": 0,
+      "fileName": "k0103_0000.png"
+    }
+  ]
+}

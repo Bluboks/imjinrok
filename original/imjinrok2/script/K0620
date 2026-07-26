@@ -1,0 +1,54 @@
+제목 		: 6. 승전의 교두보 - 행주대첩
+화일 		: K0620
+성격		: 정해진 시간동안 지키고 적군 섬멸
+
+장소		: 조선군 막사
+등장인물	: 권율, 사명대사, 홍의장군
+
+		   ID.		초상화위치
+권율		:  0번		   0번
+사명대사	:  0번		   1번
+홍의장군	:  0번		   2번
+
+-------------------------------------스크립트----------------------------------
+
+[CHANGEMUSIC][music\briefmusic.yav]
+[CHANGETITLE][ybriefingfnt\k01\k01.spr][SETDELAYTIME][500]
+
+[CHANGETITLE][ybriefingfnt\K01\k0101.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\K01\k0102.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\K01\k0103.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\K01\k0104.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\K01\k0105.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\K01\k0106.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\K01\k0107.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\K01\k0108.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\K01\k0109.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\K01\k0110.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\K01\k0111.spr][SETDELAYTIME][15]
+
+[TITLE][6. 행주대첩]
+[OBJECTIVE][1. 사명대사는 화계사로 가서 부적을 얻는다. (사명대사는 살아 남아야 한다.)][2. 적군 섬멸]
+
+[SETDELAYTIME][100]
+[SPEECH][K1][0][K06010][드디어 행주산성이 완성되었소.]
+[SPEECH][K4][1][K06020][그동안 노고가 크셨습니다. 이곳은 지형이 좁고, 남쪽은 한강이 가로막혀 있어 적의 공격을 막기에 가장 좋은 곳입니다.]
+[SPEECH][K5][2][K06030][그러나, 지원군으로 온 명의 군대는 벽제관에서 패배한 이후 전투에 참가하려 하지도 않고 오히려 우리군대의 발만 묶고 있으니 우리는 이곳에 고립되어 있는 것과 마찬가지입니다.]
+[SPEECH][K1][0][K06040][어차피 명군은 다른 나라 사람인 것이오. 우리의 땅은 우리가 지켜야 하오. 왜군은 자신들의 진지를 위협하고 있는 이 곳을 공격해 올 것이오. 만일 우리가 그들을 막을 수 있다면, 적군은 한성에서 물러나 더 남쪽으로 퇴각해야 할 것이오. 어찌보면 좋은 기회라 할 수 있지 않겠소?]
+[SPEECH][K5][2][K06050][옳으신 말씀입니다.]
+[SPEECH][K1][0][K06060][적의 공격이 있을 것이오. 산성이 완성된 것은 든든한 일이지만...]
+[SPEECH][K5][2][K06070][권율 장군, 무슨 걱정이라도?]
+[SPEECH][K1][0][K06080][계속되는 가뭄으로 곡물수확이 신통치 않아 군졸들이 먹을 군량이 부족해 걱정이오. 배불리 먹어야 싸울 수 있을 텐데...]
+[SPEECH][K5][2][K06090][그렇군요. 비가 안온지 너무 오래되어 밭의 감자들이 모두 말라버렸습니다.]
+[SPEECH][K4][1][K06100][소승에게 좋은 생각이 있습니다.]
+[SPEECH][K1][0][K06110][무슨 말씀이오? 대사.]
+[SPEECH][K4][1][K06120][이곳의 동쪽에 화계사라는 옛 절이 있습니다.]
+[SPEECH][K1][0][K06130][화계사?]
+[SPEECH][K4][1][K06140][예. 불가에 대대로 전해져 오는 얘기에 따르면 그 절에 비를 내리고 물을 불게 할 수 있는 효험을 지닌 부적이 보관되어 있다고 합니다.]
+[SPEECH][K5][2][K06150][그것이 사실이오?]
+[SPEECH][K4][1][K06160][소승이 화계사에 가서 그 부적을 얻어 비를 내리게 하면 부족한 군량 문제는 해결될 것입니다.]
+[SPEECH][K1][0][K06170][그리만 된다면 얼마나 좋겠소. 대사만 믿겠소. 적의 공격이 시작되기 전에 그 부적을 얻어 비를 불러주시오.]
+[SPEECH][K4][1][K06180][소승, 목숨을 걸고 명을 받들겠습니다.]
+[NOEND]
+
+-------------------------------------스크립트----------------------------------

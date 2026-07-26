@@ -11,6 +11,8 @@ import {
   type UnitDefinition,
 } from "./content.js";
 
+const KNOWN_DAMAGE_TYPES = new Set(["physical", "fire", "lightning", "drowning"]);
+
 export interface ContentPackDefinition {
   id: string;
   displayName: string;
@@ -226,10 +228,58 @@ function validateUnitDefinitions(registry: ContentRegistry, issues: ContentValid
       issues.push(createIssue(`units.${unitId}.footprint.height`, "Footprint height must be a positive number."));
     }
 
-    for (const actionId of definition.actionIds) {
-      if (!registry.actions[actionId]) {
-        issues.push(createIssue(`units.${unitId}.actionIds`, `Unknown action '${actionId}'.`));
+    if (definition.combat) {
+      validatePositiveNumber(definition.combat.damage, `units.${unitId}.combat.damage`, issues);
+      validatePositiveNumber(definition.combat.range, `units.${unitId}.combat.range`, issues);
+      validatePositiveNumber(definition.combat.cooldownTicks, `units.${unitId}.combat.cooldownTicks`, issues);
+      validatePositiveNumber(definition.combat.aggroRange, `units.${unitId}.combat.aggroRange`, issues);
+
+      if (definition.combat.damageType !== undefined && !KNOWN_DAMAGE_TYPES.has(definition.combat.damageType)) {
+        issues.push(createIssue(`units.${unitId}.combat.damageType`, `Unknown damage type '${definition.combat.damageType}'.`));
       }
+
+      if (definition.combat.aggroRange < definition.combat.range) {
+        issues.push(createIssue(`units.${unitId}.combat.aggroRange`, "Aggro range must be at least attack range."));
+      }
+    }
+
+    for (const [resource, amount] of Object.entries(definition.cost ?? {})) {
+      if (!knownBankResourceKinds.has(resource)) {
+        issues.push(createIssue(`units.${unitId}.cost.${resource}`, `Unknown bank resource '${resource}'.`));
+        continue;
+      }
+
+      validatePositiveNumber(amount, `units.${unitId}.cost.${resource}`, issues);
+    }
+
+    const hotkeysByActionId = new Map<string, string>();
+
+    for (const actionId of definition.actionIds) {
+      const action = registry.actions[actionId];
+
+      if (!action) {
+        issues.push(createIssue(`units.${unitId}.actionIds`, `Unknown action '${actionId}'.`));
+        continue;
+      }
+
+      const hotkey = action.hotkey.trim().toUpperCase();
+
+      if (!hotkey) {
+        issues.push(createIssue(`actions.${actionId}.hotkey`, "Action hotkey is required."));
+        continue;
+      }
+
+      const conflictingActionId = hotkeysByActionId.get(hotkey);
+
+      if (conflictingActionId) {
+        issues.push(createIssue(
+          `units.${unitId}.actionIds`,
+          `Actions '${conflictingActionId}' and '${actionId}' share hotkey '${hotkey}'.`,
+        ));
+        continue;
+      }
+
+      hotkeysByActionId.set(hotkey, actionId);
     }
 
     if (definition.category === "building" && !definition.placement) {
@@ -241,6 +291,12 @@ function validateUnitDefinitions(registry: ContentRegistry, issues: ContentValid
         issues.push(createIssue(`units.${unitId}.placement.allowedTerrain`, `Unknown terrain '${terrainId}'.`));
       }
     }
+  }
+}
+
+function validatePositiveNumber(value: number, path: string, issues: ContentValidationIssue[]): void {
+  if (!Number.isFinite(value) || value <= 0) {
+    issues.push(createIssue(path, "Value must be a positive number."));
   }
 }
 

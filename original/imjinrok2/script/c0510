@@ -1,0 +1,32 @@
+제목 		: 5. 깨어진 강화
+
+-------------------------------------스크립트----------------------------------
+[CHANGEMUSIC][music\briefmusicc.yav]
+[CHANGETITLE][ybriefingfnt\c01\c01.spr][SETDELAYTIME][500]
+
+[CHANGETITLE][ybriefingfnt\c01\c0101.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\c01\c0102.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\c01\c0103.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\c01\c0104.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\c01\c0105.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\c01\c0106.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\c01\c0107.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\c01\c0108.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\c01\c0109.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\c01\c0110.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\c01\c0111.spr][SETDELAYTIME][15]
+
+[TITLE][5. 깨어진 강화]
+[OBJECTIVE][1. 지원군이 도착할 때까지 기지를 지켜라. (여여문은 살아 남아야 한다.)][2. 지원군이 도착한 후 함께 적군을 섬멸하라.]
+
+[SETDELAYTIME][100]
+[SPEECH][C3][0][C05010][장군, 큰일 났습니다. ]
+[SPEECH][C1][1][C05020][무슨 일이냐?]
+[SPEECH][C3][0][C05030][강화회담으로 물러난 줄 알았던 왜군이 여여문 장군의 진지를 공격하고 있다는 급보가 들어왔습니다.]
+[SPEECH][C1][1][C05040][무엇이? 이런 못된 것들이 있나? 왜군은 남해안으로 철수하기로 하지 않았던가?]
+[SPEECH][C2][2][C05050][서둘러 여여문 장군을 도우러 가야 합니다.]
+[SPEECH][C1][1][C05060][여기서 여여문 장군의 진지까지는 얼마나 걸리느냐?]
+[SPEECH][C3][0][C05070][약 5일 정도 걸릴 것입니다.]
+[SPEECH][C1][1][C05080][5일이라... 그동안 여여문 장군이 버틸 수 있어야 할텐데... 최대한 서둘러서 출병한다. 자 모두 서둘러라.]
+[NOEND]
+-------------------------------------스크립트----------------------------------

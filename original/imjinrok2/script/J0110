@@ -1,0 +1,33 @@
+제목 		: 1. 전쟁의 발발
+
+-------------------------------------스크립트----------------------------------
+[CHANGEMUSIC][music\briefmusicj.yav]
+[CHANGETITLE][ybriefingfnt\j01\j01.spr][SETDELAYTIME][500]
+
+[CHANGETITLE][ybriefingfnt\j01\j0101.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\j01\j0102.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\j01\j0103.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\j01\j0104.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\j01\j0105.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\j01\j0106.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\j01\j0107.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\j01\j0108.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\j01\j0109.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\j01\j0110.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\j01\j0111.spr][SETDELAYTIME][15]
+
+[TITLE][1. 전쟁의 발발]
+[OBJECTIVE][1. 부산성과 동래성의 군사를 전멸시켜라. (고니시와 가토는 살아 남아야 한다.)][]
+
+[SETDELAYTIME][100]
+[SPEECH][J5][0][J01010][언제쯤 조선에 당도하게 되겠소? 와카자키 장군. ]
+[SPEECH][J3][1][J01020][내일 저녁때 쯤이면 부산포에 도착할 수 있을 것입니다.]
+[SPEECH][J5][0][J01030][조선에서 돌아온 첩자들의 보고에 따르면, 조선은 당쟁으로 인해 정치적으로 혼란스럽고 군비가 갖추어지지 않아 방비가 허술하다고 하니 그대들은 손쉽게 공을 세울 수 있을 것이오. ]
+[SPEECH][J2][2][J01040][대 일본군 선봉대로서 조선을 단숨에 굴복시켜 보이겠습니다.]
+[SPEECH][J1][3][J01050][그러나 쉽게만 볼 일은 아닙니다.]
+[SPEECH][J2][2][J01060][무슨 소리를 하는 거요? 고니시 장군.]
+[SPEECH][J1][3][J01070][비록 조선이 명에 조공을 바치며 섬기고 있다고 하나 명을 비롯한 대륙의 한족들은 항상 조선을 경계해 왔소. 조선은 쉽게 정복할 수 있는 만만한 나라가 아니라는 말이오. ]
+[SPEECH][J5][0][J01080][고니시 장군의 말도 맞소. 조선으로 출병하는 모든 장군들은 고니시 장군의 말을 명심하기 바라오. ]
+[SPEECH][J2][2][J01090][예, 알겠습니다.]
+[NOEND]
+-------------------------------------스크립트----------------------------------

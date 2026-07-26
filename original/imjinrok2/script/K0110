@@ -1,0 +1,46 @@
+제목 		: 1. 불안한 전운.
+화일 		: K0110
+
+장소		: 조선 조정(경복궁)
+성격		: 육상전
+등장인물 	: 유성룡, 선조, 권율
+
+                  ID.             초상화위치
+선조		: 0번			0
+권율		: 1번			1
+유성룡  	: 3번			2
+
+-------------------------------------스크립트----------------------------------
+[CHANGEMUSIC][music\briefmusic.yav]
+[CHANGETITLE][ybriefingfnt\k01\k01.spr][SETDELAYTIME][500]
+
+[CHANGETITLE][ybriefingfnt\K01\k0101.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\K01\k0102.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\K01\k0103.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\K01\k0104.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\K01\k0105.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\K01\k0106.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\K01\k0107.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\K01\k0108.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\K01\k0109.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\K01\k0110.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\K01\k0111.spr][SETDELAYTIME][15]
+
+[TITLE][1. 불안한 전운]
+[OBJECTIVE][1. 봉화대를 짓고 적군 섬멸 (유성룡, 권율은 살아 남아야 한다.)][]
+
+[SETDELAYTIME][100]
+[SPEECH][K3][0][k01010][전하, 왜의 전쟁준비에 대하여 다녀온 통신사들의 이야기는 다르나 만일에 대비하여 준비를 하여야 하옵니다. ]
+[SPEECH][K10][1][k01020][국방을 강화하는 것은 좋으나, 우리에게는 명나라가 있지 않소. 또한 지난 번 여진족을 정벌했던 것처럼 일부 왜의 무리가 쳐들어 온다 할지라도 능히 막을 수 있지 않겠소?]
+[SPEECH][K3][0][k01030][ 하오나 전하, 왜의 움직임이 심상치 않사옵니다. 잘 훈련된 정병 10만을 준비하여야만 맞서 싸울 수 있을 것이옵니다. 부디 통촉하여 주시옵소서.]
+[SETDELAYTIME][100]
+[SPEECH][K1][2][k01040][전하, 왜군의 대부대가 지금 부산포에 침입하였다 하옵니다.]
+[SPEECH][K10][1][k01050][아니, 뭐라구? 왜군이 쳐들어 왔단 말인가! 부산포를 지키는 우리 군졸들은 무엇을 하고 있단 말이오?]
+[SPEECH][K1][2][k01060][왜군의 군세가 워낙 강하고 그들이 지닌 조총이란 무기 또한 우수하여 부산포의 우리 군졸로만 막기에는 역부족이라 하옵니다.]
+[SPEECH][K10][1][k01070][그렇다면 어서 조선의 전 군졸들을 보내서라도 왜군의 진격을 막도록 하시오.]
+[SPEECH][K3][0][k01080][그러나 전하, 군졸들을 내려보내기 전에 왜군은 한성에 도달할 것이옵니다. 우선 상주에 방어선을 만들고 적의 기세를 꺾어 사태를 수습할 시간을 벌어야 할 줄 아뢰오.]
+[SPEECH][K1][2][k01090][하오나, 우리의 군세가 왜군에 비해 부족하옵니다. 지금 방어선을 만든다고 하더라도 싸워 이기기는 힘들 것이옵니다. 속히 명에 원군을 청하셔서 도움을 받아야 할 줄로 아옵니다.]
+[SPEECH][K10][1][k01100][권장군의 말이 옳으나 우선 적의 기세를 꺾는 것이 가장 중요할 것이오. 유성룡을 총사령관으로 임명할 것이니, 서둘러 나가 왜군의 북상을 막도록 하시오.]
+[SPEECH][K3][0][k01110][어명을 받들어 시행하겠사옵니다.]
+[NOEND]
+-------------------------------------스크립트----------------------------------

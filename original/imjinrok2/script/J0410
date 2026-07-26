@@ -1,0 +1,35 @@
+제목 		: 4. 벽제관 전투
+
+-------------------------------------스크립트----------------------------------
+[CHANGEMUSIC][music\briefmusicj.yav]
+[CHANGETITLE][ybriefingfnt\j01\j01.spr][SETDELAYTIME][500]
+
+[CHANGETITLE][ybriefingfnt\j01\j0101.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\j01\j0102.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\j01\j0103.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\j01\j0104.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\j01\j0105.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\j01\j0106.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\j01\j0107.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\j01\j0108.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\j01\j0109.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\j01\j0110.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\j01\j0111.spr][SETDELAYTIME][15]
+
+[TITLE][4. 벽제관전투]
+[OBJECTIVE][1. 명의 군량 저장소를 모두 파괴하라.][2. 적군 섬멸]
+
+
+[SETDELAYTIME][100]
+[SPEECH][J5][0][J04010][나쁜 소식이 들어왔소. 이여송이 이끄는 명의 대군이 평양성을 점령했다하오.]
+[SPEECH][J2][1][J04020][큰일입니다. 그렇지 않아도 조선 수군때문에 보급이 이루어지지 않아 싸우기 어려운 판에 명군까지 왔다면...]
+[SPEECH][J1][2][J04030][명군은 어차피 원군일 뿐입니다. 그들은 적극적으로 싸울 마음이 없을 것이고 게다가 먼 길을 오느라 매우 지쳐 있을 것입니다.]
+[SPEECH][J4][3][J04040][고니시 장군의 말이 맞습니다. 명군에게는 치명적인 약점이 있습니다.]
+[SPEECH][J5][0][J04050][치명적인 약점? 그것이 무엇이오?]
+[SPEECH][J1][2][J04060][군량을 말씀하시려고 하십니까?]
+[SPEECH][J4][3][J04070][그렇습니다. 명은 급하게 출병했고 게다가 조선까지의 거리가 멀어 충분한 양의 군량을 가져오지 못했을 것입니다. 우리가 명의 군량이 저장된 곳만 파괴할 수 있다면 충분히 승산이 있습니다.]
+[SPEECH][J5][0][J04080][음.. 좋은 생각이오. 가토 장군, 지금 즉시 나가서 명의 군량 저장소가 어디 있는지 알아오도록 하시오.]
+[SPEECH][J2][1][J04090][예, 바로 알아보겠습니다.]
+[SPEECH][J5][0][J04100][나머지 장수들은 명군을 맞아 싸울 준비를 하시오.]
+[NOEND]
+-------------------------------------스크립트----------------------------------

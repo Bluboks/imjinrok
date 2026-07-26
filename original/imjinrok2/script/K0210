@@ -1,0 +1,44 @@
+제목 		: 2. 불타는 한성.
+화일 		: K0210
+
+장소		: 조선 조정(경복궁)
+성격		: 육상전
+등장인물 	: 유성룡, 선조, 권율
+
+                    초상화위치
+선조		: 	0
+권율		: 	1
+유성룡  	: 	2
+
+-------------------------------------스크립트----------------------------------
+[CHANGEMUSIC][music\briefmusic.yav]
+[CHANGETITLE][ybriefingfnt\k01\k01.spr][SETDELAYTIME][500]
+
+[CHANGETITLE][ybriefingfnt\K01\k0101.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\K01\k0102.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\K01\k0103.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\K01\k0104.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\K01\k0105.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\K01\k0106.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\K01\k0107.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\K01\k0108.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\K01\k0109.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\K01\k0110.spr][SETDELAYTIME][15]
+[CHANGETITLE][ybriefingfnt\K01\k0111.spr][SETDELAYTIME][15]
+
+[TITLE][2. 불타는 한성]
+[OBJECTIVE][1. 어가를 평양성까지 대피시킨다. (유성룡은 살아 남아야 한다.)][]
+
+[SETDELAYTIME][100]
+[SPEECH][K10][0][K02010][상주의 방어군은 어찌되었소?]
+[SPEECH][K3][1][K02020][왜군의 공격을 막아내기에는 역부족이었사옵니다. 그러나 아직 왜군이 한성에 다다르기 까지는 약간의 여유가 있으니 인근의 모든 군졸들을 집결시켜 한성을 지켜내야 하옵니다.]
+[SPEECH][K10][0][K02030][아! 이일을 어찌해야 할 것인가? 짐이 어리석어 이 땅의 많은 백성들이 고통을 겪게 되다니... 장차 내가 죽어 선대의 대왕님들을 어찌 뵐 수 있겠는가? 200년 종묘사직의 영광이 이제 와서 무너진단 말인가.. 흑흑]
+[SPEECH][K3][1][K02040][전하, 고정하시오소서. 아직 모든 것을 잃은 것은 아니옵니다. 왕실이 건재하고 의로운 백성들이 남아 있는 한 반드시 적을 물리칠 수 있을 것이옵니다. 명을 내리시어 한성을 지키게 하시고 서둘러 평양성으로 피하시는 것이 옳은 줄 아뢰오.]
+[SPEECH][K10][0][K02050][알겠소. 그대의 말이 맞소. 내 비록 도적을 끌어들인 책임이 있으나, 나라의 큰 위기를 맞아 가만히 있을 수만은 없는 일이오. 총사령관 유성룡은 즉시 전국의 백성들에게 왜적을 맞아 싸울 것을 명하는 교서를 내리도록 하시오. ]
+[SPEECH][K3][1][K02060][예, 즉각 실행하겠사옵니다.] 
+[SETDELAYTIME][100]
+[SPEECH][K10][0][K02070][통신사들이 왜에 다녀온 후 전쟁에 대비하자던 그대의 말을 따랐더라면....]
+[SPEECH][K3][1][K02080][권율장군, 전하께옵서 무사히 평양성으로 피하실 수 있도록 먼저 가서 안전한지 확인하도록 하시오. ]
+[SPEECH][K1][2][K02090][예, 목숨을 걸고 명을 받들겠습니다.]
+[NOEND]
+-------------------------------------스크립트----------------------------------

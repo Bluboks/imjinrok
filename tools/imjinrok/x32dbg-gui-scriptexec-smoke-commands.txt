@@ -1,0 +1,1 @@
+scriptexec C:\rev\work\x32dbg-gui-script-smoke.xdbg
