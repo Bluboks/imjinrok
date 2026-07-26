@@ -37,6 +37,7 @@
 - [K01 공통 임무 목표 모달 진입 입력·컨트롤](reverse-engineering/mechanics/application-state-16-objective-control.md)
 - [목표 pending action dispatcher와 UI-domain 계약](reverse-engineering/mechanics/objective-pending-action-dispatch.md)
 - [K01 목표 모달 UI 이벤트 소유 경계](reverse-engineering/mechanics/objective-modal-ui-event-boundary.md)
+- [K01 목표 모달 presenter·input lifecycle](reverse-engineering/mechanics/objective-modal-presenter-lifecycle.md)
 - [조선 창병·내부 클래스 2 애니메이션 파일럿](reverse-engineering/mechanics/unit-animation-pilot.md)
 - [K01 권율·유성룡 핵심 애니메이션 파일럿](reverse-engineering/mechanics/k01-hero-animation-pilot.md)
 - [K01 권율·유성룡 일반 공격 phase 파일럿](reverse-engineering/mechanics/k01-hero-basic-attack-pilot.md)

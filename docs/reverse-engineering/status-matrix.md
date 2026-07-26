@@ -24,7 +24,7 @@
 | 건물 상태 이미지 | 조선 본영·봉화대 본체 건설·정상·반파 범위 정적 확정 | 모든 진행도·50% 경계 재현 완료 | 두 건물 본체 원본 기반 | 나머지 프레임·오버레이와 다른 7개 건물 복원 |
 | 브리핑 초상화 | 정적 확정 | 재현 완료 | 원본 기반 | 새 원본 변형에도 추출기·클라이언트 교차 검증 적용 |
 | `SPEECH` 대화 레이아웃 | 정적 확정 | 재현 완료 | 확정 좌표 원본 기반 | 제목·목표·버튼·글꼴을 별도 분석 |
-| K01 공통 임무 목표 모달 결합 | 기존 범위에 더해 ordered producer overwrite, `FUN_00449090`의 `0x3f0` 소비·`0x3f1` 활성·`1000` reset과 surface/resource 실패 정적 확정 | request→strict release→`0x3f0`과 dispatcher 목표 생명주기 재현 완료; 프로젝트 event 중복·재생성 경계 테스트; SPR 실패의 오류 보고 뒤 계속·상태 전이는 재현, loader 내부 객체 부수효과와 오디오 자원은 미재현 | 기하·입력·cleanup과 `original-parity` action 의미만 원본 기반; K01 HUD button trigger·event bridge·private active request는 staged 프로젝트 전용, presenter 없음 | gameplay-panel 표시 정체, 실제 modal presenter·dismiss wiring, 목표 label·글꼴·줄바꿈 |
+| K01 공통 임무 목표 모달 결합 | frame/content/dismiss·K01 text·strict release와 ordered dispatcher lifecycle 정적 확정 | 원본 lifecycle 재현 완료; 프로젝트 event·duplicate·resize·shutdown·failure 경계 테스트 | 검증된 raster·기하·text·strict release presenter는 원본 기반; HUD trigger/event는 프로젝트 전용, font·wrap·backdrop·Escape·responsive blocker는 의도적 적응 | gameplay-panel 표시 정체, mechanism source, 원본 font·wrap·dismiss visual·sound |
 | UI·입력 | 임무 목표 모달 범위 제외 나머지는 추정 | 임무 목표 모달 범위 제외 나머지는 미재현 | 의도적 프로젝트 UI | 원본 HUD 루트·선택 패널·실행 중 목표 추적 입력 복원 |
 | 음향·연출 | 미확인 | 미재현 | 부분 구현 | 이벤트와 자원 매핑 복원 |
 
@@ -69,10 +69,11 @@
   `FUN_004a5730` 호출로 소비해 `0x3f1`로 전진하고, dismiss에서 `1000` reset 뒤 resource
   release·clear 시도를 수행하는 흐름과 surface/resource 실패를 재현했다. 확정 의미는 숫자 상태를
   노출하지 않는 `open-objective-modal` UI-domain 계약으로만 이식했다. 후속 프로젝트 구조 감사는
-  K01 HUD objective button을 명시적인 staged 적응 trigger로 삼아 `UIScene` private active
-  request까지 event를 전달했다. 원본 mechanism 발행 source와 실제 presenter·dismiss, 글꼴·줄바꿈,
-  gameplay-panel의 사용자 노출 정체는 미확정이다. 실행 중 목표 추적 HUD는 별도 프로젝트 전용
-  구현이다.
+  K01 HUD objective button을 명시적인 project trigger로 삼아 `UIScene`의 독립 presenter까지
+  event를 전달했다. 검증된 raster·기하·K0110 text·strict release만 원본 기반이며 font·wrap·
+  backdrop·Escape·responsive blocker는 의도적 적응이다. 원본 mechanism 발행 source,
+  gameplay-panel의 사용자 노출 정체와 원본 dismiss visual·sound는 미확정이다. 실행 중 목표 추적
+  HUD는 별도 프로젝트 전용 구현이다.
 - 내부 클래스 2의 원본 이름은 `조선 창병`으로 확정했다. 프로젝트 ID `swordsman`은 호환용 별칭이며
   상태 1·2는 모두 이동 비주얼이다. 상태 1 일반 이동은 이식했지만 상태 2의 사람용 환경 명칭,
   idle·전투와 전투 수치는 아직 확정하지 않았다.

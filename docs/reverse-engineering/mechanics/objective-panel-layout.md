@@ -7,7 +7,7 @@
 - 분석 상태: `정적 확정`
 - 재현 상태: 아래에 명시한 갱신·종료 cleanup 범위만 `재현 완료`
 - 구현 상태: 확정 자원·좌표·입력 판정·종료 cleanup의 독립 모듈은 해당 재현 범위에서
-  `원본 기반`, 실제 장면 연결은 `없음`
+  `원본 기반`; 후속 presenter가 raster·기하·strict release를 장면에 연결
 
 세 후보 가운데 이 질문을 선택했다. 전체 HUD 루트는 여러 위젯의 공통 좌표계와 입력 전파를 함께
 복원해야 하고, 하단 선택 패널은 더 많은 상태별 자원과 수치 필드를 소비한다. 반면 임무 목표 모달은
@@ -290,10 +290,10 @@ signed WORD로 받으므로 종료 판정에는 low WORD `0`만 사용한다.
 - 클라이언트 테스트는 독립 추출기 결과와 같은 JSON 벡터를 직접 사용한다.
 - 640×480 원본 좌표는 고정 상수다. 다른 viewport에서는 하나의 균일 배율과 중앙 여백만 적용하고
   종횡비를 늘이지 않는다. 이것은 `의도적 적응`이다.
-- 실제 장면에는 연결하지 않았다. K01 목표 문자열과 원본 사용자 표시 입력은 후속 정적 분석에서
-  확정했지만 글꼴·줄바꿈과 simulation↔UI 계약이 미확정인 상태에서 기존
-  `SkirmishScene.updateObjectiveTrackerOverlay`를 이 모달로 바꾸면 검증되지 않은 UI를 원본 기반처럼
-  보이게 하므로 보류했다. `SkirmishScene.ts`는 수정하지 않았다.
+- 이 파일럿 시점에는 실제 장면에 연결하지 않았다. 후속 presenter는 K01 목표 문자열과 확정
+  기하만 `UIScene`에 연결하고 글꼴·줄바꿈·backdrop·Escape를 의도적 적응으로 격리했다. 기존
+  `SkirmishScene.updateObjectiveTrackerOverlay`는 교체하지 않았고 `SkirmishScene.ts`도 수정하지
+  않았다.
 
 ## 미확정 항목과 다음 질문
 
@@ -309,6 +309,7 @@ K01 결합 질문은 [별도 문서](objective-modal-k01-binding.md)에서, stat
 `0x3f0`의 목표 모달 소비·reset과 scoped surface/resource 실패를 정적 확정·재현하고 semantic
 UI-domain 계약까지 추가했다. 후속
 [프로젝트 UI 이벤트 경계 분석](objective-modal-ui-event-boundary.md)은 HUD button의 staged
-프로젝트 적응 trigger에서 `UIScene` private active request까지 연결했지만 사용자에게 보이는
-panel presenter는 아직 없다. 원본 mechanism 소유
-semantic action source도 계속 미확정이다.
+프로젝트 적응 trigger에서 `UIScene` private active request까지 연결했다. 후속
+[presenter lifecycle](objective-modal-presenter-lifecycle.md)은 검증된 raster·기하·K0110 text·
+strict release를 표시하되 font·wrap·backdrop·Escape·responsive blocker를 의도적 적응으로
+분리했다. 원본 mechanism 소유 semantic action source도 계속 미확정이다.

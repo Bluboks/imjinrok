@@ -223,7 +223,9 @@ K01 확장 UI는 같은 channel union에 별도 action type과 typed metadata를
 명시적인 staged 프로젝트 적응 trigger로 사용해 같은 semantic action을 `UIScene` private active
 request까지 전달한다. 이는 원본 application state `0x17`, control release 또는 뒤 컨트롤
 overwrite 결과를 복제한 것이 아니며 숫자 전역을 흉내 낸 fallback adapter도 아니다. 사용자에게
-보이는 presenter는 아직 없다.
+보이는 presentation은 후속
+[presenter lifecycle](objective-modal-presenter-lifecycle.md)에서 검증된 raster·기하·K0110 text·
+strict release만 원본 기반으로 연결하고 나머지 web lifecycle을 의도적 적응으로 분리했다.
 
 ## simulation/mechanism handoff
 
@@ -251,9 +253,10 @@ action을 한 번 consume하고 자체 modal lifecycle을 소유한다. 이 shap
 - 실패한 원본 SPR loader가 남기는 세부 객체 상태; 이번에 확정한 것은 오류 보고 뒤 계속과
   dispatcher의 `0x3f1` 전이
 - 원본 mechanism 결과에서 semantic action을 발행할 구체 simulation/gameplay 모듈
-- 목표 문장의 글꼴·줄바꿈과 실제 장면 modal lifecycle 연결
+- 목표 문장의 원본 글꼴·줄바꿈과 원본 mechanism-owned action source 연결
 
 프로젝트 event 소유 경계는
-[후속 문서](objective-modal-ui-event-boundary.md)에서 확인했다. 다음 좁은 질문은 경쟁 값 중
-K01 표시 흐름에 실제로 필요한 하나를 소비 함수까지 추적하거나, active request를 실제 modal
-presenter·dismiss lifecycle에 연결하는 것이다.
+[후속 문서](objective-modal-ui-event-boundary.md)에서 확인했고,
+[presenter lifecycle](objective-modal-presenter-lifecycle.md)도 연결했다. 다음 좁은 질문은 경쟁
+값 중 K01 표시 흐름에 실제로 필요한 하나를 소비 함수까지 추적하거나 원본 font·wrap을 복원하는
+것이다.

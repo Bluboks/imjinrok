@@ -65,7 +65,9 @@ producer의 마지막 활성 overwrite 뒤 `FUN_00449090`이 살아남은 `0x3f0
 소비하고, 로더 실패에도 `0x3f1`로 전진하며 종료 시 `1000`으로 reset하는 흐름을 정적 확정·재현했다.
 클라이언트에는 숫자 상태가 없는 semantic `open-objective-modal` 계약을 추가했다. 후속 프로젝트
 구조 감사는 K01 HUD objective button을 staged 프로젝트 적응 trigger로 삼아 `UIScene`의 private
-active request까지 연결했지만 사용자에게 보이는 modal presenter는 아직 없다.
+active request까지 연결했다. 후속 [presenter lifecycle 구현](../reverse-engineering/mechanics/objective-modal-presenter-lifecycle.md)은
+검증된 frame·content·dismiss 기하와 K0110 문자열을 독립 controller로 표시한다. font·wrap·
+backdrop·Escape·responsive blocker는 의도적 프로젝트 적응이다.
 
 두 텍스트 블록의 X·최대 폭·세로 중심과 K01 문자열 입력은 확정했지만 글꼴·줄바꿈 규칙,
 gameplay-panel의 화면상 정체는 아직 확정하지 않았다. 원본 SPR 로더 내부 실패 종류·객체 결과와

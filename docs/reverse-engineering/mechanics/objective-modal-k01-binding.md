@@ -6,7 +6,8 @@
 
 - 분석 상태: `정적 확정`
 - 재현 상태: 이 문서에 적은 상태 반환·signed WORD 인덱스·레코드 결합 범위는 `재현 완료`
-- 구현 상태: `분석 전용`, 새 클라이언트 장면 연결 없음
+- 구현 상태: 이 질문의 원본 state producer는 `분석 전용`; 후속 presenter가 확정 K0110 텍스트만
+  장면 content로 사용
 
 K01은 공통 임무 목표 모달에 정적으로 결합된다. 한국 캠페인 1단계 선택은
 `DAT_0088afcc = 1`을 기록한다. 모달은 이 signed WORD를 128배해 `0x00abf0e8`에 더하므로
@@ -187,11 +188,12 @@ EXE embedded 문자열도 바이트 단위로 고정한다.
 
 ## 이식 경계와 미확정 항목
 
-이번 질문의 결과는 분석 전용이다. 기존
+이번 질문 시점의 결과는 분석 전용이었다. 기존
 `apps/game-client/src/originalObjectivePanelLayout.ts`는 앞선 질문에서 재현 완료한 공통 모달
-기하·입력·cleanup 모델이며, 이번에 복원한 K01 진입 상태나 텍스트를 장면에 연결하지 않았다.
-`SkirmishScene.ts`도 수정하지 않았다. K01 결합이 정적 확정됐다는 사실만으로 미확정 글꼴·줄바꿈과
-표시 트리거를 임의 구현하지 않는다.
+기하·입력·cleanup 모델이다. 후속
+[presenter lifecycle](objective-modal-presenter-lifecycle.md)은 확정 K0110 텍스트를 장면
+content로 연결하지만 원본 state producer는 연결하지 않고, 미확정 글꼴·줄바꿈과 표시 trigger를
+프로젝트 적응으로 분리한다. `SkirmishScene.ts`는 수정하지 않았다.
 
 남은 항목은 다음과 같다.
 

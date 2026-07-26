@@ -125,8 +125,10 @@ simulation↔UI 연결은 미확정이라 장면 연결은 보류했다. 뒤이�
 
 후속 프로젝트 구조 감사는 기존 `game.events` HUD view 경계를 확장해 K01 HUD objective button에서
 숫자 상태 없는 semantic action을 발행하고 `UIScene`의 queue·private active request까지 한 번
-소비하는 staged 연결을 두었다. 이 trigger와 bridge는 프로젝트 전용이며 사용자에게 보이는 modal
-presenter·dismiss wiring은 아직 없다.
+소비하는 staged 연결을 두었다. 후속 presenter 단계는 검증된 objectiveborder raster·원본 기하·
+K0110 text·strict release를 독립 UI controller에 연결했다. HUD trigger/event는 프로젝트 전용이고
+font·wrap·backdrop·Escape·responsive blocker는 의도적 적응이다. 원본 gameplay-panel 정체와
+mechanism source, font·dismiss visual·sound는 남아 있다.
 
 통과 조건:
 

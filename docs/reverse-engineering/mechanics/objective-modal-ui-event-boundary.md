@@ -10,8 +10,8 @@
   `analysis/fixtures/objective-pending-action-dispatch-vectors.json`의 action 결과를 그대로 사용
 - 프로젝트 구조 확인: producer→event→queue→consumer와 scene shutdown/recreation은 코드 경로와
   독립 테스트로 확인
-- 구현 상태: K01 HUD objective button에서 UI-owned active-request 상태까지 `프로젝트 전용 staged
-  연결`; 모달 렌더링·dismiss lifecycle은 `없음`
+- 구현 상태: 이 문서 범위는 K01 HUD objective button에서 UI-owned active request까지의
+  `프로젝트 전용 staged 연결`; 후속 presenter lifecycle은 별도 문서에서 구현
 
 기존 `ACTION_TRIGGERED_EVENT` 자체는 이 요청의 소유 경계가 아니다. 이 이벤트는 `UIScene`의
 entity command button·hotkey가 shared `ActionDefinitionId`와 선택 엔티티를 발행하고
@@ -109,7 +109,7 @@ shared scenario 변경은 필요 없다.
 ```text
 K01 HUD objective button pointerup
   -> resolve candidate:
-       scenarioId == "imjinrok-k01"
+       scenarioId == canonical imjinrokK01Scenario.id ("imjinrok-k01-opening")
        gameplay interaction is enabled
        scenario objective IDs contain "build-beacon"
   -> create K01 open-objective-modal action
@@ -129,7 +129,8 @@ playback이 제어 불가능하거나 paused인 briefing·result·pause 상태�
 않으며 event 시점에도 후보를 다시 계산한다. 반복 pointer input은 각각 event 한 개를 발행하고
 bridge에서 각각 한 번 소비된다. 다만 같은
 `objectiveId`가 이미 active이면 `ObjectiveModalRequestState.open()`은 두 번째 open activation을
-거부한다. presenter가 향후 `close()`를 호출한 뒤에는 새 request가 다시 active가 될 수 있다.
+거부한다. 후속 presenter가 dismiss callback에서 `close()`를 호출한 뒤에는 새 request가 다시
+active가 될 수 있다.
 
 `stop()`은 정확한 listener를 제거하고 아직 남은 queue를 비운다. `UIScene.handleShutdown()`은
 bridge를 stop하고 active request도 지운다. 재생성된 `UIScene`는 새 bridge 하나만 등록하므로 이전
@@ -162,13 +163,11 @@ object가 아니거나 다른 type인 값을 K01 emitter에 직접 넘겨도 구
 
 ## 구현 경계와 미확정
 
-이번 작업은 event 전달과 UI-owned active-request 상태까지만 만든 staged project adaptation이다.
-현재 HUD button은 private active request만 만들며 사용자에게 보이는 modal 기능을 완성하지 않는다.
-`UIScene`에는 아직
-`originalObjectivePanelLayout`을 실제 Phaser container로 그리는 presenter가 없고,
-active request를 닫기 control·Escape·scene modal blocking과 연결하지 않았다. 따라서
-“K01 목표 모달이 화면에 표시된다” 또는 “원본 dismiss lifecycle이 장면에서 동작한다”고 판정하지
-않는다.
+이 문서의 작업은 event 전달과 UI-owned active-request 상태까지만 만든 staged project
+adaptation이다. 후속
+[presenter lifecycle 문서](objective-modal-presenter-lifecycle.md)는 검증된 raster·기하·K0110
+text·strict pointer release를 실제 Phaser presentation에 연결했다. font·wrap·backdrop·Escape·
+responsive blocker와 HUD trigger는 원본 동작이 아니라 명시적 프로젝트 적응이다.
 
 원본 fixture·추출기·generated analysis는 변경하지 않았다. 경쟁 값 `0x3ee`, `0x3ec`,
 `0x3ea`에는 의미 이름을 추가하지 않았다. `packages/simulation/src/**`와
@@ -176,7 +175,5 @@ active request를 닫기 control·Escape·scene modal blocking과 연결하지 �
 
 ## 다음 좁은 질문
 
-다음 질문은 `UIScene`가 active request를 실제 presenter에 넘길 때, 이미 확정된 원본
-frame/content/dismiss geometry와 K01 objective text를 사용하면서 미확정 글꼴·줄바꿈을 프로젝트
-적응으로 분리하고, pointer·Escape dismiss와 blocking input·resize·shutdown을 어떤 독립 UI
-controller가 소유해야 하는가이다.
+후속 질문의 판정과 구현은
+[objective modal presenter lifecycle](objective-modal-presenter-lifecycle.md)에 기록했다.
