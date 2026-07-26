@@ -42,6 +42,8 @@
 0x00437650 entity-initializer
 0x00438130 attack-outcome-roll-candidate
 0x0043e1e0 health-application-mode-producer-candidate
+0x0043f560 simulation-interval-selector-setter-candidate
+0x0043f580 simulation-interval-selector-candidate
 0x00438c50 target-validity-before-projectile-spawn
 0x004381a0 normal-direction-field-writer
 0x00438ed0 state-1-frame-base-writer
@@ -51,7 +53,17 @@
 0x0043c300 action-state-1-update
 0x0043c9c0 entity-action-state-dispatcher
 0x00442b10 defender-damage-application-candidate
+0x00443080 simulation-timestamp-history-initializer-candidate
+0x00443090 simulation-timestamp-history-reset-candidate
+0x004430b0 simulation-timestamp-history-update-candidate
+0x004430f0 simulation-feedback-adjustment-producer-candidate
+0x00446420 simulation-interval-reset-candidate
+0x004464c0 simulation-pre-update-gate-candidate
 0x00447360 projectile-pool-update
+0x00447bc0 simulation-step-scheduler-candidate
+0x00447e10 simulation-wall-clock-gate-candidate
+0x00473b50 simulation-feedback-message-consumer-candidate
+0x00477f50 simulation-command-readiness-gate-candidate
 0x00443360 sprite-resource-loader
 0x00441de0 entity-alive-check-candidate
 0x00441e40 active-entity-record-lookup-candidate
@@ -61,6 +73,7 @@
 0x0045bf30 attack-stat-selector
 0x0045bf40 defense-stat-selector
 0x0045bf50 entity-type-definition-initializer
+0x0045f9c0 main-message-loop-candidate
 0x00482180 script-load-candidate
 0x00482340 script-start-candidate
 0x004823a0 script-busy-check-candidate
@@ -78,6 +91,7 @@
 0x004a8410 speech-slot-rectangle
 0x004a8870 speaker-id-lookup-candidate
 0x004a9010 speech-text-wrap-candidate
+0x004ae539 executable-entry-point
 0x0048a731 k01-k0120-condition-site
 0x0048a812 k01-hero-loss-condition-site
 0x0048d6f0 mission-result-gate-candidate
