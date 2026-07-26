@@ -1,0 +1,2333 @@
+{
+  "schemaVersion": 1,
+  "evidenceStatus": "static-proven-type-identities",
+  "analysisScope": "Internal class, original CP949 name, sprite slot, base frame, raw flags, and source path only. Animation and gameplay meanings are not inferred.",
+  "source": {
+    "executablePath": "original/imjinrok2/imjinrok2.exe",
+    "executableSha256": "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e",
+    "seedsPath": "analysis/generated/imjinrok2/seeds.json",
+    "seedsSourceSha256": "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e",
+    "ghidraSchemaVersion": 2
+  },
+  "layout": {
+    "typeWriterFunction": "0x0045bd00",
+    "typeInitializerFunction": "0x0045bf50",
+    "runtimeNameInitializerFunction": "0x0048ea90",
+    "typeTableAddress": "0x00882e10",
+    "typeRecordStride": 332,
+    "runtimeNameBase": "0x00aa4018",
+    "resourcePointerTable": "0x004bc094",
+    "fields": {
+      "spriteSlot": "+0x04",
+      "baseFrame": "+0x06",
+      "flags": "+0x4c",
+      "namePointer": "+0x6c"
+    }
+  },
+  "analyzedFunctions": [
+    {
+      "entry": "0x0045bd00",
+      "name": "FUN_0045bd00",
+      "bodyRanges": [
+        "0x0045bd00-0x0045bef8"
+      ],
+      "instructionCount": 103
+    },
+    {
+      "entry": "0x0045bf50",
+      "name": "FUN_0045bf50",
+      "bodyRanges": [
+        "0x0045bf50-0x0045efb9"
+      ],
+      "instructionCount": 5100
+    },
+    {
+      "entry": "0x0048ea90",
+      "name": "FUN_0048ea90",
+      "bodyRanges": [
+        "0x0048ea90-0x004924b2"
+      ],
+      "instructionCount": 5587
+    }
+  ],
+  "summary": {
+    "typeCount": 95,
+    "minimumClass": 1,
+    "maximumClass": 95,
+    "uniqueOriginalNameCount": 95,
+    "uniqueSpritePathCount": 93,
+    "sharedSpritePathCount": 2,
+    "baseFrameZeroCount": 58,
+    "baseFrameSevenCount": 35,
+    "otherBaseFrameCount": 2
+  },
+  "codeAnchors": [
+    {
+      "id": "type-definition-sprite-slot-write",
+      "va": "0x0045bd0a",
+      "bytes": "66 89 41 04",
+      "meaning": "argument 0 is written to type record sprite slot +0x04",
+      "rawOffset": "0x0005bd0a",
+      "expectedBytes": "66 89 41 04",
+      "actualBytes": "66 89 41 04",
+      "matched": true
+    },
+    {
+      "id": "type-definition-base-frame-write",
+      "va": "0x0045bd13",
+      "bytes": "66 89 51 06",
+      "meaning": "argument 1 is written to type record base frame +0x06",
+      "rawOffset": "0x0005bd13",
+      "expectedBytes": "66 89 51 06",
+      "actualBytes": "66 89 51 06",
+      "matched": true
+    },
+    {
+      "id": "type-definition-flags-write",
+      "va": "0x0045be6a",
+      "bytes": "89 51 4c",
+      "meaning": "argument 37 is written to type record flags +0x4c",
+      "rawOffset": "0x0005be6a",
+      "expectedBytes": "89 51 4c",
+      "actualBytes": "89 51 4c",
+      "matched": true
+    },
+    {
+      "id": "type-definition-name-pointer-write",
+      "va": "0x0045bef0",
+      "bytes": "89 51 6c",
+      "meaning": "argument 49 is written to type record name pointer +0x6c",
+      "rawOffset": "0x0005bef0",
+      "expectedBytes": "89 51 6c",
+      "actualBytes": "89 51 6c",
+      "matched": true
+    },
+    {
+      "id": "type-definition-argument-cleanup",
+      "va": "0x0045bef6",
+      "bytes": "c2 cc 00",
+      "meaning": "the writer consumes exactly 51 DWORD arguments",
+      "rawOffset": "0x0005bef6",
+      "expectedBytes": "c2 cc 00",
+      "actualBytes": "c2 cc 00",
+      "matched": true
+    },
+    {
+      "id": "type-definition-initializer-entry",
+      "va": "0x0045bf50",
+      "bytes": "56 6a 00 68 58 47 aa 00",
+      "meaning": "the complete type-definition initializer begins with class 1 arguments",
+      "rawOffset": "0x0005bf50",
+      "expectedBytes": "56 6a 00 68 58 47 aa 00",
+      "actualBytes": "56 6a 00 68 58 47 aa 00",
+      "matched": true
+    },
+    {
+      "id": "runtime-name-initializer-entry",
+      "va": "0x0048ea90",
+      "bytes": "53 8b d1 56 57",
+      "meaning": "the runtime name initializer derives destination storage from ECX",
+      "rawOffset": "0x0008ea90",
+      "expectedBytes": "53 8b d1 56 57",
+      "actualBytes": "53 8b d1 56 57",
+      "matched": true
+    },
+    {
+      "id": "sprite-resource-pointer-table",
+      "va": "0x0044336b",
+      "bytes": "ba 94 c0 4b 00",
+      "meaning": "the sprite loader starts from the slot-indexed resource pointer table",
+      "rawOffset": "0x0004336b",
+      "expectedBytes": "ba 94 c0 4b 00",
+      "actualBytes": "ba 94 c0 4b 00",
+      "matched": true
+    }
+  ],
+  "types": [
+    {
+      "internalClass": 1,
+      "originalGameplayName": "시작점",
+      "definition": {
+        "recordAddress": "0x00882f5c",
+        "initializerCallAddress": "0x0045bfbf",
+        "flags": "0x00000000"
+      },
+      "name": {
+        "runtimePointer": "0x00aa4758",
+        "sourcePointer": "0x004c8588",
+        "sourceInstructionAddress": "0x0048ef1f",
+        "destinationInstructionAddress": "0x0048ef31"
+      },
+      "sprite": {
+        "slot": 81,
+        "baseFrame": 0,
+        "pointerCell": "0x004bc1d8",
+        "sourcePathPointer": "0x004bd3a4",
+        "sourcePath": "fnt\\playerstart.spr",
+        "sourcePathNormalized": "fnt/playerstart.spr"
+      }
+    },
+    {
+      "internalClass": 2,
+      "originalGameplayName": "조선 창병",
+      "definition": {
+        "recordAddress": "0x008830a8",
+        "initializerCallAddress": "0x0045c03f",
+        "flags": "0x04080805"
+      },
+      "name": {
+        "runtimePointer": "0x00aa5028",
+        "sourcePointer": "0x004c8364",
+        "sourceInstructionAddress": "0x0048f8cf",
+        "destinationInstructionAddress": "0x0048f8e4"
+      },
+      "sprite": {
+        "slot": 100,
+        "baseFrame": 0,
+        "pointerCell": "0x004bc224",
+        "sourcePathPointer": "0x004bd24c",
+        "sourcePath": "char\\swordk.spr",
+        "sourcePathNormalized": "char/swordk.spr"
+      }
+    },
+    {
+      "internalClass": 3,
+      "originalGameplayName": "일본 창병",
+      "definition": {
+        "recordAddress": "0x008831f4",
+        "initializerCallAddress": "0x0045c0bb",
+        "flags": "0x04080805"
+      },
+      "name": {
+        "runtimePointer": "0x00aa5048",
+        "sourcePointer": "0x004c8254",
+        "sourceInstructionAddress": "0x0048fc92",
+        "destinationInstructionAddress": "0x0048fca1"
+      },
+      "sprite": {
+        "slot": 101,
+        "baseFrame": 0,
+        "pointerCell": "0x004bc228",
+        "sourcePathPointer": "0x004bd23c",
+        "sourcePath": "char\\swordj.spr",
+        "sourcePathNormalized": "char/swordj.spr"
+      }
+    },
+    {
+      "internalClass": 4,
+      "originalGameplayName": "조선 궁수",
+      "definition": {
+        "recordAddress": "0x00883340",
+        "initializerCallAddress": "0x0045c33e",
+        "flags": "0x04082805"
+      },
+      "name": {
+        "runtimePointer": "0x00aa50e8",
+        "sourcePointer": "0x004c8358",
+        "sourceInstructionAddress": "0x0048f8fa",
+        "destinationInstructionAddress": "0x0048f90c"
+      },
+      "sprite": {
+        "slot": 102,
+        "baseFrame": 0,
+        "pointerCell": "0x004bc22c",
+        "sourcePathPointer": "0x004bd228",
+        "sourcePath": "char\\archerk.spr",
+        "sourcePathNormalized": "char/archerk.spr"
+      }
+    },
+    {
+      "internalClass": 5,
+      "originalGameplayName": "명 천궁",
+      "definition": {
+        "recordAddress": "0x0088348c",
+        "initializerCallAddress": "0x0045c643",
+        "flags": "0x81143001"
+      },
+      "name": {
+        "runtimePointer": "0x00aa51a8",
+        "sourcePointer": "0x004c82ac",
+        "sourceInstructionAddress": "0x0048fb4f",
+        "destinationInstructionAddress": "0x0048fb61"
+      },
+      "sprite": {
+        "slot": 199,
+        "baseFrame": 0,
+        "pointerCell": "0x004bc3b0",
+        "sourcePathPointer": "0x004bcad4",
+        "sourcePath": "char\\samc.spr",
+        "sourcePathNormalized": "char/samc.spr"
+      }
+    },
+    {
+      "internalClass": 6,
+      "originalGameplayName": "조선 공격기",
+      "definition": {
+        "recordAddress": "0x008835d8",
+        "initializerCallAddress": "0x0045c9be",
+        "flags": "0x2210200d"
+      },
+      "name": {
+        "runtimePointer": "0x00aa5288",
+        "sourcePointer": "0x004c830c",
+        "sourceInstructionAddress": "0x0048f9ea",
+        "destinationInstructionAddress": "0x0048f9fc"
+      },
+      "sprite": {
+        "slot": 103,
+        "baseFrame": 0,
+        "pointerCell": "0x004bc230",
+        "sourcePathPointer": "0x004bd214",
+        "sourcePath": "char\\attackerk.spr",
+        "sourcePathNormalized": "char/attackerk.spr"
+      }
+    },
+    {
+      "internalClass": 7,
+      "originalGameplayName": "조선 농부",
+      "definition": {
+        "recordAddress": "0x00883724",
+        "initializerCallAddress": "0x0045cd2d",
+        "flags": "0x000a0801"
+      },
+      "name": {
+        "runtimePointer": "0x00aa5368",
+        "sourcePointer": "0x004c837c",
+        "sourceInstructionAddress": "0x0048f87f",
+        "destinationInstructionAddress": "0x0048f891"
+      },
+      "sprite": {
+        "slot": 105,
+        "baseFrame": 0,
+        "pointerCell": "0x004bc238",
+        "sourcePathPointer": "0x004bd1ec",
+        "sourcePath": "char\\farmerk.spr",
+        "sourcePathNormalized": "char/farmerk.spr"
+      }
+    },
+    {
+      "internalClass": 8,
+      "originalGameplayName": "일본 가미가제",
+      "definition": {
+        "recordAddress": "0x00883870",
+        "initializerCallAddress": "0x0045cb37",
+        "flags": "0x22100009"
+      },
+      "name": {
+        "runtimePointer": "0x00aa52e8",
+        "sourcePointer": "0x004c81e0",
+        "sourceInstructionAddress": "0x0048fdf2",
+        "destinationInstructionAddress": "0x0048fe0c"
+      },
+      "sprite": {
+        "slot": 107,
+        "baseFrame": 0,
+        "pointerCell": "0x004bc240",
+        "sourcePathPointer": "0x004bd1cc",
+        "sourcePath": "char\\sat.spr",
+        "sourcePathNormalized": "char/sat.spr"
+      }
+    },
+    {
+      "internalClass": 9,
+      "originalGameplayName": "조선 천자총통",
+      "definition": {
+        "recordAddress": "0x008839bc",
+        "initializerCallAddress": "0x0045c6c0",
+        "flags": "0x80141005"
+      },
+      "name": {
+        "runtimePointer": "0x00aa51c8",
+        "sourcePointer": "0x004c833c",
+        "sourceInstructionAddress": "0x0048f947",
+        "destinationInstructionAddress": "0x0048f959"
+      },
+      "sprite": {
+        "slot": 111,
+        "baseFrame": 0,
+        "pointerCell": "0x004bc250",
+        "sourcePathPointer": "0x004bd178",
+        "sourcePath": "char\\cannonk.spr",
+        "sourcePathNormalized": "char/cannonk.spr"
+      }
+    },
+    {
+      "internalClass": 10,
+      "originalGameplayName": "조선 갑사",
+      "definition": {
+        "recordAddress": "0x00883b08",
+        "initializerCallAddress": "0x0045c4c4",
+        "flags": "0x0008b005"
+      },
+      "name": {
+        "runtimePointer": "0x00aa5148",
+        "sourcePointer": "0x004c834c",
+        "sourceInstructionAddress": "0x0048f922",
+        "destinationInstructionAddress": "0x0048f934"
+      },
+      "sprite": {
+        "slot": 109,
+        "baseFrame": 0,
+        "pointerCell": "0x004bc248",
+        "sourcePathPointer": "0x004bd1a0",
+        "sourcePath": "char\\horsearcherk.spr",
+        "sourcePathNormalized": "char/horsearcherk.spr"
+      }
+    },
+    {
+      "internalClass": 11,
+      "originalGameplayName": "조선 승병",
+      "definition": {
+        "recordAddress": "0x00883c54",
+        "initializerCallAddress": "0x0045c1b7",
+        "flags": "0x00080805"
+      },
+      "name": {
+        "runtimePointer": "0x00aa5088",
+        "sourcePointer": "0x004c8324",
+        "sourceInstructionAddress": "0x0048f997",
+        "destinationInstructionAddress": "0x0048f9a9"
+      },
+      "sprite": {
+        "slot": 112,
+        "baseFrame": 0,
+        "pointerCell": "0x004bc254",
+        "sourcePathPointer": "0x004bd168",
+        "sourcePath": "char\\budak.spr",
+        "sourcePathNormalized": "char/budak.spr"
+      }
+    },
+    {
+      "internalClass": 12,
+      "originalGameplayName": "일본 조총병",
+      "definition": {
+        "recordAddress": "0x00883da0",
+        "initializerCallAddress": "0x0045c3be",
+        "flags": "0x0c082805"
+      },
+      "name": {
+        "runtimePointer": "0x00aa5108",
+        "sourcePointer": "0x004c8248",
+        "sourceInstructionAddress": "0x0048fcb7",
+        "destinationInstructionAddress": "0x0048fcc9"
+      },
+      "sprite": {
+        "slot": 114,
+        "baseFrame": 0,
+        "pointerCell": "0x004bc25c",
+        "sourcePathPointer": "0x004bd144",
+        "sourcePath": "char\\gunj1.spr",
+        "sourcePathNormalized": "char/gunj1.spr"
+      }
+    },
+    {
+      "internalClass": 13,
+      "originalGameplayName": "일본 사무라이",
+      "definition": {
+        "recordAddress": "0x00883eec",
+        "initializerCallAddress": "0x0045c541",
+        "flags": "0x00089005"
+      },
+      "name": {
+        "runtimePointer": "0x00aa5168",
+        "sourcePointer": "0x004c8238",
+        "sourceInstructionAddress": "0x0048fcdf",
+        "destinationInstructionAddress": "0x0048fcf1"
+      },
+      "sprite": {
+        "slot": 117,
+        "baseFrame": 0,
+        "pointerCell": "0x004bc268",
+        "sourcePathPointer": "0x004bd10c",
+        "sourcePath": "char\\horseswordj1.spr",
+        "sourcePathNormalized": "char/horseswordj1.spr"
+      }
+    },
+    {
+      "internalClass": 14,
+      "originalGameplayName": "일본 귀갑차",
+      "definition": {
+        "recordAddress": "0x00884038",
+        "initializerCallAddress": "0x0045c843",
+        "flags": "0x80143205"
+      },
+      "name": {
+        "runtimePointer": "0x00aa5228",
+        "sourcePointer": "0x004c822c",
+        "sourceInstructionAddress": "0x0048fd07",
+        "destinationInstructionAddress": "0x0048fd1c"
+      },
+      "sprite": {
+        "slot": 104,
+        "baseFrame": 0,
+        "pointerCell": "0x004bc234",
+        "sourcePathPointer": "0x004bd200",
+        "sourcePath": "char\\ghosttankj.spr",
+        "sourcePathNormalized": "char/ghosttankj.spr"
+      }
+    },
+    {
+      "internalClass": 15,
+      "originalGameplayName": "조선 화차",
+      "definition": {
+        "recordAddress": "0x00884184",
+        "initializerCallAddress": "0x0045c944",
+        "flags": "0x91101005"
+      },
+      "name": {
+        "runtimePointer": "0x00aa5268",
+        "sourcePointer": "0x004c8330",
+        "sourceInstructionAddress": "0x0048f96f",
+        "destinationInstructionAddress": "0x0048f981"
+      },
+      "sprite": {
+        "slot": 190,
+        "baseFrame": 0,
+        "pointerCell": "0x004bc38c",
+        "sourcePathPointer": "0x004bcb78",
+        "sourcePath": "char\\firetankk.spr",
+        "sourcePathNormalized": "char/firetankk.spr"
+      }
+    },
+    {
+      "internalClass": 16,
+      "originalGameplayName": "일본 무녀",
+      "definition": {
+        "recordAddress": "0x008842d0",
+        "initializerCallAddress": "0x0045c2bb",
+        "flags": "0x00080805"
+      },
+      "name": {
+        "runtimePointer": "0x00aa50c8",
+        "sourcePointer": "0x004c8214",
+        "sourceInstructionAddress": "0x0048fd5a",
+        "destinationInstructionAddress": "0x0048fd6c"
+      },
+      "sprite": {
+        "slot": 124,
+        "baseFrame": 0,
+        "pointerCell": "0x004bc284",
+        "sourcePathPointer": "0x004bd078",
+        "sourcePath": "char\\advbudaj.spr",
+        "sourcePathNormalized": "char/advbudaj.spr"
+      }
+    },
+    {
+      "internalClass": 17,
+      "originalGameplayName": "일본 공격기",
+      "definition": {
+        "recordAddress": "0x0088441c",
+        "initializerCallAddress": "0x0045ca37",
+        "flags": "0x2210200d"
+      },
+      "name": {
+        "runtimePointer": "0x00aa52a8",
+        "sourcePointer": "0x004c81f0",
+        "sourceInstructionAddress": "0x0048fdcf",
+        "destinationInstructionAddress": "0x0048fde1"
+      },
+      "sprite": {
+        "slot": 125,
+        "baseFrame": 0,
+        "pointerCell": "0x004bc288",
+        "sourcePathPointer": "0x004bd064",
+        "sourcePath": "char\\attackerj.spr",
+        "sourcePathNormalized": "char/attackerj.spr"
+      }
+    },
+    {
+      "internalClass": 18,
+      "originalGameplayName": "일본 안택선",
+      "definition": {
+        "recordAddress": "0x00884568",
+        "initializerCallAddress": "0x0045d1c2",
+        "flags": "0x80142415"
+      },
+      "name": {
+        "runtimePointer": "0x00aa5468",
+        "sourcePointer": "0x004c81d4",
+        "sourceInstructionAddress": "0x0048fe22",
+        "destinationInstructionAddress": "0x0048fe34"
+      },
+      "sprite": {
+        "slot": 127,
+        "baseFrame": 0,
+        "pointerCell": "0x004bc290",
+        "sourcePathPointer": "0x004bd040",
+        "sourcePath": "char\\pshipj.spr",
+        "sourcePathNormalized": "char/pshipj.spr"
+      }
+    },
+    {
+      "internalClass": 19,
+      "originalGameplayName": "일본 누각선",
+      "definition": {
+        "recordAddress": "0x008846b4",
+        "initializerCallAddress": "0x0045d245",
+        "flags": "0x80142015"
+      },
+      "name": {
+        "runtimePointer": "0x00aa5488",
+        "sourcePointer": "0x004c81c8",
+        "sourceInstructionAddress": "0x0048fe4a",
+        "destinationInstructionAddress": "0x0048fe59"
+      },
+      "sprite": {
+        "slot": 208,
+        "baseFrame": 0,
+        "pointerCell": "0x004bc3d4",
+        "sourcePathPointer": "0x004bca3c",
+        "sourcePath": "char\\ashipj.spr",
+        "sourcePathNormalized": "char/ashipj.spr"
+      }
+    },
+    {
+      "internalClass": 20,
+      "originalGameplayName": "일본 닌자",
+      "definition": {
+        "recordAddress": "0x00884800",
+        "initializerCallAddress": "0x0045c5c2",
+        "flags": "0x00080805"
+      },
+      "name": {
+        "runtimePointer": "0x00aa5188",
+        "sourcePointer": "0x004c8208",
+        "sourceInstructionAddress": "0x0048fd7f",
+        "destinationInstructionAddress": "0x0048fd91"
+      },
+      "sprite": {
+        "slot": 134,
+        "baseFrame": 0,
+        "pointerCell": "0x004bc2ac",
+        "sourcePathPointer": "0x004bcfbc",
+        "sourcePath": "char\\ninjaj.spr",
+        "sourcePathNormalized": "char/ninjaj.spr"
+      }
+    },
+    {
+      "internalClass": 21,
+      "originalGameplayName": "명 농부",
+      "definition": {
+        "recordAddress": "0x0088494c",
+        "initializerCallAddress": "0x0045ceaf",
+        "flags": "0x000a0801"
+      },
+      "name": {
+        "runtimePointer": "0x00aa53c8",
+        "sourcePointer": "0x004c82e0",
+        "sourceInstructionAddress": "0x0048fa87",
+        "destinationInstructionAddress": "0x0048fa9c"
+      },
+      "sprite": {
+        "slot": 142,
+        "baseFrame": 0,
+        "pointerCell": "0x004bc2cc",
+        "sourcePathPointer": "0x004bcf20",
+        "sourcePath": "char\\farmerc.spr",
+        "sourcePathNormalized": "char/farmerc.spr"
+      }
+    },
+    {
+      "internalClass": 22,
+      "originalGameplayName": "명 창병",
+      "definition": {
+        "recordAddress": "0x00884a98",
+        "initializerCallAddress": "0x0045c13a",
+        "flags": "0x04080805"
+      },
+      "name": {
+        "runtimePointer": "0x00aa5068",
+        "sourcePointer": "0x004c82d8",
+        "sourceInstructionAddress": "0x0048fab2",
+        "destinationInstructionAddress": "0x0048fac4"
+      },
+      "sprite": {
+        "slot": 147,
+        "baseFrame": 0,
+        "pointerCell": "0x004bc2e0",
+        "sourcePathPointer": "0x004bcec4",
+        "sourcePath": "char\\swordc1.spr",
+        "sourcePathNormalized": "char/swordc1.spr"
+      }
+    },
+    {
+      "internalClass": 23,
+      "originalGameplayName": "조선 황소",
+      "definition": {
+        "recordAddress": "0x00884be4",
+        "initializerCallAddress": "0x0045ce2e",
+        "flags": "0x00081001"
+      },
+      "name": {
+        "runtimePointer": "0x00aa53a8",
+        "sourcePointer": "0x004c8370",
+        "sourceInstructionAddress": "0x0048f8a7",
+        "destinationInstructionAddress": "0x0048f8b9"
+      },
+      "sprite": {
+        "slot": 152,
+        "baseFrame": 80,
+        "pointerCell": "0x004bc2f4",
+        "sourcePathPointer": "0x004bce70",
+        "sourcePath": "char\\bullk.spr",
+        "sourcePathNormalized": "char/bullk.spr"
+      }
+    },
+    {
+      "internalClass": 24,
+      "originalGameplayName": "명 불량기포",
+      "definition": {
+        "recordAddress": "0x00884d30",
+        "initializerCallAddress": "0x0045c741",
+        "flags": "0x80141005"
+      },
+      "name": {
+        "runtimePointer": "0x00aa51e8",
+        "sourcePointer": "0x004c82c0",
+        "sourceInstructionAddress": "0x0048faff",
+        "destinationInstructionAddress": "0x0048fb11"
+      },
+      "sprite": {
+        "slot": 191,
+        "baseFrame": 0,
+        "pointerCell": "0x004bc390",
+        "sourcePathPointer": "0x004bcb68",
+        "sourcePath": "char\\tankc.spr",
+        "sourcePathNormalized": "char/tankc.spr"
+      }
+    },
+    {
+      "internalClass": 25,
+      "originalGameplayName": "명 발석거",
+      "definition": {
+        "recordAddress": "0x00884e7c",
+        "initializerCallAddress": "0x0045c7c5",
+        "flags": "0x90101005"
+      },
+      "name": {
+        "runtimePointer": "0x00aa5208",
+        "sourcePointer": "0x004c82b4",
+        "sourceInstructionAddress": "0x0048fb27",
+        "destinationInstructionAddress": "0x0048fb39"
+      },
+      "sprite": {
+        "slot": 194,
+        "baseFrame": 0,
+        "pointerCell": "0x004bc39c",
+        "sourcePathPointer": "0x004bcb2c",
+        "sourcePath": "char\\cannon2c1.spr",
+        "sourcePathNormalized": "char/cannon2c1.spr"
+      }
+    },
+    {
+      "internalClass": 26,
+      "originalGameplayName": "조선 거북선",
+      "definition": {
+        "recordAddress": "0x00884fc8",
+        "initializerCallAddress": "0x0045cfba",
+        "flags": "0x80140015"
+      },
+      "name": {
+        "runtimePointer": "0x00aa53e8",
+        "sourcePointer": "0x004c8300",
+        "sourceInstructionAddress": "0x0048fa12",
+        "destinationInstructionAddress": "0x0048fa21"
+      },
+      "sprite": {
+        "slot": 196,
+        "baseFrame": 0,
+        "pointerCell": "0x004bc3a4",
+        "sourcePathPointer": "0x004bcb08",
+        "sourcePath": "char\\ashipk.spr",
+        "sourcePathNormalized": "char/ashipk.spr"
+      }
+    },
+    {
+      "internalClass": 27,
+      "originalGameplayName": "조선 판옥선",
+      "definition": {
+        "recordAddress": "0x00885114",
+        "initializerCallAddress": "0x0045d03c",
+        "flags": "0x80140015"
+      },
+      "name": {
+        "runtimePointer": "0x00aa5408",
+        "sourcePointer": "0x004c82f4",
+        "sourceInstructionAddress": "0x0048fa37",
+        "destinationInstructionAddress": "0x0048fa49"
+      },
+      "sprite": {
+        "slot": 201,
+        "baseFrame": 0,
+        "pointerCell": "0x004bc3b8",
+        "sourcePathPointer": "0x004bcab0",
+        "sourcePath": "char\\pshipk.spr",
+        "sourcePathNormalized": "char/pshipk.spr"
+      }
+    },
+    {
+      "internalClass": 28,
+      "originalGameplayName": "명 승천용",
+      "definition": {
+        "recordAddress": "0x00885260",
+        "initializerCallAddress": "0x0045cabb",
+        "flags": "0x2208200d"
+      },
+      "name": {
+        "runtimePointer": "0x00aa52c8",
+        "sourcePointer": "0x004c828c",
+        "sourceInstructionAddress": "0x0048fbc7",
+        "destinationInstructionAddress": "0x0048fbd9"
+      },
+      "sprite": {
+        "slot": 193,
+        "baseFrame": 0,
+        "pointerCell": "0x004bc398",
+        "sourcePathPointer": "0x004bcb40",
+        "sourcePath": "char\\attackerc.spr",
+        "sourcePathNormalized": "char/attackerc.spr"
+      }
+    },
+    {
+      "internalClass": 29,
+      "originalGameplayName": "명 사선",
+      "definition": {
+        "recordAddress": "0x008853ac",
+        "initializerCallAddress": "0x0045d0bf",
+        "flags": "0x80140015"
+      },
+      "name": {
+        "runtimePointer": "0x00aa5428",
+        "sourcePointer": "0x004c8284",
+        "sourceInstructionAddress": "0x0048fbef",
+        "destinationInstructionAddress": "0x0048fc01"
+      },
+      "sprite": {
+        "slot": 209,
+        "baseFrame": 0,
+        "pointerCell": "0x004bc3d8",
+        "sourcePathPointer": "0x004bca2c",
+        "sourcePath": "char\\ashipc.spr",
+        "sourcePathNormalized": "char/ashipc.spr"
+      }
+    },
+    {
+      "internalClass": 30,
+      "originalGameplayName": "명 호선",
+      "definition": {
+        "recordAddress": "0x008854f8",
+        "initializerCallAddress": "0x0045d142",
+        "flags": "0x80142015"
+      },
+      "name": {
+        "runtimePointer": "0x00aa5448",
+        "sourcePointer": "0x004c827c",
+        "sourceInstructionAddress": "0x0048fc17",
+        "destinationInstructionAddress": "0x0048fc29"
+      },
+      "sprite": {
+        "slot": 212,
+        "baseFrame": 0,
+        "pointerCell": "0x004bc3e4",
+        "sourcePathPointer": "0x004bc9f4",
+        "sourcePath": "char\\pshipc.spr",
+        "sourcePathNormalized": "char/pshipc.spr"
+      }
+    },
+    {
+      "internalClass": 31,
+      "originalGameplayName": "일본 농부",
+      "definition": {
+        "recordAddress": "0x00885644",
+        "initializerCallAddress": "0x0045cdae",
+        "flags": "0x00081001"
+      },
+      "name": {
+        "runtimePointer": "0x00aa5388",
+        "sourcePointer": "0x004c8270",
+        "sourceInstructionAddress": "0x0048fc3d",
+        "destinationInstructionAddress": "0x0048fc54"
+      },
+      "sprite": {
+        "slot": 145,
+        "baseFrame": 0,
+        "pointerCell": "0x004bc2d8",
+        "sourcePathPointer": "0x004bcee8",
+        "sourcePath": "char\\farmerj.spr",
+        "sourcePathNormalized": "char/farmerj.spr"
+      }
+    },
+    {
+      "internalClass": 32,
+      "originalGameplayName": "조선 수송기",
+      "definition": {
+        "recordAddress": "0x00885790",
+        "initializerCallAddress": "0x0045cbb4",
+        "flags": "0x22100409"
+      },
+      "name": {
+        "runtimePointer": "0x00aa5308",
+        "sourcePointer": "0x004c8318",
+        "sourceInstructionAddress": "0x0048f9ba",
+        "destinationInstructionAddress": "0x0048f9d4"
+      },
+      "sprite": {
+        "slot": 206,
+        "baseFrame": 0,
+        "pointerCell": "0x004bc3cc",
+        "sourcePathPointer": "0x004bca5c",
+        "sourcePath": "char\\tflyk.spr",
+        "sourcePathNormalized": "char/tflyk.spr"
+      }
+    },
+    {
+      "internalClass": 33,
+      "originalGameplayName": "일본 수송기",
+      "definition": {
+        "recordAddress": "0x008858dc",
+        "initializerCallAddress": "0x0045cc33",
+        "flags": "0x2210040d"
+      },
+      "name": {
+        "runtimePointer": "0x00aa5328",
+        "sourcePointer": "0x004c81fc",
+        "sourceInstructionAddress": "0x0048fda7",
+        "destinationInstructionAddress": "0x0048fdb9"
+      },
+      "sprite": {
+        "slot": 149,
+        "baseFrame": 0,
+        "pointerCell": "0x004bc2e8",
+        "sourcePathPointer": "0x004bcea0",
+        "sourcePath": "char\\tflyj.spr",
+        "sourcePathNormalized": "char/tflyj.spr"
+      }
+    },
+    {
+      "internalClass": 34,
+      "originalGameplayName": "명 주작",
+      "definition": {
+        "recordAddress": "0x00885a28",
+        "initializerCallAddress": "0x0045ccb0",
+        "flags": "0x22080409"
+      },
+      "name": {
+        "runtimePointer": "0x00aa5348",
+        "sourcePointer": "0x004c8298",
+        "sourceInstructionAddress": "0x0048fba2",
+        "destinationInstructionAddress": "0x0048fbb4"
+      },
+      "sprite": {
+        "slot": 202,
+        "baseFrame": 0,
+        "pointerCell": "0x004bc3bc",
+        "sourcePathPointer": "0x004bcaa0",
+        "sourcePath": "char\\tflyc.spr",
+        "sourcePathNormalized": "char/tflyc.spr"
+      }
+    },
+    {
+      "internalClass": 35,
+      "originalGameplayName": "명 화승총병",
+      "definition": {
+        "recordAddress": "0x00885b74",
+        "initializerCallAddress": "0x0045c444",
+        "flags": "0x0c082805"
+      },
+      "name": {
+        "runtimePointer": "0x00aa5128",
+        "sourcePointer": "0x004c82cc",
+        "sourceInstructionAddress": "0x0048fada",
+        "destinationInstructionAddress": "0x0048fae9"
+      },
+      "sprite": {
+        "slot": 150,
+        "baseFrame": 0,
+        "pointerCell": "0x004bc2ec",
+        "sourcePathPointer": "0x004bce90",
+        "sourcePath": "char\\gunc.spr",
+        "sourcePathNormalized": "char/gunc.spr"
+      }
+    },
+    {
+      "internalClass": 36,
+      "originalGameplayName": "명 주술사",
+      "definition": {
+        "recordAddress": "0x00885cc0",
+        "initializerCallAddress": "0x0045c23a",
+        "flags": "0x00080805"
+      },
+      "name": {
+        "runtimePointer": "0x00aa50a8",
+        "sourcePointer": "0x004c82a0",
+        "sourceInstructionAddress": "0x0048fb7a",
+        "destinationInstructionAddress": "0x0048fb8c"
+      },
+      "sprite": {
+        "slot": 207,
+        "baseFrame": 0,
+        "pointerCell": "0x004bc3d0",
+        "sourcePathPointer": "0x004bca4c",
+        "sourcePath": "char\\budac.spr",
+        "sourcePathNormalized": "char/budac.spr"
+      }
+    },
+    {
+      "internalClass": 37,
+      "originalGameplayName": "일본 화염차",
+      "definition": {
+        "recordAddress": "0x00885e0c",
+        "initializerCallAddress": "0x0045c8c3",
+        "flags": "0x80141005"
+      },
+      "name": {
+        "runtimePointer": "0x00aa5248",
+        "sourcePointer": "0x004c8220",
+        "sourceInstructionAddress": "0x0048fd32",
+        "destinationInstructionAddress": "0x0048fd44"
+      },
+      "sprite": {
+        "slot": 198,
+        "baseFrame": 0,
+        "pointerCell": "0x004bc3ac",
+        "sourcePathPointer": "0x004bcae4",
+        "sourcePath": "char\\flametankj.spr",
+        "sourcePathNormalized": "char/flametankj.spr"
+      }
+    },
+    {
+      "internalClass": 38,
+      "originalGameplayName": "조선 수송선",
+      "definition": {
+        "recordAddress": "0x00885f58",
+        "initializerCallAddress": "0x0045d2c5",
+        "flags": "0x80142411"
+      },
+      "name": {
+        "runtimePointer": "0x00aa54a8",
+        "sourcePointer": "0x004c82e8",
+        "sourceInstructionAddress": "0x0048fa5f",
+        "destinationInstructionAddress": "0x0048fa71"
+      },
+      "sprite": {
+        "slot": 203,
+        "baseFrame": 0,
+        "pointerCell": "0x004bc3c0",
+        "sourcePathPointer": "0x004bca90",
+        "sourcePath": "char\\tshipk.spr",
+        "sourcePathNormalized": "char/tshipk.spr"
+      }
+    },
+    {
+      "internalClass": 39,
+      "originalGameplayName": "명 코끼리",
+      "definition": {
+        "recordAddress": "0x008860a4",
+        "initializerCallAddress": "0x0045cf38",
+        "flags": "0x00081005"
+      },
+      "name": {
+        "runtimePointer": "0x00aa5b28",
+        "sourcePointer": "0x004c7f14",
+        "sourceInstructionAddress": "0x004906df",
+        "destinationInstructionAddress": "0x004906f1"
+      },
+      "sprite": {
+        "slot": 214,
+        "baseFrame": 0,
+        "pointerCell": "0x004bc3ec",
+        "sourcePathPointer": "0x004bc9c8",
+        "sourcePath": "char\\elephantc1.spr",
+        "sourcePathNormalized": "char/elephantc1.spr"
+      }
+    },
+    {
+      "internalClass": 40,
+      "originalGameplayName": "조선 탑",
+      "definition": {
+        "recordAddress": "0x008861f0",
+        "initializerCallAddress": "0x0045ecbc",
+        "flags": "0x00710002"
+      },
+      "name": {
+        "runtimePointer": "0x00aa5ac8",
+        "sourcePointer": "0x004c803c",
+        "sourceInstructionAddress": "0x00490322",
+        "destinationInstructionAddress": "0x00490334"
+      },
+      "sprite": {
+        "slot": 211,
+        "baseFrame": 7,
+        "pointerCell": "0x004bc3e0",
+        "sourcePathPointer": "0x004bca04",
+        "sourcePath": "char\\advtemplek.spr",
+        "sourcePathNormalized": "char/advtemplek.spr"
+      }
+    },
+    {
+      "internalClass": 41,
+      "originalGameplayName": "조선 조선소",
+      "definition": {
+        "recordAddress": "0x0088633c",
+        "initializerCallAddress": "0x0045ed43",
+        "flags": "0x00710002"
+      },
+      "name": {
+        "runtimePointer": "0x00aa5a48",
+        "sourcePointer": "0x004c8044",
+        "sourceInstructionAddress": "0x004902f7",
+        "destinationInstructionAddress": "0x0049030c"
+      },
+      "sprite": {
+        "slot": 131,
+        "baseFrame": 7,
+        "pointerCell": "0x004bc2a0",
+        "sourcePathPointer": "0x004bcff4",
+        "sourcePath": "char\\shipyardk.spr",
+        "sourcePathNormalized": "char/shipyardk.spr"
+      }
+    },
+    {
+      "internalClass": 42,
+      "originalGameplayName": "조선 화포망루",
+      "definition": {
+        "recordAddress": "0x00886488",
+        "initializerCallAddress": "0x0045eab6",
+        "flags": "0x00110006"
+      },
+      "name": {
+        "runtimePointer": "0x00aa59a8",
+        "sourcePointer": "0x004c8068",
+        "sourceInstructionAddress": "0x00490282",
+        "destinationInstructionAddress": "0x00490291"
+      },
+      "sprite": {
+        "slot": 128,
+        "baseFrame": 7,
+        "pointerCell": "0x004bc294",
+        "sourcePathPointer": "0x004bd030",
+        "sourcePath": "char\\towerk.spr",
+        "sourcePathNormalized": "char/towerk.spr"
+      }
+    },
+    {
+      "internalClass": 43,
+      "originalGameplayName": "조선 신기전망루",
+      "definition": {
+        "recordAddress": "0x008865d4",
+        "initializerCallAddress": "0x0045eb35",
+        "flags": "0x00112002"
+      },
+      "name": {
+        "runtimePointer": "0x00aa59c8",
+        "sourcePointer": "0x004c8058",
+        "sourceInstructionAddress": "0x004902a7",
+        "destinationInstructionAddress": "0x004902b9"
+      },
+      "sprite": {
+        "slot": 192,
+        "baseFrame": 7,
+        "pointerCell": "0x004bc394",
+        "sourcePathPointer": "0x004bcb54",
+        "sourcePath": "char\\advtowerk.spr",
+        "sourcePathNormalized": "char/advtowerk.spr"
+      }
+    },
+    {
+      "internalClass": 44,
+      "originalGameplayName": "조선 절",
+      "definition": {
+        "recordAddress": "0x00886720",
+        "initializerCallAddress": "0x0045ec2f",
+        "flags": "0x00710002"
+      },
+      "name": {
+        "runtimePointer": "0x00aa5a28",
+        "sourcePointer": "0x004c8050",
+        "sourceInstructionAddress": "0x004902cf",
+        "destinationInstructionAddress": "0x004902e1"
+      },
+      "sprite": {
+        "slot": 129,
+        "baseFrame": 7,
+        "pointerCell": "0x004bc298",
+        "sourcePathPointer": "0x004bd01c",
+        "sourcePath": "char\\templek.spr",
+        "sourcePathNormalized": "char/templek.spr"
+      }
+    },
+    {
+      "internalClass": 45,
+      "originalGameplayName": "조선 제철장",
+      "definition": {
+        "recordAddress": "0x0088686c",
+        "initializerCallAddress": "0x0045e921",
+        "flags": "0x00710002"
+      },
+      "name": {
+        "runtimePointer": "0x00aa5948",
+        "sourcePointer": "0x004c808c",
+        "sourceInstructionAddress": "0x0049022a",
+        "destinationInstructionAddress": "0x00490244"
+      },
+      "sprite": {
+        "slot": 121,
+        "baseFrame": 7,
+        "pointerCell": "0x004bc278",
+        "sourcePathPointer": "0x004bd0b4",
+        "sourcePath": "char\\heavymakerk.spr",
+        "sourcePathNormalized": "char/heavymakerk.spr"
+      }
+    },
+    {
+      "internalClass": 46,
+      "originalGameplayName": "조선 비행체제작소",
+      "definition": {
+        "recordAddress": "0x008869b8",
+        "initializerCallAddress": "0x0045ea32",
+        "flags": "0x00710002"
+      },
+      "name": {
+        "runtimePointer": "0x00aa5988",
+        "sourcePointer": "0x004c8078",
+        "sourceInstructionAddress": "0x0049025a",
+        "destinationInstructionAddress": "0x0049026c"
+      },
+      "sprite": {
+        "slot": 126,
+        "baseFrame": 7,
+        "pointerCell": "0x004bc28c",
+        "sourcePathPointer": "0x004bd050",
+        "sourcePath": "char\\airmakerk.spr",
+        "sourcePathNormalized": "char/airmakerk.spr"
+      }
+    },
+    {
+      "internalClass": 47,
+      "originalGameplayName": "조선 목장",
+      "definition": {
+        "recordAddress": "0x00886b04",
+        "initializerCallAddress": "0x0045e7a2",
+        "flags": "0x00710002"
+      },
+      "name": {
+        "runtimePointer": "0x00aa58e8",
+        "sourcePointer": "0x004c80a4",
+        "sourceInstructionAddress": "0x004901df",
+        "destinationInstructionAddress": "0x004901f1"
+      },
+      "sprite": {
+        "slot": 120,
+        "baseFrame": 7,
+        "pointerCell": "0x004bc274",
+        "sourcePathPointer": "0x004bd0cc",
+        "sourcePath": "char\\stablek.spr",
+        "sourcePathNormalized": "char/stablek.spr"
+      }
+    },
+    {
+      "internalClass": 48,
+      "originalGameplayName": "조선 방앗간",
+      "definition": {
+        "recordAddress": "0x00886c50",
+        "initializerCallAddress": "0x0045e354",
+        "flags": "0x00310182"
+      },
+      "name": {
+        "runtimePointer": "0x00aa5848",
+        "sourcePointer": "0x004c80cc",
+        "sourceInstructionAddress": "0x0049016a",
+        "destinationInstructionAddress": "0x0049017c"
+      },
+      "sprite": {
+        "slot": 146,
+        "baseFrame": 7,
+        "pointerCell": "0x004bc2dc",
+        "sourcePathPointer": "0x004bced8",
+        "sourcePath": "char\\millk.spr",
+        "sourcePathNormalized": "char/millk.spr"
+      }
+    },
+    {
+      "internalClass": 49,
+      "originalGameplayName": "조선 본영",
+      "definition": {
+        "recordAddress": "0x00886d9c",
+        "initializerCallAddress": "0x0045e24a",
+        "flags": "0x00710082"
+      },
+      "name": {
+        "runtimePointer": "0x00aa5808",
+        "sourcePointer": "0x004c80d8",
+        "sourceInstructionAddress": "0x0049013f",
+        "destinationInstructionAddress": "0x00490154"
+      },
+      "sprite": {
+        "slot": 141,
+        "baseFrame": 7,
+        "pointerCell": "0x004bc2c8",
+        "sourcePathPointer": "0x004bcf34",
+        "sourcePath": "char\\hqk.spr",
+        "sourcePathNormalized": "char/hqk.spr"
+      }
+    },
+    {
+      "internalClass": 50,
+      "originalGameplayName": "조선 훈련소",
+      "definition": {
+        "recordAddress": "0x00886ee8",
+        "initializerCallAddress": "0x0045e461",
+        "flags": "0x00710002"
+      },
+      "name": {
+        "runtimePointer": "0x00aa5888",
+        "sourcePointer": "0x004c80c0",
+        "sourceInstructionAddress": "0x00490192",
+        "destinationInstructionAddress": "0x004901a4"
+      },
+      "sprite": {
+        "slot": 108,
+        "baseFrame": 7,
+        "pointerCell": "0x004bc244",
+        "sourcePathPointer": "0x004bd1b8",
+        "sourcePath": "char\\barrackk.spr",
+        "sourcePathNormalized": "char/barrackk.spr"
+      }
+    },
+    {
+      "internalClass": 51,
+      "originalGameplayName": "조선 훈련도감",
+      "definition": {
+        "recordAddress": "0x00887034",
+        "initializerCallAddress": "0x0045e4e8",
+        "flags": "0x00710002"
+      },
+      "name": {
+        "runtimePointer": "0x00aa58a8",
+        "sourcePointer": "0x004c80b0",
+        "sourceInstructionAddress": "0x004901b7",
+        "destinationInstructionAddress": "0x004901c9"
+      },
+      "sprite": {
+        "slot": 213,
+        "baseFrame": 7,
+        "pointerCell": "0x004bc3e8",
+        "sourcePathPointer": "0x004bc9dc",
+        "sourcePath": "char\\advbarrackk.spr",
+        "sourcePathNormalized": "char/advbarrackk.spr"
+      }
+    },
+    {
+      "internalClass": 52,
+      "originalGameplayName": "조선 봉화대",
+      "definition": {
+        "recordAddress": "0x00887180",
+        "initializerCallAddress": "0x0045e826",
+        "flags": "0x00310002"
+      },
+      "name": {
+        "runtimePointer": "0x00aa5908",
+        "sourcePointer": "0x004c8098",
+        "sourceInstructionAddress": "0x00490207",
+        "destinationInstructionAddress": "0x00490219"
+      },
+      "sprite": {
+        "slot": 113,
+        "baseFrame": 7,
+        "pointerCell": "0x004bc258",
+        "sourcePathPointer": "0x004bd154",
+        "sourcePath": "char\\firehousek.spr",
+        "sourcePathNormalized": "char/firehousek.spr"
+      }
+    },
+    {
+      "internalClass": 53,
+      "originalGameplayName": "일본 대장간",
+      "definition": {
+        "recordAddress": "0x008872cc",
+        "initializerCallAddress": "0x0045d6f2",
+        "flags": "0x00510042"
+      },
+      "name": {
+        "runtimePointer": "0x00aa5568",
+        "sourcePointer": "0x004c7fc8",
+        "sourceInstructionAddress": "0x00490487",
+        "destinationInstructionAddress": "0x00490499"
+      },
+      "sprite": {
+        "slot": 122,
+        "baseFrame": 7,
+        "pointerCell": "0x004bc27c",
+        "sourcePathPointer": "0x004bd09c",
+        "sourcePath": "char\\heavymakerj.spr",
+        "sourcePathNormalized": "char/heavymakerj.spr"
+      }
+    },
+    {
+      "internalClass": 54,
+      "originalGameplayName": "일본 신사",
+      "definition": {
+        "recordAddress": "0x00887418",
+        "initializerCallAddress": "0x0045d659",
+        "flags": "0x00510002"
+      },
+      "name": {
+        "runtimePointer": "0x00aa5548",
+        "sourcePointer": "0x004c7fd4",
+        "sourceInstructionAddress": "0x0049045f",
+        "destinationInstructionAddress": "0x00490471"
+      },
+      "sprite": {
+        "slot": 200,
+        "baseFrame": 7,
+        "pointerCell": "0x004bc3b4",
+        "sourcePathPointer": "0x004bcac0",
+        "sourcePath": "char\\advtemplej.spr",
+        "sourcePathNormalized": "char/advtemplej.spr"
+      }
+    },
+    {
+      "internalClass": 55,
+      "originalGameplayName": "일본 사원",
+      "definition": {
+        "recordAddress": "0x00887564",
+        "initializerCallAddress": "0x0045d5ca",
+        "flags": "0x00510042"
+      },
+      "name": {
+        "runtimePointer": "0x00aa5528",
+        "sourcePointer": "0x004c7fe0",
+        "sourceInstructionAddress": "0x00490437",
+        "destinationInstructionAddress": "0x00490449"
+      },
+      "sprite": {
+        "slot": 210,
+        "baseFrame": 7,
+        "pointerCell": "0x004bc3dc",
+        "sourcePathPointer": "0x004bca18",
+        "sourcePath": "char\\templej.spr",
+        "sourcePathNormalized": "char/templej.spr"
+      }
+    },
+    {
+      "internalClass": 56,
+      "originalGameplayName": "일본 조선소",
+      "definition": {
+        "recordAddress": "0x008876b0",
+        "initializerCallAddress": "0x0045d811",
+        "flags": "0x00510042"
+      },
+      "name": {
+        "runtimePointer": "0x00aa55a8",
+        "sourcePointer": "0x004c7fa8",
+        "sourceInstructionAddress": "0x004904da",
+        "destinationInstructionAddress": "0x004904ec"
+      },
+      "sprite": {
+        "slot": 133,
+        "baseFrame": 7,
+        "pointerCell": "0x004bc2a8",
+        "sourcePathPointer": "0x004bcfcc",
+        "sourcePath": "char\\shipyardj.spr",
+        "sourcePathNormalized": "char/shipyardj.spr"
+      }
+    },
+    {
+      "internalClass": 57,
+      "originalGameplayName": "일본 시장",
+      "definition": {
+        "recordAddress": "0x008877fc",
+        "initializerCallAddress": "0x0045d88b",
+        "flags": "0x00110182"
+      },
+      "name": {
+        "runtimePointer": "0x00aa55c8",
+        "sourcePointer": "0x004c7f9c",
+        "sourceInstructionAddress": "0x00490502",
+        "destinationInstructionAddress": "0x00490511"
+      },
+      "sprite": {
+        "slot": 123,
+        "baseFrame": 7,
+        "pointerCell": "0x004bc280",
+        "sourcePathPointer": "0x004bd08c",
+        "sourcePath": "char\\millj.spr",
+        "sourcePathNormalized": "char/millj.spr"
+      }
+    },
+    {
+      "internalClass": 58,
+      "originalGameplayName": "일본 본영",
+      "definition": {
+        "recordAddress": "0x00887948",
+        "initializerCallAddress": "0x0045d3bc",
+        "flags": "0x00510082"
+      },
+      "name": {
+        "runtimePointer": "0x00aa54c8",
+        "sourcePointer": "0x004c8004",
+        "sourceInstructionAddress": "0x004903bf",
+        "destinationInstructionAddress": "0x004903d1"
+      },
+      "sprite": {
+        "slot": 106,
+        "baseFrame": 7,
+        "pointerCell": "0x004bc23c",
+        "sourcePathPointer": "0x004bd1dc",
+        "sourcePath": "char\\jhq.spr",
+        "sourcePathNormalized": "char/jhq.spr"
+      }
+    },
+    {
+      "internalClass": 59,
+      "originalGameplayName": "일본 마료",
+      "definition": {
+        "recordAddress": "0x00887a94",
+        "initializerCallAddress": "0x0045d547",
+        "flags": "0x00510042"
+      },
+      "name": {
+        "runtimePointer": "0x00aa5508",
+        "sourcePointer": "0x004c7fec",
+        "sourceInstructionAddress": "0x00490412",
+        "destinationInstructionAddress": "0x00490424"
+      },
+      "sprite": {
+        "slot": 119,
+        "baseFrame": 7,
+        "pointerCell": "0x004bc270",
+        "sourcePathPointer": "0x004bd0e0",
+        "sourcePath": "char\\stablej.spr",
+        "sourcePathNormalized": "char/stablej.spr"
+      }
+    },
+    {
+      "internalClass": 60,
+      "originalGameplayName": "일본 훈련소",
+      "definition": {
+        "recordAddress": "0x00887be0",
+        "initializerCallAddress": "0x0045d4b5",
+        "flags": "0x00510042"
+      },
+      "name": {
+        "runtimePointer": "0x00aa54e8",
+        "sourcePointer": "0x004c7ff8",
+        "sourceInstructionAddress": "0x004903ea",
+        "destinationInstructionAddress": "0x004903fc"
+      },
+      "sprite": {
+        "slot": 110,
+        "baseFrame": 7,
+        "pointerCell": "0x004bc24c",
+        "sourcePathPointer": "0x004bd18c",
+        "sourcePath": "char\\barrackj.spr",
+        "sourcePathNormalized": "char/barrackj.spr"
+      }
+    },
+    {
+      "internalClass": 61,
+      "originalGameplayName": "일본 비행체제작소",
+      "definition": {
+        "recordAddress": "0x00887d2c",
+        "initializerCallAddress": "0x0045d782",
+        "flags": "0x00510042"
+      },
+      "name": {
+        "runtimePointer": "0x00aa5588",
+        "sourcePointer": "0x004c7fb4",
+        "sourceInstructionAddress": "0x004904ad",
+        "destinationInstructionAddress": "0x004904c4"
+      },
+      "sprite": {
+        "slot": 130,
+        "baseFrame": 7,
+        "pointerCell": "0x004bc29c",
+        "sourcePathPointer": "0x004bd008",
+        "sourcePath": "char\\airmakerj.spr",
+        "sourcePathNormalized": "char/airmakerj.spr"
+      }
+    },
+    {
+      "internalClass": 62,
+      "originalGameplayName": "일본 관측소",
+      "definition": {
+        "recordAddress": "0x00887e78",
+        "initializerCallAddress": "0x0045d43a",
+        "flags": "0x00110042"
+      },
+      "name": {
+        "runtimePointer": "0x00aa5b08",
+        "sourcePointer": "0x004c7f84",
+        "sourceInstructionAddress": "0x0049054f",
+        "destinationInstructionAddress": "0x00490561"
+      },
+      "sprite": {
+        "slot": 221,
+        "baseFrame": 7,
+        "pointerCell": "0x004bc408",
+        "sourcePathPointer": "0x004bc940",
+        "sourcePath": "char\\firehousej.spr",
+        "sourcePathNormalized": "char/firehousej.spr"
+      }
+    },
+    {
+      "internalClass": 63,
+      "originalGameplayName": "일본 망루",
+      "definition": {
+        "recordAddress": "0x00887fc4",
+        "initializerCallAddress": "0x0045d916",
+        "flags": "0x00112006"
+      },
+      "name": {
+        "runtimePointer": "0x00aa59e8",
+        "sourcePointer": "0x004c7f90",
+        "sourceInstructionAddress": "0x00490527",
+        "destinationInstructionAddress": "0x00490539"
+      },
+      "sprite": {
+        "slot": 219,
+        "baseFrame": 7,
+        "pointerCell": "0x004bc400",
+        "sourcePathPointer": "0x004bc968",
+        "sourcePath": "char\\towerj.spr",
+        "sourcePathNormalized": "char/towerj.spr"
+      }
+    },
+    {
+      "internalClass": 64,
+      "originalGameplayName": "명 대장간",
+      "definition": {
+        "recordAddress": "0x00888110",
+        "initializerCallAddress": "0x0045e9a8",
+        "flags": "0x00710002"
+      },
+      "name": {
+        "runtimePointer": "0x00aa5968",
+        "sourcePointer": "0x004c7f50",
+        "sourceInstructionAddress": "0x00490617",
+        "destinationInstructionAddress": "0x00490629"
+      },
+      "sprite": {
+        "slot": 138,
+        "baseFrame": 7,
+        "pointerCell": "0x004bc2bc",
+        "sourcePathPointer": "0x004bcf6c",
+        "sourcePath": "char\\heavymakerc.spr",
+        "sourcePathNormalized": "char/heavymakerc.spr"
+      }
+    },
+    {
+      "internalClass": 65,
+      "originalGameplayName": "명 병부성",
+      "definition": {
+        "recordAddress": "0x0088825c",
+        "initializerCallAddress": "0x0045e582",
+        "flags": "0x00710002"
+      },
+      "name": {
+        "runtimePointer": "0x00aa58c8",
+        "sourcePointer": "0x004c7f68",
+        "sourceInstructionAddress": "0x004905ca",
+        "destinationInstructionAddress": "0x004905dc"
+      },
+      "sprite": {
+        "slot": 136,
+        "baseFrame": 7,
+        "pointerCell": "0x004bc2b4",
+        "sourcePathPointer": "0x004bcf98",
+        "sourcePath": "char\\barrackc.spr",
+        "sourcePathNormalized": "char/barrackc.spr"
+      }
+    },
+    {
+      "internalClass": 66,
+      "originalGameplayName": "명 관측소",
+      "definition": {
+        "recordAddress": "0x008883a8",
+        "initializerCallAddress": "0x0045e8a8",
+        "flags": "0x00310002"
+      },
+      "name": {
+        "runtimePointer": "0x00aa5928",
+        "sourcePointer": "0x004c7f5c",
+        "sourceInstructionAddress": "0x004905ef",
+        "destinationInstructionAddress": "0x00490601"
+      },
+      "sprite": {
+        "slot": 137,
+        "baseFrame": 7,
+        "pointerCell": "0x004bc2b8",
+        "sourcePathPointer": "0x004bcf84",
+        "sourcePath": "char\\firehousec.spr",
+        "sourcePathNormalized": "char/firehousec.spr"
+      }
+    },
+    {
+      "internalClass": 67,
+      "originalGameplayName": "명 소환소",
+      "definition": {
+        "recordAddress": "0x008884f4",
+        "initializerCallAddress": "0x0045ee46",
+        "flags": "0x00710002"
+      },
+      "name": {
+        "runtimePointer": "0x00aa5a88",
+        "sourcePointer": "0x004c7f30",
+        "sourceInstructionAddress": "0x00490692",
+        "destinationInstructionAddress": "0x004906a4"
+      },
+      "sprite": {
+        "slot": 140,
+        "baseFrame": 7,
+        "pointerCell": "0x004bc2c4",
+        "sourcePathPointer": "0x004bcf44",
+        "sourcePath": "char\\airmakerc.spr",
+        "sourcePathNormalized": "char/airmakerc.spr"
+      }
+    },
+    {
+      "internalClass": 68,
+      "originalGameplayName": "명 조선소",
+      "definition": {
+        "recordAddress": "0x00888640",
+        "initializerCallAddress": "0x0045edc5",
+        "flags": "0x00710002"
+      },
+      "name": {
+        "runtimePointer": "0x00aa5a68",
+        "sourcePointer": "0x004c7f3c",
+        "sourceInstructionAddress": "0x00490662",
+        "destinationInstructionAddress": "0x0049067c"
+      },
+      "sprite": {
+        "slot": 139,
+        "baseFrame": 7,
+        "pointerCell": "0x004bc2c0",
+        "sourcePathPointer": "0x004bcf58",
+        "sourcePath": "char\\shipyardc.spr",
+        "sourcePathNormalized": "char/shipyardc.spr"
+      }
+    },
+    {
+      "internalClass": 69,
+      "originalGameplayName": "명 망루",
+      "definition": {
+        "recordAddress": "0x0088878c",
+        "initializerCallAddress": "0x0045ebb4",
+        "flags": "0x00112006"
+      },
+      "name": {
+        "runtimePointer": "0x00aa5a08",
+        "sourcePointer": "0x004c7f48",
+        "sourceInstructionAddress": "0x0049063f",
+        "destinationInstructionAddress": "0x00490651"
+      },
+      "sprite": {
+        "slot": 197,
+        "baseFrame": 7,
+        "pointerCell": "0x004bc3a8",
+        "sourcePathPointer": "0x004bcaf8",
+        "sourcePath": "char\\towerc.spr",
+        "sourcePathNormalized": "char/towerc.spr"
+      }
+    },
+    {
+      "internalClass": 70,
+      "originalGameplayName": "명 본영",
+      "definition": {
+        "recordAddress": "0x008888d8",
+        "initializerCallAddress": "0x0045e2d9",
+        "flags": "0x00510082"
+      },
+      "name": {
+        "runtimePointer": "0x00aa5828",
+        "sourcePointer": "0x004c7f7c",
+        "sourceInstructionAddress": "0x00490577",
+        "destinationInstructionAddress": "0x0049058c"
+      },
+      "sprite": {
+        "slot": 135,
+        "baseFrame": 7,
+        "pointerCell": "0x004bc2b0",
+        "sourcePathPointer": "0x004bcfac",
+        "sourcePath": "char\\hqc.spr",
+        "sourcePathNormalized": "char/hqc.spr"
+      }
+    },
+    {
+      "internalClass": 71,
+      "originalGameplayName": "명 사원",
+      "definition": {
+        "recordAddress": "0x00888a24",
+        "initializerCallAddress": "0x0045e712",
+        "flags": "0x00710002"
+      },
+      "name": {
+        "runtimePointer": "0x00aa5aa8",
+        "sourcePointer": "0x004c7f00",
+        "sourceInstructionAddress": "0x0049072f",
+        "destinationInstructionAddress": "0x00490744"
+      },
+      "sprite": {
+        "slot": 205,
+        "baseFrame": 7,
+        "pointerCell": "0x004bc3c8",
+        "sourcePathPointer": "0x004bca6c",
+        "sourcePath": "char\\templec.spr",
+        "sourcePathNormalized": "char/templec.spr"
+      }
+    },
+    {
+      "internalClass": 72,
+      "originalGameplayName": "명 군사연구소",
+      "definition": {
+        "recordAddress": "0x00888b70",
+        "initializerCallAddress": "0x0045e68b",
+        "flags": "0x00710002"
+      },
+      "name": {
+        "runtimePointer": "0x00aa5ae8",
+        "sourcePointer": "0x004c7f20",
+        "sourceInstructionAddress": "0x004906ba",
+        "destinationInstructionAddress": "0x004906c9"
+      },
+      "sprite": {
+        "slot": 223,
+        "baseFrame": 7,
+        "pointerCell": "0x004bc410",
+        "sourcePathPointer": "0x004bc914",
+        "sourcePath": "char\\milllabc.spr",
+        "sourcePathNormalized": "char/milllabc.spr"
+      }
+    },
+    {
+      "internalClass": 73,
+      "originalGameplayName": "명 시장",
+      "definition": {
+        "recordAddress": "0x00888cbc",
+        "initializerCallAddress": "0x0045e3dc",
+        "flags": "0x00310182"
+      },
+      "name": {
+        "runtimePointer": "0x00aa5868",
+        "sourcePointer": "0x004c7f74",
+        "sourceInstructionAddress": "0x004905a2",
+        "destinationInstructionAddress": "0x004905b4"
+      },
+      "sprite": {
+        "slot": 144,
+        "baseFrame": 7,
+        "pointerCell": "0x004bc2d4",
+        "sourcePathPointer": "0x004bcefc",
+        "sourcePath": "char\\millc.spr",
+        "sourcePathNormalized": "char/millc.spr"
+      }
+    },
+    {
+      "internalClass": 74,
+      "originalGameplayName": "명 조련소",
+      "definition": {
+        "recordAddress": "0x00888e08",
+        "initializerCallAddress": "0x0045e610",
+        "flags": "0x00710002"
+      },
+      "name": {
+        "runtimePointer": "0x00aa5b48",
+        "sourcePointer": "0x004c7f08",
+        "sourceInstructionAddress": "0x00490707",
+        "destinationInstructionAddress": "0x00490719"
+      },
+      "sprite": {
+        "slot": 222,
+        "baseFrame": 7,
+        "pointerCell": "0x004bc40c",
+        "sourcePathPointer": "0x004bc928",
+        "sourcePath": "char\\elebarrackc.spr",
+        "sourcePathNormalized": "char/elebarrackc.spr"
+      }
+    },
+    {
+      "internalClass": 75,
+      "originalGameplayName": "일본 건설수레",
+      "definition": {
+        "recordAddress": "0x00888f54",
+        "initializerCallAddress": "0x0045d341",
+        "flags": "0x80161001"
+      },
+      "name": {
+        "runtimePointer": "0x00aa5bc8",
+        "sourcePointer": "0x004c8260",
+        "sourceInstructionAddress": "0x0048fc6a",
+        "destinationInstructionAddress": "0x0048fc7c"
+      },
+      "sprite": {
+        "slot": 204,
+        "baseFrame": 14,
+        "pointerCell": "0x004bc3c4",
+        "sourcePathPointer": "0x004bca80",
+        "sourcePath": "char\\carj.spr",
+        "sourcePathNormalized": "char/carj.spr"
+      }
+    },
+    {
+      "internalClass": 76,
+      "originalGameplayName": "조선 권율",
+      "definition": {
+        "recordAddress": "0x008890a0",
+        "initializerCallAddress": "0x0045d998",
+        "flags": "0x00880805"
+      },
+      "name": {
+        "runtimePointer": "0x00aa55e8",
+        "sourcePointer": "0x004c81b0",
+        "sourceInstructionAddress": "0x0048fe97",
+        "destinationInstructionAddress": "0x0048fea9"
+      },
+      "sprite": {
+        "slot": 153,
+        "baseFrame": 0,
+        "pointerCell": "0x004bc2f8",
+        "sourcePathPointer": "0x004bce5c",
+        "sourcePath": "char\\generalk11.spr",
+        "sourcePathNormalized": "char/generalk11.spr"
+      }
+    },
+    {
+      "internalClass": 77,
+      "originalGameplayName": "조선 이순신",
+      "definition": {
+        "recordAddress": "0x008891ec",
+        "initializerCallAddress": "0x0045da1b",
+        "flags": "0x00882805"
+      },
+      "name": {
+        "runtimePointer": "0x00aa5608",
+        "sourcePointer": "0x004c81a4",
+        "sourceInstructionAddress": "0x0048febf",
+        "destinationInstructionAddress": "0x0048fed4"
+      },
+      "sprite": {
+        "slot": 156,
+        "baseFrame": 0,
+        "pointerCell": "0x004bc304",
+        "sourcePathPointer": "0x004bce20",
+        "sourcePath": "char\\generalk21.spr",
+        "sourcePathNormalized": "char/generalk21.spr"
+      }
+    },
+    {
+      "internalClass": 78,
+      "originalGameplayName": "조선 유성룡",
+      "definition": {
+        "recordAddress": "0x00889338",
+        "initializerCallAddress": "0x0045daa1",
+        "flags": "0x00882805"
+      },
+      "name": {
+        "runtimePointer": "0x00aa5628",
+        "sourcePointer": "0x004c8198",
+        "sourceInstructionAddress": "0x0048feea",
+        "destinationInstructionAddress": "0x0048fefc"
+      },
+      "sprite": {
+        "slot": 158,
+        "baseFrame": 0,
+        "pointerCell": "0x004bc30c",
+        "sourcePathPointer": "0x004bcdf8",
+        "sourcePath": "char\\generalk31.spr",
+        "sourcePathNormalized": "char/generalk31.spr"
+      }
+    },
+    {
+      "internalClass": 79,
+      "originalGameplayName": "조선 사명대사",
+      "definition": {
+        "recordAddress": "0x00889484",
+        "initializerCallAddress": "0x0045db27",
+        "flags": "0x00882805"
+      },
+      "name": {
+        "runtimePointer": "0x00aa5648",
+        "sourcePointer": "0x004c8188",
+        "sourceInstructionAddress": "0x0048ff12",
+        "destinationInstructionAddress": "0x0048ff21"
+      },
+      "sprite": {
+        "slot": 160,
+        "baseFrame": 0,
+        "pointerCell": "0x004bc314",
+        "sourcePathPointer": "0x004bcdd0",
+        "sourcePath": "char\\generalk4.spr",
+        "sourcePathNormalized": "char/generalk4.spr"
+      }
+    },
+    {
+      "internalClass": 80,
+      "originalGameplayName": "조선 곽재우",
+      "definition": {
+        "recordAddress": "0x008895d0",
+        "initializerCallAddress": "0x0045dbac",
+        "flags": "0x00881005"
+      },
+      "name": {
+        "runtimePointer": "0x00aa5668",
+        "sourcePointer": "0x004c817c",
+        "sourceInstructionAddress": "0x0048ff37",
+        "destinationInstructionAddress": "0x0048ff49"
+      },
+      "sprite": {
+        "slot": 161,
+        "baseFrame": 0,
+        "pointerCell": "0x004bc318",
+        "sourcePathPointer": "0x004bcdbc",
+        "sourcePath": "char\\generalk51.spr",
+        "sourcePathNormalized": "char/generalk51.spr"
+      }
+    },
+    {
+      "internalClass": 81,
+      "originalGameplayName": "조선 곽재우분신",
+      "definition": {
+        "recordAddress": "0x0088971c",
+        "initializerCallAddress": "0x0045dc22",
+        "flags": "0x00004005"
+      },
+      "name": {
+        "runtimePointer": "0x00aa5688",
+        "sourcePointer": "0x004c816c",
+        "sourceInstructionAddress": "0x0048ff5f",
+        "destinationInstructionAddress": "0x0048ff71"
+      },
+      "sprite": {
+        "slot": 161,
+        "baseFrame": 0,
+        "pointerCell": "0x004bc318",
+        "sourcePathPointer": "0x004bcdbc",
+        "sourcePath": "char\\generalk51.spr",
+        "sourcePathNormalized": "char/generalk51.spr"
+      }
+    },
+    {
+      "internalClass": 82,
+      "originalGameplayName": "일본 고니시",
+      "definition": {
+        "recordAddress": "0x00889868",
+        "initializerCallAddress": "0x0045dd2a",
+        "flags": "0x00880805"
+      },
+      "name": {
+        "runtimePointer": "0x00aa56c8",
+        "sourcePointer": "0x004c811c",
+        "sourceInstructionAddress": "0x00490075",
+        "destinationInstructionAddress": "0x0049008c"
+      },
+      "sprite": {
+        "slot": 165,
+        "baseFrame": 0,
+        "pointerCell": "0x004bc328",
+        "sourcePathPointer": "0x004bcd6c",
+        "sourcePath": "char\\generalj11.spr",
+        "sourcePathNormalized": "char/generalj11.spr"
+      }
+    },
+    {
+      "internalClass": 83,
+      "originalGameplayName": "일본 가토",
+      "definition": {
+        "recordAddress": "0x008899b4",
+        "initializerCallAddress": "0x0045ddac",
+        "flags": "0x00880805"
+      },
+      "name": {
+        "runtimePointer": "0x00aa56e8",
+        "sourcePointer": "0x004c8110",
+        "sourceInstructionAddress": "0x004900a2",
+        "destinationInstructionAddress": "0x004900b4"
+      },
+      "sprite": {
+        "slot": 168,
+        "baseFrame": 0,
+        "pointerCell": "0x004bc334",
+        "sourcePathPointer": "0x004bcd30",
+        "sourcePath": "char\\generalj21.spr",
+        "sourcePathNormalized": "char/generalj21.spr"
+      }
+    },
+    {
+      "internalClass": 84,
+      "originalGameplayName": "일본 와카자키",
+      "definition": {
+        "recordAddress": "0x00889b00",
+        "initializerCallAddress": "0x0045de30",
+        "flags": "0x00882805"
+      },
+      "name": {
+        "runtimePointer": "0x00aa5708",
+        "sourcePointer": "0x004c8100",
+        "sourceInstructionAddress": "0x004900ca",
+        "destinationInstructionAddress": "0x004900d9"
+      },
+      "sprite": {
+        "slot": 171,
+        "baseFrame": 0,
+        "pointerCell": "0x004bc340",
+        "sourcePathPointer": "0x004bccf4",
+        "sourcePath": "char\\generalj31.spr",
+        "sourcePathNormalized": "char/generalj31.spr"
+      }
+    },
+    {
+      "internalClass": 85,
+      "originalGameplayName": "일본 세이쇼오",
+      "definition": {
+        "recordAddress": "0x00889c4c",
+        "initializerCallAddress": "0x0045deb7",
+        "flags": "0x00882805"
+      },
+      "name": {
+        "runtimePointer": "0x00aa5728",
+        "sourcePointer": "0x004c80f0",
+        "sourceInstructionAddress": "0x004900ef",
+        "destinationInstructionAddress": "0x00490101"
+      },
+      "sprite": {
+        "slot": 174,
+        "baseFrame": 0,
+        "pointerCell": "0x004bc34c",
+        "sourcePathPointer": "0x004bccb8",
+        "sourcePath": "char\\generalj41.spr",
+        "sourcePathNormalized": "char/generalj41.spr"
+      }
+    },
+    {
+      "internalClass": 86,
+      "originalGameplayName": "일본 우기다",
+      "definition": {
+        "recordAddress": "0x00889d98",
+        "initializerCallAddress": "0x0045df3a",
+        "flags": "0x00881005"
+      },
+      "name": {
+        "runtimePointer": "0x00aa5748",
+        "sourcePointer": "0x004c80e4",
+        "sourceInstructionAddress": "0x00490117",
+        "destinationInstructionAddress": "0x00490129"
+      },
+      "sprite": {
+        "slot": 178,
+        "baseFrame": 0,
+        "pointerCell": "0x004bc35c",
+        "sourcePathPointer": "0x004bcc68",
+        "sourcePath": "char\\general5j.spr",
+        "sourcePathNormalized": "char/general5j.spr"
+      }
+    },
+    {
+      "internalClass": 87,
+      "originalGameplayName": "명 이여송",
+      "definition": {
+        "recordAddress": "0x00889ee4",
+        "initializerCallAddress": "0x0045dfbd",
+        "flags": "0x00889005"
+      },
+      "name": {
+        "runtimePointer": "0x00aa5768",
+        "sourcePointer": "0x004c8154",
+        "sourceInstructionAddress": "0x0048ffb2",
+        "destinationInstructionAddress": "0x0048ffc4"
+      },
+      "sprite": {
+        "slot": 179,
+        "baseFrame": 0,
+        "pointerCell": "0x004bc360",
+        "sourcePathPointer": "0x004bcc54",
+        "sourcePath": "char\\generalc11.spr",
+        "sourcePathNormalized": "char/generalc11.spr"
+      }
+    },
+    {
+      "internalClass": 88,
+      "originalGameplayName": "명 조승훈",
+      "definition": {
+        "recordAddress": "0x0088a030",
+        "initializerCallAddress": "0x0045e040",
+        "flags": "0x00880805"
+      },
+      "name": {
+        "runtimePointer": "0x00aa5788",
+        "sourcePointer": "0x004c8148",
+        "sourceInstructionAddress": "0x0048ffda",
+        "destinationInstructionAddress": "0x0048ffec"
+      },
+      "sprite": {
+        "slot": 182,
+        "baseFrame": 0,
+        "pointerCell": "0x004bc36c",
+        "sourcePathPointer": "0x004bcc18",
+        "sourcePath": "char\\generalc2.spr",
+        "sourcePathNormalized": "char/generalc2.spr"
+      }
+    },
+    {
+      "internalClass": 89,
+      "originalGameplayName": "명 심유경",
+      "definition": {
+        "recordAddress": "0x0088a17c",
+        "initializerCallAddress": "0x0045e0c7",
+        "flags": "0x00882805"
+      },
+      "name": {
+        "runtimePointer": "0x00aa57a8",
+        "sourcePointer": "0x004c813c",
+        "sourceInstructionAddress": "0x0048ffff",
+        "destinationInstructionAddress": "0x00490011"
+      },
+      "sprite": {
+        "slot": 183,
+        "baseFrame": 0,
+        "pointerCell": "0x004bc370",
+        "sourcePathPointer": "0x004bcc04",
+        "sourcePath": "char\\generalc31.spr",
+        "sourcePathNormalized": "char/generalc31.spr"
+      }
+    },
+    {
+      "internalClass": 90,
+      "originalGameplayName": "명 진린",
+      "definition": {
+        "recordAddress": "0x0088a2c8",
+        "initializerCallAddress": "0x0045e14b",
+        "flags": "0x00882805"
+      },
+      "name": {
+        "runtimePointer": "0x00aa57c8",
+        "sourcePointer": "0x004c8134",
+        "sourceInstructionAddress": "0x00490027",
+        "destinationInstructionAddress": "0x00490039"
+      },
+      "sprite": {
+        "slot": 186,
+        "baseFrame": 0,
+        "pointerCell": "0x004bc37c",
+        "sourcePathPointer": "0x004bcbc8",
+        "sourcePath": "char\\generalc41.spr",
+        "sourcePathNormalized": "char/generalc41.spr"
+      }
+    },
+    {
+      "internalClass": 91,
+      "originalGameplayName": "명 여여문",
+      "definition": {
+        "recordAddress": "0x0088a414",
+        "initializerCallAddress": "0x0045e1cf",
+        "flags": "0x00880805"
+      },
+      "name": {
+        "runtimePointer": "0x00aa57e8",
+        "sourcePointer": "0x004c8128",
+        "sourceInstructionAddress": "0x0049004f",
+        "destinationInstructionAddress": "0x00490061"
+      },
+      "sprite": {
+        "slot": 189,
+        "baseFrame": 0,
+        "pointerCell": "0x004bc388",
+        "sourcePathPointer": "0x004bcb8c",
+        "sourcePath": "char\\generalc51.spr",
+        "sourcePathNormalized": "char/generalc51.spr"
+      }
+    },
+    {
+      "internalClass": 92,
+      "originalGameplayName": "조선 선조의 어가",
+      "definition": {
+        "recordAddress": "0x0088a560",
+        "initializerCallAddress": "0x0045eec6",
+        "flags": "0x00080801"
+      },
+      "name": {
+        "runtimePointer": "0x00aa5b68",
+        "sourcePointer": "0x004c8028",
+        "sourceInstructionAddress": "0x0049034a",
+        "destinationInstructionAddress": "0x00490359"
+      },
+      "sprite": {
+        "slot": 224,
+        "baseFrame": 0,
+        "pointerCell": "0x004bc414",
+        "sourcePathPointer": "0x004bc900",
+        "sourcePath": "char\\koreanking.spr",
+        "sourcePathNormalized": "char/koreanking.spr"
+      }
+    },
+    {
+      "internalClass": 93,
+      "originalGameplayName": "솜씨 좋은 도공",
+      "definition": {
+        "recordAddress": "0x0088a6ac",
+        "initializerCallAddress": "0x0045efb3",
+        "flags": "0x00080801"
+      },
+      "name": {
+        "runtimePointer": "0x00aa5ba8",
+        "sourcePointer": "0x004c8010",
+        "sourceInstructionAddress": "0x00490397",
+        "destinationInstructionAddress": "0x004903a9"
+      },
+      "sprite": {
+        "slot": 105,
+        "baseFrame": 0,
+        "pointerCell": "0x004bc238",
+        "sourcePathPointer": "0x004bd1ec",
+        "sourcePath": "char\\farmerk.spr",
+        "sourcePathNormalized": "char/farmerk.spr"
+      }
+    },
+    {
+      "internalClass": 94,
+      "originalGameplayName": "조선 허준",
+      "definition": {
+        "recordAddress": "0x0088a7f8",
+        "initializerCallAddress": "0x0045dca7",
+        "flags": "0x00882805"
+      },
+      "name": {
+        "runtimePointer": "0x00aa56a8",
+        "sourcePointer": "0x004c8160",
+        "sourceInstructionAddress": "0x0048ff87",
+        "destinationInstructionAddress": "0x0048ff99"
+      },
+      "sprite": {
+        "slot": 164,
+        "baseFrame": 0,
+        "pointerCell": "0x004bc324",
+        "sourcePathPointer": "0x004bcd80",
+        "sourcePath": "char\\generalk6.spr",
+        "sourcePathNormalized": "char/generalk6.spr"
+      }
+    },
+    {
+      "internalClass": 95,
+      "originalGameplayName": "깃발",
+      "definition": {
+        "recordAddress": "0x0088a944",
+        "initializerCallAddress": "0x0045ef3c",
+        "flags": "0x00000001"
+      },
+      "name": {
+        "runtimePointer": "0x00aa5b88",
+        "sourcePointer": "0x004c8020",
+        "sourceInstructionAddress": "0x0049036f",
+        "destinationInstructionAddress": "0x00490381"
+      },
+      "sprite": {
+        "slot": 225,
+        "baseFrame": 0,
+        "pointerCell": "0x004bc418",
+        "sourcePathPointer": "0x004bc8ec",
+        "sourcePath": "char\\flagman.spr",
+        "sourcePathNormalized": "char/flagman.spr"
+      }
+    }
+  ]
+}

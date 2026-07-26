@@ -1,6 +1,16 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { copyFileSync, mkdtempSync, openSync, closeSync, readSync, writeSync } from "node:fs";
+import {
+  closeSync,
+  copyFileSync,
+  mkdtempSync,
+  openSync,
+  readFileSync,
+  readSync,
+  rmSync,
+  writeFileSync,
+  writeSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -8,6 +18,8 @@ import {
   DIRECTION_DELTAS,
   EXPECTED_EXECUTABLE_SHA256,
   EXPECTED_SPRITE_SHA256,
+  EXPECTED_TYPE_FLAGS,
+  STATE_1_SPECIAL_DIRECTION_MASK,
   extractUnitAnimationPilot,
   selectPilotFrame,
 } from "./extract-unit-animation-pilot.mjs";
@@ -16,11 +28,12 @@ const repositoryRoot = join(dirname(fileURLToPath(import.meta.url)), "../..");
 const executablePath = join(repositoryRoot, "original/imjinrok2/imjinrok2.exe");
 const spritePath = join(repositoryRoot, "original/imjinrok2/char/swordk.spr");
 const jumpTablesPath = join(repositoryRoot, "analysis/generated/imjinrok2/jump-tables.json");
+const seedsPath = join(repositoryRoot, "analysis/generated/imjinrok2/seeds.json");
 
 test("extracts the static internal-class-2 to sprite-slot-100 animation evidence chain", () => {
-  const report = extractUnitAnimationPilot({ executablePath, spritePath, jumpTablesPath });
+  const report = extractUnitAnimationPilot({ executablePath, spritePath, jumpTablesPath, seedsPath });
 
-  assert.equal(report.analysisStatus, "static-confirmed-for-scoped-pilot");
+  assert.equal(report.analysisStatus, "static-confirmed-for-class-2-movement");
   assert.deepEqual(
     {
       internalClass: report.identity.internalClass,
@@ -57,8 +70,41 @@ test("extracts the static internal-class-2 to sprite-slot-100 animation evidence
   assert.equal(report.entityBinding.initializerAddress, "0x00429f48");
   assert.equal(report.typeDefinition.recordAddress, "0x008830a8");
   assert.equal(report.typeDefinition.originalGameplayName, "조선 창병");
+  assert.equal(report.typeDefinition.flags, "0x04080805");
+  assert.equal(EXPECTED_TYPE_FLAGS, 0x04080805);
   assert.equal(report.states.find((state) => state.state === 1)?.pathCondition, "(DWORD [entity+0x74] & 0x80000008) == 0");
   assert.equal(report.states.find((state) => state.state === 2)?.pathCondition, "unconditional");
+  assert.equal(report.stateSemantics.normalMovementFunction, "0x00425b20");
+  assert.equal(report.stateSemantics.state1.meaning, "movement");
+  assert.equal(report.stateSemantics.state2.meaning, "alternate-movement-visual");
+  assert.equal(report.stateSemantics.state1.selectorCondition, "BYTE [entity+0xba] != 1");
+  assert.match(report.stateSemantics.state2.selectorCondition, /BYTE \[entity\+0xba\] == 1/);
+  assert.equal(report.state1SpecialDirectionPath.selectionMask, "0x80000008");
+  assert.equal(STATE_1_SPECIAL_DIRECTION_MASK >>> 0, 0x80000008);
+  assert.equal(report.state1SpecialDirectionPath.class2InitialMaskValue, "0x00000000");
+  assert.equal(report.state1SpecialDirectionPath.class2UsesNormalPathAtInitialization, true);
+  assert.deepEqual(report.state1SpecialDirectionPath.class2ConfiguredFrameBaseFields, [
+    "+0xa8",
+    "+0xaa",
+    "+0xac",
+    "+0xae",
+    "+0xb0",
+  ]);
+  assert.equal(report.state1SpecialDirectionPath.directions.length, 16);
+  assert.deepEqual(
+    report.state1SpecialDirectionPath.directions
+      .filter((direction) => direction.class2FrameBaseConfigured === false)
+      .map(({ direction, frameBaseField }) => [direction, frameBaseField]),
+    [
+      [0x04, "+0xb4"],
+      [0x10, "+0xb4"],
+      [0x14, "+0xb8"],
+      [1001, "+0xb2"],
+      [1002, "+0xb6"],
+      [1003, "+0xb6"],
+      [1004, "+0xb2"],
+    ],
+  );
   assert.equal(report.evidencePoints.every((point) => point.matched), true);
 });
 
@@ -169,6 +215,33 @@ test("refuses an executable whose fixed static evidence no longer matches", () =
     () => extractUnitAnimationPilot({ executablePath: alteredExecutablePath, spritePath, jumpTablesPath }),
     /SHA-256 mismatch/,
   );
+});
+
+test("refuses static-analysis artifacts generated from a different executable", (t) => {
+  const directory = mkdtempSync(join(tmpdir(), "imjinrok-animation-analysis-"));
+  t.after(() => rmSync(directory, { recursive: true, force: true }));
+
+  for (const [sourcePath, field] of [
+    [jumpTablesPath, "jumpTablesPath"],
+    [seedsPath, "seedsPath"],
+  ]) {
+    const alteredPath = join(directory, sourcePath.endsWith("seeds.json") ? "seeds.json" : "jump-tables.json");
+    const artifact = JSON.parse(readFileSync(sourcePath, "utf8"));
+    artifact.sourceSha256 = "0".repeat(64);
+    writeFileSync(alteredPath, `${JSON.stringify(artifact)}\n`);
+
+    assert.throws(
+      () =>
+        extractUnitAnimationPilot({
+          executablePath,
+          spritePath,
+          jumpTablesPath,
+          seedsPath,
+          [field]: alteredPath,
+        }),
+      /source SHA-256 mismatch/,
+    );
+  }
 });
 
 function expectedBaseField(state, direction) {

@@ -10,9 +10,12 @@ import { readCString, readPeImage, toHex } from "./pe-image.mjs";
 const DEFAULT_EXECUTABLE_PATH = "original/imjinrok2/imjinrok2.exe";
 const DEFAULT_SPRITE_PATH = "original/imjinrok2/char/swordk.spr";
 const DEFAULT_JUMP_TABLES_PATH = "analysis/generated/imjinrok2/jump-tables.json";
+const DEFAULT_SEEDS_PATH = "analysis/generated/imjinrok2/seeds.json";
 
 export const EXPECTED_EXECUTABLE_SHA256 = "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e";
 export const EXPECTED_SPRITE_SHA256 = "414d285b207ba12afdd856a0f16ddde615381cf491fe493d6ededf91681b55eb";
+export const EXPECTED_TYPE_FLAGS = 0x04080805;
+export const STATE_1_SPECIAL_DIRECTION_MASK = 0x80000008;
 
 export const PILOT_IDENTITY = {
   internalClass: 2,
@@ -32,6 +35,33 @@ export const DIRECTION_DELTAS = new Map([
   [0x40, { deltaX: 1, deltaY: 0 }],
   [0x41, { deltaX: 1, deltaY: 1 }],
   [0x50, { deltaX: 1, deltaY: -1 }],
+]);
+
+const SPECIAL_STATE_1_DESTINATIONS = new Map([
+  [0x01, { destination: 0x0041efea, frameBaseField: 0x00ac, mirrorX: false }],
+  [0x04, { destination: 0x0041f01e, frameBaseField: 0x00b4, mirrorX: false }],
+  [0x05, { destination: 0x0041f004, frameBaseField: 0x00b0, mirrorX: false }],
+  [0x10, { destination: 0x0041f052, frameBaseField: 0x00b4, mirrorX: true }],
+  [0x14, { destination: 0x0041f038, frameBaseField: 0x00b8, mirrorX: false }],
+  [0x40, { destination: 0x0041f219, frameBaseField: 0x00ac, mirrorX: true }],
+  [0x41, { destination: 0x0041f086, frameBaseField: 0x00a8, mirrorX: false }],
+  [0x50, { destination: 0x0041f06c, frameBaseField: 0x00b0, mirrorX: true }],
+  [1000, { destination: 0x0041f0a0, frameBaseField: 0x00ae, mirrorX: false }],
+  [1001, { destination: 0x0041f0e9, frameBaseField: 0x00b2, mirrorX: false }],
+  [1002, { destination: 0x0041f11d, frameBaseField: 0x00b6, mirrorX: false }],
+  [1003, { destination: 0x0041f137, frameBaseField: 0x00b6, mirrorX: true }],
+  [1004, { destination: 0x0041f103, frameBaseField: 0x00b2, mirrorX: true }],
+  [1005, { destination: 0x0041f0cf, frameBaseField: 0x00ae, mirrorX: true }],
+  [1006, { destination: 0x0041f16b, frameBaseField: 0x00aa, mirrorX: true }],
+  [1007, { destination: 0x0041f151, frameBaseField: 0x00aa, mirrorX: false }],
+]);
+
+const CLASS_2_STATE_1_CONFIGURED_FRAME_BASE_FIELDS = new Set([
+  0x00a8,
+  0x00aa,
+  0x00ac,
+  0x00ae,
+  0x00b0,
 ]);
 
 const STATE_SPECS = new Map([
@@ -199,6 +229,18 @@ const STATIC_EVIDENCE = [
     meaning: "state 1 uses the recovered +0x1e6 direction mapping only when flags +0x74 mask 0x80000008 is clear",
   },
   {
+    id: "state-1-special-direction-read",
+    va: 0x0041efad,
+    bytes: "66 0f b6 81 a7 00 00 00 66 89 41 0a 0f bf 81 e8 01 00 00",
+    meaning: "state 1 masked path writes the configured slot and reads its alternate direction from +0x1e8",
+  },
+  {
+    id: "state-1-special-direction-1000",
+    va: 0x0041efc0,
+    bytes: "3d e8 03 00 00 0f 8f ef 00 00 00 0f 84 cf 00 00 00",
+    meaning: "state 1 masked path handles direction 1000 directly and routes greater values to the 1001..1007 switch",
+  },
+  {
     id: "state-1-slot-write-and-direction-read",
     va: 0x0041f185,
     bytes: "0f bf 81 e6 01 00 00 66 0f b6 91 a7 00 00 00",
@@ -241,6 +283,66 @@ const STATIC_EVIDENCE = [
     meaning: "normal direction writer stores the bitmask in WORD fields +0x1e6 and +0x1e8",
   },
   {
+    id: "movement-dispatch-by-runtime-flags",
+    va: 0x00425af0,
+    bytes: "8a 41 74 8b 54 24 04 a8 08 8b 44 24 08 50 52 74 08 e8 da 07 00 00 c2 08 00 e8 12 00 00 00",
+    meaning: "movement dispatcher selects the normal movement update when runtime flags +0x74 bit 0x08 is clear",
+  },
+  {
+    id: "normal-movement-state-2-write",
+    va: 0x00425cc9,
+    bytes: "c6 46 03 02",
+    meaning: "normal movement writes animation state 2 when the +0xba selector is 1",
+  },
+  {
+    id: "normal-movement-state-1-write",
+    va: 0x00425cf8,
+    bytes: "c6 46 03 01",
+    meaning: "normal movement writes animation state 1 when the +0xba selector is not 1",
+  },
+  {
+    id: "alternate-movement-eligibility-flag",
+    va: 0x0042615f,
+    bytes: "f7 46 74 00 00 00 04",
+    meaning: "normal movement considers the alternate selector only when runtime flags include 0x04000000",
+  },
+  {
+    id: "alternate-movement-selector-writes",
+    va: 0x004261d3,
+    bytes: "c6 86 ba 00 00 00 01 eb 07 c6 86 ba 00 00 00 00",
+    meaning: "normal movement records the exact alternate-movement condition result in BYTE +0xba",
+  },
+  {
+    id: "movement-state-selection",
+    va: 0x004261e3,
+    bytes: "80 be ba 00 00 00 01 75 37",
+    meaning: "normal movement branches between animation states 2 and 1 by comparing BYTE +0xba with 1",
+  },
+  {
+    id: "movement-state-2-steady-write",
+    va: 0x00426201,
+    bytes: "c6 46 03 02",
+    meaning: "normal movement steady path writes animation state 2",
+  },
+  {
+    id: "movement-state-1-steady-write",
+    va: 0x00426238,
+    bytes: "c6 46 03 01",
+    meaning: "normal movement steady path writes animation state 1",
+  },
+  {
+    id: "type-flags-to-runtime-copy",
+    va: 0x00437ba0,
+    bytes: "8b 90 5c 2e 88 00 89 56 74",
+    meaning: "entity initialization copies type-definition flags +0x4c into runtime entity flags +0x74",
+  },
+  {
+    id: "class-2-state-1-five-base-initializer",
+    va: 0x00438f0f,
+    bytes: "46 03 fb 66 83 fe 05 7c e8",
+    meaning: "the class 2 state-1 initializer loop configures exactly five frame-base fields +0xa8..+0xb0",
+  },
+  {
     id: "render-mirror-read",
     va: 0x0041ffb0,
     bytes: "8a 86 b5 01 00 00",
@@ -272,6 +374,7 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
     executablePath: args.input ?? DEFAULT_EXECUTABLE_PATH,
     spritePath: args.sprite ?? DEFAULT_SPRITE_PATH,
     jumpTablesPath: args.jumpTables ?? DEFAULT_JUMP_TABLES_PATH,
+    seedsPath: args.seeds ?? DEFAULT_SEEDS_PATH,
   });
 
   if (args.json) {
@@ -285,6 +388,7 @@ export function extractUnitAnimationPilot({
   executablePath = DEFAULT_EXECUTABLE_PATH,
   spritePath = DEFAULT_SPRITE_PATH,
   jumpTablesPath = DEFAULT_JUMP_TABLES_PATH,
+  seedsPath = DEFAULT_SEEDS_PATH,
 } = {}) {
   const { buffer: executableBuffer, image } = readPeImage(executablePath);
   const executableSha256 = sha256(executableBuffer);
@@ -295,7 +399,20 @@ export function extractUnitAnimationPilot({
   assertEqual(spriteSha256, EXPECTED_SPRITE_SHA256, `${spritePath} SHA-256`);
   const spriteHeader = parseSpriteLikeHeader(spriteBuffer, spritePath);
 
-  const jumpTables = readJumpTables(jumpTablesPath);
+  const jumpTables = readJumpTables(jumpTablesPath, executableSha256);
+  const seedFunctions = readSeedFunctions(seedsPath, executableSha256);
+  const movementFunction = requireSeedFunction(seedFunctions, 0x00425b20);
+  const movementInstructions = [
+    [0x00425cc9, "MOV byte ptr [ESI + 0x3],0x2"],
+    [0x00425cf8, "MOV byte ptr [ESI + 0x3],0x1"],
+    [0x004261d3, "MOV byte ptr [ESI + 0xba],0x1"],
+    [0x004261dc, "MOV byte ptr [ESI + 0xba],0x0"],
+    [0x00426201, "MOV byte ptr [ESI + 0x3],0x2"],
+    [0x00426238, "MOV byte ptr [ESI + 0x3],0x1"],
+  ];
+  for (const [address, text] of movementInstructions) {
+    requireSeedInstruction(movementFunction, address, text);
+  }
   const evidencePoints = STATIC_EVIDENCE.map((point) => readEvidencePoint(executableBuffer, image, point));
   const mismatch = evidencePoints.find((point) => !point.matched);
   if (mismatch) {
@@ -319,13 +436,15 @@ export function extractUnitAnimationPilot({
     assertEqual(dispatchCase.destination, toHex(spec.dispatchDestination), `state ${state} dispatcher destination`);
     return extractStateReport(jumpTables, state, spec);
   });
+  const specialState1Directions = extractSpecialState1Directions(jumpTables);
+  const initialSpecialMaskValue = (EXPECTED_TYPE_FLAGS & STATE_1_SPECIAL_DIRECTION_MASK) >>> 0;
 
   return {
-    analysisStatus: "static-confirmed-for-scoped-pilot",
+    analysisStatus: "static-confirmed-for-class-2-movement",
     identity: {
       ...PILOT_IDENTITY,
       warning:
-        "The binary confirms the original name and sprite source. Current combat statistics and the gameplay meanings of animation states 1 and 2 remain unconfirmed.",
+        "The binary confirms the original name, sprite source, and movement meanings of animation states 1 and 2. Idle, combat animation states, hit timing, and combat statistics remain unconfirmed.",
     },
     sources: {
       executable: {
@@ -342,6 +461,11 @@ export function extractUnitAnimationPilot({
       },
       jumpTables: {
         path: jumpTablesPath,
+        sourceSha256: executableSha256,
+      },
+      seeds: {
+        path: seedsPath,
+        sourceSha256: executableSha256,
       },
     },
     resourceBinding,
@@ -361,6 +485,8 @@ export function extractUnitAnimationPilot({
       namePointer: toHex(0x00aa5028),
       nameSourcePointer: toHex(0x004c8364),
       originalGameplayName,
+      flagsField: "+0x4c",
+      flags: toHex(EXPECTED_TYPE_FLAGS),
     },
     runtimeFields: {
       animationState: toOffset(0x03),
@@ -370,6 +496,8 @@ export function extractUnitAnimationPilot({
       phase: toOffset(0x1b2),
       mirrorSelector: toOffset(0x1b5),
       direction: toOffset(0x1e6),
+      alternateDirection: toOffset(0x1e8),
+      alternateMovementSelector: toOffset(0x00ba),
     },
     directionGeneration: Array.from(DIRECTION_DELTAS, ([direction, delta]) => ({
       direction,
@@ -377,6 +505,45 @@ export function extractUnitAnimationPilot({
       ...delta,
     })),
     states: stateReports,
+    stateSemantics: {
+      movementDispatcher: toHex(0x00425af0),
+      normalMovementFunction: toHex(0x00425b20),
+      normalMovementFunctionBodyRanges: movementFunction.bodyRanges,
+      runtimeFlagsField: toOffset(0x74),
+      typeFlagsCopyAddress: toHex(0x00437ba6),
+      alternateMovementSelectorField: toOffset(0x00ba),
+      alternateMovementEligibilityMask: toHex(0x04000000),
+      state1: {
+        meaning: "movement",
+        selectorCondition: "BYTE [entity+0xba] != 1",
+        phaseCountField: toOffset(0x00a6),
+      },
+      state2: {
+        meaning: "alternate-movement-visual",
+        selectorCondition:
+          "BYTE [entity+0xba] == 1 after the full 0x0042615f..0x004261dc environmental/runtime predicate",
+        phaseCountField: toOffset(0x00bb),
+        warning:
+          "The control flow proves a movement variant, but the original human-facing terrain/environment label is not yet named.",
+      },
+    },
+    state1SpecialDirectionPath: {
+      selectionMask: toHex(STATE_1_SPECIAL_DIRECTION_MASK),
+      runtimeFlagsField: toOffset(0x74),
+      normalDirectionField: toOffset(0x01e6),
+      specialDirectionField: toOffset(0x01e8),
+      class2InitialTypeFlags: toHex(EXPECTED_TYPE_FLAGS),
+      class2InitialMaskValue: toHex(initialSpecialMaskValue),
+      class2UsesNormalPathAtInitialization: initialSpecialMaskValue === 0,
+      class2ConfiguredFrameBaseFields: Array.from(
+        CLASS_2_STATE_1_CONFIGURED_FRAME_BASE_FIELDS,
+        toOffset,
+      ),
+      directions: specialState1Directions,
+      reproductionStatus: "quarantined-for-class-2",
+      warning:
+        "The class 2 initializer configures only five bases. The masked path also reads +0xb2, +0xb4, +0xb6, and +0xb8, so the complete branch is not safe to reproduce for class 2; later runtime flag mutation is not yet excluded.",
+    },
     renderFormula: {
       spriteRecordIndex: "spriteSlot",
       spriteRecordStride: 0x0bf8,
@@ -513,6 +680,32 @@ function extractStateReport(jumpTables, state, spec) {
   };
 }
 
+function extractSpecialState1Directions(jumpTables) {
+  const standardSwitch = findSwitch(jumpTables, 0x0041efa0, 0x0041efe3);
+  const extendedSwitch = findSwitch(jumpTables, 0x0041efa0, 0x0041f0c8);
+
+  return Array.from(SPECIAL_STATE_1_DESTINATIONS, ([direction, mapping]) => {
+    if (direction !== 1000) {
+      const switchCase = requireCase(direction < 1000 ? standardSwitch : extendedSwitch, direction);
+      assertEqual(
+        switchCase.destination,
+        toHex(mapping.destination),
+        `state 1 special direction ${direction} destination`,
+      );
+    }
+
+    return {
+      direction,
+      directionHex: toSmallHex(direction),
+      destination: toHex(mapping.destination),
+      frameBaseField: toOffset(mapping.frameBaseField),
+      mirrorX: mapping.mirrorX,
+      class2FrameBaseConfigured:
+        CLASS_2_STATE_1_CONFIGURED_FRAME_BASE_FIELDS.has(mapping.frameBaseField),
+    };
+  });
+}
+
 function getDirectionMapping(spec, direction) {
   const destination = spec.directionDestinations.get(direction);
   return destination === undefined ? undefined : spec.destinations.get(destination);
@@ -532,7 +725,7 @@ function buildTestVectors() {
   return vectors;
 }
 
-function readJumpTables(path) {
+function readJumpTables(path, expectedSourceSha256) {
   let parsed;
   try {
     parsed = JSON.parse(readFileSync(path, "utf8"));
@@ -542,7 +735,40 @@ function readJumpTables(path) {
   if (!parsed.tables || typeof parsed.tables !== "object") {
     throw new Error(`${path} does not contain a jump-tables 'tables' object`);
   }
+  assertEqual(parsed.sourceSha256, expectedSourceSha256, `${path} source SHA-256`);
   return Object.values(parsed.tables);
+}
+
+function readSeedFunctions(path, expectedSourceSha256) {
+  let parsed;
+  try {
+    parsed = JSON.parse(readFileSync(path, "utf8"));
+  } catch (error) {
+    throw new Error(`Cannot read static seed analysis from ${path}: ${error.message}`, { cause: error });
+  }
+  if (!Array.isArray(parsed.functions)) {
+    throw new Error(`${path} does not contain a seed-analysis 'functions' array`);
+  }
+  assertEqual(parsed.sourceSha256, expectedSourceSha256, `${path} source SHA-256`);
+  return parsed.functions;
+}
+
+function requireSeedFunction(functions, entry) {
+  const seedFunction = functions.find((candidate) => candidate.entry === toHex(entry));
+  if (!seedFunction) {
+    throw new Error(`Missing seed function ${toHex(entry)}`);
+  }
+  return seedFunction;
+}
+
+function requireSeedInstruction(seedFunction, address, text) {
+  const instruction = seedFunction.instructions.find(
+    (candidate) => candidate.address === toHex(address) && candidate.text === text,
+  );
+  if (!instruction) {
+    throw new Error(`Missing seed instruction ${toHex(address)} ${text} in ${seedFunction.entry}`);
+  }
+  return instruction;
 }
 
 function readEncodedCString(buffer, image, va, encoding) {
@@ -624,18 +850,25 @@ function toSmallHex(value) {
 
 function parseArgs(argv) {
   const parsed = {};
+  const pathOptionKeys = new Map([
+    ["--input", "input"],
+    ["--sprite", "sprite"],
+    ["--jump-tables", "jumpTables"],
+    ["--seeds", "seeds"],
+  ]);
   for (let index = 0; index < argv.length; index += 1) {
     const arg = argv[index];
     if (arg === "--json") {
       parsed.json = true;
       continue;
     }
-    if (arg === "--input" || arg === "--sprite" || arg === "--jump-tables") {
+    const pathOptionKey = pathOptionKeys.get(arg);
+    if (pathOptionKey) {
       const value = argv[index + 1];
       if (!value) {
         throw new Error(`${arg} requires a path`);
       }
-      parsed[arg === "--input" ? "input" : arg === "--sprite" ? "sprite" : "jumpTables"] = value;
+      parsed[pathOptionKey] = value;
       index += 1;
       continue;
     }
