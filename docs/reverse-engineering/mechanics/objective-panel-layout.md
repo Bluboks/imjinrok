@@ -307,4 +307,8 @@ K01 결합 질문은 [별도 문서](objective-modal-k01-binding.md)에서, stat
 컨트롤 질문은 [후속 문서](application-state-16-objective-control.md)에서 각각 정적 확정·재현
 완료했다. [pending action dispatcher 분석](objective-pending-action-dispatch.md)은 살아남은
 `0x3f0`의 목표 모달 소비·reset과 scoped surface/resource 실패를 정적 확정·재현하고 semantic
-UI-domain 계약까지 추가했다. 다음 연결에는 mechanism 소유 semantic action source가 필요하다.
+UI-domain 계약까지 추가했다. 후속
+[프로젝트 UI 이벤트 경계 분석](objective-modal-ui-event-boundary.md)은 HUD button의 staged
+프로젝트 적응 trigger에서 `UIScene` private active request까지 연결했지만 사용자에게 보이는
+panel presenter는 아직 없다. 원본 mechanism 소유
+semantic action source도 계속 미확정이다.

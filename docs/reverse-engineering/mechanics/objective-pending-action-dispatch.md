@@ -218,9 +218,12 @@ K01 확장 UI는 같은 channel union에 별도 action type과 typed metadata를
 테스트는 dispatcher fixture의 `consumedActions`를 직접 읽어 원본 `0x3f0` 숫자 없이 같은 관찰
 결과를 검사하고, K01 확장 action과의 typed superset도 검사한다.
 
-장면에는 연결하지 않았다. 현재 허용된 UI 소유 데이터에는 application state `0x17`,
-원본 control release, 뒤 컨트롤 overwrite 결과를 알리는 source가 없다. 숫자 전역을 흉내 낸
-fallback adapter도 만들지 않았다.
+원본 mechanism source에는 연결하지 않았다. 후속
+[프로젝트 UI 이벤트 경계 분석](objective-modal-ui-event-boundary.md)은 K01 HUD objective button을
+명시적인 staged 프로젝트 적응 trigger로 사용해 같은 semantic action을 `UIScene` private active
+request까지 전달한다. 이는 원본 application state `0x17`, control release 또는 뒤 컨트롤
+overwrite 결과를 복제한 것이 아니며 숫자 전역을 흉내 낸 fallback adapter도 아니다. 사용자에게
+보이는 presenter는 아직 없다.
 
 ## simulation/mechanism handoff
 
@@ -247,9 +250,10 @@ action을 한 번 consume하고 자체 modal lifecycle을 소유한다. 이 shap
 - `FUN_004495e0` alternate overlay 분기의 별도 UI 의미
 - 실패한 원본 SPR loader가 남기는 세부 객체 상태; 이번에 확정한 것은 오류 보고 뒤 계속과
   dispatcher의 `0x3f1` 전이
-- 현재 simulation/gameplay 계층에서 semantic action을 소유·발행할 구체 모듈
+- 원본 mechanism 결과에서 semantic action을 발행할 구체 simulation/gameplay 모듈
 - 목표 문장의 글꼴·줄바꿈과 실제 장면 modal lifecycle 연결
 
-다음 좁은 질문은 경쟁 값 중 K01 표시 흐름에 실제로 필요한 하나를 소비 함수까지 추적해 semantic
-action을 확정하거나, gameplay mechanism에서 `open-objective-modal`을 발행할 기존 소유 이벤트를
-찾아 위 handoff 계약의 연결점을 정적으로·구조적으로 확정하는 것이다.
+프로젝트 event 소유 경계는
+[후속 문서](objective-modal-ui-event-boundary.md)에서 확인했다. 다음 좁은 질문은 경쟁 값 중
+K01 표시 흐름에 실제로 필요한 하나를 소비 함수까지 추적하거나, active request를 실제 modal
+presenter·dismiss lifecycle에 연결하는 것이다.

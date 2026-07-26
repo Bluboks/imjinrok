@@ -227,5 +227,7 @@ gameplay-panel 객체와 공통 UI owner를 현재 허용된 UI 모듈만으로 
 [후속 pending action dispatcher 분석](objective-pending-action-dispatch.md)은 목표 control
 release 뒤 경쟁 overwrite, `0x3f0` 소비·활성·reset·실패 경로와 semantic
 `open-objective-modal` 계약을 정적 확정·재현했다. 다음 연결 질문은 mechanism 소유 semantic
-action 발행 source를 찾는 것이다. `0x0088bd80` gameplay-panel의 생성 자원과 draw 경로도
+원본 mechanism action 발행 source를 찾는 것이다. 프로젝트 HUD button→`UIScene` event 경계는
+[후속 프로젝트 구조 문서](objective-modal-ui-event-boundary.md)에서 별도 적응으로 연결했다.
+`0x0088bd80` gameplay-panel의 생성 자원과 draw 경로도
 화면상 원본 표시 식별을 위해 여전히 미확정이다.
