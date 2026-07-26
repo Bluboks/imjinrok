@@ -157,6 +157,10 @@ K01 종단 검증까지 통과해야 한다.
 [K01 영웅 일반 공격 파일럿](reverse-engineering/mechanics/k01-hero-basic-attack-pilot.md),
 후속 수명과 피해는
 [K01 유성룡 투사체 파일럿](reverse-engineering/mechanics/k01-ryu-projectile-pilot.md)을 따른다.
+풀 갱신기는 [K01 투사체 풀 cadence](reverse-engineering/mechanics/k01-projectile-pool-cadence.md)에서
+accepted original step마다 정확히 한 번 호출됨을 복원했다. 다만 original step은 Windows
+message queue와 가변 millisecond gate를 따르므로 24 Hz에 연결할 exact multiplier는 없고,
+실제 연결은 명시적인 port scheduling 정책을 정하기 전까지 보류한다.
 
 통과 조건:
 

@@ -20,7 +20,9 @@ WORD 경계, 완충 수치·체력, 대상 소멸·세대 불일치, 풀 고갈�
 읽는 사실은 증명했지만, 이 필드의 생산자와 전체 caller 범위 및 비음수 range guard는 이번
 범위에서 증명하지 않았다. 따라서 독립 포트는 경로 좌표마다 `0..32767`만 받는다. 이는 원본의
 유효 좌표 도메인이 아니라, 확인한 산술을 signed-WORD wrap 없이 정확히 재현하는 보수적인
-accepted subset이다. 원본 전역 틱의 초 단위, 전체 signed-WORD 좌표 호출 범위, 원본 좌표와
+accepted subset이다. 후속 cadence 분석은 투사체 풀이 accepted original scheduler step마다
+한 번 갱신됨을 확정했지만, 그 scheduler가 message queue와 가변 millisecond gate를 사용하므로
+고정 FPS나 24 Hz exact mapping은 나오지 않았다. 전체 signed-WORD 좌표 호출 범위, 원본 좌표와
 프로젝트 `GridPoint`의 변환, 공격 전 대상 검색·사거리, 피격 반응·사망·참조 정리는 이 질문에
 포함하지 않는다. 확인한 계산과 경로 선택기는 `packages/simulation`의 독립 모듈로 이식했지만,
 현행 24 Hz 전투 루프에는 추정 배율로 연결하지 않았다.
@@ -34,7 +36,7 @@ accepted subset이다. 원본 전역 틱의 초 단위, 전체 signed-WORD 좌�
 | SHA-256 | `25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e` |
 | 형식 | PE32 x86, ImageBase `0x00400000` |
 | Ghidra | `12.1.2`, `x86:LE:32:default`, compiler spec `windows` |
-| seed 산출물 | `analysis/generated/imjinrok2/seeds.json`, SHA-256 `4448068ad3530bf5dda6cc0d4f404107684bb1dd8029c4f5b80f0aa995c5e058` |
+| seed 산출물 | `analysis/generated/imjinrok2/seeds.json`, SHA-256 `88d91d582ac0b864cb3f0448e2600df16878351bde1c7c91e6e96465df2b49f9` |
 | jump-table 산출물 | `analysis/generated/imjinrok2/jump-tables.json`, SHA-256 `0ae517eb172f61b974ca7a4411e64c1cc42065c462ed53b3065ab2da633dfe2f` |
 
 ## 함수와 바이트 범위
@@ -320,7 +322,8 @@ cooldown 18의 즉시 공격으로 처리한다. 이를 교체하려면 아직 �
 ## 남은 불확실성과 다음 질문
 
 - `entity+0x4a` payload 보정값의 생산자와 전체 의미
-- 원본 전역 틱 한 단위의 초 환산
+- 원본 풀 호출은 accepted scheduler step당 1회지만 message-loop·가변 millisecond gate를
+  프로젝트 24 Hz로 옮길 exact mapping
 - attacker `+0x6a/+0x6c`와 active target `+0x32/+0x34` 좌표의 생산자·range guard 및
   호출자가 전달할 수 있는 전체 signed-WORD 범위
 - signed-word 투사체 좌표와 프로젝트 world/grid 좌표의 정확한 변환

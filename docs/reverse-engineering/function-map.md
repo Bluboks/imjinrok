@@ -50,10 +50,17 @@
 | `0x00438130` | `FUN_00438130`, `0x00438130-0x0043819d` | 9 / 29 | raw mode/table gate 뒤 signed-WORD 완충 수치·체력 적용 | 유성룡 kind 9 gate·wrap·실패 분기 정적 확정 |
 | `0x00438c50` | `FUN_00438c50`, `0x00438c50-0x00438e22` | 26 / 165 | 공격 전 대상 활성·거리 조건 판정 | 유성룡 생성 선행 guard의 호출 순서 정적 확정, 전체 사거리 의미 미확정 |
 | `0x0043e1e0` | `FUN_0043e1e0`, `0x0043e1e0-0x0043e3e2` | 37 / 179 | raw command WORD switch | input 302가 health-application mode WORD를 toggle하는 범위 정적 확정 |
+| `0x0043f560` | `FUN_0043f560`, `0x0043f560-0x0043f573` | 1 / 5 | raw simulation interval selector 기록 | 호출 규약과 interval 재계산 순서 정적 확정 |
+| `0x0043f580` | `FUN_0043f580`, `0x0043f580-0x0043f5c6` | 8 / 20 | mode·selector별 millisecond base interval 선택 | 64/60/50/40/30 DWORD 산술 정적 확정 |
+| `0x00443090` | `FUN_00443090`, `0x00443090-0x004430a6` | 3 / 8 | timestamp/feedback record 표 reset | raw zero-write 범위 정적 확정 |
+| `0x004430f0` | `FUN_004430f0`, `0x004430f0-0x00443146` | 12 / 30 | message record 비교 기반 interval feedback writer | DWORD `-1/+1` 및 무변경 실패 경로 정적 확정 |
 | `0x0043b4d0` | `FUN_0043b4d0`, `0x0043b4d0-0x0043c2f5` | 238 / 1,018 | 엔티티 주기 갱신과 건물 유효 체력→반파 상태 | 조선 본영 체력 분기 범위 정적 확정 |
 | `0x0043c9c0` | `FUN_0043c9c0`, `0x0043c9c0-0x0043d35f` | 143 / 684 | `+0x1b0` 상위 행동 상태 dispatcher | 상태 5→일반 공격 경로 정적 확정 |
 | `0x00443360` | `FUN_00443360` | 자원 순회 | 경로 포인터 표→런타임 스프라이트 레코드 로드 | 타입 1~95의 슬롯 경로 정적 확정 |
 | `0x00447360` | `FUN_00447360`, `0x00447360-0x00447599` | 35 / 156 | active 투사체 slot 0~99 순회·갱신·해제 | subtype `0x0c` 수명주기 정적 확정 |
+| `0x00447bc0` | `FUN_00447bc0`, `0x00447bc0-0x00447cfa` | 21 / 75 | 원본 simulation-step scheduler | 13개 resolved direct call의 raw 조건·순서, 모든 gate 승인 뒤 pool 1회와 조건부 post-pool call 정적 확정; callee 의미 미확정 |
+| `0x00447e10` | `FUN_00447e10`, `0x00447e10-0x00447ec8` | 18 / 66 | `timeGetTime` DWORD interval gate | wrap·50-step 보정·backlog 1회 처리 정적 확정 |
+| `0x00473b50` | `FUN_00473b50`, `0x00473b50-0x0047418b` | 47 / 498 | raw message-record consumer | 두 case의 feedback writer callsite 정적 확정, protocol 의미 미확정 |
 | `0x00438ef0` | `FUN_00438ef0` | 5회 반복 | 상태 1 slot과 다섯 frame base 초기화 | 클래스 2·76·78 호출 인수 정적 확정 |
 | `0x00441de0` | `FUN_00441de0`, `0x00441de0-0x00441e36` | 8 / 30 | 선택된 유닛 레코드 생존 확인 | 입력 선택 과정과 `+0x07` 의미 |
 | `0x00441db0` | `FUN_00441db0`, `0x00441db0-0x00441dd8` | 3 / 12 | active/generation 관련 WORD 검사 | 투사체 초기화의 attacker 참조 호출 정적 확정 |
@@ -61,6 +68,7 @@
 | `0x004517a0` | `FUN_004517a0`, `0x004517a0-0x00451905` | 10 / 104 | 스프라이트 프레임 blit | 호출 규약과 좌표계 |
 | `0x0045bd00` | `FUN_0045bd00`, `0x0045bd00-0x0045bef8` | 1 / 103 | stride `0x14c` 타입 정의 레코드 writer | slot·base frame·이름 필드 정적 확정 |
 | `0x0045bf50` | `FUN_0045bf50`, `0x0045bf50-0x0045efb9` | 1 / 5,100 | 전체 엔티티 타입 정의 초기화 | class 1~95 슬롯·기본 프레임·flags·이름 포인터 정적 확정 |
+| `0x0045f9c0` | `FUN_0045f9c0`, `0x0045f9c0-0x004607ac` | 209 / 801 | main Windows message loop와 state switch | message drain, millisecond sample, scheduler 두 callsite 정적 확정 |
 | `0x00482180` | `FUN_00482180`, `0x00482180-0x004822f4` | 16 / 114 | 스크립트 적재 또는 큐 등록 | 인수, 반환값과 오류 경로 |
 | `0x00482340` | `FUN_00482340`, `0x00482340-0x0048238c` | 4 / 22 | 스크립트 시작 또는 commit | 엔진 상태 변화 |
 | `0x004823a0` | `FUN_004823a0`, `0x004823a0-0x004823a3` | 1 / 2 | 스크립트 엔진 busy 확인 | 반환값을 읽는 모든 호출자 |
@@ -73,6 +81,7 @@
 | `0x0048d6f0` | `FUN_0048d6f0`, `0x0048d6f0-0x0048d73a` | 7 / 31 | 공통 미션 결과 타이머 판정 | 모든 반환 경로와 시간 단위 |
 | `0x0048dde0` | `FUN_0048ddb0`, `0x0048ddb0-0x0048deca` | 36 / 105 | 미션 결과 소비·전환 | 호출 주기와 후속 함수 |
 | `0x0048ea90` | `FUN_0048ea90`, `0x0048ea90-0x004924b2` | 1 / 5,587 | 원본 문자열을 런타임 저장소에 초기화 | class 1~95 CP949 이름 복사와 초상화 ID 저장 범위 정적 확정 |
+| `0x004ae539` | `entry`, `0x004ae539-0x004ae623` | 6 / 75 | PE entry | `0x004ae602` main loop call 정적 확정 |
 | `0x004a7410` | `FUN_004a7410`, `0x004a7410-0x004a75d6` | 5 / 64 | `hero.spr` 로드와 인물 조회 포인터 표 초기화 | 초상화 경로는 정적 확정 |
 | `0x004a7690` | `FUN_004a7690`, `0x004a7690-0x004a7874` | 13 / 130 | ID 조회 결과→프레임 표→`hero.spr` 그리기 | 초상화 경로는 정적 확정 |
 | `0x004a7a50` | `FUN_004a7a50` | 텍스트 계산 포함 | `SPEECH` 대사 폭 278, X 188, Y 190 중심 배치 | 배치 수식은 정적 확정 |
