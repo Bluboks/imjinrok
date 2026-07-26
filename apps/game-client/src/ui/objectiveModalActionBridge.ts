@@ -1,3 +1,4 @@
+import { imjinrokK01Scenario } from "@shared";
 import {
   UI_DOMAIN_ACTION_REQUESTED_EVENT,
   type UiDomainActionRequestedView,
@@ -11,7 +12,7 @@ import {
   type K01OpenObjectiveModalAction,
 } from "./objectiveModalActions.js";
 
-export const K01_SCENARIO_ID = "imjinrok-k01";
+export const K01_SCENARIO_ID = imjinrokK01Scenario.id;
 
 export interface UiDomainActionEventBus {
   on(

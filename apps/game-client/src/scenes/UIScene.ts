@@ -46,6 +46,9 @@ import {
 } from "../hud.js";
 import type { GameLaunchContext } from "../session.js";
 import {
+  ORIGINAL_OBJECTIVE_PANEL_FRAME_ASSET,
+} from "../originalObjectivePanelLayout.js";
+import {
   createMinimapGeometry,
   createMinimapFogTexture,
   drawMinimapEntityMarker,
@@ -66,6 +69,14 @@ import {
   ObjectiveModalRequestState,
   resolveK01ObjectiveModalActionCandidate,
 } from "../ui/objectiveModalActionBridge.js";
+import {
+  OBJECTIVE_MODAL_FRAME_TEXTURE_KEY,
+  ObjectiveModalPresenterController,
+  openK01ObjectiveModalRequest,
+} from "../ui/objectiveModalPresenter.js";
+import {
+  createPhaserObjectiveModalPresenterHost,
+} from "../ui/objectiveModalPhaserView.js";
 import { drawSelectionPanel } from "../ui/selectionPanel.js";
 
 const VIRTUAL_CURSOR_SIZE = 15;
@@ -114,10 +125,20 @@ export class UIScene extends Phaser.Scene {
   private battlefieldSummary: BattlefieldSummaryView | null = null;
   private gamePlayback: GamePlaybackView = { paused: false, speed: 1, controllable: false, audioMuted: false };
   private objectiveModalActionBridge: ObjectiveModalActionBridge | null = null;
+  private objectiveModalPresenter: ObjectiveModalPresenterController | null = null;
   private readonly objectiveModalRequestState = new ObjectiveModalRequestState();
 
   constructor() {
     super("ui");
+  }
+
+  preload(): void {
+    if (!this.textures.exists(OBJECTIVE_MODAL_FRAME_TEXTURE_KEY)) {
+      this.load.image(
+        OBJECTIVE_MODAL_FRAME_TEXTURE_KEY,
+        ORIGINAL_OBJECTIVE_PANEL_FRAME_ASSET,
+      );
+    }
   }
 
   create(data: GameLaunchContext): void {
@@ -141,6 +162,12 @@ export class UIScene extends Phaser.Scene {
     this.gamePlayback =
       (this.registry.get(GAME_PLAYBACK_REGISTRY_KEY) as GamePlaybackView | null | undefined) ?? this.gamePlayback;
     this.objectiveModalRequestState.close();
+    this.objectiveModalPresenter?.shutdown();
+    this.objectiveModalPresenter = new ObjectiveModalPresenterController(
+      createPhaserObjectiveModalPresenterHost(this),
+      this.handleObjectiveModalDismissed,
+    );
+    this.objectiveModalPresenter.start();
     this.objectiveModalActionBridge?.stop();
     this.objectiveModalActionBridge = new ObjectiveModalActionBridge(
       this.game.events,
@@ -187,7 +214,25 @@ export class UIScene extends Phaser.Scene {
   private readonly handleObjectiveModalAction = (
     action: unknown,
   ): void => {
-    this.objectiveModalRequestState.open(action);
+    if (!this.objectiveModalPresenter || !this.launchContext) {
+      throw new Error(
+        "objective modal action cannot be presented before UIScene lifecycle initialization",
+      );
+    }
+
+    const opened = openK01ObjectiveModalRequest({
+      action,
+      source: this.launchContext,
+      requestState: this.objectiveModalRequestState,
+      presenter: this.objectiveModalPresenter,
+    });
+    if (opened) {
+      this.isMinimapNavigating = false;
+    }
+  };
+
+  private readonly handleObjectiveModalDismissed = (): void => {
+    this.objectiveModalRequestState.close();
   };
 
   private handleResize(): void {
@@ -284,6 +329,9 @@ export class UIScene extends Phaser.Scene {
   }
 
   private handlePointerDown(pointer: Phaser.Input.Pointer): void {
+    if (this.isObjectiveModalActive()) {
+      return;
+    }
     if (!this.isLeftButtonEvent(pointer)) {
       return;
     }
@@ -294,6 +342,9 @@ export class UIScene extends Phaser.Scene {
   }
 
   private handlePointerMove(pointer: Phaser.Input.Pointer): void {
+    if (this.isObjectiveModalActive()) {
+      return;
+    }
     if (!this.isMinimapNavigating || this.virtualCursor.locked) {
       return;
     }
@@ -302,10 +353,18 @@ export class UIScene extends Phaser.Scene {
   }
 
   private handlePointerUp(): void {
+    if (this.isObjectiveModalActive()) {
+      return;
+    }
     this.isMinimapNavigating = false;
   }
 
   private handleKeyDown(event: KeyboardEvent): void {
+    if (this.isObjectiveModalActive()) {
+      event.preventDefault();
+      event.stopPropagation();
+      return;
+    }
     if (event.repeat || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) {
       return;
     }
@@ -327,6 +386,9 @@ export class UIScene extends Phaser.Scene {
   }
 
   private emitMinimapNavigationAt(point: Phaser.Math.Vector2, clampToMinimap = false): boolean {
+    if (this.isObjectiveModalActive()) {
+      return false;
+    }
     const bounds = this.minimapViewport?.worldBounds ?? this.minimapMap?.worldBounds;
     const target = this.minimapGeometry && bounds ? getMinimapWorldPoint(point, this.minimapGeometry, bounds, clampToMinimap) : null;
 
@@ -345,6 +407,8 @@ export class UIScene extends Phaser.Scene {
   private handleShutdown(): void {
     this.objectiveModalActionBridge?.stop();
     this.objectiveModalActionBridge = null;
+    this.objectiveModalPresenter?.shutdown();
+    this.objectiveModalPresenter = null;
     this.objectiveModalRequestState.close();
     this.game.events.off(SELECTED_ENTITY_CHANGED_EVENT, this.handleSelectionChanged, this);
     this.game.events.off(DRAG_SELECTION_CHANGED_EVENT, this.handleDragSelectionChanged, this);
@@ -528,6 +592,9 @@ export class UIScene extends Phaser.Scene {
   }
 
   private emitActionTriggered(actionId: ActionDefinitionId, source: ActionTriggerSource): void {
+    if (this.isObjectiveModalActive()) {
+      return;
+    }
     this.game.events.emit(ACTION_TRIGGERED_EVENT, {
       actionId,
       selectedEntityIds: this.selectedEntities.map((selection) => selection.id),
@@ -991,7 +1058,7 @@ export class UIScene extends Phaser.Scene {
           .setOrigin(0, 0)
           .setInteractive({ useHandCursor: true })
           .on("pointerup", () => {
-            this.game.events.emit(GAME_PLAYBACK_CONTROL_EVENT, { type: controlType } satisfies GamePlaybackControlView);
+            this.emitPlaybackControl(controlType);
           }),
       );
     }
@@ -1057,6 +1124,9 @@ export class UIScene extends Phaser.Scene {
   }
 
   private handleBattlefieldSummaryPointerUp(): void {
+    if (this.isObjectiveModalActive()) {
+      return;
+    }
     if ((this.battlefieldSummary?.local.idleWorkers ?? 0) <= 0) {
       return;
     }
@@ -1064,6 +1134,20 @@ export class UIScene extends Phaser.Scene {
     this.game.events.emit(BATTLEFIELD_SUMMARY_ACTION_EVENT, {
       type: "select-idle-worker",
     } satisfies BattlefieldSummaryActionView);
+  }
+
+  private emitPlaybackControl(controlType: GamePlaybackControlView["type"]): void {
+    if (this.isObjectiveModalActive()) {
+      return;
+    }
+
+    this.game.events.emit(GAME_PLAYBACK_CONTROL_EVENT, {
+      type: controlType,
+    } satisfies GamePlaybackControlView);
+  }
+
+  private isObjectiveModalActive(): boolean {
+    return this.objectiveModalPresenter?.active ?? false;
   }
 
   private getEnvironmentLabel(environment: BattlefieldSummaryView["environment"]): string {

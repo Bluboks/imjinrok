@@ -17,6 +17,11 @@ export interface ResolvedOriginalObjectivePanelLayout {
   frame: OriginalObjectivePanelRect;
   content: OriginalObjectivePanelRect;
   dismissButton: OriginalObjectivePanelRect;
+  text: {
+    maxWidth: number;
+    firstCenterY: number;
+    secondCenterY: number;
+  };
 }
 
 export interface OriginalObjectivePanelUpdateInput {
@@ -49,6 +54,9 @@ export interface OriginalObjectivePanelOwnerFrame {
 const FRAME_RECT: Readonly<OriginalObjectivePanelRect> = { x: 112, y: 81, width: 416, height: 236 };
 const CONTENT_RECT: Readonly<OriginalObjectivePanelRect> = { x: 158, y: 135, width: 320, height: 124 };
 const DISMISS_BUTTON_RECT: Readonly<OriginalObjectivePanelRect> = { x: 415, y: 267, width: 80, height: 24 };
+const TEXT_MAX_WIDTH = 320;
+const FIRST_TEXT_CENTER_Y = 166;
+const SECOND_TEXT_CENTER_Y = 228;
 
 export function resolveOriginalObjectivePanelLayout(
   viewportWidth: number,
@@ -75,7 +83,28 @@ export function resolveOriginalObjectivePanelLayout(
     frame: scaleRect(FRAME_RECT, scale, offsetX, offsetY),
     content: scaleRect(CONTENT_RECT, scale, offsetX, offsetY),
     dismissButton: scaleRect(DISMISS_BUTTON_RECT, scale, offsetX, offsetY),
+    text: {
+      maxWidth: TEXT_MAX_WIDTH * scale,
+      firstCenterY: offsetY + FIRST_TEXT_CENTER_Y * scale,
+      secondCenterY: offsetY + SECOND_TEXT_CENTER_Y * scale,
+    },
   };
+}
+
+export function isResolvedOriginalObjectiveDismissButtonHit(
+  layout: ResolvedOriginalObjectivePanelLayout,
+  pointerX: number,
+  pointerY: number,
+): boolean {
+  assertFiniteCoordinate(pointerX, "pointerX");
+  assertFiniteCoordinate(pointerY, "pointerY");
+  const dismissButton = layout.dismissButton;
+  return (
+    pointerX > dismissButton.x &&
+    pointerX < dismissButton.x + dismissButton.width &&
+    pointerY > dismissButton.y &&
+    pointerY < dismissButton.y + dismissButton.height
+  );
 }
 
 export function resolveOriginalObjectivePanelUpdate(
@@ -239,5 +268,11 @@ function assertSignedWord(value: number, label: string): void {
 function assertDword(value: number, label: string): void {
   if (!Number.isInteger(value) || value < -0x80000000 || value > 0xffffffff) {
     throw new RangeError(`${label} must fit the original 32-bit field; got ${String(value)}`);
+  }
+}
+
+function assertFiniteCoordinate(value: number, label: string): void {
+  if (!Number.isFinite(value)) {
+    throw new RangeError(`${label} must be finite; got ${String(value)}`);
   }
 }

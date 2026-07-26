@@ -7,6 +7,7 @@ import { fileURLToPath } from "node:url";
 import { extractObjectivePanelLayoutEvidence } from "../../../tools/imjinrok/extract-objective-panel-layout-evidence.mjs";
 import {
   ORIGINAL_OBJECTIVE_PANEL_FRAME_ASSET,
+  isResolvedOriginalObjectiveDismissButtonHit,
   resolveOriginalObjectivePanelLayout,
   resolveOriginalObjectivePanelOwnerFrame,
   resolveOriginalObjectivePanelUpdate,
@@ -67,6 +68,7 @@ test("client rectangles exactly match the independent original-input extraction"
     frame: toClientRect(report.layout.frame),
     content: toClientRect(report.layout.content),
     dismissButton: toClientRect(report.layout.dismissButton),
+    text: report.layout.text,
   });
 });
 
@@ -107,6 +109,7 @@ test("scales all original rectangles uniformly and centers the 640x480 canvas", 
     frame: { x: 224, y: 162, width: 832, height: 472 },
     content: { x: 316, y: 270, width: 640, height: 248 },
     dismissButton: { x: 830, y: 534, width: 160, height: 48 },
+    text: { maxWidth: 640, firstCenterY: 332, secondCenterY: 456 },
   });
   assert.deepEqual(resolveOriginalObjectivePanelLayout(1280, 720), {
     scale: 1.5,
@@ -115,7 +118,23 @@ test("scales all original rectangles uniformly and centers the 640x480 canvas", 
     frame: { x: 328, y: 121.5, width: 624, height: 354 },
     content: { x: 397, y: 202.5, width: 480, height: 186 },
     dismissButton: { x: 782.5, y: 400.5, width: 120, height: 36 },
+    text: { maxWidth: 480, firstCenterY: 249, secondCenterY: 342 },
   });
+});
+
+test("preserves strict dismiss edges after responsive scaling", () => {
+  const layout = resolveOriginalObjectivePanelLayout(1280, 720);
+
+  assert.equal(isResolvedOriginalObjectiveDismissButtonHit(layout, 782.5, 418), false);
+  assert.equal(isResolvedOriginalObjectiveDismissButtonHit(layout, 902.5, 418), false);
+  assert.equal(isResolvedOriginalObjectiveDismissButtonHit(layout, 842.5, 400.5), false);
+  assert.equal(isResolvedOriginalObjectiveDismissButtonHit(layout, 842.5, 436.5), false);
+  assert.equal(isResolvedOriginalObjectiveDismissButtonHit(layout, 782.51, 400.51), true);
+  assert.equal(isResolvedOriginalObjectiveDismissButtonHit(layout, 902.49, 436.49), true);
+  assert.throws(
+    () => isResolvedOriginalObjectiveDismissButtonHit(layout, Number.NaN, 418),
+    /pointerX must be finite/,
+  );
 });
 
 test("client behavior passes the same normal, boundary, failure, and out-of-range vectors", () => {

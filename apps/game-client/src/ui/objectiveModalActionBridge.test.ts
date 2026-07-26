@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { imjinrokK01Scenario } from "@shared";
 import {
   UI_DOMAIN_ACTION_REQUESTED_EVENT,
   type UiDomainActionRequestedView,
@@ -88,14 +89,18 @@ class FakeUiDomainActionEventBus implements UiDomainActionEventBus {
 }
 
 test("selects only the existing project-owned K01 objective producer", () => {
+  const canonicalObjectiveIds = imjinrokK01Scenario.objectives.map(
+    (objective) => objective.id,
+  );
   assert.deepEqual(
     resolveK01ObjectiveModalActionCandidate({
-      scenarioId: K01_SCENARIO_ID,
+      scenarioId: imjinrokK01Scenario.id,
       interactionEnabled: true,
-      objectiveIds: [K01_OBJECTIVE_ID],
+      objectiveIds: canonicalObjectiveIds,
     }),
     createK01OpenObjectiveModalAction(),
   );
+  assert.equal(K01_SCENARIO_ID, imjinrokK01Scenario.id);
   assert.equal(
     resolveK01ObjectiveModalActionCandidate({
       scenarioId: "imjinrok-k02",
