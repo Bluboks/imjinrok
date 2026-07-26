@@ -5,3 +5,5 @@ dist/
 .vscode/
 *.log
 coverage/
+temporary/reports/
+temporary/converted/
