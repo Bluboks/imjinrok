@@ -1,10 +1,19 @@
 #!/usr/bin/env node
-import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseSpriteLikeHeader } from "./codec.mjs";
 import { readCString, readPeImage, toHex } from "./pe-image.mjs";
+import {
+  assertEqual,
+  readJson,
+  readVaRange,
+  requireRawOffset,
+  sha256,
+  verifyEvidencePoint,
+  verifyRawCodeRange,
+  verifySeededFunction,
+} from "./static-evidence.mjs";
 
 const DEFAULT_EXECUTABLE_PATH = "original/imjinrok2/imjinrok2.exe";
 const DEFAULT_SPRITE_PATH = "original/imjinrok2/yfnt/objectiveborder.spr";
@@ -225,9 +234,9 @@ export function extractObjectivePanelLayoutEvidence({
     rawCodeRanges,
     evidencePoints,
     pilotBinding: {
-      status: "unresolved",
+      status: "static-confirmed-by-dedicated-binding-extractor",
       conclusion:
-        "the complete structured direct-reference set contains no direct literal write of state 0x3f0; the upstream return-value/indirect producer and K01 binding remain unresolved",
+        "the direct-reference set alone has no literal 0x3f0 write, but the complete upstream return path is now recovered: a return of 1 from control 0x005527b0 sets FUN_004495e0's pending return to 0x3f0; independent later controls 0x005528f8, 0x00552ae0, and 0x00552850 then run in that order and can replace it with 0x3ee, 0x3ec, and 0x3ea; when none matches, FUN_00449090 writes 0x3f0 to DAT_00552998, and the dedicated binding extractor proves DAT_0088afcc=1 selects K0110 for K01",
       stateStorage: {
         address: "0x00552998",
         width: "signed WORD",
@@ -242,9 +251,10 @@ export function extractObjectivePanelLayoutEvidence({
           { address: "0x00449188", call: "0x0044917b to FUN_004aa810" },
           { address: "0x004491af", call: "0x004491a5 to FUN_004a6c80" },
         ],
-        missingDirectLiteralWrite: "0x3f0",
-        unresolved:
-          "the upstream handler return-value or indirect producer that yields 0x3f0, and its K01 binding",
+        directReferenceScope:
+          "the complete structured direct-reference set has no direct literal write of 0x3f0; this does not exclude indirect memory writes",
+        resolvedProducer:
+          "0x004496b5 sets EDI=0x3f0 after control 0x005527b0 matches; independent controls 0x005528f8, 0x00552ae0, and 0x00552850 then run in order and can overwrite it with 0x3ee, 0x3ec, and 0x3ea; 0x004498ec returns the final DI in AX and 0x00449105 stores SI to DAT_00552998",
         consumer: "0x004491bc in FUN_00449090",
       },
       textRecordSelection: {
@@ -255,16 +265,15 @@ export function extractObjectivePanelLayoutEvidence({
         extractorCall: "0x004a5839 to FUN_004838f0",
         outputs:
           "two local buffers copied from the first type-7 record payload at offsets 0x000 and 0x100",
-        unresolved:
-          "the producer/value that selects a K01 record and the identity of the selected record",
+        resolved:
+          "FUN_0048d690 stores Korean campaign stage 1 as DAT_0088afcc=1; record 1 is script\\k0110 and its OBJECTIVE arguments are the K01 modal text inputs",
+        dedicatedExtractor: "tools/imjinrok/extract-objective-modal-k01-binding.mjs",
       },
     },
     unresolvedFields: [
-      "the upstream handler return-value or indirect producer that yields UI state 0x3f0, and its K01 binding",
-      "the DAT_0088afcc value/producer and 128-byte table record that would bind the selected text payload to K01",
       "the producer and semantic name of DAT_00552b80 beyond its exact consume-on-value-1 behavior",
       "the dynamically supplied presentation surface's concrete vtable type at FUN_004a5980 param_1+0x1c",
-      "font face, font size, wrapping language rules, and the two objective text strings",
+      "font face, font size, and Korean wrapping language rules",
     ],
   };
 }
@@ -382,57 +391,6 @@ function reproduceSuccessfulResourceCleanup(cleanupSurfaceLockSucceeded) {
   return events;
 }
 
-function verifySeededFunction(buffer, image, seeds, expected) {
-  const fn = seeds.functions?.find((candidate) => candidate.entry === expected.entry);
-  if (!fn) {
-    throw new Error(`${seeds.sourceSha256}: missing seeded function ${expected.entry}`);
-  }
-  assertEqual(fn.bodyRanges?.length, 1, `${expected.entry} body range count`);
-  assertEqual(fn.bodyRanges[0], expected.bodyRange, `${expected.entry} body range`);
-  assertEqual(fn.basicBlocks?.length, expected.blockCount, `${expected.entry} CFG block count`);
-  assertEqual(fn.instructions?.length, expected.instructionCount, `${expected.entry} instruction count`);
-  const first = parseAddress(fn.instructions[0].address, `${expected.entry} first instruction`);
-  const last = fn.instructions.at(-1);
-  const endExclusive =
-    parseAddress(last.address, `${expected.entry} last instruction`) + parseInstructionBytes(last.bytes).length;
-  const bytes = readVaRange(buffer, image, first, endExclusive);
-  assertEqual(sha256(bytes), expected.bodySha256, `${expected.entry} complete body SHA-256`);
-  return {
-    entry: expected.entry,
-    bodyRange: expected.bodyRange,
-    byteRange: `${toHex(first)}-${toHex(endExclusive)} (end exclusive)`,
-    blockCount: expected.blockCount,
-    instructionCount: expected.instructionCount,
-    bodySha256: expected.bodySha256,
-  };
-}
-
-function verifyRawCodeRange(buffer, image, range) {
-  const bytes = readVaRange(buffer, image, range.start, range.endExclusive);
-  assertEqual(sha256(bytes), range.sha256, `${range.id} SHA-256`);
-  return {
-    id: range.id,
-    byteRange: `${toHex(range.start)}-${toHex(range.endExclusive)} (end exclusive)`,
-    bodySha256: range.sha256,
-  };
-}
-
-function verifyEvidencePoint(buffer, image, point) {
-  const expected = parseInstructionBytes(point.bytes);
-  const actual = readVaRange(buffer, image, point.va, point.va + expected.length);
-  if (Buffer.compare(actual, expected) !== 0) {
-    throw new Error(
-      `Static evidence mismatch at ${toHex(point.va)} (${point.meaning}): expected ${formatBytes(expected)}, got ${formatBytes(actual)}`,
-    );
-  }
-  return {
-    va: toHex(point.va),
-    rawOffset: toHex(requireRawOffset(image, point.va)),
-    bytes: formatBytes(actual),
-    meaning: point.meaning,
-  };
-}
-
 function verifyUiStateReferences(references) {
   if (!Array.isArray(references.references)) {
     throw new TypeError("references.json must contain a references array");
@@ -448,42 +406,6 @@ function verifyUiStateReferences(references) {
   return actual;
 }
 
-function readJson(path) {
-  try {
-    return JSON.parse(readFileSync(path, "utf8"));
-  } catch (error) {
-    throw new Error(`Cannot read static-analysis JSON from ${path}: ${error.message}`, { cause: error });
-  }
-}
-
-function readVaRange(buffer, image, start, endExclusive) {
-  const rawOffset = requireRawOffset(image, start);
-  const bytes = buffer.subarray(rawOffset, rawOffset + endExclusive - start);
-  if (bytes.length !== endExclusive - start) {
-    throw new RangeError(`${toHex(start)}-${toHex(endExclusive)} exceeds the executable`);
-  }
-  return bytes;
-}
-
-function requireRawOffset(image, va) {
-  const offset = image.vaToRawOffset(va);
-  if (offset === undefined) {
-    throw new RangeError(`${toHex(va)} is not backed by a PE file section`);
-  }
-  return offset;
-}
-
-function parseInstructionBytes(value) {
-  return Buffer.from(value.replaceAll(" ", ""), "hex");
-}
-
-function parseAddress(value, label) {
-  if (typeof value !== "string" || !/^0x[0-9a-f]+$/u.test(value)) {
-    throw new TypeError(`${label} is not a hexadecimal address: ${String(value)}`);
-  }
-  return Number.parseInt(value.slice(2), 16);
-}
-
 function assertSignedWord(value, label) {
   if (!Number.isInteger(value) || value < -0x8000 || value > 0x7fff) {
     throw new RangeError(`${label} must be a signed WORD value (-32768..32767); got ${String(value)}`);
@@ -494,20 +416,6 @@ function assertDword(value, label) {
   if (!Number.isInteger(value) || value < -0x80000000 || value > 0xffffffff) {
     throw new RangeError(`${label} must fit the original 32-bit field; got ${String(value)}`);
   }
-}
-
-function assertEqual(actual, expected, label) {
-  if (actual !== expected) {
-    throw new Error(`${label} mismatch: expected ${expected}, got ${actual}`);
-  }
-}
-
-function sha256(buffer) {
-  return createHash("sha256").update(buffer).digest("hex");
-}
-
-function formatBytes(bytes) {
-  return Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join(" ");
 }
 
 function parseArgs(argv) {
@@ -539,7 +447,7 @@ function formatReport(report) {
     `  frame: (${report.layout.frame.x}, ${report.layout.frame.y})-(${report.layout.frame.right}, ${report.layout.frame.bottom})`,
     `  content: (${report.layout.content.x}, ${report.layout.content.y})-(${report.layout.content.right}, ${report.layout.content.bottom})`,
     `  dismiss button: (${report.layout.dismissButton.x}, ${report.layout.dismissButton.y})-(${report.layout.dismissButton.right}, ${report.layout.dismissButton.bottom}), strict interior`,
-    `  K01 pilot binding: ${report.pilotBinding.status}`,
+    `  K01 binding: ${report.pilotBinding.status}`,
     `  complete seeded functions: ${report.functions.length}`,
   ].join("\n");
 }

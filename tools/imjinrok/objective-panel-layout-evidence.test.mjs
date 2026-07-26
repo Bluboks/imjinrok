@@ -92,7 +92,7 @@ test("verifies complete seeded function bodies, CFGs, and manually recovered vta
   assert.equal(report.evidencePoints.length, 24);
 });
 
-test("keeps the K01 pilot binding unresolved from the complete direct-reference set", () => {
+test("preserves the direct-reference audit while pointing to the resolved K01 binding", () => {
   const report = extractObjectivePanelLayoutEvidence({
     executablePath,
     spritePath,
@@ -101,9 +101,9 @@ test("keeps the K01 pilot binding unresolved from the complete direct-reference 
   });
 
   assert.deepEqual(report.pilotBinding, {
-    status: "unresolved",
+    status: "static-confirmed-by-dedicated-binding-extractor",
     conclusion:
-      "the complete structured direct-reference set contains no direct literal write of state 0x3f0; the upstream return-value/indirect producer and K01 binding remain unresolved",
+      "the direct-reference set alone has no literal 0x3f0 write, but the complete upstream return path is now recovered: a return of 1 from control 0x005527b0 sets FUN_004495e0's pending return to 0x3f0; independent later controls 0x005528f8, 0x00552ae0, and 0x00552850 then run in that order and can replace it with 0x3ee, 0x3ec, and 0x3ea; when none matches, FUN_00449090 writes 0x3f0 to DAT_00552998, and the dedicated binding extractor proves DAT_0088afcc=1 selects K0110 for K01",
     stateStorage: {
       address: "0x00552998",
       width: "signed WORD",
@@ -133,9 +133,10 @@ test("keeps the K01 pilot binding unresolved from the complete direct-reference 
         { address: "0x00449188", call: "0x0044917b to FUN_004aa810" },
         { address: "0x004491af", call: "0x004491a5 to FUN_004a6c80" },
       ],
-      missingDirectLiteralWrite: "0x3f0",
-      unresolved:
-        "the upstream handler return-value or indirect producer that yields 0x3f0, and its K01 binding",
+      directReferenceScope:
+        "the complete structured direct-reference set has no direct literal write of 0x3f0; this does not exclude indirect memory writes",
+      resolvedProducer:
+        "0x004496b5 sets EDI=0x3f0 after control 0x005527b0 matches; independent controls 0x005528f8, 0x00552ae0, and 0x00552850 then run in order and can overwrite it with 0x3ee, 0x3ec, and 0x3ea; 0x004498ec returns the final DI in AX and 0x00449105 stores SI to DAT_00552998",
       consumer: "0x004491bc in FUN_00449090",
     },
     textRecordSelection: {
@@ -146,8 +147,9 @@ test("keeps the K01 pilot binding unresolved from the complete direct-reference 
       extractorCall: "0x004a5839 to FUN_004838f0",
       outputs:
         "two local buffers copied from the first type-7 record payload at offsets 0x000 and 0x100",
-      unresolved:
-        "the producer/value that selects a K01 record and the identity of the selected record",
+      resolved:
+        "FUN_0048d690 stores Korean campaign stage 1 as DAT_0088afcc=1; record 1 is script\\k0110 and its OBJECTIVE arguments are the K01 modal text inputs",
+      dedicatedExtractor: "tools/imjinrok/extract-objective-modal-k01-binding.mjs",
     },
   });
 });

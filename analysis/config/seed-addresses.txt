@@ -38,6 +38,9 @@
 0x00441de0 entity-alive-check-candidate
 0x00441e40 active-entity-record-lookup-candidate
 0x004517a0 sprite-frame-blit-candidate
+0x0043e620 campaign-stage-selection-controller
+0x004495e0 common-ui-control-handler
+0x0045f9c0 application-state-loop
 0x0045bd00 entity-type-definition-writer
 0x0045bf30 attack-stat-selector
 0x0045bf40 defense-stat-selector
@@ -61,7 +64,14 @@
 0x004a9010 speech-text-wrap-candidate
 0x0048a731 k01-k0120-condition-site
 0x0048a812 k01-hero-loss-condition-site
+0x0048d030 mission-record-table-initializer
+0x0048d410 mission-map-path-dispatcher
+0x0048d610 mission-record-selector
+0x0048d660 campaign-stage-count
+0x0048d690 selected-stage-index-writer
 0x0048d6f0 mission-result-gate-candidate
+0x0048dbe0 mission-map-loader
+0x0048ddb0 mission-handler-dispatcher
 0x0048dde0 mission-result-consumer-candidate
 0x004a5730 objective-modal-initialize
 0x004a5980 objective-modal-update
@@ -83,3 +93,5 @@
 0x004a5ac0 objective-modal-release
 0x00411cd0 control-release-state
 0x0044b040 visible-error-message
+0x004aafa0 stage-selector-initializer
+0x004ab630 stage-selector-update
