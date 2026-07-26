@@ -74,6 +74,7 @@
 0x0043c300 action-state-1-update
 0x0043c9c0 entity-action-state-dispatcher
 0x00442b10 defender-damage-application-candidate
+0x00442ca0 raw-byte-grid-selector-operation-candidate
 0x00443080 simulation-timestamp-history-initializer-candidate
 0x00443090 simulation-timestamp-history-reset-candidate
 0x004430b0 simulation-timestamp-history-update-candidate
@@ -105,14 +106,19 @@
 0x0045bf40 defense-stat-selector
 0x0045bf50 entity-type-definition-initializer
 0x0045f9c0 main-message-loop-candidate
+0x00461570 raw-coordinate-state-writer-candidate
+0x004648d0 raw-byte-state-writer-candidate
 0x00482180 script-load-candidate
 0x00482340 script-start-candidate
+0x00482390 script-post-state-check-candidate
 0x004823a0 script-busy-check-candidate
 0x00482590 script-command-lookup-candidate
 0x00482860 script-command-dispatch-candidate
 0x004824c0 script-queue-consumer-candidate
 0x004830f0 script-record-dispatch-candidate
 0x0048ea90 speaker-id-storage-initializer-candidate
+0x00487fa0 k01-pre-trigger-raw-relation-blocker-candidate
+0x00488420 signed-word-descriptor-entity-creation-candidate
 0x004a7410 hero-panel-resource-initializer-candidate
 0x004a7690 speech-portrait-draw-candidate
 0x004a7a50 speech-text-layout
