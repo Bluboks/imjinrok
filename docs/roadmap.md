@@ -30,11 +30,13 @@ VM에서 원본 게임을 플레이하며 화면 변화를 따라가는 방식�
   교체했다. K01 권율·유성룡도 전용 `generalk11/12/13.spr`·`generalk31/32.spr`와 상태 8
   idle·1 일반 이동·4 공격·7 사망의 프레임·방향·미러를 복원해 사명대사 공유 비주얼과 임시
   상태 프레임을 제거했다. 두 영웅의 일반 공격 효과 phase·사이클 종료·회복 카운터도 정적
-  복원했으며 권율 직접 피해와 유성룡 투사체 생성까지 재현했다. 초 단위 재생 속도와 유성룡 투사체
-  충돌은 다음 전투 파일럿 경계에 남아 있다.
+  복원했으며 권율 직접 피해와 유성룡 subtype `0x0c`의 생성·보수적인 port accepted 좌표 subset
+  `0..32767` 비행·도착 충돌·effect kind `9` WORD 피해·raw 적용 gate·실패 경로까지 재현했다.
+  원본 caller 전체 signed-WORD 좌표 범위와 원본 좌표·틱의 프로젝트 변환은 다음 전투 통합
+  경계에 남아 있다.
 - 3단계: 시작 전. 자동 함수 경계와 후보 주소가 있으며 메커니즘 역할은 아직 `추정`이다.
 - 4단계: 부분 진행. K01 영웅의 공격 상태 진입 이후 phase·효과 시점·회복은 완료했지만 대상
-  검색·사거리·유성룡 투사체 충돌·사망 정리는 미확정이다.
+  검색·사거리·사망 정리와 원본 좌표·시간 변환은 미확정이다.
 
 ## K01 MVP 완료 조건
 
@@ -149,10 +151,12 @@ K01 종단 검증까지 통과해야 한다.
 현재 K01 영웅 제한 범위에서는 3·4·6·8의 일부를 완료했다. 권율은 8-phase 중 phase 7에서
 직접 피해 kind 1, 유성룡은 10-phase 중 phase 7에서 subtype `0x0c` 투사체를 생성한다.
 두 영웅 모두 phase가 0으로 돌아오면 주 회복 카운터를 초기화하고 짝수 전역 틱 두 번 뒤 다시
-준비된다. 권율의 기본 payload 80과 직접 피해 수식은 재현했으며 유성룡의 최종 충돌 피해는 남아
-있다. 자세한 범위는
-[K01 영웅 일반 공격 파일럿](reverse-engineering/mechanics/k01-hero-basic-attack-pilot.md)을
-따른다.
+준비된다. 권율의 기본 payload 80과 직접 피해 수식에 이어 유성룡의 subtype `0x0c`는 보수적인
+좌표 accepted subset `0..32767`에서 경로·도착·effect kind `9` 피해를 재현했다. 원본 caller
+전체 signed-WORD 좌표 범위는 미확정이다. 자세한 생성 phase는
+[K01 영웅 일반 공격 파일럿](reverse-engineering/mechanics/k01-hero-basic-attack-pilot.md),
+후속 수명과 피해는
+[K01 유성룡 투사체 파일럿](reverse-engineering/mechanics/k01-ryu-projectile-pilot.md)을 따른다.
 
 통과 조건:
 
