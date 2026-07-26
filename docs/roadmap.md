@@ -35,8 +35,9 @@ VM에서 원본 게임을 플레이하며 화면 변화를 따라가는 방식�
   원본 caller 전체 signed-WORD 좌표 범위와 원본 좌표·틱의 프로젝트 변환은 다음 전투 통합
   경계에 남아 있다.
 - 3단계: 시작 전. 자동 함수 경계와 후보 주소가 있으며 메커니즘 역할은 아직 `추정`이다.
-- 4단계: 부분 진행. K01 영웅의 공격 상태 진입 이후 phase·효과 시점·회복은 완료했지만 대상
-  검색·사거리·사망 정리와 원본 좌표·시간 변환은 미확정이다.
+- 4단계: 부분 진행. K01 영웅의 대상 검색·사거리, 공격 phase·피해·투사체와 signed-health
+  사망·slot/reference 정리는 정적 확정·재현했다. 원본 identity·좌표·accepted update 단위의
+  프로젝트 변환과 실제 opt-in 연결은 미확정이다.
 
 ## K01 MVP 완료 조건
 
@@ -102,8 +103,8 @@ VM에서 원본 게임을 플레이하며 화면 변화를 따라가는 방식�
    `조선 창병`·슬롯 100으로 식별, 상태 1·2 이동 의미와 방향식 완료, 상태 1 일반 이동 이식;
    상태 2 통합·특수 분기 base·idle·전투는 미확정
    - K01 영웅 확장: 클래스 76 `조선 권율`과 78 `조선 유성룡`의 전용 SPR·상태 8 idle·
-     1 일반 이동·4 공격·7 사망 이식 완료; 공격 효과 phase 7은 정적 확정, 초 단위 재생 속도·
-     피격·사망 표시 수명은 미확정
+     1 일반 이동·4 공격·7 사망 이식 완료; 공격 효과 phase 7과 원본 accepted update 단위의
+     사망 phase·slot 해제는 정적 확정, 초 단위 재생 속도와 프로젝트 사망 수명 이식은 미확정
 2. 건물의 건설·정상·피해→본체·오버레이 프레임 식 — 본체 2개 완료: 조선 본영과 조선 봉화대
    frame 0~7·정상 7·반파 8; 각 자원의 나머지 프레임과 오버레이는 미확정
 3. `SPEECH` 초상화 ID→자원·프레임 식 — 완료: `hero.spr`의 17개 ID 표
@@ -148,7 +149,7 @@ K01 종단 검증까지 통과해야 한다.
 7. 사망과 대상 참조 정리
 8. 재사용 대기와 다음 상태
 
-현재 K01 영웅 제한 범위에서는 1·2·3·4·6·8의 일부를 완료했다. raw 현재 대상 writer와
+현재 K01 영웅 제한 범위에서는 1·2·3·4·6·7·8의 일부를 완료했다. raw 현재 대상 writer와
 low-WORD 검사, Y-major 자동 scan, 권율의 inclusive footprint 사거리와 유성룡의 strict
 squared 사거리 및 out-of-range 접근·missing 취소를 정적 복원·재현했다. 원본 참조·좌표·
 footprint를 프로젝트 모델로 옮기는 exact mapping은 미확정이라 simulation에는 연결하지 않았다.
@@ -168,6 +169,14 @@ message queue와 가변 millisecond gate를 따르므로 24 Hz에 연결할 exac
 대상 생산·탐색·사거리의 상세 경계는
 [K01 권율·유성룡 대상 선택과 사거리](reverse-engineering/mechanics/k01-hero-targeting-range.md)를
 따른다.
+signed health 0 뒤 행동 6의 parameterized 8-phase 진행, 행동 7/`0x16` 경계, 조건부
+outer active-list 해제와
+stale target의 health→slot→generation 무효화 순서는
+[K01 영웅 사망 수명주기](reverse-engineering/mechanics/k01-hero-death-lifecycle.md)에서
+생성 기본 configuration 범위로 정적 확정·재현했다. 확인한 사망·해제 경로에서 다른 record의
+`+0x122` direct eager clear는 없지만 runtime flag writer 도달과 alias write는 미확정이다.
+다만 accepted
+entity-update 단위와 프로젝트 24 Hz·identity의 exact mapping이 없어 runtime에는 연결하지 않았다.
 
 통과 조건:
 

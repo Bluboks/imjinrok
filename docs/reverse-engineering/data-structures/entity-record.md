@@ -15,7 +15,6 @@ K01의 봉화대 검색과 영웅 생존 확인에서 사용되는 레코드 관
 | ---: | ---: | --- | --- |
 | `+0x00` | byte | 유닛 타입 후보 | K0120 비교값 `0x34` |
 | `+0x01` | byte | 소유자 후보 | 현재 플레이어와 비교 |
-| `+0x07` | word 후보 | 생존·활성 수치 후보 | `0x00441de0` 확인 경로 |
 | `+0x55` | byte | 건설 진행도 후보 | 완성값 `0x64` 비교 |
 
 관련 전역과 코드:
@@ -23,9 +22,11 @@ K01의 봉화대 검색과 영웅 생존 확인에서 사용되는 레코드 관
 - 레코드 스캔 시작 후보: `0x0063528f`
 - 최대 스캔 수: `0x4b0`
 - 현재 플레이어 후보: `0x00bccc44`
-- 활성 레코드 선택 후보: `0x00441e40`
+- 클래스 76·78 alive lookup: `0x004885e0` → `0x00441db0`/`0x00441de0`
 
-레코드 stride와 정확한 베이스 포인터 의미는 새 함수 분석에서 다시 확인한다.
+K0120 scan 관점의 stride와 베이스 포인터 의미는 별도 분석이 필요하다. 반면 보호 영웅 alive
+검사는 아래 `0x558`-byte 런타임 entity record의 slot table, signed health `+0x3e`, full
+reference `+0x1b6/+0x1b8`을 사용함을 정적 확정했다.
 
 ## 렌더링 엔티티 객체 후보
 
@@ -44,33 +45,38 @@ K01의 봉화대 검색과 영웅 생존 확인에서 사용되는 레코드 관
 | `+0x37` | byte | 내부 엔티티 클래스 | 클래스 switch·타입 정의 인덱스 범위 `정적 확정` |
 | `+0x38` | signed byte | health-application table raw index | subtype `0x0c` 적용 gate 소비는 `정적 확정`, 사람용 의미·범위 보장은 미확정 |
 | `+0x3c` | word | 최대 체력 | 클래스 49·52 체력 분기 범위 `정적 확정` |
-| `+0x3e` | word | 현재 체력 | 클래스 49·52 체력 분기 범위 `정적 확정` |
+| `+0x3e` | signed word | 현재 체력 | 피해 clamp, 클래스 76·78 사망·참조 validity와 49·52 체력 분기 범위 `정적 확정` |
 | `+0x44`, `+0x50` | word | effect kind 9 defense base·modifier raw 입력 | WORD wrap·signed cap 범위 `정적 확정`, 사람용 명칭은 미확정 |
 | `+0x46` | word | 타입 정의에서 복사된 기본 공격 payload | 클래스 76·78 일반 공격 범위 `정적 확정` |
 | `+0x4a` | word | 임시 공격 payload 보정 후보 | 클래스 76·78 소비는 `정적 확정`, 생산자 의미는 미확정 |
-| `+0x6e` | byte | 애니메이션 phase 전진에 필요한 내부 갱신 수 | 클래스 76·78 일반 공격 범위 `정적 확정` |
-| `+0x6f` | byte | phase 내부 갱신 카운터 | 클래스 76·78 일반 공격 범위 `정적 확정` |
-| `+0x74` | dword | 타입·행동 flags | 클래스 2 방향 분기와 클래스 49·52 체력 분기 범위 `정적 확정` |
+| `+0x6e` | signed byte | 애니메이션 phase 전진에 필요한 내부 갱신 수 | 클래스 76·78 공격·사망 phase 범위 `정적 확정` |
+| `+0x6f` | signed byte | phase 내부 갱신 카운터 | 클래스 76·78 공격·사망 8-bit wrap 범위 `정적 확정` |
+| `+0x74` | dword | 타입·행동 raw flags | 클래스 2·49·52 및 클래스 76·78 action 7/`0x16` 범위 `정적 확정` |
 | `+0x7c` | dword | 일반 공격 전달 분기값 | 클래스 76의 `0x13`, 클래스 78의 `9` 범위 `정적 확정` |
 | `+0x80` | dword | 직접 피해 class 보정 분류 | effect kind 1 계산 범위 `정적 확정`, 사람용 명칭은 미확정 |
 | `+0x83` | byte | effect kind 9 조건부 half-defense raw flag | 값 1 분기 범위 `정적 확정`, 사람용 명칭은 미확정 |
+| `+0x84` | word | 행동 6 완료 raw flags | 클래스 76·78 생성 기본값 `0x0014`; runtime mutation과 action 7 선택 범위 `정적 확정` |
 | `+0x88` | dword | 행동 내부 하위 상태 | 행동 상태 5 일반 공격 범위 `정적 확정` |
 | `+0x8c` | byte | 건설 진행 정수 백분율 | 클래스 49·52 건설·체력 분기 범위 `정적 확정` |
 | `+0x90` | word | 체력보다 먼저 피해를 받는 완충 수치 | 직접 피해 적용 범위 `정적 확정`, 게임 내 명칭은 미확정 |
 | `+0xba` | byte | 상태 2 이동 비주얼 선택자 | 클래스 2 일반 이동 함수 범위 `정적 확정` |
-| `+0x122` | dword | 공격 대상 인덱스·세대 참조 | 클래스 76·78 일반 공격 범위 `정적 확정` |
+| `+0x122` | dword | 공격 대상 slot·generation 참조 | 클래스 76·78 공격과 사망 후 stale 수명 범위 `정적 확정` |
 | `+0x138` | word | 주 공격 회복 임계값 | 클래스 76·78 값 2 범위 `정적 확정` |
 | `+0x13a` | word | 주 공격 회복 카운터 | 짝수 전역 틱 증가·사이클 종료 시 0, 클래스 76·78 범위 `정적 확정` |
 | `+0x13e` | word | 보조 공격 회복 임계값 | 클래스 76·78 값 0 범위 `정적 확정` |
 | `+0x140` | word | 보조 공격 회복 카운터 | 일반 공격 readiness 검사 범위 `정적 확정` |
 | `+0x143` | byte | 공격 효과 발생 phase | 클래스 76·78 값 7 범위 `정적 확정` |
 | `+0x144` | word | 상태 4 공격 phase 수 | 클래스 76 값 8·클래스 78 값 10 범위 `정적 확정` |
-| `+0x1b0` | word | 상위 행동 상태 | 값 5가 일반 공격인 범위 `정적 확정` |
-| `+0x1b2` | word | 애니메이션 phase | 클래스 2·49·52 파일럿 범위 `정적 확정` |
+| `+0x18c` | signed word | 사망 visual phase count | 클래스 76·78 값 8 범위 `정적 확정` |
+| `+0x1b0` | word | 상위 행동 상태 | 값 5 일반 공격, 6/7/`0x16` 사망 수명 범위 `정적 확정` |
+| `+0x1b2` | signed word | 애니메이션 phase | 클래스 76·78 사망 signed-IDIV/low-WORD 진행 포함 제한 범위 `정적 확정` |
 | `+0x1b5` | byte | 좌우 mirror 선택자 | 클래스 2 파일럿 범위 `정적 확정` |
+| `+0x1b6/+0x1b8` | word + word | entity slot / generation full reference | 생성·validity·release/reuse 범위 `정적 확정` |
 | `+0x1e6` | word | 일반 방향 값 | 클래스 2 상태 1 일반 분기·상태 2 범위 `정적 확정` |
 | `+0x1e8` | word | 상태 1 특수 방향 값 | 분기표 정적 복원, 클래스 2 전체 base 초기화는 미확정 |
+| `+0x1f0` | byte | raw active/death-entry gate | 사망 진입은 값 1, active lookup은 nonzero 범위 `정적 확정` |
 | `+0x1f1` | byte | 공격 처리 중 표시·상태 후보 | 일반 공격 진입·완료 쓰기는 `정적 확정`, 일반 명칭은 미확정 |
+| `+0x234/+0x236` | signed word + signed word | raw action `0x16` limit/counter | 초기 100/0, signed `JL`·equality 전이 범위 `정적 확정` |
 | `+0x250` | word | 정상 0·반파 1 본체 상태 | 클래스 49·52 범위 `정적 확정` |
 | `+0x456` | word | 프레임 소스 후보 | setter 경로 |
 | `+0x48e` | word | 두 번째 프레임 소스 후보 | setter 경로 |
@@ -129,3 +135,10 @@ K01 클래스 76·78의 공격 필드 데이터 흐름과 제한된 의미는
 [K01 영웅 일반 공격 파일럿](../mechanics/k01-hero-basic-attack-pilot.md)을 따른다.
 
 이 항목을 확정하기 전에는 포팅 프로젝트의 `UnitState`와 직접 동일시하지 않는다.
+
+클래스 76·78의 health-zero→행동 6 phase→runtime flags에 따른 행동 7 유지/active-list
+해제와, 확인한 사망·해제 경로에서 direct-clear되지 않는 다른 record의 `+0x122` stale
+reference 수명은
+[K01 영웅 사망 수명주기](../mechanics/k01-hero-death-lifecycle.md)를 따른다. active slot
+table이 0이 되는 release 시점에도 record의 `+0x1b6/+0x1b8`은 그대로이며, 이후 create가
+generation WORD를 증가시키고 record 전체를 재초기화한다.

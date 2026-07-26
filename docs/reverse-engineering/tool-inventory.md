@@ -33,6 +33,7 @@
 | `extract-k01-ryu-projectile-pilot.mjs`, `k01-ryu-projectile-pilot.test.mjs` | 유지 | 유성룡 subtype `0x0c`의 slot·레코드·보수적 port accepted 좌표 subset `0..32767`·control-word 비행 분기·도착 dispatcher·effect kind `9` WORD 피해·raw health gate와 실패 경로 정적 추출·재현; 원본 caller 전체 좌표 범위는 미확정 |
 | `extract-k01-projectile-pool-cadence.mjs`, `k01-projectile-pool-cadence.test.mjs` | 유지 | main message loop→scheduler→투사체 풀의 유일 call chain, scheduler의 13개 resolved direct call raw 조건·pre-clock/post-pool 순서, selector·feedback·DWORD millisecond gate와 거부 경로 재현; callee 의미·fixed FPS·24 Hz exact mapping은 확정하지 않음 |
 | `extract-k01-hero-targeting-range.mjs`, `k01-hero-targeting-range.test.mjs` | 유지 | K01 두 영웅의 full DWORD 대상 writer, low-WORD 검사, raw relation 필터, Y-major 자동 scan, WORD/DWORD wrap 사거리와 취소·이동·재검사 전이 추출·재현; 프로젝트 참조·좌표·footprint mapping은 미확정 |
+| `extract-k01-hero-death-lifecycle.mjs`, `k01-hero-death-lifecycle.test.mjs` | 유지 | K01 두 영웅의 signed-health 행동 6 진입, incoming cadence/runtime flags별 phase·행동 7/`0x16`·조건부 release, health→slot→generation 무효화와 확인한 경로의 direct eager-clear 부재를 정적 추출·재현; runtime flag 도달·alias write·24 Hz mapping은 미확정 |
 | `extract-building-state-pilot.mjs`, `building-state-pilot.test.mjs` | 유지 | 조선 본영·클래스 49·슬롯 141의 건설 진행도와 정상·반파 본체 프레임 정적 파일럿 |
 | `extract-entity-type-catalog.mjs`, `entity-type-catalog.test.mjs` | 유지 | 클래스 1~95의 원본 이름·슬롯·기본 프레임·flags·SPR 경로 전수 추출과 결정론 검증 |
 | `extract-beacon-state-pilot.mjs`, `beacon-state-pilot.test.mjs` | 유지 | 조선 봉화대·클래스 52·`firehousek.spr` 정체와 건설·정상·반파 본체 프레임 정적 파일럿 |

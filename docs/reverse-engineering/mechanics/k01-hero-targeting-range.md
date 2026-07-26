@@ -212,5 +212,6 @@ generation DWORD, tile/center/footprint 필드, occupancy grid, raw relation tab
 - `0x004196e0` 유성룡 raw alternate 반환 경로의 전투 의미
 - accepted-step counter 기반 modulo-20 phase를 프로젝트 24 Hz에 옮길 원본 기반 규칙
 
-다음 좁은 질문은 이 integration gate를 억지로 넘기지 않고, 공격 이후 실제 사망 정리나
-K01 결과에 직접 필요한 별도 원본 상태 전이를 한 항목씩 정적 복구하는 것이다.
+공격 이후 signed health 0, 행동 6/7, slot 해제와 stale current-target 수명은
+[K01 영웅 사망 수명주기](k01-hero-death-lifecycle.md)에서 후속 복원했다. integration gate는
+원본 참조·좌표·entity-update 단위의 프로젝트 exact mapping이 생길 때까지 그대로 유지한다.

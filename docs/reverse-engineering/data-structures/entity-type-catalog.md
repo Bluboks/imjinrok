@@ -94,8 +94,11 @@ EXE와 Ghidra 산출물의 입력 SHA-256이 다르면 추출을 거부한다.
   정체뿐 아니라 보조 슬롯 `generalk12`·`generalk13`·`generalk32`와 대기·이동·공격·사망
   프레임을 [K01 영웅 파일럿](../mechanics/k01-hero-animation-pilot.md)에서 정적 확정했다.
   두 영웅의 효과 phase 7과 공격 payload·회복은
-  [일반 공격 파일럿](../mechanics/k01-hero-basic-attack-pilot.md)에서 별도 확정했다. 피격·
-  초 단위 재생 속도·사망 표시 수명주기는 아직 미확정이다.
+  [일반 공격 파일럿](../mechanics/k01-hero-basic-attack-pilot.md)에서 별도 확정했다.
+  [사망 수명주기](../mechanics/k01-hero-death-lifecycle.md)는 생성 기본값과 현재 raw flags에
+  따른 행동 6/7·조건부 slot 해제를 원본 accepted update 단위로 확정했다. runtime writer의
+  K01 도달 여부, 초 단위 재생 속도와 프로젝트 수명 이식은
+  여전히 미확정이다.
 
 ## 재생성과 검증
 
