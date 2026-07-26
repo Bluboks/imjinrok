@@ -60,11 +60,19 @@ HUD, 메뉴, 브리핑, 대화, 선택 패널, 입력 영역의 위치·크기·
 Escape 또는 strict gameplay-panel press/release부터 state `0x16`, K01 mode 1의
 `buttons201.spr` 컨트롤 strict release와 `0x3f0`까지 정적 확정·재현했다.
 
+후속 [pending action dispatcher 분석](../reverse-engineering/mechanics/objective-pending-action-dispatch.md)은
+producer의 마지막 활성 overwrite 뒤 `FUN_00449090`이 살아남은 `0x3f0`을 목표 모달 초기화로
+소비하고, 로더 실패에도 `0x3f1`로 전진하며 종료 시 `1000`으로 reset하는 흐름을 정적 확정·재현했다.
+클라이언트에는 숫자 상태가 없는 semantic `open-objective-modal` 계약만 추가했고 장면에는 연결하지
+않았다.
+
 두 텍스트 블록의 X·최대 폭·세로 중심과 K01 문자열 입력은 확정했지만 글꼴·줄바꿈 규칙,
-gameplay-panel의 화면상 정체는 아직 확정하지 않았다. 원본 SPR 로더 실패와 오디오 자원 parity는
-정적-only이고 재현·이식하지 않았다. 자원·계산·입력 판정과 정상 로드 자원 cleanup 모듈만
-클라이언트에서 원본 기반이며 K01 결합은 분석 전용이다. 현재 실행 중인 목표 추적 패널은 이 원본
-모달과 다른 프로젝트 전용 구현이다.
+gameplay-panel의 화면상 정체는 아직 확정하지 않았다. 원본 SPR 로더 내부 실패 종류·객체 결과와
+오디오 자원 parity는 정적-only이고 이식하지 않았다. 후속 dispatcher 벡터는 loader 실패 보고 뒤
+계속해 `0x3f1`로 전진하는 제어 효과만 재현한다. 자원·계산·입력 판정과 정상 로드 자원 cleanup
+모듈은 클라이언트에서 원본 기반이다. K01 진입 결합은 분석 전용이고 semantic action 계약은 독립
+UI-domain 모듈까지만 구현했다. 현재 실행 중인 목표 추적 패널은 이 원본 모달과 다른 프로젝트 전용
+구현이다.
 
 ## 변경 통과 조건
 

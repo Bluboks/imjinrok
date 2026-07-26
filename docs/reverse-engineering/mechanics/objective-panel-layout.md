@@ -23,9 +23,10 @@
 
 재현 완료 및 이식 범위는 정확한 사각형, 닫기 반환·one-shot 소비·이전 버튼 정규화·draw 순서,
 비활성·초기화·표시 소유 상태, 정상적으로 로드된 자원의 종료 해제와 그 뒤 clear 시도, clear용 lock
-성공·실패다. 원본 런타임 SPR 로더 실패와 계속 진행 동작, 컨트롤 press sound와 내부 latch 변경은
-정적으로만 확정했으며 재현·이식하지 않았다. sound/latch는 이번 질문의 닫기 반환값에는 영향을 주지
-않는 부수효과다.
+성공·실패다. 이 문서의 벡터는 원본 런타임 SPR 로더 실패와 계속 진행 동작, 컨트롤 press sound와
+내부 latch 변경을 재현·이식하지 않았다. 후속 dispatcher 벡터는 loader 실패 보고 뒤
+`0x3f1`로 계속하는 제어 효과만 별도 재현했다. sound/latch는 이번 질문의 닫기 반환값에는 영향을
+주지 않는 부수효과다.
 
 K01 목표 문자열 두 입력은 후속 분석에서 확정했지만 글꼴과 줄바꿈 언어 규칙은 아직 확정하지
 않았다. 현재 실행 중인 웹 목표 추적 패널은 별개의 프로젝트 전용 HUD이며 이 모달과 같다고 주장하지
@@ -195,8 +196,8 @@ case뿐이다. 간접 점프 목적지는 생성된 CFG에서 전부 복구됐�
     center Y 228에 blit한다.
 11. 임시 레코드를 정리하고 반환한다.
 
-위 로더 실패 흐름은 전체 정적 제어 흐름으로 확정했지만 독립 런타임 재현 벡터나 클라이언트 이식
-범위에는 포함하지 않는다.
+위 로더 실패 흐름은 전체 정적 제어 흐름으로 확정했다. 이 문서의 독립 재현 벡터나 클라이언트 이식
+범위에는 포함하지 않으며, 후속 dispatcher 벡터는 실패 보고 뒤 `0x3f1` 전진만 재현한다.
 
 ### 프레임 갱신·표시·종료
 
@@ -276,7 +277,8 @@ signed WORD로 받으므로 종료 판정에는 low WORD `0`만 사용한다.
 `tools/imjinrok/objective-panel-layout-evidence.test.mjs`가 독립 참조 모델로 이 벡터를 실행한다.
 모든 update 벡터는 종료 여부뿐 아니라 hit, one-shot 소비, 이전 버튼 정규화와 전체 draw 순서를
 완전한 기대 결과로 비교한다. 변조 EXE, 변조 SPR, stale·불완전 `seeds.json`, 표현 범위를 벗어난
-입력도 추출기 입력 거부 테스트로 검사하며, 이는 원본 런타임 SPR 로더 실패 재현과 별개다.
+입력도 추출기 입력 거부 테스트로 검사하며, 이는 후속 dispatcher의 원본 loader 실패 제어 효과
+벡터와도 별개다.
 
 ## 클라이언트 이식과 웹 적응
 
@@ -303,4 +305,6 @@ signed WORD로 받으므로 종료 판정에는 low WORD `0`만 사용한다.
 
 K01 결합 질문은 [별도 문서](objective-modal-k01-binding.md)에서, state `0x16` 진입과 목표
 컨트롤 질문은 [후속 문서](application-state-16-objective-control.md)에서 각각 정적 확정·재현
-완료했다. 다음 좁은 UI 질문은 gameplay-panel의 화면상 정체·자원·draw 경로를 복원하는 것이다.
+완료했다. [pending action dispatcher 분석](objective-pending-action-dispatch.md)은 살아남은
+`0x3f0`의 목표 모달 소비·reset과 scoped surface/resource 실패를 정적 확정·재현하고 semantic
+UI-domain 계약까지 추가했다. 다음 연결에는 mechanism 소유 semantic action source가 필요하다.

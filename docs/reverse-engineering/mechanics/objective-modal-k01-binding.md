@@ -202,5 +202,7 @@ EXE embedded 문자열도 바이트 단위로 고정한다.
 
 [후속 분석](application-state-16-objective-control.md)은 state `0x16`의 complete structured
 direct-reference 생산, Escape·gameplay-panel request와 `0x005527b0`의
-`buttons201.spr` 자원·사각형·입력을 정적 확정·재현했다. 다음 좁은 UI 질문은 gameplay-panel의
-화면상 정체·자원·draw 경로를 복원하는 것이다.
+`buttons201.spr` 자원·사각형·입력을 정적 확정·재현했다. 별도
+[pending action dispatcher 분석](objective-pending-action-dispatch.md)은 `0x3f0`의 소비 의미,
+활성·reset·실패 경로와 숫자 상태 없는 UI-domain 계약을 확정했다. gameplay-panel의 화면상
+정체·자원·draw 경로는 여전히 별도 미확정 질문이다.

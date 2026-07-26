@@ -110,13 +110,17 @@ VM에서 원본 게임을 플레이하며 화면 변화를 따라가는 방식�
 이어서 K01 UI 파일럿 후보로 선택한 공통 임무 목표 모달의 `objectiveborder.spr`, 640×480 frame
 `(112,81)-(528,317)`, 내용 영역, 닫기 컨트롤·strict-edge hit test와 종료·실패 경로를 정적
 확정했다. 좌표·종료 판정·draw 순서와 정상 로드 자원의 종료 cleanup(clear lock 성공·실패)만
-재현·이식했으며, SPR 로더 실패와 컨트롤 sound/latch는 정적-only다. 후속 분석은
+해당 모듈에 재현·이식했으며, SPR 로더 내부 객체 결과와 컨트롤 sound/latch는 정적-only다. 후속
+dispatcher 분석은 loader 실패 보고 뒤 `0x3f1`로 계속하는 제어 효과만 별도 재현했다. 후속 분석은
 `FUN_004495e0`의 `0x3f0` handler 반환 생산 경로와 K01 인덱스 1이 `script\k0110`의 목표
 텍스트·K01 map·handler를 선택하는 결합을 정적 확정·재현했다. 이 결합은 분석 전용이며 글꼴·
 줄바꿈은 미확정이다. 이어 state `0x16`의 complete structured direct-reference 생산,
 Escape·gameplay-panel request, K01 mode 1의 `buttons201.spr` 목표 컨트롤
 `(264,110)-(376,138)` strict release까지 정적 확정·재현했다. gameplay-panel의 화면상 정체와
-simulation↔UI 계약은 미확정이라 장면 연결은 보류했다.
+simulation↔UI 연결은 미확정이라 장면 연결은 보류했다. 뒤이어 ordered producer overwrite와
+`FUN_00449090`의 `0x3f0` 소비·`0x3f1` 활성·`1000` reset, scoped surface/resource 실패를
+정적 확정·재현하고 숫자 원본 상태가 없는 `open-objective-modal` UI-domain 계약을 추가했다.
+mechanism이 이 semantic action을 발행할 기존 소유 연결점은 아직 미확정이다.
 실행 중 목표 추적 HUD, 전체 HUD 루트와 선택 패널은 이 완료 범위에 포함하지 않는다.
 
 통과 조건:

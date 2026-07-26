@@ -224,5 +224,8 @@ gameplay-panel 객체와 공통 UI owner를 현재 허용된 UI 모듈만으로 
 - structured direct-reference export 밖의 application-state 간접 write 존재 여부
 - 정상 원본 자원 대신 SPR runtime load가 실패한 뒤의 실제 객체·표시 결과
 
-다음 좁은 UI 질문은 `0x0088bd80` gameplay-panel의 생성 자원과 draw 경로를 복원해, Escape와
-동등하게 공통 UI open request를 만드는 화면상 컨트롤의 원본 표시를 식별하는 것이다.
+[후속 pending action dispatcher 분석](objective-pending-action-dispatch.md)은 목표 control
+release 뒤 경쟁 overwrite, `0x3f0` 소비·활성·reset·실패 경로와 semantic
+`open-objective-modal` 계약을 정적 확정·재현했다. 다음 연결 질문은 mechanism 소유 semantic
+action 발행 source를 찾는 것이다. `0x0088bd80` gameplay-panel의 생성 자원과 draw 경로도
+화면상 원본 표시 식별을 위해 여전히 미확정이다.

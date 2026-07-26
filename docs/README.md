@@ -35,6 +35,7 @@
 - [공통 임무 목표 모달 기하·입력 파일럿](reverse-engineering/mechanics/objective-panel-layout.md)
 - [공통 임무 목표 모달의 K01 결합](reverse-engineering/mechanics/objective-modal-k01-binding.md)
 - [K01 공통 임무 목표 모달 진입 입력·컨트롤](reverse-engineering/mechanics/application-state-16-objective-control.md)
+- [목표 pending action dispatcher와 UI-domain 계약](reverse-engineering/mechanics/objective-pending-action-dispatch.md)
 - [조선 창병·내부 클래스 2 애니메이션 파일럿](reverse-engineering/mechanics/unit-animation-pilot.md)
 - [K01 권율·유성룡 핵심 애니메이션 파일럿](reverse-engineering/mechanics/k01-hero-animation-pilot.md)
 - [K01 권율·유성룡 일반 공격 phase 파일럿](reverse-engineering/mechanics/k01-hero-basic-attack-pilot.md)

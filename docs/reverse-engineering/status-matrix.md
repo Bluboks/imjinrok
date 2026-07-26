@@ -24,7 +24,7 @@
 | 건물 상태 이미지 | 조선 본영·봉화대 본체 건설·정상·반파 범위 정적 확정 | 모든 진행도·50% 경계 재현 완료 | 두 건물 본체 원본 기반 | 나머지 프레임·오버레이와 다른 7개 건물 복원 |
 | 브리핑 초상화 | 정적 확정 | 재현 완료 | 원본 기반 | 새 원본 변형에도 추출기·클라이언트 교차 검증 적용 |
 | `SPEECH` 대화 레이아웃 | 정적 확정 | 재현 완료 | 확정 좌표 원본 기반 | 제목·목표·버튼·글꼴을 별도 분석 |
-| K01 공통 임무 목표 모달 결합 | 공통 모달, `0x3f0` 반환, K01 텍스트 결합, state `0x16`의 complete structured direct-reference 생산과 Escape·gameplay-panel request 경로, `buttons201.spr` 목표 컨트롤 사각형·표시/입력 조건 정적 확정 | 기존 기하·cleanup·결합과 별도로 request→state `0x16`→K01 mode 1→strict release→`0x3f0` 연결 재현 완료; SPR 런타임 로더 실패와 오디오 자원은 미재현 | 기하·입력·cleanup 독립 모듈만 원본 기반, K01 진입 결합은 분석 전용이며 장면 연결 없음 | gameplay-panel의 사용자 노출 이름·자원·draw 경로, 목표 컨트롤 label·글꼴·줄바꿈 |
+| K01 공통 임무 목표 모달 결합 | 기존 범위에 더해 ordered producer overwrite, `FUN_00449090`의 `0x3f0` 소비·`0x3f1` 활성·`1000` reset과 surface/resource 실패 정적 확정 | request→strict release→`0x3f0`과 dispatcher 목표 생명주기 재현 완료; SPR 실패의 오류 보고 뒤 계속·상태 전이는 재현, loader 내부 객체 부수효과와 오디오 자원은 미재현 | 기하·입력·cleanup 독립 모듈과 숫자 상태 없는 `open-objective-modal` UI-domain 계약 원본 기반; K01 scene 연결 없음 | gameplay-panel 표시 정체, mechanism→UI semantic action 발행 연결, 목표 label·글꼴·줄바꿈 |
 | UI·입력 | 임무 목표 모달 범위 제외 나머지는 추정 | 임무 목표 모달 범위 제외 나머지는 미재현 | 의도적 프로젝트 UI | 원본 HUD 루트·선택 패널·실행 중 목표 추적 입력 복원 |
 | 음향·연출 | 미확인 | 미재현 | 부분 구현 | 이벤트와 자원 매핑 복원 |
 
@@ -53,7 +53,8 @@
   `(415,267)-(495,291)`, 엄격한 내부 hit test, 외부 one-shot 종료, draw·clear 잠금 실패,
   SPR 로더 실패와 sound/latch 부수효과를 `정적 확정`했다. 이 가운데 좌표·종료 판정·one-shot
   소비·이전 버튼 정규화·draw 순서와 정상 로드 자원의 종료 cleanup(clear 시도 및 clear-lock
-  성공·실패)만 `재현 완료`·`원본 기반`으로 이식했다. 로더 실패와 sound/latch는 정적-only이며,
+  성공·실패)만 `재현 완료`·`원본 기반`으로 이식했다. 로더 내부 객체 결과와 sound/latch는
+  정적-only이며, 후속 dispatcher 벡터는 실패 보고 뒤 `0x3f1`로 계속하는 제어 효과만 재현한다.
   변조 추출기 입력 거부 테스트를 로더 실패 재현으로 세지 않는다. `DAT_00552998`의 완전한 구조화
   직접 참조 집합에는 literal `0x3f0` 쓰기가 없지만, 후속 분석은 `FUN_004495e0`의
   `0x004496b5`가 컨트롤 반환을 `0x3f0`으로 만들고 `FUN_00449090`의 `0x00449105`가 이를
@@ -64,8 +65,12 @@
   Escape 또는 strict gameplay-panel press/release가 request 1을 만들고 state `0x16`으로
   전환한 뒤, K01 mode 1의 `buttons201.spr` 컨트롤 `(264,110)-(376,138)` strict release가
   `0x3f0`을 만드는 연쇄를 정적 확정·재현했다. structured direct-reference 집합 밖의 간접 state
-  write는 없다고 단정하지 않는다. 글꼴·줄바꿈과 gameplay-panel의 사용자 노출 정체는 미확정이라
-  장면 연결을 보류했다. 실행 중 목표 추적 HUD는 별도 프로젝트 전용 구현이다.
+  write는 없다고 단정하지 않는다. 이어 `FUN_00449090`이 살아남은 `0x3f0`을
+  `FUN_004a5730` 호출로 소비해 `0x3f1`로 전진하고, dismiss에서 `1000` reset 뒤 resource
+  release·clear 시도를 수행하는 흐름과 surface/resource 실패를 재현했다. 확정 의미는 숫자 상태를
+  노출하지 않는 `open-objective-modal` UI-domain 계약으로만 이식했다. mechanism 발행 source와
+  글꼴·줄바꿈, gameplay-panel의 사용자 노출 정체가 미확정이라 장면 연결을 보류했다. 실행 중 목표
+  추적 HUD는 별도 프로젝트 전용 구현이다.
 - 내부 클래스 2의 원본 이름은 `조선 창병`으로 확정했다. 프로젝트 ID `swordsman`은 호환용 별칭이며
   상태 1·2는 모두 이동 비주얼이다. 상태 1 일반 이동은 이식했지만 상태 2의 사람용 환경 명칭,
   idle·전투와 전투 수치는 아직 확정하지 않았다.
