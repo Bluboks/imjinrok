@@ -29,8 +29,8 @@ test("committed Ghidra analysis artifacts are internally consistent", () => {
   assert.equal(summary.referenceCount, 57_572);
   assert.equal(summary.computedJumpCount, 268);
   assert.equal(summary.jumpTableCount, 234);
-  assert.equal(summary.seedCount, 64);
-  assert.equal(summary.seedFunctionCount, 63);
+  assert.equal(summary.seedCount, 84);
+  assert.equal(summary.seedFunctionCount, 83);
 });
 
 test("validator rejects a source hash mismatch instead of accepting stale evidence", (t) => {

@@ -1,0 +1,458 @@
+{
+  "sourceExecutableSha256": "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e",
+  "sourceSpriteSha256": "62552fecc34139e6729b84d4e15dcbe6ea3622eb76b7f443af29fa5322813ea5",
+  "updateVectors": [
+    {
+      "id": "normal-unpressed-lock-success",
+      "input": {
+        "pointerX": 450,
+        "pointerY": 280,
+        "currentButtonDown": 0,
+        "previousButtonDown": 0,
+        "oneShotDismiss": 0,
+        "surfaceLockSucceeded": true
+      },
+      "expected": {
+        "dismissed": false,
+        "dismissReason": null,
+        "consumeOneShotDismiss": false,
+        "hitDismissButton": true,
+        "nextPreviousButtonDown": 0,
+        "drawEvents": [
+          "save-dirty-rect",
+          "expand-dirty-rect",
+          "draw-frame",
+          "draw-dismiss-control",
+          "unlock",
+          "restore-dirty-rect",
+          "present-content-region"
+        ]
+      }
+    },
+    {
+      "id": "surface-lock-failure-still-presents-content",
+      "input": {
+        "pointerX": 0,
+        "pointerY": 0,
+        "currentButtonDown": 1,
+        "previousButtonDown": 0,
+        "oneShotDismiss": 0,
+        "surfaceLockSucceeded": false
+      },
+      "expected": {
+        "dismissed": false,
+        "dismissReason": null,
+        "consumeOneShotDismiss": false,
+        "hitDismissButton": false,
+        "nextPreviousButtonDown": 1,
+        "drawEvents": ["present-content-region"]
+      }
+    },
+    {
+      "id": "release-strictly-inside-dismisses",
+      "input": {
+        "pointerX": 416,
+        "pointerY": 268,
+        "currentButtonDown": 0,
+        "previousButtonDown": 1,
+        "oneShotDismiss": 0,
+        "surfaceLockSucceeded": true
+      },
+      "expected": {
+        "dismissed": true,
+        "dismissReason": "pointer-release",
+        "consumeOneShotDismiss": false,
+        "hitDismissButton": true,
+        "nextPreviousButtonDown": null,
+        "drawEvents": []
+      }
+    },
+    {
+      "id": "left-edge-is-outside",
+      "input": {
+        "pointerX": 415,
+        "pointerY": 280,
+        "currentButtonDown": 0,
+        "previousButtonDown": 1,
+        "oneShotDismiss": 0,
+        "surfaceLockSucceeded": true
+      },
+      "expected": {
+        "dismissed": false,
+        "dismissReason": null,
+        "consumeOneShotDismiss": false,
+        "hitDismissButton": false,
+        "nextPreviousButtonDown": 0,
+        "drawEvents": [
+          "save-dirty-rect",
+          "expand-dirty-rect",
+          "draw-frame",
+          "draw-dismiss-control",
+          "unlock",
+          "restore-dirty-rect",
+          "present-content-region"
+        ]
+      }
+    },
+    {
+      "id": "right-edge-is-outside",
+      "input": {
+        "pointerX": 495,
+        "pointerY": 280,
+        "currentButtonDown": 0,
+        "previousButtonDown": 1,
+        "oneShotDismiss": 0,
+        "surfaceLockSucceeded": true
+      },
+      "expected": {
+        "dismissed": false,
+        "dismissReason": null,
+        "consumeOneShotDismiss": false,
+        "hitDismissButton": false,
+        "nextPreviousButtonDown": 0,
+        "drawEvents": [
+          "save-dirty-rect",
+          "expand-dirty-rect",
+          "draw-frame",
+          "draw-dismiss-control",
+          "unlock",
+          "restore-dirty-rect",
+          "present-content-region"
+        ]
+      }
+    },
+    {
+      "id": "top-edge-is-outside",
+      "input": {
+        "pointerX": 450,
+        "pointerY": 267,
+        "currentButtonDown": 0,
+        "previousButtonDown": 1,
+        "oneShotDismiss": 0,
+        "surfaceLockSucceeded": true
+      },
+      "expected": {
+        "dismissed": false,
+        "dismissReason": null,
+        "consumeOneShotDismiss": false,
+        "hitDismissButton": false,
+        "nextPreviousButtonDown": 0,
+        "drawEvents": [
+          "save-dirty-rect",
+          "expand-dirty-rect",
+          "draw-frame",
+          "draw-dismiss-control",
+          "unlock",
+          "restore-dirty-rect",
+          "present-content-region"
+        ]
+      }
+    },
+    {
+      "id": "bottom-edge-is-outside",
+      "input": {
+        "pointerX": 450,
+        "pointerY": 291,
+        "currentButtonDown": 0,
+        "previousButtonDown": 1,
+        "oneShotDismiss": 0,
+        "surfaceLockSucceeded": true
+      },
+      "expected": {
+        "dismissed": false,
+        "dismissReason": null,
+        "consumeOneShotDismiss": false,
+        "hitDismissButton": false,
+        "nextPreviousButtonDown": 0,
+        "drawEvents": [
+          "save-dirty-rect",
+          "expand-dirty-rect",
+          "draw-frame",
+          "draw-dismiss-control",
+          "unlock",
+          "restore-dirty-rect",
+          "present-content-region"
+        ]
+      }
+    },
+    {
+      "id": "held-button-does-not-dismiss",
+      "input": {
+        "pointerX": 450,
+        "pointerY": 280,
+        "currentButtonDown": 1,
+        "previousButtonDown": 1,
+        "oneShotDismiss": 0,
+        "surfaceLockSucceeded": true
+      },
+      "expected": {
+        "dismissed": false,
+        "dismissReason": null,
+        "consumeOneShotDismiss": false,
+        "hitDismissButton": true,
+        "nextPreviousButtonDown": 1,
+        "drawEvents": [
+          "save-dirty-rect",
+          "expand-dirty-rect",
+          "draw-frame",
+          "draw-dismiss-control",
+          "unlock",
+          "restore-dirty-rect",
+          "present-content-region"
+        ]
+      }
+    },
+    {
+      "id": "previous-state-out-of-range-two-does-not-dismiss",
+      "input": {
+        "pointerX": 450,
+        "pointerY": 280,
+        "currentButtonDown": 0,
+        "previousButtonDown": 2,
+        "oneShotDismiss": 0,
+        "surfaceLockSucceeded": true
+      },
+      "expected": {
+        "dismissed": false,
+        "dismissReason": null,
+        "consumeOneShotDismiss": false,
+        "hitDismissButton": true,
+        "nextPreviousButtonDown": 0,
+        "drawEvents": [
+          "save-dirty-rect",
+          "expand-dirty-rect",
+          "draw-frame",
+          "draw-dismiss-control",
+          "unlock",
+          "restore-dirty-rect",
+          "present-content-region"
+        ]
+      }
+    },
+    {
+      "id": "one-shot-value-one-dismisses-and-is-consumed",
+      "input": {
+        "pointerX": -32768,
+        "pointerY": 32767,
+        "currentButtonDown": 0,
+        "previousButtonDown": 0,
+        "oneShotDismiss": 1,
+        "surfaceLockSucceeded": true
+      },
+      "expected": {
+        "dismissed": true,
+        "dismissReason": "external-one-shot",
+        "consumeOneShotDismiss": true,
+        "hitDismissButton": false,
+        "nextPreviousButtonDown": null,
+        "drawEvents": []
+      }
+    },
+    {
+      "id": "one-shot-dismiss-preserves-inside-hit-observation",
+      "input": {
+        "pointerX": 450,
+        "pointerY": 280,
+        "currentButtonDown": 1,
+        "previousButtonDown": 0,
+        "oneShotDismiss": 1,
+        "surfaceLockSucceeded": true
+      },
+      "expected": {
+        "dismissed": true,
+        "dismissReason": "external-one-shot",
+        "consumeOneShotDismiss": true,
+        "hitDismissButton": true,
+        "nextPreviousButtonDown": null,
+        "drawEvents": []
+      }
+    },
+    {
+      "id": "one-shot-out-of-range-two-does-not-dismiss",
+      "input": {
+        "pointerX": -32768,
+        "pointerY": 32767,
+        "currentButtonDown": 0,
+        "previousButtonDown": 0,
+        "oneShotDismiss": 2,
+        "surfaceLockSucceeded": true
+      },
+      "expected": {
+        "dismissed": false,
+        "dismissReason": null,
+        "consumeOneShotDismiss": false,
+        "hitDismissButton": false,
+        "nextPreviousButtonDown": 0,
+        "drawEvents": [
+          "save-dirty-rect",
+          "expand-dirty-rect",
+          "draw-frame",
+          "draw-dismiss-control",
+          "unlock",
+          "restore-dirty-rect",
+          "present-content-region"
+        ]
+      }
+    },
+    {
+      "id": "disabled-control-cannot-dismiss",
+      "input": {
+        "controlEnabled": 0,
+        "controlActive": 1,
+        "pointerX": 450,
+        "pointerY": 280,
+        "currentButtonDown": 0,
+        "previousButtonDown": 1,
+        "oneShotDismiss": 0,
+        "surfaceLockSucceeded": true
+      },
+      "expected": {
+        "dismissed": false,
+        "dismissReason": null,
+        "consumeOneShotDismiss": false,
+        "hitDismissButton": true,
+        "nextPreviousButtonDown": 0,
+        "drawEvents": [
+          "save-dirty-rect",
+          "expand-dirty-rect",
+          "draw-frame",
+          "draw-dismiss-control",
+          "unlock",
+          "restore-dirty-rect",
+          "present-content-region"
+        ]
+      }
+    }
+  ],
+  "ownerVectors": [
+    {
+      "id": "owner-disabled",
+      "input": { "ownerEnabled": 0, "state": 1008 },
+      "expected": { "phase": "inactive", "nextState": 1008, "events": [] }
+    },
+    {
+      "id": "different-owner-state",
+      "input": { "ownerEnabled": 1, "state": 1007 },
+      "expected": { "phase": "inactive", "nextState": 1007, "events": [] }
+    },
+    {
+      "id": "initialization-state",
+      "input": { "ownerEnabled": 1, "state": 1008 },
+      "expected": {
+        "phase": "initialize",
+        "nextState": 1009,
+        "events": ["initialize-objective-modal"]
+      }
+    },
+    {
+      "id": "normal-display-state",
+      "input": {
+        "ownerEnabled": 1,
+        "state": 1009,
+        "update": {
+          "pointerX": 450,
+          "pointerY": 280,
+          "currentButtonDown": 0,
+          "previousButtonDown": 0,
+          "oneShotDismiss": 0,
+          "surfaceLockSucceeded": true
+        }
+      },
+      "expected": {
+        "phase": "display",
+        "nextState": 1009,
+        "events": [
+          "save-dirty-rect",
+          "expand-dirty-rect",
+          "draw-frame",
+          "draw-dismiss-control",
+          "unlock",
+          "restore-dirty-rect",
+          "present-content-region"
+        ],
+        "update": {
+          "dismissed": false,
+          "dismissReason": null,
+          "consumeOneShotDismiss": false,
+          "hitDismissButton": true,
+          "nextPreviousButtonDown": 0,
+          "drawEvents": [
+            "save-dirty-rect",
+            "expand-dirty-rect",
+            "draw-frame",
+            "draw-dismiss-control",
+            "unlock",
+            "restore-dirty-rect",
+            "present-content-region"
+          ]
+        }
+      }
+    },
+    {
+      "id": "dismissal-clears-content-after-resource-release",
+      "input": {
+        "ownerEnabled": 1,
+        "state": 1009,
+        "cleanupSurfaceLockSucceeded": true,
+        "update": {
+          "pointerX": 416,
+          "pointerY": 268,
+          "currentButtonDown": 0,
+          "previousButtonDown": 1,
+          "oneShotDismiss": 0,
+          "surfaceLockSucceeded": true
+        }
+      },
+      "expected": {
+        "phase": "dismiss",
+        "nextState": 1000,
+        "events": [
+          "release-objective-resource",
+          "attempt-clear-content",
+          "clear-content-region",
+          "unlock-clear-surface"
+        ],
+        "update": {
+          "dismissed": true,
+          "dismissReason": "pointer-release",
+          "consumeOneShotDismiss": false,
+          "hitDismissButton": true,
+          "nextPreviousButtonDown": null,
+          "drawEvents": []
+        }
+      }
+    },
+    {
+      "id": "dismissal-clear-lock-failure-still-attempts-clear",
+      "input": {
+        "ownerEnabled": 1,
+        "state": 1009,
+        "cleanupSurfaceLockSucceeded": false,
+        "update": {
+          "pointerX": 416,
+          "pointerY": 268,
+          "currentButtonDown": 0,
+          "previousButtonDown": 1,
+          "oneShotDismiss": 0,
+          "surfaceLockSucceeded": true
+        }
+      },
+      "expected": {
+        "phase": "dismiss",
+        "nextState": 1000,
+        "events": [
+          "release-objective-resource",
+          "attempt-clear-content"
+        ],
+        "update": {
+          "dismissed": true,
+          "dismissReason": "pointer-release",
+          "consumeOneShotDismiss": false,
+          "hitDismissButton": true,
+          "nextPreviousButtonDown": null,
+          "drawEvents": []
+        }
+      }
+    }
+  ]
+}
