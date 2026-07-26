@@ -24,6 +24,24 @@ export { getBuildTimeTicks, getConstructionProgress, isUnitUnderConstruction } f
 export { applyCommand, findBuildWorkPath, issueCommand, validateCommand, type CommandValidationResult, type IssueCommandResult } from "./commands.js";
 export { arePlayersAllied, arePlayersEnemies, getPlayerTeamId } from "./diplomacy.js";
 export { resolveDamageAmount, type DamagePacket } from "./damage.js";
+export {
+  advanceOriginalProjectilePoolRandomState,
+  allocateOriginalProjectileSlot,
+  buildOriginalRyuProjectileRoute,
+  calculateOriginalEffectKindNineDamage,
+  ORIGINAL_PROJECTILE_POOL_RANDOM_MODULUS,
+  ORIGINAL_PROJECTILE_POOL_RANDOM_MULTIPLIER,
+  ORIGINAL_PROJECTILE_SLOT_COUNT,
+  ORIGINAL_RYU_PROJECTILE_EFFECT_KIND,
+  ORIGINAL_RYU_PROJECTILE_SAMPLE_INTERVAL,
+  ORIGINAL_RYU_PROJECTILE_SUBTYPE,
+  resolveOriginalRyuProjectileImpact,
+  type OriginalProjectilePoint,
+  type OriginalProjectilePoolRandomState,
+  type OriginalProjectileRoute,
+  type OriginalRyuProjectileImpactInput,
+  type OriginalRyuProjectileImpactResult,
+} from "./originalRyuProjectile.js";
 export type { EnvironmentState } from "./environment.js";
 export { findPathForUnit, isTerrainWalkable } from "./navigation.js";
 export { getFootprintTiles, validateBuildingPlacement, type BuildingPlacementValidationResult } from "./placement.js";
