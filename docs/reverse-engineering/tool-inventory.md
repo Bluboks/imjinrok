@@ -24,10 +24,12 @@
 | `validate-static-analysis.mjs` | 유지 | 생성 JSON의 스키마·입력 해시·정렬·참조 무결성 검사 |
 | `static-analysis-pipeline.test.mjs` | 유지 | 커밋된 실제 산출물과 실패 경로 회귀 검사 |
 | `pe-image.mjs` | 유지 | PE 헤더, VA와 파일 오프셋의 독립 교차 검사. 함수 의미 분석에는 사용하지 않음 |
+| `static-evidence.mjs` | 유지 | 전용 추출기들이 원본 해시, seed 함수 전체 본문, 원시 코드 범위와 VA 바이트 anchor를 중복 없이 검증하는 공통 helper |
 | `extract-executable-refs.mjs`, `executable-refs.test.mjs` | 유지 | ASCII 문자열과 PE 위치를 탐색점으로 수집. 문자열 존재는 동작 증거가 아님 |
 | `extract-mission-portrait-mapping.mjs`, `mission-portrait-mapping.test.mjs` | 유지 | `SPEECH` 소비자·ID 조회·`hero.spr` 프레임 표의 정적 확정 결과 추출과 회귀 검사 |
 | `extract-speech-layout-evidence.mjs`, `speech-layout-evidence.test.mjs` | 유지 | `SPEECH` 숫자 슬롯·초상화 사각형·대사 좌표의 정적 확정 결과 추출과 회귀 검사 |
 | `extract-objective-panel-layout-evidence.mjs`, `objective-panel-layout-evidence.test.mjs` | 유지 | 임무 목표 모달 전체 흐름·원본 SPR·사각형·hit test·실패 경로는 함수 해시·CFG로 정적 검증하고, 갱신 결과와 정상 로드 자원의 종료 clear-lock 성공·실패만 원본 입력 벡터로 재현 |
+| `extract-objective-modal-k01-binding.mjs`, `objective-modal-k01-binding.test.mjs` | 유지 | `0x3f0` 생산과 독립 `0x3ee→0x3ec→0x3ea` 컨트롤의 마지막 활성 우선순위, signed WORD K01 인덱스 1과 K0110 목표 텍스트·K01 map·handler 결합을 EXE·스크립트·맵 해시와 전체 함수·원시 범위로 정적 검증하고 경계 벡터로 재현 |
 | `extract-unit-animation-pilot.mjs`, `unit-animation-pilot.test.mjs` | 유지 | 조선 창병·클래스 2 식별, 상태 1·2 이동 의미·방향·phase→frame·mirror와 특수 분기 격리 |
 | `extract-k01-hero-movement-pilot.mjs`, `k01-hero-movement-pilot.test.mjs` | 유지 | K01 권율·유성룡의 클래스, 주·보조 SPR, 상태 8/1/4/7 대기·이동·공격·사망 방향·phase→frame·mirror 정적 추출 |
 | `extract-k01-hero-basic-attack-pilot.mjs`, `k01-hero-basic-attack-pilot.test.mjs` | 유지 | K01 두 영웅의 일반 공격 상태·효과 phase·회복 카운터·payload, 권율 직접 피해와 유성룡 투사체 생성 정적 추출·재현 |

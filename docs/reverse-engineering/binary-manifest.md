@@ -49,7 +49,7 @@ objdump -x original/imjinrok2/imjinrok2.exe
 | compiler spec | `windows` |
 | 자동 분석 함수 | `2448` |
 | 정의된 문자열 | `1545` |
-| seed 주소 / 포함 함수 | `84` / `83` |
+| seed 주소 / 포함 함수 | `96` / `94` |
 | 구조화 산출물 | `analysis/generated/imjinrok2/` |
 
 도구 배포 URL과 SHA-256은 `tools/imjinrok/static-analysis-versions.env`에 고정했다. 원본 EXE 해시가
@@ -88,6 +88,9 @@ Ghidra의 메모리 지도에는 PE 네 섹션 외에 헤더와 분석용 `tdb` 
 | `char/firehousek.spr` | `ac6621124bbf2106a5d9309499da7701a5c4e5223692dd2f4f51e2e9c1ab97aa` | 조선 봉화대 본체 frame 0~8 |
 | `yfnt/hero.spr` | `a701bd0a66ec30dfd0bbc33ad7e78b937e725292fd37e9cae983ca28ad6af853` | `SPEECH` 초상화 17개 |
 | `yfnt/objectiveborder.spr` | `62552fecc34139e6729b84d4e15dcbe6ea3622eb76b7f443af29fa5322813ea5` | 임무 목표 모달 frame 0, 416×236 |
+| `script/K0110` | `d9dcc3c78d0373181677afc63fe9331ff561387e36877a62912ca66515f4aea8` | K01 인덱스 1의 임무 목표 텍스트 입력 |
+| `script/K0210` | `53a0a6f03b6ff7bc8d2456b5c66712054a73a2c4b921fff6c62f765552bd4331` | 인접 인덱스 2의 목표 텍스트 교차 검사 |
+| `stagemap/k01.map` | `43ec3a173032f74c12d3cce1db1078b076b651ed79070a0914673a5b65da99cb` | 인덱스 1의 K01 map 결합 |
 
 향후 매니페스트에는 다음을 포함한다.
 
