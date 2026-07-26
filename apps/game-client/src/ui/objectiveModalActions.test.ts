@@ -5,8 +5,12 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
   appendUiDomainAction,
+  assertK01OpenObjectiveModalAction,
   consumeNextUiDomainAction,
+  createK01OpenObjectiveModalAction,
   createOpenObjectiveModalAction,
+  K01_OBJECTIVE_ID,
+  K01_OBJECTIVE_MODAL_TRIGGER,
   type OpenObjectiveModalAction,
   type UiDomainAction,
 } from "./objectiveModalActions";
@@ -61,7 +65,7 @@ test("keeps original-parity actions and K01 extension actions in one typed chann
   const originalAction: K01UiAction = createOpenObjectiveModalAction<{
     profile: "original-parity";
     objectiveId: string;
-  }>({ profile: "original-parity", objectiveId: "k01-primary" });
+  }>({ profile: "original-parity", objectiveId: K01_OBJECTIVE_ID });
   const extensionAction: K01UiAction = {
     type: "show-k01-reinforcement-notice",
     metadata: { waveId: "k0120", optional: false },
@@ -83,4 +87,17 @@ test("does not invent an action when the channel is empty", () => {
     action: null,
     remainingActions: [],
   });
+});
+
+test("creates and validates the project-owned K01 metadata without original state numbers", () => {
+  const action = createK01OpenObjectiveModalAction();
+  assert.deepEqual(action, {
+    type: "open-objective-modal",
+    metadata: {
+      profile: "original-parity",
+      objectiveId: K01_OBJECTIVE_ID,
+      trigger: K01_OBJECTIVE_MODAL_TRIGGER,
+    },
+  });
+  assert.doesNotThrow(() => assertK01OpenObjectiveModalAction(action));
 });

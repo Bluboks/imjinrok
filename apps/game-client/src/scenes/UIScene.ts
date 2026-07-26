@@ -60,6 +60,12 @@ import {
 } from "../ui/minimap.js";
 import { drawActionGrid, getEnabledActionForHotkey } from "../ui/actionGrid.js";
 import { drawPanelFrame, HUD_TEXT_STYLE, type PanelBounds } from "../ui/hudPanel.js";
+import {
+  emitK01ObjectiveModalActionRequest,
+  ObjectiveModalActionBridge,
+  ObjectiveModalRequestState,
+  resolveK01ObjectiveModalActionCandidate,
+} from "../ui/objectiveModalActionBridge.js";
 import { drawSelectionPanel } from "../ui/selectionPanel.js";
 
 const VIRTUAL_CURSOR_SIZE = 15;
@@ -107,6 +113,8 @@ export class UIScene extends Phaser.Scene {
   private playerEconomy: PlayerEconomyView | null = null;
   private battlefieldSummary: BattlefieldSummaryView | null = null;
   private gamePlayback: GamePlaybackView = { paused: false, speed: 1, controllable: false, audioMuted: false };
+  private objectiveModalActionBridge: ObjectiveModalActionBridge | null = null;
+  private readonly objectiveModalRequestState = new ObjectiveModalRequestState();
 
   constructor() {
     super("ui");
@@ -132,6 +140,13 @@ export class UIScene extends Phaser.Scene {
       (this.registry.get(BATTLEFIELD_SUMMARY_REGISTRY_KEY) as BattlefieldSummaryView | null | undefined) ?? null;
     this.gamePlayback =
       (this.registry.get(GAME_PLAYBACK_REGISTRY_KEY) as GamePlaybackView | null | undefined) ?? this.gamePlayback;
+    this.objectiveModalRequestState.close();
+    this.objectiveModalActionBridge?.stop();
+    this.objectiveModalActionBridge = new ObjectiveModalActionBridge(
+      this.game.events,
+      this.handleObjectiveModalAction,
+    );
+    this.objectiveModalActionBridge.start();
 
     this.drawHud();
     this.dragSelectionGraphics = this.add.graphics().setScrollFactor(0).setDepth(1500);
@@ -168,6 +183,12 @@ export class UIScene extends Phaser.Scene {
       this.drawHud();
     }
   }
+
+  private readonly handleObjectiveModalAction = (
+    action: unknown,
+  ): void => {
+    this.objectiveModalRequestState.open(action);
+  };
 
   private handleResize(): void {
     this.drawHud();
@@ -248,10 +269,13 @@ export class UIScene extends Phaser.Scene {
 
   private handleGamePlaybackChanged(view: GamePlaybackView): void {
     const controllableChanged = this.gamePlayback.controllable !== view.controllable;
+    const objectiveInteractionChanged =
+      (this.gamePlayback.controllable && !this.gamePlayback.paused) !==
+      (view.controllable && !view.paused);
 
     this.gamePlayback = view;
 
-    if (controllableChanged && this.hudContainer) {
+    if ((controllableChanged || objectiveInteractionChanged) && this.hudContainer) {
       this.drawHud();
       return;
     }
@@ -319,6 +343,9 @@ export class UIScene extends Phaser.Scene {
   }
 
   private handleShutdown(): void {
+    this.objectiveModalActionBridge?.stop();
+    this.objectiveModalActionBridge = null;
+    this.objectiveModalRequestState.close();
     this.game.events.off(SELECTED_ENTITY_CHANGED_EVENT, this.handleSelectionChanged, this);
     this.game.events.off(DRAG_SELECTION_CHANGED_EVENT, this.handleDragSelectionChanged, this);
     this.game.events.off(VIRTUAL_CURSOR_CHANGED_EVENT, this.handleVirtualCursorChanged, this);
@@ -802,7 +829,68 @@ export class UIScene extends Phaser.Scene {
       .on("pointerup", this.handleBattlefieldSummaryPointerUp, this);
     container.add(this.battlefieldSummaryText);
     this.updateBattlefieldSummaryText();
+    this.drawObjectiveModalRequestControl(container, hudTop);
     this.drawPlaybackControls(container, hudTop);
+  }
+
+  private drawObjectiveModalRequestControl(
+    container: Phaser.GameObjects.Container,
+    hudTop: number,
+  ): void {
+    if (!this.resolveObjectiveModalActionCandidate()) {
+      return;
+    }
+
+    const width = 52;
+    const height = 20;
+    const x = this.scale.width - 236;
+    const y = hudTop + 2;
+    const graphics = this.add.graphics().setScrollFactor(0);
+    graphics
+      .fillStyle(0x102428, 0.96)
+      .fillRoundedRect(x, y, width, height, 5)
+      .lineStyle(1, 0xb89e5e, 0.9)
+      .strokeRoundedRect(x, y, width, height, 5);
+    container.add(graphics);
+    container.add(
+      this.add
+        .text(x + width / 2, y + 3, "목표", {
+          ...HUD_TEXT_STYLE,
+          fontSize: "11px",
+          color: "#f1dfaa",
+        })
+        .setOrigin(0.5, 0),
+    );
+    container.add(
+      this.add
+        .zone(x, y, width, height)
+        .setOrigin(0, 0)
+        .setInteractive({ useHandCursor: true })
+        .on("pointerup", this.handleObjectiveModalRequest, this),
+    );
+  }
+
+  private handleObjectiveModalRequest(): void {
+    const action = this.resolveObjectiveModalActionCandidate();
+    if (action) {
+      emitK01ObjectiveModalActionRequest(this.game.events, action);
+    }
+  }
+
+  private resolveObjectiveModalActionCandidate(): ReturnType<
+    typeof resolveK01ObjectiveModalActionCandidate
+  > {
+    const scenario = this.launchContext?.scenario;
+    if (!scenario) {
+      return null;
+    }
+
+    return resolveK01ObjectiveModalActionCandidate({
+      scenarioId: scenario.id,
+      interactionEnabled:
+        this.gamePlayback.controllable && !this.gamePlayback.paused,
+      objectiveIds: scenario.objectives.map((objective) => objective.id),
+    });
   }
 
   private getSessionMapLabel(context: GameLaunchContext): string {
