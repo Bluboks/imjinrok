@@ -39,7 +39,7 @@ K01 목표 문자열 두 입력은 후속 분석에서 확정했지만 글꼴과
 | `original/imjinrok2/yfnt/objectiveborder.spr` | `62552fecc34139e6729b84d4e15dcbe6ea3622eb76b7f443af29fa5322813ea5` | 416×236, 1프레임 |
 
 `analysis/config/seed-addresses.txt`에 필요한 함수 시작점을 추가하고 전체 파이프라인으로 다시 생성했다.
-현재 산출물은 seed 96개, 포함 함수 94개다. 이 추출기는 `seeds.json`의 원본 해시뿐 아니라 이 질문에
+현재 산출물은 seed 113개, 포함 함수 111개다. 이 추출기는 `seeds.json`의 원본 해시뿐 아니라 이 질문에
 필요한 20개 함수의 전체 바이트 SHA-256, 본문 범위, CFG 블록 수와 명령어 수를 검사한다.
 `FUN_00448ff0`·`FUN_00449030`은 원시 함수 범위 전체 해시로 추가 고정하고, `references.json`의
 원본 해시와 `DAT_00552998` 직접 참조 14개 전수 집합도 검사한다.
@@ -288,8 +288,8 @@ signed WORD로 받으므로 종료 판정에는 low WORD `0`만 사용한다.
 - 클라이언트 테스트는 독립 추출기 결과와 같은 JSON 벡터를 직접 사용한다.
 - 640×480 원본 좌표는 고정 상수다. 다른 viewport에서는 하나의 균일 배율과 중앙 여백만 적용하고
   종횡비를 늘이지 않는다. 이것은 `의도적 적응`이다.
-- 실제 장면에는 연결하지 않았다. K01 목표 문자열은 후속 정적 분석에서 확정했지만 글꼴·줄바꿈과
-  정확한 사용자 표시 트리거가 미확정인 상태에서 기존
+- 실제 장면에는 연결하지 않았다. K01 목표 문자열과 원본 사용자 표시 입력은 후속 정적 분석에서
+  확정했지만 글꼴·줄바꿈과 simulation↔UI 계약이 미확정인 상태에서 기존
   `SkirmishScene.updateObjectiveTrackerOverlay`를 이 모달로 바꾸면 검증되지 않은 UI를 원본 기반처럼
   보이게 하므로 보류했다. `SkirmishScene.ts`는 수정하지 않았다.
 
@@ -298,9 +298,9 @@ signed WORD로 받으므로 종료 판정에는 low WORD `0`만 사용한다.
 - `DAT_00552b80`을 설정하는 생산자와 그 도메인 의미
 - 텍스트 측정·표시에서 사용하는 글꼴 face·크기와 한국어 줄바꿈 규칙
 - 동적으로 전달되는 presentation surface의 구체 vtable 타입
-- 컨트롤 객체 `0x005527b0`의 사용자 노출 이름·자원·사각형
-- application state `0x16`을 만드는 완전한 상위 사용자 동작·표시 조건
+- 컨트롤 객체 `0x005527b0`의 사용자 노출 한국어 label
+- state `0x16` request를 만드는 gameplay-panel의 화면상 정체·자원·draw 경로
 
-K01 결합 질문은 [별도 문서](objective-modal-k01-binding.md)에서 정적 확정·재현 완료했다. 다음
-좁은 UI 질문은 application state `0x16`의 완전한 생산 경로와 컨트롤 객체 `0x005527b0`의
-자원·사각형을 복원해, K01에서 모달을 여는 정확한 사용자 동작과 표시 조건을 정적 확정하는 것이다.
+K01 결합 질문은 [별도 문서](objective-modal-k01-binding.md)에서, state `0x16` 진입과 목표
+컨트롤 질문은 [후속 문서](application-state-16-objective-control.md)에서 각각 정적 확정·재현
+완료했다. 다음 좁은 UI 질문은 gameplay-panel의 화면상 정체·자원·draw 경로를 복원하는 것이다.

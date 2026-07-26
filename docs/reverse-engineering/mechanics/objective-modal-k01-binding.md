@@ -37,7 +37,7 @@ K01은 공통 임무 목표 모달에 정적으로 결합된다. 한국 캠페�
 | `original/imjinrok2/stagemap/k01.map` | `43ec3a173032f74c12d3cce1db1078b076b651ed79070a0914673a5b65da99cb` | K01 맵 결합 입력 |
 
 `analysis/config/seed-addresses.txt`를 바꾸고 전체 `pnpm imjinrok:analyze-exe` 파이프라인으로
-`analysis/generated/imjinrok2/`를 재생성했다. 현재 기준선은 seed 96개, 포함 seed 함수 94개다.
+`analysis/generated/imjinrok2/`를 재생성했다. 현재 기준선은 seed 113개, 포함 seed 함수 111개다.
 전역 자동 분석 개수는 함수 2,448개, 정의 문자열 1,545개, 내부 참조 57,572개, 간접 분기 268개,
 점프 테이블 234개로 유지된다.
 
@@ -195,11 +195,12 @@ EXE embedded 문자열도 바이트 단위로 고정한다.
 
 남은 항목은 다음과 같다.
 
-- 컨트롤 객체 `0x005527b0`의 사용자 노출 이름·자원·정확한 사각형
-- application state `0x16`에 들어가는 사용자 동작과 표시 조건의 완전한 상위 경로
+- 컨트롤 객체 `0x005527b0`의 사용자 노출 한국어 label
+- state `0x16` request를 만드는 gameplay-panel의 화면상 정체·자원·draw 경로
 - 원본 글꼴 face·크기와 K01 목표 문장의 한국어 줄바꿈 규칙
 - 레코드 객체가 비워 둔 zero record의 역사적 이유
 
-다음 좁은 UI 질문은 application state `0x16`의 완전한 생산 경로와 컨트롤 객체
-`0x005527b0`의 자원·사각형을 함께 복원해, K01에서 이 공통 모달을 여는 정확한 사용자 동작과 표시
-조건을 정적 확정하는 것이다.
+[후속 분석](application-state-16-objective-control.md)은 state `0x16`의 complete structured
+direct-reference 생산, Escape·gameplay-panel request와 `0x005527b0`의
+`buttons201.spr` 자원·사각형·입력을 정적 확정·재현했다. 다음 좁은 UI 질문은 gameplay-panel의
+화면상 정체·자원·draw 경로를 복원하는 것이다.

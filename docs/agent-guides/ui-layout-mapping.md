@@ -56,8 +56,12 @@ HUD, 메뉴, 브리핑, 대화, 선택 패널, 입력 영역의 위치·크기·
 `DAT_0088afcc=1`을 기록해 `script\k0110`의 목표 텍스트를 선택하는 경로를 정적 확정·재현했다.
 공통 모달 기하와 이 K01 결합은 각각 독립된 재현 범위로 관리한다.
 
-두 텍스트 블록의 X·최대 폭·세로 중심과 K01 문자열 입력은 확정했지만 글꼴·줄바꿈 규칙과 정확한
-사용자 표시 트리거는 아직 확정하지 않았다. 원본 SPR 로더 실패와 컨트롤 sound/latch 부수효과는
+후속 [K01 진입 입력·컨트롤 분석](../reverse-engineering/mechanics/application-state-16-objective-control.md)은
+Escape 또는 strict gameplay-panel press/release부터 state `0x16`, K01 mode 1의
+`buttons201.spr` 컨트롤 strict release와 `0x3f0`까지 정적 확정·재현했다.
+
+두 텍스트 블록의 X·최대 폭·세로 중심과 K01 문자열 입력은 확정했지만 글꼴·줄바꿈 규칙,
+gameplay-panel의 화면상 정체는 아직 확정하지 않았다. 원본 SPR 로더 실패와 오디오 자원 parity는
 정적-only이고 재현·이식하지 않았다. 자원·계산·입력 판정과 정상 로드 자원 cleanup 모듈만
 클라이언트에서 원본 기반이며 K01 결합은 분석 전용이다. 현재 실행 중인 목표 추적 패널은 이 원본
 모달과 다른 프로젝트 전용 구현이다.

@@ -113,7 +113,10 @@ VM에서 원본 게임을 플레이하며 화면 변화를 따라가는 방식�
 재현·이식했으며, SPR 로더 실패와 컨트롤 sound/latch는 정적-only다. 후속 분석은
 `FUN_004495e0`의 `0x3f0` handler 반환 생산 경로와 K01 인덱스 1이 `script\k0110`의 목표
 텍스트·K01 map·handler를 선택하는 결합을 정적 확정·재현했다. 이 결합은 분석 전용이며 글꼴·
-줄바꿈과 application state `0x16`의 완전한 사용자 진입 조건이 미확정이라 장면 연결은 보류했다.
+줄바꿈은 미확정이다. 이어 state `0x16`의 complete structured direct-reference 생산,
+Escape·gameplay-panel request, K01 mode 1의 `buttons201.spr` 목표 컨트롤
+`(264,110)-(376,138)` strict release까지 정적 확정·재현했다. gameplay-panel의 화면상 정체와
+simulation↔UI 계약은 미확정이라 장면 연결은 보류했다.
 실행 중 목표 추적 HUD, 전체 HUD 루트와 선택 패널은 이 완료 범위에 포함하지 않는다.
 
 통과 조건:
