@@ -175,10 +175,10 @@ export interface ActionDefinition {
 export const actionDefinitions = {
   move: { id: "move", icon: "M", hotkey: "M", label: "이동" },
   gather: { id: "gather", icon: "G", hotkey: "G", label: "채집" },
-  build: { id: "build", icon: "H", hotkey: "Q", label: "민가 건설" },
-  "build-town-center": { id: "build-town-center", icon: "TC", hotkey: "T", label: "본영 건설" },
-  "build-barracks": { id: "build-barracks", icon: "Bk", hotkey: "K", label: "병영 건설" },
-  "build-beacon": { id: "build-beacon", icon: "BF", hotkey: "F", label: "봉화대 건설" },
+  build: { id: "build", icon: "H", hotkey: "Q", label: "조선 방앗간 건설" },
+  "build-town-center": { id: "build-town-center", icon: "TC", hotkey: "T", label: "조선 본영 건설" },
+  "build-barracks": { id: "build-barracks", icon: "Bk", hotkey: "K", label: "조선 훈련소 건설" },
+  "build-beacon": { id: "build-beacon", icon: "BF", hotkey: "F", label: "조선 봉화대 건설" },
   stop: { id: "stop", icon: "S", hotkey: "S", label: "정지" },
   "attack-move": { id: "attack-move", icon: "A", hotkey: "A", label: "공격 이동" },
   patrol: { id: "patrol", icon: "P", hotkey: "P", label: "순찰" },
@@ -186,7 +186,7 @@ export const actionDefinitions = {
   hold: { id: "hold", icon: "H", hotkey: "H", label: "위치 사수" },
   "train-villager": { id: "train-villager", icon: "V", hotkey: "V", label: "농민 훈련" },
   "train-swordsman": { id: "train-swordsman", icon: "Sp", hotkey: "W", label: "조선 창병 훈련" },
-  "train-archer": { id: "train-archer", icon: "Ar", hotkey: "A", label: "궁병 훈련" },
+  "train-archer": { id: "train-archer", icon: "Ar", hotkey: "A", label: "조선 궁수 훈련" },
   "cancel-production": { id: "cancel-production", icon: "X", hotkey: "X", label: "대기열 취소" },
   "cancel-construction": { id: "cancel-construction", icon: "X", hotkey: "X", label: "건설 취소" },
   "rally-point": { id: "rally-point", icon: "R", hotkey: "R", label: "집결지" },
@@ -257,7 +257,7 @@ export interface UnitDefinition {
 export const unitDefinitions = {
   "town-center": {
     id: "town-center",
-    displayName: "본영",
+    displayName: "조선 본영",
     category: "building",
     actionIds: townCenterActionIds,
     buildTimeTicks: 600,
@@ -280,7 +280,7 @@ export const unitDefinitions = {
   },
   house: {
     id: "house",
-    displayName: "민가",
+    displayName: "조선 방앗간",
     category: "building",
     actionIds: passiveBuildingActionIds,
     buildTimeTicks: 180,
@@ -302,7 +302,7 @@ export const unitDefinitions = {
   },
   barracks: {
     id: "barracks",
-    displayName: "병영",
+    displayName: "조선 훈련소",
     category: "building",
     actionIds: barracksActionIds,
     buildTimeTicks: 420,
@@ -323,7 +323,7 @@ export const unitDefinitions = {
   },
   beacon: {
     id: "beacon",
-    displayName: "봉화대",
+    displayName: "조선 봉화대",
     category: "building",
     actionIds: passiveBuildingActionIds,
     buildTimeTicks: 300,
@@ -390,7 +390,7 @@ export const unitDefinitions = {
   },
   archer: {
     id: "archer",
-    displayName: "궁병",
+    displayName: "조선 궁수",
     category: "infantry",
     actionIds: infantryActionIds,
     cost: { food: 45, wood: 35 },
@@ -412,7 +412,7 @@ export const unitDefinitions = {
   },
   "japanese-swordsman": {
     id: "japanese-swordsman",
-    displayName: "왜군 검병",
+    displayName: "일본 창병",
     category: "infantry",
     actionIds: infantryActionIds,
     populationCost: 1,
@@ -432,7 +432,7 @@ export const unitDefinitions = {
   },
   "japanese-gunner": {
     id: "japanese-gunner",
-    displayName: "왜군 조총병",
+    displayName: "일본 조총병",
     category: "infantry",
     actionIds: infantryActionIds,
     populationCost: 1,
@@ -452,7 +452,7 @@ export const unitDefinitions = {
   },
   "japanese-camp-house": {
     id: "japanese-camp-house",
-    displayName: "왜군 주둔지",
+    displayName: "일본 시장",
     category: "building",
     actionIds: passiveBuildingActionIds,
     footprint: { width: 2, height: 2, blocksMovement: true },
@@ -471,7 +471,7 @@ export const unitDefinitions = {
   },
   "japanese-camp-barracks": {
     id: "japanese-camp-barracks",
-    displayName: "왜군 병영",
+    displayName: "일본 훈련소",
     category: "building",
     actionIds: passiveBuildingActionIds,
     footprint: { width: 3, height: 3, blocksMovement: true },
@@ -490,7 +490,7 @@ export const unitDefinitions = {
   },
   "japanese-camp-tower": {
     id: "japanese-camp-tower",
-    displayName: "왜군 망루",
+    displayName: "일본 망루",
     category: "building",
     actionIds: passiveBuildingActionIds,
     footprint: { width: 2, height: 2, blocksMovement: true },
@@ -510,7 +510,7 @@ export const unitDefinitions = {
   },
   "japanese-camp-firehouse": {
     id: "japanese-camp-firehouse",
-    displayName: "왜군 화포장",
+    displayName: "일본 관측소",
     category: "building",
     actionIds: passiveBuildingActionIds,
     footprint: { width: 3, height: 3, blocksMovement: true },
@@ -549,7 +549,7 @@ export const unitDefinitions = {
   },
   "ryu-seong-ryong": {
     id: "ryu-seong-ryong",
-    displayName: "유성룡",
+    displayName: "조선 유성룡",
     category: "infantry",
     actionIds: infantryActionIds,
     populationCost: 1,
@@ -569,7 +569,7 @@ export const unitDefinitions = {
   },
   "gwon-yul": {
     id: "gwon-yul",
-    displayName: "권율",
+    displayName: "조선 권율",
     category: "infantry",
     actionIds: infantryActionIds,
     populationCost: 1,
@@ -589,7 +589,7 @@ export const unitDefinitions = {
   },
   "royal-cart": {
     id: "royal-cart",
-    displayName: "어가",
+    displayName: "조선 선조의 어가",
     category: "infantry",
     actionIds: evacuationActionIds,
     populationCost: 1,

@@ -51,6 +51,19 @@ export interface VisualBase {
 
 export type Facing = "n" | "ne" | "e" | "se" | "s" | "sw" | "w" | "nw";
 
+export function getGridFacing(deltaX: number, deltaY: number, fallback: Facing = "s"): Facing {
+  if (Math.abs(deltaX) < 0.1 && Math.abs(deltaY) < 0.1) {
+    return fallback;
+  }
+
+  const angle = Math.atan2(deltaY, deltaX);
+  const sector = Math.round(angle / (Math.PI / 4));
+  const normalized = ((sector % 8) + 8) % 8;
+  const facings = ["e", "se", "s", "sw", "w", "nw", "n", "ne"] as const;
+
+  return facings[normalized] ?? "s";
+}
+
 export type TerrainKindSlot =
   | "base"
   | "plateauTop"

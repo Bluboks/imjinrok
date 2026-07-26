@@ -7,11 +7,12 @@ import {
   factionDefinitions,
   createImjinrokMapScaffold,
   createMapDefinitionFromId,
+  getGridFacing,
+  getNextCampaignScenario,
   getThemeAssetUrl,
   getThemeFrameRefs,
   getTerrainVisual,
   getTileAt,
-  getNextCampaignScenario,
   imjinrokCampaignScenarios,
   IMJINROK_CAMPAIGN_PROGRESS_STORAGE_KEY,
   markCampaignScenarioCompleted,
@@ -8740,16 +8741,7 @@ export class SkirmishScene extends Phaser.Scene {
     const dx = target.x - unit.position.x;
     const dy = target.y - unit.position.y;
 
-    if (Math.abs(dx) < 0.1 && Math.abs(dy) < 0.1) {
-      return fallbackFacing;
-    }
-
-    const angle = Math.atan2(dy, dx);
-    const sector = Math.round(angle / (Math.PI / 4));
-    const normalized = ((sector % 8) + 8) % 8;
-    const facings = ["e", "se", "s", "sw", "w", "nw", "n", "ne"] as const;
-
-    return facings[normalized] ?? "s";
+    return getGridFacing(dx, dy, fallbackFacing);
   }
 
   private getUnitFacingTarget(unit: UnitState): GridPoint | null {

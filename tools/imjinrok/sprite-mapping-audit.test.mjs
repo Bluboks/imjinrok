@@ -42,34 +42,195 @@ test("sprite mapping audit is deterministic and current", (t) => {
   );
 });
 
-test("entity mappings stay quarantined outside the statically proven pilot scopes", () => {
+test("frame mappings stay quarantined outside statically proven scopes while identities are cataloged", () => {
   assert.deepEqual(report.summary, {
-    visualCount: 16,
-    unitVisualCount: 7,
+    visualCount: 18,
+    unitVisualCount: 9,
     buildingVisualCount: 9,
-    stateMappingCount: 51,
-    clipCount: 291,
-    frameReferenceCount: 1_878,
+    stateMappingCount: 62,
+    clipCount: 382,
+    frameReferenceCount: 2_616,
     missingFrameReferenceCount: 0,
-    unverifiedVisualCount: 14,
-    mixedVisualCount: 1,
-    scopedStaticProvenVisualCount: 1,
+    unverifiedVisualCount: 2,
+    mixedVisualCount: 14,
+    scopedStaticProvenVisualCount: 2,
+    staticIdentityVisualCount: 16,
+    ambiguousIdentityVisualCount: 1,
+    unboundIdentityVisualCount: 1,
+    projectBindingCount: 17,
+    projectBindingConflictCount: 0,
     portraitCueCount: 17,
     unverifiedPortraitCueCount: 0,
-    findingCount: 70,
+    findingCount: 67,
   });
   assert.equal(
     report.visuals.filter((visual) => visual.evidenceStatus === "unverified").length,
-    14,
+    2,
   );
+  assert.deepEqual(report.entityTypeCatalog.summary, {
+    typeCount: 95,
+    minimumClass: 1,
+    maximumClass: 95,
+    uniqueOriginalNameCount: 95,
+    uniqueSpritePathCount: 93,
+    sharedSpritePathCount: 2,
+    baseFrameZeroCount: 58,
+    baseFrameSevenCount: 35,
+    otherBaseFrameCount: 2,
+  });
   const koreanSpearman = report.visuals.find((visual) => visual.visualId === "korean-swordsman");
   assert.equal(koreanSpearman?.evidenceStatus, "mixed");
   assert.equal(koreanSpearman?.staticEvidence.originalGameplayName, "조선 창병");
+  assert.equal(
+    koreanSpearman?.staticEvidence.animationStateMapping,
+    "static-proven-movement-only",
+  );
+  assert.equal(
+    report.findings.some(
+      (finding) =>
+        finding.visualId === "korean-swordsman" &&
+        (finding.state === "move" || finding.state === "walk") &&
+        (finding.code === "direction-order-unverified" ||
+          finding.code === "mirrored-facing-unverified"),
+    ),
+    false,
+  );
+  assert.equal(
+    report.findings.filter(
+      (finding) =>
+        finding.visualId === "korean-swordsman" &&
+        (finding.code === "direction-order-unverified" ||
+          finding.code === "mirrored-facing-unverified"),
+    ).length,
+    4,
+  );
+  const japaneseSpearman = report.visuals.find(
+    (visual) => visual.visualId === "japanese-swordsman",
+  );
+  assert.equal(japaneseSpearman?.staticEvidence.internalClass, 3);
+  assert.equal(
+    japaneseSpearman?.staticEvidence.originalGameplayName,
+    "일본 창병",
+  );
   const koreanHeadquarters = report.visuals.find((visual) => visual.visualId === "korean-hq");
   assert.equal(koreanHeadquarters?.evidenceStatus, "scoped-static-proven");
   assert.deepEqual(koreanHeadquarters?.staticEvidence.constructionFrames, [0, 1, 2, 3, 4, 5, 6, 7]);
   assert.equal(koreanHeadquarters?.staticEvidence.healthyFrame, 7);
   assert.equal(koreanHeadquarters?.staticEvidence.damagedFrame, 8);
+  const currentBeacon = report.visuals.find(
+    (visual) => visual.visualId === "korean-signal-beacon",
+  );
+  assert.equal(
+    currentBeacon?.staticEvidence.originalGameplayName,
+    "조선 봉화대",
+  );
+  assert.equal(
+    currentBeacon?.staticEvidence.sourcePath,
+    "char\\firehousek.spr",
+  );
+  assert.equal(currentBeacon?.staticEvidence.healthyFrame, 7);
+  assert.equal(currentBeacon?.staticEvidence.damagedFrame, 8);
+  const currentGeneral = report.visuals.find(
+    (visual) => visual.visualId === "korean-general-k4",
+  );
+  assert.equal(currentGeneral?.staticEvidence.internalClass, 79);
+  assert.equal(
+    currentGeneral?.staticEvidence.originalGameplayName,
+    "조선 사명대사",
+  );
+  const gwonYul = report.visuals.find(
+    (visual) => visual.visualId === "korean-gwon-yul",
+  );
+  assert.equal(gwonYul?.staticEvidence.internalClass, 76);
+  assert.equal(gwonYul?.staticEvidence.originalGameplayName, "조선 권율");
+  assert.equal(
+    gwonYul?.staticEvidence.animationStateMapping,
+    "static-proven-core-state-frames",
+  );
+  assert.deepEqual(gwonYul?.staticEvidence.stateFrameRanges, {
+    idle: [0, 39],
+    move: [0, 39],
+    walk: [0, 39],
+    attack: [0, 47],
+    death: [40, 47],
+  });
+  assert.deepEqual(gwonYul?.staticEvidence.stateSources, {
+    idle: "char\\generalk13.spr",
+    move: "char\\generalk11.spr",
+    walk: "char\\generalk11.spr",
+    attack: "char\\generalk12.spr",
+    death: "char\\generalk11.spr",
+  });
+  assert.deepEqual(
+    gwonYul?.sources.map((source) => [source.path, source.primary]),
+    [
+      ["original/imjinrok2/char/generalk11.spr", true],
+      ["original/imjinrok2/char/generalk12.spr", false],
+      ["original/imjinrok2/char/generalk13.spr", false],
+    ],
+  );
+  const ryuSeongRyong = report.visuals.find(
+    (visual) => visual.visualId === "korean-ryu-seong-ryong",
+  );
+  assert.equal(ryuSeongRyong?.staticEvidence.internalClass, 78);
+  assert.equal(
+    ryuSeongRyong?.staticEvidence.originalGameplayName,
+    "조선 유성룡",
+  );
+  assert.equal(
+    ryuSeongRyong?.staticEvidence.animationStateMapping,
+    "static-proven-core-state-frames",
+  );
+  assert.deepEqual(
+    ryuSeongRyong?.staticEvidence.stateFrameRanges,
+    {
+      idle: [0, 39],
+      move: [40, 79],
+      walk: [40, 79],
+      attack: [0, 49],
+      death: [50, 57],
+    },
+  );
+  assert.equal(
+    report.findings.some(
+      (finding) =>
+        ["korean-gwon-yul", "korean-ryu-seong-ryong"].includes(
+          finding.visualId,
+        ) &&
+        ["idle", "move", "walk", "attack", "death"].includes(
+          finding.state,
+        ) &&
+        (finding.code === "direction-order-unverified" ||
+          finding.code === "mirrored-facing-unverified"),
+    ),
+    false,
+  );
+  const currentVillager = report.visuals.find(
+    (visual) => visual.visualId === "villager-korean-farmer",
+  );
+  assert.equal(currentVillager?.staticEvidence.identity, "ambiguous");
+  assert.deepEqual(
+    currentVillager?.staticEvidence.identityCandidates.map(
+      ({ internalClass, originalGameplayName }) => [
+        internalClass,
+        originalGameplayName,
+      ],
+    ),
+    [
+      [7, "조선 농부"],
+      [93, "솜씨 좋은 도공"],
+    ],
+  );
+  const unboundAdvancedTower = report.visuals.find(
+    (visual) => visual.visualId === "japanese-camp-advanced-tower",
+  );
+  assert.equal(unboundAdvancedTower?.staticEvidence.identity, "unbound");
+  assert.deepEqual(
+    report.entityTypeCatalog.projectBindings
+      .filter((binding) => binding.nameMatchesOriginal === false)
+      .map((binding) => binding.entityId),
+    [],
+  );
   assert.ok(
     report.portraits.cues.every(
       (cue) => cue.evidenceStatus === "static-proven",
@@ -145,7 +306,7 @@ test("entity mappings stay quarantined outside the statically proven pilot scope
     report.findings.filter(
       (finding) => finding.code === "building-health-frame-unverified",
     ).length,
-    8,
+    7,
   );
   assert.deepEqual(report.portraits.currentScenarioPortraitIds, [
     "J1",

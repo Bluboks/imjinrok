@@ -78,8 +78,20 @@ const FIVE_FACING_MIRRORED_FACINGS = {
   w: "e",
   sw: "se",
 } as const satisfies Partial<Record<Facing, Facing>>;
+const STATICALLY_RECOVERED_DIRECTION_SOURCES = {
+  s: { frameBaseIndex: 0, mirrorX: false },
+  sw: { frameBaseIndex: 1, mirrorX: false },
+  w: { frameBaseIndex: 2, mirrorX: false },
+  nw: { frameBaseIndex: 3, mirrorX: false },
+  n: { frameBaseIndex: 2, mirrorX: true },
+  ne: { frameBaseIndex: 1, mirrorX: true },
+  e: { frameBaseIndex: 0, mirrorX: true },
+  se: { frameBaseIndex: 4, mirrorX: false },
+} as const satisfies Record<Facing, { frameBaseIndex: number; mirrorX: boolean }>;
 const SOURCE_FRAMES_PER_FACING = 8;
 const ROYAL_CART_FRAMES_PER_FACING = 10;
+const PROVISIONAL_RECOVERED_HERO_IDLE_FPS = 4;
+const PROVISIONAL_RECOVERED_HERO_ACTIVE_FPS = 8;
 
 const entityFrameRange = (
   visualId: string,
@@ -165,6 +177,63 @@ const sourceFiveFacingClips = (
 
   return clips;
 };
+
+function staticallyRecoveredNormalMovementClips(
+  visualId: string,
+  stem: string,
+  startFrame: number,
+  fps: number,
+): Partial<Record<Facing | "default", AnimationClip>> {
+  return staticallyRecoveredDirectionalClips({
+    visualId,
+    stem,
+    frameStart: startFrame,
+    frameStride: SOURCE_FRAMES_PER_FACING,
+    phaseCount: SOURCE_FRAMES_PER_FACING,
+    fps,
+    loop: true,
+  });
+}
+
+function staticallyRecoveredDirectionalClips({
+  visualId,
+  stem,
+  frameStart,
+  frameStride,
+  phaseCount,
+  fps,
+  loop,
+}: {
+  visualId: string;
+  stem: string;
+  frameStart: number;
+  frameStride: number;
+  phaseCount: number;
+  fps: number;
+  loop: boolean;
+}): Partial<Record<Facing | "default", AnimationClip>> {
+  const clips: Partial<Record<Facing | "default", AnimationClip>> = {};
+  for (const facing of ENTITY_FACING_ORDER) {
+    const source = STATICALLY_RECOVERED_DIRECTION_SOURCES[facing];
+    clips[facing] = {
+      frames: entityFrameRange(
+        visualId,
+        stem,
+        frameStart + source.frameBaseIndex * frameStride,
+        phaseCount,
+      ),
+      fps,
+      loop,
+      ...(source.mirrorX ? { mirrorX: true } : {}),
+    };
+  }
+  const defaultClip = clips.s;
+  if (defaultClip) {
+    clips.default = defaultClip;
+  }
+
+  return clips;
+}
 
 const sourceFiveFacingStillClips = (
   visualId: string,
@@ -381,11 +450,21 @@ export const swordsmanEntityVisual = {
     },
     move: {
       facings: ENTITY_FACING_ORDER,
-      clips: sourceFiveFacingClips("swordsman", "swordk", 0, 8),
+      clips: staticallyRecoveredNormalMovementClips(
+        "swordsman",
+        "swordk",
+        0,
+        8,
+      ),
     },
     walk: {
       facings: ENTITY_FACING_ORDER,
-      clips: sourceFiveFacingClips("swordsman", "swordk", 0, 8),
+      clips: staticallyRecoveredNormalMovementClips(
+        "swordsman",
+        "swordk",
+        0,
+        8,
+      ),
     },
     attack: {
       facings: ENTITY_FACING_ORDER,
@@ -522,6 +601,146 @@ export const generalK4EntityVisual = {
   },
 } as const satisfies EntityVisual;
 
+export const gwonYulEntityVisual = {
+  id: "korean-gwon-yul",
+  kind: "entity",
+  assetPath: "entities/gwon-yul",
+  render: {
+    srcPxPerWu: 32,
+    filtering: "nearest",
+  },
+  defaults: {
+    size: { w: 128, h: 108 },
+    pivot: { anchor: { x: 64, y: 98 } },
+  },
+  states: {
+    idle: {
+      facings: ENTITY_FACING_ORDER,
+      clips: staticallyRecoveredDirectionalClips({
+        visualId: "gwon_yul",
+        stem: "generalk13",
+        frameStart: 0,
+        frameStride: 8,
+        phaseCount: 8,
+        fps: PROVISIONAL_RECOVERED_HERO_IDLE_FPS,
+        loop: true,
+      }),
+    },
+    move: {
+      facings: ENTITY_FACING_ORDER,
+      clips: staticallyRecoveredNormalMovementClips(
+        "gwon_yul",
+        "generalk11",
+        0,
+        PROVISIONAL_RECOVERED_HERO_ACTIVE_FPS,
+      ),
+    },
+    walk: {
+      facings: ENTITY_FACING_ORDER,
+      clips: staticallyRecoveredNormalMovementClips(
+        "gwon_yul",
+        "generalk11",
+        0,
+        PROVISIONAL_RECOVERED_HERO_ACTIVE_FPS,
+      ),
+    },
+    attack: {
+      facings: ENTITY_FACING_ORDER,
+      clips: staticallyRecoveredDirectionalClips({
+        visualId: "gwon_yul",
+        stem: "generalk12",
+        frameStart: 0,
+        frameStride: 10,
+        phaseCount: 8,
+        fps: PROVISIONAL_RECOVERED_HERO_ACTIVE_FPS,
+        loop: false,
+      }),
+    },
+    death: {
+      facings: ENTITY_FACING_ORDER,
+      clips: staticallyRecoveredDirectionalClips({
+        visualId: "gwon_yul",
+        stem: "generalk11",
+        frameStart: 40,
+        frameStride: 0,
+        phaseCount: 8,
+        fps: PROVISIONAL_RECOVERED_HERO_ACTIVE_FPS,
+        loop: false,
+      }),
+    },
+  },
+} as const satisfies EntityVisual;
+
+export const ryuSeongRyongEntityVisual = {
+  id: "korean-ryu-seong-ryong",
+  kind: "entity",
+  assetPath: "entities/ryu-seong-ryong",
+  render: {
+    srcPxPerWu: 32,
+    filtering: "nearest",
+  },
+  defaults: {
+    size: { w: 88, h: 76 },
+    pivot: { anchor: { x: 44, y: 66 } },
+  },
+  states: {
+    idle: {
+      facings: ENTITY_FACING_ORDER,
+      clips: staticallyRecoveredDirectionalClips({
+        visualId: "ryu_seong_ryong",
+        stem: "generalk31",
+        frameStart: 0,
+        frameStride: 8,
+        phaseCount: 8,
+        fps: PROVISIONAL_RECOVERED_HERO_IDLE_FPS,
+        loop: true,
+      }),
+    },
+    move: {
+      facings: ENTITY_FACING_ORDER,
+      clips: staticallyRecoveredNormalMovementClips(
+        "ryu_seong_ryong",
+        "generalk31",
+        40,
+        PROVISIONAL_RECOVERED_HERO_ACTIVE_FPS,
+      ),
+    },
+    walk: {
+      facings: ENTITY_FACING_ORDER,
+      clips: staticallyRecoveredNormalMovementClips(
+        "ryu_seong_ryong",
+        "generalk31",
+        40,
+        PROVISIONAL_RECOVERED_HERO_ACTIVE_FPS,
+      ),
+    },
+    attack: {
+      facings: ENTITY_FACING_ORDER,
+      clips: staticallyRecoveredDirectionalClips({
+        visualId: "ryu_seong_ryong",
+        stem: "generalk32",
+        frameStart: 0,
+        frameStride: 10,
+        phaseCount: 10,
+        fps: PROVISIONAL_RECOVERED_HERO_ACTIVE_FPS,
+        loop: false,
+      }),
+    },
+    death: {
+      facings: ENTITY_FACING_ORDER,
+      clips: staticallyRecoveredDirectionalClips({
+        visualId: "ryu_seong_ryong",
+        stem: "generalk32",
+        frameStart: 50,
+        frameStride: 0,
+        phaseCount: 8,
+        fps: PROVISIONAL_RECOVERED_HERO_ACTIVE_FPS,
+        loop: false,
+      }),
+    },
+  },
+} as const satisfies EntityVisual;
+
 export const townCenterEntityVisual = {
   id: "korean-hq",
   kind: "entity",
@@ -620,24 +839,29 @@ export const barracksEntityVisual = {
 export const beaconEntityVisual = {
   id: "korean-signal-beacon",
   kind: "entity",
-  assetPath: "entities/beacon",
+  assetPath: "entities/korean-signal-beacon",
   render: {
     srcPxPerWu: 32,
     filtering: "nearest",
   },
   defaults: {
-    size: { w: 80, h: 96 },
-    pivot: { anchor: { x: 40, y: 72 } },
+    size: { w: 114, h: 108 },
+    pivot: { anchor: { x: 57, y: 84 } },
   },
   states: {
     idle: {
       clips: {
-        default: { frames: [entityFrame("beacon", "towerk", 8)], fps: 1, loop: true },
+        default: { frames: [entityFrame("beacon", "firehousek", 7)], fps: 1, loop: true },
+      },
+    },
+    damaged: {
+      clips: {
+        default: { frames: [entityFrame("beacon", "firehousek", 8)], fps: 1, loop: true },
       },
     },
     construction: {
       clips: {
-        default: buildingConstructionClip("beacon", "towerk"),
+        default: buildingConstructionClip("beacon", "firehousek", 7, [0, 10, 20, 30, 40, 50, 70, 100]),
       },
     },
   },
@@ -741,6 +965,8 @@ export const defaultTheme = {
     "korean-archer": archerEntityVisual,
     "japanese-gunner": japaneseGunnerEntityVisual,
     "korean-general-k4": generalK4EntityVisual,
+    "korean-gwon-yul": gwonYulEntityVisual,
+    "korean-ryu-seong-ryong": ryuSeongRyongEntityVisual,
     "korean-hq": townCenterEntityVisual,
     "korean-mill-house-proxy": houseEntityVisual,
     "korean-barracks": barracksEntityVisual,
@@ -761,8 +987,8 @@ export const defaultTheme = {
     archer: "korean-archer",
     "japanese-swordsman": "japanese-swordsman",
     "japanese-gunner": "japanese-gunner",
-    "ryu-seong-ryong": "korean-general-k4",
-    "gwon-yul": "korean-general-k4",
+    "ryu-seong-ryong": "korean-ryu-seong-ryong",
+    "gwon-yul": "korean-gwon-yul",
     "town-center": "korean-hq",
     house: "korean-mill-house-proxy",
     barracks: "korean-barracks",
