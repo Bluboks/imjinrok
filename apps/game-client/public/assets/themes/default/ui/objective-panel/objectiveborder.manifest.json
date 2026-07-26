@@ -1,0 +1,13 @@
+{
+  "source": "original/imjinrok2/yfnt/objectiveborder.spr",
+  "layout": "spr",
+  "width": 416,
+  "height": 236,
+  "frameCount": 1,
+  "exportedFrames": [
+    {
+      "index": 0,
+      "fileName": "objectiveborder_0000.png"
+    }
+  ]
+}
