@@ -68,7 +68,7 @@ accepted subset이다. 후속 cadence 분석은 투사체 풀이 accepted origin
 | `0x00438130-0x0043819d` / `0x00038130-0x0003819d` | `ECX=defender`, stack 8 bytes 정리, 완충→체력 적용 | 체력 0이면 `0`, 생존·무변경이면 `1` |
 | `0x00438c50-0x00438e22` / `0x00038c50-0x00038e22` | `thiscall`, 생성 전 대상 활성·거리 판정 | 유성룡 spawn 선행 guard |
 | `0x0043e1e0-0x0043e3e2` / `0x0003e1e0-0x0003e3e2` | `thiscall`형 command switch, 첫 stack WORD와 26개 stack 인수, `ret 0x68` | raw input `302`가 `0x007c6282`를 0/1 toggle |
-| `0x00441db0-0x00441dd8` / `0x00041db0-0x00041dd8` | `cdecl`, active/generation 관련 WORD 검사 | 레코드 초기화가 attacker 참조 low WORD로 호출 |
+| `0x00441db0-0x00441dd8` / `0x00041db0-0x00041dd8` | `cdecl`, low-WORD slot table nonzero·record positive WORD 검사 | 레코드 초기화가 attacker 참조 low WORD로 호출 |
 | `0x00441e40-0x00441e7a` / `0x00041e40-0x00041e7a` | `cdecl`, index의 활성 엔티티 확인 | 생성 전과 충돌 effect 소비자 |
 | `0x00447360-0x00447599` / `0x00047360-0x00047599` | `cdecl`, 100개 투사체 풀 순회 | 갱신 반환 `0`이면 `0x00411180` |
 

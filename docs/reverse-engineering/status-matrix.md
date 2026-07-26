@@ -16,7 +16,7 @@
 | 게임 틱과 메인 루프 | 투사체 pool 범위의 message-loop→scheduler, millisecond gate와 accepted-step 호출 수 정적 확정 | 해당 raw selector·feedback·wrap·거부 벡터 재현 완료 | 독립 포트와 24 Hz loop는 미연결 | 다른 subsystem 업데이트 순서와 24 Hz port scheduling 정책 결정 |
 | K01 봉화대 트리거 | 추정 | 미재현 | 프로토타입 | 전체 CFG와 합성 레코드 테스트 |
 | K01 승패 판정 | 추정 | 미재현 | 프로토타입 | 결과 함수 전체 분기와 경계 테스트 |
-| 전투·피해 | K01 영웅 phase·피해, subtype `0x0c` 수명과 보수적 좌표 subset, accepted original step당 pool call 1 및 message-loop/millisecond scheduler 정적 확정 | 투사체 정상·경계·실패와 scheduler selector·wrap·거부 벡터 재현 | 프로토타입, 유성룡 독립 계산 부분 이식 | caller 전체 signed-WORD 좌표 범위, 대상 검색·사거리, 좌표 변환, 24 Hz port scheduling 정책, 실제 연결·사망 정리 |
+| 전투·피해 | K01 영웅 phase·피해·raw 현재 대상 생산/검사·자동 scan·고정폭 사거리, subtype `0x0c` 수명과 accepted-step pool cadence 정적 확정 | 대상 inactive·range wrap/boundary·scan tie/실패, 투사체·scheduler 정상/실패 벡터 재현 | 프로토타입, 유성룡 독립 계산 부분 이식 | 원본 참조·좌표·footprint exact mapping, 24 Hz port 정책, 실제 연결·사망 정리 |
 | 이동·경로 탐색 | 추정 | 미재현 | 프로토타입 | 좌표·경로 레코드와 실패 경로 복원 |
 | 생산·건설·연구 | 조선 본영·봉화대 표시 진행도 범위만 정적 확정 | 해당 프레임 선택 재현 완료 | 메커니즘은 프로토타입, 표시 일부 원본 기반 | 생산·건설 시간과 자원·완료 상태 전이 복원 |
 | AI | 미확인 | 미재현 | 프로젝트 구현 | 원본 의사결정 함수 지도 |
@@ -71,11 +71,11 @@
 
 ### 공격 주기
 
-- 분석 상태: K01 영웅의 공격 상태 이후 phase·회복과 권율 직접 피해, 유성룡 subtype `0x0c`
-  비행·충돌·WORD 최종 피해·raw 적용 gate는 원본 CFG와 `0..32767` accepted coordinate
-  subset에 한해 `정적 확정`; 원본 caller 전체 signed-WORD 좌표 범위, 대상 검색·사거리·사망
-  정리는 계속 `추정` 또는 `미확인`
-- 재현 상태: 두 영웅 phase·회복과 두 피해, subtype `0x0c` 정상·wrap·gate·실패는 `재현 완료`;
+- 분석 상태: K01 두 영웅의 raw 대상 생산·검사·자동 scan, 권율 inclusive footprint range와
+  유성룡 strict squared range, 공격 접근/취소 전이는 `정적 확정`; 원본 참조·좌표·footprint의
+  프로젝트 mapping과 사망 정리는 계속 `추정` 또는 `미확인`
+- 재현 상태: 대상 inactive·range wrap/boundary·scan tie/실패와 두 영웅 phase·피해,
+  subtype `0x0c` 정상·wrap·gate·실패는 `재현 완료`;
   전체 주기는 부분 재현
 - 구현 상태: 유성룡 `0..32767` accepted coordinate subset 독립 계산은 부분 이식, 실제 전투
   연결은 원본 caller 전체 좌표 범위·좌표 변환과 24 Hz scheduling port 정책 대기

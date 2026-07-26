@@ -148,7 +148,11 @@ K01 종단 검증까지 통과해야 한다.
 7. 사망과 대상 참조 정리
 8. 재사용 대기와 다음 상태
 
-현재 K01 영웅 제한 범위에서는 3·4·6·8의 일부를 완료했다. 권율은 8-phase 중 phase 7에서
+현재 K01 영웅 제한 범위에서는 1·2·3·4·6·8의 일부를 완료했다. raw 현재 대상 writer와
+low-WORD 검사, Y-major 자동 scan, 권율의 inclusive footprint 사거리와 유성룡의 strict
+squared 사거리 및 out-of-range 접근·missing 취소를 정적 복원·재현했다. 원본 참조·좌표·
+footprint를 프로젝트 모델로 옮기는 exact mapping은 미확정이라 simulation에는 연결하지 않았다.
+권율은 8-phase 중 phase 7에서
 직접 피해 kind 1, 유성룡은 10-phase 중 phase 7에서 subtype `0x0c` 투사체를 생성한다.
 두 영웅 모두 phase가 0으로 돌아오면 주 회복 카운터를 초기화하고 짝수 전역 틱 두 번 뒤 다시
 준비된다. 권율의 기본 payload 80과 직접 피해 수식에 이어 유성룡의 subtype `0x0c`는 보수적인
@@ -161,6 +165,9 @@ K01 종단 검증까지 통과해야 한다.
 accepted original step마다 정확히 한 번 호출됨을 복원했다. 다만 original step은 Windows
 message queue와 가변 millisecond gate를 따르므로 24 Hz에 연결할 exact multiplier는 없고,
 실제 연결은 명시적인 port scheduling 정책을 정하기 전까지 보류한다.
+대상 생산·탐색·사거리의 상세 경계는
+[K01 권율·유성룡 대상 선택과 사거리](reverse-engineering/mechanics/k01-hero-targeting-range.md)를
+따른다.
 
 통과 조건:
 

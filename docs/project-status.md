@@ -19,8 +19,10 @@
 정적 복원·재현했고 독립 계산을 부분 이식했다. 투사체 풀은 원본 scheduler가 승인한 step마다
 정확히 한 번 호출되지만, scheduler는 message queue와 가변 millisecond interval·raw gate에
 의존해 고정 FPS가 아니다. 따라서 24 Hz와의 exact multiplier는 복원되지 않았다. 원본 caller의
-전체 signed-WORD 좌표 범위, 프로젝트 좌표 변환과 실제 투사체 연결, 현재 시뮬레이션의 사망
-엔티티 제거 시점은 아직 원본 기반이 아니다.
+전체 signed-WORD 좌표 범위는 미확정이다. 두 영웅의 raw 현재 대상 생산·검사, Y-major 자동
+탐색과 권율의 inclusive footprint range·유성룡의 strict squared range는 정적 복원·재현했다.
+다만 원본 참조·좌표·footprint를 프로젝트 모델로 옮기는 exact mapping, 실제 투사체 연결,
+현재 시뮬레이션의 사망 엔티티 제거 시점은 아직 원본 기반이 아니다.
 
 ## 단기 목표
 
@@ -44,7 +46,7 @@ K02는 이 단기 MVP의 완료 조건이 아니다. 기존 K02 프로토타입�
 | 엔티티 정체·자원 | 고유 연결 표시 이름 반영, 봉화대·K01 영웅 자원 수정 | 클래스 1~95 명칭·슬롯·기본 프레임·flags·경로 전수 확정 | 연속성·대표 타입·공유 경로·입력 해시 테스트 | 타입 정체 정적 확정, 행동·수치 의미는 별도 |
 | K01 캠페인 | 처음부터 결과까지 프로토타입 존재 | 브리핑 일부 확정, 봉화대·승패 부분 분석 | 구현 테스트와 일부 정적 벡터 | 단기 팬 리마스터 MVP, 아직 미완료 |
 | K02 캠페인 | 프로토타입 존재 | 제한적 | 원본 재현 없음 | K01 이후로 연기 |
-| 전투 | 프로토타입, 유성룡 좌표 accepted subset `0..32767` 독립 계산 부분 이식 | K01 영웅 phase·피해, subtype `0x0c` 수명, accepted original step당 pool call 1과 message-loop/millisecond scheduler 확정 | 투사체 정상·wrap·gate·scheduler 거부·시간 경계 벡터 재현 | 독립 단위 부분 이식; 실제 연결은 caller 전체 좌표 범위·좌표 변환과 24 Hz port 정책 대기 |
+| 전투 | 프로토타입, 유성룡 좌표 accepted subset `0..32767` 독립 계산 부분 이식 | K01 영웅 phase·피해·raw 대상 생산/검사·자동 탐색·고정폭 사거리, subtype `0x0c` 수명, accepted original step당 pool call 1과 scheduler 확정 | 대상 inactive·사거리 wrap/boundary·scan tie/실패, 투사체와 scheduler 벡터 재현 | 독립 단위 부분 이식; 대상/좌표/footprint exact mapping과 24 Hz port 정책 대기 |
 | 이동·경로 탐색 | 구현 존재 | 후보 함수 존재 | 원본 재현 없음 | 미검증 |
 | AI | 구현 존재 | 체계적 함수 지도 없음 | 원본 재현 없음 | 미검증 |
 | 생산·건설·연구 | 구현 존재 | 본영·봉화대 표시 상태만 복원 | 표시 프레임 재현 | 메커니즘은 미검증 |

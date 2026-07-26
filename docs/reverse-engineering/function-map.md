@@ -31,7 +31,9 @@
 | `0x00413070` | `FUN_00413070`, `0x00413070-0x0041362d` | 160 / 442 | 공격 kind·defender class별 payload 보정과 방어 백분율 차감 | effect kind 1·권율 직접 피해 범위 정적 확정 |
 | `0x00413700` | `FUN_00413700`, `0x00413700-0x00413b02` | 61 / 329 | 공격 effect kind별 단일·범위 대상 전달 | kind 1→단일 defender 경로 정적 확정 |
 | `0x00413b30` | `FUN_00413b30`, `0x00413b30-0x00413ddd` | 30 / 208 | defender 피해 계산·체력 적용·사망 후속 처리 | 권율 직접 피해 호출 순서 정적 확정 |
-| `0x00416c70` | `FUN_00416c70`, `0x00416c70-0x0041737e` | 84 / 555 | 행동 상태 5의 대상 검증·접근·일반 공격 하위 상태 | 하위 상태 3→공격 resolver 범위 정적 확정 |
+| `0x00416870` | `FUN_00416870`, `0x00416870-0x004168eb` | 6 / 41 | command 5의 full DWORD 대상 참조 writer | low-WORD raw guard·self-reference 거부·`+0x122` write 정적 확정 |
+| `0x004168f0` | `FUN_004168f0`, `0x004168f0-0x00416966` | 11 / 46 | 저장 대상의 low-WORD active·raw category/flag 검사 | generation/관계 검사가 아님을 포함해 정적 확정 |
+| `0x00416c70` | `FUN_00416c70`, `0x00416c70-0x0041737e` | 84 / 555 | 행동 상태 5의 대상 검사·접근·일반 공격 하위 상태 | missing 취소/scan, out-of-range 이동, arrival 재검사 정적 확정 |
 | `0x00417430` | `FUN_00417430`, `0x00417430-0x004196de` | 272 / 2,468 | 일반 공격 readiness·phase·효과 전달·사이클 완료 | K01 권율·유성룡 phase·전달 분기 정적 확정 |
 | `0x0041a880` | `FUN_0041a880`, `0x0041a880-0x0041a98d` | 7 / 70 | 유성룡 투사체 생성 직전 좌표 조건별 전역 객체 호출 | direct store·attacker pointer 전달 없음; callee의 전역·좌표-indexed mutation과 사람용 의미 미확정 |
 | `0x0041a990` | `FUN_0041a990`, `0x0041a990-0x0041a9ae` | 1 / 5 | 공격자에 대상 참조와 상태값 1·5 기록 | 유성룡 생성 전 호출 순서 정적 확정 |
@@ -48,7 +50,9 @@
 | `0x004291d0` | `FUN_004291d0` | 클래스 점프 테이블 포함 | 내부 클래스별 애니메이션 설정 초기화 | class 2·49·76·78의 문서화된 범위 정적 확정 |
 | `0x00437650` | `FUN_00437650`, `0x00437650-0x00438025` | 39 / 539 | 엔티티 초기화와 건설 진행도·체력 초기값 설정 | 조선 본영 관련 필드 범위 정적 확정 |
 | `0x00438130` | `FUN_00438130`, `0x00438130-0x0043819d` | 9 / 29 | raw mode/table gate 뒤 signed-WORD 완충 수치·체력 적용 | 유성룡 kind 9 gate·wrap·실패 분기 정적 확정 |
-| `0x00438c50` | `FUN_00438c50`, `0x00438c50-0x00438e22` | 26 / 165 | 공격 전 대상 활성·거리 조건 판정 | 유성룡 생성 선행 guard의 호출 순서 정적 확정, 전체 사거리 의미 미확정 |
+| `0x00438c50` | `FUN_00438c50`, `0x00438c50-0x00438e22` | 26 / 165 | low-WORD active 뒤 footprint 또는 squared range 판정 | 권율 signed low-WORD `<=1`, 유성룡 signed DWORD strict `<50625`와 wrap 정적 확정 |
+| `0x00439770` | `FUN_00439770`, `0x00439770-0x00439d62` | 63 / 425 | raw gate 뒤 occupancy/list 자동 대상 후보 scan | Y-major/X-minor 순서·제외·첫 command 성공 정적 확정 |
+| `0x00439d70` | `FUN_00439d70`, `0x00439d70-0x00439f40` | 24 / 153 | 후보 재검사와 command 5 queue | 현재 action 1/5 조건과 raw 선호 검사 정적 확정 |
 | `0x0043e1e0` | `FUN_0043e1e0`, `0x0043e1e0-0x0043e3e2` | 37 / 179 | raw command WORD switch | input 302가 health-application mode WORD를 toggle하는 범위 정적 확정 |
 | `0x0043f560` | `FUN_0043f560`, `0x0043f560-0x0043f573` | 1 / 5 | raw simulation interval selector 기록 | 호출 규약과 interval 재계산 순서 정적 확정 |
 | `0x0043f580` | `FUN_0043f580`, `0x0043f580-0x0043f5c6` | 8 / 20 | mode·selector별 millisecond base interval 선택 | 64/60/50/40/30 DWORD 산술 정적 확정 |
@@ -63,7 +67,7 @@
 | `0x00473b50` | `FUN_00473b50`, `0x00473b50-0x0047418b` | 47 / 498 | raw message-record consumer | 두 case의 feedback writer callsite 정적 확정, protocol 의미 미확정 |
 | `0x00438ef0` | `FUN_00438ef0` | 5회 반복 | 상태 1 slot과 다섯 frame base 초기화 | 클래스 2·76·78 호출 인수 정적 확정 |
 | `0x00441de0` | `FUN_00441de0`, `0x00441de0-0x00441e36` | 8 / 30 | 선택된 유닛 레코드 생존 확인 | 입력 선택 과정과 `+0x07` 의미 |
-| `0x00441db0` | `FUN_00441db0`, `0x00441db0-0x00441dd8` | 3 / 12 | active/generation 관련 WORD 검사 | 투사체 초기화의 attacker 참조 호출 정적 확정 |
+| `0x00441db0` | `FUN_00441db0`, `0x00441db0-0x00441dd8` | 3 / 12 | low-WORD slot table nonzero·record positive WORD 검사 | generation 비교 없이 두 raw 조건만 검사함을 정적 확정 |
 | `0x00441e40` | `FUN_00441e40`, `0x00441e40-0x00441e7a` | 5 / 19 | 인덱스로 활성 레코드 선택 | 반환 포인터와 비활성 조건 |
 | `0x004517a0` | `FUN_004517a0`, `0x004517a0-0x00451905` | 10 / 104 | 스프라이트 프레임 blit | 호출 규약과 좌표계 |
 | `0x0045bd00` | `FUN_0045bd00`, `0x0045bd00-0x0045bef8` | 1 / 103 | stride `0x14c` 타입 정의 레코드 writer | slot·base frame·이름 필드 정적 확정 |
