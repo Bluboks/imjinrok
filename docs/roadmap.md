@@ -39,8 +39,9 @@ VM에서 원본 게임을 플레이하며 화면 변화를 따라가는 방식�
   범위와, general/영웅 loss latch→strict timer→dispatcher→distinct raw-tick commit 범위를
   정적 확정·재현했다. commit된 `0x18/0x1a` 뒤 shared teardown, win/loss SPR·YAV
   initializer, unsigned cadence/completion, relay와 external/stage final route도 정적
-  확정·재현했다.
-  flag/timer reset, 원본 class/identity의 프로젝트 mapping과 raw clock/result/asset transition
+  확정·재현했다. 표준 main state 1의 broad DWORD zero fill이 win/loss timer를 지운 뒤
+  stage 1 K01 map source를 선택하는 반개구간·순서도 정적 확정·재현했다.
+  trigger flag의 전체 reset lifecycle, 원본 class/identity의 프로젝트 mapping과 raw clock/result/asset transition
   mapping은 남아 있다.
 - 4단계: 부분 진행. K01 영웅의 대상 검색·사거리, 공격 phase·피해·투사체와 signed-health
   사망·slot/reference 정리는 정적 확정·재현했다. 원본 identity·좌표·accepted update 단위의
@@ -147,11 +148,11 @@ VM에서 원본 게임을 플레이하며 화면 변화를 따라가는 방식�
 - shared teardown exact order와 win/loss SPR·YAV presentation 초기화
 - unsigned cadence/completion, cleanup, `0x8c→0x96→0x1c` relay
 - external-mode 우선, special stage·WORD wrap·transient overwrite final route
+- 표준 main state 1→`[0x007c5ed8,0x00843980)` DWORD zero fill→stage 1 K01 map copy 순서
 
 아직 포함하지 않은 하위 단위:
 
-- flag reset lifecycle
-- win/loss timer의 mission 진입·zero-reset producer
+- 표준 entry broad zero 밖의 K01 trigger flag reset/consumer lifecycle
 - final destination `0x140/0x64/0x10/0x20/raw WORD`별 후속 lifecycle
 - 원본 class 12·13·14·82와 프로젝트 identity/map의 exact mapping
 - raw clocks와 프로젝트 24 Hz·result/asset/identity policy의 exact mapping

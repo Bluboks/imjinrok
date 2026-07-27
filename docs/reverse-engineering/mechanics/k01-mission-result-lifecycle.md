@@ -203,14 +203,17 @@ isolated opt-in original-K01 policy로 연결할 수 있다.
 
 ## 남은 불확실성과 다음 질문
 
-- `0x0084373c/0x00843740`의 mission 진입·reset lifecycle
+- 표준 main state 1의 mission-entry reset은
+  [K01 표준 미션 진입 timer reset](k01-mission-timer-reset.md)에서 정적 확정·재현했다.
+  다른 진입·reset topology의 전수 범위는 별도다.
 - result clock `0x00882e04`와 raw global tick `0x007c5f80`의 단위·생산 관계
 - `FUN_00480180/0x00480300` 내부와 final destination별 후속 lifecycle
 - 원본 result transition을 프로젝트 generic campaign 결과로 옮기는 identity/policy mapping
 
 `FUN_00446420` 이후 presentation과 final route는
 [K01 결과 presentation과 post-result 전환](k01-final-result-transition.md)에서 별도
-정적 확정·재현했다. 다음 좁은 질문은 K01 timer의 mission 진입·zero-reset producer다.
+정적 확정·재현했다. 다음 좁은 질문은 K01 native 증원 class와 프로젝트 identity/map 좌표의
+exact mapping이다.
 사용자가 제공한 “완성 봉화가 하나라도 있으면 미니맵 enable, 마지막 봉화 제거
 시 disable” 수명주기는 이 결과 경로의 증거가 아니며, 별도 정적 분석 전까지
 `user-reported/unverified` 후속 질문으로만 유지한다.

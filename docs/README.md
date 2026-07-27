@@ -42,6 +42,7 @@
 - [K01 봉화대 완성·K0120 native trigger](reverse-engineering/mechanics/k01-beacon-k0120-trigger.md)
 - [K01 미션 결과 latch·timer·commit 수명주기](reverse-engineering/mechanics/k01-mission-result-lifecycle.md)
 - [K01 결과 presentation·post-result 전환](reverse-engineering/mechanics/k01-final-result-transition.md)
+- [K01 표준 미션 진입 timer reset](reverse-engineering/mechanics/k01-mission-timer-reset.md)
 - [조선 본영 건설·체력 프레임 파일럿](reverse-engineering/mechanics/building-state-pilot.md)
 - [조선 봉화대 건설·체력 프레임 파일럿](reverse-engineering/mechanics/beacon-state-pilot.md)
 - [엔티티 자료구조](reverse-engineering/data-structures/entity-record.md)

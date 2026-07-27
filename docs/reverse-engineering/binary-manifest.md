@@ -49,7 +49,7 @@ objdump -x original/imjinrok2/imjinrok2.exe
 | compiler spec | `windows` |
 | 자동 분석 함수 | `2448` |
 | 정의된 문자열 | `1545` |
-| seed 주소 / 포함 함수 | `145` / `144` |
+| seed 주소 / 포함 함수 | `149` / `148` |
 | 구조화 산출물 | `analysis/generated/imjinrok2/` |
 
 도구 배포 URL과 SHA-256은 `tools/imjinrok/static-analysis-versions.env`에 고정했다. 원본 EXE 해시가
@@ -61,7 +61,8 @@ pnpm imjinrok:analyze-exe
 pnpm imjinrok:verify-static-analysis
 ```
 
-2026-07-27에 K01 result presentation seed를 포함해 깨끗한 임시 Ghidra 프로젝트로 전체 분석을 두 번 실행했고, `manifest.json`,
+2026-07-27에 K01 mission-entry timer-reset seed를 포함해 깨끗한 임시 Ghidra 프로젝트로
+전체 분석을 두 번 실행했고, `manifest.json`,
 `functions.json`, `strings.json`, `references.json`, `jump-tables.json`, `seeds.json`의
 SHA-256이 모두 일치했다. 생성 파일별 현재 해시는
 `analysis/generated/imjinrok2/SHA256SUMS`에 있다.

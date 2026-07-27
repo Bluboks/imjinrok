@@ -211,13 +211,14 @@ generic superset architecture를 바꾸거나 기존 K01 runtime에 추정 adapt
 
 ## 남은 불확실성과 다음 질문
 
-- `WORD 0x008438dc`의 reset producer와 lifecycle
+- 표준 mission entry broad zero-fill 밖의 `WORD 0x008438dc` 전체 reset lifecycle
 - raw relation-table 값, selector 5 grids, 세 direct global write의 사람용 의미
 - class 12·13·14·82의 프로젝트 identity/visual/behavior exact mapping
-- result timer의 mission 진입·zero-reset producer
 
 이 문서의 return 뒤 K01 loss latch, fixed-width timer와 final commit은
 [K01 미션 결과 수명주기](k01-mission-result-lifecycle.md)에서 별도 정적 확정·재현했다.
 그 뒤 presentation·final route도
 [K01 결과 presentation과 post-result 전환](k01-final-result-transition.md)에서 별도
-정적 확정·재현했다. 다음 좁은 질문은 timer의 mission 진입·zero-reset producer다.
+정적 확정·재현했다. 표준 entry의 timer와 trigger flag 포함 DWORD zero는
+[K01 표준 미션 진입 timer reset](k01-mission-timer-reset.md)에서 별도 확정했다.
+다음 좁은 질문은 native 증원 class의 프로젝트 identity/map exact mapping이다.

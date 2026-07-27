@@ -538,6 +538,11 @@
       "functionEntry": "0x0045f9c0"
     },
     {
+      "label": "mission-session-zero-fill",
+      "address": "0x00460baf",
+      "functionEntry": "0x00460ba0"
+    },
+    {
       "label": "raw-coordinate-state-writer-candidate",
       "address": "0x00461570",
       "functionEntry": "0x00461570"
@@ -671,6 +676,21 @@
       "label": "mission-result-gate-candidate",
       "address": "0x0048d6f0",
       "functionEntry": "0x0048d6f0"
+    },
+    {
+      "label": "k01-stage-map-dispatch",
+      "address": "0x0048d42b",
+      "functionEntry": "0x0048d410"
+    },
+    {
+      "label": "k01-stage-map-source-copy",
+      "address": "0x0048d744",
+      "functionEntry": "0x0048d740"
+    },
+    {
+      "label": "mission-entry-reset-base",
+      "address": "0x0048dbe4",
+      "functionEntry": "0x0048dbe0"
     },
     {
       "label": "mission-result-consumer-candidate",
@@ -202765,6 +202785,966 @@
       "decompilation": "\n/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */\n\nundefined4 FUN_0045f9c0(undefined4 param_1,undefined4 param_2,undefined4 param_3,undefined4 param_4)\n\n{\n  short sVar1;\n  int iVar2;\n  undefined4 uVar3;\n  BOOL BVar4;\n  uint uVar5;\n  short *psVar6;\n  undefined2 extraout_var;\n  undefined4 uVar7;\n  undefined4 *puVar8;\n  undefined4 *puVar9;\n  undefined1 local_c98 [4];\n  tagMSG local_c94;\n  undefined1 local_c78 [128];\n  undefined1 local_bf8 [4];\n  undefined4 local_bf4;\n  undefined4 local_bf0;\n  undefined4 local_4;\n  \n  iVar2 = FUN_00460a10(param_1,param_4);\n  if (iVar2 == 0) {\n    return 0;\n  }\n  FUN_004acfc2(local_c98);\n  _DAT_00bccc3c = FUN_004ace62(local_c98);\n  if ((*(int *)(_DAT_00bccc3c + 0xc) == 0x1c) && (*(int *)(_DAT_00bccc3c + 0x10) == 3)) {\n    DAT_0088bda8 = 1;\n  }\n  FUN_0047f660(&DAT_004bdfa4);\n  FUN_0047f480(&DAT_0094ba60,&DAT_00bccc48);\n  FUN_0045f190();\n  ShowCursor(0);\n  FUN_0046f870(2);\n  DAT_004bdfcc = 1;\n  iVar2 = FUN_00442ef0();\n  if (iVar2 == 0) {\n    DAT_004bdfc8 = 0xa0;\n  }\n  DAT_004bdfcc = (uint)(iVar2 != 0);\n  iVar2 = FUN_00476330();\n  if (iVar2 == 1) {\n    FUN_00442dd0(s_fnt_launchscreen_spr_004be004,&DAT_0094ba60,local_c78);\n    iVar2 = FUN_004434a0(local_c78,local_bf8);\n    if (iVar2 == 1) {\n      iVar2 = FUN_0044ab10(0);\n      if (iVar2 == 1) {\n        FUN_0044d8c0(0,0,local_bf4,local_bf0,local_4);\n        FUN_0044ab60(0);\n      }\n      iVar2 = FUN_0044abb0(DAT_00549580);\n      if (iVar2 == 1) {\n        FUN_0044d8c0(0,0,local_bf4,local_bf0,local_4);\n        FUN_0044ada0(DAT_00549580);\n      }\n      FUN_00443440(local_bf8);\n    }\n    DAT_00c5ce4c = 0;\n    _DAT_00c5ce50 = 0;\n    DAT_00c5ce54 = 0;\n    DAT_00c5ce58 = 0;\n    DAT_00c5ce5c = 0;\n    iVar2 = FUN_004766d0();\n    if ((iVar2 == 1) && (DAT_004bdfcc == 0)) {\n      DAT_004bdfc8 = 200;\n    }\n    else {\n      iVar2 = FUN_00476430();\n      if (iVar2 == 1) {\n        iVar2 = FUN_00475fc0();\n        if (iVar2 == 1) {\n          uVar3 = FUN_00475ff0();\n          FUN_00473590(uVar3);\n          FUN_004851e0();\n          FUN_00473650(&DAT_00c5c814);\n        }\n        DAT_00c06e38 = 1;\n        FUN_0046f870(2);\n        DAT_004c229c = 1;\n        DAT_00c5ce48 = 0;\n        _DAT_00c5ce60 = 0;\n        DAT_00c5ce64 = 0;\n        DAT_004bdff4 = 0;\n        DAT_004bdfc8 = 4;\n      }\n      else {\n        DAT_004bdfc8 = 0xdc;\n      }\n    }\n  }\n  FUN_00443360();\n  FUN_00412e40();\n  FUN_00414090(DAT_005e51c0);\n  iVar2 = FUN_00440d40(DAT_005e51c0);\n  if (iVar2 == 0) {\n    FUN_0044b040(&DAT_00559418,s_Notice_004bdffc,&DAT_00aa6de8);\n  }\n  else {\n    FUN_0043f5e0(DAT_00634ad0);\n    FUN_00472ec0();\n  }\n  FUN_0044af20();\n  _DAT_00c06db8 = timeGetTime();\nswitchD_0045fd56_caseD_10:\n  do {\n    while (BVar4 = PeekMessageA(&local_c94,(HWND)0x0,0,0,0), BVar4 != 0) {\n      BVar4 = GetMessageA(&local_c94,(HWND)0x0,0,0);\n      if (BVar4 == 0) {\n        return local_c94.wParam;\n      }\n      TranslateMessage(&local_c94);\n      DispatchMessageA(&local_c94);\n    }\n  } while ((DAT_00c06e24 != 0) ||\n          ((((DAT_00634c90 == 0 && (DAT_004bdfc8 != 3)) && (DAT_004bdfc8 != 0x17)) &&\n           ((DAT_004bdfc8 != 0x18 && (DAT_004bdfc8 != 0x1a))))));\n  _DAT_0088c0b0 = DAT_00882e04;\n  DAT_00882e04 = timeGetTime();\n  if (DAT_00634c90 == 1) {\n    FUN_00472f90();\n    FUN_00472f10();\n    FUN_004409f0();\n  }\n  iVar2 = (int)DAT_004bdfc8;\n  if (iVar2 < 0x29) {\n    if (iVar2 != 0x28) {\n      switch(iVar2 + -1) {\n      case 0:\n        FUN_00445770();\n        FUN_0048dbe0();\n        FUN_004457d0();\n        DAT_004bdfc8 = 3;\n        goto switchD_0045fd56_caseD_10;\n      case 1:\n        FUN_00445770();\n        if (DAT_00c5b834 == 1) {\n          FUN_00445e60();\n          FUN_004457d0();\n          DAT_004bdfc8 = 3;\n        }\n        else {\n          FUN_00445990();\n          FUN_004457d0();\n          DAT_004bdfc8 = 3;\n        }\n        goto switchD_0045fd56_caseD_10;\n      case 2:\n        FUN_00447bc0();\n        uVar5 = (int)(DAT_00882e04 - DAT_00882e08) >> 0x1f;\n        if ((0x31 < (int)((DAT_00882e04 - DAT_00882e08 ^ uVar5) - uVar5)) &&\n           (DAT_00882e08 = DAT_00882e04, DAT_004bdfc8 == 3)) {\n          iVar2 = (int)DAT_00843738;\n          DAT_00552770 = 0;\n          if (0 < iVar2) {\n            psVar6 = &DAT_00842dd8;\n            do {\n              sVar1 = *psVar6;\n              psVar6 = psVar6 + 1;\n              iVar2 = iVar2 + -1;\n              *(undefined4 *)(&DAT_00635288 + sVar1 * 0x558) = 0;\n            } while (iVar2 != 0);\n          }\n          FUN_004475a0();\n        }\n        goto switchD_0045fd56_caseD_10;\n      case 3:\n        FUN_00483e40();\n        DAT_004bdfc8 = 5;\n        goto switchD_0045fd56_caseD_10;\n      case 4:\n        sVar1 = FUN_00484130();\n        if (sVar1 == 1) {\n          DAT_0088afcc = 0;\n          DAT_004bdfc8 = 2;\n        }\n        else if (sVar1 == 2) {\n          if (DAT_00c06e38 == 1) goto LAB_00460076;\n          if (DAT_004cc548 != 1) goto LAB_004604e1;\n          FUN_00409740();\n          DAT_00c06da0 = 0x140;\n          DAT_004bdfc8 = 0x8c;\n        }\n        goto switchD_0045fd56_caseD_10;\n      case 5:\n        FUN_00485c40();\n        DAT_004bdfc8 = 7;\n        goto switchD_0045fd56_caseD_10;\n      case 6:\n        puVar8 = (undefined4 *)&DAT_00634e44;\n        for (iVar2 = 0x100; iVar2 != 0; iVar2 = iVar2 + -1) {\n          *puVar8 = 0;\n          puVar8 = puVar8 + 1;\n        }\n        sVar1 = FUN_00485f20(&DAT_00634e44);\n        break;\n      case 7:\n        iVar2 = FUN_0044ab10(0);\n        if (iVar2 == 1) {\n          FUN_0044bc90(0);\n          FUN_0044ab60(0);\n        }\n        FUN_0046f870(2);\n        FUN_004499b0();\n        DAT_004bdfc8 = 9;\n        goto switchD_0045fd56_caseD_10;\n      case 8:\n        sVar1 = FUN_00449bb0();\n        break;\n      case 9:\n        FUN_00460b50();\n        DAT_00c06da0 = 0xb;\n        DAT_004bdfc8 = 0x8c;\n        goto switchD_0045fd56_caseD_10;\n      case 10:\n        DestroyWindow(DAT_005e51c0);\n        goto switchD_0045fd56_caseD_10;\n      case 0xb:\n        iVar2 = FUN_004868a0();\n        DAT_004bdfc8 = (-(ushort)(iVar2 != 1) & 0xfff9) + 0xd;\n        goto switchD_0045fd56_caseD_10;\n      case 0xc:\n        sVar1 = FUN_00486a40();\n        if (sVar1 == 1) {\n          DAT_00c06da0 = 4;\n          DAT_004bdfc8 = 0x8c;\n        }\n        else if (sVar1 == 2) {\n          DAT_00c06da0 = 6;\n          DAT_004bdfc8 = 0x8c;\n        }\n        goto switchD_0045fd56_caseD_10;\n      case 0xd:\n        FUN_0043e550();\n        DAT_004bdfc8 = 0xf;\n        goto switchD_0045fd56_caseD_10;\n      case 0xe:\n        sVar1 = FUN_0043e620();\n        if (sVar1 != 0) {\n          if (sVar1 == 0x11) {\n            DAT_00c06da0 = 0x10;\n            DAT_004bdfc8 = 0x8c;\n          }\n          else if ((sVar1 == 0x12) || (sVar1 == 0x13)) {\n            DAT_00c06da0 = 0x10;\n            DAT_004bdfc8 = 0x8c;\n          }\n          else {\n            DAT_004bdfc8 = 0x8c;\n            DAT_00c06da0 = sVar1;\n          }\n        }\n        goto switchD_0045fd56_caseD_10;\n      case 0xf:\n        FUN_0047f2a0();\n        DAT_004bdfc8 = 0x14;\n      default:\n        goto switchD_0045fd56_caseD_10;\n      case 0x13:\n        sVar1 = FUN_0047f300();\n        break;\n      case 0x15:\n        FUN_0046f870(2);\n        FUN_00448ff0();\n        DAT_004bdfc8 = 0x17;\n        goto switchD_0045fd56_caseD_10;\n      case 0x16:\n        if (DAT_00c06e20 == 1) {\n          FUN_00447bc0();\n        }\n        sVar1 = FUN_00449090();\n        if (DAT_004bdfc8 == 0x17) {\n          DAT_00c06e30 = 0;\n          switch(sVar1) {\n          case 3:\n            FUN_00492630();\n            DAT_004bdfc8 = sVar1;\n            break;\n          case 8:\n            if (DAT_004cc548 == 1) {\n              if (DAT_007c5f80 < 1000) {\n                uVar3 = 3;\n              }\n              else {\n                uVar3 = 2;\n              }\n              FUN_00409790(uVar3);\n              DAT_00c06da0 = 0x140;\n              DAT_004bdfc8 = 0x8c;\n              FUN_00446420();\n              break;\n            }\n          case 0x20:\n            DAT_004bdfc8 = 0x8c;\n            DAT_00c06da0 = sVar1;\n            FUN_00446420();\n            break;\n          case 10:\n            if (DAT_00634ac0 == 1) {\n              DAT_00c06e74 = 1;\n              FUN_004145b0();\n            }\n            if (DAT_00c06e38 == 1) {\n              if (DAT_00c06e20 == 1) {\n                FUN_00474ae0();\n                DAT_00c06e20 = 0;\n              }\n              DAT_007c6614 = 0;\n              DAT_00c06da0 = 0x1c;\n              DAT_004bdfc8 = 0x8c;\n            }\n            else {\nLAB_00460076:\n              DAT_00c06da0 = 10;\n              DAT_004bdfc8 = 0x8c;\n            }\n          }\n        }\n        goto switchD_0045fd56_caseD_10;\n      case 0x17:\n        FUN_00493290();\n        DAT_004bdfc8 = 0x19;\n        if (DAT_0088afcc != 0) {\n          iVar2 = (int)DAT_0088afcc % 10;\n          uVar7 = CONCAT22((short)((uint)iVar2 >> 0x10),DAT_0088afce);\n          uVar3 = FUN_0043fbe0(uVar7,iVar2);\n          FUN_0043fb30(uVar3,uVar7,iVar2);\n          FUN_0043f670();\n        }\n        goto switchD_0045fd56_caseD_10;\n      case 0x18:\n        sVar1 = FUN_004932a0();\n        break;\n      case 0x19:\n        FUN_004932c0();\n        DAT_004bdfc8 = 0x1b;\n        goto switchD_0045fd56_caseD_10;\n      case 0x1a:\n        sVar1 = FUN_004932d0();\n        break;\n      case 0x1b:\n        FUN_00480180();\n        DAT_004bdfc8 = 0x1d;\n        goto switchD_0045fd56_caseD_10;\n      case 0x1c:\n        FUN_004615a0(CONCAT22((short)((uint)(iVar2 + -1) >> 0x10),DAT_007c6614));\n        sVar1 = FUN_00480300();\n        if (sVar1 != 0) {\n          if (DAT_00c06e38 == 1) {\n            DAT_004bdfc8 = 10;\n          }\n          if (DAT_004cc548 == 1) {\n            if (DAT_007c6614 == 1) {\n              uVar3 = 1;\n            }\n            else {\n              uVar3 = 2;\n            }\n            FUN_00409790(uVar3);\n            DAT_00c06da0 = 0x140;\n            DAT_004bdfc8 = 0x8c;\n          }\n          else {\n            DAT_004bdfc8 = sVar1;\n            if (DAT_0088afcc != 0) {\n              if (DAT_007c6614 == 1) {\n                if (((DAT_0088afcc == 8) || (DAT_0088afcc == 0x12)) || (DAT_0088afcc == 0x1b)) {\n                  DAT_004bdfc8 = 100;\n                }\n                else {\n                  DAT_0088afcc = DAT_0088afcc + 1;\n                  DAT_004bdfc8 = 0x10;\n                }\n              }\n              else {\n                DAT_004bdfc8 = 0x20;\n              }\n            }\n          }\n        }\n        goto switchD_0045fd56_caseD_10;\n      case 0x1d:\n        FUN_004766f0();\n        DAT_004bdfc8 = 0x1f;\n        goto switchD_0045fd56_caseD_10;\n      case 0x1e:\n        sVar1 = FUN_00476760();\n        if (sVar1 != 0) {\n          DAT_004bdfc8 = sVar1;\n        }\n        goto switchD_0045fd56_caseD_10;\n      case 0x1f:\n        DAT_004bdfc8 = 0x21;\n        goto switchD_0045fd56_caseD_10;\n      case 0x20:\n        if (DAT_0088afcc == 0) {\n          DAT_004bdfc8 = 2;\n          puVar8 = &DAT_00c5c538;\n          puVar9 = &DAT_00c5b780;\n          for (iVar2 = 0x5b; iVar2 != 0; iVar2 = iVar2 + -1) {\n            *puVar9 = *puVar8;\n            puVar8 = puVar8 + 1;\n            puVar9 = puVar9 + 1;\n          }\n        }\n        else {\n          DAT_004bdfc8 = 0x10;\n        }\n        goto switchD_0045fd56_caseD_10;\n      case 0x21:\n        FUN_0045efc0();\n        DAT_004bdfc8 = 0x23;\n        goto switchD_0045fd56_caseD_10;\n      case 0x22:\n        sVar1 = FUN_0045efd0();\n        if (sVar1 == 3) {\n          FUN_00445770();\n          FUN_00443160(CONCAT22(extraout_var,DAT_00abfff0));\n          iVar2 = FUN_0044abb0(DAT_0054926c);\n          if (iVar2 == 1) {\n            FUN_0044dc70(0,0,DAT_0088ccb4,DAT_0088ccb8,DAT_0088d8a4);\n            FUN_0044ada0(DAT_0054926c);\n          }\n          if (DAT_00634ac0 == 1) {\n            FUN_004143d0();\n          }\n          FUN_0045bb40();\n          DAT_00c06da0 = 3;\n          DAT_004bdfc8 = 0x8c;\n        }\n        else if (sVar1 == 8) goto LAB_004604e1;\n        goto switchD_0045fd56_caseD_10;\n      }\n      uVar5 = (uint)sVar1;\nLAB_0045fe44:\n      if (uVar5 != 0) {\n        DAT_004bdfc8 = 0x8c;\n        DAT_00c06da0 = (short)uVar5;\n      }\n      goto switchD_0045fd56_caseD_10;\n    }\n    FUN_00494950();\n    DAT_004bdfc8 = 0x32;\n    goto switchD_0045fd56_caseD_10;\n  }\n  if (iVar2 < 0x12e) {\n    if (iVar2 == 0x12d) {\n      sVar1 = FUN_00404990();\n      goto LAB_0046065a;\n    }\n    goto code_r0x00460423;\n  }\n  switch(iVar2) {\n  case 0x12e:\n    iVar2 = FUN_00405740();\n    DAT_004bdfc8 = (-(ushort)(iVar2 != 0) & 0x125) + 10;\n    goto switchD_0045fd56_caseD_10;\n  case 0x12f:\n    sVar1 = FUN_00405870();\n    break;\n  case 0x130:\n    iVar2 = FUN_004024d0();\n    DAT_004bdfc8 = (-(ushort)(iVar2 != 0) & 0x127) + 10;\n    goto switchD_0045fd56_caseD_10;\n  case 0x131:\n    sVar1 = FUN_00402600();\n    break;\n  case 0x132:\n    iVar2 = FUN_00403f50();\n    DAT_004bdfc8 = (-(ushort)(iVar2 != 0) & 0x129) + 10;\n    goto switchD_0045fd56_caseD_10;\n  case 0x133:\n    sVar1 = FUN_00404060();\n    break;\n  case 0x134:\n    iVar2 = FUN_00402eb0();\n    DAT_004bdfc8 = (-(ushort)(iVar2 != 0) & 299) + 10;\n    goto switchD_0045fd56_caseD_10;\n  case 0x135:\n    sVar1 = FUN_00402f60();\n    break;\n  case 0x136:\n    iVar2 = FUN_004037f0();\n    DAT_004bdfc8 = (-(ushort)(iVar2 != 0) & 0x12d) + 10;\n    goto switchD_0045fd56_caseD_10;\n  case 0x137:\n    sVar1 = FUN_004038c0();\n    break;\n  case 0x138:\n    iVar2 = FUN_00404fa0();\n    DAT_004bdfc8 = (-(ushort)(iVar2 != 0) & 0x12f) + 10;\n    goto switchD_0045fd56_caseD_10;\n  case 0x139:\n    sVar1 = FUN_00405040();\n    break;\n  case 0x13a:\n    iVar2 = FUN_00403420();\n    DAT_004bdfc8 = (-(ushort)(iVar2 != 0) & 0x131) + 10;\n    goto switchD_0045fd56_caseD_10;\n  case 0x13b:\n    sVar1 = FUN_00403490();\n    break;\n  case 0x13c:\n    iVar2 = FUN_004062b0();\n    DAT_004bdfc8 = (-(ushort)(iVar2 != 0) & 0x133) + 10;\n    goto switchD_0045fd56_caseD_10;\n  case 0x13d:\n    uVar5 = FUN_00406390();\n    uVar5 = uVar5 & 0xffff;\n    goto LAB_0045fe44;\n  default:\n    goto switchD_0045fd56_caseD_10;\n  case 0x140:\n    iVar2 = FUN_00405f20();\n    DAT_004bdfc8 = (-(ushort)(iVar2 != 0) & 0x137) + 10;\n    goto switchD_0045fd56_caseD_10;\n  case 0x141:\n    sVar1 = FUN_00405fd0();\n  }\nLAB_0046065a:\n  if (sVar1 != 0) {\n    DAT_004bdfc8 = sVar1;\n  }\n  goto switchD_0045fd56_caseD_10;\ncode_r0x00460423:\n  switch(iVar2) {\n  case 0x32:\n    sVar1 = FUN_004949b0();\n    if (sVar1 != 0) {\n      DAT_004bdfc8 = (-(ushort)(sVar1 != 1) & 0xffcc) + 0x3c;\n    }\n  default:\n    goto switchD_0045fd56_caseD_10;\n  case 0x3c:\n    FUN_004a9920();\n    DAT_004bdfc8 = 0x46;\n    goto switchD_0045fd56_caseD_10;\n  case 0x46:\n    sVar1 = FUN_004a9980();\n    if (sVar1 != 0) {\n      DAT_004bdfc8 = (-(ushort)(sVar1 != 1) & 0xff54) + 0xb4;\n    }\n    goto switchD_0045fd56_caseD_10;\n  case 0x50:\n    FUN_004ac5f0();\n    DAT_004bdfc8 = 0x5a;\n    goto switchD_0045fd56_caseD_10;\n  case 0x5a:\n    sVar1 = FUN_004ac720();\n    if (sVar1 != 0) {\nLAB_004604e1:\n      DAT_00c06da0 = 8;\n      DAT_004bdfc8 = 0x8c;\n    }\n    goto switchD_0045fd56_caseD_10;\n  case 100:\n    FUN_00494420();\n    DAT_004bdfc8 = 0x6e;\n    goto switchD_0045fd56_caseD_10;\n  case 0x6e:\n    sVar1 = FUN_00494480();\n    if (sVar1 != 0) {\n      DAT_004bdfc8 = 0x50;\n    }\n    goto switchD_0045fd56_caseD_10;\n  case 0x8c:\n    FUN_004407d0();\n    DAT_004bdfc8 = 0x96;\n    goto switchD_0045fd56_caseD_10;\n  case 0x96:\n    iVar2 = FUN_00440860();\n    if (iVar2 == 1) {\n      DAT_004bdfc8 = DAT_00c06da0;\n    }\n    goto switchD_0045fd56_caseD_10;\n  case 0xa0:\n    FUN_004935a0();\n    DAT_004bdfc8 = 0xaa;\n    goto switchD_0045fd56_caseD_10;\n  case 0xaa:\n    sVar1 = FUN_004935c0();\n    break;\n  case 0xb4:\n    FUN_00499250();\n    DAT_004bdfc8 = 0xbe;\n    goto switchD_0045fd56_caseD_10;\n  case 0xbe:\n    sVar1 = FUN_004992b0();\n    break;\n  case 200:\n    FUN_00493670();\n    DAT_004bdfc8 = 0xd2;\n    goto switchD_0045fd56_caseD_10;\n  case 0xd2:\n    sVar1 = FUN_00493690();\n    if (sVar1 == 1) {\n      iVar2 = FUN_00442ef0();\n      if (iVar2 == 1) {\n        DAT_004bdfcc = 1;\n        DAT_004bdfc8 = 4;\n      }\n      else {\n        DAT_004bdfc8 = 200;\n      }\n    }\n    else if (sVar1 == 0) {\n      DAT_004bdfc8 = 10;\n    }\n    goto switchD_0045fd56_caseD_10;\n  case 0xdc:\n    FUN_00493740();\n    DAT_004bdfc8 = 0xe6;\n    goto switchD_0045fd56_caseD_10;\n  case 0xe6:\n    iVar2 = FUN_00493760();\n    if (iVar2 == 1) {\n      DAT_004bdfc8 = 10;\n    }\n    goto switchD_0045fd56_caseD_10;\n  case 300:\n    iVar2 = FUN_00404880();\n    DAT_004bdfc8 = (-(ushort)(iVar2 != 0) & 0x123) + 10;\n    goto switchD_0045fd56_caseD_10;\n  }\n  if (sVar1 != 0) {\n    DAT_004bdfc8 = 8;\n  }\n  goto switchD_0045fd56_caseD_10;\n}\n\n"
     },
     {
+      "entry": "0x00460ba0",
+      "name": "FUN_00460ba0",
+      "prototype": "undefined FUN_00460ba0()",
+      "bodyRanges": ["0x00460ba0-0x00460e20"],
+      "basicBlocks": [
+        {
+          "start": "0x00460ba0",
+          "end": "0x00460bbb",
+          "destinations": ["0x00460bbc|FALL_THROUGH"]
+        },
+        {
+          "start": "0x00460bbc",
+          "end": "0x00460bcb",
+          "destinations": ["0x00460b70|UNCONDITIONAL_CALL", "0x00460bbc|CONDITIONAL_JUMP", "0x00460bcc|FALL_THROUGH"]
+        },
+        {
+          "start": "0x00460bcc",
+          "end": "0x00460c00",
+          "destinations": ["0x00441d40|UNCONDITIONAL_CALL", "0x00460c01|FALL_THROUGH", "0x0046eb20|UNCONDITIONAL_CALL", "0x004924c0|UNCONDITIONAL_CALL"]
+        },
+        {
+          "start": "0x00460c01",
+          "end": "0x00460c14",
+          "destinations": ["0x00460c01|CONDITIONAL_JUMP", "0x00460c15|FALL_THROUGH", "0x0047df30|UNCONDITIONAL_CALL"]
+        },
+        {
+          "start": "0x00460c15",
+          "end": "0x00460cd6",
+          "destinations": ["0x00460cd7|FALL_THROUGH", "0x00470870|UNCONDITIONAL_CALL"]
+        },
+        {
+          "start": "0x00460cd7",
+          "end": "0x00460cf0",
+          "destinations": ["0x00460cd7|CONDITIONAL_JUMP", "0x00460cf1|FALL_THROUGH"]
+        },
+        {
+          "start": "0x00460cf1",
+          "end": "0x00460d21",
+          "destinations": ["0x00460d22|FALL_THROUGH"]
+        },
+        {
+          "start": "0x00460d22",
+          "end": "0x00460d2e",
+          "destinations": ["0x00460d22|CONDITIONAL_JUMP", "0x00460d2f|FALL_THROUGH"]
+        },
+        {
+          "start": "0x00460d2f",
+          "end": "0x00460d55",
+          "destinations": ["0x00460d56|FALL_THROUGH"]
+        },
+        {
+          "start": "0x00460d56",
+          "end": "0x00460d6c",
+          "destinations": ["0x00460d56|CONDITIONAL_JUMP", "0x00460d6d|FALL_THROUGH"]
+        },
+        {
+          "start": "0x00460d6d",
+          "end": "0x00460d77",
+          "destinations": ["0x00460d78|FALL_THROUGH"]
+        },
+        {
+          "start": "0x00460d78",
+          "end": "0x00460d87",
+          "destinations": ["0x00460d78|CONDITIONAL_JUMP", "0x00460d88|FALL_THROUGH"]
+        },
+        {
+          "start": "0x00460d88",
+          "end": "0x00460d99",
+          "destinations": ["0x00460d9a|FALL_THROUGH"]
+        },
+        {
+          "start": "0x00460d9a",
+          "end": "0x00460da0",
+          "destinations": ["0x00460da1|FALL_THROUGH"]
+        },
+        {
+          "start": "0x00460da1",
+          "end": "0x00460dab",
+          "destinations": ["0x00460da1|CONDITIONAL_JUMP", "0x00460dac|FALL_THROUGH"]
+        },
+        {
+          "start": "0x00460dac",
+          "end": "0x00460daf",
+          "destinations": ["0x00460d9a|CONDITIONAL_JUMP", "0x00460db0|FALL_THROUGH"]
+        },
+        {
+          "start": "0x00460db0",
+          "end": "0x00460e20",
+          "destinations": ["0x0047f760|UNCONDITIONAL_CALL"]
+        }
+      ],
+      "instructions": [
+        {
+          "address": "0x00460ba0",
+          "bytes": "53",
+          "flowType": "FALL_THROUGH",
+          "text": "PUSH EBX"
+        },
+        {
+          "address": "0x00460ba1",
+          "bytes": "55",
+          "flowType": "FALL_THROUGH",
+          "text": "PUSH EBP"
+        },
+        {
+          "address": "0x00460ba2",
+          "bytes": "56",
+          "flowType": "FALL_THROUGH",
+          "text": "PUSH ESI"
+        },
+        {
+          "address": "0x00460ba3",
+          "bytes": "8b f1",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV ESI,ECX"
+        },
+        {
+          "address": "0x00460ba5",
+          "bytes": "57",
+          "flowType": "FALL_THROUGH",
+          "text": "PUSH EDI"
+        },
+        {
+          "address": "0x00460ba6",
+          "bytes": "b9 aa f6 01 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV ECX,0x1f6aa"
+        },
+        {
+          "address": "0x00460bab",
+          "bytes": "33 c0",
+          "flowType": "FALL_THROUGH",
+          "text": "XOR EAX,EAX"
+        },
+        {
+          "address": "0x00460bad",
+          "bytes": "8b fe",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV EDI,ESI"
+        },
+        {
+          "address": "0x00460baf",
+          "bytes": "f3 ab",
+          "flowType": "FALL_THROUGH",
+          "text": "STOSD.REP ES:EDI"
+        },
+        {
+          "address": "0x00460bb1",
+          "bytes": "8d be ac c7 07 00",
+          "flowType": "FALL_THROUGH",
+          "text": "LEA EDI,[ESI + 0x7c7ac]"
+        },
+        {
+          "address": "0x00460bb7",
+          "bytes": "bb 08 00 00 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV EBX,0x8"
+        },
+        {
+          "address": "0x00460bbc",
+          "bytes": "8b cf",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV ECX,EDI"
+        },
+        {
+          "address": "0x00460bbe",
+          "bytes": "e8 ad ff ff ff",
+          "flowType": "UNCONDITIONAL_CALL",
+          "text": "CALL 0x00460b70"
+        },
+        {
+          "address": "0x00460bc3",
+          "bytes": "81 c7 ea 00 00 00",
+          "flowType": "FALL_THROUGH",
+          "text": "ADD EDI,0xea"
+        },
+        {
+          "address": "0x00460bc9",
+          "bytes": "4b",
+          "flowType": "FALL_THROUGH",
+          "text": "DEC EBX"
+        },
+        {
+          "address": "0x00460bca",
+          "bytes": "75 f0",
+          "flowType": "CONDITIONAL_JUMP",
+          "text": "JNZ 0x00460bbc"
+        },
+        {
+          "address": "0x00460bcc",
+          "bytes": "8d 8e f0 01 00 00",
+          "flowType": "FALL_THROUGH",
+          "text": "LEA ECX,[ESI + 0x1f0]"
+        },
+        {
+          "address": "0x00460bd2",
+          "bytes": "c7 86 fc ce 07 00 f0 d8 ff ff",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV dword ptr [ESI + 0x7cefc],0xffffd8f0"
+        },
+        {
+          "address": "0x00460bdc",
+          "bytes": "e8 3f df 00 00",
+          "flowType": "UNCONDITIONAL_CALL",
+          "text": "CALL 0x0046eb20"
+        },
+        {
+          "address": "0x00460be1",
+          "bytes": "8d 8e d0 01 00 00",
+          "flowType": "FALL_THROUGH",
+          "text": "LEA ECX,[ESI + 0x1d0]"
+        },
+        {
+          "address": "0x00460be7",
+          "bytes": "e8 d4 18 03 00",
+          "flowType": "UNCONDITIONAL_CALL",
+          "text": "CALL 0x004924c0"
+        },
+        {
+          "address": "0x00460bec",
+          "bytes": "8d 8e 74 03 00 00",
+          "flowType": "FALL_THROUGH",
+          "text": "LEA ECX,[ESI + 0x374]"
+        },
+        {
+          "address": "0x00460bf2",
+          "bytes": "e8 49 11 fe ff",
+          "flowType": "UNCONDITIONAL_CALL",
+          "text": "CALL 0x00441d40"
+        },
+        {
+          "address": "0x00460bf7",
+          "bytes": "33 db",
+          "flowType": "FALL_THROUGH",
+          "text": "XOR EBX,EBX"
+        },
+        {
+          "address": "0x00460bf9",
+          "bytes": "33 ff",
+          "flowType": "FALL_THROUGH",
+          "text": "XOR EDI,EDI"
+        },
+        {
+          "address": "0x00460bfb",
+          "bytes": "8d ae a8 65 06 00",
+          "flowType": "FALL_THROUGH",
+          "text": "LEA EBP,[ESI + 0x665a8]"
+        },
+        {
+          "address": "0x00460c01",
+          "bytes": "57",
+          "flowType": "FALL_THROUGH",
+          "text": "PUSH EDI"
+        },
+        {
+          "address": "0x00460c02",
+          "bytes": "8b cd",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV ECX,EBP"
+        },
+        {
+          "address": "0x00460c04",
+          "bytes": "e8 27 d3 01 00",
+          "flowType": "UNCONDITIONAL_CALL",
+          "text": "CALL 0x0047df30"
+        },
+        {
+          "address": "0x00460c09",
+          "bytes": "47",
+          "flowType": "FALL_THROUGH",
+          "text": "INC EDI"
+        },
+        {
+          "address": "0x00460c0a",
+          "bytes": "81 c5 10 2c 00 00",
+          "flowType": "FALL_THROUGH",
+          "text": "ADD EBP,0x2c10"
+        },
+        {
+          "address": "0x00460c10",
+          "bytes": "83 ff 08",
+          "flowType": "FALL_THROUGH",
+          "text": "CMP EDI,0x8"
+        },
+        {
+          "address": "0x00460c13",
+          "bytes": "7c ec",
+          "flowType": "CONDITIONAL_JUMP",
+          "text": "JL 0x00460c01"
+        },
+        {
+          "address": "0x00460c15",
+          "bytes": "8d be 28 c6 07 00",
+          "flowType": "FALL_THROUGH",
+          "text": "LEA EDI,[ESI + 0x7c628]"
+        },
+        {
+          "address": "0x00460c1b",
+          "bytes": "b9 32 00 00 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV ECX,0x32"
+        },
+        {
+          "address": "0x00460c20",
+          "bytes": "33 c0",
+          "flowType": "FALL_THROUGH",
+          "text": "XOR EAX,EAX"
+        },
+        {
+          "address": "0x00460c22",
+          "bytes": "f3 ab",
+          "flowType": "FALL_THROUGH",
+          "text": "STOSD.REP ES:EDI"
+        },
+        {
+          "address": "0x00460c24",
+          "bytes": "8d be f0 c6 07 00",
+          "flowType": "FALL_THROUGH",
+          "text": "LEA EDI,[ESI + 0x7c6f0]"
+        },
+        {
+          "address": "0x00460c2a",
+          "bytes": "b9 1e 00 00 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV ECX,0x1e"
+        },
+        {
+          "address": "0x00460c2f",
+          "bytes": "f3 ab",
+          "flowType": "FALL_THROUGH",
+          "text": "STOSD.REP ES:EDI"
+        },
+        {
+          "address": "0x00460c31",
+          "bytes": "66 89 9e 9c 03 00 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV word ptr [ESI + 0x39c],BX"
+        },
+        {
+          "address": "0x00460c38",
+          "bytes": "66 89 9e 9e 03 00 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV word ptr [ESI + 0x39e],BX"
+        },
+        {
+          "address": "0x00460c3f",
+          "bytes": "66 89 9e a0 03 00 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV word ptr [ESI + 0x3a0],BX"
+        },
+        {
+          "address": "0x00460c46",
+          "bytes": "66 89 9e a2 03 00 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV word ptr [ESI + 0x3a2],BX"
+        },
+        {
+          "address": "0x00460c4d",
+          "bytes": "bf 01 00 00 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV EDI,0x1"
+        },
+        {
+          "address": "0x00460c52",
+          "bytes": "66 89 9e a4 03 00 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV word ptr [ESI + 0x3a4],BX"
+        },
+        {
+          "address": "0x00460c59",
+          "bytes": "8d 8e 88 03 00 00",
+          "flowType": "FALL_THROUGH",
+          "text": "LEA ECX,[ESI + 0x388]"
+        },
+        {
+          "address": "0x00460c5f",
+          "bytes": "66 89 9e a6 03 00 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV word ptr [ESI + 0x3a6],BX"
+        },
+        {
+          "address": "0x00460c66",
+          "bytes": "66 89 9e a8 03 00 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV word ptr [ESI + 0x3a8],BX"
+        },
+        {
+          "address": "0x00460c6d",
+          "bytes": "89 9e a8 00 00 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV dword ptr [ESI + 0xa8],EBX"
+        },
+        {
+          "address": "0x00460c73",
+          "bytes": "89 9e ac 00 00 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV dword ptr [ESI + 0xac],EBX"
+        },
+        {
+          "address": "0x00460c79",
+          "bytes": "89 9e b0 00 00 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV dword ptr [ESI + 0xb0],EBX"
+        },
+        {
+          "address": "0x00460c7f",
+          "bytes": "89 be b4 00 00 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV dword ptr [ESI + 0xb4],EDI"
+        },
+        {
+          "address": "0x00460c85",
+          "bytes": "89 9e bc 00 00 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV dword ptr [ESI + 0xbc],EBX"
+        },
+        {
+          "address": "0x00460c8b",
+          "bytes": "89 9e b8 00 00 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV dword ptr [ESI + 0xb8],EBX"
+        },
+        {
+          "address": "0x00460c91",
+          "bytes": "66 89 9e 4c 07 00 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV word ptr [ESI + 0x74c],BX"
+        },
+        {
+          "address": "0x00460c98",
+          "bytes": "66 89 9e 4e 07 00 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV word ptr [ESI + 0x74e],BX"
+        },
+        {
+          "address": "0x00460c9f",
+          "bytes": "e8 cc fb 00 00",
+          "flowType": "UNCONDITIONAL_CALL",
+          "text": "CALL 0x00470870"
+        },
+        {
+          "address": "0x00460ca4",
+          "bytes": "66 89 9e 38 07 00 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV word ptr [ESI + 0x738],BX"
+        },
+        {
+          "address": "0x00460cab",
+          "bytes": "66 89 be 3a 07 00 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV word ptr [ESI + 0x73a],DI"
+        },
+        {
+          "address": "0x00460cb2",
+          "bytes": "88 9e 50 07 00 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV byte ptr [ESI + 0x750],BL"
+        },
+        {
+          "address": "0x00460cb8",
+          "bytes": "66 89 9e 52 07 00 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV word ptr [ESI + 0x752],BX"
+        },
+        {
+          "address": "0x00460cbf",
+          "bytes": "66 89 9e 54 07 00 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV word ptr [ESI + 0x754],BX"
+        },
+        {
+          "address": "0x00460cc6",
+          "bytes": "8d 8e a4 07 00 00",
+          "flowType": "FALL_THROUGH",
+          "text": "LEA ECX,[ESI + 0x7a4]"
+        },
+        {
+          "address": "0x00460ccc",
+          "bytes": "8d 86 80 07 00 00",
+          "flowType": "FALL_THROUGH",
+          "text": "LEA EAX,[ESI + 0x780]"
+        },
+        {
+          "address": "0x00460cd2",
+          "bytes": "ba 09 00 00 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV EDX,0x9"
+        },
+        {
+          "address": "0x00460cd7",
+          "bytes": "66 89 59 b8",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV word ptr [ECX + -0x48],BX"
+        },
+        {
+          "address": "0x00460cdb",
+          "bytes": "66 89 18",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV word ptr [EAX],BX"
+        },
+        {
+          "address": "0x00460cde",
+          "bytes": "66 89 58 02",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV word ptr [EAX + 0x2],BX"
+        },
+        {
+          "address": "0x00460ce2",
+          "bytes": "66 89 19",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV word ptr [ECX],BX"
+        },
+        {
+          "address": "0x00460ce5",
+          "bytes": "89 58 38",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV dword ptr [EAX + 0x38],EBX"
+        },
+        {
+          "address": "0x00460ce8",
+          "bytes": "83 c1 02",
+          "flowType": "FALL_THROUGH",
+          "text": "ADD ECX,0x2"
+        },
+        {
+          "address": "0x00460ceb",
+          "bytes": "83 c0 04",
+          "flowType": "FALL_THROUGH",
+          "text": "ADD EAX,0x4"
+        },
+        {
+          "address": "0x00460cee",
+          "bytes": "4a",
+          "flowType": "FALL_THROUGH",
+          "text": "DEC EDX"
+        },
+        {
+          "address": "0x00460cef",
+          "bytes": "75 e6",
+          "flowType": "CONDITIONAL_JUMP",
+          "text": "JNZ 0x00460cd7"
+        },
+        {
+          "address": "0x00460cf1",
+          "bytes": "83 cd ff",
+          "flowType": "FALL_THROUGH",
+          "text": "OR EBP,0xffffffff"
+        },
+        {
+          "address": "0x00460cf4",
+          "bytes": "66 89 9e dc 07 00 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV word ptr [ESI + 0x7dc],BX"
+        },
+        {
+          "address": "0x00460cfb",
+          "bytes": "66 89 9e de 07 00 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV word ptr [ESI + 0x7de],BX"
+        },
+        {
+          "address": "0x00460d02",
+          "bytes": "66 89 9e e0 07 00 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV word ptr [ESI + 0x7e0],BX"
+        },
+        {
+          "address": "0x00460d09",
+          "bytes": "66 89 ae 4c 08 00 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV word ptr [ESI + 0x84c],BP"
+        },
+        {
+          "address": "0x00460d10",
+          "bytes": "66 89 ae 4e 08 00 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV word ptr [ESI + 0x84e],BP"
+        },
+        {
+          "address": "0x00460d17",
+          "bytes": "8d 86 06 08 00 00",
+          "flowType": "FALL_THROUGH",
+          "text": "LEA EAX,[ESI + 0x806]"
+        },
+        {
+          "address": "0x00460d1d",
+          "bytes": "b9 09 00 00 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV ECX,0x9"
+        },
+        {
+          "address": "0x00460d22",
+          "bytes": "66 89 58 dc",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV word ptr [EAX + -0x24],BX"
+        },
+        {
+          "address": "0x00460d26",
+          "bytes": "66 89 18",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV word ptr [EAX],BX"
+        },
+        {
+          "address": "0x00460d29",
+          "bytes": "83 c0 02",
+          "flowType": "FALL_THROUGH",
+          "text": "ADD EAX,0x2"
+        },
+        {
+          "address": "0x00460d2c",
+          "bytes": "49",
+          "flowType": "FALL_THROUGH",
+          "text": "DEC ECX"
+        },
+        {
+          "address": "0x00460d2d",
+          "bytes": "75 f3",
+          "flowType": "CONDITIONAL_JUMP",
+          "text": "JNZ 0x00460d22"
+        },
+        {
+          "address": "0x00460d2f",
+          "bytes": "8d be 64 0c 00 00",
+          "flowType": "FALL_THROUGH",
+          "text": "LEA EDI,[ESI + 0xc64]"
+        },
+        {
+          "address": "0x00460d35",
+          "bytes": "b9 a0 28 00 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV ECX,0x28a0"
+        },
+        {
+          "address": "0x00460d3a",
+          "bytes": "33 c0",
+          "flowType": "FALL_THROUGH",
+          "text": "XOR EAX,EAX"
+        },
+        {
+          "address": "0x00460d3c",
+          "bytes": "ba 14 00 00 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV EDX,0x14"
+        },
+        {
+          "address": "0x00460d41",
+          "bytes": "f3 ab",
+          "flowType": "FALL_THROUGH",
+          "text": "STOSD.REP ES:EDI"
+        },
+        {
+          "address": "0x00460d43",
+          "bytes": "66 89 9e e6 ae 00 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV word ptr [ESI + 0xaee6],BX"
+        },
+        {
+          "address": "0x00460d4a",
+          "bytes": "8d 8e d8 af 00 00",
+          "flowType": "FALL_THROUGH",
+          "text": "LEA ECX,[ESI + 0xafd8]"
+        },
+        {
+          "address": "0x00460d50",
+          "bytes": "8d 86 60 af 00 00",
+          "flowType": "FALL_THROUGH",
+          "text": "LEA EAX,[ESI + 0xaf60]"
+        },
+        {
+          "address": "0x00460d56",
+          "bytes": "66 89 18",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV word ptr [EAX],BX"
+        },
+        {
+          "address": "0x00460d59",
+          "bytes": "66 89 58 02",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV word ptr [EAX + 0x2],BX"
+        },
+        {
+          "address": "0x00460d5d",
+          "bytes": "66 89 59 d8",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV word ptr [ECX + -0x28],BX"
+        },
+        {
+          "address": "0x00460d61",
+          "bytes": "66 89 19",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV word ptr [ECX],BX"
+        },
+        {
+          "address": "0x00460d64",
+          "bytes": "83 c0 04",
+          "flowType": "FALL_THROUGH",
+          "text": "ADD EAX,0x4"
+        },
+        {
+          "address": "0x00460d67",
+          "bytes": "83 c1 02",
+          "flowType": "FALL_THROUGH",
+          "text": "ADD ECX,0x2"
+        },
+        {
+          "address": "0x00460d6a",
+          "bytes": "4a",
+          "flowType": "FALL_THROUGH",
+          "text": "DEC EDX"
+        },
+        {
+          "address": "0x00460d6b",
+          "bytes": "75 e9",
+          "flowType": "CONDITIONAL_JUMP",
+          "text": "JNZ 0x00460d56"
+        },
+        {
+          "address": "0x00460d6d",
+          "bytes": "8d 86 60 b9 00 00",
+          "flowType": "FALL_THROUGH",
+          "text": "LEA EAX,[ESI + 0xb960]"
+        },
+        {
+          "address": "0x00460d73",
+          "bytes": "b9 b0 04 00 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV ECX,0x4b0"
+        },
+        {
+          "address": "0x00460d78",
+          "bytes": "66 89 98 a0 f6 ff ff",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV word ptr [EAX + 0xfffff6a0],BX"
+        },
+        {
+          "address": "0x00460d7f",
+          "bytes": "66 89 18",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV word ptr [EAX],BX"
+        },
+        {
+          "address": "0x00460d82",
+          "bytes": "83 c0 02",
+          "flowType": "FALL_THROUGH",
+          "text": "ADD EAX,0x2"
+        },
+        {
+          "address": "0x00460d85",
+          "bytes": "49",
+          "flowType": "FALL_THROUGH",
+          "text": "DEC ECX"
+        },
+        {
+          "address": "0x00460d86",
+          "bytes": "75 f0",
+          "flowType": "CONDITIONAL_JUMP",
+          "text": "JNZ 0x00460d78"
+        },
+        {
+          "address": "0x00460d88",
+          "bytes": "66 89 9e 84 ee 00 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV word ptr [ESI + 0xee84],BX"
+        },
+        {
+          "address": "0x00460d8f",
+          "bytes": "8d 96 86 ee 00 00",
+          "flowType": "FALL_THROUGH",
+          "text": "LEA EDX,[ESI + 0xee86]"
+        },
+        {
+          "address": "0x00460d95",
+          "bytes": "bf b4 00 00 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV EDI,0xb4"
+        },
+        {
+          "address": "0x00460d9a",
+          "bytes": "8b c2",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV EAX,EDX"
+        },
+        {
+          "address": "0x00460d9c",
+          "bytes": "b9 b4 00 00 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV ECX,0xb4"
+        },
+        {
+          "address": "0x00460da1",
+          "bytes": "c6 00 08",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV byte ptr [EAX],0x8"
+        },
+        {
+          "address": "0x00460da4",
+          "bytes": "05 b4 00 00 00",
+          "flowType": "FALL_THROUGH",
+          "text": "ADD EAX,0xb4"
+        },
+        {
+          "address": "0x00460da9",
+          "bytes": "49",
+          "flowType": "FALL_THROUGH",
+          "text": "DEC ECX"
+        },
+        {
+          "address": "0x00460daa",
+          "bytes": "75 f5",
+          "flowType": "CONDITIONAL_JUMP",
+          "text": "JNZ 0x00460da1"
+        },
+        {
+          "address": "0x00460dac",
+          "bytes": "42",
+          "flowType": "FALL_THROUGH",
+          "text": "INC EDX"
+        },
+        {
+          "address": "0x00460dad",
+          "bytes": "4f",
+          "flowType": "FALL_THROUGH",
+          "text": "DEC EDI"
+        },
+        {
+          "address": "0x00460dae",
+          "bytes": "75 ea",
+          "flowType": "CONDITIONAL_JUMP",
+          "text": "JNZ 0x00460d9a"
+        },
+        {
+          "address": "0x00460db0",
+          "bytes": "8d 8e 68 c7 07 00",
+          "flowType": "FALL_THROUGH",
+          "text": "LEA ECX,[ESI + 0x7c768]"
+        },
+        {
+          "address": "0x00460db6",
+          "bytes": "89 9e 70 d8 07 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV dword ptr [ESI + 0x7d870],EBX"
+        },
+        {
+          "address": "0x00460dbc",
+          "bytes": "66 89 9e 5a 07 00 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV word ptr [ESI + 0x75a],BX"
+        },
+        {
+          "address": "0x00460dc3",
+          "bytes": "e8 98 e9 01 00",
+          "flowType": "UNCONDITIONAL_CALL",
+          "text": "CALL 0x0047f760"
+        },
+        {
+          "address": "0x00460dc8",
+          "bytes": "66 89 ae 98 c7 07 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV word ptr [ESI + 0x7c798],BP"
+        },
+        {
+          "address": "0x00460dcf",
+          "bytes": "66 89 ae 9a c7 07 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV word ptr [ESI + 0x7c79a],BP"
+        },
+        {
+          "address": "0x00460dd6",
+          "bytes": "66 89 9e 06 da 07 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV word ptr [ESI + 0x7da06],BX"
+        },
+        {
+          "address": "0x00460ddd",
+          "bytes": "66 89 9e 08 da 07 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV word ptr [ESI + 0x7da08],BX"
+        },
+        {
+          "address": "0x00460de4",
+          "bytes": "66 89 9e 0a da 07 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV word ptr [ESI + 0x7da0a],BX"
+        },
+        {
+          "address": "0x00460deb",
+          "bytes": "66 89 9e 0c da 07 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV word ptr [ESI + 0x7da0c],BX"
+        },
+        {
+          "address": "0x00460df2",
+          "bytes": "66 89 9e 12 da 07 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV word ptr [ESI + 0x7da12],BX"
+        },
+        {
+          "address": "0x00460df9",
+          "bytes": "66 89 9e 14 da 07 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV word ptr [ESI + 0x7da14],BX"
+        },
+        {
+          "address": "0x00460e00",
+          "bytes": "66 89 9e 16 da 07 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV word ptr [ESI + 0x7da16],BX"
+        },
+        {
+          "address": "0x00460e07",
+          "bytes": "66 89 9e 18 da 07 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV word ptr [ESI + 0x7da18],BX"
+        },
+        {
+          "address": "0x00460e0e",
+          "bytes": "66 89 9e 1a da 07 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV word ptr [ESI + 0x7da1a],BX"
+        },
+        {
+          "address": "0x00460e15",
+          "bytes": "66 89 9e 1c da 07 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV word ptr [ESI + 0x7da1c],BX"
+        },
+        {
+          "address": "0x00460e1c",
+          "bytes": "5f",
+          "flowType": "FALL_THROUGH",
+          "text": "POP EDI"
+        },
+        {
+          "address": "0x00460e1d",
+          "bytes": "5e",
+          "flowType": "FALL_THROUGH",
+          "text": "POP ESI"
+        },
+        {
+          "address": "0x00460e1e",
+          "bytes": "5d",
+          "flowType": "FALL_THROUGH",
+          "text": "POP EBP"
+        },
+        {
+          "address": "0x00460e1f",
+          "bytes": "5b",
+          "flowType": "FALL_THROUGH",
+          "text": "POP EBX"
+        },
+        {
+          "address": "0x00460e20",
+          "bytes": "c3",
+          "flowType": "TERMINATOR",
+          "text": "RET"
+        }
+      ],
+      "decompilation": "\nvoid __fastcall FUN_00460ba0(undefined4 *param_1)\n\n{\n  undefined2 *puVar1;\n  undefined4 *puVar2;\n  undefined1 *puVar3;\n  int iVar4;\n  undefined4 *puVar5;\n  int iVar6;\n  undefined1 *puVar7;\n  \n  puVar5 = param_1;\n  for (iVar4 = 0x1f6aa; iVar4 != 0; iVar4 = iVar4 + -1) {\n    *puVar5 = 0;\n    puVar5 = puVar5 + 1;\n  }\n  iVar4 = 8;\n  do {\n    FUN_00460b70();\n    iVar4 = iVar4 + -1;\n  } while (iVar4 != 0);\n  param_1[0x1f3bf] = 0xffffd8f0;\n  FUN_0046eb20();\n  FUN_004924c0();\n  FUN_00441d40();\n  iVar4 = 0;\n  do {\n    FUN_0047df30(iVar4);\n    iVar4 = iVar4 + 1;\n  } while (iVar4 < 8);\n  puVar5 = param_1 + 0x1f18a;\n  for (iVar4 = 0x32; iVar4 != 0; iVar4 = iVar4 + -1) {\n    *puVar5 = 0;\n    puVar5 = puVar5 + 1;\n  }\n  puVar5 = param_1 + 0x1f1bc;\n  for (iVar4 = 0x1e; iVar4 != 0; iVar4 = iVar4 + -1) {\n    *puVar5 = 0;\n    puVar5 = puVar5 + 1;\n  }\n  *(undefined2 *)(param_1 + 0xe7) = 0;\n  *(undefined2 *)((int)param_1 + 0x39e) = 0;\n  *(undefined2 *)(param_1 + 0xe8) = 0;\n  *(undefined2 *)((int)param_1 + 0x3a2) = 0;\n  *(undefined2 *)(param_1 + 0xe9) = 0;\n  *(undefined2 *)((int)param_1 + 0x3a6) = 0;\n  *(undefined2 *)(param_1 + 0xea) = 0;\n  param_1[0x2a] = 0;\n  param_1[0x2b] = 0;\n  param_1[0x2c] = 0;\n  param_1[0x2d] = 1;\n  param_1[0x2f] = 0;\n  param_1[0x2e] = 0;\n  *(undefined2 *)(param_1 + 0x1d3) = 0;\n  *(undefined2 *)((int)param_1 + 0x74e) = 0;\n  FUN_00470870();\n  *(undefined2 *)(param_1 + 0x1ce) = 0;\n  *(undefined2 *)((int)param_1 + 0x73a) = 1;\n  *(undefined1 *)(param_1 + 0x1d4) = 0;\n  *(undefined2 *)((int)param_1 + 0x752) = 0;\n  *(undefined2 *)(param_1 + 0x1d5) = 0;\n  puVar5 = param_1 + 0x1e9;\n  puVar2 = param_1 + 0x1e0;\n  iVar4 = 9;\n  do {\n    *(undefined2 *)(puVar5 + -0x12) = 0;\n    *(undefined2 *)puVar2 = 0;\n    *(undefined2 *)((int)puVar2 + 2) = 0;\n    *(undefined2 *)puVar5 = 0;\n    puVar2[0xe] = 0;\n    puVar5 = (undefined4 *)((int)puVar5 + 2);\n    puVar2 = puVar2 + 1;\n    iVar4 = iVar4 + -1;\n  } while (iVar4 != 0);\n  *(undefined2 *)(param_1 + 0x1f7) = 0;\n  *(undefined2 *)((int)param_1 + 0x7de) = 0;\n  *(undefined2 *)(param_1 + 0x1f8) = 0;\n  *(undefined2 *)(param_1 + 0x213) = 0xffff;\n  *(undefined2 *)((int)param_1 + 0x84e) = 0xffff;\n  puVar1 = (undefined2 *)((int)param_1 + 0x806);\n  iVar4 = 9;\n  do {\n    puVar1[-0x12] = 0;\n    *puVar1 = 0;\n    puVar1 = puVar1 + 1;\n    iVar4 = iVar4 + -1;\n  } while (iVar4 != 0);\n  iVar6 = 0x14;\n  puVar5 = param_1 + 0x319;\n  for (iVar4 = 0x28a0; iVar4 != 0; iVar4 = iVar4 + -1) {\n    *puVar5 = 0;\n    puVar5 = puVar5 + 1;\n  }\n  *(undefined2 *)((int)param_1 + 0xaee6) = 0;\n  puVar5 = param_1 + 0x2bf6;\n  puVar2 = param_1 + 0x2bd8;\n  do {\n    *(undefined2 *)puVar2 = 0;\n    *(undefined2 *)((int)puVar2 + 2) = 0;\n    *(undefined2 *)(puVar5 + -10) = 0;\n    *(undefined2 *)puVar5 = 0;\n    puVar2 = puVar2 + 1;\n    puVar5 = (undefined4 *)((int)puVar5 + 2);\n    iVar6 = iVar6 + -1;\n  } while (iVar6 != 0);\n  puVar5 = param_1 + 0x2e58;\n  iVar4 = 0x4b0;\n  do {\n    *(undefined2 *)(puVar5 + -600) = 0;\n    *(undefined2 *)puVar5 = 0;\n    puVar5 = (undefined4 *)((int)puVar5 + 2);\n    iVar4 = iVar4 + -1;\n  } while (iVar4 != 0);\n  *(undefined2 *)(param_1 + 0x3ba1) = 0;\n  puVar7 = (undefined1 *)((int)param_1 + 0xee86);\n  iVar4 = 0xb4;\n  do {\n    iVar6 = 0xb4;\n    puVar3 = puVar7;\n    do {\n      *puVar3 = 8;\n      puVar3 = puVar3 + 0xb4;\n      iVar6 = iVar6 + -1;\n    } while (iVar6 != 0);\n    puVar7 = puVar7 + 1;\n    iVar4 = iVar4 + -1;\n  } while (iVar4 != 0);\n  param_1[0x1f61c] = 0;\n  *(undefined2 *)((int)param_1 + 0x75a) = 0;\n  FUN_0047f760();\n  *(undefined2 *)(param_1 + 0x1f1e6) = 0xffff;\n  *(undefined2 *)((int)param_1 + 0x7c79a) = 0xffff;\n  *(undefined2 *)((int)param_1 + 0x7da06) = 0;\n  *(undefined2 *)(param_1 + 0x1f682) = 0;\n  *(undefined2 *)((int)param_1 + 0x7da0a) = 0;\n  *(undefined2 *)(param_1 + 0x1f683) = 0;\n  *(undefined2 *)((int)param_1 + 0x7da12) = 0;\n  *(undefined2 *)(param_1 + 0x1f685) = 0;\n  *(undefined2 *)((int)param_1 + 0x7da16) = 0;\n  *(undefined2 *)(param_1 + 0x1f686) = 0;\n  *(undefined2 *)((int)param_1 + 0x7da1a) = 0;\n  *(undefined2 *)(param_1 + 0x1f687) = 0;\n  return;\n}\n\n"
+    },
+    {
       "entry": "0x00461570",
       "name": "FUN_00461570",
       "prototype": "undefined FUN_00461570()",
@@ -218661,6 +219641,832 @@
       "decompilation": "\nuint FUN_0048a5c0(void)\n\n{\n  int iVar1;\n  int iVar2;\n  undefined4 uVar3;\n  uint uVar4;\n  undefined2 extraout_var;\n  undefined2 extraout_var_00;\n  undefined2 extraout_var_01;\n  undefined2 extraout_var_02;\n  undefined2 extraout_var_03;\n  undefined2 uVar5;\n  char *pcVar6;\n  int local_50;\n  undefined2 local_4c;\n  undefined2 local_4a;\n  undefined2 local_48;\n  undefined2 local_46;\n  undefined2 local_44;\n  undefined2 local_42;\n  undefined2 local_40;\n  undefined2 local_3e;\n  undefined2 local_3c;\n  undefined2 local_3a;\n  undefined2 local_38;\n  undefined2 local_36;\n  undefined2 local_34;\n  undefined2 local_32;\n  undefined2 local_30;\n  undefined2 local_2e;\n  undefined2 local_2c;\n  undefined2 local_2a;\n  undefined2 local_28;\n  undefined2 local_26;\n  undefined2 local_24;\n  undefined2 local_22;\n  undefined2 local_20;\n  undefined2 local_1e;\n  undefined2 local_1c;\n  undefined2 local_1a;\n  undefined2 local_18;\n  undefined2 local_16;\n  undefined2 local_14;\n  undefined2 local_12;\n  undefined2 local_10;\n  undefined2 local_e;\n  undefined2 local_c;\n  undefined2 local_a;\n  undefined2 local_8;\n  undefined2 local_6;\n  undefined2 local_4;\n  \n  local_4c = 0xd;\n  local_3c = 0xd;\n  local_38 = 2;\n  local_20 = 2;\n  local_16 = 2;\n  local_e = 2;\n  local_8 = 2;\n  local_6 = 2;\n  local_34 = 0xe;\n  local_2c = 0xe;\n  local_24 = 0xe;\n  local_4a = 1;\n  local_48 = 0xfffe;\n  local_46 = 0xfffe;\n  local_44 = 0x52;\n  local_42 = 1;\n  local_40 = 0;\n  local_3e = 0xfffe;\n  local_3a = 1;\n  local_36 = 0xfffe;\n  local_32 = 1;\n  local_30 = 0xfffe;\n  local_2e = 0;\n  local_2a = 1;\n  local_28 = 0;\n  local_26 = 0;\n  local_22 = 1;\n  local_1e = 0;\n  local_1c = 0xc;\n  local_1a = 1;\n  local_18 = 0xfffe;\n  local_14 = 0xc;\n  local_12 = 1;\n  local_10 = 0;\n  local_c = 0xc;\n  local_a = 1;\n  local_4 = 0;\n  if (DAT_007c5f80 == 0) {\n    FUN_00488780();\n    FUN_00488860(5);\n  }\n  iVar1 = FUN_004823a0();\n  if ((iVar1 == 0) && (DAT_007c5f80 == 3)) {\n    FUN_00482180(s_script_k0115_004c2f48);\n    FUN_00482340();\n  }\n  FUN_004888b0();\n  iVar1 = FUN_00488080();\n  if ((iVar1 == 0) && (DAT_00843740 == 0)) {\n    DAT_00843740 = DAT_00882e04;\n  }\n  iVar1 = FUN_00487fa0();\n  uVar5 = extraout_var_00;\n  if ((iVar1 == 0) && (DAT_008438dc == 0)) {\n    iVar1 = 0;\n    pcVar6 = &DAT_0063528f;\n    local_50 = 0x4b0;\n    do {\n      iVar2 = FUN_00441e40(iVar1);\n      uVar5 = extraout_var_01;\n      if ((((iVar2 != 0) && (pcVar6[1] == DAT_00bccc44)) && (*pcVar6 == '4')) &&\n         (pcVar6[0x55] == 'd')) {\n        DAT_008438dc = 1;\n        iVar2 = FUN_004823a0();\n        if (iVar2 == 0) {\n          FUN_00482180(s_script_k0120_004c2f38);\n          FUN_00482340();\n        }\n        FUN_00488420(0x37,0x35,0x10,&local_4c);\n        FUN_00442ca0(0x37,0x35,5);\n        FUN_004648d0(1);\n        FUN_00461570(0x37,0x35);\n        uVar5 = extraout_var_02;\n      }\n      iVar1 = iVar1 + 1;\n      pcVar6 = pcVar6 + 0x558;\n      local_50 = local_50 + -1;\n    } while (local_50 != 0);\n  }\n  if ((DAT_008438dc == 1) && (iVar1 = FUN_00482390(), uVar5 = extraout_var_03, iVar1 == 0)) {\n    return 1;\n  }\n  uVar3 = FUN_004885e0(0x4c,CONCAT22(uVar5,DAT_00bccc44));\n  iVar1 = FUN_00441de0(uVar3);\n  if ((iVar1 == 0) && (DAT_00843740 == 0)) {\n    DAT_00843740 = DAT_00882e04;\n  }\n  uVar3 = FUN_004885e0(0x4e,CONCAT22(extraout_var,DAT_00bccc44));\n  uVar4 = FUN_00441de0(uVar3);\n  if ((uVar4 == 0) && (DAT_00843740 == 0)) {\n    DAT_00843740 = DAT_00882e04;\n  }\n  return uVar4 & 0xffff0000;\n}\n\n"
     },
     {
+      "entry": "0x0048d410",
+      "name": "FUN_0048d410",
+      "prototype": "undefined FUN_0048d410()",
+      "bodyRanges": ["0x0048d410-0x0048d594"],
+      "basicBlocks": [
+        {
+          "start": "0x0048d410",
+          "end": "0x0048d421",
+          "destinations": ["0x0048d422|FALL_THROUGH", "0x0048d51a|CONDITIONAL_JUMP"]
+        },
+        {
+          "start": "0x0048d422",
+          "end": "0x0048d428",
+          "destinations": ["0x0048d429|COMPUTED_JUMP", "0x0048d435|COMPUTED_JUMP", "0x0048d441|COMPUTED_JUMP", "0x0048d44d|COMPUTED_JUMP", "0x0048d459|COMPUTED_JUMP", "0x0048d465|COMPUTED_JUMP", "0x0048d471|COMPUTED_JUMP", "0x0048d47d|COMPUTED_JUMP", "0x0048d489|COMPUTED_JUMP", "0x0048d495|COMPUTED_JUMP", "0x0048d49e|COMPUTED_JUMP", "0x0048d4a7|COMPUTED_JUMP", "0x0048d4b0|COMPUTED_JUMP", "0x0048d4b9|COMPUTED_JUMP", "0x0048d4c2|COMPUTED_JUMP", "0x0048d4cb|COMPUTED_JUMP", "0x0048d4d4|COMPUTED_JUMP", "0x0048d4dd|COMPUTED_JUMP", "0x0048d4e6|COMPUTED_JUMP", "0x0048d4ef|COMPUTED_JUMP", "0x0048d4f8|COMPUTED_JUMP", "0x0048d501|COMPUTED_JUMP", "0x0048d50a|COMPUTED_JUMP", "0x0048d513|COMPUTED_JUMP", "0x0048d51a|COMPUTED_JUMP"]
+        },
+        {
+          "start": "0x0048d429",
+          "end": "0x0048d434",
+          "destinations": ["0x0048d51a|UNCONDITIONAL_JUMP", "0x0048d740|UNCONDITIONAL_CALL"]
+        },
+        {
+          "start": "0x0048d435",
+          "end": "0x0048d440",
+          "destinations": ["0x0048d51a|UNCONDITIONAL_JUMP", "0x0048d770|UNCONDITIONAL_CALL"]
+        },
+        {
+          "start": "0x0048d441",
+          "end": "0x0048d44c",
+          "destinations": ["0x0048d51a|UNCONDITIONAL_JUMP", "0x0048d7a0|UNCONDITIONAL_CALL"]
+        },
+        {
+          "start": "0x0048d44d",
+          "end": "0x0048d458",
+          "destinations": ["0x0048d51a|UNCONDITIONAL_JUMP", "0x0048d7d0|UNCONDITIONAL_CALL"]
+        },
+        {
+          "start": "0x0048d459",
+          "end": "0x0048d464",
+          "destinations": ["0x0048d51a|UNCONDITIONAL_JUMP", "0x0048d800|UNCONDITIONAL_CALL"]
+        },
+        {
+          "start": "0x0048d465",
+          "end": "0x0048d470",
+          "destinations": ["0x0048d51a|UNCONDITIONAL_JUMP", "0x0048d830|UNCONDITIONAL_CALL"]
+        },
+        {
+          "start": "0x0048d471",
+          "end": "0x0048d47c",
+          "destinations": ["0x0048d51a|UNCONDITIONAL_JUMP", "0x0048d860|UNCONDITIONAL_CALL"]
+        },
+        {
+          "start": "0x0048d47d",
+          "end": "0x0048d488",
+          "destinations": ["0x0048d51a|UNCONDITIONAL_JUMP", "0x0048d890|UNCONDITIONAL_CALL"]
+        },
+        {
+          "start": "0x0048d489",
+          "end": "0x0048d494",
+          "destinations": ["0x0048d51a|UNCONDITIONAL_JUMP", "0x0048d8c0|UNCONDITIONAL_CALL"]
+        },
+        {
+          "start": "0x0048d495",
+          "end": "0x0048d49d",
+          "destinations": ["0x0048d51a|UNCONDITIONAL_JUMP", "0x0048d8f0|UNCONDITIONAL_CALL"]
+        },
+        {
+          "start": "0x0048d49e",
+          "end": "0x0048d4a6",
+          "destinations": ["0x0048d51a|UNCONDITIONAL_JUMP", "0x0048d920|UNCONDITIONAL_CALL"]
+        },
+        {
+          "start": "0x0048d4a7",
+          "end": "0x0048d4af",
+          "destinations": ["0x0048d51a|UNCONDITIONAL_JUMP", "0x0048d950|UNCONDITIONAL_CALL"]
+        },
+        {
+          "start": "0x0048d4b0",
+          "end": "0x0048d4b8",
+          "destinations": ["0x0048d51a|UNCONDITIONAL_JUMP", "0x0048d980|UNCONDITIONAL_CALL"]
+        },
+        {
+          "start": "0x0048d4b9",
+          "end": "0x0048d4c1",
+          "destinations": ["0x0048d51a|UNCONDITIONAL_JUMP", "0x0048d9b0|UNCONDITIONAL_CALL"]
+        },
+        {
+          "start": "0x0048d4c2",
+          "end": "0x0048d4ca",
+          "destinations": ["0x0048d51a|UNCONDITIONAL_JUMP", "0x0048d9e0|UNCONDITIONAL_CALL"]
+        },
+        {
+          "start": "0x0048d4cb",
+          "end": "0x0048d4d3",
+          "destinations": ["0x0048d51a|UNCONDITIONAL_JUMP", "0x0048da10|UNCONDITIONAL_CALL"]
+        },
+        {
+          "start": "0x0048d4d4",
+          "end": "0x0048d4dc",
+          "destinations": ["0x0048d51a|UNCONDITIONAL_JUMP", "0x0048da40|UNCONDITIONAL_CALL"]
+        },
+        {
+          "start": "0x0048d4dd",
+          "end": "0x0048d4e5",
+          "destinations": ["0x0048d51a|UNCONDITIONAL_JUMP", "0x0048da70|UNCONDITIONAL_CALL"]
+        },
+        {
+          "start": "0x0048d4e6",
+          "end": "0x0048d4ee",
+          "destinations": ["0x0048d51a|UNCONDITIONAL_JUMP", "0x0048daa0|UNCONDITIONAL_CALL"]
+        },
+        {
+          "start": "0x0048d4ef",
+          "end": "0x0048d4f7",
+          "destinations": ["0x0048d51a|UNCONDITIONAL_JUMP", "0x0048dad0|UNCONDITIONAL_CALL"]
+        },
+        {
+          "start": "0x0048d4f8",
+          "end": "0x0048d500",
+          "destinations": ["0x0048d51a|UNCONDITIONAL_JUMP", "0x0048db00|UNCONDITIONAL_CALL"]
+        },
+        {
+          "start": "0x0048d501",
+          "end": "0x0048d509",
+          "destinations": ["0x0048d51a|UNCONDITIONAL_JUMP", "0x0048db30|UNCONDITIONAL_CALL"]
+        },
+        {
+          "start": "0x0048d50a",
+          "end": "0x0048d512",
+          "destinations": ["0x0048d51a|UNCONDITIONAL_JUMP", "0x0048db60|UNCONDITIONAL_CALL"]
+        },
+        {
+          "start": "0x0048d513",
+          "end": "0x0048d519",
+          "destinations": ["0x0048d51a|FALL_THROUGH", "0x0048db90|UNCONDITIONAL_CALL"]
+        },
+        {
+          "start": "0x0048d51a",
+          "end": "0x0048d538",
+          "destinations": ["0x00462af0|UNCONDITIONAL_CALL", "0x0048d539|FALL_THROUGH"]
+        },
+        {
+          "start": "0x0048d539",
+          "end": "0x0048d545",
+          "destinations": ["0x0048d539|CONDITIONAL_JUMP", "0x0048d546|FALL_THROUGH"]
+        },
+        {
+          "start": "0x0048d546",
+          "end": "0x0048d579",
+          "destinations": ["0x00443160|UNCONDITIONAL_CALL", "0x004648d0|UNCONDITIONAL_CALL", "0x004648e0|UNCONDITIONAL_CALL", "0x0048d57a|FALL_THROUGH"]
+        },
+        {
+          "start": "0x0048d57a",
+          "end": "0x0048d590",
+          "destinations": ["0x0048d57a|CONDITIONAL_JUMP", "0x0048d591|FALL_THROUGH"]
+        },
+        {
+          "start": "0x0048d591",
+          "end": "0x0048d594",
+          "destinations": []
+        }
+      ],
+      "instructions": [
+        {
+          "address": "0x0048d410",
+          "bytes": "0f bf 44 24 04",
+          "flowType": "FALL_THROUGH",
+          "text": "MOVSX EAX,word ptr [ESP + 0x4]"
+        },
+        {
+          "address": "0x0048d415",
+          "bytes": "48",
+          "flowType": "FALL_THROUGH",
+          "text": "DEC EAX"
+        },
+        {
+          "address": "0x0048d416",
+          "bytes": "56",
+          "flowType": "FALL_THROUGH",
+          "text": "PUSH ESI"
+        },
+        {
+          "address": "0x0048d417",
+          "bytes": "83 f8 1b",
+          "flowType": "FALL_THROUGH",
+          "text": "CMP EAX,0x1b"
+        },
+        {
+          "address": "0x0048d41a",
+          "bytes": "8b f1",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV ESI,ECX"
+        },
+        {
+          "address": "0x0048d41c",
+          "bytes": "0f 87 f8 00 00 00",
+          "flowType": "CONDITIONAL_JUMP",
+          "text": "JA 0x0048d51a"
+        },
+        {
+          "address": "0x0048d422",
+          "bytes": "ff 24 85 98 d5 48 00",
+          "flowType": "COMPUTED_JUMP",
+          "text": "JMP dword ptr [EAX*0x4 + 0x48d598]"
+        },
+        {
+          "address": "0x0048d429",
+          "bytes": "8b ce",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV ECX,ESI"
+        },
+        {
+          "address": "0x0048d42b",
+          "bytes": "e8 10 03 00 00",
+          "flowType": "UNCONDITIONAL_CALL",
+          "text": "CALL 0x0048d740"
+        },
+        {
+          "address": "0x0048d430",
+          "bytes": "e9 e5 00 00 00",
+          "flowType": "UNCONDITIONAL_JUMP",
+          "text": "JMP 0x0048d51a"
+        },
+        {
+          "address": "0x0048d435",
+          "bytes": "8b ce",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV ECX,ESI"
+        },
+        {
+          "address": "0x0048d437",
+          "bytes": "e8 34 03 00 00",
+          "flowType": "UNCONDITIONAL_CALL",
+          "text": "CALL 0x0048d770"
+        },
+        {
+          "address": "0x0048d43c",
+          "bytes": "e9 d9 00 00 00",
+          "flowType": "UNCONDITIONAL_JUMP",
+          "text": "JMP 0x0048d51a"
+        },
+        {
+          "address": "0x0048d441",
+          "bytes": "8b ce",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV ECX,ESI"
+        },
+        {
+          "address": "0x0048d443",
+          "bytes": "e8 58 03 00 00",
+          "flowType": "UNCONDITIONAL_CALL",
+          "text": "CALL 0x0048d7a0"
+        },
+        {
+          "address": "0x0048d448",
+          "bytes": "e9 cd 00 00 00",
+          "flowType": "UNCONDITIONAL_JUMP",
+          "text": "JMP 0x0048d51a"
+        },
+        {
+          "address": "0x0048d44d",
+          "bytes": "8b ce",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV ECX,ESI"
+        },
+        {
+          "address": "0x0048d44f",
+          "bytes": "e8 7c 03 00 00",
+          "flowType": "UNCONDITIONAL_CALL",
+          "text": "CALL 0x0048d7d0"
+        },
+        {
+          "address": "0x0048d454",
+          "bytes": "e9 c1 00 00 00",
+          "flowType": "UNCONDITIONAL_JUMP",
+          "text": "JMP 0x0048d51a"
+        },
+        {
+          "address": "0x0048d459",
+          "bytes": "8b ce",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV ECX,ESI"
+        },
+        {
+          "address": "0x0048d45b",
+          "bytes": "e8 a0 03 00 00",
+          "flowType": "UNCONDITIONAL_CALL",
+          "text": "CALL 0x0048d800"
+        },
+        {
+          "address": "0x0048d460",
+          "bytes": "e9 b5 00 00 00",
+          "flowType": "UNCONDITIONAL_JUMP",
+          "text": "JMP 0x0048d51a"
+        },
+        {
+          "address": "0x0048d465",
+          "bytes": "8b ce",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV ECX,ESI"
+        },
+        {
+          "address": "0x0048d467",
+          "bytes": "e8 c4 03 00 00",
+          "flowType": "UNCONDITIONAL_CALL",
+          "text": "CALL 0x0048d830"
+        },
+        {
+          "address": "0x0048d46c",
+          "bytes": "e9 a9 00 00 00",
+          "flowType": "UNCONDITIONAL_JUMP",
+          "text": "JMP 0x0048d51a"
+        },
+        {
+          "address": "0x0048d471",
+          "bytes": "8b ce",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV ECX,ESI"
+        },
+        {
+          "address": "0x0048d473",
+          "bytes": "e8 e8 03 00 00",
+          "flowType": "UNCONDITIONAL_CALL",
+          "text": "CALL 0x0048d860"
+        },
+        {
+          "address": "0x0048d478",
+          "bytes": "e9 9d 00 00 00",
+          "flowType": "UNCONDITIONAL_JUMP",
+          "text": "JMP 0x0048d51a"
+        },
+        {
+          "address": "0x0048d47d",
+          "bytes": "8b ce",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV ECX,ESI"
+        },
+        {
+          "address": "0x0048d47f",
+          "bytes": "e8 0c 04 00 00",
+          "flowType": "UNCONDITIONAL_CALL",
+          "text": "CALL 0x0048d890"
+        },
+        {
+          "address": "0x0048d484",
+          "bytes": "e9 91 00 00 00",
+          "flowType": "UNCONDITIONAL_JUMP",
+          "text": "JMP 0x0048d51a"
+        },
+        {
+          "address": "0x0048d489",
+          "bytes": "8b ce",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV ECX,ESI"
+        },
+        {
+          "address": "0x0048d48b",
+          "bytes": "e8 30 04 00 00",
+          "flowType": "UNCONDITIONAL_CALL",
+          "text": "CALL 0x0048d8c0"
+        },
+        {
+          "address": "0x0048d490",
+          "bytes": "e9 85 00 00 00",
+          "flowType": "UNCONDITIONAL_JUMP",
+          "text": "JMP 0x0048d51a"
+        },
+        {
+          "address": "0x0048d495",
+          "bytes": "8b ce",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV ECX,ESI"
+        },
+        {
+          "address": "0x0048d497",
+          "bytes": "e8 54 04 00 00",
+          "flowType": "UNCONDITIONAL_CALL",
+          "text": "CALL 0x0048d8f0"
+        },
+        {
+          "address": "0x0048d49c",
+          "bytes": "eb 7c",
+          "flowType": "UNCONDITIONAL_JUMP",
+          "text": "JMP 0x0048d51a"
+        },
+        {
+          "address": "0x0048d49e",
+          "bytes": "8b ce",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV ECX,ESI"
+        },
+        {
+          "address": "0x0048d4a0",
+          "bytes": "e8 7b 04 00 00",
+          "flowType": "UNCONDITIONAL_CALL",
+          "text": "CALL 0x0048d920"
+        },
+        {
+          "address": "0x0048d4a5",
+          "bytes": "eb 73",
+          "flowType": "UNCONDITIONAL_JUMP",
+          "text": "JMP 0x0048d51a"
+        },
+        {
+          "address": "0x0048d4a7",
+          "bytes": "8b ce",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV ECX,ESI"
+        },
+        {
+          "address": "0x0048d4a9",
+          "bytes": "e8 a2 04 00 00",
+          "flowType": "UNCONDITIONAL_CALL",
+          "text": "CALL 0x0048d950"
+        },
+        {
+          "address": "0x0048d4ae",
+          "bytes": "eb 6a",
+          "flowType": "UNCONDITIONAL_JUMP",
+          "text": "JMP 0x0048d51a"
+        },
+        {
+          "address": "0x0048d4b0",
+          "bytes": "8b ce",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV ECX,ESI"
+        },
+        {
+          "address": "0x0048d4b2",
+          "bytes": "e8 c9 04 00 00",
+          "flowType": "UNCONDITIONAL_CALL",
+          "text": "CALL 0x0048d980"
+        },
+        {
+          "address": "0x0048d4b7",
+          "bytes": "eb 61",
+          "flowType": "UNCONDITIONAL_JUMP",
+          "text": "JMP 0x0048d51a"
+        },
+        {
+          "address": "0x0048d4b9",
+          "bytes": "8b ce",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV ECX,ESI"
+        },
+        {
+          "address": "0x0048d4bb",
+          "bytes": "e8 f0 04 00 00",
+          "flowType": "UNCONDITIONAL_CALL",
+          "text": "CALL 0x0048d9b0"
+        },
+        {
+          "address": "0x0048d4c0",
+          "bytes": "eb 58",
+          "flowType": "UNCONDITIONAL_JUMP",
+          "text": "JMP 0x0048d51a"
+        },
+        {
+          "address": "0x0048d4c2",
+          "bytes": "8b ce",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV ECX,ESI"
+        },
+        {
+          "address": "0x0048d4c4",
+          "bytes": "e8 17 05 00 00",
+          "flowType": "UNCONDITIONAL_CALL",
+          "text": "CALL 0x0048d9e0"
+        },
+        {
+          "address": "0x0048d4c9",
+          "bytes": "eb 4f",
+          "flowType": "UNCONDITIONAL_JUMP",
+          "text": "JMP 0x0048d51a"
+        },
+        {
+          "address": "0x0048d4cb",
+          "bytes": "8b ce",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV ECX,ESI"
+        },
+        {
+          "address": "0x0048d4cd",
+          "bytes": "e8 3e 05 00 00",
+          "flowType": "UNCONDITIONAL_CALL",
+          "text": "CALL 0x0048da10"
+        },
+        {
+          "address": "0x0048d4d2",
+          "bytes": "eb 46",
+          "flowType": "UNCONDITIONAL_JUMP",
+          "text": "JMP 0x0048d51a"
+        },
+        {
+          "address": "0x0048d4d4",
+          "bytes": "8b ce",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV ECX,ESI"
+        },
+        {
+          "address": "0x0048d4d6",
+          "bytes": "e8 65 05 00 00",
+          "flowType": "UNCONDITIONAL_CALL",
+          "text": "CALL 0x0048da40"
+        },
+        {
+          "address": "0x0048d4db",
+          "bytes": "eb 3d",
+          "flowType": "UNCONDITIONAL_JUMP",
+          "text": "JMP 0x0048d51a"
+        },
+        {
+          "address": "0x0048d4dd",
+          "bytes": "8b ce",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV ECX,ESI"
+        },
+        {
+          "address": "0x0048d4df",
+          "bytes": "e8 8c 05 00 00",
+          "flowType": "UNCONDITIONAL_CALL",
+          "text": "CALL 0x0048da70"
+        },
+        {
+          "address": "0x0048d4e4",
+          "bytes": "eb 34",
+          "flowType": "UNCONDITIONAL_JUMP",
+          "text": "JMP 0x0048d51a"
+        },
+        {
+          "address": "0x0048d4e6",
+          "bytes": "8b ce",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV ECX,ESI"
+        },
+        {
+          "address": "0x0048d4e8",
+          "bytes": "e8 b3 05 00 00",
+          "flowType": "UNCONDITIONAL_CALL",
+          "text": "CALL 0x0048daa0"
+        },
+        {
+          "address": "0x0048d4ed",
+          "bytes": "eb 2b",
+          "flowType": "UNCONDITIONAL_JUMP",
+          "text": "JMP 0x0048d51a"
+        },
+        {
+          "address": "0x0048d4ef",
+          "bytes": "8b ce",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV ECX,ESI"
+        },
+        {
+          "address": "0x0048d4f1",
+          "bytes": "e8 da 05 00 00",
+          "flowType": "UNCONDITIONAL_CALL",
+          "text": "CALL 0x0048dad0"
+        },
+        {
+          "address": "0x0048d4f6",
+          "bytes": "eb 22",
+          "flowType": "UNCONDITIONAL_JUMP",
+          "text": "JMP 0x0048d51a"
+        },
+        {
+          "address": "0x0048d4f8",
+          "bytes": "8b ce",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV ECX,ESI"
+        },
+        {
+          "address": "0x0048d4fa",
+          "bytes": "e8 01 06 00 00",
+          "flowType": "UNCONDITIONAL_CALL",
+          "text": "CALL 0x0048db00"
+        },
+        {
+          "address": "0x0048d4ff",
+          "bytes": "eb 19",
+          "flowType": "UNCONDITIONAL_JUMP",
+          "text": "JMP 0x0048d51a"
+        },
+        {
+          "address": "0x0048d501",
+          "bytes": "8b ce",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV ECX,ESI"
+        },
+        {
+          "address": "0x0048d503",
+          "bytes": "e8 28 06 00 00",
+          "flowType": "UNCONDITIONAL_CALL",
+          "text": "CALL 0x0048db30"
+        },
+        {
+          "address": "0x0048d508",
+          "bytes": "eb 10",
+          "flowType": "UNCONDITIONAL_JUMP",
+          "text": "JMP 0x0048d51a"
+        },
+        {
+          "address": "0x0048d50a",
+          "bytes": "8b ce",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV ECX,ESI"
+        },
+        {
+          "address": "0x0048d50c",
+          "bytes": "e8 4f 06 00 00",
+          "flowType": "UNCONDITIONAL_CALL",
+          "text": "CALL 0x0048db60"
+        },
+        {
+          "address": "0x0048d511",
+          "bytes": "eb 07",
+          "flowType": "UNCONDITIONAL_JUMP",
+          "text": "JMP 0x0048d51a"
+        },
+        {
+          "address": "0x0048d513",
+          "bytes": "8b ce",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV ECX,ESI"
+        },
+        {
+          "address": "0x0048d515",
+          "bytes": "e8 76 06 00 00",
+          "flowType": "UNCONDITIONAL_CALL",
+          "text": "CALL 0x0048db90"
+        },
+        {
+          "address": "0x0048d51a",
+          "bytes": "56",
+          "flowType": "FALL_THROUGH",
+          "text": "PUSH ESI"
+        },
+        {
+          "address": "0x0048d51b",
+          "bytes": "b9 f0 ff ab 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV ECX,0xabfff0"
+        },
+        {
+          "address": "0x0048d520",
+          "bytes": "c7 05 8c 5f 7c 00 01 00 00 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV dword ptr [0x007c5f8c],0x1"
+        },
+        {
+          "address": "0x0048d52a",
+          "bytes": "e8 c1 55 fd ff",
+          "flowType": "UNCONDITIONAL_CALL",
+          "text": "CALL 0x00462af0"
+        },
+        {
+          "address": "0x0048d52f",
+          "bytes": "b8 a0 20 ac 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV EAX,0xac20a0"
+        },
+        {
+          "address": "0x0048d534",
+          "bytes": "b9 08 00 00 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV ECX,0x8"
+        },
+        {
+          "address": "0x0048d539",
+          "bytes": "66 c7 00 00 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV word ptr [EAX],0x0"
+        },
+        {
+          "address": "0x0048d53e",
+          "bytes": "05 c8 00 00 00",
+          "flowType": "FALL_THROUGH",
+          "text": "ADD EAX,0xc8"
+        },
+        {
+          "address": "0x0048d543",
+          "bytes": "49",
+          "flowType": "FALL_THROUGH",
+          "text": "DEC ECX"
+        },
+        {
+          "address": "0x0048d544",
+          "bytes": "75 f3",
+          "flowType": "CONDITIONAL_JUMP",
+          "text": "JNZ 0x0048d539"
+        },
+        {
+          "address": "0x0048d546",
+          "bytes": "66 a1 f0 ff ab 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV AX,[0x00abfff0]"
+        },
+        {
+          "address": "0x0048d54c",
+          "bytes": "50",
+          "flowType": "FALL_THROUGH",
+          "text": "PUSH EAX"
+        },
+        {
+          "address": "0x0048d54d",
+          "bytes": "e8 0e 5c fb ff",
+          "flowType": "UNCONDITIONAL_CALL",
+          "text": "CALL 0x00443160"
+        },
+        {
+          "address": "0x0048d552",
+          "bytes": "83 c4 04",
+          "flowType": "FALL_THROUGH",
+          "text": "ADD ESP,0x4"
+        },
+        {
+          "address": "0x0048d555",
+          "bytes": "b9 f0 ff ab 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV ECX,0xabfff0"
+        },
+        {
+          "address": "0x0048d55a",
+          "bytes": "6a 01",
+          "flowType": "FALL_THROUGH",
+          "text": "PUSH 0x1"
+        },
+        {
+          "address": "0x0048d55c",
+          "bytes": "e8 6f 73 fd ff",
+          "flowType": "UNCONDITIONAL_CALL",
+          "text": "CALL 0x004648d0"
+        },
+        {
+          "address": "0x0048d561",
+          "bytes": "b9 f0 ff ab 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV ECX,0xabfff0"
+        },
+        {
+          "address": "0x0048d566",
+          "bytes": "e8 75 73 fd ff",
+          "flowType": "UNCONDITIONAL_CALL",
+          "text": "CALL 0x004648e0"
+        },
+        {
+          "address": "0x0048d56b",
+          "bytes": "b9 8c c4 82 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV ECX,0x82c48c"
+        },
+        {
+          "address": "0x0048d570",
+          "bytes": "b8 84 00 ac 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV EAX,0xac0084"
+        },
+        {
+          "address": "0x0048d575",
+          "bytes": "ba 08 00 00 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV EDX,0x8"
+        },
+        {
+          "address": "0x0048d57a",
+          "bytes": "8b 70 e0",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV ESI,dword ptr [EAX + -0x20]"
+        },
+        {
+          "address": "0x0048d57d",
+          "bytes": "83 c0 04",
+          "flowType": "FALL_THROUGH",
+          "text": "ADD EAX,0x4"
+        },
+        {
+          "address": "0x0048d580",
+          "bytes": "89 71 fc",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV dword ptr [ECX + -0x4],ESI"
+        },
+        {
+          "address": "0x0048d583",
+          "bytes": "8b 70 fc",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV ESI,dword ptr [EAX + -0x4]"
+        },
+        {
+          "address": "0x0048d586",
+          "bytes": "89 31",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV dword ptr [ECX],ESI"
+        },
+        {
+          "address": "0x0048d588",
+          "bytes": "81 c1 10 2c 00 00",
+          "flowType": "FALL_THROUGH",
+          "text": "ADD ECX,0x2c10"
+        },
+        {
+          "address": "0x0048d58e",
+          "bytes": "4a",
+          "flowType": "FALL_THROUGH",
+          "text": "DEC EDX"
+        },
+        {
+          "address": "0x0048d58f",
+          "bytes": "75 e9",
+          "flowType": "CONDITIONAL_JUMP",
+          "text": "JNZ 0x0048d57a"
+        },
+        {
+          "address": "0x0048d591",
+          "bytes": "5e",
+          "flowType": "FALL_THROUGH",
+          "text": "POP ESI"
+        },
+        {
+          "address": "0x0048d592",
+          "bytes": "c2 04 00",
+          "flowType": "TERMINATOR",
+          "text": "RET 0x4"
+        }
+      ],
+      "decompilation": "\nvoid __thiscall FUN_0048d410(undefined4 param_1,undefined2 param_2)\n\n{\n  undefined2 *puVar1;\n  undefined4 *puVar2;\n  int iVar3;\n  undefined4 *puVar4;\n  \n  switch(param_2) {\n  case 1:\n    FUN_0048d740();\n    break;\n  case 2:\n    FUN_0048d770();\n    break;\n  case 3:\n    FUN_0048d7a0();\n    break;\n  case 4:\n    FUN_0048d7d0();\n    break;\n  case 5:\n    FUN_0048d800();\n    break;\n  case 6:\n    FUN_0048d830();\n    break;\n  case 7:\n    FUN_0048d860();\n    break;\n  case 8:\n    FUN_0048d890();\n    break;\n  case 0xb:\n    FUN_0048d8c0();\n    break;\n  case 0xc:\n    FUN_0048d8f0();\n    break;\n  case 0xd:\n    FUN_0048d920();\n    break;\n  case 0xe:\n    FUN_0048d950();\n    break;\n  case 0xf:\n    FUN_0048d980();\n    break;\n  case 0x10:\n    FUN_0048d9b0();\n    break;\n  case 0x11:\n    FUN_0048d9e0();\n    break;\n  case 0x12:\n    FUN_0048da10();\n    break;\n  case 0x15:\n    FUN_0048da40();\n    break;\n  case 0x16:\n    FUN_0048da70();\n    break;\n  case 0x17:\n    FUN_0048daa0();\n    break;\n  case 0x18:\n    FUN_0048dad0();\n    break;\n  case 0x19:\n    FUN_0048db00();\n    break;\n  case 0x1a:\n    FUN_0048db30();\n    break;\n  case 0x1b:\n    FUN_0048db60();\n    break;\n  case 0x1c:\n    FUN_0048db90();\n  }\n  DAT_007c5f8c = 1;\n  FUN_00462af0(param_1);\n  puVar1 = &DAT_00ac20a0;\n  iVar3 = 8;\n  do {\n    *puVar1 = 0;\n    puVar1 = puVar1 + 100;\n    iVar3 = iVar3 + -1;\n  } while (iVar3 != 0);\n  FUN_00443160(CONCAT22((short)((uint)puVar1 >> 0x10),DAT_00abfff0));\n  FUN_004648d0(1);\n  FUN_004648e0();\n  puVar4 = &DAT_0082c48c;\n  iVar3 = 8;\n  puVar2 = &DAT_00ac0084;\n  do {\n    puVar4[-1] = puVar2[-8];\n    *puVar4 = *puVar2;\n    puVar4 = puVar4 + 0xb04;\n    iVar3 = iVar3 + -1;\n    puVar2 = puVar2 + 1;\n  } while (iVar3 != 0);\n  return;\n}\n\n"
+    },
+    {
       "entry": "0x0048d6f0",
       "name": "FUN_0048d6f0",
       "prototype": "undefined FUN_0048d6f0()",
@@ -218891,6 +220697,1140 @@
         }
       ],
       "decompilation": "\nundefined4 FUN_0048d6f0(void)\n\n{\n  uint uVar1;\n  \n  if ((DAT_0084373c != 0) &&\n     (uVar1 = DAT_00882e04 - DAT_0084373c >> 0x1f,\n     2000 < (int)((DAT_00882e04 - DAT_0084373c ^ uVar1) - uVar1))) {\n    return 1;\n  }\n  if ((DAT_00843740 != 0) &&\n     (uVar1 = DAT_00882e04 - DAT_00843740 >> 0x1f,\n     2000 < (int)((DAT_00882e04 - DAT_00843740 ^ uVar1) - uVar1))) {\n    return 0xffffffff;\n  }\n  return 0;\n}\n\n"
+    },
+    {
+      "entry": "0x0048d740",
+      "name": "FUN_0048d740",
+      "prototype": "undefined FUN_0048d740()",
+      "bodyRanges": ["0x0048d740-0x0048d768"],
+      "basicBlocks": [
+        {
+          "start": "0x0048d740",
+          "end": "0x0048d768",
+          "destinations": []
+        }
+      ],
+      "instructions": [
+        {
+          "address": "0x0048d740",
+          "bytes": "56",
+          "flowType": "FALL_THROUGH",
+          "text": "PUSH ESI"
+        },
+        {
+          "address": "0x0048d741",
+          "bytes": "8b d1",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV EDX,ECX"
+        },
+        {
+          "address": "0x0048d743",
+          "bytes": "57",
+          "flowType": "FALL_THROUGH",
+          "text": "PUSH EDI"
+        },
+        {
+          "address": "0x0048d744",
+          "bytes": "bf c8 31 4c 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV EDI,0x4c31c8"
+        },
+        {
+          "address": "0x0048d749",
+          "bytes": "83 c9 ff",
+          "flowType": "FALL_THROUGH",
+          "text": "OR ECX,0xffffffff"
+        },
+        {
+          "address": "0x0048d74c",
+          "bytes": "33 c0",
+          "flowType": "FALL_THROUGH",
+          "text": "XOR EAX,EAX"
+        },
+        {
+          "address": "0x0048d74e",
+          "bytes": "f2 ae",
+          "flowType": "FALL_THROUGH",
+          "text": "SCASB.REPNE ES:EDI"
+        },
+        {
+          "address": "0x0048d750",
+          "bytes": "f7 d1",
+          "flowType": "FALL_THROUGH",
+          "text": "NOT ECX"
+        },
+        {
+          "address": "0x0048d752",
+          "bytes": "2b f9",
+          "flowType": "FALL_THROUGH",
+          "text": "SUB EDI,ECX"
+        },
+        {
+          "address": "0x0048d754",
+          "bytes": "8b c1",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV EAX,ECX"
+        },
+        {
+          "address": "0x0048d756",
+          "bytes": "8b f7",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV ESI,EDI"
+        },
+        {
+          "address": "0x0048d758",
+          "bytes": "8b fa",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV EDI,EDX"
+        },
+        {
+          "address": "0x0048d75a",
+          "bytes": "c1 e9 02",
+          "flowType": "FALL_THROUGH",
+          "text": "SHR ECX,0x2"
+        },
+        {
+          "address": "0x0048d75d",
+          "bytes": "f3 a5",
+          "flowType": "FALL_THROUGH",
+          "text": "MOVSD.REP ES:EDI,ESI"
+        },
+        {
+          "address": "0x0048d75f",
+          "bytes": "8b c8",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV ECX,EAX"
+        },
+        {
+          "address": "0x0048d761",
+          "bytes": "83 e1 03",
+          "flowType": "FALL_THROUGH",
+          "text": "AND ECX,0x3"
+        },
+        {
+          "address": "0x0048d764",
+          "bytes": "f3 a4",
+          "flowType": "FALL_THROUGH",
+          "text": "MOVSB.REP ES:EDI,ESI"
+        },
+        {
+          "address": "0x0048d766",
+          "bytes": "5f",
+          "flowType": "FALL_THROUGH",
+          "text": "POP EDI"
+        },
+        {
+          "address": "0x0048d767",
+          "bytes": "5e",
+          "flowType": "FALL_THROUGH",
+          "text": "POP ESI"
+        },
+        {
+          "address": "0x0048d768",
+          "bytes": "c3",
+          "flowType": "TERMINATOR",
+          "text": "RET"
+        }
+      ],
+      "decompilation": "\nvoid __fastcall FUN_0048d740(char *param_1)\n\n{\n  char cVar1;\n  uint uVar2;\n  uint uVar3;\n  char *pcVar4;\n  char *pcVar5;\n  \n  uVar2 = 0xffffffff;\n  pcVar4 = s_stagemap_k01_map_004c31c8;\n  do {\n    pcVar5 = pcVar4;\n    if (uVar2 == 0) break;\n    uVar2 = uVar2 - 1;\n    pcVar5 = pcVar4 + 1;\n    cVar1 = *pcVar4;\n    pcVar4 = pcVar5;\n  } while (cVar1 != '\\0');\n  uVar2 = ~uVar2;\n  pcVar4 = pcVar5 + -uVar2;\n  for (uVar3 = uVar2 >> 2; uVar3 != 0; uVar3 = uVar3 - 1) {\n    *(undefined4 *)param_1 = *(undefined4 *)pcVar4;\n    pcVar4 = pcVar4 + 4;\n    param_1 = param_1 + 4;\n  }\n  for (uVar2 = uVar2 & 3; uVar2 != 0; uVar2 = uVar2 - 1) {\n    *param_1 = *pcVar4;\n    pcVar4 = pcVar4 + 1;\n    param_1 = param_1 + 1;\n  }\n  return;\n}\n\n"
+    },
+    {
+      "entry": "0x0048dbe0",
+      "name": "FUN_0048dbe0",
+      "prototype": "undefined FUN_0048dbe0()",
+      "bodyRanges": ["0x0048dbe0-0x0048dda9"],
+      "basicBlocks": [
+        {
+          "start": "0x0048dbe0",
+          "end": "0x0048dc01",
+          "destinations": ["0x0043dc10|UNCONDITIONAL_CALL", "0x00460ba0|UNCONDITIONAL_CALL", "0x0048dc02|FALL_THROUGH"]
+        },
+        {
+          "start": "0x0048dc02",
+          "end": "0x0048dc29",
+          "destinations": ["0x0048dc02|CONDITIONAL_JUMP", "0x0048dc2a|FALL_THROUGH"]
+        },
+        {
+          "start": "0x0048dc2a",
+          "end": "0x0048dc7d",
+          "destinations": ["0x0043faa0|UNCONDITIONAL_CALL", "0x0043fbe0|UNCONDITIONAL_CALL", "0x0048d410|UNCONDITIONAL_CALL", "0x0048dc7e|FALL_THROUGH"]
+        },
+        {
+          "start": "0x0048dc7e",
+          "end": "0x0048dc8c",
+          "destinations": ["0x0048dc8d|FALL_THROUGH", "0x0048dce9|CONDITIONAL_JUMP"]
+        },
+        {
+          "start": "0x0048dc8d",
+          "end": "0x0048dc8f",
+          "destinations": ["0x0048dc90|FALL_THROUGH", "0x0048dce9|CONDITIONAL_JUMP"]
+        },
+        {
+          "start": "0x0048dc90",
+          "end": "0x0048dc9e",
+          "destinations": ["0x0048dc9f|FALL_THROUGH", "0x0048dce9|CONDITIONAL_JUMP"]
+        },
+        {
+          "start": "0x0048dc9f",
+          "end": "0x0048dca9",
+          "destinations": ["0x0048dcaa|FALL_THROUGH", "0x0048dce9|CONDITIONAL_JUMP"]
+        },
+        {
+          "start": "0x0048dcaa",
+          "end": "0x0048dcae",
+          "destinations": ["0x0048dcaf|FALL_THROUGH", "0x0048dce9|CONDITIONAL_JUMP"]
+        },
+        {
+          "start": "0x0048dcaf",
+          "end": "0x0048dcb9",
+          "destinations": ["0x0048dcba|FALL_THROUGH", "0x0048dce9|CONDITIONAL_JUMP"]
+        },
+        {
+          "start": "0x0048dcba",
+          "end": "0x0048dce8",
+          "destinations": ["0x00483c50|UNCONDITIONAL_CALL", "0x0048dce9|FALL_THROUGH"]
+        },
+        {
+          "start": "0x0048dce9",
+          "end": "0x0048dcf9",
+          "destinations": ["0x0048dc7e|CONDITIONAL_JUMP", "0x0048dcfa|FALL_THROUGH"]
+        },
+        {
+          "start": "0x0048dcfa",
+          "end": "0x0048dd08",
+          "destinations": ["0x0048dd09|FALL_THROUGH"]
+        },
+        {
+          "start": "0x0048dd09",
+          "end": "0x0048dd24",
+          "destinations": ["0x0048dd09|CONDITIONAL_JUMP", "0x0048dd25|FALL_THROUGH"]
+        },
+        {
+          "start": "0x0048dd25",
+          "end": "0x0048dd2b",
+          "destinations": ["0x0048dd2c|FALL_THROUGH"]
+        },
+        {
+          "start": "0x0048dd2c",
+          "end": "0x0048dd3f",
+          "destinations": ["0x0048dd40|FALL_THROUGH"]
+        },
+        {
+          "start": "0x0048dd40",
+          "end": "0x0048dd44",
+          "destinations": ["0x0048dd45|FALL_THROUGH", "0x0048dd58|CONDITIONAL_JUMP"]
+        },
+        {
+          "start": "0x0048dd45",
+          "end": "0x0048dd4e",
+          "destinations": ["0x0048dd4f|FALL_THROUGH", "0x0048dd58|CONDITIONAL_JUMP"]
+        },
+        {
+          "start": "0x0048dd4f",
+          "end": "0x0048dd57",
+          "destinations": ["0x0048dd58|FALL_THROUGH"]
+        },
+        {
+          "start": "0x0048dd58",
+          "end": "0x0048dd65",
+          "destinations": ["0x0048dd40|CONDITIONAL_JUMP", "0x0048dd66|FALL_THROUGH"]
+        },
+        {
+          "start": "0x0048dd66",
+          "end": "0x0048dd71",
+          "destinations": ["0x0048dd2c|CONDITIONAL_JUMP", "0x0048dd72|FALL_THROUGH"]
+        },
+        {
+          "start": "0x0048dd72",
+          "end": "0x0048dda9",
+          "destinations": []
+        }
+      ],
+      "instructions": [
+        {
+          "address": "0x0048dbe0",
+          "bytes": "53",
+          "flowType": "FALL_THROUGH",
+          "text": "PUSH EBX"
+        },
+        {
+          "address": "0x0048dbe1",
+          "bytes": "55",
+          "flowType": "FALL_THROUGH",
+          "text": "PUSH EBP"
+        },
+        {
+          "address": "0x0048dbe2",
+          "bytes": "56",
+          "flowType": "FALL_THROUGH",
+          "text": "PUSH ESI"
+        },
+        {
+          "address": "0x0048dbe3",
+          "bytes": "57",
+          "flowType": "FALL_THROUGH",
+          "text": "PUSH EDI"
+        },
+        {
+          "address": "0x0048dbe4",
+          "bytes": "b9 d8 5e 7c 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV ECX,0x7c5ed8"
+        },
+        {
+          "address": "0x0048dbe9",
+          "bytes": "e8 b2 2f fd ff",
+          "flowType": "UNCONDITIONAL_CALL",
+          "text": "CALL 0x00460ba0"
+        },
+        {
+          "address": "0x0048dbee",
+          "bytes": "b9 80 bd bc 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV ECX,0xbcbd80"
+        },
+        {
+          "address": "0x0048dbf3",
+          "bytes": "e8 18 00 fb ff",
+          "flowType": "UNCONDITIONAL_CALL",
+          "text": "CALL 0x0043dc10"
+        },
+        {
+          "address": "0x0048dbf8",
+          "bytes": "ba b0 cd c5 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV EDX,0xc5cdb0"
+        },
+        {
+          "address": "0x0048dbfd",
+          "bytes": "bb 08 00 00 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV EBX,0x8"
+        },
+        {
+          "address": "0x0048dc02",
+          "bytes": "bf 38 48 aa 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV EDI,0xaa4838"
+        },
+        {
+          "address": "0x0048dc07",
+          "bytes": "83 c9 ff",
+          "flowType": "FALL_THROUGH",
+          "text": "OR ECX,0xffffffff"
+        },
+        {
+          "address": "0x0048dc0a",
+          "bytes": "33 c0",
+          "flowType": "FALL_THROUGH",
+          "text": "XOR EAX,EAX"
+        },
+        {
+          "address": "0x0048dc0c",
+          "bytes": "f2 ae",
+          "flowType": "FALL_THROUGH",
+          "text": "SCASB.REPNE ES:EDI"
+        },
+        {
+          "address": "0x0048dc0e",
+          "bytes": "f7 d1",
+          "flowType": "FALL_THROUGH",
+          "text": "NOT ECX"
+        },
+        {
+          "address": "0x0048dc10",
+          "bytes": "2b f9",
+          "flowType": "FALL_THROUGH",
+          "text": "SUB EDI,ECX"
+        },
+        {
+          "address": "0x0048dc12",
+          "bytes": "8b c1",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV EAX,ECX"
+        },
+        {
+          "address": "0x0048dc14",
+          "bytes": "8b f7",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV ESI,EDI"
+        },
+        {
+          "address": "0x0048dc16",
+          "bytes": "8b fa",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV EDI,EDX"
+        },
+        {
+          "address": "0x0048dc18",
+          "bytes": "83 c2 0f",
+          "flowType": "FALL_THROUGH",
+          "text": "ADD EDX,0xf"
+        },
+        {
+          "address": "0x0048dc1b",
+          "bytes": "c1 e9 02",
+          "flowType": "FALL_THROUGH",
+          "text": "SHR ECX,0x2"
+        },
+        {
+          "address": "0x0048dc1e",
+          "bytes": "f3 a5",
+          "flowType": "FALL_THROUGH",
+          "text": "MOVSD.REP ES:EDI,ESI"
+        },
+        {
+          "address": "0x0048dc20",
+          "bytes": "8b c8",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV ECX,EAX"
+        },
+        {
+          "address": "0x0048dc22",
+          "bytes": "83 e1 03",
+          "flowType": "FALL_THROUGH",
+          "text": "AND ECX,0x3"
+        },
+        {
+          "address": "0x0048dc25",
+          "bytes": "4b",
+          "flowType": "FALL_THROUGH",
+          "text": "DEC EBX"
+        },
+        {
+          "address": "0x0048dc26",
+          "bytes": "f3 a4",
+          "flowType": "FALL_THROUGH",
+          "text": "MOVSB.REP ES:EDI,ESI"
+        },
+        {
+          "address": "0x0048dc28",
+          "bytes": "75 d8",
+          "flowType": "CONDITIONAL_JUMP",
+          "text": "JNZ 0x0048dc02"
+        },
+        {
+          "address": "0x0048dc2a",
+          "bytes": "b9 b8 4a 63 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV ECX,0x634ab8"
+        },
+        {
+          "address": "0x0048dc2f",
+          "bytes": "e8 ac 1f fb ff",
+          "flowType": "UNCONDITIONAL_CALL",
+          "text": "CALL 0x0043fbe0"
+        },
+        {
+          "address": "0x0048dc34",
+          "bytes": "50",
+          "flowType": "FALL_THROUGH",
+          "text": "PUSH EAX"
+        },
+        {
+          "address": "0x0048dc35",
+          "bytes": "b9 b8 4a 63 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV ECX,0x634ab8"
+        },
+        {
+          "address": "0x0048dc3a",
+          "bytes": "e8 61 1e fb ff",
+          "flowType": "UNCONDITIONAL_CALL",
+          "text": "CALL 0x0043faa0"
+        },
+        {
+          "address": "0x0048dc3f",
+          "bytes": "8b f8",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV EDI,EAX"
+        },
+        {
+          "address": "0x0048dc41",
+          "bytes": "83 c9 ff",
+          "flowType": "FALL_THROUGH",
+          "text": "OR ECX,0xffffffff"
+        },
+        {
+          "address": "0x0048dc44",
+          "bytes": "33 c0",
+          "flowType": "FALL_THROUGH",
+          "text": "XOR EAX,EAX"
+        },
+        {
+          "address": "0x0048dc46",
+          "bytes": "f2 ae",
+          "flowType": "FALL_THROUGH",
+          "text": "SCASB.REPNE ES:EDI"
+        },
+        {
+          "address": "0x0048dc48",
+          "bytes": "f7 d1",
+          "flowType": "FALL_THROUGH",
+          "text": "NOT ECX"
+        },
+        {
+          "address": "0x0048dc4a",
+          "bytes": "2b f9",
+          "flowType": "FALL_THROUGH",
+          "text": "SUB EDI,ECX"
+        },
+        {
+          "address": "0x0048dc4c",
+          "bytes": "66 a1 cc af 88 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV AX,[0x0088afcc]"
+        },
+        {
+          "address": "0x0048dc52",
+          "bytes": "8b d1",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV EDX,ECX"
+        },
+        {
+          "address": "0x0048dc54",
+          "bytes": "8b f7",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV ESI,EDI"
+        },
+        {
+          "address": "0x0048dc56",
+          "bytes": "bf b0 cd c5 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV EDI,0xc5cdb0"
+        },
+        {
+          "address": "0x0048dc5b",
+          "bytes": "50",
+          "flowType": "FALL_THROUGH",
+          "text": "PUSH EAX"
+        },
+        {
+          "address": "0x0048dc5c",
+          "bytes": "c1 e9 02",
+          "flowType": "FALL_THROUGH",
+          "text": "SHR ECX,0x2"
+        },
+        {
+          "address": "0x0048dc5f",
+          "bytes": "f3 a5",
+          "flowType": "FALL_THROUGH",
+          "text": "MOVSD.REP ES:EDI,ESI"
+        },
+        {
+          "address": "0x0048dc61",
+          "bytes": "8b ca",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV ECX,EDX"
+        },
+        {
+          "address": "0x0048dc63",
+          "bytes": "83 e1 03",
+          "flowType": "FALL_THROUGH",
+          "text": "AND ECX,0x3"
+        },
+        {
+          "address": "0x0048dc66",
+          "bytes": "f3 a4",
+          "flowType": "FALL_THROUGH",
+          "text": "MOVSB.REP ES:EDI,ESI"
+        },
+        {
+          "address": "0x0048dc68",
+          "bytes": "b9 68 f0 ab 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV ECX,0xabf068"
+        },
+        {
+          "address": "0x0048dc6d",
+          "bytes": "e8 9e f7 ff ff",
+          "flowType": "UNCONDITIONAL_CALL",
+          "text": "CALL 0x0048d410"
+        },
+        {
+          "address": "0x0048dc72",
+          "bytes": "33 ed",
+          "flowType": "FALL_THROUGH",
+          "text": "XOR EBP,EBP"
+        },
+        {
+          "address": "0x0048dc74",
+          "bytes": "bf fc 56 63 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV EDI,0x6356fc"
+        },
+        {
+          "address": "0x0048dc79",
+          "bytes": "be e4 06 ac 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV ESI,0xac06e4"
+        },
+        {
+          "address": "0x0048dc7e",
+          "bytes": "66 8b 96 c0 f9 ff ff",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV DX,word ptr [ESI + 0xfffff9c0]"
+        },
+        {
+          "address": "0x0048dc85",
+          "bytes": "0f bf c2",
+          "flowType": "FALL_THROUGH",
+          "text": "MOVSX EAX,DX"
+        },
+        {
+          "address": "0x0048dc88",
+          "bytes": "83 e8 00",
+          "flowType": "FALL_THROUGH",
+          "text": "SUB EAX,0x0"
+        },
+        {
+          "address": "0x0048dc8b",
+          "bytes": "74 5c",
+          "flowType": "CONDITIONAL_JUMP",
+          "text": "JZ 0x0048dce9"
+        },
+        {
+          "address": "0x0048dc8d",
+          "bytes": "48",
+          "flowType": "FALL_THROUGH",
+          "text": "DEC EAX"
+        },
+        {
+          "address": "0x0048dc8e",
+          "bytes": "74 59",
+          "flowType": "CONDITIONAL_JUMP",
+          "text": "JZ 0x0048dce9"
+        },
+        {
+          "address": "0x0048dc90",
+          "bytes": "66 8b 06",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV AX,word ptr [ESI]"
+        },
+        {
+          "address": "0x0048dc93",
+          "bytes": "66 8b 8e 40 06 00 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV CX,word ptr [ESI + 0x640]"
+        },
+        {
+          "address": "0x0048dc9a",
+          "bytes": "66 85 c0",
+          "flowType": "FALL_THROUGH",
+          "text": "TEST AX,AX"
+        },
+        {
+          "address": "0x0048dc9d",
+          "bytes": "7c 4a",
+          "flowType": "CONDITIONAL_JUMP",
+          "text": "JL 0x0048dce9"
+        },
+        {
+          "address": "0x0048dc9f",
+          "bytes": "0f bf d8",
+          "flowType": "FALL_THROUGH",
+          "text": "MOVSX EBX,AX"
+        },
+        {
+          "address": "0x0048dca2",
+          "bytes": "3b 1d 90 2d ac 00",
+          "flowType": "FALL_THROUGH",
+          "text": "CMP EBX,dword ptr [0x00ac2d90]"
+        },
+        {
+          "address": "0x0048dca8",
+          "bytes": "7d 3f",
+          "flowType": "CONDITIONAL_JUMP",
+          "text": "JGE 0x0048dce9"
+        },
+        {
+          "address": "0x0048dcaa",
+          "bytes": "66 85 c9",
+          "flowType": "FALL_THROUGH",
+          "text": "TEST CX,CX"
+        },
+        {
+          "address": "0x0048dcad",
+          "bytes": "7c 3a",
+          "flowType": "CONDITIONAL_JUMP",
+          "text": "JL 0x0048dce9"
+        },
+        {
+          "address": "0x0048dcaf",
+          "bytes": "0f bf d9",
+          "flowType": "FALL_THROUGH",
+          "text": "MOVSX EBX,CX"
+        },
+        {
+          "address": "0x0048dcb2",
+          "bytes": "3b 1d 94 2d ac 00",
+          "flowType": "FALL_THROUGH",
+          "text": "CMP EBX,dword ptr [0x00ac2d94]"
+        },
+        {
+          "address": "0x0048dcb8",
+          "bytes": "7d 2f",
+          "flowType": "CONDITIONAL_JUMP",
+          "text": "JGE 0x0048dce9"
+        },
+        {
+          "address": "0x0048dcba",
+          "bytes": "66 8b 9e 80 0c 00 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV BX,word ptr [ESI + 0xc80]"
+        },
+        {
+          "address": "0x0048dcc1",
+          "bytes": "53",
+          "flowType": "FALL_THROUGH",
+          "text": "PUSH EBX"
+        },
+        {
+          "address": "0x0048dcc2",
+          "bytes": "6a 64",
+          "flowType": "FALL_THROUGH",
+          "text": "PUSH 0x64"
+        },
+        {
+          "address": "0x0048dcc4",
+          "bytes": "6a 01",
+          "flowType": "FALL_THROUGH",
+          "text": "PUSH 0x1"
+        },
+        {
+          "address": "0x0048dcc6",
+          "bytes": "51",
+          "flowType": "FALL_THROUGH",
+          "text": "PUSH ECX"
+        },
+        {
+          "address": "0x0048dcc7",
+          "bytes": "50",
+          "flowType": "FALL_THROUGH",
+          "text": "PUSH EAX"
+        },
+        {
+          "address": "0x0048dcc8",
+          "bytes": "55",
+          "flowType": "FALL_THROUGH",
+          "text": "PUSH EBP"
+        },
+        {
+          "address": "0x0048dcc9",
+          "bytes": "52",
+          "flowType": "FALL_THROUGH",
+          "text": "PUSH EDX"
+        },
+        {
+          "address": "0x0048dcca",
+          "bytes": "e8 81 5f ff ff",
+          "flowType": "UNCONDITIONAL_CALL",
+          "text": "CALL 0x00483c50"
+        },
+        {
+          "address": "0x0048dccf",
+          "bytes": "66 8b 0e",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV CX,word ptr [ESI]"
+        },
+        {
+          "address": "0x0048dcd2",
+          "bytes": "66 8b 96 40 06 00 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV DX,word ptr [ESI + 0x640]"
+        },
+        {
+          "address": "0x0048dcd9",
+          "bytes": "66 c7 47 fe 01 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV word ptr [EDI + -0x2],0x1"
+        },
+        {
+          "address": "0x0048dcdf",
+          "bytes": "66 89 0f",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV word ptr [EDI],CX"
+        },
+        {
+          "address": "0x0048dce2",
+          "bytes": "83 c4 1c",
+          "flowType": "FALL_THROUGH",
+          "text": "ADD ESP,0x1c"
+        },
+        {
+          "address": "0x0048dce5",
+          "bytes": "66 89 57 02",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV word ptr [EDI + 0x2],DX"
+        },
+        {
+          "address": "0x0048dce9",
+          "bytes": "45",
+          "flowType": "FALL_THROUGH",
+          "text": "INC EBP"
+        },
+        {
+          "address": "0x0048dcea",
+          "bytes": "83 c6 02",
+          "flowType": "FALL_THROUGH",
+          "text": "ADD ESI,0x2"
+        },
+        {
+          "address": "0x0048dced",
+          "bytes": "81 c7 58 05 00 00",
+          "flowType": "FALL_THROUGH",
+          "text": "ADD EDI,0x558"
+        },
+        {
+          "address": "0x0048dcf3",
+          "bytes": "66 81 fd 20 03",
+          "flowType": "FALL_THROUGH",
+          "text": "CMP BP,0x320"
+        },
+        {
+          "address": "0x0048dcf8",
+          "bytes": "7c 84",
+          "flowType": "CONDITIONAL_JUMP",
+          "text": "JL 0x0048dc7e"
+        },
+        {
+          "address": "0x0048dcfa",
+          "bytes": "b9 80 c4 82 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV ECX,0x82c480"
+        },
+        {
+          "address": "0x0048dcff",
+          "bytes": "b8 34 00 ac 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV EAX,0xac0034"
+        },
+        {
+          "address": "0x0048dd04",
+          "bytes": "ba 08 00 00 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV EDX,0x8"
+        },
+        {
+          "address": "0x0048dd09",
+          "bytes": "8b f0",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV ESI,EAX"
+        },
+        {
+          "address": "0x0048dd0b",
+          "bytes": "8b f9",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV EDI,ECX"
+        },
+        {
+          "address": "0x0048dd0d",
+          "bytes": "83 c0 06",
+          "flowType": "FALL_THROUGH",
+          "text": "ADD EAX,0x6"
+        },
+        {
+          "address": "0x0048dd10",
+          "bytes": "81 c1 10 2c 00 00",
+          "flowType": "FALL_THROUGH",
+          "text": "ADD ECX,0x2c10"
+        },
+        {
+          "address": "0x0048dd16",
+          "bytes": "8b 1e",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV EBX,dword ptr [ESI]"
+        },
+        {
+          "address": "0x0048dd18",
+          "bytes": "4a",
+          "flowType": "FALL_THROUGH",
+          "text": "DEC EDX"
+        },
+        {
+          "address": "0x0048dd19",
+          "bytes": "89 1f",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV dword ptr [EDI],EBX"
+        },
+        {
+          "address": "0x0048dd1b",
+          "bytes": "66 8b 76 04",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV SI,word ptr [ESI + 0x4]"
+        },
+        {
+          "address": "0x0048dd1f",
+          "bytes": "66 89 77 04",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV word ptr [EDI + 0x4],SI"
+        },
+        {
+          "address": "0x0048dd23",
+          "bytes": "75 e4",
+          "flowType": "CONDITIONAL_JUMP",
+          "text": "JNZ 0x0048dd09"
+        },
+        {
+          "address": "0x0048dd25",
+          "bytes": "33 d2",
+          "flowType": "FALL_THROUGH",
+          "text": "XOR EDX,EDX"
+        },
+        {
+          "address": "0x0048dd27",
+          "bytes": "b8 83 c4 82 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV EAX,0x82c483"
+        },
+        {
+          "address": "0x0048dd2c",
+          "bytes": "33 c9",
+          "flowType": "FALL_THROUGH",
+          "text": "XOR ECX,ECX"
+        },
+        {
+          "address": "0x0048dd2e",
+          "bytes": "b3 01",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV BL,0x1"
+        },
+        {
+          "address": "0x0048dd30",
+          "bytes": "8a 48 fe",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV CL,byte ptr [EAX + -0x2]"
+        },
+        {
+          "address": "0x0048dd33",
+          "bytes": "33 f6",
+          "flowType": "FALL_THROUGH",
+          "text": "XOR ESI,ESI"
+        },
+        {
+          "address": "0x0048dd35",
+          "bytes": "d2 e3",
+          "flowType": "FALL_THROUGH",
+          "text": "SHL BL,CL"
+        },
+        {
+          "address": "0x0048dd37",
+          "bytes": "33 ff",
+          "flowType": "FALL_THROUGH",
+          "text": "XOR EDI,EDI"
+        },
+        {
+          "address": "0x0048dd39",
+          "bytes": "bd 85 c4 82 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV EBP,0x82c485"
+        },
+        {
+          "address": "0x0048dd3e",
+          "bytes": "88 18",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV byte ptr [EAX],BL"
+        },
+        {
+          "address": "0x0048dd40",
+          "bytes": "66 3b d6",
+          "flowType": "FALL_THROUGH",
+          "text": "CMP DX,SI"
+        },
+        {
+          "address": "0x0048dd43",
+          "bytes": "74 13",
+          "flowType": "CONDITIONAL_JUMP",
+          "text": "JZ 0x0048dd58"
+        },
+        {
+          "address": "0x0048dd45",
+          "bytes": "8a 48 02",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV CL,byte ptr [EAX + 0x2]"
+        },
+        {
+          "address": "0x0048dd48",
+          "bytes": "8a 5d 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV BL,byte ptr [EBP]"
+        },
+        {
+          "address": "0x0048dd4b",
+          "bytes": "3a cb",
+          "flowType": "FALL_THROUGH",
+          "text": "CMP CL,BL"
+        },
+        {
+          "address": "0x0048dd4d",
+          "bytes": "74 09",
+          "flowType": "CONDITIONAL_JUMP",
+          "text": "JZ 0x0048dd58"
+        },
+        {
+          "address": "0x0048dd4f",
+          "bytes": "b3 01",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV BL,0x1"
+        },
+        {
+          "address": "0x0048dd51",
+          "bytes": "8b cf",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV ECX,EDI"
+        },
+        {
+          "address": "0x0048dd53",
+          "bytes": "d2 e3",
+          "flowType": "FALL_THROUGH",
+          "text": "SHL BL,CL"
+        },
+        {
+          "address": "0x0048dd55",
+          "bytes": "08 58 01",
+          "flowType": "FALL_THROUGH",
+          "text": "OR byte ptr [EAX + 0x1],BL"
+        },
+        {
+          "address": "0x0048dd58",
+          "bytes": "46",
+          "flowType": "FALL_THROUGH",
+          "text": "INC ESI"
+        },
+        {
+          "address": "0x0048dd59",
+          "bytes": "47",
+          "flowType": "FALL_THROUGH",
+          "text": "INC EDI"
+        },
+        {
+          "address": "0x0048dd5a",
+          "bytes": "81 c5 10 2c 00 00",
+          "flowType": "FALL_THROUGH",
+          "text": "ADD EBP,0x2c10"
+        },
+        {
+          "address": "0x0048dd60",
+          "bytes": "66 83 fe 08",
+          "flowType": "FALL_THROUGH",
+          "text": "CMP SI,0x8"
+        },
+        {
+          "address": "0x0048dd64",
+          "bytes": "7c da",
+          "flowType": "CONDITIONAL_JUMP",
+          "text": "JL 0x0048dd40"
+        },
+        {
+          "address": "0x0048dd66",
+          "bytes": "42",
+          "flowType": "FALL_THROUGH",
+          "text": "INC EDX"
+        },
+        {
+          "address": "0x0048dd67",
+          "bytes": "05 10 2c 00 00",
+          "flowType": "FALL_THROUGH",
+          "text": "ADD EAX,0x2c10"
+        },
+        {
+          "address": "0x0048dd6c",
+          "bytes": "66 83 fa 08",
+          "flowType": "FALL_THROUGH",
+          "text": "CMP DX,0x8"
+        },
+        {
+          "address": "0x0048dd70",
+          "bytes": "7c ba",
+          "flowType": "CONDITIONAL_JUMP",
+          "text": "JL 0x0048dd2c"
+        },
+        {
+          "address": "0x0048dd72",
+          "bytes": "0f bf 05 44 cc bc 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOVSX EAX,word ptr [0x00bccc44]"
+        },
+        {
+          "address": "0x0048dd79",
+          "bytes": "c1 e0 03",
+          "flowType": "FALL_THROUGH",
+          "text": "SHL EAX,0x3"
+        },
+        {
+          "address": "0x0048dd7c",
+          "bytes": "5f",
+          "flowType": "FALL_THROUGH",
+          "text": "POP EDI"
+        },
+        {
+          "address": "0x0048dd7d",
+          "bytes": "5e",
+          "flowType": "FALL_THROUGH",
+          "text": "POP ESI"
+        },
+        {
+          "address": "0x0048dd7e",
+          "bytes": "8b 88 f4 ff ab 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV ECX,dword ptr [EAX + 0xabfff4]"
+        },
+        {
+          "address": "0x0048dd84",
+          "bytes": "5d",
+          "flowType": "FALL_THROUGH",
+          "text": "POP EBP"
+        },
+        {
+          "address": "0x0048dd85",
+          "bytes": "89 0d 88 2d ac 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV dword ptr [0x00ac2d88],ECX"
+        },
+        {
+          "address": "0x0048dd8b",
+          "bytes": "8b 80 f8 ff ab 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV EAX,dword ptr [EAX + 0xabfff8]"
+        },
+        {
+          "address": "0x0048dd91",
+          "bytes": "a3 8c 2d ac 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV [0x00ac2d8c],EAX"
+        },
+        {
+          "address": "0x0048dd96",
+          "bytes": "66 a3 82 26 84 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV [0x00842682],AX"
+        },
+        {
+          "address": "0x0048dd9c",
+          "bytes": "66 89 0d 80 26 84 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV word ptr [0x00842680],CX"
+        },
+        {
+          "address": "0x0048dda3",
+          "bytes": "b8 01 00 00 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV EAX,0x1"
+        },
+        {
+          "address": "0x0048dda8",
+          "bytes": "5b",
+          "flowType": "FALL_THROUGH",
+          "text": "POP EBX"
+        },
+        {
+          "address": "0x0048dda9",
+          "bytes": "c3",
+          "flowType": "TERMINATOR",
+          "text": "RET"
+        }
+      ],
+      "decompilation": "\n/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */\n\nundefined4 FUN_0048dbe0(void)\n\n{\n  char cVar1;\n  short sVar2;\n  undefined2 uVar3;\n  undefined4 uVar4;\n  char *pcVar5;\n  int iVar6;\n  undefined4 *puVar7;\n  uint uVar8;\n  uint uVar9;\n  undefined4 *puVar10;\n  short sVar11;\n  int iVar12;\n  char *pcVar13;\n  short sVar14;\n  short *psVar15;\n  byte bVar16;\n  char *pcVar17;\n  short *psVar18;\n  \n  FUN_00460ba0();\n  FUN_0043dc10();\n  iVar12 = 8;\n  pcVar5 = (char *)&DAT_00c5cdb0;\n  do {\n    uVar8 = 0xffffffff;\n    pcVar13 = &DAT_00aa4838;\n    do {\n      pcVar17 = pcVar13;\n      if (uVar8 == 0) break;\n      uVar8 = uVar8 - 1;\n      pcVar17 = pcVar13 + 1;\n      cVar1 = *pcVar13;\n      pcVar13 = pcVar17;\n    } while (cVar1 != '\\0');\n    uVar8 = ~uVar8;\n    pcVar13 = pcVar17 + -uVar8;\n    pcVar17 = pcVar5;\n    for (uVar9 = uVar8 >> 2; uVar9 != 0; uVar9 = uVar9 - 1) {\n      *(undefined4 *)pcVar17 = *(undefined4 *)pcVar13;\n      pcVar13 = pcVar13 + 4;\n      pcVar17 = pcVar17 + 4;\n    }\n    iVar12 = iVar12 + -1;\n    for (uVar8 = uVar8 & 3; uVar8 != 0; uVar8 = uVar8 - 1) {\n      *pcVar17 = *pcVar13;\n      pcVar13 = pcVar13 + 1;\n      pcVar17 = pcVar17 + 1;\n    }\n    pcVar5 = pcVar5 + 0xf;\n  } while (iVar12 != 0);\n  uVar4 = FUN_0043fbe0();\n  pcVar5 = (char *)FUN_0043faa0(uVar4);\n  uVar3 = DAT_0088afcc;\n  uVar8 = 0xffffffff;\n  do {\n    pcVar13 = pcVar5;\n    if (uVar8 == 0) break;\n    uVar8 = uVar8 - 1;\n    pcVar13 = pcVar5 + 1;\n    cVar1 = *pcVar5;\n    pcVar5 = pcVar13;\n  } while (cVar1 != '\\0');\n  uVar8 = ~uVar8;\n  pcVar5 = pcVar13 + -uVar8;\n  pcVar13 = (char *)&DAT_00c5cdb0;\n  for (uVar9 = uVar8 >> 2; uVar9 != 0; uVar9 = uVar9 - 1) {\n    *(undefined4 *)pcVar13 = *(undefined4 *)pcVar5;\n    pcVar5 = pcVar5 + 4;\n    pcVar13 = pcVar13 + 4;\n  }\n  for (uVar8 = uVar8 & 3; uVar8 != 0; uVar8 = uVar8 - 1) {\n    *pcVar13 = *pcVar5;\n    pcVar5 = pcVar5 + 1;\n    pcVar13 = pcVar13 + 1;\n  }\n  FUN_0048d410(uVar3);\n  iVar12 = 0;\n  psVar18 = &DAT_006356fc;\n  psVar15 = &DAT_00ac06e4;\n  do {\n    sVar11 = psVar15[-800];\n    if ((sVar11 != 0) && (iVar6 = sVar11 + -1, iVar6 != 0)) {\n      sVar14 = *psVar15;\n      sVar2 = psVar15[800];\n      if ((-1 < sVar14) && (((sVar14 < DAT_00ac2d90 && (-1 < sVar2)) && (sVar2 < DAT_00ac2d94)))) {\n        FUN_00483c50(sVar11,iVar12,CONCAT22((short)((uint)iVar6 >> 0x10),sVar14),sVar2,1,100,\n                     CONCAT22(sVar2 >> 0xf,psVar15[0x640]));\n        sVar11 = *psVar15;\n        sVar14 = psVar15[800];\n        psVar18[-1] = 1;\n        *psVar18 = sVar11;\n        psVar18[1] = sVar14;\n      }\n    }\n    iVar12 = iVar12 + 1;\n    psVar15 = psVar15 + 1;\n    psVar18 = psVar18 + 0x2ac;\n  } while ((short)iVar12 < 800);\n  iVar12 = 8;\n  puVar7 = &DAT_00ac0034;\n  puVar10 = (undefined4 *)&DAT_0082c480;\n  do {\n    iVar12 = iVar12 + -1;\n    *puVar10 = *puVar7;\n    *(undefined2 *)(puVar10 + 1) = *(undefined2 *)(puVar7 + 1);\n    puVar7 = (undefined4 *)((int)puVar7 + 6);\n    puVar10 = puVar10 + 0xb04;\n  } while (iVar12 != 0);\n  sVar11 = 0;\n  pcVar5 = &DAT_0082c483;\n  do {\n    sVar14 = 0;\n    bVar16 = 0;\n    pcVar13 = &DAT_0082c485;\n    *pcVar5 = '\\x01' << (pcVar5[-2] & 0x1fU);\n    do {\n      if ((sVar11 != sVar14) && (pcVar5[2] != *pcVar13)) {\n        pcVar5[1] = pcVar5[1] | '\\x01' << (bVar16 & 0x1f);\n      }\n      sVar14 = sVar14 + 1;\n      bVar16 = bVar16 + 1;\n      pcVar13 = pcVar13 + 0x2c10;\n    } while (sVar14 < 8);\n    sVar11 = sVar11 + 1;\n    pcVar5 = pcVar5 + 0x2c10;\n  } while (sVar11 < 8);\n  _DAT_00ac2d88 = *(undefined4 *)(&DAT_00abfff4 + DAT_00bccc44 * 4);\n  _DAT_00ac2d8c = (&DAT_00abfff8)[DAT_00bccc44 * 2];\n  DAT_00842682 = (short)(&DAT_00abfff8)[DAT_00bccc44 * 2];\n  DAT_00842680 = (short)*(undefined4 *)(&DAT_00abfff4 + DAT_00bccc44 * 4);\n  return 1;\n}\n\n"
     },
     {
       "entry": "0x0048ddb0",

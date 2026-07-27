@@ -12,9 +12,11 @@ For a K01 result already committed as raw state 0x18 or 0x1a, what exact shared 
   exact mapping이 없으므로 integration gate를 닫았다.
 
 이 문서는 [K01 미션 결과 latch·timer·commit 수명주기](k01-mission-result-lifecycle.md)가
-확정한 `0x004481d0`의 commit 이후부터 시작한다. win/loss timer producer·zero reset,
+확정한 `0x004481d0`의 commit 이후부터 시작한다. win/loss timer latch/fallback producer,
 `0x0048df40/0x0048dfc0`, 봉화대/minimap 일반 수명주기, `FUN_00480180`과 `FUN_00480300`
 내부는 범위 밖이다.
+표준 mission-entry zero reset은
+[K01 표준 미션 진입 timer reset](k01-mission-timer-reset.md)에서 별도 확정했다.
 
 ## 원본과 canonical 재현
 
@@ -34,15 +36,16 @@ EXE·네 자원 hash, SPR header, 9개 함수의 range/hash/CFG, 47개 direct ca
 10개 byte anchor, import/data reference, 두 main-loop jump table, raw phase table을 함께 검증한다.
 stale source, seed/label/function/call/jump-table/asset/EXE 변조는 오류로 중단한다.
 
-seed 7개를 추가해 깨끗한 임시 Ghidra 프로젝트로 두 번 전체 생성했으며 두 실행의 해시가 같았다.
+presentation seed 7개와 후속 mission-entry timer-reset semantic site 4개를 포함한 현재
+canonical 분석을 깨끗한 임시 Ghidra 프로젝트로 두 번 전체 생성했으며 두 실행의 해시가 같았다.
 
 | 산출물 | SHA-256 |
 | --- | --- |
-| `SHA256SUMS` | `ca8a63a51a444e58336378f777d46ee2ceec8a26dfb66aeab1e756632aae1dd0` |
-| `manifest.json` | `43edd3f75005de5b7d77e7b611d1d6cfa8227bf637e5bf100d40198ee2e94093` |
-| `seeds.json` | `513720fbb8bf9ffa70bad477c47bef6e3db36a29c1d568c2c931d4afc9448824` |
+| `SHA256SUMS` | `b74f06eca72e5d22695a907bd20b9f4dd459ead0d7224b0f05dbfbed9540bb3d` |
+| `manifest.json` | `f5f2d972d9447ecf052ce71359f02874bc081c63c19ff1fa5783f2fd62ed48dd` |
+| `seeds.json` | `eb559198f7c9082ff9402d185a679f73b4f723208a977796f0ca9340490c2b1e` |
 
-canonical count는 seed 주소 145개, 포함 함수 144개다.
+현재 canonical count는 seed 주소 149개, 포함 함수 148개다.
 
 ## 함수와 데이터
 
@@ -234,13 +237,12 @@ route보다 우선하며 역시 `0x0a`를 덮는다. 따라서 `0x0a`는 이 범
 
 ## 남은 불확실성과 다음 질문
 
-- `0x0084373c/0x00843740` zero-reset lifecycle; `0x0048df40/0x0048dfc0`은 reset이 아닌
-  fallback producer 후보이므로 별도 단위
+- 표준 main state 1의 `0x0084373c/0x00843740` zero reset은 별도 문서에서 확정했다.
+  다른 reset topology와 reset이 아닌 `0x0048df40/0x0048dfc0` fallback producer는 별도 단위다.
 - `FUN_00480180`, `FUN_00480300` 내부와 후자의 raw 반환 생산 의미
 - `FUN_004407d0`, `FUN_00440860`의 opaque 내부 상태와 사람이 보는 transition 의미
 - raw phase pair와 28개 SPR frame의 exact correlation
 - final call 이후 `0x140/0x64/0x10/0x20/raw WORD` 각 destination의 독립 lifecycle
 - original clock/result/asset identity를 generic 프로젝트에 옮기는 opt-in mapping
 
-다음 좁은 질문은 이 presentation 경로에 섞지 않고, K01 win/loss timer의 mission 진입·zero-reset
-producer를 별도 정적 분석하는 것이다.
+다음 좁은 질문은 K01 native 증원 class와 프로젝트 identity/map 좌표의 exact mapping이다.

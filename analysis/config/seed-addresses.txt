@@ -106,6 +106,7 @@
 0x0045bf40 defense-stat-selector
 0x0045bf50 entity-type-definition-initializer
 0x0045f9c0 main-message-loop-candidate
+0x00460baf mission-session-zero-fill
 0x00461570 raw-coordinate-state-writer-candidate
 0x004648d0 raw-byte-state-writer-candidate
 0x00482180 script-load-candidate
@@ -133,6 +134,9 @@
 0x0048a812 k01-hero-loss-condition-site
 0x004885e0 k01-owner-class-reference-lookup
 0x0048d6f0 mission-result-gate-candidate
+0x0048d42b k01-stage-map-dispatch
+0x0048d744 k01-stage-map-source-copy
+0x0048dbe4 mission-entry-reset-base
 0x0048dde0 mission-result-consumer-candidate
 0x004481d0 raw-global-tick-result-dispatch-wrapper
 0x00488080 active-list-raw-presence-check

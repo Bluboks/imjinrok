@@ -41,6 +41,9 @@ commit된 state `0x18/0x1a` 뒤에는 shared teardown, 원본 win/loss SPR·YAV 
 unsigned DWORD 50/2000 strict poll, `0x8c→0x96→0x1c` relay와 external/stage final route가
 이어진다. exact-one gate, cleanup과 transient state overwrite·stage WORD wrap까지 정적
 복원·재현했다.
+표준 main state 1 mission entry에서는 stage 1 K01 map source를 선택하기 전에 broad
+`REP STOSD`가 `[0x007c5ed8,0x00843980)`을 0으로 채워 win/loss timer를 초기화하는 순서도
+정적 복원·재현했다.
 다만 원본 class 12·13·14·82와 현재 scenario identity가 정확히 일치하지 않아 runtime에는
 연결하지 않았다. raw clock→24 Hz와 result transition/identity policy mapping도 없어 승패
 수명주기는 runtime에 연결하지 않았다.
@@ -65,7 +68,7 @@ K02는 이 단기 MVP의 완료 조건이 아니다. 기존 K02 프로토타입�
 | 원본 PE·주소 변환 | 고정 Ghidra 파이프라인 존재 | 일반 참조·점프 테이블 포함 | 2회 생성 해시 일치 | 정적 분석 1단계 완료 |
 | 스크립트·맵·SPR·YAV 파서 | 도구 존재 | 원본 파일 기반 | 파서별 편차 있음 | 재감사 후 유지 |
 | 엔티티 정체·자원 | 고유 연결 표시 이름 반영, 봉화대·K01 영웅 자원 수정 | 클래스 1~95 명칭·슬롯·기본 프레임·flags·경로 전수 확정 | 연속성·대표 타입·공유 경로·입력 해시 테스트 | 타입 정체 정적 확정, 행동·수치 의미는 별도 |
-| K01 캠페인 | 처음부터 결과까지 프로토타입 존재 | 봉화대→K0120, latch→timer→commit, result presentation→final route 범위 확정 | native effect·timer·unsigned presentation·relay·route 경계 재현 | 단기 팬 리마스터 MVP, timer reset·raw clock·asset/identity/result policy mapping 미완료 |
+| K01 캠페인 | 처음부터 결과까지 프로토타입 존재 | 표준 entry timer reset, 봉화대→K0120, latch→timer→commit, result presentation→final route 범위 확정 | reset 범위·순서, native effect·timer·unsigned presentation·relay·route 경계 재현 | 단기 팬 리마스터 MVP, raw clock·asset/identity/result policy mapping 미완료 |
 | K02 캠페인 | 프로토타입 존재 | 제한적 | 원본 재현 없음 | K01 이후로 연기 |
 | 전투 | 프로토타입, 유성룡 좌표 accepted subset `0..32767` 독립 계산 부분 이식 | K01 영웅 phase·피해·대상·사거리·투사체와 signed-health 사망·slot/reference 수명주기 확정 | 대상·투사체·scheduler 및 사망 phase·delay·stale reference 경계 재현 | 독립 단위 부분 이식; identity/좌표/24 Hz exact mapping과 opt-in 사망 정책 대기 |
 | 이동·경로 탐색 | 구현 존재 | 후보 함수 존재 | 원본 재현 없음 | 미검증 |
@@ -102,12 +105,11 @@ K02는 이 단기 MVP의 완료 조건이 아니다. 기존 K02 프로토타입�
 
 ## 현재 최우선 작업
 
-1. K01 win/loss timer의 mission 진입·zero-reset producer를 독립 정적 분석
-2. K01 봉화대 native 증원 class를 프로젝트 identity·map 좌표에 exact mapping
-3. 원본 raw clock/entity-update 단위와 24 Hz·identity의 exact opt-in integration policy를 별도 설계
-4. K01 HUD, 선택 패널, 목표·진행 표시와 미션 대화 전체 레이아웃을 정적으로 복원
-5. K01에 등장하는 나머지 건물·유닛의 정체·상태·방향 매핑을 독립 복원
-6. 브리핑부터 승패 결과까지 K01 종단 적합성 시나리오를 통과
+1. K01 봉화대 native 증원 class를 프로젝트 identity·map 좌표에 exact mapping
+2. 원본 raw clock/entity-update 단위와 24 Hz·identity의 exact opt-in integration policy를 별도 설계
+3. K01 HUD, 선택 패널, 목표·진행 표시와 미션 대화 전체 레이아웃을 정적으로 복원
+4. K01에 등장하는 나머지 건물·유닛의 정체·상태·방향 매핑을 독립 복원
+5. 브리핑부터 승패 결과까지 K01 종단 적합성 시나리오를 통과
 
 사용자가 설명한 “완성 봉화가 하나라도 있으면 미니맵 enable, 마지막 봉화 제거 시 disable”은
 별도 `user-reported/unverified` 정적 분석 후속 질문이다. 현재 K01 raw effect나 원본 확정

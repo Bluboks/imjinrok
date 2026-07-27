@@ -81,6 +81,7 @@
 | `0x0045bd00` | `FUN_0045bd00`, `0x0045bd00-0x0045bef8` | 1 / 103 | stride `0x14c` 타입 정의 레코드 writer | slot·base frame·이름 필드 정적 확정 |
 | `0x0045bf50` | `FUN_0045bf50`, `0x0045bf50-0x0045efb9` | 1 / 5,100 | 전체 엔티티 타입 정의 초기화 | class 1~95 슬롯·기본 프레임·flags·이름 포인터 정적 확정 |
 | `0x0045f9c0` | `FUN_0045f9c0`, `0x0045f9c0-0x004607ac` | 209 / 801 | main Windows message loop와 state switch | scheduler와 result `0x18..0x1d`, `0x8c/0x96` relay·final route 범위 정적 확정 |
+| `0x00460ba0` | `FUN_00460ba0`, `0x00460ba0-0x00460e20` | 17 / 144 | ECX base에서 `0x1f6aa` DWORD zero fill 후 후속 raw 초기화 | 표준 mission entry의 `[0x007c5ed8,0x00843980)` prefix 범위 정적 확정 |
 | `0x00461570` | `FUN_00461570`, `0x00461570-0x00461590` | 1 / 6 | raw enable·좌표 DWORD writer | K01 call의 `0x00843674/78/7c = 1/55/53` 정적 확정; consumer 의미 미확정 |
 | `0x004648d0` | `FUN_004648d0`, `0x004648d0-0x004648d9` | 1 / 3 | stack BYTE→`ECX+2` writer | K01 call의 `BYTE 0x00abfff2=1` 정적 확정; consumer 의미 미확정 |
 | `0x00482180` | `FUN_00482180`, `0x00482180-0x004822f4` | 16 / 114 | `0/1` 반환 script loader 계약 정적 확정 | 반환값의 내부 의미·오류 원인은 미확정 |
@@ -100,7 +101,10 @@
 | `0x004885e0` | `FUN_004885e0`, `0x004885e0-0x0048866f` | 7 / 53 | owner/class 목록의 positive-record full reference 선택 | K01 76·78 alive-check 연결 정적 확정 |
 | `0x0048a731` | `FUN_0048a5c0`, `0x0048a5c0-0x0048a878` | 32 / 181 | K01 raw-relation/flag gate→봉화대 scan→K0120/native effect→post-state 반환 | 같은 scan 복수 match·loader 0/1 무검사·void start·ignored descriptor-helper failure 포함 범위 정적 확정 |
 | `0x0048a812` | `FUN_0048a5c0`, `0x0048a5c0-0x0048a878` | 32 / 181 | K01 general→beacon→class 76/78 loss latch와 direct AX 1 | zero sentinel·first-write order와 K01 win-timer direct write 부재 정적 확정 |
+| `0x0048d410` | `FUN_0048d410`, `0x0048d410-0x0048d594` | 31 / 110 | signed stage map-source dispatcher | stage 1→`0x0048d740` K01 source copy 범위 정적 확정 |
 | `0x0048d6f0` | `FUN_0048d6f0`, `0x0048d6f0-0x0048d73a` | 7 / 31 | win-first 공통 미션 timer resolver | zero sentinel, DWORD wrap·signed abs overflow, strict `>0x7d0` 정적 확정 |
+| `0x0048d740` | `FUN_0048d740`, `0x0048d740-0x0048d768` | 1 / 20 | `stagemap\k01.map` NUL-terminated source copy | stage 1 destination copy 범위 정적 확정 |
+| `0x0048dbe0` | `FUN_0048dbe0`, `0x0048dbe0-0x0048dda9` | 21 / 147 | broad mission initializer와 stage map dispatch 연결 | `0x007c5ed8` zero-fill 선행 순서 정적 확정 |
 | `0x0048dde0` | `FUN_0048ddb0`, `0x0048ddb0-0x0048deca` | 36 / 105 | 세 WORD pre-gate→timer→signed stage dispatcher | timer result flag writer와 stage 1 K01 순서 정적 확정 |
 | `0x00493290` | `FUN_00493290`, `0x00493290-0x0049329e` | 1 / 5 | selector 1 presentation initializer wrapper | state `0x18`, AX 1 반환 정적 확정 |
 | `0x004932a0` | `FUN_004932a0`, `0x004932a0-0x004932b4` | 1 / 9 | selector 1 presentation poll wrapper | common EAX exact 1→WORD `0x1c`, 그 외 0 정적 확정 |
