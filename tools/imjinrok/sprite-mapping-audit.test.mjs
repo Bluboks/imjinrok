@@ -44,20 +44,20 @@ test("sprite mapping audit is deterministic and current", (t) => {
 
 test("frame mappings stay quarantined outside statically proven scopes while identities are cataloged", () => {
   assert.deepEqual(report.summary, {
-    visualCount: 18,
-    unitVisualCount: 9,
+    visualCount: 21,
+    unitVisualCount: 12,
     buildingVisualCount: 9,
-    stateMappingCount: 62,
-    clipCount: 382,
-    frameReferenceCount: 2_616,
+    stateMappingCount: 65,
+    clipCount: 385,
+    frameReferenceCount: 2_619,
     missingFrameReferenceCount: 0,
     unverifiedVisualCount: 2,
-    mixedVisualCount: 14,
+    mixedVisualCount: 17,
     scopedStaticProvenVisualCount: 2,
-    staticIdentityVisualCount: 16,
+    staticIdentityVisualCount: 19,
     ambiguousIdentityVisualCount: 1,
     unboundIdentityVisualCount: 1,
-    projectBindingCount: 17,
+    projectBindingCount: 20,
     projectBindingConflictCount: 0,
     portraitCueCount: 17,
     unverifiedPortraitCueCount: 0,
@@ -103,6 +103,54 @@ test("frame mappings stay quarantined outside statically proven scopes while ide
           finding.code === "mirrored-facing-unverified"),
     ).length,
     4,
+  );
+  assert.deepEqual(
+    [
+      ["japanese-samurai", 13, "일본 사무라이", 0],
+      ["japanese-turtle-tank", 14, "일본 귀갑차", 0],
+      ["japanese-konishi", 82, "일본 고니시", 0],
+    ].map(([visualId, internalClass, originalGameplayName, baseFrame]) => {
+      const visual = report.visuals.find(
+        (candidate) => candidate.visualId === visualId,
+      );
+      return {
+        visualId,
+        internalClass: visual?.staticEvidence.internalClass,
+        originalGameplayName:
+          visual?.staticEvidence.originalGameplayName,
+        baseFrame: visual?.staticEvidence.baseFrame,
+        animationStateMapping:
+          visual?.staticEvidence.animationStateMapping,
+        mapping: visual?.mappings,
+      };
+    }),
+    [
+      ["japanese-samurai", 13, "일본 사무라이", "horseswordj1_0000.png"],
+      ["japanese-turtle-tank", 14, "일본 귀갑차", "ghosttankj_0000.png"],
+      ["japanese-konishi", 82, "일본 고니시", "generalj11_0000.png"],
+    ].map(([visualId, internalClass, originalGameplayName, frameFile]) => ({
+      visualId,
+      internalClass,
+      originalGameplayName,
+      baseFrame: 0,
+      animationStateMapping: "unverified",
+      mapping: [
+        {
+          scope: "base",
+          state: "default",
+          declaredFacings: [],
+          clips: [
+            {
+              facing: "default",
+              frameFiles: [frameFile],
+              frameIndexes: [0],
+              mirrorX: false,
+              missingFrames: [],
+            },
+          ],
+        },
+      ],
+    })),
   );
   const japaneseSpearman = report.visuals.find(
     (visual) => visual.visualId === "japanese-swordsman",

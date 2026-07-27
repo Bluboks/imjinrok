@@ -264,6 +264,49 @@ const sourceFiveFacingStillClips = (
   return clips;
 };
 
+interface SourceIdentityStillVisualOptions {
+  id: string;
+  assetPath: string;
+  visualId: string;
+  stem: string;
+  size: { w: number; h: number };
+  pivot: { x: number; y: number };
+}
+
+// Identity/source-only visual: frame 0 is the statically proven type base frame.
+// State meaning, animation, direction, render scale, and pivot remain project adaptations.
+const sourceIdentityStillEntityVisual = ({
+  id,
+  assetPath,
+  visualId,
+  stem,
+  size,
+  pivot,
+}: SourceIdentityStillVisualOptions): EntityVisual => ({
+  id,
+  kind: "entity",
+  assetPath,
+  render: {
+    srcPxPerWu: 32,
+    filtering: "nearest",
+  },
+  defaults: {
+    size,
+    pivot: { anchor: pivot },
+  },
+  states: {
+    default: {
+      clips: {
+        default: {
+          frames: [entityFrame(visualId, stem, 0)],
+          fps: 1,
+          loop: true,
+        },
+      },
+    },
+  },
+});
+
 const buildingConstructionClip = (
   visualId: string,
   stem: string,
@@ -568,6 +611,36 @@ export const japaneseGunnerEntityVisual = {
     },
   },
 } as const satisfies EntityVisual;
+
+export const japaneseSamuraiEntityVisual =
+  sourceIdentityStillEntityVisual({
+    id: "japanese-samurai",
+    assetPath: "entities/japanese-samurai",
+    visualId: "japanese_samurai",
+    stem: "horseswordj1",
+    size: { w: 80, h: 80 },
+    pivot: { x: 40, y: 72 },
+  });
+
+export const japaneseTurtleTankEntityVisual =
+  sourceIdentityStillEntityVisual({
+    id: "japanese-turtle-tank",
+    assetPath: "entities/japanese-turtle-tank",
+    visualId: "japanese_turtle_tank",
+    stem: "ghosttankj",
+    size: { w: 70, h: 60 },
+    pivot: { x: 35, y: 52 },
+  });
+
+export const japaneseKonishiEntityVisual =
+  sourceIdentityStillEntityVisual({
+    id: "japanese-konishi",
+    assetPath: "entities/japanese-konishi",
+    visualId: "japanese_konishi",
+    stem: "generalj11",
+    size: { w: 140, h: 108 },
+    pivot: { x: 70, y: 100 },
+  });
 
 export const generalK4EntityVisual = {
   id: "korean-general-k4",
@@ -964,6 +1037,9 @@ export const defaultTheme = {
     "japanese-swordsman": japaneseSwordsmanEntityVisual,
     "korean-archer": archerEntityVisual,
     "japanese-gunner": japaneseGunnerEntityVisual,
+    "japanese-samurai": japaneseSamuraiEntityVisual,
+    "japanese-turtle-tank": japaneseTurtleTankEntityVisual,
+    "japanese-konishi": japaneseKonishiEntityVisual,
     "korean-general-k4": generalK4EntityVisual,
     "korean-gwon-yul": gwonYulEntityVisual,
     "korean-ryu-seong-ryong": ryuSeongRyongEntityVisual,
@@ -987,6 +1063,9 @@ export const defaultTheme = {
     archer: "korean-archer",
     "japanese-swordsman": "japanese-swordsman",
     "japanese-gunner": "japanese-gunner",
+    "japanese-samurai": "japanese-samurai",
+    "japanese-turtle-tank": "japanese-turtle-tank",
+    "japanese-konishi": "japanese-konishi",
     "ryu-seong-ryong": "korean-ryu-seong-ryong",
     "gwon-yul": "korean-gwon-yul",
     "town-center": "korean-hq",

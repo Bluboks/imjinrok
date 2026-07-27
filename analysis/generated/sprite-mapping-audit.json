@@ -8,7 +8,7 @@
   "sourceFiles": [
     {
       "path": "packages/shared/src/themes.ts",
-      "sha256": "e3899949c210c6b5c9b2e75cce01facd884a33d24cd67ae8436412970aa67d3e"
+      "sha256": "d0d64cb26cb741ffe4840033fd5741d05467274a03347dc443dacc9e1529d793"
     },
     {
       "path": "packages/shared/src/visuals.ts",
@@ -16,11 +16,11 @@
     },
     {
       "path": "packages/shared/src/content.ts",
-      "sha256": "9748650dccd49232fae16b06b13e3acc1540f81dc5bad48134a884c8bd5fc5bb"
+      "sha256": "e89d4317b5f452d06b91c8115f52c82e40763e3b8621c463e3f7cfaceb10c507"
     },
     {
       "path": "packages/shared/src/scenarios.ts",
-      "sha256": "fd9b415042984aa47530c6079a59a94291ae0d6cbe879ac9770bcc258b4db58b"
+      "sha256": "43371ee28e3bbf787ad14dfc46280cf7dce76ca89d3c669a25776e23bf9b6d35"
     },
     {
       "path": "apps/game-client/src/scenes/SkirmishScene.ts",
@@ -60,7 +60,7 @@
     },
     {
       "path": "tools/imjinrok/audit-sprite-mappings.mjs",
-      "sha256": "a423f819aedff1ed5d82085686c153ffd64fd9affe8d59126ac1a08aae904827"
+      "sha256": "c737ac8763ea61bbdacc15e7634cdbd11ee08780db16b68faa0a226d4a5387a3"
     },
     {
       "path": "apps/game-client/public/assets/themes/default/ui/mission-portraits/hero.manifest.json",
@@ -68,20 +68,20 @@
     }
   ],
   "summary": {
-    "visualCount": 18,
-    "unitVisualCount": 9,
+    "visualCount": 21,
+    "unitVisualCount": 12,
     "buildingVisualCount": 9,
-    "stateMappingCount": 62,
-    "clipCount": 382,
-    "frameReferenceCount": 2616,
+    "stateMappingCount": 65,
+    "clipCount": 385,
+    "frameReferenceCount": 2619,
     "missingFrameReferenceCount": 0,
     "unverifiedVisualCount": 2,
-    "mixedVisualCount": 14,
+    "mixedVisualCount": 17,
     "scopedStaticProvenVisualCount": 2,
-    "staticIdentityVisualCount": 16,
+    "staticIdentityVisualCount": 19,
     "ambiguousIdentityVisualCount": 1,
     "unboundIdentityVisualCount": 1,
-    "projectBindingCount": 17,
+    "projectBindingCount": 20,
     "projectBindingConflictCount": 0,
     "portraitCueCount": 17,
     "unverifiedPortraitCueCount": 0,
@@ -92,6 +92,22 @@
       "visualId": "japanese-camp-advanced-tower",
       "category": "building",
       "assetPath": "entities/japanese-camp-advanced-tower",
+      "render": {
+        "srcPxPerWu": 32,
+        "filtering": "nearest"
+      },
+      "defaults": {
+        "size": {
+          "w": 75,
+          "h": 98
+        },
+        "pivot": {
+          "anchor": {
+            "x": 38,
+            "y": 74
+          }
+        }
+      },
       "evidenceStatus": "unverified",
       "staticEvidence": {
         "status": "unverified",
@@ -183,6 +199,22 @@
       "visualId": "japanese-camp-barracks",
       "category": "building",
       "assetPath": "entities/japanese-camp-barracks",
+      "render": {
+        "srcPxPerWu": 32,
+        "filtering": "nearest"
+      },
+      "defaults": {
+        "size": {
+          "w": 125,
+          "h": 110
+        },
+        "pivot": {
+          "anchor": {
+            "x": 63,
+            "y": 86
+          }
+        }
+      },
       "evidenceStatus": "mixed",
       "staticEvidence": {
         "status": "mixed",
@@ -293,6 +325,22 @@
       "visualId": "japanese-camp-firehouse",
       "category": "building",
       "assetPath": "entities/japanese-camp-firehouse",
+      "render": {
+        "srcPxPerWu": 32,
+        "filtering": "nearest"
+      },
+      "defaults": {
+        "size": {
+          "w": 113,
+          "h": 123
+        },
+        "pivot": {
+          "anchor": {
+            "x": 57,
+            "y": 96
+          }
+        }
+      },
       "evidenceStatus": "mixed",
       "staticEvidence": {
         "status": "mixed",
@@ -409,6 +457,22 @@
       "visualId": "japanese-camp-house",
       "category": "building",
       "assetPath": "entities/japanese-camp-house",
+      "render": {
+        "srcPxPerWu": 32,
+        "filtering": "nearest"
+      },
+      "defaults": {
+        "size": {
+          "w": 109,
+          "h": 117
+        },
+        "pivot": {
+          "anchor": {
+            "x": 55,
+            "y": 92
+          }
+        }
+      },
       "evidenceStatus": "mixed",
       "staticEvidence": {
         "status": "mixed",
@@ -541,6 +605,22 @@
       "visualId": "japanese-camp-tower",
       "category": "building",
       "assetPath": "entities/japanese-camp-tower",
+      "render": {
+        "srcPxPerWu": 32,
+        "filtering": "nearest"
+      },
+      "defaults": {
+        "size": {
+          "w": 71,
+          "h": 98
+        },
+        "pivot": {
+          "anchor": {
+            "x": 36,
+            "y": 74
+          }
+        }
+      },
       "evidenceStatus": "mixed",
       "staticEvidence": {
         "status": "mixed",
@@ -637,6 +717,22 @@
       "visualId": "japanese-gunner",
       "category": "unit",
       "assetPath": "entities/japanese-gunner",
+      "render": {
+        "srcPxPerWu": 32,
+        "filtering": "nearest"
+      },
+      "defaults": {
+        "size": {
+          "w": 60,
+          "h": 60
+        },
+        "pivot": {
+          "anchor": {
+            "x": 30,
+            "y": 52
+          }
+        }
+      },
       "evidenceStatus": "mixed",
       "staticEvidence": {
         "status": "mixed",
@@ -1516,9 +1612,181 @@
       ]
     },
     {
+      "visualId": "japanese-konishi",
+      "category": "unit",
+      "assetPath": "entities/japanese-konishi",
+      "render": {
+        "srcPxPerWu": 32,
+        "filtering": "nearest"
+      },
+      "defaults": {
+        "size": {
+          "w": 140,
+          "h": 108
+        },
+        "pivot": {
+          "anchor": {
+            "x": 70,
+            "y": 100
+          }
+        }
+      },
+      "evidenceStatus": "mixed",
+      "staticEvidence": {
+        "status": "mixed",
+        "identity": "static-proven",
+        "originalGameplayName": "일본 고니시",
+        "internalClass": 82,
+        "spriteSlot": 165,
+        "sourcePath": "char\\generalj11.spr",
+        "baseFrame": 0,
+        "flags": "0x00880805",
+        "animationStateMapping": "unverified"
+      },
+      "source": {
+        "path": "original/imjinrok2/char/generalj11.spr",
+        "sha256": "eff3f8eb3a60c50ea6ac534d90e568bac415526a00f6ca2e287e00bfdf4bb03f",
+        "frameCount": 49,
+        "width": 140,
+        "height": 108
+      },
+      "conversionManifest": {
+        "path": "apps/game-client/public/assets/themes/default/entities/japanese-konishi/generalj11.manifest.json",
+        "sha256": "a71d9b7392a4bc366a7346c90f174c5a7e2d919296ae26d892788c0f43ac7b54"
+      },
+      "sources": [
+        {
+          "path": "original/imjinrok2/char/generalj11.spr",
+          "sha256": "eff3f8eb3a60c50ea6ac534d90e568bac415526a00f6ca2e287e00bfdf4bb03f",
+          "frameCount": 49,
+          "width": 140,
+          "height": 108,
+          "conversionManifest": {
+            "path": "apps/game-client/public/assets/themes/default/entities/japanese-konishi/generalj11.manifest.json",
+            "sha256": "a71d9b7392a4bc366a7346c90f174c5a7e2d919296ae26d892788c0f43ac7b54"
+          },
+          "primary": true
+        }
+      ],
+      "mappings": [
+        {
+          "scope": "base",
+          "state": "default",
+          "declaredFacings": [],
+          "clips": [
+            {
+              "facing": "default",
+              "frameFiles": [
+                "generalj11_0000.png"
+              ],
+              "frameIndexes": [
+                0
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "visualId": "japanese-samurai",
+      "category": "unit",
+      "assetPath": "entities/japanese-samurai",
+      "render": {
+        "srcPxPerWu": 32,
+        "filtering": "nearest"
+      },
+      "defaults": {
+        "size": {
+          "w": 80,
+          "h": 80
+        },
+        "pivot": {
+          "anchor": {
+            "x": 40,
+            "y": 72
+          }
+        }
+      },
+      "evidenceStatus": "mixed",
+      "staticEvidence": {
+        "status": "mixed",
+        "identity": "static-proven",
+        "originalGameplayName": "일본 사무라이",
+        "internalClass": 13,
+        "spriteSlot": 117,
+        "sourcePath": "char\\horseswordj1.spr",
+        "baseFrame": 0,
+        "flags": "0x00089005",
+        "animationStateMapping": "unverified"
+      },
+      "source": {
+        "path": "original/imjinrok2/char/horseswordj1.spr",
+        "sha256": "f08dba883a1e5686383d05882d2c0f21c2bb52b6b2c2bb00e4d806f41ac9fdfa",
+        "frameCount": 90,
+        "width": 80,
+        "height": 80
+      },
+      "conversionManifest": {
+        "path": "apps/game-client/public/assets/themes/default/entities/japanese-samurai/horseswordj1.manifest.json",
+        "sha256": "4d2ef829d95a1b90c2e666757f29c948369e9f27c6b2b11aab992f18030bf9c9"
+      },
+      "sources": [
+        {
+          "path": "original/imjinrok2/char/horseswordj1.spr",
+          "sha256": "f08dba883a1e5686383d05882d2c0f21c2bb52b6b2c2bb00e4d806f41ac9fdfa",
+          "frameCount": 90,
+          "width": 80,
+          "height": 80,
+          "conversionManifest": {
+            "path": "apps/game-client/public/assets/themes/default/entities/japanese-samurai/horseswordj1.manifest.json",
+            "sha256": "4d2ef829d95a1b90c2e666757f29c948369e9f27c6b2b11aab992f18030bf9c9"
+          },
+          "primary": true
+        }
+      ],
+      "mappings": [
+        {
+          "scope": "base",
+          "state": "default",
+          "declaredFacings": [],
+          "clips": [
+            {
+              "facing": "default",
+              "frameFiles": [
+                "horseswordj1_0000.png"
+              ],
+              "frameIndexes": [
+                0
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            }
+          ]
+        }
+      ]
+    },
+    {
       "visualId": "japanese-swordsman",
       "category": "unit",
       "assetPath": "entities/japanese-swordsman",
+      "render": {
+        "srcPxPerWu": 32,
+        "filtering": "nearest"
+      },
+      "defaults": {
+        "size": {
+          "w": 60,
+          "h": 50
+        },
+        "pivot": {
+          "anchor": {
+            "x": 30,
+            "y": 44
+          }
+        }
+      },
       "evidenceStatus": "mixed",
       "staticEvidence": {
         "status": "mixed",
@@ -2398,9 +2666,103 @@
       ]
     },
     {
+      "visualId": "japanese-turtle-tank",
+      "category": "unit",
+      "assetPath": "entities/japanese-turtle-tank",
+      "render": {
+        "srcPxPerWu": 32,
+        "filtering": "nearest"
+      },
+      "defaults": {
+        "size": {
+          "w": 70,
+          "h": 60
+        },
+        "pivot": {
+          "anchor": {
+            "x": 35,
+            "y": 52
+          }
+        }
+      },
+      "evidenceStatus": "mixed",
+      "staticEvidence": {
+        "status": "mixed",
+        "identity": "static-proven",
+        "originalGameplayName": "일본 귀갑차",
+        "internalClass": 14,
+        "spriteSlot": 104,
+        "sourcePath": "char\\ghosttankj.spr",
+        "baseFrame": 0,
+        "flags": "0x80143205",
+        "animationStateMapping": "unverified"
+      },
+      "source": {
+        "path": "original/imjinrok2/char/ghosttankj.spr",
+        "sha256": "34c3fdb3bcd79bc95f907aa7c381c11a374b30c8f7dd45f89f0e762a139f04ec",
+        "frameCount": 88,
+        "width": 70,
+        "height": 60
+      },
+      "conversionManifest": {
+        "path": "apps/game-client/public/assets/themes/default/entities/japanese-turtle-tank/ghosttankj.manifest.json",
+        "sha256": "5d83ac52b270f0489bcde28e83896365c58468de340ffae3cebea64943bd7dc5"
+      },
+      "sources": [
+        {
+          "path": "original/imjinrok2/char/ghosttankj.spr",
+          "sha256": "34c3fdb3bcd79bc95f907aa7c381c11a374b30c8f7dd45f89f0e762a139f04ec",
+          "frameCount": 88,
+          "width": 70,
+          "height": 60,
+          "conversionManifest": {
+            "path": "apps/game-client/public/assets/themes/default/entities/japanese-turtle-tank/ghosttankj.manifest.json",
+            "sha256": "5d83ac52b270f0489bcde28e83896365c58468de340ffae3cebea64943bd7dc5"
+          },
+          "primary": true
+        }
+      ],
+      "mappings": [
+        {
+          "scope": "base",
+          "state": "default",
+          "declaredFacings": [],
+          "clips": [
+            {
+              "facing": "default",
+              "frameFiles": [
+                "ghosttankj_0000.png"
+              ],
+              "frameIndexes": [
+                0
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            }
+          ]
+        }
+      ]
+    },
+    {
       "visualId": "korean-archer",
       "category": "unit",
       "assetPath": "entities/archer",
+      "render": {
+        "srcPxPerWu": 32,
+        "filtering": "nearest"
+      },
+      "defaults": {
+        "size": {
+          "w": 60,
+          "h": 60
+        },
+        "pivot": {
+          "anchor": {
+            "x": 30,
+            "y": 52
+          }
+        }
+      },
       "evidenceStatus": "mixed",
       "staticEvidence": {
         "status": "mixed",
@@ -3283,6 +3645,22 @@
       "visualId": "korean-barracks",
       "category": "building",
       "assetPath": "entities/barracks",
+      "render": {
+        "srcPxPerWu": 32,
+        "filtering": "nearest"
+      },
+      "defaults": {
+        "size": {
+          "w": 128,
+          "h": 117
+        },
+        "pivot": {
+          "anchor": {
+            "x": 64,
+            "y": 91
+          }
+        }
+      },
       "evidenceStatus": "mixed",
       "staticEvidence": {
         "status": "mixed",
@@ -3407,6 +3785,22 @@
       "visualId": "korean-general-k4",
       "category": "unit",
       "assetPath": "entities/general-k4",
+      "render": {
+        "srcPxPerWu": 32,
+        "filtering": "nearest"
+      },
+      "defaults": {
+        "size": {
+          "w": 84,
+          "h": 76
+        },
+        "pivot": {
+          "anchor": {
+            "x": 42,
+            "y": 66
+          }
+        }
+      },
       "evidenceStatus": "mixed",
       "staticEvidence": {
         "status": "mixed",
@@ -4289,6 +4683,22 @@
       "visualId": "korean-gwon-yul",
       "category": "unit",
       "assetPath": "entities/gwon-yul",
+      "render": {
+        "srcPxPerWu": 32,
+        "filtering": "nearest"
+      },
+      "defaults": {
+        "size": {
+          "w": 128,
+          "h": 108
+        },
+        "pivot": {
+          "anchor": {
+            "x": 64,
+            "y": 98
+          }
+        }
+      },
       "evidenceStatus": "mixed",
       "staticEvidence": {
         "status": "mixed",
@@ -5593,6 +6003,22 @@
       "visualId": "korean-hq",
       "category": "building",
       "assetPath": "entities/town-center",
+      "render": {
+        "srcPxPerWu": 32,
+        "filtering": "nearest"
+      },
+      "defaults": {
+        "size": {
+          "w": 131,
+          "h": 131
+        },
+        "pivot": {
+          "anchor": {
+            "x": 66,
+            "y": 101
+          }
+        }
+      },
       "evidenceStatus": "scoped-static-proven",
       "staticEvidence": {
         "status": "scoped-static-proven",
@@ -5718,6 +6144,22 @@
       "visualId": "korean-mill-house-proxy",
       "category": "building",
       "assetPath": "entities/house",
+      "render": {
+        "srcPxPerWu": 32,
+        "filtering": "nearest"
+      },
+      "defaults": {
+        "size": {
+          "w": 114,
+          "h": 107
+        },
+        "pivot": {
+          "anchor": {
+            "x": 57,
+            "y": 84
+          }
+        }
+      },
       "evidenceStatus": "mixed",
       "staticEvidence": {
         "status": "mixed",
@@ -5814,6 +6256,22 @@
       "visualId": "korean-royal-cart",
       "category": "unit",
       "assetPath": "entities/royal-cart",
+      "render": {
+        "srcPxPerWu": 32,
+        "filtering": "nearest"
+      },
+      "defaults": {
+        "size": {
+          "w": 80,
+          "h": 80
+        },
+        "pivot": {
+          "anchor": {
+            "x": 40,
+            "y": 58
+          }
+        }
+      },
       "evidenceStatus": "mixed",
       "staticEvidence": {
         "status": "mixed",
@@ -6527,6 +6985,22 @@
       "visualId": "korean-ryu-seong-ryong",
       "category": "unit",
       "assetPath": "entities/ryu-seong-ryong",
+      "render": {
+        "srcPxPerWu": 32,
+        "filtering": "nearest"
+      },
+      "defaults": {
+        "size": {
+          "w": 88,
+          "h": 76
+        },
+        "pivot": {
+          "anchor": {
+            "x": 44,
+            "y": 66
+          }
+        }
+      },
       "evidenceStatus": "mixed",
       "staticEvidence": {
         "status": "mixed",
@@ -7855,6 +8329,22 @@
       "visualId": "korean-signal-beacon",
       "category": "building",
       "assetPath": "entities/korean-signal-beacon",
+      "render": {
+        "srcPxPerWu": 32,
+        "filtering": "nearest"
+      },
+      "defaults": {
+        "size": {
+          "w": 114,
+          "h": 108
+        },
+        "pivot": {
+          "anchor": {
+            "x": 57,
+            "y": 84
+          }
+        }
+      },
       "evidenceStatus": "scoped-static-proven",
       "staticEvidence": {
         "status": "scoped-static-proven",
@@ -7980,6 +8470,22 @@
       "visualId": "korean-swordsman",
       "category": "unit",
       "assetPath": "entities/swordsman",
+      "render": {
+        "srcPxPerWu": 32,
+        "filtering": "nearest"
+      },
+      "defaults": {
+        "size": {
+          "w": 60,
+          "h": 60
+        },
+        "pivot": {
+          "anchor": {
+            "x": 30,
+            "y": 52
+          }
+        }
+      },
       "evidenceStatus": "mixed",
       "staticEvidence": {
         "status": "mixed",
@@ -8864,6 +9370,22 @@
       "visualId": "villager-korean-farmer",
       "category": "unit",
       "assetPath": "entities/villager",
+      "render": {
+        "srcPxPerWu": 32,
+        "filtering": "nearest"
+      },
+      "defaults": {
+        "size": {
+          "w": 60,
+          "h": 60
+        },
+        "pivot": {
+          "anchor": {
+            "x": 30,
+            "y": 52
+          }
+        }
+      },
       "evidenceStatus": "unverified",
       "staticEvidence": {
         "status": "unverified",
@@ -10495,6 +11017,40 @@
       {
         "entityId": "archer",
         "projectDisplayName": "조선 궁수",
+        "projectGameplayAdapter": {
+          "category": "infantry",
+          "actionIds": [
+            "move",
+            "stop",
+            "attack-move",
+            "patrol",
+            "hold"
+          ],
+          "populationCost": 1,
+          "footprint": {
+            "width": 1,
+            "height": 1,
+            "blocksMovement": true
+          },
+          "baseAttributes": {
+            "health": 38,
+            "mana": 0,
+            "movementSpeed": 3.9
+          },
+          "combat": {
+            "damage": 6,
+            "range": 5.5,
+            "cooldownTicks": 22,
+            "aggroRange": 8
+          },
+          "renderRadius": 6,
+          "selectionRadius": 6,
+          "hitRadius": 16,
+          "sightRadius": 8,
+          "minimapShape": "circle",
+          "minimapRadius": 2.9,
+          "selectedMinimapRadius": 4.2
+        },
         "visualId": "korean-archer",
         "visualSourcePath": "original/imjinrok2/char/archerk.spr",
         "identityStatus": "static-proven",
@@ -10505,6 +11061,33 @@
       {
         "entityId": "barracks",
         "projectDisplayName": "조선 훈련소",
+        "projectGameplayAdapter": {
+          "category": "building",
+          "actionIds": [
+            "train-swordsman",
+            "train-archer",
+            "cancel-production",
+            "rally-point",
+            "stop"
+          ],
+          "footprint": {
+            "width": 3,
+            "height": 3,
+            "blocksMovement": true
+          },
+          "baseAttributes": {
+            "health": 1200,
+            "mana": 0,
+            "movementSpeed": 0
+          },
+          "renderRadius": 10,
+          "selectionRadius": 10,
+          "hitRadius": 22,
+          "sightRadius": 6,
+          "minimapShape": "square",
+          "minimapRadius": 3.5,
+          "selectedMinimapRadius": 4.5
+        },
         "visualId": "korean-barracks",
         "visualSourcePath": "original/imjinrok2/char/barrackk.spr",
         "identityStatus": "static-proven",
@@ -10515,6 +11098,36 @@
       {
         "entityId": "beacon",
         "projectDisplayName": "조선 봉화대",
+        "projectGameplayAdapter": {
+          "category": "building",
+          "actionIds": [
+            "stop"
+          ],
+          "footprint": {
+            "width": 2,
+            "height": 2,
+            "blocksMovement": true
+          },
+          "baseAttributes": {
+            "health": 760,
+            "mana": 0,
+            "movementSpeed": 0
+          },
+          "combat": {
+            "damage": 8,
+            "damageType": "fire",
+            "range": 7,
+            "cooldownTicks": 24,
+            "aggroRange": 7
+          },
+          "renderRadius": 8,
+          "selectionRadius": 8,
+          "hitRadius": 18,
+          "sightRadius": 8,
+          "minimapShape": "square",
+          "minimapRadius": 3.2,
+          "selectedMinimapRadius": 4.2
+        },
         "visualId": "korean-signal-beacon",
         "visualSourcePath": "original/imjinrok2/char/firehousek.spr",
         "identityStatus": "static-proven",
@@ -10525,6 +11138,40 @@
       {
         "entityId": "gwon-yul",
         "projectDisplayName": "조선 권율",
+        "projectGameplayAdapter": {
+          "category": "infantry",
+          "actionIds": [
+            "move",
+            "stop",
+            "attack-move",
+            "patrol",
+            "hold"
+          ],
+          "populationCost": 1,
+          "footprint": {
+            "width": 1,
+            "height": 1,
+            "blocksMovement": true
+          },
+          "baseAttributes": {
+            "health": 170,
+            "mana": 0,
+            "movementSpeed": 4.1
+          },
+          "combat": {
+            "damage": 12,
+            "range": 1.5,
+            "cooldownTicks": 17,
+            "aggroRange": 7
+          },
+          "renderRadius": 6,
+          "selectionRadius": 6,
+          "hitRadius": 16,
+          "sightRadius": 9,
+          "minimapShape": "circle",
+          "minimapRadius": 3.2,
+          "selectedMinimapRadius": 4.5
+        },
         "visualId": "korean-gwon-yul",
         "visualSourcePath": "original/imjinrok2/char/generalk11.spr",
         "identityStatus": "static-proven",
@@ -10535,6 +11182,29 @@
       {
         "entityId": "house",
         "projectDisplayName": "조선 방앗간",
+        "projectGameplayAdapter": {
+          "category": "building",
+          "actionIds": [
+            "stop"
+          ],
+          "footprint": {
+            "width": 2,
+            "height": 2,
+            "blocksMovement": true
+          },
+          "baseAttributes": {
+            "health": 550,
+            "mana": 0,
+            "movementSpeed": 0
+          },
+          "renderRadius": 8,
+          "selectionRadius": 8,
+          "hitRadius": 18,
+          "sightRadius": 4,
+          "minimapShape": "square",
+          "minimapRadius": 3,
+          "selectedMinimapRadius": 4
+        },
         "visualId": "korean-mill-house-proxy",
         "visualSourcePath": "original/imjinrok2/char/millk.spr",
         "identityStatus": "static-proven",
@@ -10545,6 +11215,36 @@
       {
         "entityId": "japanese-camp-advanced-tower",
         "projectDisplayName": "왜군 강화 망루",
+        "projectGameplayAdapter": {
+          "category": "building",
+          "actionIds": [
+            "stop"
+          ],
+          "footprint": {
+            "width": 2,
+            "height": 2,
+            "blocksMovement": true
+          },
+          "baseAttributes": {
+            "health": 920,
+            "mana": 0,
+            "movementSpeed": 0
+          },
+          "combat": {
+            "damage": 10,
+            "damageType": "fire",
+            "range": 8,
+            "cooldownTicks": 24,
+            "aggroRange": 8
+          },
+          "renderRadius": 8,
+          "selectionRadius": 8,
+          "hitRadius": 18,
+          "sightRadius": 9,
+          "minimapShape": "square",
+          "minimapRadius": 3.2,
+          "selectedMinimapRadius": 4.2
+        },
         "visualId": "japanese-camp-advanced-tower",
         "visualSourcePath": "original/imjinrok2/char/advtowerj.spr",
         "identityStatus": "unbound"
@@ -10552,6 +11252,29 @@
       {
         "entityId": "japanese-camp-barracks",
         "projectDisplayName": "일본 훈련소",
+        "projectGameplayAdapter": {
+          "category": "building",
+          "actionIds": [
+            "stop"
+          ],
+          "footprint": {
+            "width": 3,
+            "height": 3,
+            "blocksMovement": true
+          },
+          "baseAttributes": {
+            "health": 1200,
+            "mana": 0,
+            "movementSpeed": 0
+          },
+          "renderRadius": 10,
+          "selectionRadius": 10,
+          "hitRadius": 22,
+          "sightRadius": 6,
+          "minimapShape": "square",
+          "minimapRadius": 3.5,
+          "selectedMinimapRadius": 4.5
+        },
         "visualId": "japanese-camp-barracks",
         "visualSourcePath": "original/imjinrok2/char/barrackj.spr",
         "identityStatus": "static-proven",
@@ -10562,6 +11285,29 @@
       {
         "entityId": "japanese-camp-firehouse",
         "projectDisplayName": "일본 관측소",
+        "projectGameplayAdapter": {
+          "category": "building",
+          "actionIds": [
+            "stop"
+          ],
+          "footprint": {
+            "width": 3,
+            "height": 3,
+            "blocksMovement": true
+          },
+          "baseAttributes": {
+            "health": 1000,
+            "mana": 0,
+            "movementSpeed": 0
+          },
+          "renderRadius": 10,
+          "selectionRadius": 10,
+          "hitRadius": 22,
+          "sightRadius": 6,
+          "minimapShape": "square",
+          "minimapRadius": 3.5,
+          "selectedMinimapRadius": 4.5
+        },
         "visualId": "japanese-camp-firehouse",
         "visualSourcePath": "original/imjinrok2/char/firehousej.spr",
         "identityStatus": "static-proven",
@@ -10572,6 +11318,29 @@
       {
         "entityId": "japanese-camp-house",
         "projectDisplayName": "일본 시장",
+        "projectGameplayAdapter": {
+          "category": "building",
+          "actionIds": [
+            "stop"
+          ],
+          "footprint": {
+            "width": 2,
+            "height": 2,
+            "blocksMovement": true
+          },
+          "baseAttributes": {
+            "health": 550,
+            "mana": 0,
+            "movementSpeed": 0
+          },
+          "renderRadius": 8,
+          "selectionRadius": 8,
+          "hitRadius": 18,
+          "sightRadius": 4,
+          "minimapShape": "square",
+          "minimapRadius": 3,
+          "selectedMinimapRadius": 4
+        },
         "visualId": "japanese-camp-house",
         "visualSourcePath": "original/imjinrok2/char/millj.spr",
         "identityStatus": "static-proven",
@@ -10582,6 +11351,36 @@
       {
         "entityId": "japanese-camp-tower",
         "projectDisplayName": "일본 망루",
+        "projectGameplayAdapter": {
+          "category": "building",
+          "actionIds": [
+            "stop"
+          ],
+          "footprint": {
+            "width": 2,
+            "height": 2,
+            "blocksMovement": true
+          },
+          "baseAttributes": {
+            "health": 760,
+            "mana": 0,
+            "movementSpeed": 0
+          },
+          "combat": {
+            "damage": 8,
+            "damageType": "fire",
+            "range": 7,
+            "cooldownTicks": 24,
+            "aggroRange": 7
+          },
+          "renderRadius": 8,
+          "selectionRadius": 8,
+          "hitRadius": 18,
+          "sightRadius": 8,
+          "minimapShape": "square",
+          "minimapRadius": 3.2,
+          "selectedMinimapRadius": 4.2
+        },
         "visualId": "japanese-camp-tower",
         "visualSourcePath": "original/imjinrok2/char/towerj.spr",
         "identityStatus": "static-proven",
@@ -10592,6 +11391,40 @@
       {
         "entityId": "japanese-gunner",
         "projectDisplayName": "일본 조총병",
+        "projectGameplayAdapter": {
+          "category": "infantry",
+          "actionIds": [
+            "move",
+            "stop",
+            "attack-move",
+            "patrol",
+            "hold"
+          ],
+          "populationCost": 1,
+          "footprint": {
+            "width": 1,
+            "height": 1,
+            "blocksMovement": true
+          },
+          "baseAttributes": {
+            "health": 38,
+            "mana": 0,
+            "movementSpeed": 3.8
+          },
+          "combat": {
+            "damage": 7,
+            "range": 5.5,
+            "cooldownTicks": 24,
+            "aggroRange": 8
+          },
+          "renderRadius": 6,
+          "selectionRadius": 6,
+          "hitRadius": 16,
+          "sightRadius": 8,
+          "minimapShape": "circle",
+          "minimapRadius": 2.9,
+          "selectedMinimapRadius": 4.2
+        },
         "visualId": "japanese-gunner",
         "visualSourcePath": "original/imjinrok2/char/gunj1.spr",
         "identityStatus": "static-proven",
@@ -10600,8 +11433,130 @@
         "nameMatchesOriginal": true
       },
       {
+        "entityId": "japanese-konishi",
+        "projectDisplayName": "일본 고니시",
+        "projectGameplayAdapter": {
+          "category": "infantry",
+          "actionIds": [
+            "move",
+            "stop",
+            "attack-move",
+            "patrol",
+            "hold"
+          ],
+          "populationCost": 1,
+          "footprint": {
+            "width": 1,
+            "height": 1,
+            "blocksMovement": true
+          },
+          "baseAttributes": {
+            "health": 38,
+            "mana": 0,
+            "movementSpeed": 3.8
+          },
+          "combat": {
+            "damage": 7,
+            "range": 5.5,
+            "cooldownTicks": 24,
+            "aggroRange": 8
+          },
+          "renderRadius": 6,
+          "selectionRadius": 6,
+          "hitRadius": 16,
+          "sightRadius": 8,
+          "minimapShape": "circle",
+          "minimapRadius": 2.9,
+          "selectedMinimapRadius": 4.2
+        },
+        "visualId": "japanese-konishi",
+        "visualSourcePath": "original/imjinrok2/char/generalj11.spr",
+        "identityStatus": "static-proven",
+        "originalGameplayName": "일본 고니시",
+        "internalClass": 82,
+        "nameMatchesOriginal": true
+      },
+      {
+        "entityId": "japanese-samurai",
+        "projectDisplayName": "일본 사무라이",
+        "projectGameplayAdapter": {
+          "category": "infantry",
+          "actionIds": [
+            "move",
+            "stop",
+            "attack-move",
+            "patrol",
+            "hold"
+          ],
+          "populationCost": 1,
+          "footprint": {
+            "width": 1,
+            "height": 1,
+            "blocksMovement": true
+          },
+          "baseAttributes": {
+            "health": 55,
+            "mana": 0,
+            "movementSpeed": 4
+          },
+          "combat": {
+            "damage": 9,
+            "range": 1.5,
+            "cooldownTicks": 18,
+            "aggroRange": 7
+          },
+          "renderRadius": 6,
+          "selectionRadius": 6,
+          "hitRadius": 16,
+          "sightRadius": 7,
+          "minimapShape": "circle",
+          "minimapRadius": 2.9,
+          "selectedMinimapRadius": 4.2
+        },
+        "visualId": "japanese-samurai",
+        "visualSourcePath": "original/imjinrok2/char/horseswordj1.spr",
+        "identityStatus": "static-proven",
+        "originalGameplayName": "일본 사무라이",
+        "internalClass": 13,
+        "nameMatchesOriginal": true
+      },
+      {
         "entityId": "japanese-swordsman",
         "projectDisplayName": "일본 창병",
+        "projectGameplayAdapter": {
+          "category": "infantry",
+          "actionIds": [
+            "move",
+            "stop",
+            "attack-move",
+            "patrol",
+            "hold"
+          ],
+          "populationCost": 1,
+          "footprint": {
+            "width": 1,
+            "height": 1,
+            "blocksMovement": true
+          },
+          "baseAttributes": {
+            "health": 55,
+            "mana": 0,
+            "movementSpeed": 4
+          },
+          "combat": {
+            "damage": 9,
+            "range": 1.5,
+            "cooldownTicks": 18,
+            "aggroRange": 7
+          },
+          "renderRadius": 6,
+          "selectionRadius": 6,
+          "hitRadius": 16,
+          "sightRadius": 7,
+          "minimapShape": "circle",
+          "minimapRadius": 2.9,
+          "selectedMinimapRadius": 4.2
+        },
         "visualId": "japanese-swordsman",
         "visualSourcePath": "original/imjinrok2/char/swordj.spr",
         "identityStatus": "static-proven",
@@ -10610,8 +11565,78 @@
         "nameMatchesOriginal": true
       },
       {
+        "entityId": "japanese-turtle-tank",
+        "projectDisplayName": "일본 귀갑차",
+        "projectGameplayAdapter": {
+          "category": "infantry",
+          "actionIds": [
+            "move",
+            "stop",
+            "attack-move",
+            "patrol",
+            "hold"
+          ],
+          "populationCost": 1,
+          "footprint": {
+            "width": 1,
+            "height": 1,
+            "blocksMovement": true
+          },
+          "baseAttributes": {
+            "health": 55,
+            "mana": 0,
+            "movementSpeed": 4
+          },
+          "combat": {
+            "damage": 9,
+            "range": 1.5,
+            "cooldownTicks": 18,
+            "aggroRange": 7
+          },
+          "renderRadius": 6,
+          "selectionRadius": 6,
+          "hitRadius": 16,
+          "sightRadius": 7,
+          "minimapShape": "circle",
+          "minimapRadius": 2.9,
+          "selectedMinimapRadius": 4.2
+        },
+        "visualId": "japanese-turtle-tank",
+        "visualSourcePath": "original/imjinrok2/char/ghosttankj.spr",
+        "identityStatus": "static-proven",
+        "originalGameplayName": "일본 귀갑차",
+        "internalClass": 14,
+        "nameMatchesOriginal": true
+      },
+      {
         "entityId": "royal-cart",
         "projectDisplayName": "조선 선조의 어가",
+        "projectGameplayAdapter": {
+          "category": "infantry",
+          "actionIds": [
+            "move",
+            "stop",
+            "hold"
+          ],
+          "populationCost": 1,
+          "footprint": {
+            "width": 1,
+            "height": 1,
+            "blocksMovement": true
+          },
+          "baseAttributes": {
+            "health": 180,
+            "mana": 0,
+            "movementSpeed": 3.2
+          },
+          "renderRadius": 8,
+          "selectionRadius": 8,
+          "hitRadius": 18,
+          "sightRadius": 8,
+          "minimapShape": "circle",
+          "minimapRadius": 3.4,
+          "selectedMinimapRadius": 4.6
+        },
         "visualId": "korean-royal-cart",
         "visualSourcePath": "original/imjinrok2/char/koreanking.spr",
         "identityStatus": "static-proven",
@@ -10622,6 +11647,40 @@
       {
         "entityId": "ryu-seong-ryong",
         "projectDisplayName": "조선 유성룡",
+        "projectGameplayAdapter": {
+          "category": "infantry",
+          "actionIds": [
+            "move",
+            "stop",
+            "attack-move",
+            "patrol",
+            "hold"
+          ],
+          "populationCost": 1,
+          "footprint": {
+            "width": 1,
+            "height": 1,
+            "blocksMovement": true
+          },
+          "baseAttributes": {
+            "health": 140,
+            "mana": 0,
+            "movementSpeed": 4
+          },
+          "combat": {
+            "damage": 10,
+            "range": 1.5,
+            "cooldownTicks": 18,
+            "aggroRange": 7
+          },
+          "renderRadius": 6,
+          "selectionRadius": 6,
+          "hitRadius": 16,
+          "sightRadius": 9,
+          "minimapShape": "circle",
+          "minimapRadius": 3.2,
+          "selectedMinimapRadius": 4.5
+        },
         "visualId": "korean-ryu-seong-ryong",
         "visualSourcePath": "original/imjinrok2/char/generalk31.spr",
         "identityStatus": "static-proven",
@@ -10632,6 +11691,40 @@
       {
         "entityId": "swordsman",
         "projectDisplayName": "조선 창병",
+        "projectGameplayAdapter": {
+          "category": "infantry",
+          "actionIds": [
+            "move",
+            "stop",
+            "attack-move",
+            "patrol",
+            "hold"
+          ],
+          "populationCost": 1,
+          "footprint": {
+            "width": 1,
+            "height": 1,
+            "blocksMovement": true
+          },
+          "baseAttributes": {
+            "health": 55,
+            "mana": 0,
+            "movementSpeed": 4
+          },
+          "combat": {
+            "damage": 9,
+            "range": 1.5,
+            "cooldownTicks": 18,
+            "aggroRange": 7
+          },
+          "renderRadius": 6,
+          "selectionRadius": 6,
+          "hitRadius": 16,
+          "sightRadius": 7,
+          "minimapShape": "circle",
+          "minimapRadius": 2.9,
+          "selectedMinimapRadius": 4.2
+        },
         "visualId": "korean-swordsman",
         "visualSourcePath": "original/imjinrok2/char/swordk.spr",
         "identityStatus": "static-proven",
@@ -10642,6 +11735,35 @@
       {
         "entityId": "town-center",
         "projectDisplayName": "조선 본영",
+        "projectGameplayAdapter": {
+          "category": "building",
+          "actionIds": [
+            "train-villager",
+            "cancel-production",
+            "rally-point",
+            "research-loom",
+            "stop",
+            "town-bell",
+            "set-gather"
+          ],
+          "footprint": {
+            "width": 4,
+            "height": 4,
+            "blocksMovement": true
+          },
+          "baseAttributes": {
+            "health": 2400,
+            "mana": 0,
+            "movementSpeed": 0
+          },
+          "renderRadius": 12,
+          "selectionRadius": 12,
+          "hitRadius": 24,
+          "sightRadius": 10,
+          "minimapShape": "square",
+          "minimapRadius": 4,
+          "selectedMinimapRadius": 5
+        },
         "visualId": "korean-hq",
         "visualSourcePath": "original/imjinrok2/char/hqk.spr",
         "identityStatus": "static-proven",
@@ -10652,12 +11774,144 @@
       {
         "entityId": "villager",
         "projectDisplayName": "농민",
+        "projectGameplayAdapter": {
+          "category": "worker",
+          "actionIds": [
+            "move",
+            "gather",
+            "build",
+            "build-town-center",
+            "build-barracks",
+            "build-beacon",
+            "stop",
+            "attack-move",
+            "patrol",
+            "repair",
+            "hold"
+          ],
+          "populationCost": 1,
+          "footprint": {
+            "width": 1,
+            "height": 1,
+            "blocksMovement": true
+          },
+          "baseAttributes": {
+            "health": 25,
+            "mana": 0,
+            "movementSpeed": 4.2
+          },
+          "combat": {
+            "damage": 3,
+            "range": 1.5,
+            "cooldownTicks": 20,
+            "aggroRange": 5
+          },
+          "renderRadius": 6,
+          "selectionRadius": 6,
+          "hitRadius": 16,
+          "sightRadius": 6,
+          "minimapShape": "circle",
+          "minimapRadius": 2.8,
+          "selectedMinimapRadius": 4
+        },
         "visualId": "villager-korean-farmer",
         "visualSourcePath": "original/imjinrok2/char/farmerk.spr",
         "identityStatus": "ambiguous"
       }
     ]
   },
+  "k01ReinforcementAdapter": [
+    {
+      "originalClass": 13,
+      "rawOwnerWord": 1,
+      "offset": {
+        "x": -2,
+        "y": -2
+      },
+      "projectKind": "japanese-samurai",
+      "identityMapping": "exact-static-identity-source"
+    },
+    {
+      "originalClass": 82,
+      "rawOwnerWord": 1,
+      "offset": {
+        "x": 0,
+        "y": -2
+      },
+      "projectKind": "japanese-konishi",
+      "identityMapping": "exact-static-identity-source"
+    },
+    {
+      "originalClass": 13,
+      "rawOwnerWord": 1,
+      "offset": {
+        "x": 2,
+        "y": -2
+      },
+      "projectKind": "japanese-samurai",
+      "identityMapping": "exact-static-identity-source"
+    },
+    {
+      "originalClass": 14,
+      "rawOwnerWord": 1,
+      "offset": {
+        "x": -2,
+        "y": 0
+      },
+      "projectKind": "japanese-turtle-tank",
+      "identityMapping": "exact-static-identity-source"
+    },
+    {
+      "originalClass": 14,
+      "rawOwnerWord": 1,
+      "offset": {
+        "x": 0,
+        "y": 0
+      },
+      "projectKind": "japanese-turtle-tank",
+      "identityMapping": "exact-static-identity-source"
+    },
+    {
+      "originalClass": 14,
+      "rawOwnerWord": 1,
+      "offset": {
+        "x": 2,
+        "y": 0
+      },
+      "projectKind": "japanese-turtle-tank",
+      "identityMapping": "exact-static-identity-source"
+    },
+    {
+      "originalClass": 12,
+      "rawOwnerWord": 1,
+      "offset": {
+        "x": -2,
+        "y": 2
+      },
+      "projectKind": "japanese-gunner",
+      "identityMapping": "exact-static-identity-source"
+    },
+    {
+      "originalClass": 12,
+      "rawOwnerWord": 1,
+      "offset": {
+        "x": 0,
+        "y": 2
+      },
+      "projectKind": "japanese-gunner",
+      "identityMapping": "exact-static-identity-source"
+    },
+    {
+      "originalClass": 12,
+      "rawOwnerWord": 1,
+      "offset": {
+        "x": 2,
+        "y": 2
+      },
+      "projectKind": "japanese-gunner",
+      "identityMapping": "exact-static-identity-source"
+    }
+  ],
   "portraits": {
     "evidenceStatus": "static-proven",
     "source": {

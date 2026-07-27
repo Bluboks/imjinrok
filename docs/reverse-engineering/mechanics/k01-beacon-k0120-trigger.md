@@ -202,16 +202,16 @@ scan 또는 skip 뒤 `0x0048a7f2`는 flag를 1과 정확히 비교한다.
 ## 현재 프로젝트와 integration gate
 
 [native 증원 정체·요청 좌표 매핑](k01-reinforcement-identity-map.md)에서 네 class와 SPR,
-K01 60×60 map 및 아홉 요청 좌표를 별도 교차 확인했다. K01 전용 adapter는 class 12 세 개를
-`japanese-gunner`의 exact static identity/source binding으로 고쳤지만 class 13·14·82 여섯 개는 여전히
-명시적 proxy다. 최종 배치, owner 의미, 행동·stats·animation은 이 trigger 증거로 확정하지 않는다.
+K01 60×60 map 및 아홉 요청 좌표를 별도 교차 확인했다. K01 전용 adapter는 class
+12·13·14·82 아홉 record를 고유 kind의 exact static identity/source binding으로 연결했다.
+최종 배치, owner 의미, 행동·stats·animation은 이 trigger 증거로 확정하지 않는다.
 generic spawn semantics는 바꾸지 않았으며 isolated opt-in gate는 남아 있다.
 
 ## 남은 불확실성과 다음 질문
 
 - 표준 mission entry broad zero-fill 밖의 `WORD 0x008438dc` 전체 reset lifecycle
 - raw relation-table 값, selector 5 grids, 세 direct global write의 사람용 의미
-- class 13·14·82의 프로젝트 identity/visual과 네 class의 behavior/stats/animation exact mapping
+- 네 class의 behavior/stats/animation, owner 의미와 최종 배치 exact mapping
 
 이 문서의 return 뒤 K01 loss latch, fixed-width timer와 final commit은
 [K01 미션 결과 수명주기](k01-mission-result-lifecycle.md)에서 별도 정적 확정·재현했다.

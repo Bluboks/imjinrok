@@ -342,7 +342,11 @@ export interface K01ReinforcementAdapterRecord {
   originalClass: 12 | 13 | 14 | 82;
   rawOwnerWord: 1;
   offset: GridPoint;
-  projectKind: "japanese-gunner" | "japanese-swordsman";
+  projectKind:
+    | "japanese-gunner"
+    | "japanese-samurai"
+    | "japanese-turtle-tank"
+    | "japanese-konishi";
   identityMapping: K01ReinforcementIdentityMapping;
   idSuffix: string;
 }
@@ -353,14 +357,14 @@ export const k01ReinforcementOwnerAdapter = {
 } as const;
 
 // K01-only adapter for the native descriptors created at 0x0048a7ae. The owner-to-player,
-// trigger, order, and proxy kinds are project adaptations; generic spawn semantics remain unchanged.
+// trigger, order, stats, collision, and behavior are project adaptations; generic spawn semantics remain unchanged.
 export const k01ReinforcementAdapter = [
-  { originalClass: 13, rawOwnerWord: 1, offset: { x: -2, y: -2 }, projectKind: "japanese-swordsman", identityMapping: "proxy", idSuffix: "k0120-reinforcement-0x0d-1" },
-  { originalClass: 82, rawOwnerWord: 1, offset: { x: 0, y: -2 }, projectKind: "japanese-gunner", identityMapping: "proxy", idSuffix: "k0120-reinforcement-0x52" },
-  { originalClass: 13, rawOwnerWord: 1, offset: { x: 2, y: -2 }, projectKind: "japanese-swordsman", identityMapping: "proxy", idSuffix: "k0120-reinforcement-0x0d-2" },
-  { originalClass: 14, rawOwnerWord: 1, offset: { x: -2, y: 0 }, projectKind: "japanese-swordsman", identityMapping: "proxy", idSuffix: "k0120-reinforcement-0x0e-1" },
-  { originalClass: 14, rawOwnerWord: 1, offset: { x: 0, y: 0 }, projectKind: "japanese-swordsman", identityMapping: "proxy", idSuffix: "k0120-reinforcement-0x0e-2" },
-  { originalClass: 14, rawOwnerWord: 1, offset: { x: 2, y: 0 }, projectKind: "japanese-swordsman", identityMapping: "proxy", idSuffix: "k0120-reinforcement-0x0e-3" },
+  { originalClass: 13, rawOwnerWord: 1, offset: { x: -2, y: -2 }, projectKind: "japanese-samurai", identityMapping: "exact-static-identity-source", idSuffix: "k0120-reinforcement-0x0d-1" },
+  { originalClass: 82, rawOwnerWord: 1, offset: { x: 0, y: -2 }, projectKind: "japanese-konishi", identityMapping: "exact-static-identity-source", idSuffix: "k0120-reinforcement-0x52" },
+  { originalClass: 13, rawOwnerWord: 1, offset: { x: 2, y: -2 }, projectKind: "japanese-samurai", identityMapping: "exact-static-identity-source", idSuffix: "k0120-reinforcement-0x0d-2" },
+  { originalClass: 14, rawOwnerWord: 1, offset: { x: -2, y: 0 }, projectKind: "japanese-turtle-tank", identityMapping: "exact-static-identity-source", idSuffix: "k0120-reinforcement-0x0e-1" },
+  { originalClass: 14, rawOwnerWord: 1, offset: { x: 0, y: 0 }, projectKind: "japanese-turtle-tank", identityMapping: "exact-static-identity-source", idSuffix: "k0120-reinforcement-0x0e-2" },
+  { originalClass: 14, rawOwnerWord: 1, offset: { x: 2, y: 0 }, projectKind: "japanese-turtle-tank", identityMapping: "exact-static-identity-source", idSuffix: "k0120-reinforcement-0x0e-3" },
   { originalClass: 12, rawOwnerWord: 1, offset: { x: -2, y: 2 }, projectKind: "japanese-gunner", identityMapping: "exact-static-identity-source", idSuffix: "k0120-reinforcement-0x0c-1" },
   { originalClass: 12, rawOwnerWord: 1, offset: { x: 0, y: 2 }, projectKind: "japanese-gunner", identityMapping: "exact-static-identity-source", idSuffix: "k0120-reinforcement-0x0c-2" },
   { originalClass: 12, rawOwnerWord: 1, offset: { x: 2, y: 2 }, projectKind: "japanese-gunner", identityMapping: "exact-static-identity-source", idSuffix: "k0120-reinforcement-0x0c-3" },

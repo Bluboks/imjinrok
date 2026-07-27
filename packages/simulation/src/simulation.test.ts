@@ -1456,9 +1456,14 @@ test("imjinrok K01 adapted reinforcement event uses the configured requested pos
   // These final positions equal the requests only because this fixture leaves each requested tile open.
   // Generic clamping/open-point search may relocate or skip them in other world states.
   assert.deepEqual(state.units["cpu-1-k0120-reinforcement-0x0d-1"]?.position, { x: 53, y: 51 });
-  assert.equal(state.units["cpu-1-k0120-reinforcement-0x52"]?.kind, "japanese-gunner");
+  assert.equal(state.units["cpu-1-k0120-reinforcement-0x0d-1"]?.kind, "japanese-samurai");
+  assert.equal(state.units["cpu-1-k0120-reinforcement-0x52"]?.kind, "japanese-konishi");
   assert.deepEqual(state.units["cpu-1-k0120-reinforcement-0x52"]?.position, { x: 55, y: 51 });
+  assert.equal(state.units["cpu-1-k0120-reinforcement-0x0d-2"]?.kind, "japanese-samurai");
   assert.deepEqual(state.units["cpu-1-k0120-reinforcement-0x0d-2"]?.position, { x: 57, y: 51 });
+  assert.equal(state.units["cpu-1-k0120-reinforcement-0x0e-1"]?.kind, "japanese-turtle-tank");
+  assert.equal(state.units["cpu-1-k0120-reinforcement-0x0e-2"]?.kind, "japanese-turtle-tank");
+  assert.equal(state.units["cpu-1-k0120-reinforcement-0x0e-3"]?.kind, "japanese-turtle-tank");
   assert.deepEqual(state.units["cpu-1-k0120-reinforcement-0x0e-2"]?.position, { x: 55, y: 53 });
   assert.equal(state.units["cpu-1-k0120-reinforcement-0x0c-1"]?.kind, "japanese-gunner");
   assert.equal(state.units["cpu-1-k0120-reinforcement-0x0c-2"]?.kind, "japanese-gunner");

@@ -13,6 +13,7 @@ import { fileURLToPath } from "node:url";
 
 import { MISSION_PORTRAIT_IMAGE_CUES } from "../../apps/game-client/src/missionPortraits.ts";
 import { unitDefinitions } from "../../packages/shared/src/content.ts";
+import { k01ReinforcementAdapter } from "../../packages/shared/src/scenarios.ts";
 import { defaultTheme } from "../../packages/shared/src/themes.ts";
 import { extractBeaconStatePilot } from "./extract-beacon-state-pilot.mjs";
 import { extractBuildingStatePilot } from "./extract-building-state-pilot.mjs";
@@ -137,6 +138,8 @@ for (const visual of Object.values(defaultTheme.visuals)
     visualId: visual.id,
     category,
     assetPath: visual.assetPath,
+    render: visual.render,
+    defaults: visual.defaults,
     evidenceStatus: staticEvidence.status,
     staticEvidence,
     source: primaryResource.source,
@@ -231,6 +234,21 @@ const report = {
     summary: entityTypeCatalog.summary,
     projectBindings: projectBindings.bindings,
   },
+  k01ReinforcementAdapter: k01ReinforcementAdapter.map(
+    ({
+      originalClass,
+      rawOwnerWord,
+      offset,
+      projectKind,
+      identityMapping,
+    }) => ({
+      originalClass,
+      rawOwnerWord,
+      offset,
+      projectKind,
+      identityMapping,
+    }),
+  ),
   portraits: {
     evidenceStatus: "static-proven",
     source: portraitAudit.source,
@@ -542,6 +560,21 @@ function buildProjectBindingAudit(visuals) {
     const binding = {
       entityId,
       projectDisplayName: definition.displayName,
+      projectGameplayAdapter: {
+        category: definition.category,
+        actionIds: definition.actionIds,
+        populationCost: definition.populationCost,
+        footprint: definition.footprint,
+        baseAttributes: definition.baseAttributes,
+        combat: definition.combat,
+        renderRadius: definition.renderRadius,
+        selectionRadius: definition.selectionRadius,
+        hitRadius: definition.hitRadius,
+        sightRadius: definition.sightRadius,
+        minimapShape: definition.minimapShape,
+        minimapRadius: definition.minimapRadius,
+        selectedMinimapRadius: definition.selectedMinimapRadius,
+      },
       visualId,
       visualSourcePath: visual.source.path,
       identityStatus: visual.staticEvidence.identity,

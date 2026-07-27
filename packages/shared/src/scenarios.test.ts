@@ -139,8 +139,10 @@ test("imjinrok K01 and K02 retain source battle script beats", () => {
     k01ReinforcementOwnerAdapter.projectPlayerId,
   );
   assert.deepEqual(countUnitsByKind(k01ReinforcementSpawn?.units ?? []), {
-    "japanese-gunner": 4,
-    "japanese-swordsman": 5,
+    "japanese-gunner": 3,
+    "japanese-konishi": 1,
+    "japanese-samurai": 2,
+    "japanese-turtle-tank": 3,
   });
   assert.deepEqual(
     k01ReinforcementSpawn?.units.map(({ idSuffix, offset }) => ({ idSuffix, offset })),
@@ -167,12 +169,12 @@ test("imjinrok K01 and K02 retain source battle script beats", () => {
       }),
     ),
     [
-      { originalClass: 13, rawOwnerWord: 1, offset: { x: -2, y: -2 }, projectKind: "japanese-swordsman", identityMapping: "proxy" },
-      { originalClass: 82, rawOwnerWord: 1, offset: { x: 0, y: -2 }, projectKind: "japanese-gunner", identityMapping: "proxy" },
-      { originalClass: 13, rawOwnerWord: 1, offset: { x: 2, y: -2 }, projectKind: "japanese-swordsman", identityMapping: "proxy" },
-      { originalClass: 14, rawOwnerWord: 1, offset: { x: -2, y: 0 }, projectKind: "japanese-swordsman", identityMapping: "proxy" },
-      { originalClass: 14, rawOwnerWord: 1, offset: { x: 0, y: 0 }, projectKind: "japanese-swordsman", identityMapping: "proxy" },
-      { originalClass: 14, rawOwnerWord: 1, offset: { x: 2, y: 0 }, projectKind: "japanese-swordsman", identityMapping: "proxy" },
+      { originalClass: 13, rawOwnerWord: 1, offset: { x: -2, y: -2 }, projectKind: "japanese-samurai", identityMapping: "exact-static-identity-source" },
+      { originalClass: 82, rawOwnerWord: 1, offset: { x: 0, y: -2 }, projectKind: "japanese-konishi", identityMapping: "exact-static-identity-source" },
+      { originalClass: 13, rawOwnerWord: 1, offset: { x: 2, y: -2 }, projectKind: "japanese-samurai", identityMapping: "exact-static-identity-source" },
+      { originalClass: 14, rawOwnerWord: 1, offset: { x: -2, y: 0 }, projectKind: "japanese-turtle-tank", identityMapping: "exact-static-identity-source" },
+      { originalClass: 14, rawOwnerWord: 1, offset: { x: 0, y: 0 }, projectKind: "japanese-turtle-tank", identityMapping: "exact-static-identity-source" },
+      { originalClass: 14, rawOwnerWord: 1, offset: { x: 2, y: 0 }, projectKind: "japanese-turtle-tank", identityMapping: "exact-static-identity-source" },
       { originalClass: 12, rawOwnerWord: 1, offset: { x: -2, y: 2 }, projectKind: "japanese-gunner", identityMapping: "exact-static-identity-source" },
       { originalClass: 12, rawOwnerWord: 1, offset: { x: 0, y: 2 }, projectKind: "japanese-gunner", identityMapping: "exact-static-identity-source" },
       { originalClass: 12, rawOwnerWord: 1, offset: { x: 2, y: 2 }, projectKind: "japanese-gunner", identityMapping: "exact-static-identity-source" },
@@ -180,10 +182,15 @@ test("imjinrok K01 and K02 retain source battle script beats", () => {
   );
   assert.equal(
     k01ReinforcementAdapter.filter(
-      ({ originalClass, projectKind, identityMapping }) =>
-        originalClass === 12 &&
-        projectKind === "japanese-gunner" &&
+      ({ identityMapping }) =>
         identityMapping === "exact-static-identity-source",
+    ).length,
+    9,
+  );
+  assert.equal(
+    k01ReinforcementAdapter.filter(
+      ({ originalClass, projectKind }) =>
+        originalClass === 12 && projectKind === "japanese-gunner",
     ).length,
     3,
   );
@@ -191,7 +198,7 @@ test("imjinrok K01 and K02 retain source battle script beats", () => {
     k01ReinforcementAdapter.filter(
       ({ identityMapping }) => identityMapping === "proxy",
     ).length,
-    6,
+    0,
   );
   assert.deepEqual(
     k01ReinforcementAdapter.map(({ offset }) => ({

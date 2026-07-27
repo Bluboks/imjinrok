@@ -2,12 +2,11 @@ import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join, resolve } from "node:path";
+import { dirname, join, resolve } from "node:path";
 import test from "node:test";
 
 import {
   extractK01ReinforcementIdentityMap,
-  JAPANESE_GUNNER_CONVERSION_MANIFEST_LOGICAL_PATH,
   mapDescriptorsToRequestedPositions,
 } from "./extract-k01-reinforcement-identity-map.mjs";
 import { K01_REINFORCEMENT_DESCRIPTORS } from "./extract-k01-beacon-k0120-trigger.mjs";
@@ -26,10 +25,64 @@ const mapPath = resolve(
   "original/imjinrok2/stagemap/k01.map",
 );
 const originalRoot = resolve(repositoryRoot, "original/imjinrok2");
-const japaneseGunnerConversionManifestPath = resolve(
-  repositoryRoot,
-  JAPANESE_GUNNER_CONVERSION_MANIFEST_LOGICAL_PATH,
-);
+const conversionManifestExpectations = [
+  {
+    projectKind: "japanese-gunner",
+    logicalPath:
+      "apps/game-client/public/assets/themes/default/entities/japanese-gunner/gunj1.manifest.json",
+    sha256:
+      "f156fab6f775bcf0df46a3f52356dcdbb86634447d9a674d6d9a39476178cae5",
+    source: "original/imjinrok2/char/gunj1.spr",
+    width: 60,
+    height: 60,
+    frameCount: 80,
+    stem: "gunj1",
+    baseFrameSha256:
+      "7d17b5bc01f785e7d2e8530db10c7fc0371b39d8558b7084676ea33296918003",
+  },
+  {
+    projectKind: "japanese-samurai",
+    logicalPath:
+      "apps/game-client/public/assets/themes/default/entities/japanese-samurai/horseswordj1.manifest.json",
+    sha256:
+      "4d2ef829d95a1b90c2e666757f29c948369e9f27c6b2b11aab992f18030bf9c9",
+    source: "original/imjinrok2/char/horseswordj1.spr",
+    width: 80,
+    height: 80,
+    frameCount: 90,
+    stem: "horseswordj1",
+    baseFrameSha256:
+      "9294f923426de05f81e5d18be55bbe8deb31d96282e70469abe3382088ff4d02",
+  },
+  {
+    projectKind: "japanese-turtle-tank",
+    logicalPath:
+      "apps/game-client/public/assets/themes/default/entities/japanese-turtle-tank/ghosttankj.manifest.json",
+    sha256:
+      "5d83ac52b270f0489bcde28e83896365c58468de340ffae3cebea64943bd7dc5",
+    source: "original/imjinrok2/char/ghosttankj.spr",
+    width: 70,
+    height: 60,
+    frameCount: 88,
+    stem: "ghosttankj",
+    baseFrameSha256:
+      "104517e7249550c719ccda7473720c2384bc217f56c71543894e8ace55dcf354",
+  },
+  {
+    projectKind: "japanese-konishi",
+    logicalPath:
+      "apps/game-client/public/assets/themes/default/entities/japanese-konishi/generalj11.manifest.json",
+    sha256:
+      "a71d9b7392a4bc366a7346c90f174c5a7e2d919296ae26d892788c0f43ac7b54",
+    source: "original/imjinrok2/char/generalj11.spr",
+    width: 140,
+    height: 108,
+    frameCount: 49,
+    stem: "generalj11",
+    baseFrameSha256:
+      "9b94fe4900a4343de2842c60caae2575e1e949bebba3e72bbdfcfc819a1caeaf",
+  },
+];
 
 test("extracts exact native descriptors, identities, and K01 requested coordinates", () => {
   const report = extractK01ReinforcementIdentityMap();
@@ -55,39 +108,94 @@ test("extracts exact native descriptors, identities, and K01 requested coordinat
       .update(readFileSync(spriteAuditPath))
       .digest("hex"),
   );
-  const conversionManifestSha256 = createHash("sha256")
-    .update(readFileSync(japaneseGunnerConversionManifestPath))
-    .digest("hex");
-  assert.deepEqual(report.sources.japaneseGunnerConversionManifest, {
-    logicalPath: JAPANESE_GUNNER_CONVERSION_MANIFEST_LOGICAL_PATH,
-    physicalPath: japaneseGunnerConversionManifestPath,
-    sha256: conversionManifestSha256,
-    source: "original/imjinrok2/char/gunj1.spr",
-    frameCount: 80,
-    exportedFrameCount: 80,
-  });
-  assert.deepEqual(report.projectStaticSourceBinding.binding, {
-    entityId: "japanese-gunner",
-    projectDisplayName: "일본 조총병",
-    visualId: "japanese-gunner",
-    visualSourcePath: "original/imjinrok2/char/gunj1.spr",
-    identityStatus: "static-proven",
-    originalGameplayName: "일본 조총병",
-    internalClass: 12,
-    nameMatchesOriginal: true,
-  });
-  assert.equal(
-    report.projectStaticSourceBinding.visual.staticEvidence
-      .animationStateMapping,
-    "unverified",
-  );
-  assert.equal(
-    report.projectStaticSourceBinding.scope,
-    "project kind identity and source SPR binding only; animation-state, direction, stats, and behavior are unverified",
+  assert.deepEqual(
+    report.sources.conversionManifests.map(
+      ({
+        logicalPath,
+        physicalPath,
+        sha256,
+        source,
+        width,
+        height,
+        frameCount,
+        exportedFrameCount,
+        firstFrame,
+        lastFrame,
+        baseFrameAsset,
+      }) => ({
+        logicalPath,
+        physicalPath,
+        sha256,
+        source,
+        width,
+        height,
+        frameCount,
+        exportedFrameCount,
+        firstFrame,
+        lastFrame,
+        baseFrameAsset,
+      }),
+    ),
+    conversionManifestExpectations.map((expected) => ({
+      logicalPath: expected.logicalPath,
+      physicalPath: resolve(repositoryRoot, expected.logicalPath),
+      sha256: expected.sha256,
+      source: expected.source,
+      width: expected.width,
+      height: expected.height,
+      frameCount: expected.frameCount,
+      exportedFrameCount: expected.frameCount,
+      firstFrame: { index: 0, fileName: `${expected.stem}_0000.png` },
+      lastFrame: {
+        index: expected.frameCount - 1,
+        fileName: `${expected.stem}_${String(expected.frameCount - 1).padStart(4, "0")}.png`,
+      },
+      baseFrameAsset: {
+        index: 0,
+        path: resolve(
+          repositoryRoot,
+          expected.logicalPath,
+          "..",
+          `${expected.stem}_0000.png`,
+        ),
+        sha256: expected.baseFrameSha256,
+      },
+    })),
   );
   assert.deepEqual(
-    report.projectStaticSourceBinding.conversionManifest,
-    report.sources.japaneseGunnerConversionManifest,
+    report.projectStaticSourceBindings.map(
+      ({ binding, visual, conversionManifest, scope }) => ({
+        entityId: binding.entityId,
+        projectDisplayName: binding.projectDisplayName,
+        originalGameplayName: binding.originalGameplayName,
+        internalClass: binding.internalClass,
+        projectKind: binding.visualId,
+        source: visual.source.path,
+        animationStateMapping:
+          visual.staticEvidence.animationStateMapping,
+        manifest: conversionManifest.logicalPath,
+        scope,
+      }),
+    ),
+    [
+      [12, "일본 조총병", "japanese-gunner", "gunj1"],
+      [13, "일본 사무라이", "japanese-samurai", "horseswordj1"],
+      [14, "일본 귀갑차", "japanese-turtle-tank", "ghosttankj"],
+      [82, "일본 고니시", "japanese-konishi", "generalj11"],
+    ].map(([internalClass, name, projectKind, stem]) => ({
+      entityId: projectKind,
+      projectDisplayName: name,
+      originalGameplayName: name,
+      internalClass,
+      projectKind,
+      source: `original/imjinrok2/char/${stem}.spr`,
+      animationStateMapping: "unverified",
+      manifest: conversionManifestExpectations.find(
+        (entry) => entry.projectKind === projectKind,
+      ).logicalPath,
+      scope:
+        "project kind identity and source SPR binding only; animation-state, direction, stats, category, collision, behavior, render scale, and pivot are unverified original semantics",
+    })),
   );
   assert.deepEqual(
     report.requestedPositions.map(
@@ -118,6 +226,30 @@ test("extracts exact native descriptors, identities, and K01 requested coordinat
     ],
   );
   assert.deepEqual(
+    report.requestedPositions.map(
+      ({ originalClass, projectKind, identityMapping }) => ({
+        originalClass,
+        projectKind,
+        identityMapping,
+      }),
+    ),
+    [
+      [13, "japanese-samurai"],
+      [82, "japanese-konishi"],
+      [13, "japanese-samurai"],
+      [14, "japanese-turtle-tank"],
+      [14, "japanese-turtle-tank"],
+      [14, "japanese-turtle-tank"],
+      [12, "japanese-gunner"],
+      [12, "japanese-gunner"],
+      [12, "japanese-gunner"],
+    ].map(([originalClass, projectKind]) => ({
+      originalClass,
+      projectKind,
+      identityMapping: "exact-static-identity-source",
+    })),
+  );
+  assert.deepEqual(
     report.identities.map(({ internalClass, originalGameplayName, sprite }) => ({
       internalClass,
       originalGameplayName,
@@ -131,6 +263,8 @@ test("extracts exact native descriptors, identities, and K01 requested coordinat
           path: "char/gunj1.spr",
           slot: 114,
           baseFrame: 0,
+          pointerCell: "0x004bc25c",
+          spriteTableIndex: 14,
           sha256: "e35c3dddfc4860d3e8ccbb7d86ecb006b11230e269d04091dcfa320dc116a7a8",
           width: 60,
           height: 60,
@@ -144,6 +278,8 @@ test("extracts exact native descriptors, identities, and K01 requested coordinat
           path: "char/horseswordj1.spr",
           slot: 117,
           baseFrame: 0,
+          pointerCell: "0x004bc268",
+          spriteTableIndex: 17,
           sha256: "f08dba883a1e5686383d05882d2c0f21c2bb52b6b2c2bb00e4d806f41ac9fdfa",
           width: 80,
           height: 80,
@@ -157,6 +293,8 @@ test("extracts exact native descriptors, identities, and K01 requested coordinat
           path: "char/ghosttankj.spr",
           slot: 104,
           baseFrame: 0,
+          pointerCell: "0x004bc234",
+          spriteTableIndex: 4,
           sha256: "34c3fdb3bcd79bc95f907aa7c381c11a374b30c8f7dd45f89f0e762a139f04ec",
           width: 70,
           height: 60,
@@ -170,6 +308,8 @@ test("extracts exact native descriptors, identities, and K01 requested coordinat
           path: "char/generalj11.spr",
           slot: 165,
           baseFrame: 0,
+          pointerCell: "0x004bc328",
+          spriteTableIndex: 65,
           sha256: "eff3f8eb3a60c50ea6ac534d90e568bac415526a00f6ca2e287e00bfdf4bb03f",
           width: 140,
           height: 108,
@@ -180,8 +320,8 @@ test("extracts exact native descriptors, identities, and K01 requested coordinat
   );
   assert.deepEqual(report.integration, {
     exactRequestedCoordinateCount: 9,
-    exactStaticIdentitySourceBindingCount: 3,
-    proxyIdentityBindingCount: 6,
+    exactStaticIdentitySourceBindingCount: 9,
+    proxyIdentityBindingCount: 0,
     rawOwnerAdapter: { rawOwnerWord: 1, projectPlayerId: "cpu-1" },
     requestedVersusFinal:
       "requested coordinates are exact for K01; generic runtime clamping/open-point search may relocate or skip final placement",
@@ -189,7 +329,9 @@ test("extracts exact native descriptors, identities, and K01 requested coordinat
       "raw owner WORD 1 to project playerId cpu-1",
       "objective-status beacon completion trigger",
       "attack-move target 10,10",
-      "class 13/14/82 proxy entity kinds",
+      "class 13/14 copy japanese-swordsman gameplay values",
+      "class 82 copies japanese-gunner gameplay values",
+      "all four current visual pivots and render scaling",
     ],
     behaviorParity:
       "not proven: project stats, combat behavior, and animation-state mappings are outside this evidence",
@@ -326,13 +468,13 @@ test("rejects tampered catalog, map, sprite audit, manifest, and SPR inputs", as
     );
     const audit = JSON.parse(readFileSync(path, "utf8"));
     const binding = audit.entityTypeCatalog.projectBindings.find(
-      ({ entityId }) => entityId === "japanese-gunner",
+      ({ entityId }) => entityId === "japanese-samurai",
     );
-    binding.internalClass = 13;
+    binding.internalClass = 14;
     writeFileSync(path, `${JSON.stringify(audit, null, 2)}\n`);
     assert.throws(
       () => extractK01ReinforcementIdentityMap({ spriteAudit: path }),
-      /japanese-gunner project binding/,
+      /japanese-samurai project binding/,
     );
   });
 
@@ -354,10 +496,13 @@ test("rejects tampered catalog, map, sprite audit, manifest, and SPR inputs", as
     );
   });
 
-  await t.test("japanese-gunner conversion manifest", () => {
+  await t.test("japanese-samurai conversion manifest with matching audit SHA", () => {
+    const expected = conversionManifestExpectations.find(
+      ({ projectKind }) => projectKind === "japanese-samurai",
+    );
     const manifestPath = copiedFile(
-      "gunj1.manifest.json",
-      japaneseGunnerConversionManifestPath,
+      "horseswordj1.manifest.json",
+      resolve(repositoryRoot, expected.logicalPath),
     );
     const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
     manifest.exportedFrames.pop();
@@ -368,7 +513,7 @@ test("rejects tampered catalog, map, sprite audit, manifest, and SPR inputs", as
     );
     const audit = JSON.parse(readFileSync(auditPath, "utf8"));
     const visual = audit.visuals.find(
-      ({ visualId }) => visualId === "japanese-gunner",
+      ({ visualId }) => visualId === "japanese-samurai",
     );
     visual.conversionManifest.sha256 = createHash("sha256")
       .update(readFileSync(manifestPath))
@@ -378,9 +523,101 @@ test("rejects tampered catalog, map, sprite audit, manifest, and SPR inputs", as
       () =>
         extractK01ReinforcementIdentityMap({
           spriteAudit: auditPath,
-          japaneseGunnerConversionManifest: manifestPath,
+          conversionManifestPathResolver: (logicalPath) =>
+            logicalPath === expected.logicalPath
+              ? manifestPath
+              : resolve(repositoryRoot, logicalPath),
         }),
-      /japanese-gunner conversion manifest exported frame count/,
+      /japanese-samurai conversion manifest exported frame count/,
+    );
+  });
+
+  await t.test("japanese-samurai structurally valid manifest byte tamper", () => {
+    const expected = conversionManifestExpectations.find(
+      ({ projectKind }) => projectKind === "japanese-samurai",
+    );
+    const manifestPath = copiedFile(
+      "horseswordj1.manifest.json",
+      resolve(repositoryRoot, expected.logicalPath),
+    );
+    writeFileSync(
+      resolve(dirname(manifestPath), "horseswordj1_0000.png"),
+      readFileSync(
+        resolve(
+          repositoryRoot,
+          expected.logicalPath,
+          "..",
+          "horseswordj1_0000.png",
+        ),
+      ),
+    );
+    writeFileSync(
+      manifestPath,
+      Buffer.concat([readFileSync(manifestPath), Buffer.from("\n")]),
+    );
+    assert.throws(
+      () =>
+        extractK01ReinforcementIdentityMap({
+          conversionManifestPathResolver: (logicalPath) =>
+            logicalPath === expected.logicalPath
+              ? manifestPath
+              : resolve(repositoryRoot, logicalPath),
+        }),
+      /japanese-samurai conversion manifest SHA-256/,
+    );
+  });
+
+  await t.test("japanese-samurai tampered base-frame PNG", () => {
+    const expected = conversionManifestExpectations.find(
+      ({ projectKind }) => projectKind === "japanese-samurai",
+    );
+    const manifestPath = copiedFile(
+      "horseswordj1.manifest.json",
+      resolve(repositoryRoot, expected.logicalPath),
+    );
+    const framePath = resolve(
+      dirname(manifestPath),
+      "horseswordj1_0000.png",
+    );
+    const frame = readFileSync(
+      resolve(
+        repositoryRoot,
+        expected.logicalPath,
+        "..",
+        "horseswordj1_0000.png",
+      ),
+    );
+    frame[frame.length - 1] ^= 1;
+    writeFileSync(framePath, frame);
+    assert.throws(
+      () =>
+        extractK01ReinforcementIdentityMap({
+          conversionManifestPathResolver: (logicalPath) =>
+            logicalPath === expected.logicalPath
+              ? manifestPath
+              : resolve(repositoryRoot, logicalPath),
+        }),
+      /japanese-samurai base-frame PNG SHA-256/,
+    );
+  });
+
+  await t.test("japanese-samurai missing referenced base-frame asset", () => {
+    const expected = conversionManifestExpectations.find(
+      ({ projectKind }) => projectKind === "japanese-samurai",
+    );
+    const manifestPath = copiedFile(
+      "horseswordj1.manifest.json",
+      resolve(repositoryRoot, expected.logicalPath),
+    );
+    assert.throws(
+      () =>
+        extractK01ReinforcementIdentityMap({
+          conversionManifestPathResolver: (logicalPath) =>
+            logicalPath === expected.logicalPath
+              ? manifestPath
+              : resolve(repositoryRoot, logicalPath),
+        }),
+      /horseswordj1_0000\.png/,
     );
   });
 
@@ -395,10 +632,10 @@ test("rejects tampered catalog, map, sprite audit, manifest, and SPR inputs", as
       const destination = resolve(root, source.replace("/", "-"));
       writeFileSync(destination, readFileSync(resolve(originalRoot, source)));
     }
-    const tamperedGunner = resolve(root, "char-gunj1.spr");
-    const buffer = readFileSync(tamperedGunner);
+    const tamperedSamurai = resolve(root, "char-horseswordj1.spr");
+    const buffer = readFileSync(tamperedSamurai);
     buffer[0] ^= 1;
-    writeFileSync(tamperedGunner, buffer);
+    writeFileSync(tamperedSamurai, buffer);
     assert.throws(
       () =>
         extractK01ReinforcementIdentityMap({
@@ -406,7 +643,7 @@ test("rejects tampered catalog, map, sprite audit, manifest, and SPR inputs", as
           spritePathResolver: (source) =>
             resolve(root, source.replace("/", "-")),
         }),
-      /class 12 SPR SHA-256/,
+      /class 13 SPR SHA-256/,
     );
   });
 });

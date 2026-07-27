@@ -41,10 +41,9 @@ VM에서 원본 게임을 플레이하며 화면 변화를 따라가는 방식�
   initializer, unsigned cadence/completion, relay와 external/stage final route도 정적
   확정·재현했다. 표준 main state 1의 broad DWORD zero fill이 win/loss timer를 지운 뒤
   stage 1 K01 map source를 선택하는 반개구간·순서도 정적 확정·재현했다.
-  native class/SPR와 K01 요청 좌표는 9개 모두 확인했고 class 12 세 개만 exact static
-  identity/source binding,
-  class 13·14·82 여섯 개는 proxy로 분리했다. trigger flag의 전체 reset lifecycle,
-  proxy identity/행동/최종 생성 정책과 raw clock/result/asset transition mapping은 남아 있다.
+  native class/SPR와 K01 요청 좌표는 9개 모두 확인했고 class 12·13·14·82를 고유 kind의
+  exact static identity/source binding으로 연결했다. trigger flag의 전체 reset lifecycle,
+  증원 행동·animation·최종 생성 정책과 raw clock/result/asset transition mapping은 남아 있다.
 - 4단계: 부분 진행. K01 영웅의 대상 검색·사거리, 공격 phase·피해·투사체와 signed-health
   사망·slot/reference 정리는 정적 확정·재현했다. 원본 identity·좌표·accepted update 단위의
   프로젝트 변환과 실제 opt-in 연결은 미확정이다.
@@ -143,8 +142,8 @@ VM에서 원본 게임을 플레이하며 화면 변화를 따라가는 방식�
 - match 선행 flag write, script busy와 무검사 loader `0/1`·void start
 - 같은 scan 복수 match의 native block 반복
 - signed-WORD descriptor 증원, selector 5 raw byte-grid와 두 raw global write
-- native class 12·13·14·82의 원본 정체·SPR, K01 요청 좌표 9/9와 프로젝트 3/9 exact
-  static identity/source·6/9 proxy 분리
+- native class 12·13·14·82의 원본 정체·SPR, K01 요청 좌표와 프로젝트 exact static
+  identity/source 9/9 연결; 신규 세 visual은 base frame 0 still로 animation 의미 격리
 - flag exact 1과 script context `+8 == 0`의 caller 전달 return 1
 - general presence→beacon bypass→class 76/78 loss latch와 zero-clock 재기록
 - win-first strict `0x7d0` timer, signed DWORD wrap/overflow와 동시 timer 우선순위

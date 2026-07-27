@@ -45,8 +45,10 @@ unsigned DWORD 50/2000 strict poll, `0x8c→0x96→0x1c` relay와 external/stage
 `REP STOSD`가 `[0x007c5ed8,0x00843980)`을 0으로 채워 win/loss timer를 초기화하는 순서도
 정적 복원·재현했다.
 native 증원의 원본 class·SPR와 K01 60×60 요청 좌표 9개도 교차 확인했다. K01 전용 adapter는
-class 12 세 개를 `japanese-gunner`의 exact static identity/source binding으로 고쳤다. class 13·14·82
-여섯 개는 여전히 proxy이며 generic open-point 배치가 최종 위치를 옮기거나 생략할 수 있다.
+class 12·13·14·82 아홉 record를 각각 `japanese-gunner`, `japanese-samurai`,
+`japanese-turtle-tank`, `japanese-konishi`의 exact static identity/source binding으로 연결했다.
+신규 세 visual은 base frame 0 still만 사용하며 generic open-point 배치가 최종 위치를 옮기거나
+생략할 수 있다.
 raw owner `1`→`cpu-1`, objective trigger와 attack-move도 프로젝트 적응이다. raw clock→24 Hz와
 result transition/identity policy mapping도 없어 승패 수명주기는 runtime에 연결하지 않았다.
 
@@ -70,7 +72,7 @@ K02는 이 단기 MVP의 완료 조건이 아니다. 기존 K02 프로토타입�
 | 원본 PE·주소 변환 | 고정 Ghidra 파이프라인 존재 | 일반 참조·점프 테이블 포함 | 2회 생성 해시 일치 | 정적 분석 1단계 완료 |
 | 스크립트·맵·SPR·YAV 파서 | 도구 존재 | 원본 파일 기반 | 파서별 편차 있음 | 재감사 후 유지 |
 | 엔티티 정체·자원 | 고유 연결 표시 이름 반영, 봉화대·K01 영웅 자원 수정 | 클래스 1~95 명칭·슬롯·기본 프레임·flags·경로 전수 확정 | 연속성·대표 타입·공유 경로·입력 해시 테스트 | 타입 정체 정적 확정, 행동·수치 의미는 별도 |
-| K01 캠페인 | 처음부터 결과까지 프로토타입, native 증원 class 12 세 개 exact static identity/source adapter | 표준 entry timer reset, 봉화대→K0120, native class/요청 좌표, latch→timer→commit, result presentation→final route 범위 확정 | 요청 좌표 9/9·exact static identity/source 3/9와 proxy 6/9, native effect·timer·presentation·route 경계 재현 | 단기 팬 리마스터 MVP, proxy identity·최종 배치·raw clock/result policy 미완료 |
+| K01 캠페인 | 처음부터 결과까지 프로토타입, native 증원 9개 exact static identity/source adapter | 표준 entry timer reset, 봉화대→K0120, native class/요청 좌표, latch→timer→commit, result presentation→final route 범위 확정 | 요청 좌표·exact static identity/source 9/9, native effect·timer·presentation·route 경계 재현 | 단기 팬 리마스터 MVP, 증원 animation/stats/behavior·최종 배치·raw clock/result policy 미완료 |
 | K02 캠페인 | 프로토타입 존재 | 제한적 | 원본 재현 없음 | K01 이후로 연기 |
 | 전투 | 프로토타입, 유성룡 좌표 accepted subset `0..32767` 독립 계산 부분 이식 | K01 영웅 phase·피해·대상·사거리·투사체와 signed-health 사망·slot/reference 수명주기 확정 | 대상·투사체·scheduler 및 사망 phase·delay·stale reference 경계 재현 | 독립 단위 부분 이식; identity/좌표/24 Hz exact mapping과 opt-in 사망 정책 대기 |
 | 이동·경로 탐색 | 구현 존재 | 후보 함수 존재 | 원본 재현 없음 | 미검증 |

@@ -17,6 +17,9 @@ test("default theme entity bindings point to loadable source-converted assets", 
   assert.equal(defaultTheme.entityBindings.archer, "korean-archer");
   assert.equal(defaultTheme.entityBindings["japanese-swordsman"], "japanese-swordsman");
   assert.equal(defaultTheme.entityBindings["japanese-gunner"], "japanese-gunner");
+  assert.equal(defaultTheme.entityBindings["japanese-samurai"], "japanese-samurai");
+  assert.equal(defaultTheme.entityBindings["japanese-turtle-tank"], "japanese-turtle-tank");
+  assert.equal(defaultTheme.entityBindings["japanese-konishi"], "japanese-konishi");
   assert.equal(defaultTheme.entityBindings["japanese-camp-house"], "japanese-camp-house");
   assert.equal(defaultTheme.entityBindings["japanese-camp-barracks"], "japanese-camp-barracks");
   assert.equal(defaultTheme.entityBindings["japanese-camp-tower"], "japanese-camp-tower");
@@ -44,6 +47,9 @@ test("original executable sprite pointer table backs K01/K02 theme source sprite
     { manifestPath: "entities/barracks/barrackk.manifest.json", sourcePath: "char/barrackk.spr", tableIndex: 8 },
     { manifestPath: "entities/japanese-camp-barracks/barrackj.manifest.json", sourcePath: "char/barrackj.spr", tableIndex: 10 },
     { manifestPath: "entities/japanese-gunner/gunj1.manifest.json", sourcePath: "char/gunj1.spr", tableIndex: 14 },
+    { manifestPath: "entities/japanese-samurai/horseswordj1.manifest.json", sourcePath: "char/horseswordj1.spr", tableIndex: 17 },
+    { manifestPath: "entities/japanese-turtle-tank/ghosttankj.manifest.json", sourcePath: "char/ghosttankj.spr", tableIndex: 4 },
+    { manifestPath: "entities/japanese-konishi/generalj11.manifest.json", sourcePath: "char/generalj11.spr", tableIndex: 65 },
     { manifestPath: "entities/japanese-camp-house/millj.manifest.json", sourcePath: "char/millj.spr", tableIndex: 23 },
     {
       manifestPath: "entities/korean-signal-beacon/firehousek.manifest.json",
@@ -340,6 +346,54 @@ test("default theme unit frame blocks stay within their source exports", () => {
   assert.equal(royalCartVisual.states.move?.clips.sw?.frames[0]?.fileName, "koreanking_0030.png");
   assert.equal(royalCartVisual.states.move?.clips.sw?.mirrorX, true);
   assert.equal(royalCartVisual.states.move?.clips.se?.frames.at(-1)?.fileName, "koreanking_0039.png");
+});
+
+test("identity-only Japanese visuals use only the proven base-frame still", () => {
+  const expectations = [
+    {
+      kind: "japanese-samurai",
+      manifestPath: "entities/japanese-samurai/horseswordj1.manifest.json",
+      source: "original/imjinrok2/char/horseswordj1.spr",
+      frameCount: 90,
+      frameFile: "horseswordj1_0000.png",
+    },
+    {
+      kind: "japanese-turtle-tank",
+      manifestPath: "entities/japanese-turtle-tank/ghosttankj.manifest.json",
+      source: "original/imjinrok2/char/ghosttankj.spr",
+      frameCount: 88,
+      frameFile: "ghosttankj_0000.png",
+    },
+    {
+      kind: "japanese-konishi",
+      manifestPath: "entities/japanese-konishi/generalj11.manifest.json",
+      source: "original/imjinrok2/char/generalj11.spr",
+      frameCount: 49,
+      frameFile: "generalj11_0000.png",
+    },
+  ] as const;
+
+  for (const expectation of expectations) {
+    const manifest = readManifest(expectation.manifestPath);
+    const visual = defaultTheme.visuals[
+      defaultTheme.entityBindings[expectation.kind]
+    ] as EntityVisual;
+    assert.equal(manifest.source, expectation.source);
+    assert.equal(manifest.frameCount, expectation.frameCount);
+    assert.equal(manifest.exportedFrames.length, expectation.frameCount);
+    assert.deepEqual(Object.keys(visual.states), ["default"]);
+    assert.deepEqual(Object.keys(visual.states.default?.clips ?? {}), ["default"]);
+    assert.equal(
+      visual.states.default?.clips.default?.frames[0]?.fileName,
+      expectation.frameFile,
+    );
+    assert.equal(
+      visual.states.default?.clips.default?.frames.length,
+      1,
+    );
+    assert.equal(visual.states.default?.facings, undefined);
+    assert.equal(visual.states.default?.clips.default?.mirrorX, undefined);
+  }
 });
 
 test("project grid facings match the statically recovered Korean spearman movement deltas", () => {

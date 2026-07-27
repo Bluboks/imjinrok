@@ -58,7 +58,7 @@ EXE와 Ghidra 산출물의 입력 SHA-256이 다르면 추출을 거부한다.
 따라서 자원 경로 하나만으로 프로젝트 엔티티를 원본 타입 하나에 연결할 수 없는 경우가 실제로 존재한다.
 이 경우 이름을 임의로 선택하지 않고 `ambiguous`로 유지한다.
 
-## 현행 18개 비주얼 대조
+## 현행 21개 비주얼 대조
 
 | 프로젝트 비주얼 | 원본 SPR | 클래스 | 정적으로 확인된 정체 | 현재 판정 |
 | --- | --- | ---: | --- | --- |
@@ -66,6 +66,9 @@ EXE와 Ghidra 산출물의 입력 SHA-256이 다르면 추출을 거부한다.
 | `japanese-swordsman` | `swordj.spr` | 3 | 일본 창병 | 정체 확정, 프레임 의미 미확정 |
 | `korean-archer` | `archerk.spr` | 4 | 조선 궁수 | 정체 확정, 프레임 의미 미확정 |
 | `japanese-gunner` | `gunj1.spr` | 12 | 일본 조총병 | 정체 확정, 프레임 의미 미확정 |
+| `japanese-samurai` | `horseswordj1.spr` | 13 | 일본 사무라이 | 정체·source 확정, base-frame still 외 프레임 의미 미확정 |
+| `japanese-turtle-tank` | `ghosttankj.spr` | 14 | 일본 귀갑차 | 정체·source 확정, base-frame still 외 프레임 의미 미확정 |
+| `japanese-konishi` | `generalj11.spr` | 82 | 일본 고니시 | 정체·source 확정, base-frame still 외 프레임 의미 미확정 |
 | `korean-general-k4` | `generalk4.spr` | 79 | 조선 사명대사 | 정체 확정, 현행 K01 영웅 바인딩 없음 |
 | `korean-gwon-yul` | `generalk11.spr` | 76 | 조선 권율 | 정체·상태 8/1/4/7 대기·이동·공격·사망 확정 |
 | `korean-ryu-seong-ryong` | `generalk31.spr` | 78 | 조선 유성룡 | 정체·상태 8/1/4/7 대기·이동·공격·사망 확정 |

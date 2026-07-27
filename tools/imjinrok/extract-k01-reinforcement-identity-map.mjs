@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
+import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { parseSpriteLikeHeader } from "./codec.mjs";
@@ -15,12 +15,42 @@ export const EXPECTED_ENTITY_CATALOG_SHA256 =
   "572044d9eec6162689154f3625c7572f27d7ee9030d4e4f9f51151b6a88f8745";
 export const EXPECTED_K01_MAP_SHA256 =
   "43ec3a173032f74c12d3cce1db1078b076b651ed79070a0914673a5b65da99cb";
-export const JAPANESE_GUNNER_CONVERSION_MANIFEST_LOGICAL_PATH =
-  "apps/game-client/public/assets/themes/default/entities/japanese-gunner/gunj1.manifest.json";
 
 const repositoryRoot = resolve(
   fileURLToPath(new URL("../..", import.meta.url)),
 );
+
+const JAPANESE_SWORDSMAN_GAMEPLAY_ADAPTER = {
+  category: "infantry",
+  actionIds: ["move", "stop", "attack-move", "patrol", "hold"],
+  populationCost: 1,
+  footprint: { width: 1, height: 1, blocksMovement: true },
+  baseAttributes: { health: 55, mana: 0, movementSpeed: 4 },
+  combat: { damage: 9, range: 1.5, cooldownTicks: 18, aggroRange: 7 },
+  renderRadius: 6,
+  selectionRadius: 6,
+  hitRadius: 16,
+  sightRadius: 7,
+  minimapShape: "circle",
+  minimapRadius: 2.9,
+  selectedMinimapRadius: 4.2,
+};
+
+const JAPANESE_GUNNER_GAMEPLAY_ADAPTER = {
+  category: "infantry",
+  actionIds: ["move", "stop", "attack-move", "patrol", "hold"],
+  populationCost: 1,
+  footprint: { width: 1, height: 1, blocksMovement: true },
+  baseAttributes: { health: 38, mana: 0, movementSpeed: 3.8 },
+  combat: { damage: 7, range: 5.5, cooldownTicks: 24, aggroRange: 8 },
+  renderRadius: 6,
+  selectionRadius: 6,
+  hitRadius: 16,
+  sightRadius: 8,
+  minimapShape: "circle",
+  minimapRadius: 2.9,
+  selectedMinimapRadius: 4.2,
+};
 
 const EXPECTED_TYPES = [
   {
@@ -29,6 +59,8 @@ const EXPECTED_TYPES = [
     sourcePathNormalized: "char/gunj1.spr",
     slot: 114,
     baseFrame: 0,
+    pointerCell: "0x004bc25c",
+    spriteTableIndex: 14,
     sha256:
       "e35c3dddfc4860d3e8ccbb7d86ecb006b11230e269d04091dcfa320dc116a7a8",
     width: 60,
@@ -36,6 +68,20 @@ const EXPECTED_TYPES = [
     frameCount: 80,
     projectKind: "japanese-gunner",
     identityMapping: "exact-static-identity-source",
+    manifestLogicalPath:
+      "apps/game-client/public/assets/themes/default/entities/japanese-gunner/gunj1.manifest.json",
+    manifestSha256:
+      "f156fab6f775bcf0df46a3f52356dcdbb86634447d9a674d6d9a39476178cae5",
+    manifestStem: "gunj1",
+    baseFrameSha256:
+      "7d17b5bc01f785e7d2e8530db10c7fc0371b39d8558b7084676ea33296918003",
+    projectGameplayAdapter: JAPANESE_GUNNER_GAMEPLAY_ADAPTER,
+    visualDefaults: {
+      render: { srcPxPerWu: 32, filtering: "nearest" },
+      size: { w: 60, h: 60 },
+      pivot: { anchor: { x: 30, y: 52 } },
+    },
+    defaultStillOnly: false,
   },
   {
     internalClass: 13,
@@ -43,13 +89,29 @@ const EXPECTED_TYPES = [
     sourcePathNormalized: "char/horseswordj1.spr",
     slot: 117,
     baseFrame: 0,
+    pointerCell: "0x004bc268",
+    spriteTableIndex: 17,
     sha256:
       "f08dba883a1e5686383d05882d2c0f21c2bb52b6b2c2bb00e4d806f41ac9fdfa",
     width: 80,
     height: 80,
     frameCount: 90,
-    projectKind: "japanese-swordsman",
-    identityMapping: "proxy",
+    projectKind: "japanese-samurai",
+    identityMapping: "exact-static-identity-source",
+    manifestLogicalPath:
+      "apps/game-client/public/assets/themes/default/entities/japanese-samurai/horseswordj1.manifest.json",
+    manifestSha256:
+      "4d2ef829d95a1b90c2e666757f29c948369e9f27c6b2b11aab992f18030bf9c9",
+    manifestStem: "horseswordj1",
+    baseFrameSha256:
+      "9294f923426de05f81e5d18be55bbe8deb31d96282e70469abe3382088ff4d02",
+    projectGameplayAdapter: JAPANESE_SWORDSMAN_GAMEPLAY_ADAPTER,
+    visualDefaults: {
+      render: { srcPxPerWu: 32, filtering: "nearest" },
+      size: { w: 80, h: 80 },
+      pivot: { anchor: { x: 40, y: 72 } },
+    },
+    defaultStillOnly: true,
   },
   {
     internalClass: 14,
@@ -57,13 +119,29 @@ const EXPECTED_TYPES = [
     sourcePathNormalized: "char/ghosttankj.spr",
     slot: 104,
     baseFrame: 0,
+    pointerCell: "0x004bc234",
+    spriteTableIndex: 4,
     sha256:
       "34c3fdb3bcd79bc95f907aa7c381c11a374b30c8f7dd45f89f0e762a139f04ec",
     width: 70,
     height: 60,
     frameCount: 88,
-    projectKind: "japanese-swordsman",
-    identityMapping: "proxy",
+    projectKind: "japanese-turtle-tank",
+    identityMapping: "exact-static-identity-source",
+    manifestLogicalPath:
+      "apps/game-client/public/assets/themes/default/entities/japanese-turtle-tank/ghosttankj.manifest.json",
+    manifestSha256:
+      "5d83ac52b270f0489bcde28e83896365c58468de340ffae3cebea64943bd7dc5",
+    manifestStem: "ghosttankj",
+    baseFrameSha256:
+      "104517e7249550c719ccda7473720c2384bc217f56c71543894e8ace55dcf354",
+    projectGameplayAdapter: JAPANESE_SWORDSMAN_GAMEPLAY_ADAPTER,
+    visualDefaults: {
+      render: { srcPxPerWu: 32, filtering: "nearest" },
+      size: { w: 70, h: 60 },
+      pivot: { anchor: { x: 35, y: 52 } },
+    },
+    defaultStillOnly: true,
   },
   {
     internalClass: 82,
@@ -71,13 +149,29 @@ const EXPECTED_TYPES = [
     sourcePathNormalized: "char/generalj11.spr",
     slot: 165,
     baseFrame: 0,
+    pointerCell: "0x004bc328",
+    spriteTableIndex: 65,
     sha256:
       "eff3f8eb3a60c50ea6ac534d90e568bac415526a00f6ca2e287e00bfdf4bb03f",
     width: 140,
     height: 108,
     frameCount: 49,
-    projectKind: "japanese-gunner",
-    identityMapping: "proxy",
+    projectKind: "japanese-konishi",
+    identityMapping: "exact-static-identity-source",
+    manifestLogicalPath:
+      "apps/game-client/public/assets/themes/default/entities/japanese-konishi/generalj11.manifest.json",
+    manifestSha256:
+      "a71d9b7392a4bc366a7346c90f174c5a7e2d919296ae26d892788c0f43ac7b54",
+    manifestStem: "generalj11",
+    baseFrameSha256:
+      "9b94fe4900a4343de2842c60caae2575e1e949bebba3e72bbdfcfc819a1caeaf",
+    projectGameplayAdapter: JAPANESE_GUNNER_GAMEPLAY_ADAPTER,
+    visualDefaults: {
+      render: { srcPxPerWu: 32, filtering: "nearest" },
+      size: { w: 140, h: 108 },
+      pivot: { anchor: { x: 70, y: 100 } },
+    },
+    defaultStillOnly: true,
   },
 ];
 
@@ -89,10 +183,6 @@ const DEFAULT_PATHS = {
   ),
   map: resolve(repositoryRoot, "original/imjinrok2/stagemap/k01.map"),
   originalRoot: resolve(repositoryRoot, "original/imjinrok2"),
-  japaneseGunnerConversionManifest: resolve(
-    repositoryRoot,
-    JAPANESE_GUNNER_CONVERSION_MANIFEST_LOGICAL_PATH,
-  ),
 };
 
 const REQUIRED_SPRITE_AUDIT_SOURCE_PATHS = [
@@ -202,10 +292,10 @@ export function extractK01ReinforcementIdentityMap(options = {}) {
   const spriteAuditBuffer = readFileSync(paths.spriteAudit);
   const spriteAuditSha256 = sha256(spriteAuditBuffer);
   const spriteAudit = parseJson(spriteAuditBuffer, paths.spriteAudit);
-  const projectStaticSourceBinding = validateProjectStaticSourceBinding(
+  const projectStaticSourceBindings = validateProjectStaticSourceBindings(
     spriteAudit,
     repositoryRoot,
-    paths.japaneseGunnerConversionManifest,
+    options.conversionManifestPathResolver,
   );
 
   const mapBuffer = readFileSync(paths.map);
@@ -255,6 +345,25 @@ export function extractK01ReinforcementIdentityMap(options = {}) {
   if (requestedPositions.some(({ inBounds }) => !inBounds)) {
     throw new Error("a K01 native requested reinforcement position is out of bounds");
   }
+  assertDeepEqual(
+    spriteAudit.k01ReinforcementAdapter,
+    requestedPositions.map(
+      ({
+        originalClass,
+        rawOwnerWord,
+        offset,
+        projectKind,
+        identityMapping,
+      }) => ({
+        originalClass,
+        rawOwnerWord,
+        offset,
+        projectKind,
+        identityMapping,
+      }),
+    ),
+    "sprite mapping audit K01 reinforcement adapter",
+  );
 
   const exactStaticIdentitySourceBindingCount = requestedPositions.filter(
     ({ identityMapping }) =>
@@ -264,17 +373,17 @@ export function extractK01ReinforcementIdentityMap(options = {}) {
     requestedPositions.length - exactStaticIdentitySourceBindingCount;
   assertEqual(
     exactStaticIdentitySourceBindingCount,
-    3,
+    9,
     "exact static identity/source binding count",
   );
-  assertEqual(proxyIdentityCount, 6, "proxy identity binding count");
+  assertEqual(proxyIdentityCount, 0, "proxy identity binding count");
 
   return {
     question:
       "For K01, how do the native reinforcement descriptor classes and requested map coordinates map into the project while keeping static-proven original facts separate from project adaptations?",
     analysisStatus: "static-proven-original-identity-and-k01-requested-coordinates",
     reproductionStatus: "reproduction-complete",
-    implementationStatus: "isolated-k01-adapter-partial-identity-binding",
+    implementationStatus: "isolated-k01-adapter-identity-source-binding",
     sources: {
       executable: beaconReport.sources.executable,
       entityCatalog: {
@@ -284,10 +393,12 @@ export function extractK01ReinforcementIdentityMap(options = {}) {
       spriteMappingAudit: {
         path: paths.spriteAudit,
         sha256: spriteAuditSha256,
-        validatedSourceFiles: projectStaticSourceBinding.validatedSourceFiles,
+        validatedSourceFiles:
+          projectStaticSourceBindings.validatedSourceFiles,
       },
-      japaneseGunnerConversionManifest:
-        projectStaticSourceBinding.conversionManifest,
+      conversionManifests: projectStaticSourceBindings.bindings.map(
+        ({ conversionManifest }) => conversionManifest,
+      ),
       k01Map: {
         path: paths.map,
         sha256: mapSha256,
@@ -306,7 +417,7 @@ export function extractK01ReinforcementIdentityMap(options = {}) {
       rawOwnerMeaning: "unresolved",
     },
     identities,
-    projectStaticSourceBinding,
+    projectStaticSourceBindings: projectStaticSourceBindings.bindings,
     requestedPositions,
     integration: {
       exactRequestedCoordinateCount: requestedPositions.length,
@@ -319,24 +430,25 @@ export function extractK01ReinforcementIdentityMap(options = {}) {
         "raw owner WORD 1 to project playerId cpu-1",
         "objective-status beacon completion trigger",
         "attack-move target 10,10",
-        "class 13/14/82 proxy entity kinds",
+        "class 13/14 copy japanese-swordsman gameplay values",
+        "class 82 copies japanese-gunner gameplay values",
+        "all four current visual pivots and render scaling",
       ],
       behaviorParity:
         "not proven: project stats, combat behavior, and animation-state mappings are outside this evidence",
     },
     uncertainties: [
-      "class 13, 14, and 82 have no exact project entity kind or verified animation mapping",
-      "class 12 animation-state mapping, combat behavior, and stats are not proven",
+      "all four animation-state mappings, combat behavior, stats, category choices, collision radii, and pivots are not original-proven",
       "final runtime placement can differ from native requested coordinates",
       "raw owner WORD 1 has no statically proven human-facing meaning in this unit",
     ],
   };
 }
 
-function validateProjectStaticSourceBinding(
+function validateProjectStaticSourceBindings(
   spriteAudit,
   currentRepositoryRoot,
-  conversionManifestPhysicalPath,
+  conversionManifestPathResolver,
 ) {
   if (!Array.isArray(spriteAudit.sourceFiles)) {
     throw new Error("sprite mapping audit is missing sourceFiles");
@@ -363,139 +475,233 @@ function validateProjectStaticSourceBinding(
     },
   );
 
-  const binding = spriteAudit.entityTypeCatalog?.projectBindings?.find(
-    ({ entityId }) => entityId === "japanese-gunner",
-  );
-  if (!binding) {
-    throw new Error(
-      "sprite mapping audit is missing japanese-gunner project binding",
+  const bindings = EXPECTED_TYPES.map((expected) => {
+    const binding = spriteAudit.entityTypeCatalog?.projectBindings?.find(
+      ({ entityId }) => entityId === expected.projectKind,
     );
-  }
-  const expectedBinding = {
-    entityId: "japanese-gunner",
-    projectDisplayName: "일본 조총병",
-    visualId: "japanese-gunner",
-    visualSourcePath: "original/imjinrok2/char/gunj1.spr",
-    identityStatus: "static-proven",
-    originalGameplayName: "일본 조총병",
-    internalClass: 12,
-    nameMatchesOriginal: true,
-  };
-  assertDeepEqual(
-    binding,
-    expectedBinding,
-    "japanese-gunner project binding",
-  );
+    if (!binding) {
+      throw new Error(
+        `sprite mapping audit is missing ${expected.projectKind} project binding`,
+      );
+    }
+    const expectedBinding = {
+      entityId: expected.projectKind,
+      projectDisplayName: expected.originalGameplayName,
+      projectGameplayAdapter: expected.projectGameplayAdapter,
+      visualId: expected.projectKind,
+      visualSourcePath: `original/imjinrok2/${expected.sourcePathNormalized}`,
+      identityStatus: "static-proven",
+      originalGameplayName: expected.originalGameplayName,
+      internalClass: expected.internalClass,
+      nameMatchesOriginal: true,
+    };
+    assertDeepEqual(
+      binding,
+      expectedBinding,
+      `${expected.projectKind} project binding`,
+    );
 
-  const visual = spriteAudit.visuals?.find(
-    ({ visualId }) => visualId === "japanese-gunner",
-  );
-  if (!visual) {
-    throw new Error(
-      "sprite mapping audit is missing japanese-gunner visual evidence",
+    const visual = spriteAudit.visuals?.find(
+      ({ visualId }) => visualId === expected.projectKind,
     );
-  }
-  assertEqual(
-    visual.evidenceStatus,
-    "mixed",
-    "japanese-gunner visual evidence status",
-  );
-  assertDeepEqual(
-    {
-      identity: visual.staticEvidence?.identity,
-      originalGameplayName: visual.staticEvidence?.originalGameplayName,
-      internalClass: visual.staticEvidence?.internalClass,
-      spriteSlot: visual.staticEvidence?.spriteSlot,
-      sourcePath: visual.staticEvidence?.sourcePath,
-      baseFrame: visual.staticEvidence?.baseFrame,
-      animationStateMapping:
-        visual.staticEvidence?.animationStateMapping,
-    },
-    {
-      identity: "static-proven",
-      originalGameplayName: "일본 조총병",
-      internalClass: 12,
-      spriteSlot: 114,
-      sourcePath: "char\\gunj1.spr",
-      baseFrame: 0,
-      animationStateMapping: "unverified",
-    },
-    "japanese-gunner visual static evidence",
-  );
-  assertDeepEqual(
-    {
-      path: visual.source?.path,
-      sha256: visual.source?.sha256,
-      width: visual.source?.width,
-      height: visual.source?.height,
-      frameCount: visual.source?.frameCount,
-    },
-    {
-      path: "original/imjinrok2/char/gunj1.spr",
-      sha256:
-        "e35c3dddfc4860d3e8ccbb7d86ecb006b11230e269d04091dcfa320dc116a7a8",
-      width: 60,
-      height: 60,
-      frameCount: 80,
-    },
-    "japanese-gunner visual source",
-  );
-  const conversionManifestBuffer = readFileSync(
-    conversionManifestPhysicalPath,
-  );
-  const conversionManifestSha256 = sha256(conversionManifestBuffer);
-  assertDeepEqual(
-    visual.conversionManifest,
-    {
-      path: JAPANESE_GUNNER_CONVERSION_MANIFEST_LOGICAL_PATH,
-      sha256: conversionManifestSha256,
-    },
-    "japanese-gunner conversion manifest provenance",
-  );
-  const conversionManifest = parseJson(
-    conversionManifestBuffer,
-    conversionManifestPhysicalPath,
-  );
-  assertEqual(
-    conversionManifest.source,
-    "original/imjinrok2/char/gunj1.spr",
-    "japanese-gunner conversion manifest source",
-  );
-  assertEqual(
-    conversionManifest.frameCount,
-    80,
-    "japanese-gunner conversion manifest frame count",
-  );
-  if (!Array.isArray(conversionManifest.exportedFrames)) {
-    throw new Error(
-      "japanese-gunner conversion manifest exportedFrames must be an array",
+    if (!visual) {
+      throw new Error(
+        `sprite mapping audit is missing ${expected.projectKind} visual evidence`,
+      );
+    }
+    assertEqual(
+      visual.evidenceStatus,
+      "mixed",
+      `${expected.projectKind} visual evidence status`,
     );
-  }
-  assertEqual(
-    conversionManifest.exportedFrames.length,
-    80,
-    "japanese-gunner conversion manifest exported frame count",
-  );
+    assertDeepEqual(
+      {
+        identity: visual.staticEvidence?.identity,
+        originalGameplayName:
+          visual.staticEvidence?.originalGameplayName,
+        internalClass: visual.staticEvidence?.internalClass,
+        spriteSlot: visual.staticEvidence?.spriteSlot,
+        sourcePath: visual.staticEvidence?.sourcePath,
+        baseFrame: visual.staticEvidence?.baseFrame,
+        animationStateMapping:
+          visual.staticEvidence?.animationStateMapping,
+      },
+      {
+        identity: "static-proven",
+        originalGameplayName: expected.originalGameplayName,
+        internalClass: expected.internalClass,
+        spriteSlot: expected.slot,
+        sourcePath: expected.sourcePathNormalized.replace("/", "\\"),
+        baseFrame: 0,
+        animationStateMapping: "unverified",
+      },
+      `${expected.projectKind} visual static evidence`,
+    );
+    assertDeepEqual(
+      {
+        path: visual.source?.path,
+        sha256: visual.source?.sha256,
+        width: visual.source?.width,
+        height: visual.source?.height,
+        frameCount: visual.source?.frameCount,
+      },
+      {
+        path: `original/imjinrok2/${expected.sourcePathNormalized}`,
+        sha256: expected.sha256,
+        width: expected.width,
+        height: expected.height,
+        frameCount: expected.frameCount,
+      },
+      `${expected.projectKind} visual source`,
+    );
+    assertDeepEqual(
+      {
+        render: visual.render,
+        size: visual.defaults?.size,
+        pivot: visual.defaults?.pivot,
+      },
+      expected.visualDefaults,
+      `${expected.projectKind} visual project adapter`,
+    );
+    if (expected.defaultStillOnly) {
+      assertDeepEqual(
+        visual.mappings,
+        [
+          {
+            scope: "base",
+            state: "default",
+            declaredFacings: [],
+            clips: [
+              {
+                facing: "default",
+                frameFiles: [`${expected.manifestStem}_0000.png`],
+                frameIndexes: [0],
+                mirrorX: false,
+                missingFrames: [],
+              },
+            ],
+          },
+        ],
+        `${expected.projectKind} default still fallback`,
+      );
+    }
 
-  return {
-    binding: expectedBinding,
-    visual: {
-      evidenceStatus: visual.evidenceStatus,
-      source: visual.source,
-      staticEvidence: visual.staticEvidence,
-    },
-    conversionManifest: {
-      logicalPath: JAPANESE_GUNNER_CONVERSION_MANIFEST_LOGICAL_PATH,
-      physicalPath: conversionManifestPhysicalPath,
-      sha256: conversionManifestSha256,
-      source: conversionManifest.source,
-      frameCount: conversionManifest.frameCount,
-      exportedFrameCount: conversionManifest.exportedFrames.length,
-    },
-    validatedSourceFiles,
-    scope:
-      "project kind identity and source SPR binding only; animation-state, direction, stats, and behavior are unverified",
-  };
+    const conversionManifestPhysicalPath = conversionManifestPathResolver
+      ? conversionManifestPathResolver(expected.manifestLogicalPath)
+      : resolve(currentRepositoryRoot, expected.manifestLogicalPath);
+    const conversionManifestBuffer = readFileSync(
+      conversionManifestPhysicalPath,
+    );
+    const conversionManifestSha256 = sha256(conversionManifestBuffer);
+    const conversionManifest = parseJson(
+      conversionManifestBuffer,
+      conversionManifestPhysicalPath,
+    );
+    assertDeepEqual(
+      {
+        source: conversionManifest.source,
+        width: conversionManifest.width,
+        height: conversionManifest.height,
+        frameCount: conversionManifest.frameCount,
+      },
+      {
+        source: `original/imjinrok2/${expected.sourcePathNormalized}`,
+        width: expected.width,
+        height: expected.height,
+        frameCount: expected.frameCount,
+      },
+      `${expected.projectKind} conversion manifest header`,
+    );
+    if (!Array.isArray(conversionManifest.exportedFrames)) {
+      throw new Error(
+        `${expected.projectKind} conversion manifest exportedFrames must be an array`,
+      );
+    }
+    assertEqual(
+      conversionManifest.exportedFrames.length,
+      expected.frameCount,
+      `${expected.projectKind} conversion manifest exported frame count`,
+    );
+    assertDeepEqual(
+      conversionManifest.exportedFrames[0],
+      { index: 0, fileName: `${expected.manifestStem}_0000.png` },
+      `${expected.projectKind} conversion manifest first frame`,
+    );
+    assertDeepEqual(
+      conversionManifest.exportedFrames.at(-1),
+      {
+        index: expected.frameCount - 1,
+        fileName: `${expected.manifestStem}_${String(expected.frameCount - 1).padStart(4, "0")}.png`,
+      },
+      `${expected.projectKind} conversion manifest last frame`,
+    );
+    const baseFrameFile = conversionManifest.exportedFrames.find(
+      ({ index }) => index === expected.baseFrame,
+    )?.fileName;
+    if (!baseFrameFile) {
+      throw new Error(
+        `${expected.projectKind} conversion manifest is missing base frame ${expected.baseFrame}`,
+      );
+    }
+    const baseFramePath = resolve(
+      dirname(conversionManifestPhysicalPath),
+      baseFrameFile,
+    );
+    const baseFrameSha256 = sha256(readFileSync(baseFramePath));
+    assertEqual(
+      baseFrameSha256,
+      expected.baseFrameSha256,
+      `${expected.projectKind} base-frame PNG SHA-256`,
+    );
+    assertEqual(
+      conversionManifestSha256,
+      expected.manifestSha256,
+      `${expected.projectKind} conversion manifest SHA-256`,
+    );
+    assertDeepEqual(
+      visual.conversionManifest,
+      {
+        path: expected.manifestLogicalPath,
+        sha256: conversionManifestSha256,
+      },
+      `${expected.projectKind} conversion manifest provenance`,
+    );
+
+    return {
+      binding: expectedBinding,
+      visual: {
+        evidenceStatus: visual.evidenceStatus,
+        source: visual.source,
+        staticEvidence: visual.staticEvidence,
+        projectAdapter: {
+          render: visual.render,
+          defaults: visual.defaults,
+          mappings: visual.mappings,
+        },
+      },
+      conversionManifest: {
+        logicalPath: expected.manifestLogicalPath,
+        physicalPath: conversionManifestPhysicalPath,
+        sha256: conversionManifestSha256,
+        source: conversionManifest.source,
+        width: conversionManifest.width,
+        height: conversionManifest.height,
+        frameCount: conversionManifest.frameCount,
+        exportedFrameCount: conversionManifest.exportedFrames.length,
+        firstFrame: conversionManifest.exportedFrames[0],
+        lastFrame: conversionManifest.exportedFrames.at(-1),
+        baseFrameAsset: {
+          index: expected.baseFrame,
+          path: baseFramePath,
+          sha256: baseFrameSha256,
+        },
+      },
+      scope:
+        "project kind identity and source SPR binding only; animation-state, direction, stats, category, collision, behavior, render scale, and pivot are unverified original semantics",
+    };
+  });
+
+  return { bindings, validatedSourceFiles };
 }
 
 function inspectIdentity(catalog, originalRoot, expected, spritePathResolver) {
@@ -526,6 +732,17 @@ function inspectIdentity(catalog, originalRoot, expected, spritePathResolver) {
     record.sprite?.baseFrame,
     expected.baseFrame,
     `class ${expected.internalClass} base frame`,
+  );
+  assertEqual(
+    record.sprite?.pointerCell,
+    expected.pointerCell,
+    `class ${expected.internalClass} sprite pointer cell`,
+  );
+  const pointerCellValue = Number.parseInt(record.sprite.pointerCell, 16);
+  assertEqual(
+    (pointerCellValue - 0x004bc224) / 4,
+    expected.spriteTableIndex,
+    `class ${expected.internalClass} sprite table index`,
   );
 
   const spritePath = spritePathResolver
@@ -559,6 +776,8 @@ function inspectIdentity(catalog, originalRoot, expected, spritePathResolver) {
       path: expected.sourcePathNormalized,
       slot: expected.slot,
       baseFrame: expected.baseFrame,
+      pointerCell: expected.pointerCell,
+      spriteTableIndex: expected.spriteTableIndex,
       sha256: spriteSha256,
       width: header.width,
       height: header.height,
