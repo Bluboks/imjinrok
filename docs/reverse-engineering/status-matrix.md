@@ -18,14 +18,14 @@
 | K01 승패 판정 | 추정 | 미재현 | 프로토타입 | 결과 함수 전체 분기와 경계 테스트 |
 | 전투·피해 | K01 권율·유성룡의 공격 상태 이후 phase·효과 시점·회복, 권율 직접 피해와 유성룡 투사체 생성 정적 확정 | 해당 phase·회복·권율 직접 피해 벡터 재현 | 프로토타입, 아직 미이식 | 유성룡 투사체 충돌, 대상 검색·사거리, 원본 틱 시간 단위 |
 | 이동·경로 탐색 | 추정 | 미재현 | 프로토타입 | 좌표·경로 레코드와 실패 경로 복원 |
-| 생산·건설·연구 | 조선 본영·봉화대 표시 진행도 정적 확정; 선택 panel로 탐색한 네 slot은 SPEECH 화자 lifecycle로 판명되어 mechanic 결합 가설 반증 | 건물 프레임 선택 완료; SPEECH slot producer/lifecycle 범위 한정 재현 완료 | 메커니즘은 프로토타입, responsive·다중 선택 selection panel은 프로젝트 superset | 실제 gameplay 선택 UI owner와 건설·생산·연구 progress producer 복원 |
+| 생산·건설·연구 | 조선 본영·봉화대 표시 진행도 정적 확정; SPEECH 결합 가설 반증; action 115의 payload-zero field-0x266 gated/bypass admission, right-release payload-one removal/no-match rollback, queue pump/count marker, state 0x0f type 76 handoff/dispatch boundary 정적 확정 | 건물 프레임, SPEECH lifecycle, bounded input transport와 action 115 dispatch·action 107 early-exit vector만 재현; queue pump/marker와 state update/dispatch는 static-only | 메커니즘은 프로토타입, responsive·다중 선택 selection panel은 프로젝트 superset | remembered right-click reservation action/owner, full production state update/post-dispatch, exact queue scheduler admission, original construction/research producer와 project contract 비교 |
 | AI | 미확인 | 미재현 | 프로젝트 구현 | 원본 의사결정 함수 지도 |
 | 애니메이션 | 조선 창병 상태 1·2 이동과 K01 권율·유성룡 상태 1·4·7·8의 슬롯·프레임·방향, 두 영웅 공격 효과 phase 7 정적 확정 | 해당 방향·phase·상태별 슬롯과 flags 분기 재현 | 조선 창병 일반 이동, 두 영웅 idle·일반 이동·공격·사망 이식; 효과 시점은 미이식 | 원본 틱→FPS 변환·사망 표시 수명, 조선 창병 상태 2 통합과 특수 분기 base 연결 |
 | 건물 상태 이미지 | 조선 본영·봉화대 본체 건설·정상·반파 범위 정적 확정 | 모든 진행도·50% 경계 재현 완료 | 두 건물 본체 원본 기반 | 나머지 프레임·오버레이와 다른 7개 건물 복원 |
 | 브리핑 초상화 | 정적 확정 | 재현 완료 | 원본 기반 | 새 원본 변형에도 추출기·클라이언트 교차 검증 적용 |
 | `SPEECH` 대화 레이아웃 | 정적 확정 | 재현 완료 | 확정 좌표 원본 기반 | 제목·목표·버튼·글꼴을 별도 분석 |
 | K01 공통 임무 목표 모달 결합 | frame/content/dismiss·K01 text·strict release·ordered dispatcher와 GDI font 요청·CP949 byte renderer·유효 폭 300 규칙 정적 확정 | lifecycle 재현 완료; typography 제어 흐름은 공급한 synthetic GDI metrics 아래 부분 재현; 프로젝트 lifecycle 테스트 | 검증된 raster·기하·text·strict release와 base wrap width 300은 원본 기반; HUD trigger/event는 프로젝트 전용, font realization·glyph 측정·Korean wrap·backdrop·Escape·responsive blocker는 의도적 적응 | gameplay-panel 표시 정체, mechanism source, 원본 실현 font/metrics·빈 문자열 `SIZE.cy`·dismiss visual·sound |
-| UI·입력 | 임무 목표 모달과 SPEECH portrait/label slot lifecycle 정적 확정; `FUN_004567c0` transient measured blit와 `FUN_00457460` cache-gated fixed-coordinate base text를 확정해 fixed bottom panel 후보 반증; 실제 gameplay 선택 UI owner는 추정 | 목표 모달 lifecycle 완료, typography 부분 재현, SPEECH slot과 transient/base-text 흐름 supplied-metric·post-call-RECT 범위 재현 완료 | selection panel의 반응형·다중 선택·mana·추가 상태는 의도적 프로젝트 UI | 실제 gameplay 선택 UI owner와 실행 중 목표 추적 입력 복원 |
+| UI·입력 | 임무 목표 모달·SPEECH lifecycle 확정; transient 후보 반증; predefined seven-slot과 별도로 selected action의 production queue-count marker 정적 확정 | 목표 모달, SPEECH, transient/base-text, bounded selection/input transport·action dispatch만 범위 한정 재현; queue pump/marker/state handoff는 static-only | selection panel의 반응형·다중 선택·mana·추가 상태는 의도적 프로젝트 UI | remembered right-click reservation action/owner, player-scoped production-filter queue gate와 실행 중 목표 추적 입력 복원 |
 | 음향·연출 | 미확인 | 미재현 | 부분 구현 | 이벤트와 자원 매핑 복원 |
 
 ## 주의

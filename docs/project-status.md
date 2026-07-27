@@ -48,7 +48,7 @@ K02는 이 단기 MVP의 완료 조건이 아니다. 기존 K02 프로토타입�
 | 브리핑 초상화 | 17개 ID·`hero.spr` 프레임 이식 | 파서→조회→프레임 표→그리기 정적 확정 | 추출기·클라이언트 교차 테스트 | 원본 기반 |
 | `SPEECH` 대화 레이아웃 | 숫자 슬롯·초상화·대사 공통 배치 이식 | 640×480 슬롯 4개와 대사 좌표 정적 확정 | 추출기·배율 변환 테스트 | 확정 범위 원본 기반 |
 | K01 공통 임무 목표 모달 결합 | 검증된 raster·기하·K0110 텍스트·strict release와 유효 base wrap 폭 300을 독립 presenter에 연결; HUD button/event는 프로젝트 전용 | 진입·dispatcher에 더해 GDI `Arial` height 12/HANGEUL_CHARSET 요청, CP949 byte chunk·strict wrap·배치·실패 경로 정적 확정 | lifecycle 재현 완료; typography 제어 흐름은 공급한 synthetic GDI metrics 아래 부분 재현 | frame/content/dismiss·action·text·유효 폭은 원본 기반; 실제 font realization·glyph 폭·Korean wrap·빈 문자열 `SIZE.cy`, gameplay-panel 정체, mechanism source, dismiss visual·sound 미확정 |
-| UI·입력 | 반응형 목표 추적 HUD 존재 | 임무 목표 모달 확정; `FUN_004567c0`의 transient measured blit와 cache-gated `(200,350)` base text를 복원해 고정 bottom selection panel 후보 반증 | 임무 목표 모달 완료; transient/base-text 흐름은 supplied synthetic metrics·post-call RECT 범위 재현 | 목표 추적 HUD·responsive selection UI를 포함한 나머지는 의도적 프로젝트 UI |
+| UI·입력 | 반응형 목표 추적 HUD 존재 | 임무 목표 모달 확정; transient overlay 후보 반증; seven-slot owner와 별도로 action 115의 payload-zero field-0x266 gated/bypass admission, right-release payload-one removal/no-match rollback, queue pump/count marker·type 76 state handoff/dispatch boundary를 정적 확정 | 임무 목표 모달 완료; transient/base-text 및 bounded selection/input transport·action dispatch만 부분 재현, pump/marker/state handoff·update·dispatch는 static-only | original raw queue/state는 이식하지 않고 목표 추적 HUD·responsive selection UI를 포함한 나머지는 의도적 프로젝트 UI |
 | VM 동적 분석 | 과거 도구·기록 존재 | 다수 시행착오 기록 | 원시 증거가 저장소에 없음 | 보관, 기본 경로에서 제외 |
 
 ## 신뢰할 수 있는 출발점
@@ -90,7 +90,18 @@ K02는 이 단기 MVP의 완료 조건이 아니다. 기존 K02 프로토타입�
    provenance 조사는 중단한다. 선택 panel로 탐색한 `FUN_004a84e0`의 네 slot은 후속 producer
    분석에서 SPEECH 화자 portrait/label lifecycle로 확정됐고 kind는 화자 index 변경
    boolean이므로 건설·생산·연구 결합 가설은 반증됐다. gameplay 선택 UI의 실제 owner/producer,
-   gameplay-panel의 화면상 정체, 원본 dismiss visual·sound와 HUD 루트 좌표계는 남음
+   이어 selection 없음의 seven-slot owner와 별도로 action 115의 payload `0`이 field
+   `0x266` exact-one reservation 성공에서만 add/assign bookkeeping을 수행하며 non-one
+   bypass는 이를 건너뛰고 common player/type writes에 합류한 뒤 state WORD exact `1`에서
+   state `0x0f` direct start 또는 non-one one-entry queue append를 수행하고, right-release
+   payload `1`은 matching queue removal without caller refund 또는 no-match refund/bookkeeping
+   경로로 소비됨을 확정했다. selected action queue-count marker와 produced type 76
+   (`조선 권율`) state handoff/dispatch boundary도 정적으로 닫았다. `FUN_0042de00`의
+   progress/completion/post-dispatch 전체 결과는 미재현이다. 이 후보는 사용자가 기억한
+   right-click persistent reservation을 확정하지 않는다. exact queue scheduler admission,
+   remembered feature의 실제
+   action/owner, gameplay-panel의 전체 화면상 정체, 원본 dismiss visual·sound와 HUD 루트
+   좌표계는 남음
 5. K01에 등장하는 나머지 건물·유닛의 정체·상태·방향 매핑을 독립 복원
 6. 브리핑부터 승패 결과까지 K01 종단 적합성 시나리오를 통과
 

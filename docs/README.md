@@ -42,6 +42,7 @@
 - [선택 패널 slot dispatcher](reverse-engineering/mechanics/selection-panel-slot-dispatch.md)
 - [선택 패널로 탐색한 SPEECH slot lifecycle](reverse-engineering/mechanics/selection-panel-slot-lifecycle.md)
 - [고정 선택 패널 후보를 반증한 transient formatted overlay](reverse-engineering/mechanics/transient-formatted-overlay.md)
+- [selection action·생산 queue dispatch·조건부 seven-slot owner 경계](reverse-engineering/mechanics/persistent-selection-action-boundary.md)
 - [조선 창병·내부 클래스 2 애니메이션 파일럿](reverse-engineering/mechanics/unit-animation-pilot.md)
 - [K01 권율·유성룡 핵심 애니메이션 파일럿](reverse-engineering/mechanics/k01-hero-animation-pilot.md)
 - [K01 권율·유성룡 일반 공격 phase 파일럿](reverse-engineering/mechanics/k01-hero-basic-attack-pilot.md)

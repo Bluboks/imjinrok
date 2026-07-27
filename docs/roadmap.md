@@ -132,6 +132,23 @@ RECT로 measured surface를 blit하는 흐름으로 정적 확정했다. 이어�
 포함해도 persistent panel의 resource·rect·lifecycle은 증명되지 않았다. synthetic GDI metrics와
 post-call RECT 아래 layout·failure를 재현했지만 table 값의 gameplay 개념은 미확정이다. 실제
 gameplay selection surface는 다른 owner와 지속 draw branch에서 다시 식별한다.
+후속 분석은 selected action의 right release가 zero target-mode에서 normalized DWORD command
+payload로 전달되지만 selection 없음의 일곱 slot owner는 쓰지 않음을 확정했다. 일곱 slot은
+매 update clear 뒤 predefined faction/scenario table로 다시 채워지며, 선택 entity의 별도 열
+slot도 contained-object identifier container다. 별도 action 115 path는 internal class 76
+(`조선 권율`) 생산, payload `0`의 field-`0x266` exact-one reservation 성공에서만
+add/assign bookkeeping, non-one은 reservation과 해당 write를 건너뛰고
+common player/type writes 뒤 state-WORD-one direct start/non-one queue append,
+right-release payload `1`의 matching removal without caller refund 또는 no-match
+refund/bookkeeping까지 정적 확정·재현했다. selected-action queue-count marker와 queue pump,
+state `0x0f` type 76 handoff·produced-entity dispatch boundary는 정적 확정했지만 재현하지
+않았으며, `FUN_0042de00` progress/completion/post-dispatch 전체 결과도 미재현이다. 이 후보는
+사용자 기억의 persistent
+right-click reservation 기능을 확정하지 않으며 실제 action/owner는 별도 lead다. current
+`productionQueue`와 좁은 표시 의미는
+호환되지만 original raw queue/state를 project contract로 만들지 않으며 제품 UI는 바꾸지
+않았다. 다음 질문은 remembered right-click reservation의 실제 action/owner 또는
+player-scoped production-filter queue gate를 각각 독립적으로 닫는다.
 
 후속 프로젝트 구조 감사는 기존 `game.events` HUD view 경계를 확장해 K01 HUD objective button에서
 숫자 상태 없는 semantic action을 발행하고 `UIScene`의 queue·private active request까지 한 번

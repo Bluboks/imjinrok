@@ -108,6 +108,25 @@ gate가 허용하면 base byte string을 target `(200,350)`에 그린다. 이 �
 persistent bottom panel의 resource·rect·lifecycle은 증명되지 않았다.
 실제 gameplay selection surface는 다른 owner·draw branch에서 다시 식별해야 한다.
 
+[후속 selection/action 경계 분석](../reverse-engineering/mechanics/persistent-selection-action-boundary.md)은
+right release가 zero target-mode action에서 normalized DWORD command payload로 전달되지만
+selection 없음의 일곱 slot owner를 쓰지 않음을 확정했다. 그 owner는 update마다 clear된 뒤
+faction/scenario-derived predefined table에서 다시 채워진다. 별도 per-entity 열 slot도
+contained-object identifier container다. 별도로 action `115`는 internal class `76`
+(`조선 권율`) 생산에 결합된다. payload `0`은 `entity+0x266` exact `1`에서만
+prerequisite/`FUN_0047e330` reservation을 검사한다. exact-one reservation 성공에서만
+entity `+0x3f0` add/assign과 optional action-indexed decrement를 수행하고, non-1은 이를
+건너뛰고 common player/type writes에 합류한다. 이후 current state WORD exact `1`에서 state
+`0x0f`를 시작하고, 다른 state 값에서는 one-entry queue append를 수행한다. right-release
+payload `1`은 matching entry를 caller refund 없이 제거하거나, no-match에서
+`FUN_0047e300` refund와 raw bookkeeping을 수행한다. selected action slot은 matching queue
+count marker를 그리지만 이것이 사용자 기억의 persistent right-click reservation 표식이라는
+결합은 확정되지 않았다. 이 좁은 production action/data-flow만 current `productionQueue` 표시와
+호환 가능하며 original raw queue/state를 project contract로 복제하지 않는다.
+fixture의 재현 완료 범위는 bounded selection/input transport와 action dispatch뿐이다.
+queue pump·queue-count marker·state `0x0f` handoff와 `FUN_0042de00`의
+progress/completion/post-dispatch 전체 결과는 static-only다.
+
 ## 변경 통과 조건
 
 - 원본 파일 해시와 함수·데이터 주소
