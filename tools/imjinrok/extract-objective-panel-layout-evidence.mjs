@@ -32,7 +32,8 @@ export const ORIGINAL_OBJECTIVE_PANEL_LAYOUT = Object.freeze({
   content: Object.freeze({ x: 158, y: 135, right: 478, bottom: 259, width: 320, height: 124 }),
   dismissButton: Object.freeze({ x: 415, y: 267, right: 495, bottom: 291, width: 80, height: 24 }),
   text: Object.freeze({
-    maxWidth: 320,
+    requestedMaxWidth: 320,
+    maxWidth: 300,
     firstCenterY: 166,
     secondCenterY: 228,
   }),
@@ -59,6 +60,7 @@ const SEEDED_FUNCTIONS = [
   ["0x004a5980", "0x004a5980-0x004a5ab3", 6, 87, "2289cf5de064b7c64f8d94d5c8d2b94406983934dea499f265f70f2645ee51b2"],
   ["0x004a5ac0", "0x004a5ac0-0x004a5ada", 3, 7, "c63a4ba6ef2c297bff073c2a16e6c1d5d7cfe86699f8b7addc4e8cc4a8d0bb33"],
   ["0x004a5ae0", "0x004a5ae0-0x004a5b29", 3, 18, "016550b760eacb89d4538a7cb82618a4241d4c22c48ce65e0d53b502f3c9f2c7"],
+  ["0x004a9010", "0x004a9010-0x004a9258", 23, 189, "bf0bc845081af0d33719555f7ed7e735b3bfa2a00f0a5f84586744ac5cb02780"],
 ].map(([entry, bodyRange, blockCount, instructionCount, bodySha256]) => ({
   entry,
   bodyRange,
@@ -112,6 +114,7 @@ const STATIC_EVIDENCE = [
   [0x004a58ae, "2b c2 ba a6 00 00 00 d1 f8 8b 19 2b d0", "first text vertical center at 166"],
   [0x004a58f1, "66 3d 40 01 89 74 24 0c 89 74 24 10 5b 7d 09", "second signed text-width clamp at 320"],
   [0x004a5927, "8b d0 b8 e4 00 00 00 d1 fa 2b c2", "second text vertical center at 228"],
+  [0x004a9029, "66 8b 84 24 b8 02 00 00 89 5c 24 18 66 3d 2c 01 7d 09 0f bf c0 89 44 24 20 eb 08 c7 44 24 20 2c 01 00 00", "signed requested text width is clamped to an effective maximum of 300"],
   [0x004a5980, "a1 70 2d 55 00 83 ec 20 b9 48 0f c8 00 50 e8 1d c3 f6 ff", "dismiss-control update call"],
   [0x004a599c, "e8 2f 39 fa ff 83 f8 01 0f 84 02 01 00 00", "one-shot external dismissal"],
   [0x004a59aa, "56 8b 74 24 28 56 b9 18 94 55 00 e8 f6 51 fa ff 83 f8 01 0f 85 92 00 00 00", "surface-lock failure branch"],

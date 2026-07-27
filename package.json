@@ -29,6 +29,7 @@
     "imjinrok:extract-objective-modal-k01-binding": "node tools/imjinrok/extract-objective-modal-k01-binding.mjs --json",
     "imjinrok:extract-application-state-16-objective-control": "node tools/imjinrok/extract-application-state-16-objective-control.mjs --json",
     "imjinrok:extract-objective-pending-action-dispatch": "node tools/imjinrok/extract-objective-pending-action-dispatch.mjs --json",
+    "imjinrok:extract-objective-modal-typography": "node tools/imjinrok/extract-objective-modal-typography.mjs --json",
     "imjinrok:extract-unit-animation-pilot": "node tools/imjinrok/extract-unit-animation-pilot.mjs --json",
     "imjinrok:extract-k01-hero-movement-pilot": "node tools/imjinrok/extract-k01-hero-movement-pilot.mjs --json",
     "imjinrok:extract-k01-hero-basic-attack-pilot": "node tools/imjinrok/extract-k01-hero-basic-attack-pilot.mjs --json",

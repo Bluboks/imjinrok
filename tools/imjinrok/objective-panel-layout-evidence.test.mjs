@@ -54,7 +54,12 @@ test("extracts the objective modal's distinct frame, content, and dismiss-contro
     frame: { x: 112, y: 81, right: 528, bottom: 317, width: 416, height: 236 },
     content: { x: 158, y: 135, right: 478, bottom: 259, width: 320, height: 124 },
     dismissButton: { x: 415, y: 267, right: 495, bottom: 291, width: 80, height: 24 },
-    text: { maxWidth: 320, firstCenterY: 166, secondCenterY: 228 },
+    text: {
+      requestedMaxWidth: 320,
+      maxWidth: 300,
+      firstCenterY: 166,
+      secondCenterY: 228,
+    },
   });
   assert.deepEqual(report.layout, ORIGINAL_OBJECTIVE_PANEL_LAYOUT);
 });
@@ -86,10 +91,10 @@ test("verifies complete seeded function bodies, CFGs, and manually recovered vta
     referencesPath,
   });
 
-  assert.equal(report.functions.length, 20);
+  assert.equal(report.functions.length, 21);
   assert.equal(report.functions.every((fn) => fn.blockCount > 0 && fn.instructionCount > 0), true);
   assert.equal(report.rawCodeRanges.length, 5);
-  assert.equal(report.evidencePoints.length, 24);
+  assert.equal(report.evidencePoints.length, 25);
 });
 
 test("preserves the direct-reference audit while pointing to the resolved K01 binding", () => {

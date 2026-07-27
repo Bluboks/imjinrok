@@ -1,0 +1,661 @@
+{
+  "sourceExecutableSha256": "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e",
+  "sourceK01ScriptSha256": "d9dcc3c78d0373181677afc63fe9331ff561387e36877a62912ca66515f4aea8",
+  "syntheticMeasurementNotice": "fullStringMeasuredHeight and chunkWidths are supplied synthetic GDI SIZE values for deterministic control-flow reproduction; they do not establish actual K0110 line breaks, actual K0110 glyph widths, or the original empty string SIZE.cy.",
+  "k01Objective": {
+    "primaryCp949Hex": "312e20bac0c8adb4ebb8a620c1feb0ed20c0fbb1ba20bcb6b8ea2028c0afbcbab7e62c20b1c7c0b2c0ba20bbecbec620b3b2bec6bedf20c7d1b4d92e29",
+    "secondaryCp949Hex": ""
+  },
+  "fontLifecycleVectors": [
+    {
+      "id": "font-created",
+      "input": {
+        "createFontSucceeded": true
+      },
+      "expected": {
+        "fontHandleStored": true,
+        "events": [
+          "request-CreateFontA-Arial-height-12-charset-0x81",
+          "store-HFONT-DAT_00634e38"
+        ]
+      }
+    },
+    {
+      "id": "font-create-failure-reported-and-retained-null",
+      "input": {
+        "createFontSucceeded": false
+      },
+      "expected": {
+        "fontHandleStored": false,
+        "events": [
+          "request-CreateFontA-Arial-height-12-charset-0x81",
+          "store-null-DAT_00634e38",
+          "report-font-create-failure",
+          "continue-initialization"
+        ]
+      }
+    }
+  ],
+  "layoutVectors": [
+    {
+      "id": "k01-primary-supplied-synthetic-gdi-metrics-wrap",
+      "input": {
+        "textCp949Hex": "312e20bac0c8adb4ebb8a620c1feb0ed20c0fbb1ba20bcb6b8ea2028c0afbcbab7e62c20b1c7c0b2c0ba20bbecbec620b3b2bec6bedf20c7d1b4d92e29",
+        "requestedMaxWidth": 320,
+        "surfaceClearLockSucceeded": true,
+        "hdcAcquisitionSucceeded": true,
+        "fontSelectionSucceeded": true,
+        "gdiMeasurementsSucceeded": true,
+        "fullStringMeasuredHeight": 12,
+        "chunkWidths": [
+          30,
+          70,
+          50,
+          45,
+          55,
+          65,
+          55,
+          40,
+          60,
+          65
+        ]
+      },
+      "expected": {
+        "status": "rendered",
+        "effectiveMaxWidth": 300,
+        "lineHeight": 18,
+        "measuredWidth": 286,
+        "measuredHeight": 38,
+        "lineCount": 2,
+        "errorReported": false,
+        "hdcReleased": true,
+        "events": [
+          "clear-scratch-rect-0-0-299-249-index-254",
+          "acquire-scratch-hdc",
+          "set-transparent-background-mode",
+          "select-DAT_00634e38",
+          "measure-font-height-with-full-input",
+          "wrap-before-chunk-5",
+          "release-scratch-hdc"
+        ],
+        "lines": [
+          {
+            "y": 0,
+            "width": 250,
+            "chunkCp949Hex": [
+              "312e20",
+              "bac0c8adb4ebb8a620",
+              "c1feb0ed20",
+              "c0fbb1ba20",
+              "bcb6b8ea20"
+            ]
+          },
+          {
+            "y": 19,
+            "width": 285,
+            "chunkCp949Hex": [
+              "28c0afbcbab7e62c20",
+              "b1c7c0b2c0ba20",
+              "bbecbec620",
+              "b3b2bec6bedf20",
+              "c7d1b4d92e29"
+            ]
+          }
+        ],
+        "drawCalls": [
+          {
+            "chunkCp949Hex": "312e20",
+            "x": 0,
+            "y": 0,
+            "shadow": {
+              "x": 1,
+              "y": 1,
+              "color": "0x010101"
+            },
+            "main": {
+              "x": 0,
+              "y": 0,
+              "color": "0x0000ffff"
+            }
+          },
+          {
+            "chunkCp949Hex": "bac0c8adb4ebb8a620",
+            "x": 30,
+            "y": 0,
+            "shadow": {
+              "x": 31,
+              "y": 1,
+              "color": "0x010101"
+            },
+            "main": {
+              "x": 30,
+              "y": 0,
+              "color": "0x0000ffff"
+            }
+          },
+          {
+            "chunkCp949Hex": "c1feb0ed20",
+            "x": 100,
+            "y": 0,
+            "shadow": {
+              "x": 101,
+              "y": 1,
+              "color": "0x010101"
+            },
+            "main": {
+              "x": 100,
+              "y": 0,
+              "color": "0x0000ffff"
+            }
+          },
+          {
+            "chunkCp949Hex": "c0fbb1ba20",
+            "x": 150,
+            "y": 0,
+            "shadow": {
+              "x": 151,
+              "y": 1,
+              "color": "0x010101"
+            },
+            "main": {
+              "x": 150,
+              "y": 0,
+              "color": "0x0000ffff"
+            }
+          },
+          {
+            "chunkCp949Hex": "bcb6b8ea20",
+            "x": 195,
+            "y": 0,
+            "shadow": {
+              "x": 196,
+              "y": 1,
+              "color": "0x010101"
+            },
+            "main": {
+              "x": 195,
+              "y": 0,
+              "color": "0x0000ffff"
+            }
+          },
+          {
+            "chunkCp949Hex": "28c0afbcbab7e62c20",
+            "x": 0,
+            "y": 19,
+            "shadow": {
+              "x": 1,
+              "y": 20,
+              "color": "0x010101"
+            },
+            "main": {
+              "x": 0,
+              "y": 19,
+              "color": "0x0000ffff"
+            }
+          },
+          {
+            "chunkCp949Hex": "b1c7c0b2c0ba20",
+            "x": 65,
+            "y": 19,
+            "shadow": {
+              "x": 66,
+              "y": 20,
+              "color": "0x010101"
+            },
+            "main": {
+              "x": 65,
+              "y": 19,
+              "color": "0x0000ffff"
+            }
+          },
+          {
+            "chunkCp949Hex": "bbecbec620",
+            "x": 120,
+            "y": 19,
+            "shadow": {
+              "x": 121,
+              "y": 20,
+              "color": "0x010101"
+            },
+            "main": {
+              "x": 120,
+              "y": 19,
+              "color": "0x0000ffff"
+            }
+          },
+          {
+            "chunkCp949Hex": "b3b2bec6bedf20",
+            "x": 160,
+            "y": 19,
+            "shadow": {
+              "x": 161,
+              "y": 20,
+              "color": "0x010101"
+            },
+            "main": {
+              "x": 160,
+              "y": 19,
+              "color": "0x0000ffff"
+            }
+          },
+          {
+            "chunkCp949Hex": "c7d1b4d92e29",
+            "x": 220,
+            "y": 19,
+            "shadow": {
+              "x": 221,
+              "y": 20,
+              "color": "0x010101"
+            },
+            "main": {
+              "x": 220,
+              "y": 19,
+              "color": "0x0000ffff"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "empty-secondary-supplied-synthetic-zero-height",
+      "input": {
+        "textCp949Hex": "",
+        "requestedMaxWidth": 320,
+        "surfaceClearLockSucceeded": true,
+        "hdcAcquisitionSucceeded": true,
+        "fontSelectionSucceeded": true,
+        "gdiMeasurementsSucceeded": true,
+        "fullStringMeasuredHeight": 0,
+        "chunkWidths": []
+      },
+      "expected": {
+        "status": "rendered",
+        "effectiveMaxWidth": 300,
+        "lineHeight": 0,
+        "measuredWidth": 1,
+        "measuredHeight": 1,
+        "lineCount": 1,
+        "errorReported": false,
+        "hdcReleased": true,
+        "events": [
+          "clear-scratch-rect-0-0-299-249-index-254",
+          "acquire-scratch-hdc",
+          "set-transparent-background-mode",
+          "select-DAT_00634e38",
+          "measure-font-height-with-full-input",
+          "release-scratch-hdc"
+        ],
+        "lines": [
+          {
+            "y": 0,
+            "width": 0,
+            "chunkCp949Hex": []
+          }
+        ],
+        "drawCalls": []
+      }
+    },
+    {
+      "id": "cumulative-equality-wraps-and-retries-next-line",
+      "input": {
+        "textCp949Hex": "412042",
+        "requestedMaxWidth": 100,
+        "surfaceClearLockSucceeded": true,
+        "hdcAcquisitionSucceeded": true,
+        "fontSelectionSucceeded": true,
+        "gdiMeasurementsSucceeded": true,
+        "fullStringMeasuredHeight": 10,
+        "chunkWidths": [
+          60,
+          40
+        ]
+      },
+      "expected": {
+        "status": "rendered",
+        "effectiveMaxWidth": 100,
+        "lineHeight": 15,
+        "measuredWidth": 61,
+        "measuredHeight": 32,
+        "lineCount": 2,
+        "errorReported": false,
+        "hdcReleased": true,
+        "events": [
+          "clear-scratch-rect-0-0-299-249-index-254",
+          "acquire-scratch-hdc",
+          "set-transparent-background-mode",
+          "select-DAT_00634e38",
+          "measure-font-height-with-full-input",
+          "wrap-before-chunk-1",
+          "release-scratch-hdc"
+        ],
+        "lines": [
+          {
+            "y": 0,
+            "width": 60,
+            "chunkCp949Hex": [
+              "4120"
+            ]
+          },
+          {
+            "y": 16,
+            "width": 40,
+            "chunkCp949Hex": [
+              "42"
+            ]
+          }
+        ],
+        "drawCalls": [
+          {
+            "chunkCp949Hex": "4120",
+            "x": 0,
+            "y": 0,
+            "shadow": {
+              "x": 1,
+              "y": 1,
+              "color": "0x010101"
+            },
+            "main": {
+              "x": 0,
+              "y": 0,
+              "color": "0x0000ffff"
+            }
+          },
+          {
+            "chunkCp949Hex": "42",
+            "x": 0,
+            "y": 16,
+            "shadow": {
+              "x": 1,
+              "y": 17,
+              "color": "0x010101"
+            },
+            "main": {
+              "x": 0,
+              "y": 16,
+              "color": "0x0000ffff"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "strict-equal-width-wraps",
+      "input": {
+        "textCp949Hex": "412042",
+        "requestedMaxWidth": 100,
+        "surfaceClearLockSucceeded": true,
+        "hdcAcquisitionSucceeded": true,
+        "fontSelectionSucceeded": true,
+        "gdiMeasurementsSucceeded": true,
+        "fullStringMeasuredHeight": 10,
+        "chunkWidths": [
+          100,
+          20
+        ]
+      },
+      "expected": {
+        "status": "vertical-overflow",
+        "effectiveMaxWidth": 100,
+        "lineHeight": 15,
+        "measuredWidth": 1,
+        "measuredHeight": 256,
+        "lineCount": 16,
+        "errorReported": true,
+        "hdcReleased": true,
+        "events": [
+          "clear-scratch-rect-0-0-299-249-index-254",
+          "acquire-scratch-hdc",
+          "set-transparent-background-mode",
+          "select-DAT_00634e38",
+          "measure-font-height-with-full-input",
+          "wrap-before-chunk-0",
+          "report-vertical-overflow",
+          "release-scratch-hdc"
+        ],
+        "lines": [
+          {
+            "y": 0,
+            "width": 0,
+            "chunkCp949Hex": []
+          },
+          {
+            "y": 16,
+            "width": 0,
+            "chunkCp949Hex": []
+          },
+          {
+            "y": 32,
+            "width": 0,
+            "chunkCp949Hex": []
+          },
+          {
+            "y": 48,
+            "width": 0,
+            "chunkCp949Hex": []
+          },
+          {
+            "y": 64,
+            "width": 0,
+            "chunkCp949Hex": []
+          },
+          {
+            "y": 80,
+            "width": 0,
+            "chunkCp949Hex": []
+          },
+          {
+            "y": 96,
+            "width": 0,
+            "chunkCp949Hex": []
+          },
+          {
+            "y": 112,
+            "width": 0,
+            "chunkCp949Hex": []
+          },
+          {
+            "y": 128,
+            "width": 0,
+            "chunkCp949Hex": []
+          },
+          {
+            "y": 144,
+            "width": 0,
+            "chunkCp949Hex": []
+          },
+          {
+            "y": 160,
+            "width": 0,
+            "chunkCp949Hex": []
+          },
+          {
+            "y": 176,
+            "width": 0,
+            "chunkCp949Hex": []
+          },
+          {
+            "y": 192,
+            "width": 0,
+            "chunkCp949Hex": []
+          },
+          {
+            "y": 208,
+            "width": 0,
+            "chunkCp949Hex": []
+          },
+          {
+            "y": 224,
+            "width": 0,
+            "chunkCp949Hex": []
+          },
+          {
+            "y": 240,
+            "width": 0,
+            "chunkCp949Hex": []
+          }
+        ],
+        "drawCalls": []
+      }
+    },
+    {
+      "id": "scratch-clear-lock-failure-does-not-stop-render",
+      "input": {
+        "textCp949Hex": "412042",
+        "requestedMaxWidth": 320,
+        "surfaceClearLockSucceeded": false,
+        "hdcAcquisitionSucceeded": true,
+        "fontSelectionSucceeded": true,
+        "gdiMeasurementsSucceeded": true,
+        "fullStringMeasuredHeight": 10,
+        "chunkWidths": [
+          20,
+          20
+        ]
+      },
+      "expected": {
+        "status": "rendered",
+        "effectiveMaxWidth": 300,
+        "lineHeight": 15,
+        "measuredWidth": 41,
+        "measuredHeight": 16,
+        "lineCount": 1,
+        "errorReported": false,
+        "hdcReleased": true,
+        "events": [
+          "scratch-clear-lock-failed",
+          "acquire-scratch-hdc",
+          "set-transparent-background-mode",
+          "select-DAT_00634e38",
+          "measure-font-height-with-full-input",
+          "release-scratch-hdc"
+        ],
+        "lines": [
+          {
+            "y": 0,
+            "width": 40,
+            "chunkCp949Hex": [
+              "4120",
+              "42"
+            ]
+          }
+        ],
+        "drawCalls": [
+          {
+            "chunkCp949Hex": "4120",
+            "x": 0,
+            "y": 0,
+            "shadow": {
+              "x": 1,
+              "y": 1,
+              "color": "0x010101"
+            },
+            "main": {
+              "x": 0,
+              "y": 0,
+              "color": "0x0000ffff"
+            }
+          },
+          {
+            "chunkCp949Hex": "42",
+            "x": 20,
+            "y": 0,
+            "shadow": {
+              "x": 21,
+              "y": 1,
+              "color": "0x010101"
+            },
+            "main": {
+              "x": 20,
+              "y": 0,
+              "color": "0x0000ffff"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "hdc-acquisition-failure-returns-one-by-one",
+      "input": {
+        "textCp949Hex": "412042",
+        "requestedMaxWidth": 320,
+        "surfaceClearLockSucceeded": true,
+        "hdcAcquisitionSucceeded": false
+      },
+      "expected": {
+        "status": "hdc-acquisition-failed",
+        "effectiveMaxWidth": 300,
+        "lineHeight": 0,
+        "measuredWidth": 1,
+        "measuredHeight": 1,
+        "lineCount": 0,
+        "errorReported": false,
+        "hdcReleased": false,
+        "events": [
+          "clear-scratch-rect-0-0-299-249-index-254",
+          "scratch-hdc-acquisition-failed"
+        ],
+        "lines": [],
+        "drawCalls": []
+      }
+    },
+    {
+      "id": "font-selection-failure-return-is-ignored",
+      "input": {
+        "textCp949Hex": "41",
+        "requestedMaxWidth": 320,
+        "surfaceClearLockSucceeded": true,
+        "hdcAcquisitionSucceeded": true,
+        "fontSelectionSucceeded": false,
+        "gdiMeasurementsSucceeded": true,
+        "fullStringMeasuredHeight": 10,
+        "chunkWidths": [
+          20
+        ]
+      },
+      "expected": {
+        "status": "rendered",
+        "effectiveMaxWidth": 300,
+        "lineHeight": 15,
+        "measuredWidth": 21,
+        "measuredHeight": 16,
+        "lineCount": 1,
+        "errorReported": false,
+        "hdcReleased": true,
+        "events": [
+          "clear-scratch-rect-0-0-299-249-index-254",
+          "acquire-scratch-hdc",
+          "set-transparent-background-mode",
+          "select-DAT_00634e38-failure-ignored",
+          "measure-font-height-with-full-input",
+          "release-scratch-hdc"
+        ],
+        "lines": [
+          {
+            "y": 0,
+            "width": 20,
+            "chunkCp949Hex": [
+              "41"
+            ]
+          }
+        ],
+        "drawCalls": [
+          {
+            "chunkCp949Hex": "41",
+            "x": 0,
+            "y": 0,
+            "shadow": {
+              "x": 1,
+              "y": 1,
+              "color": "0x010101"
+            },
+            "main": {
+              "x": 0,
+              "y": 0,
+              "color": "0x0000ffff"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
