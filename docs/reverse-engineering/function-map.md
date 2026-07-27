@@ -64,6 +64,7 @@
 | `0x0043b4d0` | `FUN_0043b4d0`, `0x0043b4d0-0x0043c2f5` | 238 / 1,018 | 엔티티 주기 갱신과 건물 유효 체력→반파 상태 | 조선 본영 체력 분기 범위 정적 확정 |
 | `0x0043c9c0` | `FUN_0043c9c0`, `0x0043c9c0-0x0043d35f` | 143 / 684 | `+0x1b0` 상위 행동 dispatcher와 outer keep/release 반환 | 상태 5 공격 및 클래스 76·78 health-zero 행동 6/7/`0x16` 정적 확정 |
 | `0x00443360` | `FUN_00443360` | 자원 순회 | 경로 포인터 표→런타임 스프라이트 레코드 로드 | 타입 1~95의 슬롯 경로 정적 확정 |
+| `0x00446420` | `FUN_00446420`, `0x00446420-0x004464be` | 9 / 33 | shared session teardown raw write/call chain | result state write 뒤 순서와 exact-one 분기 정적 확정; opaque callee 의미 미확정, unrelated caller 존재 |
 | `0x00447360` | `FUN_00447360`, `0x00447360-0x00447599` | 35 / 156 | active entity list 뒤 투사체 slot 0~99 순회 | entity dispatcher 반환 0→`0x00483aa0`, subtype `0x0c` pool 범위 정적 확정 |
 | `0x00447bc0` | `FUN_00447bc0`, `0x00447bc0-0x00447cfa` | 21 / 75 | 원본 simulation-step scheduler | 13개 resolved direct call의 raw 조건·순서, 모든 gate 승인 뒤 pool 1회와 조건부 post-pool call 정적 확정; callee 의미 미확정 |
 | `0x00447e10` | `FUN_00447e10`, `0x00447e10-0x00447ec8` | 18 / 66 | `timeGetTime` DWORD interval gate | wrap·50-step 보정·backlog 1회 처리 정적 확정 |
@@ -79,7 +80,7 @@
 | `0x004517a0` | `FUN_004517a0`, `0x004517a0-0x00451905` | 10 / 104 | 스프라이트 프레임 blit | 호출 규약과 좌표계 |
 | `0x0045bd00` | `FUN_0045bd00`, `0x0045bd00-0x0045bef8` | 1 / 103 | stride `0x14c` 타입 정의 레코드 writer | slot·base frame·이름 필드 정적 확정 |
 | `0x0045bf50` | `FUN_0045bf50`, `0x0045bf50-0x0045efb9` | 1 / 5,100 | 전체 엔티티 타입 정의 초기화 | class 1~95 슬롯·기본 프레임·flags·이름 포인터 정적 확정 |
-| `0x0045f9c0` | `FUN_0045f9c0`, `0x0045f9c0-0x004607ac` | 209 / 801 | main Windows message loop와 state switch | message drain, millisecond sample, scheduler 두 callsite 정적 확정 |
+| `0x0045f9c0` | `FUN_0045f9c0`, `0x0045f9c0-0x004607ac` | 209 / 801 | main Windows message loop와 state switch | scheduler와 result `0x18..0x1d`, `0x8c/0x96` relay·final route 범위 정적 확정 |
 | `0x00461570` | `FUN_00461570`, `0x00461570-0x00461590` | 1 / 6 | raw enable·좌표 DWORD writer | K01 call의 `0x00843674/78/7c = 1/55/53` 정적 확정; consumer 의미 미확정 |
 | `0x004648d0` | `FUN_004648d0`, `0x004648d0-0x004648d9` | 1 / 3 | stack BYTE→`ECX+2` writer | K01 call의 `BYTE 0x00abfff2=1` 정적 확정; consumer 의미 미확정 |
 | `0x00482180` | `FUN_00482180`, `0x00482180-0x004822f4` | 16 / 114 | `0/1` 반환 script loader 계약 정적 확정 | 반환값의 내부 의미·오류 원인은 미확정 |
@@ -101,6 +102,13 @@
 | `0x0048a812` | `FUN_0048a5c0`, `0x0048a5c0-0x0048a878` | 32 / 181 | K01 general→beacon→class 76/78 loss latch와 direct AX 1 | zero sentinel·first-write order와 K01 win-timer direct write 부재 정적 확정 |
 | `0x0048d6f0` | `FUN_0048d6f0`, `0x0048d6f0-0x0048d73a` | 7 / 31 | win-first 공통 미션 timer resolver | zero sentinel, DWORD wrap·signed abs overflow, strict `>0x7d0` 정적 확정 |
 | `0x0048dde0` | `FUN_0048ddb0`, `0x0048ddb0-0x0048deca` | 36 / 105 | 세 WORD pre-gate→timer→signed stage dispatcher | timer result flag writer와 stage 1 K01 순서 정적 확정 |
+| `0x00493290` | `FUN_00493290`, `0x00493290-0x0049329e` | 1 / 5 | selector 1 presentation initializer wrapper | state `0x18`, AX 1 반환 정적 확정 |
+| `0x004932a0` | `FUN_004932a0`, `0x004932a0-0x004932b4` | 1 / 9 | selector 1 presentation poll wrapper | common EAX exact 1→WORD `0x1c`, 그 외 0 정적 확정 |
+| `0x004932c0` | `FUN_004932c0`, `0x004932c0-0x004932ce` | 1 / 5 | selector 0 presentation initializer wrapper | state `0x1a`, AX 1 반환 정적 확정 |
+| `0x004932d0` | `FUN_004932d0`, `0x004932d0-0x004932e4` | 1 / 9 | selector 0 presentation poll wrapper | common EAX exact 1→WORD `0x1c`, 그 외 0 정적 확정 |
+| `0x004932f0` | `FUN_004932f0`, `0x004932f0-0x004933f4` | 8 / 69 | result SPR·YAV 공통 initializer | phase/두 clock reset, selector exact-one 자원 분기·load 실패 log 정적 확정 |
+| `0x00493400` | `FUN_00493400`, `0x00493400-0x00493534` | 13 / 99 | result presentation 공통 poll | variant 인수 미사용, unsigned 50/2000 경계·key 순서 정적 확정 |
+| `0x00493540` | `FUN_00493540`, `0x00493540-0x00493596` | 7 / 25 | result presentation cleanup | handle gate·stop exact-one·release·zero write 순서 정적 확정 |
 | `0x0048ea90` | `FUN_0048ea90`, `0x0048ea90-0x004924b2` | 1 / 5,587 | 원본 문자열을 런타임 저장소에 초기화 | class 1~95 CP949 이름 복사와 초상화 ID 저장 범위 정적 확정 |
 | `0x004ae539` | `entry`, `0x004ae539-0x004ae623` | 6 / 75 | PE entry | `0x004ae602` main loop call 정적 확정 |
 | `0x004a7410` | `FUN_004a7410`, `0x004a7410-0x004a75d6` | 5 / 64 | `hero.spr` 로드와 인물 조회 포인터 표 초기화 | 초상화 경로는 정적 확정 |

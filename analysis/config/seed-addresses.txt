@@ -79,7 +79,7 @@
 0x00443090 simulation-timestamp-history-reset-candidate
 0x004430b0 simulation-timestamp-history-update-candidate
 0x004430f0 simulation-feedback-adjustment-producer-candidate
-0x00446420 simulation-interval-reset-candidate
+0x00446420 shared-session-teardown
 0x004464c0 simulation-pre-update-gate-candidate
 0x00447360 projectile-pool-update
 0x00447bc0 simulation-step-scheduler-candidate
@@ -137,3 +137,10 @@
 0x004481d0 raw-global-tick-result-dispatch-wrapper
 0x00488080 active-list-raw-presence-check
 0x004492f0 mission-result-global-flag-write
+0x00493290 result-presentation-win-initializer-wrapper
+0x004932a0 result-presentation-win-poll-wrapper
+0x004932c0 result-presentation-loss-initializer-wrapper
+0x004932d0 result-presentation-loss-poll-wrapper
+0x004932f0 result-presentation-common-initializer
+0x00493400 result-presentation-common-poll
+0x00493540 result-presentation-cleanup

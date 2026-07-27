@@ -214,8 +214,10 @@ generic superset architecture를 바꾸거나 기존 K01 runtime에 추정 adapt
 - `WORD 0x008438dc`의 reset producer와 lifecycle
 - raw relation-table 값, selector 5 grids, 세 direct global write의 사람용 의미
 - class 12·13·14·82의 프로젝트 identity/visual/behavior exact mapping
-- result timer의 진입·reset과 final result call 이후 상태 전환
+- result timer의 mission 진입·zero-reset producer
 
 이 문서의 return 뒤 K01 loss latch, fixed-width timer와 final commit은
 [K01 미션 결과 수명주기](k01-mission-result-lifecycle.md)에서 별도 정적 확정·재현했다.
-그 다음 좁은 질문은 timer 진입·reset과 final result call 이후 상태 전환이다.
+그 뒤 presentation·final route도
+[K01 결과 presentation과 post-result 전환](k01-final-result-transition.md)에서 별도
+정적 확정·재현했다. 다음 좁은 질문은 timer의 mission 진입·zero-reset producer다.

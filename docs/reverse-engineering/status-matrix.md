@@ -15,7 +15,7 @@
 | 엔티티 자료구조 | 추정 | 미재현 | 별도 프로젝트 모델 존재 | 생성·읽기·쓰기 경로 교차 확인 |
 | 게임 틱과 메인 루프 | 투사체 pool 범위의 message-loop→scheduler, millisecond gate와 accepted-step 호출 수 정적 확정 | 해당 raw selector·feedback·wrap·거부 벡터 재현 완료 | 독립 포트와 24 Hz loop는 미연결 | 다른 subsystem 업데이트 순서와 24 Hz port scheduling 정책 결정 |
 | K01 봉화대 트리거 | raw-relation blocker→1,200-slot 완성 record scan→flag·K0120·native effect→post-state 반환 범위 정적 확정 | blocker·세 active gate·field·flag·busy·loader 0/1·void start·복수 match·descriptor·selector·return 재현 완료 | 프로토타입, 원본 정책 미연결 | 원본 class/identity·map mapping 뒤 isolated opt-in 연결; 후속 result chain은 별도 정적 확정 |
-| K01 승패 판정 | general/영웅 loss latch→beacon bypass→strict timer→pre-gate/stage→distinct-tick commit 범위 정적 확정 | zero sentinel·2000/2001·wrap/overflow·동시 timer·once-per-tick 재현 완료 | 프로토타입, 원본 정책 미연결 | raw clock·result transition·identity policy exact mapping 뒤 isolated opt-in 연결 |
+| K01 승패 판정 | general/영웅 latch→timer→distinct-tick commit과 shared teardown→SPR/YAV poll→relay→external/stage route 범위 정적 확정 | timer wrap/overflow와 result cadence·cleanup·state overwrite·WORD wrap 재현 완료 | 프로토타입, 원본 정책 미연결 | timer zero-reset·raw clock·asset/result identity policy exact mapping 뒤 isolated opt-in 연결 |
 | 전투·피해 | K01 영웅 phase·피해·대상·사거리·subtype `0x0c`, signed-health 행동 6/7·slot/reference 사망 수명주기 정적 확정 | 대상·투사체·scheduler 및 health/action/phase/delay/stale-reference 경계 재현 완료 | 프로토타입, 유성룡 독립 계산 부분 이식; 사망 수명 미이식 | 원본 참조·좌표·identity·24 Hz exact mapping과 opt-in 연결 |
 | 이동·경로 탐색 | 추정 | 미재현 | 프로토타입 | 좌표·경로 레코드와 실패 경로 복원 |
 | 생산·건설·연구 | 조선 본영·봉화대 표시 진행도 범위만 정적 확정 | 해당 프레임 선택 재현 완료 | 메커니즘은 프로토타입, 표시 일부 원본 기반 | 생산·건설 시간과 자원·완료 상태 전이 복원 |
@@ -33,7 +33,7 @@
 - 현재 구현 테스트는 재현 상태를 올리지 않는다.
 - 과거 VM 기록은 이 표의 상태를 자동으로 올리지 않는다.
 - PE 기반선은 Ghidra 12.1.2로 함수 2,448개·문자열 1,545개·내부 참조 57,572개·간접 분기
-  268개·점프 테이블 234개를 2회 생성해 산출물 해시가 일치했다.
+  268개·점프 테이블 234개·seed 145개/포함 함수 144개를 2회 생성해 산출물 해시가 일치했다.
 - 공통 함수 지도의 `부분 재현`은 자동 분석 결과의 결정론을 뜻하며, 함수 역할이 정적 확정됐다는 뜻이 아니다.
 - 95개 원본 타입의 정체·자원은 전수 확정했다. 현행 18개 비주얼 중 16개는 원본 타입 하나와
   고유하게 연결되고, `farmerk.spr`는 두 타입이 공유해 `ambiguous`, `advtowerj.spr`는 원본 타입
@@ -66,6 +66,11 @@
   재기록할 수 있다. 공통 resolver의 strict `0x7d0`, signed overflow와 win-first 동시 timer,
   dispatcher pre-gate/timer 우선, distinct raw global tick result commit은 정적 확정·재현했다.
   raw clock→24 Hz와 result/identity policy mapping은 미확정이라 runtime에는 연결하지 않았다.
+- commit된 result state `0x18/0x1a`는 shared teardown 뒤 win/loss SPR·YAV initializer와
+  unsigned cadence/completion poll을 거친다. exact-one wrapper는 target `0x1c`를 `0x8c→0x96`
+  relay로 전달하고 final consumer는 external mode를 stage보다 우선하며 special stage,
+  WORD increment/wrap과 transient `0x0a` overwrite를 적용한다. raw phase pair→SPR frame,
+  timer zero-reset, 프로젝트 24 Hz·result/asset policy mapping은 미확정이라 미이식이다.
 - `SPEECH` 숫자 슬롯 0~3과 대사 배치는 EXE의 사각형·텍스트 계산을 추출해 `정적 확정`했다.
 - 내부 클래스 2의 원본 이름은 `조선 창병`으로 확정했다. 프로젝트 ID `swordsman`은 호환용 별칭이며
   상태 1·2는 모두 이동 비주얼이다. 상태 1 일반 이동은 이식했지만 상태 2의 사람용 환경 명칭,
