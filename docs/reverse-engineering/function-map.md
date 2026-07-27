@@ -73,6 +73,8 @@
 | `0x00441de0` | `FUN_00441de0`, `0x00441de0-0x00441e36` | 8 / 30 | slot·signed health·full DWORD reference alive 검사 | K01 클래스 76·78 health-zero 즉시 실패 정적 확정 |
 | `0x00441e40` | `FUN_00441e40`, `0x00441e40-0x00441e7a` | 5 / 19 | slot·signed health·raw `+0x1f0` active 검사 | health-zero와 slot-release 실패 순서 정적 확정 |
 | `0x00441e80` | `FUN_00441e80`, `0x00441e80-0x00441ee4` | 10 / 36 | 위 active 조건 + full DWORD reference 검사 | generation mismatch 실패 정적 확정 |
+| `0x004481d0` | `FUN_004481d0`, `0x004481d0-0x00448225` | 6 / 21 | raw global tick cache→mission dispatcher→AX별 result code/call | same-tick skip와 cache 선행 write 정적 확정 |
+| `0x004492f0` | `FUN_004492f0`, `0x004492f0-0x004492fa` | 1 / 2 | `DWORD 0x0055299c=1` raw writer | dispatcher의 matured timer result에서만 호출 정적 확정 |
 | `0x00442ca0` | `FUN_00442ca0`, `0x00442ca0-0x00442d95` | 25 / 82 | selector별 raw byte-grid 변경 | K01 selector 5 table·경계·두 grid write 정적 확정; 사람용 의미 미확정 |
 | `0x004517a0` | `FUN_004517a0`, `0x004517a0-0x00451905` | 10 / 104 | 스프라이트 프레임 blit | 호출 규약과 좌표계 |
 | `0x0045bd00` | `FUN_0045bd00`, `0x0045bd00-0x0045bef8` | 1 / 103 | stride `0x14c` 타입 정의 레코드 writer | slot·base frame·이름 필드 정적 확정 |
@@ -92,12 +94,13 @@
 | `0x00483aa0` | `FUN_00483aa0`, `0x00483aa0-0x00483c2e` | 12 / 95 | active-list swap-last 제거와 active/reuse WORD clear | dispatcher가 0을 반환한 class 76·78 state-7 경로의 release 순서 정적 확정 |
 | `0x00483c50` | `FUN_00483c50`, `0x00483c50-0x00483c9f` | 1 / 26 | generation WORD 증가와 entity create wrapper | 16-bit wrap·initializer 전달 정적 확정 |
 | `0x00487fa0` | `FUN_00487fa0`, `0x00487fa0-0x0048800f` | 7 / 37 | active list의 `+0x74` mask와 raw relation-table 차이 blocker | K01 scan 전 first-difference return 정적 확정; 관계의 사람용 의미 미확정 |
+| `0x00488080` | `FUN_00488080`, `0x00488080-0x004880e4` | 7 / 32 | active list의 positive record·`+0x74` mask·signed owner equality 검사 | K01 general-presence raw predicate 정적 확정; 사람용 관계 의미 미확정 |
 | `0x00488420` | `FUN_00488420`, `0x00488420-0x004884b5` | 11 / 59 | signed-WORD descriptor entity creator | class-zero 종료, slot-zero failure, 좌표 skip와 prior creation 유지 정적 확정 |
 | `0x004885e0` | `FUN_004885e0`, `0x004885e0-0x0048866f` | 7 / 53 | owner/class 목록의 positive-record full reference 선택 | K01 76·78 alive-check 연결 정적 확정 |
 | `0x0048a731` | `FUN_0048a5c0`, `0x0048a5c0-0x0048a878` | 32 / 181 | K01 raw-relation/flag gate→봉화대 scan→K0120/native effect→post-state 반환 | 같은 scan 복수 match·loader 0/1 무검사·void start·ignored descriptor-helper failure 포함 범위 정적 확정 |
-| `0x0048a812` | `FUN_0048a5c0`, `0x0048a5c0-0x0048a878` | 32 / 181 | K01 보호 영웅 클래스 76·78 alive 검사 지점 | health 0 즉시 false 연결 정적 확정; 후속 결과 상태 전체는 별도 |
-| `0x0048d6f0` | `FUN_0048d6f0`, `0x0048d6f0-0x0048d73a` | 7 / 31 | 공통 미션 결과 타이머 판정 | 모든 반환 경로와 시간 단위 |
-| `0x0048dde0` | `FUN_0048ddb0`, `0x0048ddb0-0x0048deca` | 36 / 105 | 미션 결과 소비·전환 | 호출 주기와 후속 함수 |
+| `0x0048a812` | `FUN_0048a5c0`, `0x0048a5c0-0x0048a878` | 32 / 181 | K01 general→beacon→class 76/78 loss latch와 direct AX 1 | zero sentinel·first-write order와 K01 win-timer direct write 부재 정적 확정 |
+| `0x0048d6f0` | `FUN_0048d6f0`, `0x0048d6f0-0x0048d73a` | 7 / 31 | win-first 공통 미션 timer resolver | zero sentinel, DWORD wrap·signed abs overflow, strict `>0x7d0` 정적 확정 |
+| `0x0048dde0` | `FUN_0048ddb0`, `0x0048ddb0-0x0048deca` | 36 / 105 | 세 WORD pre-gate→timer→signed stage dispatcher | timer result flag writer와 stage 1 K01 순서 정적 확정 |
 | `0x0048ea90` | `FUN_0048ea90`, `0x0048ea90-0x004924b2` | 1 / 5,587 | 원본 문자열을 런타임 저장소에 초기화 | class 1~95 CP949 이름 복사와 초상화 ID 저장 범위 정적 확정 |
 | `0x004ae539` | `entry`, `0x004ae539-0x004ae623` | 6 / 75 | PE entry | `0x004ae602` main loop call 정적 확정 |
 | `0x004a7410` | `FUN_004a7410`, `0x004a7410-0x004a75d6` | 5 / 64 | `hero.spr` 로드와 인물 조회 포인터 표 초기화 | 초상화 경로는 정적 확정 |

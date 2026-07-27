@@ -36,8 +36,10 @@ VM에서 원본 게임을 플레이하며 화면 변화를 따라가는 방식�
   경계에 남아 있다.
 - 3단계: 진행 중. K01 raw-relation blocker→1,200-slot 완성 봉화대 scan→flag·K0120
   busy·loader `0/1` 무검사·void start→native 증원·raw post-effect→조건부 post-state 반환
-  범위를 정적 확정·재현했다.
-  flag reset, 원본 class/identity의 프로젝트 mapping과 승리 timer/result는 남아 있다.
+  범위와, general/영웅 loss latch→strict timer→dispatcher→distinct raw-tick commit 범위를
+  정적 확정·재현했다.
+  flag/timer reset, 원본 class/identity의 프로젝트 mapping과 raw clock/result transition
+  mapping은 남아 있다.
 - 4단계: 부분 진행. K01 영웅의 대상 검색·사거리, 공격 phase·피해·투사체와 signed-health
   사망·slot/reference 정리는 정적 확정·재현했다. 원본 identity·좌표·accepted update 단위의
   프로젝트 변환과 실제 opt-in 연결은 미확정이다.
@@ -137,12 +139,22 @@ VM에서 원본 게임을 플레이하며 화면 변화를 따라가는 방식�
 - 같은 scan 복수 match의 native block 반복
 - signed-WORD descriptor 증원, selector 5 raw byte-grid와 두 raw global write
 - flag exact 1과 script context `+8 == 0`의 caller 전달 return 1
+- general presence→beacon bypass→class 76/78 loss latch와 zero-clock 재기록
+- win-first strict `0x7d0` timer, signed DWORD wrap/overflow와 동시 timer 우선순위
+- dispatcher pre-gate/timer 우선과 distinct raw global tick result code commit
 
 아직 포함하지 않은 하위 단위:
 
 - flag reset lifecycle
+- win/loss timer 진입·reset과 final result call 이후 상태 전환
 - 원본 class 12·13·14·82와 프로젝트 identity/map의 exact mapping
-- 승리 timer/result와 영웅 손실 결과 해석
+- raw clocks와 프로젝트 24 Hz·result/identity policy의 exact mapping
+
+별도 후속 질문:
+
+- `user-reported/unverified`: 완성 봉화가 하나 이상이면 미니맵 enable, 마지막 봉화 제거 시
+  disable된다는 일반 수명주기. K01 selector 5/raw global effect와 연결하기 전에 원본 writer/
+  clearer/consumer를 독립 정적 분석한다.
 
 통과 조건:
 

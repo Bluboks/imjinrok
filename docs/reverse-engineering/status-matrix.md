@@ -14,8 +14,8 @@
 | 엔티티 타입 정체 | 클래스 1~95 이름·슬롯·기본 프레임·flags·SPR 경로 정적 확정 | 전수 추출·결정론 검증 완료 | 고유 연결 표시 이름과 봉화대 자원 반영 | flags 비트·행동·수치 의미는 메커니즘별 복원 |
 | 엔티티 자료구조 | 추정 | 미재현 | 별도 프로젝트 모델 존재 | 생성·읽기·쓰기 경로 교차 확인 |
 | 게임 틱과 메인 루프 | 투사체 pool 범위의 message-loop→scheduler, millisecond gate와 accepted-step 호출 수 정적 확정 | 해당 raw selector·feedback·wrap·거부 벡터 재현 완료 | 독립 포트와 24 Hz loop는 미연결 | 다른 subsystem 업데이트 순서와 24 Hz port scheduling 정책 결정 |
-| K01 봉화대 트리거 | raw-relation blocker→1,200-slot 완성 record scan→flag·K0120·native effect→post-state 반환 범위 정적 확정 | blocker·세 active gate·field·flag·busy·loader 0/1·void start·복수 match·descriptor·selector·return 재현 완료 | 프로토타입, 원본 정책 미연결 | 원본 class/identity·map mapping 뒤 isolated opt-in 연결; 승리 timer/result는 별도 |
-| K01 승패 판정 | 추정 | 미재현 | 프로토타입 | 결과 함수 전체 분기와 경계 테스트 |
+| K01 봉화대 트리거 | raw-relation blocker→1,200-slot 완성 record scan→flag·K0120·native effect→post-state 반환 범위 정적 확정 | blocker·세 active gate·field·flag·busy·loader 0/1·void start·복수 match·descriptor·selector·return 재현 완료 | 프로토타입, 원본 정책 미연결 | 원본 class/identity·map mapping 뒤 isolated opt-in 연결; 후속 result chain은 별도 정적 확정 |
+| K01 승패 판정 | general/영웅 loss latch→beacon bypass→strict timer→pre-gate/stage→distinct-tick commit 범위 정적 확정 | zero sentinel·2000/2001·wrap/overflow·동시 timer·once-per-tick 재현 완료 | 프로토타입, 원본 정책 미연결 | raw clock·result transition·identity policy exact mapping 뒤 isolated opt-in 연결 |
 | 전투·피해 | K01 영웅 phase·피해·대상·사거리·subtype `0x0c`, signed-health 행동 6/7·slot/reference 사망 수명주기 정적 확정 | 대상·투사체·scheduler 및 health/action/phase/delay/stale-reference 경계 재현 완료 | 프로토타입, 유성룡 독립 계산 부분 이식; 사망 수명 미이식 | 원본 참조·좌표·identity·24 Hz exact mapping과 opt-in 연결 |
 | 이동·경로 탐색 | 추정 | 미재현 | 프로토타입 | 좌표·경로 레코드와 실패 경로 복원 |
 | 생산·건설·연구 | 조선 본영·봉화대 표시 진행도 범위만 정적 확정 | 해당 프레임 선택 재현 완료 | 메커니즘은 프로토타입, 표시 일부 원본 기반 | 생산·건설 시간과 자원·완료 상태 전이 복원 |
@@ -60,7 +60,12 @@
   idle이면 loader의 `0/1` 반환을 검사하지 않고 void start를 호출한다. post-state는 최종 flag가
   정확히 1일 때만 native block 뒤에서 읽는다.
   같은 scan의 복수 match는 반복되고, scan 뒤 flag가 정확히 1이며 script context `+8`이 0일
-  때만 1을 caller에 넘긴다. flag reset, native raw state의 사람용 의미와 승리 결과는 미확정이다.
+  때만 1을 caller에 넘긴다. flag reset과 native raw state의 사람용 의미는 미확정이다.
+- K01 updater는 general raw presence, 봉화대 direct return, class 76, class 78 순으로 처리한다.
+  loss timer zero일 때만 result clock을 기록하지만 clock 자체가 zero면 같은 invocation에서
+  재기록할 수 있다. 공통 resolver의 strict `0x7d0`, signed overflow와 win-first 동시 timer,
+  dispatcher pre-gate/timer 우선, distinct raw global tick result commit은 정적 확정·재현했다.
+  raw clock→24 Hz와 result/identity policy mapping은 미확정이라 runtime에는 연결하지 않았다.
 - `SPEECH` 숫자 슬롯 0~3과 대사 배치는 EXE의 사각형·텍스트 계산을 추출해 `정적 확정`했다.
 - 내부 클래스 2의 원본 이름은 `조선 창병`으로 확정했다. 프로젝트 ID `swordsman`은 호환용 별칭이며
   상태 1·2는 모두 이동 비주얼이다. 상태 1 일반 이동은 이식했지만 상태 2의 사람용 환경 명칭,
