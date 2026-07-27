@@ -95,9 +95,11 @@ slot RECT initializer다. `FUN_004a81f0`은 label renderer이며 생산·연구 
 않는다.
 
 원본 slot kind와 현재 `selectionPanel.ts`의 construction/research/production 의미 결합은
-미확정이다. 따라서 현행 responsive·multi-selection·mana·추가 상태 UI는 프로젝트 superset으로
-유지하고, 고정 네 slot이나 미확정 kind를 public contract에 이식하지 않는다. 실제 GDI label
-metrics도 synthetic 입력 아래 산술만 재현하며 Noto/Canvas typography는 의도적 적응이다.
+[후속 lifecycle 분석](../reverse-engineering/mechanics/selection-panel-slot-lifecycle.md)에서
+반증됐다. 이 record는 SPEECH 화자 portrait/label slot이고 kind는 old/new 화자 index 불일치
+boolean이다. 따라서 현행 responsive·multi-selection·mana·추가 상태 UI는 별도 프로젝트
+superset으로 유지하고, 고정 네 SPEECH slot을 public contract에 이식하지 않는다. 실제 GDI
+label metrics도 synthetic 입력 아래 산술만 재현하며 Noto/Canvas typography는 의도적 적응이다.
 
 ## 변경 통과 조건
 

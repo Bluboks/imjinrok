@@ -96,14 +96,14 @@
 | `0x004a5980` | `FUN_004a5980`, `0x004a5980-0x004a5ab3` | 6 / 87 | 내부 해제·외부 one-shot 종료, frame `(112,81)` 416×236 draw, 내용 RECT `(158,135)-(478,259)` present | 목표 모달 갱신·종료·잠금 실패 범위 정적 확정 |
 | `0x004a5ac0` | `FUN_004a5ac0`, `0x004a5ac0-0x004a5ada` | 3 / 7 | SPR 포인터가 있으면 해제한 뒤 조건과 무관하게 `FUN_004a5ae0`으로 tail-jump | 목표 모달 종료 정리 순서 정적 확정 |
 | `0x004a5ae0` | `FUN_004a5ae0`, `0x004a5ae0-0x004a5b29` | 3 / 18 | clear 잠금을 시도하고 성공 시 `(158,135)-(477,258)`을 투명 index `0xfe`로 clear·unlock | 목표 모달 내용 clear 성공·실패 범위 정적 확정 |
-| `0x004a7410` | `FUN_004a7410`, `0x004a7410-0x004a75d6` | 5 / 64 | `hero.spr` 로드와 인물 조회 포인터 표 초기화 | 초상화 경로는 정적 확정 |
-| `0x004a7690` | `FUN_004a7690`, `0x004a7690-0x004a7874` | 13 / 130 | ID 조회 결과→프레임 표→`hero.spr` 그리기 | 초상화 경로는 정적 확정 |
+| `0x004a7410` | `FUN_004a7410`, `0x004a7410-0x004a75d6` | 5 / 64 | `hero.spr` 로드와 17-entry ID/CP949 화자 label 포인터 표 초기화 | SPEECH slot lifecycle 정적 확정 |
+| `0x004a7690` | `FUN_004a7690`, `0x004a7690-0x004a7874` | 13 / 130 | SPEECH ID 조회, old/new 화자 kind, portrait slot active/progress 생산 | 전체 producer 순서·실패 경계 정적 확정 |
 | `0x004a7a50` | `FUN_004a7a50` | 텍스트 계산 포함 | `SPEECH` 대사 폭 278, X 188, Y 190 중심 배치 | 배치 수식은 정적 확정 |
-| `0x004a7b10` | `FUN_004a7b10`, `0x004a7b10-0x004a7bb3` | 7 / 73 | 대사 표시 조정과 초상화 그리기 호출 | 초상화 경로는 정적 확정 |
-| `0x004a7f70` | `FUN_004a7f70` | 사각형 helper 호출 | `SPEECH` 슬롯 지우기 후보 | 전체 호출 조건 |
-| `0x004a8030` | `FUN_004a8030` | 사각형 helper 호출 | `SPEECH` 슬롯 blit 후보 | 활성·비활성 표시 전체 |
+| `0x004a7b10` | `FUN_004a7b10`, `0x004a7b10-0x004a7bb3` | 7 / 73 | SPEECH portrait slot producer와 별도 text producer 조정 | wrapper direct caller·분기 정적 확정 |
+| `0x004a7f70` | `FUN_004a7f70` | 사각형 helper 호출 | SPEECH slot producer admission guard | 전체 guard 분기 정적 확정 |
+| `0x004a8030` | `FUN_004a8030` | 사각형 helper 호출 | SPEECH slot mode별 clear/redraw와 text/resource cleanup | record clear·retain 경계 정적 확정 |
 | `0x004a8410` | `FUN_004a8410` | 4-case switch | signed slot 0~3의 130×120 RECT initializer; draw는 caller 소유 | dispatcher·progress·label caller와 범위 밖 origin 미초기화 경로 정적 확정 |
-| `0x004a8870` | `FUN_004a8870`, `0x004a8870-0x004a88e9` | 12 / 51 | 17개 인물 ID 조회, 실패 시 `-1` | 정적 확정 |
+| `0x004a8870` | `FUN_004a8870`, `0x004a8870-0x004a88e9` | 12 / 51 | 17개 SPEECH 화자 ID 조회, 실패 보고 후 signed WORD `-1` | producer의 unchecked frame-table 경계까지 정적 확정 |
 | `0x004a9010` | `FUN_004a9010`, `0x004a9010-0x004a9258` | 23 / 189 | 공용 Windows-949 byte renderer; `DAT_00634e38` GDI font 선택, caller 폭을 300으로 제한, ASCII-space chunk strict wrap, shadow/main `TextOutA`, WORD 크기 출력 | 목표 모달 두 direct call과 전체 경계 정적 확정; 실제 Windows font realization·K0110 glyph metrics 미확정 |
 | `0x004aafa0` | `FUN_004aafa0`, `0x004aafa0-0x004ab2ac` | 12 / 170 | 단계 선택 UI의 임무 레코드 소비 | K01 인덱스 결합 정적 확정 |
 | `0x004ab630` | `FUN_004ab630`, `0x004ab630-0x004ab6b5` | 8 / 58 | 단계 선택 레코드 정리 | K01 레코드 생명주기 정적 확정 |

@@ -8,9 +8,10 @@
 - 재현 상태: **범위 한정 재현 완료**. raw DWORD gate, 네 slot 순서, progress WORD 갱신과 사각형,
   공급한 synthetic GDI 측정값 아래 label 위치, HDC 실패, source/destination 실패 경계를 10개
   결정론 vector로 재현한다.
-- 구현 상태: **분석 전용, production 변경 없음**. 원본 slot kind와 현재 프로젝트의 건설·생산·연구
-  의미를 연결하는 upstream record binding이 닫히지 않았다. 반응형·다중 선택·mana·추가 상태를
-  제공하는 `selectionPanel.ts`는 프로젝트 superset으로 유지한다.
+- 구현 상태: **분석 전용, production 변경 없음**. 후속
+  [slot lifecycle 분석](selection-panel-slot-lifecycle.md)은 이 owner record를 건설·생산·연구가
+  아니라 `SPEECH` 화자 portrait/label slot으로 확정했다. 반응형·다중 선택·mana·추가 상태를
+  제공하는 `selectionPanel.ts`는 별도 프로젝트 superset으로 유지한다.
 
 후보 이름은 다음처럼 교정한다.
 
@@ -206,10 +207,11 @@ canonical JSON SHA-256을 무조건 비교하고 다음 observable 경계를 별
 construction, research, production을 우선순위로 고르고, 다중 선택·mana·체력·추가 상태를 함께
 표시한다. 이것은 코드 경로 감사 결과이지 원본 parity 증거가 아니다.
 
-이번 원본 범위는 “네 slot 중 active exact-one을 순서대로 그리고, kind exact-one만 progress
-partial blit로 보낸다”까지 닫혔다. kind 값이나 label record index가 건설·생산·연구 중 무엇인지,
-progress WORD가 현재 프로젝트의 각 progress와 어떤 producer에서 결합되는지는 닫히지 않았다.
-따라서 다음을 하지 않는다.
+이번 원본 범위는 “네 SPEECH slot 중 active exact-one을 순서대로 그리고, kind exact-one만
+portrait transition partial blit로 보낸다”까지 닫혔다. 후속 lifecycle 분석은 kind가 이전
+화자 label index와 새 화자 index의 불일치 boolean이고, label table이 17개 화자 이름임을
+정적으로 확정했다. 따라서 construction/research/production과의 compatibility 가설은 성립하지
+않으며 다음을 하지 않는다.
 
 - kind `1`을 건설·생산·연구 중 하나로 이름 붙이지 않는다.
 - 현재 프로젝트의 construction/research/production 우선순위를 원본 분기로 소급하지 않는다.
@@ -217,14 +219,13 @@ progress WORD가 현재 프로젝트의 각 progress와 어떤 producer에서 �
   만들지 않는다.
 - 의미가 닫히지 않은 벡터를 production UI에 이식하지 않는다.
 
-## 미확정과 다음 좁은 질문
+## 후속에서 닫힌 범위와 남은 질문
 
-- `owner+0xc8/+0xe8/+0x13c/+0x10`을 쓰는 upstream producer와 record lifecycle
-- kind exact `1`의 원본 사람용 의미
-- `0x00c83e44` label table의 record identity와 실제 byte string
-- raw `owner+0xf8/+0x564/+0x568`의 원본 의미
-- source allocation 실패 뒤 각 indirect surface method의 실제 결과
+[slot lifecycle 분석](selection-panel-slot-lifecycle.md)은
+`owner+0xc8/+0xe8/+0x13c/+0x10`의 생성·SPEECH 갱신·reset·clear, kind exact `1`,
+`0x00c83e44`의 17개 화자 label pointer/bytes, optional field의 독립 lifecycle을 정적
+확정했다. source allocation 실패 뒤 각 indirect surface implementation의 실제 결과와
+구조화 분석 밖 arbitrary alias write는 계속 미확정이다.
 
-다음 좁은 질문은 `owner=0x005e3680`의 네 slot record를 쓰는 complete producer 집합을 복원해
-kind·active·progress·label index가 어떤 원본 mechanic record에서 함께 생성·갱신·해제되는지
-확정하는 것이다.
+다음 좁은 질문은 실제 gameplay 선택 UI owner와 건설·생산·연구 progress producer를 별도로
+찾아 project selection view data와 의미상 결합 가능한 record인지 검증하는 것이다.
