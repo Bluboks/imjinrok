@@ -101,6 +101,13 @@ boolean이다. 따라서 현행 responsive·multi-selection·mana·추가 상태
 superset으로 유지하고, 고정 네 SPEECH slot을 public contract에 이식하지 않는다. 실제 GDI
 label metrics도 synthetic 입력 아래 산술만 재현하며 Noto/Canvas typography는 의도적 적응이다.
 
+별도 [transient formatted overlay 분석](../reverse-engineering/mechanics/transient-formatted-overlay.md)은
+`FUN_004567c0`을 고정 bottom selection panel로 보던 탐색 후보도 반증했다. 이 함수는
+producer 좌표와 supplied 측정값/post-call RECT로 transient surface를 blit한 뒤, 별도 cache
+gate가 허용하면 base byte string을 target `(200,350)`에 그린다. 이 고정 text draw까지 포함해도
+persistent bottom panel의 resource·rect·lifecycle은 증명되지 않았다.
+실제 gameplay selection surface는 다른 owner·draw branch에서 다시 식별해야 한다.
+
 ## 변경 통과 조건
 
 - 원본 파일 해시와 함수·데이터 주소

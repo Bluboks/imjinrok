@@ -25,7 +25,7 @@
 | 브리핑 초상화 | 정적 확정 | 재현 완료 | 원본 기반 | 새 원본 변형에도 추출기·클라이언트 교차 검증 적용 |
 | `SPEECH` 대화 레이아웃 | 정적 확정 | 재현 완료 | 확정 좌표 원본 기반 | 제목·목표·버튼·글꼴을 별도 분석 |
 | K01 공통 임무 목표 모달 결합 | frame/content/dismiss·K01 text·strict release·ordered dispatcher와 GDI font 요청·CP949 byte renderer·유효 폭 300 규칙 정적 확정 | lifecycle 재현 완료; typography 제어 흐름은 공급한 synthetic GDI metrics 아래 부분 재현; 프로젝트 lifecycle 테스트 | 검증된 raster·기하·text·strict release와 base wrap width 300은 원본 기반; HUD trigger/event는 프로젝트 전용, font realization·glyph 측정·Korean wrap·backdrop·Escape·responsive blocker는 의도적 적응 | gameplay-panel 표시 정체, mechanism source, 원본 실현 font/metrics·빈 문자열 `SIZE.cy`·dismiss visual·sound |
-| UI·입력 | 임무 목표 모달과 SPEECH portrait/label slot dispatcher·producer lifecycle 정적 확정; HUD 루트와 실제 gameplay 선택 UI owner는 추정 | 목표 모달 lifecycle 완료, typography 부분 재현, SPEECH slot dispatcher/producer 범위 한정 재현 완료 | selection panel의 반응형·다중 선택·mana·추가 상태는 의도적 프로젝트 UI | 실제 gameplay 선택 UI owner와 실행 중 목표 추적 입력 복원 |
+| UI·입력 | 임무 목표 모달과 SPEECH portrait/label slot lifecycle 정적 확정; `FUN_004567c0` transient measured blit와 `FUN_00457460` cache-gated fixed-coordinate base text를 확정해 fixed bottom panel 후보 반증; 실제 gameplay 선택 UI owner는 추정 | 목표 모달 lifecycle 완료, typography 부분 재현, SPEECH slot과 transient/base-text 흐름 supplied-metric·post-call-RECT 범위 재현 완료 | selection panel의 반응형·다중 선택·mana·추가 상태는 의도적 프로젝트 UI | 실제 gameplay 선택 UI owner와 실행 중 목표 추적 입력 복원 |
 | 음향·연출 | 미확인 | 미재현 | 부분 구현 | 이벤트와 자원 매핑 복원 |
 
 ## 주의

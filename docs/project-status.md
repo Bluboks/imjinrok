@@ -48,7 +48,7 @@ K02는 이 단기 MVP의 완료 조건이 아니다. 기존 K02 프로토타입�
 | 브리핑 초상화 | 17개 ID·`hero.spr` 프레임 이식 | 파서→조회→프레임 표→그리기 정적 확정 | 추출기·클라이언트 교차 테스트 | 원본 기반 |
 | `SPEECH` 대화 레이아웃 | 숫자 슬롯·초상화·대사 공통 배치 이식 | 640×480 슬롯 4개와 대사 좌표 정적 확정 | 추출기·배율 변환 테스트 | 확정 범위 원본 기반 |
 | K01 공통 임무 목표 모달 결합 | 검증된 raster·기하·K0110 텍스트·strict release와 유효 base wrap 폭 300을 독립 presenter에 연결; HUD button/event는 프로젝트 전용 | 진입·dispatcher에 더해 GDI `Arial` height 12/HANGEUL_CHARSET 요청, CP949 byte chunk·strict wrap·배치·실패 경로 정적 확정 | lifecycle 재현 완료; typography 제어 흐름은 공급한 synthetic GDI metrics 아래 부분 재현 | frame/content/dismiss·action·text·유효 폭은 원본 기반; 실제 font realization·glyph 폭·Korean wrap·빈 문자열 `SIZE.cy`, gameplay-panel 정체, mechanism source, dismiss visual·sound 미확정 |
-| UI·입력 | 반응형 목표 추적 HUD 존재 | 임무 목표 모달 범위 제외 나머지는 자원·호출 지점 후보 | 임무 목표 모달 범위만 재현 완료 | 목표 추적 HUD를 포함한 나머지는 의도적 프로젝트 UI |
+| UI·입력 | 반응형 목표 추적 HUD 존재 | 임무 목표 모달 확정; `FUN_004567c0`의 transient measured blit와 cache-gated `(200,350)` base text를 복원해 고정 bottom selection panel 후보 반증 | 임무 목표 모달 완료; transient/base-text 흐름은 supplied synthetic metrics·post-call RECT 범위 재현 | 목표 추적 HUD·responsive selection UI를 포함한 나머지는 의도적 프로젝트 UI |
 | VM 동적 분석 | 과거 도구·기록 존재 | 다수 시행착오 기록 | 원시 증거가 저장소에 없음 | 보관, 기본 경로에서 제외 |
 
 ## 신뢰할 수 있는 출발점

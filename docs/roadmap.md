@@ -126,6 +126,12 @@ simulation↔UI 연결은 미확정이라 장면 연결은 보류했다. 뒤이�
 확정했고, kind는 old/new 화자 index 불일치 boolean이다. 건설·생산·연구 결합 가설은 반증됐으므로
 현행 responsive·multi-selection·mana UI를 원본 고정 네 slot 구조로 바꾸지 않았다. 실제 gameplay
 선택 UI owner와 progress producer는 별도 질문으로 남긴다.
+`FUN_004567c0`도 고정 bottom selection panel이 아니라 producer 좌표와 supplied post-call
+RECT로 measured surface를 blit하는 흐름으로 정적 확정했다. 이어지는 `FUN_00457460`은
+비직관적 cache gate가 허용할 때 base byte string을 target `(200,350)`에 그린다. 이 고정 draw를
+포함해도 persistent panel의 resource·rect·lifecycle은 증명되지 않았다. synthetic GDI metrics와
+post-call RECT 아래 layout·failure를 재현했지만 table 값의 gameplay 개념은 미확정이다. 실제
+gameplay selection surface는 다른 owner와 지속 draw branch에서 다시 식별한다.
 
 후속 프로젝트 구조 감사는 기존 `game.events` HUD view 경계를 확장해 K01 HUD objective button에서
 숫자 상태 없는 semantic action을 발행하고 `UIScene`의 queue·private active request까지 한 번
