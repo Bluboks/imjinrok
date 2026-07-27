@@ -676,6 +676,21 @@
       "label": "mission-result-consumer-candidate",
       "address": "0x0048dde0",
       "functionEntry": "0x0048ddb0"
+    },
+    {
+      "label": "raw-global-tick-result-dispatch-wrapper",
+      "address": "0x004481d0",
+      "functionEntry": "0x004481d0"
+    },
+    {
+      "label": "active-list-raw-presence-check",
+      "address": "0x00488080",
+      "functionEntry": "0x00488080"
+    },
+    {
+      "label": "mission-result-global-flag-write",
+      "address": "0x004492f0",
+      "functionEntry": "0x004492f0"
     }
   ],
   "functions": [
@@ -164667,6 +164682,201 @@
       "decompilation": "\n/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */\n\nundefined4 FUN_00447e10(void)\n\n{\n  uint uVar1;\n  uint uVar2;\n  int iVar3;\n  \n  uVar1 = FUN_0043f580();\n  _DAT_00552794 = DAT_0054a4a8 + uVar1;\n  DAT_0054a4a8 = 0;\n  if (DAT_007c5f80 % 0x32 == 0) {\n    if (DAT_00552788 < 0xb) {\n      if ((DAT_00552788 < 4) && (uVar1 <= _DAT_00552794)) {\n        _DAT_00552794 = _DAT_00552794 - 1;\n      }\n    }\n    else if (_DAT_00552794 < uVar1 + 0x14) {\n      _DAT_00552794 = _DAT_00552794 + 1;\n    }\n    DAT_00552788 = 0;\n  }\n  if ((uint)(DAT_00882e04 - DAT_0055276c) < _DAT_00552794) {\n    uVar1 = (DAT_0055276c - DAT_00882e04) + _DAT_00552794;\n    uVar2 = _DAT_00552794;\n    if ((-(uint)(uVar1 != 0) & uVar1) < _DAT_00552794) {\n      uVar2 = -(uint)(uVar1 != 0) & uVar1;\n    }\n    iVar3 = DAT_00882e04;\n    if (0 < (int)uVar2) {\n      return 0;\n    }\n  }\n  else {\n    uVar2 = (DAT_00882e04 - DAT_0055276c) - _DAT_00552794;\n    uVar1 = _DAT_00552794;\n    if (uVar2 < _DAT_00552794) {\n      uVar1 = uVar2;\n    }\n    iVar3 = DAT_00882e04 - uVar1;\n  }\n  DAT_0055276c = iVar3;\n  return 1;\n}\n\n"
     },
     {
+      "entry": "0x004481d0",
+      "name": "FUN_004481d0",
+      "prototype": "undefined FUN_004481d0()",
+      "bodyRanges": ["0x004481d0-0x00448225"],
+      "basicBlocks": [
+        {
+          "start": "0x004481d0",
+          "end": "0x004481de",
+          "destinations": ["0x004481df|FALL_THROUGH", "0x00448223|CONDITIONAL_JUMP"]
+        },
+        {
+          "start": "0x004481df",
+          "end": "0x004481ee",
+          "destinations": ["0x004481ef|FALL_THROUGH", "0x00448209|CONDITIONAL_JUMP", "0x0048ddb0|UNCONDITIONAL_CALL"]
+        },
+        {
+          "start": "0x004481ef",
+          "end": "0x00448208",
+          "destinations": ["0x00446420|UNCONDITIONAL_CALL"]
+        },
+        {
+          "start": "0x00448209",
+          "end": "0x0044820e",
+          "destinations": ["0x0044820f|FALL_THROUGH", "0x00448223|CONDITIONAL_JUMP"]
+        },
+        {
+          "start": "0x0044820f",
+          "end": "0x00448222",
+          "destinations": ["0x00446420|UNCONDITIONAL_CALL"]
+        },
+        {
+          "start": "0x00448223",
+          "end": "0x00448225",
+          "destinations": []
+        }
+      ],
+      "instructions": [
+        {
+          "address": "0x004481d0",
+          "bytes": "a1 80 5f 7c 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV EAX,[0x007c5f80]"
+        },
+        {
+          "address": "0x004481d5",
+          "bytes": "8b 0d 80 27 55 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV ECX,dword ptr [0x00552780]"
+        },
+        {
+          "address": "0x004481db",
+          "bytes": "3b c1",
+          "flowType": "FALL_THROUGH",
+          "text": "CMP EAX,ECX"
+        },
+        {
+          "address": "0x004481dd",
+          "bytes": "74 44",
+          "flowType": "CONDITIONAL_JUMP",
+          "text": "JZ 0x00448223"
+        },
+        {
+          "address": "0x004481df",
+          "bytes": "a3 80 27 55 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV [0x00552780],EAX"
+        },
+        {
+          "address": "0x004481e4",
+          "bytes": "e8 c7 5b 04 00",
+          "flowType": "UNCONDITIONAL_CALL",
+          "text": "CALL 0x0048ddb0"
+        },
+        {
+          "address": "0x004481e9",
+          "bytes": "66 3d 01 00",
+          "flowType": "FALL_THROUGH",
+          "text": "CMP AX,0x1"
+        },
+        {
+          "address": "0x004481ed",
+          "bytes": "75 1a",
+          "flowType": "CONDITIONAL_JUMP",
+          "text": "JNZ 0x00448209"
+        },
+        {
+          "address": "0x004481ef",
+          "bytes": "66 a3 14 66 7c 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV [0x007c6614],AX"
+        },
+        {
+          "address": "0x004481f5",
+          "bytes": "66 c7 05 c8 df 4b 00 18 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV word ptr [0x004bdfc8],0x18"
+        },
+        {
+          "address": "0x004481fe",
+          "bytes": "e8 1d e2 ff ff",
+          "flowType": "UNCONDITIONAL_CALL",
+          "text": "CALL 0x00446420"
+        },
+        {
+          "address": "0x00448203",
+          "bytes": "b8 01 00 00 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV EAX,0x1"
+        },
+        {
+          "address": "0x00448208",
+          "bytes": "c3",
+          "flowType": "TERMINATOR",
+          "text": "RET"
+        },
+        {
+          "address": "0x00448209",
+          "bytes": "66 3d ff ff",
+          "flowType": "FALL_THROUGH",
+          "text": "CMP AX,0xffff"
+        },
+        {
+          "address": "0x0044820d",
+          "bytes": "75 14",
+          "flowType": "CONDITIONAL_JUMP",
+          "text": "JNZ 0x00448223"
+        },
+        {
+          "address": "0x0044820f",
+          "bytes": "66 c7 05 c8 df 4b 00 1a 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV word ptr [0x004bdfc8],0x1a"
+        },
+        {
+          "address": "0x00448218",
+          "bytes": "e8 03 e2 ff ff",
+          "flowType": "UNCONDITIONAL_CALL",
+          "text": "CALL 0x00446420"
+        },
+        {
+          "address": "0x0044821d",
+          "bytes": "b8 01 00 00 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV EAX,0x1"
+        },
+        {
+          "address": "0x00448222",
+          "bytes": "c3",
+          "flowType": "TERMINATOR",
+          "text": "RET"
+        },
+        {
+          "address": "0x00448223",
+          "bytes": "33 c0",
+          "flowType": "FALL_THROUGH",
+          "text": "XOR EAX,EAX"
+        },
+        {
+          "address": "0x00448225",
+          "bytes": "c3",
+          "flowType": "TERMINATOR",
+          "text": "RET"
+        }
+      ],
+      "decompilation": "\nundefined4 FUN_004481d0(void)\n\n{\n  short sVar1;\n  \n  if (DAT_007c5f80 != DAT_00552780) {\n    DAT_00552780 = DAT_007c5f80;\n    sVar1 = FUN_0048ddb0();\n    if (sVar1 == 1) {\n      DAT_004bdfc8 = 0x18;\n      DAT_007c6614 = sVar1;\n      FUN_00446420();\n      return 1;\n    }\n    if (sVar1 == -1) {\n      DAT_004bdfc8 = 0x1a;\n      FUN_00446420();\n      return 1;\n    }\n  }\n  return 0;\n}\n\n"
+    },
+    {
+      "entry": "0x004492f0",
+      "name": "FUN_004492f0",
+      "prototype": "undefined FUN_004492f0()",
+      "bodyRanges": ["0x004492f0-0x004492fa"],
+      "basicBlocks": [
+        {
+          "start": "0x004492f0",
+          "end": "0x004492fa",
+          "destinations": []
+        }
+      ],
+      "instructions": [
+        {
+          "address": "0x004492f0",
+          "bytes": "c7 05 9c 29 55 00 01 00 00 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV dword ptr [0x0055299c],0x1"
+        },
+        {
+          "address": "0x004492fa",
+          "bytes": "c3",
+          "flowType": "TERMINATOR",
+          "text": "RET"
+        }
+      ],
+      "decompilation": "\nvoid FUN_004492f0(void)\n\n{\n  DAT_0055299c = 1;\n  return;\n}\n\n"
+    },
+    {
       "entry": "0x004517a0",
       "name": "FUN_004517a0",
       "prototype": "undefined FUN_004517a0()",
@@ -216135,6 +216345,244 @@
         }
       ],
       "decompilation": "\nundefined4 FUN_00487fa0(void)\n\n{\n  short sVar1;\n  int iVar2;\n  short sVar3;\n  \n  sVar3 = 0;\n  if (0 < DAT_00843738) {\n    do {\n      sVar1 = (&DAT_00842dd8)[sVar3];\n      iVar2 = FUN_00441db0((int)sVar1);\n      if ((iVar2 != 0) && (iVar2 = sVar1 * 0x558, (*(uint *)(&DAT_006352cc + iVar2) & 0x20002) != 0)\n         ) {\n        iVar2 = FUN_004426a0((int)(char)(&DAT_00635290)[iVar2],(int)DAT_00bccc44);\n        if (iVar2 == 0) {\n          return 1;\n        }\n      }\n      sVar3 = sVar3 + 1;\n    } while (sVar3 < DAT_00843738);\n  }\n  return 0;\n}\n\n"
+    },
+    {
+      "entry": "0x00488080",
+      "name": "FUN_00488080",
+      "prototype": "undefined FUN_00488080()",
+      "bodyRanges": ["0x00488080-0x004880e4"],
+      "basicBlocks": [
+        {
+          "start": "0x00488080",
+          "end": "0x0048808c",
+          "destinations": ["0x0048808d|FALL_THROUGH", "0x004880d8|CONDITIONAL_JUMP"]
+        },
+        {
+          "start": "0x0048808d",
+          "end": "0x004880a4",
+          "destinations": ["0x00441db0|UNCONDITIONAL_CALL", "0x004880a5|FALL_THROUGH", "0x004880ce|CONDITIONAL_JUMP"]
+        },
+        {
+          "start": "0x004880a5",
+          "end": "0x004880bc",
+          "destinations": ["0x004880bd|FALL_THROUGH", "0x004880ce|CONDITIONAL_JUMP"]
+        },
+        {
+          "start": "0x004880bd",
+          "end": "0x004880cd",
+          "destinations": ["0x004880ce|FALL_THROUGH", "0x004880dd|CONDITIONAL_JUMP"]
+        },
+        {
+          "start": "0x004880ce",
+          "end": "0x004880d7",
+          "destinations": ["0x0048808d|CONDITIONAL_JUMP", "0x004880d8|FALL_THROUGH"]
+        },
+        {
+          "start": "0x004880d8",
+          "end": "0x004880dc",
+          "destinations": []
+        },
+        {
+          "start": "0x004880dd",
+          "end": "0x004880e4",
+          "destinations": []
+        }
+      ],
+      "instructions": [
+        {
+          "address": "0x00488080",
+          "bytes": "56",
+          "flowType": "FALL_THROUGH",
+          "text": "PUSH ESI"
+        },
+        {
+          "address": "0x00488081",
+          "bytes": "57",
+          "flowType": "FALL_THROUGH",
+          "text": "PUSH EDI"
+        },
+        {
+          "address": "0x00488082",
+          "bytes": "33 ff",
+          "flowType": "FALL_THROUGH",
+          "text": "XOR EDI,EDI"
+        },
+        {
+          "address": "0x00488084",
+          "bytes": "66 39 3d 38 37 84 00",
+          "flowType": "FALL_THROUGH",
+          "text": "CMP word ptr [0x00843738],DI"
+        },
+        {
+          "address": "0x0048808b",
+          "bytes": "7e 4b",
+          "flowType": "CONDITIONAL_JUMP",
+          "text": "JLE 0x004880d8"
+        },
+        {
+          "address": "0x0048808d",
+          "bytes": "0f bf c7",
+          "flowType": "FALL_THROUGH",
+          "text": "MOVSX EAX,DI"
+        },
+        {
+          "address": "0x00488090",
+          "bytes": "0f bf 34 45 d8 2d 84 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOVSX ESI,word ptr [EAX*0x2 + 0x842dd8]"
+        },
+        {
+          "address": "0x00488098",
+          "bytes": "56",
+          "flowType": "FALL_THROUGH",
+          "text": "PUSH ESI"
+        },
+        {
+          "address": "0x00488099",
+          "bytes": "e8 12 9d fb ff",
+          "flowType": "UNCONDITIONAL_CALL",
+          "text": "CALL 0x00441db0"
+        },
+        {
+          "address": "0x0048809e",
+          "bytes": "83 c4 04",
+          "flowType": "FALL_THROUGH",
+          "text": "ADD ESP,0x4"
+        },
+        {
+          "address": "0x004880a1",
+          "bytes": "85 c0",
+          "flowType": "FALL_THROUGH",
+          "text": "TEST EAX,EAX"
+        },
+        {
+          "address": "0x004880a3",
+          "bytes": "74 29",
+          "flowType": "CONDITIONAL_JUMP",
+          "text": "JZ 0x004880ce"
+        },
+        {
+          "address": "0x004880a5",
+          "bytes": "8d 0c f6",
+          "flowType": "FALL_THROUGH",
+          "text": "LEA ECX,[ESI + ESI*0x8]"
+        },
+        {
+          "address": "0x004880a8",
+          "bytes": "8d 04 4e",
+          "flowType": "FALL_THROUGH",
+          "text": "LEA EAX,[ESI + ECX*0x2]"
+        },
+        {
+          "address": "0x004880ab",
+          "bytes": "8d 04 c0",
+          "flowType": "FALL_THROUGH",
+          "text": "LEA EAX,[EAX + EAX*0x8]"
+        },
+        {
+          "address": "0x004880ae",
+          "bytes": "c1 e0 03",
+          "flowType": "FALL_THROUGH",
+          "text": "SHL EAX,0x3"
+        },
+        {
+          "address": "0x004880b1",
+          "bytes": "f7 80 cc 52 63 00 02 00 02 00",
+          "flowType": "FALL_THROUGH",
+          "text": "TEST dword ptr [EAX + 0x6352cc],0x20002"
+        },
+        {
+          "address": "0x004880bb",
+          "bytes": "74 11",
+          "flowType": "CONDITIONAL_JUMP",
+          "text": "JZ 0x004880ce"
+        },
+        {
+          "address": "0x004880bd",
+          "bytes": "66 0f be 90 90 52 63 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOVSX DX,byte ptr [EAX + 0x635290]"
+        },
+        {
+          "address": "0x004880c5",
+          "bytes": "66 3b 15 44 cc bc 00",
+          "flowType": "FALL_THROUGH",
+          "text": "CMP DX,word ptr [0x00bccc44]"
+        },
+        {
+          "address": "0x004880cc",
+          "bytes": "74 0f",
+          "flowType": "CONDITIONAL_JUMP",
+          "text": "JZ 0x004880dd"
+        },
+        {
+          "address": "0x004880ce",
+          "bytes": "47",
+          "flowType": "FALL_THROUGH",
+          "text": "INC EDI"
+        },
+        {
+          "address": "0x004880cf",
+          "bytes": "66 3b 3d 38 37 84 00",
+          "flowType": "FALL_THROUGH",
+          "text": "CMP DI,word ptr [0x00843738]"
+        },
+        {
+          "address": "0x004880d6",
+          "bytes": "7c b5",
+          "flowType": "CONDITIONAL_JUMP",
+          "text": "JL 0x0048808d"
+        },
+        {
+          "address": "0x004880d8",
+          "bytes": "5f",
+          "flowType": "FALL_THROUGH",
+          "text": "POP EDI"
+        },
+        {
+          "address": "0x004880d9",
+          "bytes": "33 c0",
+          "flowType": "FALL_THROUGH",
+          "text": "XOR EAX,EAX"
+        },
+        {
+          "address": "0x004880db",
+          "bytes": "5e",
+          "flowType": "FALL_THROUGH",
+          "text": "POP ESI"
+        },
+        {
+          "address": "0x004880dc",
+          "bytes": "c3",
+          "flowType": "TERMINATOR",
+          "text": "RET"
+        },
+        {
+          "address": "0x004880dd",
+          "bytes": "5f",
+          "flowType": "FALL_THROUGH",
+          "text": "POP EDI"
+        },
+        {
+          "address": "0x004880de",
+          "bytes": "b8 01 00 00 00",
+          "flowType": "FALL_THROUGH",
+          "text": "MOV EAX,0x1"
+        },
+        {
+          "address": "0x004880e3",
+          "bytes": "5e",
+          "flowType": "FALL_THROUGH",
+          "text": "POP ESI"
+        },
+        {
+          "address": "0x004880e4",
+          "bytes": "c3",
+          "flowType": "TERMINATOR",
+          "text": "RET"
+        }
+      ],
+      "decompilation": "\nundefined4 FUN_00488080(void)\n\n{\n  short sVar1;\n  int iVar2;\n  short sVar3;\n  \n  sVar3 = 0;\n  if (0 < DAT_00843738) {\n    do {\n      sVar1 = (&DAT_00842dd8)[sVar3];\n      iVar2 = FUN_00441db0((int)sVar1);\n      if (((iVar2 != 0) &&\n          (iVar2 = sVar1 * 0x558, (*(uint *)(&DAT_006352cc + iVar2) & 0x20002) != 0)) &&\n         ((char)(&DAT_00635290)[iVar2] == DAT_00bccc44)) {\n        return 1;\n      }\n      sVar3 = sVar3 + 1;\n    } while (sVar3 < DAT_00843738);\n  }\n  return 0;\n}\n\n"
     },
     {
       "entry": "0x00488420",

@@ -17,8 +17,8 @@
   "referenceCount": 57572,
   "computedJumpCount": 268,
   "jumpTableCount": 234,
-  "seedCount": 135,
-  "seedFunctionCount": 134,
+  "seedCount": 138,
+  "seedFunctionCount": 137,
   "memoryBlocks": [
     {
       "name": "Headers",

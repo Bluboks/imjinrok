@@ -134,3 +134,6 @@
 0x004885e0 k01-owner-class-reference-lookup
 0x0048d6f0 mission-result-gate-candidate
 0x0048dde0 mission-result-consumer-candidate
+0x004481d0 raw-global-tick-result-dispatch-wrapper
+0x00488080 active-list-raw-presence-check
+0x004492f0 mission-result-global-flag-write
