@@ -1,0 +1,589 @@
+{
+  "sourceExecutableSha256": "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e",
+  "sourceFunctionsSha256": "c10ea2de1f4998411d52443419c9a7f52ff7f9c18e79bd4115ba197d2f5bebc3",
+  "sourceReferencesSha256": "df11ff3713988ef22b3390b5b0ae7b4a87464b5de547a4866e1c8ec8a0bcaf4c",
+  "scopeNotice": "The first vector group supplies bounded synthetic selection inputs; its seven-slot values model the recovered zero-or-internal-class-1..95 producer domain. The production dispatch vectors are restricted to statically recovered action definitions 107 and 115. Only action 115 is bound here to original internal class 76 (조선 권율). Payload zero models bounded admission; right-release payload one models matching queue removal or the no-match refund/bookkeeping fallthrough. FUN_0042de00 state-0x0f progress, completion, and post-dispatch side effects are static-only and are not reproduction vectors. This narrow production-action slice does not establish the remembered right-click reservation feature or make the seven-slot owner or the project's construction, productionQueue, or researchQueue contracts equivalent to the original queue.",
+  "vectors": [
+    {
+      "id": "no-selection-rebuilds-and-draws-seven-predefined-owner-slots",
+      "input": {
+        "selectionCount": 0,
+        "drawSurfaceLockSucceeded": true,
+        "predefinedSlots": [11, 0, 22, 33, 0, 44, 55]
+      },
+      "expected": {
+        "selectionCount": 0,
+        "command": null,
+        "predefinedOwnerSlots": [11, 0, 22, 33, 0, 44, 55],
+        "operations": [
+          { "type": "reset-action-and-seven-slot-state" },
+          { "type": "rebuild-predefined-no-selection-owner", "slots": [11, 0, 22, 33, 0, 44, 55] },
+          { "type": "draw-predefined-no-selection-slot", "slot": 0, "typeWord": 11 },
+          { "type": "draw-predefined-no-selection-slot", "slot": 2, "typeWord": 22 },
+          { "type": "draw-predefined-no-selection-slot", "slot": 3, "typeWord": 33 },
+          { "type": "draw-predefined-no-selection-slot", "slot": 5, "typeWord": 44 },
+          { "type": "draw-predefined-no-selection-slot", "slot": 6, "typeWord": 55 }
+        ]
+      },
+      "expectedOutputSha256": "a1763bcdb2e3abbb567ac4b5bcd929b637ebd670119ca845398641c7adac0ec0"
+    },
+    {
+      "id": "no-selection-lock-failure-retains-rebuilt-owner-without-draw",
+      "input": {
+        "selectionCount": 0,
+        "drawSurfaceLockSucceeded": false,
+        "predefinedSlots": [1, 2, 3, 4, 5, 6, 7]
+      },
+      "expected": {
+        "selectionCount": 0,
+        "command": null,
+        "predefinedOwnerSlots": [1, 2, 3, 4, 5, 6, 7],
+        "operations": [
+          { "type": "reset-action-and-seven-slot-state" },
+          { "type": "rebuild-predefined-no-selection-owner", "slots": [1, 2, 3, 4, 5, 6, 7] },
+          { "type": "skip-no-selection-draw-surface-lock-failure" }
+        ]
+      },
+      "expectedOutputSha256": "0d594aeaefce7653f1bc9a24ed528deda20bcbaadb13868ae9e34a6bd5d46c4c"
+    },
+    {
+      "id": "no-selection-all-zero-slots-have-no-per-slot-draw",
+      "input": {
+        "selectionCount": 0,
+        "drawSurfaceLockSucceeded": true,
+        "predefinedSlots": [0, 0, 0, 0, 0, 0, 0]
+      },
+      "expected": {
+        "selectionCount": 0,
+        "command": null,
+        "predefinedOwnerSlots": [0, 0, 0, 0, 0, 0, 0],
+        "operations": [
+          { "type": "reset-action-and-seven-slot-state" },
+          { "type": "rebuild-predefined-no-selection-owner", "slots": [0, 0, 0, 0, 0, 0, 0] }
+        ]
+      },
+      "expectedOutputSha256": "60075cc8fd23ad1f7066276edaa00d98e071e203a0d3e0e74d14c96b1c132f9f"
+    },
+    {
+      "id": "right-release-zero-target-mode-packs-immediate-payload",
+      "input": {
+        "selectionCount": 1,
+        "drawSurfaceLockSucceeded": true,
+        "actionAvailable": true,
+        "pointerRelease": true,
+        "pointerButton": "right",
+        "actionWord": 321,
+        "targetModeWord": 0,
+        "immediateMode": true
+      },
+      "expected": {
+        "selectionCount": 1,
+        "command": {
+          "actionWord": 321,
+          "actionRecordByte2": 0,
+          "immediateModeByte3": 1,
+          "rightReleasePayload": 1,
+          "delivery": "immediate-entity-action"
+        },
+        "predefinedOwnerSlots": [],
+        "operations": [
+          { "type": "reset-action-and-seven-slot-state" },
+          { "type": "draw-selected-action-slot", "actionWord": 321 },
+          { "type": "accept-right-zero-target-mode-action-release" },
+          { "type": "pack-command", "actionWord": 321, "actionRecordByte2": 0, "immediateModeByte3": 1, "rightReleasePayload": 1 },
+          { "type": "deliver-command", "delivery": "immediate-entity-action" }
+        ]
+      },
+      "expectedOutputSha256": "9a44b69ca79a101d0e24d5e9987a577d82cc7abd85c5b097ef46a56ec10faedd"
+    },
+    {
+      "id": "right-release-zero-target-mode-packs-queued-payload",
+      "input": {
+        "selectionCount": 2,
+        "drawSurfaceLockSucceeded": true,
+        "actionAvailable": true,
+        "pointerRelease": true,
+        "pointerButton": "right",
+        "actionWord": 654,
+        "targetModeWord": 0,
+        "immediateMode": false
+      },
+      "expected": {
+        "selectionCount": 2,
+        "command": {
+          "actionWord": 654,
+          "actionRecordByte2": 0,
+          "immediateModeByte3": 0,
+          "rightReleasePayload": 1,
+          "delivery": "queued-entity-action"
+        },
+        "predefinedOwnerSlots": [],
+        "operations": [
+          { "type": "reset-action-and-seven-slot-state" },
+          { "type": "draw-selected-action-slot", "actionWord": 654 },
+          { "type": "accept-right-zero-target-mode-action-release" },
+          { "type": "pack-command", "actionWord": 654, "actionRecordByte2": 0, "immediateModeByte3": 0, "rightReleasePayload": 1 },
+          { "type": "deliver-command", "delivery": "queued-entity-action" }
+        ]
+      },
+      "expectedOutputSha256": "f2763e726b7c78260613ebbe4884df9b2aada2e83356ac348d73a12f75356eb2"
+    },
+    {
+      "id": "right-release-nonzero-target-mode-is-ignored",
+      "input": {
+        "selectionCount": 1,
+        "drawSurfaceLockSucceeded": true,
+        "actionAvailable": true,
+        "pointerRelease": true,
+        "pointerButton": "right",
+        "actionWord": 777,
+        "targetModeWord": 4,
+        "immediateMode": true
+      },
+      "expected": {
+        "selectionCount": 1,
+        "command": null,
+        "predefinedOwnerSlots": [],
+        "operations": [
+          { "type": "reset-action-and-seven-slot-state" },
+          { "type": "draw-selected-action-slot", "actionWord": 777 },
+          { "type": "ignore-right-release-for-nonzero-target-mode" }
+        ]
+      },
+      "expectedOutputSha256": "235997a98dc6d673f7693745c884d636699e5365cc7612468463595915f15c10"
+    },
+    {
+      "id": "left-release-packs-zero-right-release-payload",
+      "input": {
+        "selectionCount": 1,
+        "drawSurfaceLockSucceeded": true,
+        "actionAvailable": true,
+        "pointerRelease": true,
+        "pointerButton": "left",
+        "actionWord": 888,
+        "targetModeWord": 9,
+        "immediateMode": true
+      },
+      "expected": {
+        "selectionCount": 1,
+        "command": {
+          "actionWord": 888,
+          "actionRecordByte2": 0,
+          "immediateModeByte3": 1,
+          "rightReleasePayload": 0,
+          "delivery": "immediate-entity-action"
+        },
+        "predefinedOwnerSlots": [],
+        "operations": [
+          { "type": "reset-action-and-seven-slot-state" },
+          { "type": "draw-selected-action-slot", "actionWord": 888 },
+          { "type": "accept-left-action-release" },
+          { "type": "pack-command", "actionWord": 888, "actionRecordByte2": 0, "immediateModeByte3": 1, "rightReleasePayload": 0 },
+          { "type": "deliver-command", "delivery": "immediate-entity-action" }
+        ]
+      },
+      "expectedOutputSha256": "8f2d036f8cf33aa65ea363380f7ad9c1b63a4ad3db842339b4478ac78e813eab"
+    },
+    {
+      "id": "held-right-button-does-not-produce-command",
+      "input": {
+        "selectionCount": 1,
+        "drawSurfaceLockSucceeded": true,
+        "actionAvailable": true,
+        "pointerRelease": false,
+        "pointerButton": "right",
+        "actionWord": 999,
+        "targetModeWord": 0,
+        "immediateMode": true
+      },
+      "expected": {
+        "selectionCount": 1,
+        "command": null,
+        "predefinedOwnerSlots": [],
+        "operations": [
+          { "type": "reset-action-and-seven-slot-state" },
+          { "type": "draw-selected-action-slot", "actionWord": 999 }
+        ]
+      },
+      "expectedOutputSha256": "4932dc705007b959de4137a634945583085dd558ddee4f364dfc72e770c01f76"
+    },
+    {
+      "id": "unavailable-action-does-not-draw-or-produce-command",
+      "input": {
+        "selectionCount": 1,
+        "drawSurfaceLockSucceeded": true,
+        "actionAvailable": false,
+        "pointerRelease": true,
+        "pointerButton": "right",
+        "actionWord": 1000,
+        "targetModeWord": 0,
+        "immediateMode": true
+      },
+      "expected": {
+        "selectionCount": 1,
+        "command": null,
+        "predefinedOwnerSlots": [],
+        "operations": [
+          { "type": "reset-action-and-seven-slot-state" }
+        ]
+      },
+      "expectedOutputSha256": "db9b8e8aae48d33fe668bbaeb83a28bdf221b29bb0bca068a1d46430b44e4fe8"
+    },
+    {
+      "id": "other-button-release-does-not-produce-command",
+      "input": {
+        "selectionCount": 1,
+        "drawSurfaceLockSucceeded": true,
+        "actionAvailable": true,
+        "pointerRelease": true,
+        "pointerButton": "other",
+        "actionWord": 1111,
+        "targetModeWord": 0,
+        "immediateMode": false
+      },
+      "expected": {
+        "selectionCount": 1,
+        "command": null,
+        "predefinedOwnerSlots": [],
+        "operations": [
+          { "type": "reset-action-and-seven-slot-state" },
+          { "type": "draw-selected-action-slot", "actionWord": 1111 }
+        ]
+      },
+      "expectedOutputSha256": "05259cc7d9633b836938e00510e3192dd59eec5dfe28fc9e476df9137a745266"
+    },
+    {
+      "id": "selected-action-lock-failure-still-produces-right-release-command",
+      "input": {
+        "selectionCount": 1,
+        "drawSurfaceLockSucceeded": false,
+        "actionAvailable": true,
+        "pointerRelease": true,
+        "pointerButton": "right",
+        "actionWord": 1212,
+        "targetModeWord": 0,
+        "immediateMode": true
+      },
+      "expected": {
+        "selectionCount": 1,
+        "command": {
+          "actionWord": 1212,
+          "actionRecordByte2": 0,
+          "immediateModeByte3": 1,
+          "rightReleasePayload": 1,
+          "delivery": "immediate-entity-action"
+        },
+        "predefinedOwnerSlots": [],
+        "operations": [
+          { "type": "reset-action-and-seven-slot-state" },
+          { "type": "skip-selected-action-draw-surface-lock-failure" },
+          { "type": "accept-right-zero-target-mode-action-release" },
+          { "type": "pack-command", "actionWord": 1212, "actionRecordByte2": 0, "immediateModeByte3": 1, "rightReleasePayload": 1 },
+          { "type": "deliver-command", "delivery": "immediate-entity-action" }
+        ]
+      },
+      "expectedOutputSha256": "175881a584cd51f584ce4b4e0ca329203c5e80d6d1929d4a2c4aaf294192ab91"
+    }
+  ],
+  "productionActionDispatchVectors": [
+    {
+      "id": "action-115-payload-zero-state-word-one-starts-produced-type-76",
+      "input": {
+        "actionId": 115,
+        "rightReleasePayload": 0,
+        "currentStateWord": 1,
+        "queueActionIds": "unreachable",
+        "entityField0x266Word": 1,
+        "reservationOutcome": "success",
+        "entityField0x1b6Word": 77
+      },
+      "expected": {
+        "actionId": 115,
+        "rightReleasePayload": 0,
+        "finalQueueActionIds": null,
+        "stateWordWrite": 15,
+        "producedTypeWrite": 76,
+        "commandConsumed": true,
+        "operations": [
+          { "type": "dispatch-production-action", "actionId": 115, "producedInternalClass": 76, "rightReleasePayload": 0 },
+          { "type": "reserve-resources-and-capacity", "producedInternalClass": 76 },
+          { "type": "assign-produced-type-field-0x0e-to-entity-field-0x3f0", "producedInternalClass": 76, "amountWord": 0 },
+          { "type": "write-produced-type-player-word-0x82c55c", "value": 0 },
+          { "type": "write-produced-type-player-word-0x82c624-from-entity-field-0x1b6", "value": 77 },
+          { "type": "clear-current-action-state" },
+          { "type": "start-production-state", "stateWord": 15, "producedInternalClass": 76 }
+        ]
+      },
+      "expectedOutputSha256": "af8d83b3d06ea343df2a66b94c5c76f447d7c1f4d1caad289b329d243510a57c"
+    },
+    {
+      "id": "action-115-payload-zero-non-one-state-appends-one-queued-action",
+      "input": {
+        "actionId": 115,
+        "rightReleasePayload": 0,
+        "currentStateWord": 15,
+        "queueActionIds": [7, 8],
+        "entityField0x266Word": 1,
+        "reservationOutcome": "success",
+        "entityField0x1b6Word": 88
+      },
+      "expected": {
+        "actionId": 115,
+        "rightReleasePayload": 0,
+        "finalQueueActionIds": [7, 8, 115],
+        "stateWordWrite": null,
+        "producedTypeWrite": null,
+        "commandConsumed": true,
+        "operations": [
+          { "type": "dispatch-production-action", "actionId": 115, "producedInternalClass": 76, "rightReleasePayload": 0 },
+          { "type": "reserve-resources-and-capacity", "producedInternalClass": 76 },
+          { "type": "add-produced-type-field-0x0e-to-entity-field-0x3f0", "producedInternalClass": 76, "amountWord": 0 },
+          { "type": "write-produced-type-player-word-0x82c55c", "value": 0 },
+          { "type": "write-produced-type-player-word-0x82c624-from-entity-field-0x1b6", "value": 88 },
+          { "type": "append-production-action-to-queue", "queueIndex": 2, "actionId": 115 }
+        ]
+      },
+      "expectedOutputSha256": "0407656c856545c81a3f9c9db5dcee5d88a63d2f532970f43c50cf6588effebd"
+    },
+    {
+      "id": "action-115-payload-zero-non-one-field-0x266-bypasses-checks-and-appends",
+      "input": {
+        "actionId": 115,
+        "rightReleasePayload": 0,
+        "currentStateWord": 15,
+        "queueActionIds": [7],
+        "entityField0x266Word": 0,
+        "prerequisiteAvailable": "unreachable",
+        "reservationOutcome": "unreachable",
+        "entityField0x1b6Word": 99
+      },
+      "expected": {
+        "actionId": 115,
+        "rightReleasePayload": 0,
+        "finalQueueActionIds": [7, 115],
+        "stateWordWrite": null,
+        "producedTypeWrite": null,
+        "commandConsumed": true,
+        "operations": [
+          { "type": "dispatch-production-action", "actionId": 115, "producedInternalClass": 76, "rightReleasePayload": 0 },
+          { "type": "bypass-prerequisite-and-reservation-for-entity-field-0x266-non-one", "entityField0x266Word": 0 },
+          { "type": "write-produced-type-player-word-0x82c55c", "value": 0 },
+          { "type": "write-produced-type-player-word-0x82c624-from-entity-field-0x1b6", "value": 99 },
+          { "type": "append-production-action-to-queue", "queueIndex": 1, "actionId": 115 }
+        ]
+      },
+      "expectedOutputSha256": "ba5ea02596db80bc33678fc8bcb2f6191696243d5eb3ec99e834b52e610e3b96"
+    },
+    {
+      "id": "action-115-payload-zero-state-one-non-one-field-0x266-bypasses-to-common-writes-and-starts",
+      "input": {
+        "actionId": 115,
+        "rightReleasePayload": 0,
+        "currentStateWord": 1,
+        "queueActionIds": "unreachable",
+        "entityField0x266Word": 0,
+        "prerequisiteAvailable": "unreachable",
+        "reservationOutcome": "unreachable",
+        "entityField0x1b6Word": 101
+      },
+      "expected": {
+        "actionId": 115,
+        "rightReleasePayload": 0,
+        "finalQueueActionIds": null,
+        "stateWordWrite": 15,
+        "producedTypeWrite": 76,
+        "commandConsumed": true,
+        "operations": [
+          { "type": "dispatch-production-action", "actionId": 115, "producedInternalClass": 76, "rightReleasePayload": 0 },
+          { "type": "bypass-prerequisite-and-reservation-for-entity-field-0x266-non-one", "entityField0x266Word": 0 },
+          { "type": "write-produced-type-player-word-0x82c55c", "value": 0 },
+          { "type": "write-produced-type-player-word-0x82c624-from-entity-field-0x1b6", "value": 101 },
+          { "type": "clear-current-action-state" },
+          { "type": "start-production-state", "stateWord": 15, "producedInternalClass": 76 }
+        ]
+      },
+      "expectedOutputSha256": "caf9be154e434a5eba4e64ad1738ebd1ac98772943873b2b63979e6e596802df"
+    },
+    {
+      "id": "action-115-payload-zero-duplicate-is-rejected-before-later-inputs",
+      "input": {
+        "actionId": 115,
+        "rightReleasePayload": 0,
+        "currentStateWord": 15,
+        "queueActionIds": [115],
+        "entityField0x266Word": "unreachable",
+        "reservationOutcome": "unreachable",
+        "entityField0x1b6Word": "unreachable"
+      },
+      "expected": {
+        "actionId": 115,
+        "rightReleasePayload": 0,
+        "finalQueueActionIds": [115],
+        "stateWordWrite": null,
+        "producedTypeWrite": null,
+        "commandConsumed": true,
+        "operations": [
+          { "type": "dispatch-production-action", "actionId": 115, "producedInternalClass": 76, "rightReleasePayload": 0 },
+          { "type": "reject-queued-action-per-action-capacity", "maximum": 1, "matchingCount": 1 }
+        ]
+      },
+      "expectedOutputSha256": "02ae1d4c4344f6e2a55b0a84faf108e40da9dcc28741f24a12ee1b0e656a5ed9"
+    },
+    {
+      "id": "twenty-entry-production-action-queue-is-full",
+      "input": {
+        "actionId": 115,
+        "rightReleasePayload": 0,
+        "currentStateWord": 15,
+        "queueActionIds": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
+        "entityField0x266Word": "unreachable",
+        "reservationOutcome": "unreachable",
+        "entityField0x1b6Word": "unreachable"
+      },
+      "expected": {
+        "actionId": 115,
+        "rightReleasePayload": 0,
+        "finalQueueActionIds": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
+        "stateWordWrite": null,
+        "producedTypeWrite": null,
+        "commandConsumed": true,
+        "operations": [
+          { "type": "dispatch-production-action", "actionId": 115, "producedInternalClass": 76, "rightReleasePayload": 0 },
+          { "type": "reject-queued-action-total-capacity", "maximum": 20 }
+        ]
+      },
+      "expectedOutputSha256": "8d4906753ab27c569c69b6289cfafa66910eecb9b99823dddfe48eba02d6acfe"
+    },
+    {
+      "id": "action-115-resource-b-reservation-failure-does-not-start-or-append",
+      "input": {
+        "actionId": 115,
+        "rightReleasePayload": 0,
+        "currentStateWord": 1,
+        "queueActionIds": "unreachable",
+        "entityField0x266Word": 1,
+        "reservationOutcome": "resource-b",
+        "entityField0x1b6Word": "unreachable"
+      },
+      "expected": {
+        "actionId": 115,
+        "rightReleasePayload": 0,
+        "finalQueueActionIds": null,
+        "stateWordWrite": null,
+        "producedTypeWrite": null,
+        "commandConsumed": true,
+        "operations": [
+          { "type": "dispatch-production-action", "actionId": 115, "producedInternalClass": 76, "rightReleasePayload": 0 },
+          { "type": "reject-resource-or-capacity-reservation", "reason": "resource-b" }
+        ]
+      },
+      "expectedOutputSha256": "ad5689f9d81c8e3d6e2a88179f07f7e9bfd54efc2ef8bc628344edd281f3d8f7"
+    },
+    {
+      "id": "action-115-right-release-payload-one-removes-match-without-caller-refund",
+      "input": {
+        "actionId": 115,
+        "rightReleasePayload": 1,
+        "currentStateWord": "unreachable",
+        "entityField0x266Word": "unreachable",
+        "reservationOutcome": "unreachable",
+        "entityField0x1b6Word": "unreachable",
+        "queueActionIds": [4, 115, 9, 115]
+      },
+      "expected": {
+        "actionId": 115,
+        "rightReleasePayload": 1,
+        "finalQueueActionIds": [4, 9, 115],
+        "stateWordWrite": null,
+        "producedTypeWrite": null,
+        "commandConsumed": true,
+        "operations": [
+          { "type": "dispatch-production-action", "actionId": 115, "producedInternalClass": 76, "rightReleasePayload": 1 },
+          { "type": "remove-first-matching-queued-action-without-caller-refund", "matchIndex": 1 }
+        ]
+      },
+      "expectedOutputSha256": "4914c367db9779b2d29506b43afdd78119be734b3aec4ea23151dd7f448c750a"
+    },
+    {
+      "id": "action-115-right-release-payload-one-no-match-refunds-and-writes-bookkeeping",
+      "input": {
+        "actionId": 115,
+        "rightReleasePayload": 1,
+        "currentStateWord": "unreachable",
+        "entityField0x266Word": "unreachable",
+        "reservationOutcome": "unreachable",
+        "entityField0x1b6Word": "unreachable",
+        "queueActionIds": [4, 9]
+      },
+      "expected": {
+        "actionId": 115,
+        "rightReleasePayload": 1,
+        "finalQueueActionIds": [4, 9],
+        "stateWordWrite": null,
+        "producedTypeWrite": null,
+        "commandConsumed": true,
+        "operations": [
+          { "type": "dispatch-production-action", "actionId": 115, "producedInternalClass": 76, "rightReleasePayload": 1 },
+          { "type": "matching-queued-action-not-found" },
+          { "type": "refund-produced-type-resources-and-capacity", "producedInternalClass": 76, "rawFields": { "field0x0eWord": 0, "field0x10Word": 400, "field0x12Word": 0 } },
+          { "type": "subtract-produced-type-field-0x0e-from-entity-field-0x3f0", "producedInternalClass": 76, "amountWord": 0 },
+          { "type": "write-produced-type-player-word-0x82c55c", "value": 1 },
+          { "type": "write-produced-type-player-word-0x82c624", "value": 0 }
+        ]
+      },
+      "expectedOutputSha256": "0dada3872a671b0756728d2299ab4fe11ec0d73d78c3fca3c17ff9a93d6a8183"
+    },
+    {
+      "id": "action-107-missing-prerequisite-is-rejected-before-reservation",
+      "input": {
+        "actionId": 107,
+        "rightReleasePayload": 0,
+        "currentStateWord": 1,
+        "queueActionIds": "unreachable",
+        "entityField0x266Word": 1,
+        "prerequisiteAvailable": false,
+        "reservationOutcome": "unreachable",
+        "entityField0x1b6Word": "unreachable"
+      },
+      "expected": {
+        "actionId": 107,
+        "rightReleasePayload": 0,
+        "finalQueueActionIds": null,
+        "stateWordWrite": null,
+        "producedTypeWrite": null,
+        "commandConsumed": true,
+        "operations": [
+          { "type": "dispatch-production-action", "actionId": 107, "producedInternalClass": 28, "rightReleasePayload": 0 },
+          { "type": "reject-missing-production-prerequisite", "prerequisiteIndexDword": 7 }
+        ]
+      },
+      "expectedOutputSha256": "029839e73830297d2a777c65fcdbedcbe19a8c7550c7750e056a8e54199c9763"
+    },
+    {
+      "id": "action-107-five-matching-queued-actions-hit-general-limit",
+      "input": {
+        "actionId": 107,
+        "rightReleasePayload": 0,
+        "currentStateWord": 15,
+        "queueActionIds": [107, 107, 107, 107, 107],
+        "entityField0x266Word": "unreachable",
+        "prerequisiteAvailable": "unreachable",
+        "reservationOutcome": "unreachable",
+        "entityField0x1b6Word": "unreachable"
+      },
+      "expected": {
+        "actionId": 107,
+        "rightReleasePayload": 0,
+        "finalQueueActionIds": [107, 107, 107, 107, 107],
+        "stateWordWrite": null,
+        "producedTypeWrite": null,
+        "commandConsumed": true,
+        "operations": [
+          { "type": "dispatch-production-action", "actionId": 107, "producedInternalClass": 28, "rightReleasePayload": 0 },
+          { "type": "reject-queued-action-per-action-capacity", "maximum": 5, "matchingCount": 5 }
+        ]
+      },
+      "expectedOutputSha256": "36c73b5db255eb682ebd283e5562a71e7d633f072a7e472225fd3fd1730c29a8"
+    }
+  ]
+}
