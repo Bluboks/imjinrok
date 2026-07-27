@@ -1,0 +1,200 @@
+{
+  "sourceExecutableSha256": "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e",
+  "sourceK0110Sha256": "d9dcc3c78d0373181677afc63fe9331ff561387e36877a62912ca66515f4aea8",
+  "scopeNotice": "resolvedLabelIndex values and lifecycle outcomes are reproduced only for the statically bounded 17-entry SPEECH identifier/label table; an unresolved identifier returns -1, and a successful surface lock then reaches an unchecked original out-of-range frame-table read after storing that sentinel",
+  "initialState": {
+    "slots": [
+      { "labelIndex": -1, "kindState": 0, "activeState": 0, "progressWord": 0, "disposition": 0 },
+      { "labelIndex": -1, "kindState": 0, "activeState": 0, "progressWord": 0, "disposition": 0 },
+      { "labelIndex": -1, "kindState": 0, "activeState": 0, "progressWord": 0, "disposition": 0 },
+      { "labelIndex": -1, "kindState": 0, "activeState": 0, "progressWord": 0, "disposition": 0 }
+    ],
+    "field_0xf8": 0,
+    "field_0x564": 0,
+    "field_0x568": 0,
+    "resourcePresent": false
+  },
+  "productionVectors": [
+    {
+      "id": "new-k3-speech-record-activates-changed-slot",
+      "input": {
+        "slot": 0,
+        "guardAccepted": true,
+        "resolvedLabelIndex": 2,
+        "surfaceLockSucceeded": true,
+        "dispositionInput": 0,
+        "resourceLoadSucceeded": true,
+        "textPathAccepted": true
+      },
+      "expectedOutputSha256": "99ca9327fbabc03113fb2e97c10a60b245f14fda095ce51e92ca71410be113ee"
+    },
+    {
+      "id": "same-k3-replacement-clears-first-but-kind-remains-zero",
+      "initialOverrides": {
+        "slot": 0,
+        "record": { "labelIndex": 2, "kindState": 1, "activeState": 1, "progressWord": 45, "disposition": 1 },
+        "field_0xf8": 1,
+        "resourcePresent": true
+      },
+      "input": {
+        "slot": 0,
+        "guardAccepted": true,
+        "resolvedLabelIndex": 2,
+        "surfaceLockSucceeded": true,
+        "dispositionInput": 7,
+        "resourceLoadSucceeded": true,
+        "textPathAccepted": true
+      },
+      "expectedOutputSha256": "e13b161df39a4c4285668bf31adbf2221641f4e040f0842c2a607b5396bcb8b4"
+    },
+    {
+      "id": "surface-lock-failure-still-activates-with-sentinel-label",
+      "input": {
+        "slot": 3,
+        "guardAccepted": true,
+        "resolvedLabelIndex": 0,
+        "surfaceLockSucceeded": false,
+        "dispositionInput": 3,
+        "resourceLoadSucceeded": true,
+        "textPathAccepted": false
+      },
+      "expectedOutputSha256": "504c4a898ae14d41e6ab56f91bf55d81991ff2f27d39907840e85b72818797d0"
+    },
+    {
+      "id": "resource-load-failure-is-reported-after-record-activation",
+      "input": {
+        "slot": 1,
+        "guardAccepted": true,
+        "resolvedLabelIndex": 15,
+        "surfaceLockSucceeded": true,
+        "dispositionInput": 0,
+        "resourceLoadSucceeded": false,
+        "textPathAccepted": true
+      },
+      "expectedOutputSha256": "05fb4a35a4d2aed4e2e6500b470571f34dc726fad1f06a2926b31f504bae398b"
+    },
+    {
+      "id": "inactive-slot-reports-existing-resource-before-failed-load-overwrite",
+      "initialOverrides": {
+        "resourcePresent": true
+      },
+      "input": {
+        "slot": 3,
+        "guardAccepted": true,
+        "resolvedLabelIndex": 0,
+        "surfaceLockSucceeded": true,
+        "dispositionInput": 5,
+        "resourceLoadSucceeded": false,
+        "textPathAccepted": false
+      },
+      "expectedOutputSha256": "3c9e1c796b29ccf7b8ca50718b4057f2d687d67019822d623dc8bf80718bbb9f"
+    },
+    {
+      "id": "active-replacement-clears-text-and-old-resource-before-new-load-failure",
+      "initialOverrides": {
+        "slot": 1,
+        "record": { "labelIndex": 15, "kindState": 0, "activeState": 1, "progressWord": 80, "disposition": 4 },
+        "field_0xf8": 1,
+        "resourcePresent": true
+      },
+      "input": {
+        "slot": 1,
+        "guardAccepted": true,
+        "resolvedLabelIndex": 0,
+        "surfaceLockSucceeded": true,
+        "dispositionInput": 2,
+        "resourceLoadSucceeded": false,
+        "textPathAccepted": false
+      },
+      "expectedOutputSha256": "8e8ffd089b7339127845b8ff30b003f18627bb9ec0b3b521be05017730948727"
+    },
+    {
+      "id": "admission-rejection-does-not-read-downstream-inputs",
+      "input": {
+        "slot": 2,
+        "guardAccepted": false,
+        "resolvedLabelIndex": "unreachable",
+        "surfaceLockSucceeded": "unreachable",
+        "dispositionInput": "unreachable",
+        "resourceLoadSucceeded": "unreachable",
+        "textPathAccepted": "unreachable"
+      },
+      "expectedOutputSha256": "3eca2cd2c9071c7c81038142a9be2933db789564dcf391dabec300fe00f0d0f3"
+    },
+    {
+      "id": "lookup-minus-one-stops-at-explicit-unsafe-boundary",
+      "initialOverrides": {
+        "slot": 2,
+        "record": { "labelIndex": 2, "kindState": 0, "activeState": 1, "progressWord": 50, "disposition": 9 },
+        "field_0xf8": 1,
+        "resourcePresent": true
+      },
+      "input": {
+        "slot": 2,
+        "guardAccepted": true,
+        "resolvedLabelIndex": -1,
+        "surfaceLockSucceeded": true,
+        "dispositionInput": "unreachable",
+        "resourceLoadSucceeded": "unreachable",
+        "textPathAccepted": "unreachable"
+      },
+      "expectedOutputSha256": "b2ffe46f96ec16a8e7ddbebc51328ca682f99fe4ec21a64aa96182efea31bb19"
+    },
+    {
+      "id": "lookup-minus-one-with-surface-lock-failure-avoids-frame-read",
+      "input": {
+        "slot": 2,
+        "guardAccepted": true,
+        "resolvedLabelIndex": -1,
+        "surfaceLockSucceeded": false,
+        "dispositionInput": 0,
+        "resourceLoadSucceeded": false,
+        "textPathAccepted": false
+      },
+      "expectedOutputSha256": "4ff5f3030674508486a5da9064967f9d504e7de5042c9b15c5ea09d382c3ca01"
+    }
+  ],
+  "resetVectors": [
+    {
+      "id": "active-reset-retains-label-and-progress",
+      "slot": 1,
+      "record": { "labelIndex": 15, "kindState": 1, "activeState": 1, "progressWord": 95, "disposition": 1 },
+      "expectedOutputSha256": "577672d4308d30ee709a52486f77f301173a37e5dd1d8364aaf3b6ff0d5b5b06"
+    },
+    {
+      "id": "non-one-active-reset-is-no-op",
+      "slot": 2,
+      "record": { "labelIndex": 2, "kindState": 4294967295, "activeState": 2, "progressWord": -5, "disposition": 7 },
+      "expectedOutputSha256": "df3e419d6094d0bac0f9935077324bd3b7d14a55c62474ad1ccc24459ff3c7ea"
+    }
+  ],
+  "clearVectors": [
+    {
+      "id": "mode-zero-restores-label-sentinel",
+      "slot": 0,
+      "mode": 0,
+      "record": { "labelIndex": 2, "kindState": 1, "activeState": 1, "progressWord": 50, "disposition": 9 },
+      "field_0xf8": 1,
+      "resourcePresent": true,
+      "expectedOutputSha256": "8ea89f705e62a7e60ec62bace11a4d3f0a1fb7db5eee71cf7d2f83d3b29c0eda"
+    },
+    {
+      "id": "nonzero-mode-retains-active-label-kind-and-progress",
+      "slot": 3,
+      "mode": 4294967295,
+      "record": { "labelIndex": 0, "kindState": 1, "activeState": 1, "progressWord": 100, "disposition": 0 },
+      "field_0xf8": 2,
+      "resourcePresent": true,
+      "expectedOutputSha256": "f450daf5709ea2f39ed7225459d913798b8a8c42889c9fc88d04d5d7609c7579"
+    },
+    {
+      "id": "inactive-clear-with-absent-resource-does-not-release",
+      "slot": 2,
+      "mode": 0,
+      "record": { "labelIndex": -1, "kindState": 0, "activeState": 0, "progressWord": 0, "disposition": 0 },
+      "field_0xf8": 0,
+      "resourcePresent": false,
+      "expectedOutputSha256": "327c8189c332e4b875682dbb1bfb9d253bd8badabf2766c494cd784b6bcb3655"
+    }
+  ]
+}
