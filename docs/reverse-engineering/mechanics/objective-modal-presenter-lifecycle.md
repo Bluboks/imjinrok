@@ -41,7 +41,8 @@
 | content | 158 | 135 | 320 | 124 |
 | dismiss hit geometry | 415 | 267 | 80 | 24 |
 
-텍스트 최대 폭은 320, 첫 세로 중심은 166, 둘째 세로 중심은 228이다. viewport 변환은
+텍스트 caller 요청 폭은 320, renderer 유효 폭은 300, 첫 세로 중심은 166, 둘째 세로 중심은
+228이다. viewport 변환은
 `min(viewportWidth / 640, viewportHeight / 480)`의 단일 배율과 중앙 여백만 사용한다.
 
 K01 action을 presentation content로 바꿀 때 다음을 모두 검증한다.
@@ -127,9 +128,13 @@ press 시작 위치는 제한하지 않는다. 이는 원본이 이전 global bu
 - 원본 dismiss hit rectangle 위로 합성되는 얇은 갈색 fill·금속색 stroke와 `닫기 ESC` label
 - 본문용 `"Noto Serif KR", Batang, serif` fallback과 가독성 stroke
 - dismiss label용 `"Noto Sans KR", "Malgun Gothic", sans-serif` fallback
-- Phaser advanced word wrap과 uniform scale에 맞춘 font size
+- 원본 renderer의 유효 base 폭 300을 사용하는 Phaser advanced word wrap과 uniform scale에
+  맞춘 font size
 
-원본 font face·size와 한국어 줄바꿈은 아직 미확정이므로 위 항목을 원본 기반으로 표기하지 않는다.
+후속 [typography 분석](objective-modal-typography.md)은 logical `Arial`, height 12,
+`HANGEUL_CHARSET` 요청과 CP949 ASCII-space chunk 제어를 정적 확정했다. 그러나 실제 Windows
+font mapper가 실현한 Korean face·glyph metrics와 K0110 line breaks는 미재현이므로 font
+family/size와 Phaser 측정·wrap은 원본 기반으로 표기하지 않는다. 유효 base 폭 300만 원본 기반이다.
 검증되지 않은 원본 버튼 sprite나 label이 있다고 주장하지 않는다.
 
 ## resize와 shutdown

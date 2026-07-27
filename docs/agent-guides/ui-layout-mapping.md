@@ -56,6 +56,12 @@ HUD, 메뉴, 브리핑, 대화, 선택 패널, 입력 영역의 위치·크기·
 `DAT_0088afcc=1`을 기록해 `script\k0110`의 목표 텍스트를 선택하는 경로를 정적 확정·재현했다.
 공통 모달 기하와 이 K01 결합은 각각 독립된 재현 범위로 관리한다.
 
+후속 [목표 모달 typography 분석](../reverse-engineering/mechanics/objective-modal-typography.md)은
+`FUN_004a9010`의 5인자 호출, GDI `Arial`/height 12/HANGEUL_CHARSET 요청, CP949 byte
+space-chunk와 내부 유효 폭 300을 정적 확정했다. 실제 Windows font realization과 K0110 glyph
+metrics가 보존 입력에 없으므로 유효 폭만 원본 기반으로 이식하고 font family·size와 Korean
+line breaks는 계속 의도적 적응으로 분리한다.
+
 후속 [K01 진입 입력·컨트롤 분석](../reverse-engineering/mechanics/application-state-16-objective-control.md)은
 Escape 또는 strict gameplay-panel press/release부터 state `0x16`, K01 mode 1의
 `buttons201.spr` 컨트롤 strict release와 `0x3f0`까지 정적 확정·재현했다.
@@ -66,11 +72,13 @@ producer의 마지막 활성 overwrite 뒤 `FUN_00449090`이 살아남은 `0x3f0
 클라이언트에는 숫자 상태가 없는 semantic `open-objective-modal` 계약을 추가했다. 후속 프로젝트
 구조 감사는 K01 HUD objective button을 staged 프로젝트 적응 trigger로 삼아 `UIScene`의 private
 active request까지 연결했다. 후속 [presenter lifecycle 구현](../reverse-engineering/mechanics/objective-modal-presenter-lifecycle.md)은
-검증된 frame·content·dismiss 기하와 K0110 문자열을 독립 controller로 표시한다. font·wrap·
-backdrop·Escape·responsive blocker는 의도적 프로젝트 적응이다.
+검증된 frame·content·dismiss 기하와 K0110 문자열을 독립 controller로 표시한다. 후속
+typography 분석의 유효 base 폭 300만 추가로 원본 기반이며, font realization·glyph 측정·Korean
+wrap·backdrop·Escape·responsive blocker는 의도적 프로젝트 적응이다.
 
-두 텍스트 블록의 X·최대 폭·세로 중심과 K01 문자열 입력은 확정했지만 글꼴·줄바꿈 규칙,
-gameplay-panel의 화면상 정체는 아직 확정하지 않았다. 원본 SPR 로더 내부 실패 종류·객체 결과와
+두 텍스트 블록의 X·요청/유효 폭·세로 중심, K01 문자열 입력, logical GDI font 요청과 CP949 byte
+wrap 제어는 확정했다. 실제 Windows font realization·K0110 glyph metrics와 gameplay-panel의
+화면상 정체는 아직 확정하지 않았다. 원본 SPR 로더 내부 실패 종류·객체 결과와
 오디오 자원 parity는 정적-only이고 이식하지 않았다. 후속 dispatcher 벡터는 loader 실패 보고 뒤
 계속해 `0x3f1`로 전진하는 제어 효과만 재현한다. 자원·계산·입력 판정과 정상 로드 자원 cleanup
 모듈은 클라이언트에서 원본 기반이다. K01 진입 결합은 분석 전용이고 semantic action 계약은 독립

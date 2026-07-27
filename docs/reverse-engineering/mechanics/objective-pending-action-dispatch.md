@@ -253,10 +253,12 @@ action을 한 번 consume하고 자체 modal lifecycle을 소유한다. 이 shap
 - 실패한 원본 SPR loader가 남기는 세부 객체 상태; 이번에 확정한 것은 오류 보고 뒤 계속과
   dispatcher의 `0x3f1` 전이
 - 원본 mechanism 결과에서 semantic action을 발행할 구체 simulation/gameplay 모듈
-- 목표 문장의 원본 글꼴·줄바꿈과 원본 mechanism-owned action source 연결
+- 목표 문장의 실제 Windows font realization·glyph metrics와 원본 mechanism-owned action source 연결
 
 프로젝트 event 소유 경계는
 [후속 문서](objective-modal-ui-event-boundary.md)에서 확인했고,
-[presenter lifecycle](objective-modal-presenter-lifecycle.md)도 연결했다. 다음 좁은 질문은 경쟁
-값 중 K01 표시 흐름에 실제로 필요한 하나를 소비 함수까지 추적하거나 원본 font·wrap을 복원하는
-것이다.
+[presenter lifecycle](objective-modal-presenter-lifecycle.md)도 연결했다. 후속
+[typography 분석](objective-modal-typography.md)은 GDI font 요청·CP949 byte wrap을 복원하고
+유효 base 폭 300만 이식했다. 다음 좁은 질문은 경쟁 값 중 K01 표시 흐름에 실제로 필요한 하나를
+소비 함수까지 추적하거나, 보존 설치 입력에서 실제 Windows font realization의 정적 provenance가
+있는지 확인하는 것이다.

@@ -1,6 +1,6 @@
 # 분석 도구 인벤토리
 
-기준일: 2026-07-26
+기준일: 2026-07-27
 
 이 문서는 `tools/imjinrok/`의 도구를 현재 정적 분석 계획에 맞게 분류한다. 분류는 도구의 존재나
 테스트 통과 여부가 아니라, 원본 동작의 근거로 사용할 수 있는 범위를 뜻한다.
@@ -32,6 +32,7 @@
 | `extract-objective-modal-k01-binding.mjs`, `objective-modal-k01-binding.test.mjs` | 유지 | `0x3f0` 생산과 독립 `0x3ee→0x3ec→0x3ea` 컨트롤의 마지막 활성 우선순위, signed WORD K01 인덱스 1과 K0110 목표 텍스트·K01 map·handler 결합을 EXE·스크립트·맵 해시와 전체 함수·원시 범위로 정적 검증하고 경계 벡터로 재현 |
 | `extract-application-state-16-objective-control.mjs`, `application-state-16-objective-control.test.mjs` | 유지 | application state `0x16`의 complete structured direct-reference 생산 경로, Escape·gameplay-panel request producer, K01 mode 1의 `buttons201.spr` 목표 컨트롤 사각형·strict 입력·draw 조건을 정적 검증하고 연결 벡터로 재현 |
 | `extract-objective-pending-action-dispatch.mjs`, `objective-pending-action-dispatch.test.mjs` | 유지 | `DAT_00552998` 직접 참조 전수, `0x3f0→0x3ee→0x3ec→0x3ea` producer overwrite, `FUN_00449090`의 목표 모달 소비·reset·surface/resource 실패를 전체 함수·jump table·바이트 anchor로 검증하고 semantic `open-objective-modal`까지 재현 |
+| `extract-objective-modal-typography.mjs`, `objective-modal-typography.test.mjs` | 유지 | 목표 모달의 5인자 renderer, `Arial`/height 12/HANGEUL_CHARSET GDI font lifecycle, CP949 byte chunk·300px strict wrap·배치·실패 경로를 EXE·K0110·함수/참조/import provenance로 검증; 실제 Windows font realization·K0110 glyph 폭은 미재현으로 분리 |
 | `extract-unit-animation-pilot.mjs`, `unit-animation-pilot.test.mjs` | 유지 | 조선 창병·클래스 2 식별, 상태 1·2 이동 의미·방향·phase→frame·mirror와 특수 분기 격리 |
 | `extract-k01-hero-movement-pilot.mjs`, `k01-hero-movement-pilot.test.mjs` | 유지 | K01 권율·유성룡의 클래스, 주·보조 SPR, 상태 8/1/4/7 대기·이동·공격·사망 방향·phase→frame·mirror 정적 추출 |
 | `extract-k01-hero-basic-attack-pilot.mjs`, `k01-hero-basic-attack-pilot.test.mjs` | 유지 | K01 두 영웅의 일반 공격 상태·효과 phase·회복 카운터·payload, 권율 직접 피해와 유성룡 투사체 생성 정적 추출·재현 |

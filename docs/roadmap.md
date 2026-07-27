@@ -113,8 +113,8 @@ VM에서 원본 게임을 플레이하며 화면 변화를 따라가는 방식�
 해당 모듈에 재현·이식했으며, SPR 로더 내부 객체 결과와 컨트롤 sound/latch는 정적-only다. 후속
 dispatcher 분석은 loader 실패 보고 뒤 `0x3f1`로 계속하는 제어 효과만 별도 재현했다. 후속 분석은
 `FUN_004495e0`의 `0x3f0` handler 반환 생산 경로와 K01 인덱스 1이 `script\k0110`의 목표
-텍스트·K01 map·handler를 선택하는 결합을 정적 확정·재현했다. 이 결합은 분석 전용이며 글꼴·
-줄바꿈은 미확정이다. 이어 state `0x16`의 complete structured direct-reference 생산,
+텍스트·K01 map·handler를 선택하는 결합을 정적 확정·재현했다. 이어 state `0x16`의 complete
+structured direct-reference 생산,
 Escape·gameplay-panel request, K01 mode 1의 `buttons201.spr` 목표 컨트롤
 `(264,110)-(376,138)` strict release까지 정적 확정·재현했다. gameplay-panel의 화면상 정체와
 simulation↔UI 연결은 미확정이라 장면 연결은 보류했다. 뒤이어 ordered producer overwrite와
@@ -126,9 +126,12 @@ simulation↔UI 연결은 미확정이라 장면 연결은 보류했다. 뒤이�
 후속 프로젝트 구조 감사는 기존 `game.events` HUD view 경계를 확장해 K01 HUD objective button에서
 숫자 상태 없는 semantic action을 발행하고 `UIScene`의 queue·private active request까지 한 번
 소비하는 staged 연결을 두었다. 후속 presenter 단계는 검증된 objectiveborder raster·원본 기하·
-K0110 text·strict release를 독립 UI controller에 연결했다. HUD trigger/event는 프로젝트 전용이고
-font·wrap·backdrop·Escape·responsive blocker는 의도적 적응이다. 원본 gameplay-panel 정체와
-mechanism source, font·dismiss visual·sound는 남아 있다.
+K0110 text·strict release를 독립 UI controller에 연결했다. typography 후속 분석은 GDI
+`Arial`/height 12/HANGEUL_CHARSET 요청, CP949 byte space-chunk와 유효 폭 300을 정적 확정하고
+제어 흐름을 공급한 synthetic GDI metrics 아래 부분 재현했다. 유효 base 폭 300만 이식했다. HUD trigger/event는
+프로젝트 전용이고 실제 Windows font realization·glyph metrics, Phaser Korean wrap·backdrop·
+Escape·responsive blocker는 의도적 적응이다. 원본 gameplay-panel 정체와 mechanism source,
+dismiss visual·sound는 남아 있다.
 
 통과 조건:
 

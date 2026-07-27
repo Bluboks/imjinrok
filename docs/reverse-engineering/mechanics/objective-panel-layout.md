@@ -102,8 +102,11 @@ K01 목표 문자열 두 입력은 후속 분석에서 확정했지만 글꼴과
 | 전역 | `0x00552b80` | DWORD | 외부 종료 one-shot. 정확히 `1`만 소비 |
 | 전역 | `0x00552998` | signed WORD | UI 소유 상태. 목표 모달 초기화 `0x3f0`, 갱신 `0x3f1` |
 
-텍스트 측정 결과의 폭·높이도 signed WORD로 읽는다. 폭은 signed 비교로 `320` 이상이면 `320`으로
-제한한다. 음수와 높이에는 이 호출자 범위에서 별도 하한 검사가 없다.
+텍스트 측정 결과의 폭·높이도 signed WORD로 읽는다. 호출자는 renderer에 `320`을 요청하지만
+`FUN_004a9010`이 이를 `300`으로 먼저 제한한다. 정상 renderer 출력은 최대 줄 폭+1이므로 caller의
+후속 signed `320` clamp는 더 줄이지 않는다. 음수와 높이에는 이 호출자 범위에서 별도 하한 검사가
+없다. font·측정·wrap의 전체 경계는
+[전용 typography 문서](objective-modal-typography.md)에 있다.
 
 ## 사각형과 right/bottom 계산
 
@@ -122,9 +125,10 @@ K01 목표 문자열 두 입력은 후속 분석에서 확정했지만 글꼴과
 hit 되는 범위는 X `416..494`, Y `268..290`이고 X `415/495`, Y `267/291`은 모두 바깥이다.
 패널 전체를 클릭하는 경로나 별도 hover 영역은 확인되지 않았다.
 
-두 텍스트 결과의 X는 158이며 최대 폭은 320이다. 첫 결과는 측정 높이의 절반을 Y 166에서 빼고,
-둘째 결과는 Y 228에서 뺀다. K01 입력 문자열은 후속 결합 분석에서 확정했으며 정확한 글꼴과
-한국어 줄바꿈 규칙은 미확정이다.
+두 텍스트 호출의 요청 폭은 320, renderer의 유효 최대 폭은 300이며 결과 X는 158이다. 첫 결과는
+측정 높이의 절반을 Y 166에서 빼고, 둘째 결과는 Y 228에서 뺀다. K01 입력 문자열과 GDI logical
+font 요청·CP949 byte wrap 제어는 후속 분석에서 확정했지만, 실제 Windows font realization과
+K0110 glyph metrics·line breaks는 미확정이다.
 
 ## 전체 제어·데이터 흐름
 
@@ -286,7 +290,8 @@ signed WORD로 받으므로 종료 판정에는 low WORD `0`만 사용한다.
   원본 SPR frame 0을 416×236으로 변환한 자원이다.
 - `apps/game-client/src/originalObjectivePanelLayout.ts`는 원본 frame·내용·닫기 사각형, 닫기
   판정과 성공적으로 로드된 자원의 종료 cleanup 순서를 독립 모듈로 이식한다. cleanup 모델은 clear
-  시도와 clear용 lock 성공 뒤 실제 clear·unlock을 구분한다.
+  시도와 clear용 lock 성공 뒤 실제 clear·unlock을 구분한다. client layout에는 실제 presentation에
+  쓰는 renderer 유효 폭 300만 노출하고 caller 요청 320은 extractor report에 보존한다.
 - 클라이언트 테스트는 독립 추출기 결과와 같은 JSON 벡터를 직접 사용한다.
 - 640×480 원본 좌표는 고정 상수다. 다른 viewport에서는 하나의 균일 배율과 중앙 여백만 적용하고
   종횡비를 늘이지 않는다. 이것은 `의도적 적응`이다.
@@ -298,7 +303,8 @@ signed WORD로 받으므로 종료 판정에는 low WORD `0`만 사용한다.
 ## 미확정 항목과 다음 질문
 
 - `DAT_00552b80`을 설정하는 생산자와 그 도메인 의미
-- 텍스트 측정·표시에서 사용하는 글꼴 face·크기와 한국어 줄바꿈 규칙
+- GDI `Arial`/height 12/HANGEUL_CHARSET 요청이 원본 Windows에서 실현한 실제 font와 K0110
+  glyph metrics·line breaks
 - 동적으로 전달되는 presentation surface의 구체 vtable 타입
 - 컨트롤 객체 `0x005527b0`의 사용자 노출 한국어 label
 - state `0x16` request를 만드는 gameplay-panel의 화면상 정체·자원·draw 경로
@@ -311,5 +317,7 @@ UI-domain 계약까지 추가했다. 후속
 [프로젝트 UI 이벤트 경계 분석](objective-modal-ui-event-boundary.md)은 HUD button의 staged
 프로젝트 적응 trigger에서 `UIScene` private active request까지 연결했다. 후속
 [presenter lifecycle](objective-modal-presenter-lifecycle.md)은 검증된 raster·기하·K0110 text·
-strict release를 표시하되 font·wrap·backdrop·Escape·responsive blocker를 의도적 적응으로
-분리했다. 원본 mechanism 소유 semantic action source도 계속 미확정이다.
+strict release를 표시하되 font realization·Korean wrap·backdrop·Escape·responsive blocker를 의도적 적응으로
+분리했다. 후속 [typography 분석](objective-modal-typography.md)은 GDI font 요청과 CP949 byte
+wrap을 복원하고 유효 base 폭 300만 이식했다. 실제 실현 font·glyph metrics와 원본 mechanism 소유
+semantic action source는 계속 미확정이다.

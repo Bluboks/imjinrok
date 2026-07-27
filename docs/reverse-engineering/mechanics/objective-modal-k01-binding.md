@@ -167,7 +167,9 @@ EXE embedded 문자열도 바이트 단위로 고정한다.
 1. `1. 어가를 평양성까지 대피시킨다. (유성룡은 살아 남아야 한다.)`
 2. 빈 문자열
 
-이 문자열 결합은 정적 확정됐지만 글꼴 face·크기와 한국어 줄바꿈은 이번 질문에 포함하지 않는다.
+이 문자열 결합은 정적 확정됐지만 글꼴·줄바꿈은 이번 질문에 포함하지 않는다. 후속
+[typography 분석](objective-modal-typography.md)이 GDI logical font 요청과 CP949 byte wrap을
+확정했으며 실제 Windows font realization·K0110 glyph metrics는 미확정으로 남겼다.
 
 ## 재현과 실패 경계
 
@@ -192,14 +194,15 @@ EXE embedded 문자열도 바이트 단위로 고정한다.
 `apps/game-client/src/originalObjectivePanelLayout.ts`는 앞선 질문에서 재현 완료한 공통 모달
 기하·입력·cleanup 모델이다. 후속
 [presenter lifecycle](objective-modal-presenter-lifecycle.md)은 확정 K0110 텍스트를 장면
-content로 연결하지만 원본 state producer는 연결하지 않고, 미확정 글꼴·줄바꿈과 표시 trigger를
+content로 연결하지만 원본 state producer는 연결하지 않고, project-adapted font·Korean wrap과 표시 trigger를
 프로젝트 적응으로 분리한다. `SkirmishScene.ts`는 수정하지 않았다.
 
 남은 항목은 다음과 같다.
 
 - 컨트롤 객체 `0x005527b0`의 사용자 노출 한국어 label
 - state `0x16` request를 만드는 gameplay-panel의 화면상 정체·자원·draw 경로
-- 원본 글꼴 face·크기와 K01 목표 문장의 한국어 줄바꿈 규칙
+- 원본 Windows가 logical `Arial`/HANGEUL_CHARSET 요청에 실현한 실제 font·glyph metrics와
+  K01 목표 문장의 실제 line breaks
 - 레코드 객체가 비워 둔 zero record의 역사적 이유
 
 [후속 분석](application-state-16-objective-control.md)은 state `0x16`의 complete structured

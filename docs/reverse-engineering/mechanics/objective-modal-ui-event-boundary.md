@@ -166,8 +166,9 @@ object가 아니거나 다른 type인 값을 K01 emitter에 직접 넘겨도 구
 이 문서의 작업은 event 전달과 UI-owned active-request 상태까지만 만든 staged project
 adaptation이다. 후속
 [presenter lifecycle 문서](objective-modal-presenter-lifecycle.md)는 검증된 raster·기하·K0110
-text·strict pointer release를 실제 Phaser presentation에 연결했다. font·wrap·backdrop·Escape·
-responsive blocker와 HUD trigger는 원본 동작이 아니라 명시적 프로젝트 적응이다.
+text·strict pointer release를 실제 Phaser presentation에 연결했다. 후속 typography 분석이
+확정한 유효 base 폭 300만 추가로 원본 기반이며, font realization·glyph measurement·Korean
+wrap·backdrop·Escape·responsive blocker와 HUD trigger는 명시적 프로젝트 적응이다.
 
 원본 fixture·추출기·generated analysis는 변경하지 않았다. 경쟁 값 `0x3ee`, `0x3ec`,
 `0x3ea`에는 의미 이름을 추가하지 않았다. `packages/simulation/src/**`와

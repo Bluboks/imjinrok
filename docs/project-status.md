@@ -1,6 +1,6 @@
 # 프로젝트 상태
 
-기준일: 2026-07-26
+기준일: 2026-07-27
 
 ## 요약
 
@@ -47,7 +47,7 @@ K02는 이 단기 MVP의 완료 조건이 아니다. 기존 K02 프로토타입�
 | 건물 상태 이미지 | 조선 본영·봉화대 건설 0~7·정상 7·반파 8 이식 | 클래스 49·52 정체와 공통 건물 진행도·체력 분기 확정 | 모든 진행도·50% 체력 경계 테스트 | 두 건물 본체 범위 원본 기반, 나머지 7개 미검증 |
 | 브리핑 초상화 | 17개 ID·`hero.spr` 프레임 이식 | 파서→조회→프레임 표→그리기 정적 확정 | 추출기·클라이언트 교차 테스트 | 원본 기반 |
 | `SPEECH` 대화 레이아웃 | 숫자 슬롯·초상화·대사 공통 배치 이식 | 640×480 슬롯 4개와 대사 좌표 정적 확정 | 추출기·배율 변환 테스트 | 확정 범위 원본 기반 |
-| K01 공통 임무 목표 모달 결합 | 검증된 raster·기하·K0110 텍스트·strict release를 독립 presenter로 연결; HUD button/event는 프로젝트 전용, font·wrap·backdrop·Escape·responsive blocker는 의도적 적응 | 진입·목표 컨트롤에 더해 ordered pending overwrite와 `FUN_00449090`의 소비·활성·reset·실패 경로 정적 확정 | 원본 request→strict release→dispatcher 생명주기와 프로젝트 event·duplicate·resize·shutdown·failure 경계 테스트 | frame/content/dismiss와 action 의미·K01 text는 원본 기반; gameplay-panel 정체, mechanism source, 원본 font·wrap·dismiss visual·sound 미확정 |
+| K01 공통 임무 목표 모달 결합 | 검증된 raster·기하·K0110 텍스트·strict release와 유효 base wrap 폭 300을 독립 presenter에 연결; HUD button/event는 프로젝트 전용 | 진입·dispatcher에 더해 GDI `Arial` height 12/HANGEUL_CHARSET 요청, CP949 byte chunk·strict wrap·배치·실패 경로 정적 확정 | lifecycle 재현 완료; typography 제어 흐름은 공급한 synthetic GDI metrics 아래 부분 재현 | frame/content/dismiss·action·text·유효 폭은 원본 기반; 실제 font realization·glyph 폭·Korean wrap·빈 문자열 `SIZE.cy`, gameplay-panel 정체, mechanism source, dismiss visual·sound 미확정 |
 | UI·입력 | 반응형 목표 추적 HUD 존재 | 임무 목표 모달 범위 제외 나머지는 자원·호출 지점 후보 | 임무 목표 모달 범위만 재현 완료 | 목표 추적 HUD를 포함한 나머지는 의도적 프로젝트 UI |
 | VM 동적 분석 | 과거 도구·기록 존재 | 다수 시행착오 기록 | 원시 증거가 저장소에 없음 | 보관, 기본 경로에서 제외 |
 
@@ -83,8 +83,11 @@ K02는 이 단기 MVP의 완료 조건이 아니다. 기존 K02 프로토타입�
    복원했고 state `0x16`의 direct 생산, 목표 컨트롤 입력, ordered overwrite 뒤 dispatcher의
    목표 모달 소비·reset까지 연결했다. 프로젝트에서는 K01 HUD objective button을 명시적 적응
    trigger로 삼아 semantic action을 `UIScene`의 독립 presenter에 한 번 전달한다. 검증된 raster·
-   geometry·K0110 text·strict release는 원본 기반이고 font·wrap·backdrop·Escape·responsive
-   blocker는 의도적 적응이다. gameplay-panel의 화면상 정체, 원본 font·dismiss visual·sound,
+   geometry·K0110 text·strict release와 renderer의 유효 base 폭 300은 원본 기반이다. GDI
+   `Arial`/height 12/HANGEUL_CHARSET 요청과 CP949 space wrap 제어는 복원했지만 실제 Windows
+   font realization·K0110 glyph metrics는 보존 입력에 없어 font family/size·Canvas 측정·
+   Korean wrap·backdrop·Escape·responsive blocker는 의도적 적응이다. gameplay-panel의 화면상
+   정체, 원본 dismiss visual·sound,
    HUD 루트 좌표계·선택 패널은 남음
 5. K01에 등장하는 나머지 건물·유닛의 정체·상태·방향 매핑을 독립 복원
 6. 브리핑부터 승패 결과까지 K01 종단 적합성 시나리오를 통과
