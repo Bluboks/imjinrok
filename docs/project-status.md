@@ -86,9 +86,11 @@ K02는 이 단기 MVP의 완료 조건이 아니다. 기존 K02 프로토타입�
    geometry·K0110 text·strict release와 renderer의 유효 base 폭 300은 원본 기반이다. GDI
    `Arial`/height 12/HANGEUL_CHARSET 요청과 CP949 space wrap 제어는 복원했지만 실제 Windows
    font realization·K0110 glyph metrics는 보존 입력에 없어 font family/size·Canvas 측정·
-   Korean wrap·backdrop·Escape·responsive blocker는 의도적 적응이다. gameplay-panel의 화면상
-   정체, 원본 dismiss visual·sound,
-   HUD 루트 좌표계·선택 패널은 남음
+   Korean wrap·backdrop·Escape·responsive blocker는 의도적 적응이다. 설치 매체 font
+   provenance 조사는 중단한다. 선택 panel은 `FUN_004a84e0`의 두 caller, 네 slot gate,
+   progress·label·surface lifecycle까지 범위 한정 정적 확정·재현했지만 kind와
+   건설·생산·연구 mechanic 결합은 미확정이다. gameplay-panel의 화면상 정체, 원본 dismiss
+   visual·sound, HUD 루트 좌표계와 slot producer는 남음
 5. K01에 등장하는 나머지 건물·유닛의 정체·상태·방향 매핑을 독립 복원
 6. 브리핑부터 승패 결과까지 K01 종단 적합성 시나리오를 통과
 

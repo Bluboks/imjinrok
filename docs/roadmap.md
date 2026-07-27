@@ -121,7 +121,11 @@ simulation↔UI 연결은 미확정이라 장면 연결은 보류했다. 뒤이�
 `FUN_00449090`의 `0x3f0` 소비·`0x3f1` 활성·`1000` reset, scoped surface/resource 실패를
 정적 확정·재현하고 숫자 원본 상태가 없는 `open-objective-modal` UI-domain 계약을 추가했다.
 원본 mechanism 결과가 이 semantic action을 발행할 연결점은 아직 미확정이다.
-실행 중 목표 추적 HUD, 전체 HUD 루트와 선택 패널은 이 완료 범위에 포함하지 않는다.
+실행 중 목표 추적 HUD와 전체 HUD 루트는 이 완료 범위에 포함하지 않는다. 선택 panel은 후속
+정적 분석에서 `FUN_004a84e0`의 두 caller, 네 slot gate, kind 분기, progress WORD,
+label/surface 경계를 정적 확정하고 범위 한정 재현했다. 다만 kind·progress·label index의 upstream
+mechanic 결합은 미확정이므로 현행 responsive·multi-selection·mana UI를 원본 구조로 바꾸지
+않았다.
 
 후속 프로젝트 구조 감사는 기존 `game.events` HUD view 경계를 확장해 K01 HUD objective button에서
 숫자 상태 없는 semantic action을 발행하고 `UIScene`의 queue·private active request까지 한 번
@@ -130,7 +134,8 @@ K0110 text·strict release를 독립 UI controller에 연결했다. typography �
 `Arial`/height 12/HANGEUL_CHARSET 요청, CP949 byte space-chunk와 유효 폭 300을 정적 확정하고
 제어 흐름을 공급한 synthetic GDI metrics 아래 부분 재현했다. 유효 base 폭 300만 이식했다. HUD trigger/event는
 프로젝트 전용이고 실제 Windows font realization·glyph metrics, Phaser Korean wrap·backdrop·
-Escape·responsive blocker는 의도적 적응이다. 원본 gameplay-panel 정체와 mechanism source,
+Escape·responsive blocker는 의도적 적응이다. 사용자가 Noto/Canvas typography를 허용했으므로
+설치 매체 font provenance 조사는 중단한다. 원본 gameplay-panel 정체와 mechanism source,
 dismiss visual·sound는 남아 있다.
 
 통과 조건:

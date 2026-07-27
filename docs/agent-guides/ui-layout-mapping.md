@@ -85,6 +85,20 @@ wrap 제어는 확정했다. 실제 Windows font realization·K0110 glyph metric
 UI-domain 모듈까지만 구현했다. 현재 실행 중인 목표 추적 패널은 이 원본 모달과 다른 프로젝트 전용
 구현이다.
 
+## 선택 패널 slot dispatcher 경계
+
+[선택 패널 slot dispatcher](../reverse-engineering/mechanics/selection-panel-slot-dispatch.md)는
+`FUN_004a84e0`의 두 direct caller, 네 slot의 exact-one active/kind 분기, progress signed WORD
+갱신, 고정 RECT, label HDC 실패와 surface lifecycle을 정적 확정하고 범위 한정 재현했다.
+`FUN_004a8480`은 clear가 아니라 base RECT initializer이고, `FUN_004a8410`도 draw가 아니라
+slot RECT initializer다. `FUN_004a81f0`은 label renderer이며 생산·연구 discriminator를 읽지
+않는다.
+
+원본 slot kind와 현재 `selectionPanel.ts`의 construction/research/production 의미 결합은
+미확정이다. 따라서 현행 responsive·multi-selection·mana·추가 상태 UI는 프로젝트 superset으로
+유지하고, 고정 네 slot이나 미확정 kind를 public contract에 이식하지 않는다. 실제 GDI label
+metrics도 synthetic 입력 아래 산술만 재현하며 Noto/Canvas typography는 의도적 적응이다.
+
 ## 변경 통과 조건
 
 - 원본 파일 해시와 함수·데이터 주소

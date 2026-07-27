@@ -245,14 +245,14 @@ HDC 획득 실패는 원본이 font 선택과 GDI 측정에 도달하지 않으�
 realization·metrics가 없으면 K0110 줄 결과를 같은 vector로 닫을 수 없기 때문이다. project는 원본
 GDI renderer architecture나 numeric state를 public UI contract에 노출하지 않는다.
 
-## 미확정과 다음 질문
+## 미확정과 후속 경계
 
 - 원본 설치 Windows가 `Arial` + `HANGEUL_CHARSET` 요청에 실현한 실제 face/file/version
 - 그 실현 font의 K0110 chunk별 `SIZE.cx`, `SIZE.cy`, 실제 line breaks와 pixels
 - 빈 문자열을 측정했을 때 원본 환경이 반환한 실제 `SIZE.cy`
-- 보존 game data 밖에 특정 Korean system font 설치 전제나 installer 설정이 있었는지
 - unchecked GDI measurement 실패에서 나타나는 undefined stack 결과
 
-다음 좁은 질문은 원본 설치 매체·installer·설정 파일에 특정 Korean font 배포 또는 시스템 font
-전제의 정적 증거가 있는지 확인하고, 없다면 원본 typography parity를 외부 환경 의존으로 영구
-분류하는 것이다.
+사용자는 pixel-identical typography를 요구하지 않으며 현재 가용한 Noto/Canvas 조합을 허용했다.
+따라서 설치 매체의 font provenance 조사는 중단하고 위 actual metric 항목은 미확정으로 유지한다.
+후속 UI 정적 분석은 [선택 패널 slot dispatcher](selection-panel-slot-dispatch.md)처럼 project
+superset을 지배하지 않는 좁은 compatibility slice 단위로 진행한다.
