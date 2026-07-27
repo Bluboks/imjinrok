@@ -1422,7 +1422,7 @@ test("built-in campaign objective routes are reachable on imported map scaffolds
   }
 });
 
-test("imjinrok K01 reinforcement wave follows beacon construction like the source script", () => {
+test("imjinrok K01 adapted reinforcement event uses the configured requested positions when open", () => {
   const scenario = imjinrokCampaignScenarios.find((candidate) => candidate.id === "imjinrok-k01-opening");
   assert.ok(scenario, "K01 scenario should be registered");
 
@@ -1453,11 +1453,16 @@ test("imjinrok K01 reinforcement wave follows beacon construction like the sourc
   assert.equal(state.scenario.scriptedEvents["k01-reinforcement-wave"]?.status, "executed");
   assert.equal(state.scenario.scriptedEvents["k01-reinforcement-wave"]?.executedAtTick, state.tick);
   assert.equal(state.scenario.objectives["withdraw-after-reinforcements"]?.status, "completed");
+  // These final positions equal the requests only because this fixture leaves each requested tile open.
+  // Generic clamping/open-point search may relocate or skip them in other world states.
   assert.deepEqual(state.units["cpu-1-k0120-reinforcement-0x0d-1"]?.position, { x: 53, y: 51 });
   assert.equal(state.units["cpu-1-k0120-reinforcement-0x52"]?.kind, "japanese-gunner");
   assert.deepEqual(state.units["cpu-1-k0120-reinforcement-0x52"]?.position, { x: 55, y: 51 });
   assert.deepEqual(state.units["cpu-1-k0120-reinforcement-0x0d-2"]?.position, { x: 57, y: 51 });
   assert.deepEqual(state.units["cpu-1-k0120-reinforcement-0x0e-2"]?.position, { x: 55, y: 53 });
+  assert.equal(state.units["cpu-1-k0120-reinforcement-0x0c-1"]?.kind, "japanese-gunner");
+  assert.equal(state.units["cpu-1-k0120-reinforcement-0x0c-2"]?.kind, "japanese-gunner");
+  assert.equal(state.units["cpu-1-k0120-reinforcement-0x0c-3"]?.kind, "japanese-gunner");
   assert.equal(
     Object.values(state.units).filter((unit) => unit.playerId === "cpu-1" && unit.id.includes("k0120-reinforcement")).length,
     9,

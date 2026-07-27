@@ -201,19 +201,17 @@ scan 또는 skip 뒤 `0x0048a7f2`는 flag를 1과 정확히 비교한다.
 
 ## 현재 프로젝트와 integration gate
 
-현재 `scenarios.ts`는 class 13을 `japanese-swordsman`, class 82를 `japanese-gunner`,
-class 14와 12를 `japanese-swordsman`으로 대신한다. 이는 각각 원본 일본 사무라이·고니시·
-귀갑차·조총병 identity의 exact mapping이 아니다. 원본 slot/reference·owner/relation·map
-coordinate와 프로젝트 identity/grid의 exact mapping도 이 질문에서 증명하지 않았다. 따라서
-generic superset architecture를 바꾸거나 기존 K01 runtime에 추정 adapter를 넣지 않았다.
-향후 이 규칙은 모든 mapping이 정적 확정·재현된 뒤에만 isolated opt-in original-K01 policy로
-연결할 수 있다.
+[native 증원 정체·요청 좌표 매핑](k01-reinforcement-identity-map.md)에서 네 class와 SPR,
+K01 60×60 map 및 아홉 요청 좌표를 별도 교차 확인했다. K01 전용 adapter는 class 12 세 개를
+`japanese-gunner`의 exact static identity/source binding으로 고쳤지만 class 13·14·82 여섯 개는 여전히
+명시적 proxy다. 최종 배치, owner 의미, 행동·stats·animation은 이 trigger 증거로 확정하지 않는다.
+generic spawn semantics는 바꾸지 않았으며 isolated opt-in gate는 남아 있다.
 
 ## 남은 불확실성과 다음 질문
 
 - 표준 mission entry broad zero-fill 밖의 `WORD 0x008438dc` 전체 reset lifecycle
 - raw relation-table 값, selector 5 grids, 세 direct global write의 사람용 의미
-- class 12·13·14·82의 프로젝트 identity/visual/behavior exact mapping
+- class 13·14·82의 프로젝트 identity/visual과 네 class의 behavior/stats/animation exact mapping
 
 이 문서의 return 뒤 K01 loss latch, fixed-width timer와 final commit은
 [K01 미션 결과 수명주기](k01-mission-result-lifecycle.md)에서 별도 정적 확정·재현했다.
@@ -221,4 +219,5 @@ generic superset architecture를 바꾸거나 기존 K01 runtime에 추정 adapt
 [K01 결과 presentation과 post-result 전환](k01-final-result-transition.md)에서 별도
 정적 확정·재현했다. 표준 entry의 timer와 trigger flag 포함 DWORD zero는
 [K01 표준 미션 진입 timer reset](k01-mission-timer-reset.md)에서 별도 확정했다.
-다음 좁은 질문은 native 증원 class의 프로젝트 identity/map exact mapping이다.
+native 증원 class와 K01 요청 좌표의 현재 확정 범위는
+[별도 매핑 문서](k01-reinforcement-identity-map.md)에 기록했다.

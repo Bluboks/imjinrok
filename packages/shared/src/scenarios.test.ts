@@ -5,6 +5,7 @@ import { dirname, resolve } from "node:path";
 import { TextDecoder } from "node:util";
 import { fileURLToPath } from "node:url";
 import { extractExecutableReferences } from "../../../tools/imjinrok/extract-executable-refs.mjs";
+import { extractK01ReinforcementIdentityMap } from "../../../tools/imjinrok/extract-k01-reinforcement-identity-map.mjs";
 import { extractMapEntities, parseMapHeader } from "../../../tools/imjinrok/map-codec.mjs";
 import {
   getImjinrokMapMetadata,
@@ -14,6 +15,8 @@ import {
   imjinrokK01Scenario,
   imjinrokK02Scenario,
   imjinrokOriginalMissionResultDelayTicks,
+  k01ReinforcementAdapter,
+  k01ReinforcementOwnerAdapter,
 } from "./index.js";
 
 const sharedSrcDirectory = dirname(fileURLToPath(import.meta.url));
@@ -127,9 +130,17 @@ test("imjinrok K01 and K02 retain source battle script beats", () => {
     status: "completed",
   });
   assert.deepEqual(k01ReinforcementSpawn?.origin, { x: 55, y: 53 });
+  assert.deepEqual(k01ReinforcementOwnerAdapter, {
+    rawOwnerWord: 1,
+    projectPlayerId: "cpu-1",
+  });
+  assert.equal(
+    k01ReinforcementSpawn?.playerId,
+    k01ReinforcementOwnerAdapter.projectPlayerId,
+  );
   assert.deepEqual(countUnitsByKind(k01ReinforcementSpawn?.units ?? []), {
-    "japanese-gunner": 1,
-    "japanese-swordsman": 8,
+    "japanese-gunner": 4,
+    "japanese-swordsman": 5,
   });
   assert.deepEqual(
     k01ReinforcementSpawn?.units.map(({ idSuffix, offset }) => ({ idSuffix, offset })),
@@ -144,6 +155,74 @@ test("imjinrok K01 and K02 retain source battle script beats", () => {
       { idSuffix: "k0120-reinforcement-0x0c-2", offset: { x: 0, y: 2 } },
       { idSuffix: "k0120-reinforcement-0x0c-3", offset: { x: 2, y: 2 } },
     ],
+  );
+  assert.deepEqual(
+    k01ReinforcementAdapter.map(
+      ({ originalClass, rawOwnerWord, offset, projectKind, identityMapping }) => ({
+        originalClass,
+        rawOwnerWord,
+        offset,
+        projectKind,
+        identityMapping,
+      }),
+    ),
+    [
+      { originalClass: 13, rawOwnerWord: 1, offset: { x: -2, y: -2 }, projectKind: "japanese-swordsman", identityMapping: "proxy" },
+      { originalClass: 82, rawOwnerWord: 1, offset: { x: 0, y: -2 }, projectKind: "japanese-gunner", identityMapping: "proxy" },
+      { originalClass: 13, rawOwnerWord: 1, offset: { x: 2, y: -2 }, projectKind: "japanese-swordsman", identityMapping: "proxy" },
+      { originalClass: 14, rawOwnerWord: 1, offset: { x: -2, y: 0 }, projectKind: "japanese-swordsman", identityMapping: "proxy" },
+      { originalClass: 14, rawOwnerWord: 1, offset: { x: 0, y: 0 }, projectKind: "japanese-swordsman", identityMapping: "proxy" },
+      { originalClass: 14, rawOwnerWord: 1, offset: { x: 2, y: 0 }, projectKind: "japanese-swordsman", identityMapping: "proxy" },
+      { originalClass: 12, rawOwnerWord: 1, offset: { x: -2, y: 2 }, projectKind: "japanese-gunner", identityMapping: "exact-static-identity-source" },
+      { originalClass: 12, rawOwnerWord: 1, offset: { x: 0, y: 2 }, projectKind: "japanese-gunner", identityMapping: "exact-static-identity-source" },
+      { originalClass: 12, rawOwnerWord: 1, offset: { x: 2, y: 2 }, projectKind: "japanese-gunner", identityMapping: "exact-static-identity-source" },
+    ],
+  );
+  assert.equal(
+    k01ReinforcementAdapter.filter(
+      ({ originalClass, projectKind, identityMapping }) =>
+        originalClass === 12 &&
+        projectKind === "japanese-gunner" &&
+        identityMapping === "exact-static-identity-source",
+    ).length,
+    3,
+  );
+  assert.equal(
+    k01ReinforcementAdapter.filter(
+      ({ identityMapping }) => identityMapping === "proxy",
+    ).length,
+    6,
+  );
+  assert.deepEqual(
+    k01ReinforcementAdapter.map(({ offset }) => ({
+      x: (k01ReinforcementSpawn?.origin.x ?? 0) + offset.x,
+      y: (k01ReinforcementSpawn?.origin.y ?? 0) + offset.y,
+    })),
+    [
+      { x: 53, y: 51 },
+      { x: 55, y: 51 },
+      { x: 57, y: 51 },
+      { x: 53, y: 53 },
+      { x: 55, y: 53 },
+      { x: 57, y: 53 },
+      { x: 53, y: 55 },
+      { x: 55, y: 55 },
+      { x: 57, y: 55 },
+    ],
+  );
+  assert.deepEqual(
+    {
+      width: getImjinrokMapMetadata("imjinrok-k01")?.width,
+      height: getImjinrokMapMetadata("imjinrok-k01")?.height,
+      view: getImjinrokMapMetadata("imjinrok-k01")?.view,
+      sourceSpawns: getImjinrokMapMetadata("imjinrok-k01")?.sourceSpawns,
+    },
+    {
+      width: 60,
+      height: 60,
+      view: { x: 13, y: 8 },
+      sourceSpawns: [{ x: 6, y: 6 }],
+    },
   );
   assert.equal(k01Objectives.has("defeat-forward-japanese"), false);
   assert.equal(k01Objectives.get("protect-ryu-seong-ryong")?.defeatDelayTicks, imjinrokOriginalMissionResultDelayTicks);
@@ -234,6 +313,43 @@ test("imjinrok K01 and K02 retain source battle script beats", () => {
   ]);
   assert.deepEqual(k02EvacuationObjective?.routeWaypointLabels, ["한성 출발", "권율 합류", "평양성 도착"]);
   assert.deepEqual(k02EvacuationObjective?.routeWaypoints, k02MapMetadata?.missionRouteWaypoints);
+});
+
+test("K01 reinforcement adapter matches the focused native evidence report", () => {
+  const report = extractK01ReinforcementIdentityMap();
+
+  assert.deepEqual(
+    k01ReinforcementAdapter.map(
+      ({
+        originalClass,
+        rawOwnerWord,
+        offset,
+        projectKind,
+        identityMapping,
+      }) => ({
+        originalClass,
+        rawOwnerWord,
+        offset,
+        projectKind,
+        identityMapping,
+      }),
+    ),
+    report.requestedPositions.map(
+      ({
+        originalClass,
+        rawOwnerWord,
+        offset,
+        projectKind,
+        identityMapping,
+      }) => ({
+        originalClass,
+        rawOwnerWord,
+        offset,
+        projectKind,
+        identityMapping,
+      }),
+    ),
+  );
 });
 
 test("imjinrok K01 and K02 use source-derived campaign starting resources", () => {

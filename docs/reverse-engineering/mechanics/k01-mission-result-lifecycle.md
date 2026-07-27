@@ -212,8 +212,8 @@ isolated opt-in original-K01 policy로 연결할 수 있다.
 
 `FUN_00446420` 이후 presentation과 final route는
 [K01 결과 presentation과 post-result 전환](k01-final-result-transition.md)에서 별도
-정적 확정·재현했다. 다음 좁은 질문은 K01 native 증원 class와 프로젝트 identity/map 좌표의
-exact mapping이다.
+정적 확정·재현했다. K01 native 증원 class와 프로젝트 identity/map 요청 좌표의 현재 범위는
+[native 증원 정체·요청 좌표 매핑](k01-reinforcement-identity-map.md)에서 후속 확정했다.
 사용자가 제공한 “완성 봉화가 하나라도 있으면 미니맵 enable, 마지막 봉화 제거
 시 disable” 수명주기는 이 결과 경로의 증거가 아니며, 별도 정적 분석 전까지
 `user-reported/unverified` 후속 질문으로만 유지한다.

@@ -245,4 +245,5 @@ route보다 우선하며 역시 `0x0a`를 덮는다. 따라서 `0x0a`는 이 범
 - final call 이후 `0x140/0x64/0x10/0x20/raw WORD` 각 destination의 독립 lifecycle
 - original clock/result/asset identity를 generic 프로젝트에 옮기는 opt-in mapping
 
-다음 좁은 질문은 K01 native 증원 class와 프로젝트 identity/map 좌표의 exact mapping이다.
+K01 native 증원 class와 프로젝트 identity/map 요청 좌표의 현재 범위는
+[native 증원 정체·요청 좌표 매핑](k01-reinforcement-identity-map.md)에서 후속 확정했다.

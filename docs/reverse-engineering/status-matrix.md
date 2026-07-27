@@ -14,7 +14,7 @@
 | 엔티티 타입 정체 | 클래스 1~95 이름·슬롯·기본 프레임·flags·SPR 경로 정적 확정 | 전수 추출·결정론 검증 완료 | 고유 연결 표시 이름과 봉화대 자원 반영 | flags 비트·행동·수치 의미는 메커니즘별 복원 |
 | 엔티티 자료구조 | 추정 | 미재현 | 별도 프로젝트 모델 존재 | 생성·읽기·쓰기 경로 교차 확인 |
 | 게임 틱과 메인 루프 | 투사체 pool 범위의 message-loop→scheduler, millisecond gate와 accepted-step 호출 수 정적 확정 | 해당 raw selector·feedback·wrap·거부 벡터 재현 완료 | 독립 포트와 24 Hz loop는 미연결 | 다른 subsystem 업데이트 순서와 24 Hz port scheduling 정책 결정 |
-| K01 봉화대 트리거 | raw-relation blocker→1,200-slot 완성 record scan→flag·K0120·native effect→post-state 반환 범위 정적 확정 | blocker·세 active gate·field·flag·busy·loader 0/1·void start·복수 match·descriptor·selector·return 재현 완료 | 프로토타입, 원본 정책 미연결 | 원본 class/identity·map mapping 뒤 isolated opt-in 연결; 후속 result chain은 별도 정적 확정 |
+| K01 봉화대 트리거 | raw-relation blocker→1,200-slot 완성 record scan→flag·K0120·native effect→post-state 반환과 native class·K01 요청 좌표 범위 정적 확정 | trigger 분기·descriptor·selector·return 및 타입/SPR·요청 좌표 9개 재현 완료 | K01 adapter에서 class 12 exact static identity/source 3개 반영, class 13·14·82 여섯 개 proxy | proxy identity·행동·stats·animation과 원본 생성 정책 뒤 isolated opt-in 확대 |
 | K01 승패 판정 | 표준 mission-entry broad timer reset→general/영웅 latch→timer→distinct-tick commit과 shared teardown→SPR/YAV poll→relay→external/stage route 범위 정적 확정 | reset 반개구간·순서, timer wrap/overflow와 result cadence·cleanup·state overwrite·WORD wrap 재현 완료 | 프로토타입, 원본 정책 미연결 | raw clock·asset/result identity policy exact mapping 뒤 isolated opt-in 연결 |
 | 전투·피해 | K01 영웅 phase·피해·대상·사거리·subtype `0x0c`, signed-health 행동 6/7·slot/reference 사망 수명주기 정적 확정 | 대상·투사체·scheduler 및 health/action/phase/delay/stale-reference 경계 재현 완료 | 프로토타입, 유성룡 독립 계산 부분 이식; 사망 수명 미이식 | 원본 참조·좌표·identity·24 Hz exact mapping과 opt-in 연결 |
 | 이동·경로 탐색 | 추정 | 미재현 | 프로토타입 | 좌표·경로 레코드와 실패 경로 복원 |
