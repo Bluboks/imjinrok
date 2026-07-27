@@ -1,0 +1,224 @@
+{
+  "sourceExecutableSha256": "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e",
+  "syntheticMeasurementNotice": "suppliedMeasuredWidth and suppliedMeasuredHeight are injected synthetic GDI outputs; they reproduce arithmetic only and do not establish original label bytes, glyph widths, pixels, or realized font metrics",
+  "surfaceFailureNotice": "sourceAvailable=false reproduces only the null source pointer passed after a reported allocation failure; downstream indirect blit behavior remains unresolved",
+  "slotRectangleVectors": [
+    {
+      "id": "slot-zero-fixed-rectangle",
+      "input": { "slot": 0 },
+      "expected": { "left": 26, "top": 49, "right": 156, "bottom": 169 }
+    },
+    {
+      "id": "slot-three-fixed-rectangle",
+      "input": { "slot": 3 },
+      "expected": { "left": 490, "top": 210, "right": 620, "bottom": 330 }
+    },
+    {
+      "id": "negative-slot-preserves-caller-origin",
+      "input": {
+        "slot": -1,
+        "callerRect": { "left": -20, "top": 7, "right": 999, "bottom": 999 }
+      },
+      "expected": { "left": -20, "top": 7, "right": 110, "bottom": 127 }
+    },
+    {
+      "id": "slot-four-preserves-caller-origin",
+      "input": {
+        "slot": 4,
+        "callerRect": { "left": 300, "top": 400, "right": -1, "bottom": -1 }
+      },
+      "expected": { "left": 300, "top": 400, "right": 430, "bottom": 520 }
+    }
+  ],
+  "commonInput": {
+    "callerDestination": "DAT_00549580",
+    "destinationSurfaceAvailable": true,
+    "baseSourceAvailable": true,
+    "slotSourceAvailability": [true, true, true, true],
+    "field_0xf8": 0,
+    "field_0x568": 0,
+    "field_0x564": 0,
+    "screenWidth": 640,
+    "screenHeight": 480,
+    "slots": [
+      { "activeState": 0, "kindState": 0, "progressWord": 0 },
+      { "activeState": 0, "kindState": 0, "progressWord": 0 },
+      { "activeState": 0, "kindState": 0, "progressWord": 0 },
+      { "activeState": 0, "kindState": 0, "progressWord": 0 }
+    ]
+  },
+  "vectors": [
+    {
+      "id": "no-owner-state-no-dispatch",
+      "inputOverrides": {},
+      "expectedOutputSha256": "218f15d4a62071e1e0fb6d4274f4393bc2c9d091d53f82db8328e9ff245f07f9"
+    },
+    {
+      "id": "field-0xf8-invokes-base-only",
+      "inputOverrides": { "field_0xf8": 1 },
+      "expectedOutputSha256": "161edea15016672e350ed2edac441d46862f3540e4bc9f925fde9d1baa0e23db"
+    },
+    {
+      "id": "progress-slot-zero-advances-five",
+      "inputOverrides": {
+        "slotOverrides": {
+          "0": { "activeState": 1, "kindState": 1, "progressWord": 0 }
+        }
+      },
+      "expectedOutputSha256": "26b4c38695f1116504d8026778385f9010e21a1e4cc40e0f8e22d9dff2a5087f"
+    },
+    {
+      "id": "progress-ninety-five-draws-full-before-next-frame-clear",
+      "inputOverrides": {
+        "slotOverrides": {
+          "1": { "activeState": 1, "kindState": 1, "progressWord": 95 }
+        }
+      },
+      "expectedOutputSha256": "ad09508862c3e726fad42873bd6df84edc224c056a29b97064c5b8819b710f72"
+    },
+    {
+      "id": "progress-one-hundred-clears-kind-and-still-draws",
+      "inputOverrides": {
+        "slotOverrides": {
+          "2": { "activeState": 1, "kindState": 1, "progressWord": 100 }
+        }
+      },
+      "expectedOutputSha256": "6809016da6a49c6646e27e9f22bd8c406f6e670a7a38c9d57b3c03e83f701a5e"
+    },
+    {
+      "id": "four-non-progress-slots-use-supplied-synthetic-label-metrics",
+      "inputOverrides": {
+        "slotOverrides": {
+          "0": {
+            "activeState": 1,
+            "kindState": 0,
+            "progressWord": 0,
+            "textRecordIndex": 0,
+            "label": {
+              "hdcAcquisitionSucceeded": true,
+              "labelPointerAvailable": true,
+              "gdiMeasurementSucceeded": true,
+              "suppliedMeasuredWidth": 40,
+              "suppliedMeasuredHeight": 12
+            }
+          },
+          "1": {
+            "activeState": 1,
+            "kindState": 2,
+            "progressWord": 0,
+            "textRecordIndex": 1,
+            "label": {
+              "hdcAcquisitionSucceeded": true,
+              "labelPointerAvailable": true,
+              "gdiMeasurementSucceeded": true,
+              "suppliedMeasuredWidth": 160,
+              "suppliedMeasuredHeight": 14
+            }
+          },
+          "2": {
+            "activeState": 1,
+            "kindState": 2147483648,
+            "progressWord": 0,
+            "textRecordIndex": 2,
+            "label": {
+              "hdcAcquisitionSucceeded": true,
+              "labelPointerAvailable": true,
+              "gdiMeasurementSucceeded": true,
+              "suppliedMeasuredWidth": 80,
+              "suppliedMeasuredHeight": 16
+            }
+          },
+          "3": {
+            "activeState": 1,
+            "kindState": 4294967295,
+            "progressWord": 0,
+            "textRecordIndex": 3,
+            "label": {
+              "hdcAcquisitionSucceeded": true,
+              "labelPointerAvailable": true,
+              "gdiMeasurementSucceeded": true,
+              "suppliedMeasuredWidth": 400,
+              "suppliedMeasuredHeight": 18
+            }
+          }
+        }
+      },
+      "expectedOutputSha256": "d2460af5816360864b90b454ccdd3626d877e73d0c7b5a65b7de87e07f619f6b"
+    },
+    {
+      "id": "label-hdc-failure-skips-downstream-fields-and-release",
+      "inputOverrides": {
+        "screenWidth": "unreachable",
+        "screenHeight": "unreachable",
+        "slotOverrides": {
+          "0": {
+            "activeState": 1,
+            "kindState": 0,
+            "progressWord": 0,
+            "textRecordIndex": "unreachable",
+            "label": {
+              "hdcAcquisitionSucceeded": false,
+              "labelPointerAvailable": "unreachable",
+              "gdiMeasurementSucceeded": "unreachable",
+              "suppliedMeasuredWidth": "unreachable",
+              "suppliedMeasuredHeight": "unreachable"
+            }
+          }
+        }
+      },
+      "expectedOutputSha256": "180fbdb7c687d5c145cd1bf4877ef60d55f3bf8943e3f49974df9ca922d33b64"
+    },
+    {
+      "id": "missing-sources-are-still-passed-before-ordered-optional-draws",
+      "inputOverrides": {
+        "baseSourceAvailable": false,
+        "slotSourceAvailability": [false, true, true, true],
+        "field_0x568": 1,
+        "field_0x564": 1,
+        "slotOverrides": {
+          "0": { "activeState": 1, "kindState": 1, "progressWord": -5 }
+        }
+      },
+      "expectedOutputSha256": "fb47c819b364e38727877e51da799b313935db0f76281785a6935b72c8438df2"
+    },
+    {
+      "id": "non-one-slot-and-draw-fields-only-trigger-base",
+      "inputOverrides": {
+        "field_0x568": 2,
+        "field_0x564": 4294967295,
+        "slotOverrides": {
+          "0": {
+            "activeState": 2,
+            "kindState": 1,
+            "progressWord": "unreachable"
+          }
+        }
+      },
+      "expectedOutputSha256": "8ee93d5a3008926485dd8d5a396f5ce5ce59608212c61755a7dbbf57f6a3b0fb"
+    },
+    {
+      "id": "alternate-caller-label-clips-with-signed-word-screen-difference",
+      "inputOverrides": {
+        "callerDestination": "DAT_0055a938",
+        "screenWidth": 100,
+        "screenHeight": 100,
+        "slotOverrides": {
+          "3": {
+            "activeState": 1,
+            "kindState": 0,
+            "progressWord": 0,
+            "textRecordIndex": -1,
+            "label": {
+              "hdcAcquisitionSucceeded": true,
+              "labelPointerAvailable": true,
+              "gdiMeasurementSucceeded": true,
+              "suppliedMeasuredWidth": 140,
+              "suppliedMeasuredHeight": 30
+            }
+          }
+        }
+      },
+      "expectedOutputSha256": "42c2bfde2eab3795e1ad58da27be2b0fa85ef77370a94d0965094f08080b9762"
+    }
+  ]
+}
