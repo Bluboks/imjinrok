@@ -262,10 +262,6 @@ function objectiveTextStyle(): Phaser.Types.GameObjects.Text.TextStyle {
     stroke: "#1a100b",
     strokeThickness: 2,
     lineSpacing: 5,
-    wordWrap: {
-      width: 320,
-      useAdvancedWrap: true,
-    },
   };
 }
 

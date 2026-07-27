@@ -192,7 +192,11 @@ test("resolves the verified base geometry and a uniformly centered scaled layout
       frame: { x: 112, y: 81, width: 416, height: 236 },
       content: { x: 158, y: 135, width: 320, height: 124 },
       dismissButton: { x: 415, y: 267, width: 80, height: 24 },
-      text: { maxWidth: 320, firstCenterY: 166, secondCenterY: 228 },
+      text: {
+        maxWidth: 300,
+        firstCenterY: 166,
+        secondCenterY: 228,
+      },
     },
   });
   assert.deepEqual(resolveObjectiveModalPresenterLayout(1280, 720), {
@@ -204,7 +208,11 @@ test("resolves the verified base geometry and a uniformly centered scaled layout
       frame: { x: 328, y: 121.5, width: 624, height: 354 },
       content: { x: 397, y: 202.5, width: 480, height: 186 },
       dismissButton: { x: 782.5, y: 400.5, width: 120, height: 36 },
-      text: { maxWidth: 480, firstCenterY: 249, secondCenterY: 342 },
+      text: {
+        maxWidth: 450,
+        firstCenterY: 249,
+        secondCenterY: 342,
+      },
     },
   });
 });

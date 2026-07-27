@@ -51,6 +51,21 @@ const vectors = JSON.parse(
     "utf8",
   ),
 ) as { updateVectors: UpdateVector[]; ownerVectors: OwnerVector[] };
+const typographyVectors = JSON.parse(
+  readFileSync(
+    resolve(
+      repositoryRoot,
+      "analysis/fixtures/objective-modal-typography-vectors.json",
+    ),
+    "utf8",
+  ),
+) as {
+  layoutVectors: Array<{
+    id: string;
+    input: { requestedMaxWidth: number };
+    expected: { effectiveMaxWidth: number };
+  }>;
+};
 
 test("client rectangles exactly match the independent original-input extraction", () => {
   const report = extractObjectivePanelLayoutEvidence({
@@ -68,7 +83,11 @@ test("client rectangles exactly match the independent original-input extraction"
     frame: toClientRect(report.layout.frame),
     content: toClientRect(report.layout.content),
     dismissButton: toClientRect(report.layout.dismissButton),
-    text: report.layout.text,
+    text: {
+      maxWidth: report.layout.text.maxWidth,
+      firstCenterY: report.layout.text.firstCenterY,
+      secondCenterY: report.layout.text.secondCenterY,
+    },
   });
 });
 
@@ -109,7 +128,11 @@ test("scales all original rectangles uniformly and centers the 640x480 canvas", 
     frame: { x: 224, y: 162, width: 832, height: 472 },
     content: { x: 316, y: 270, width: 640, height: 248 },
     dismissButton: { x: 830, y: 534, width: 160, height: 48 },
-    text: { maxWidth: 640, firstCenterY: 332, secondCenterY: 456 },
+    text: {
+      maxWidth: 600,
+      firstCenterY: 332,
+      secondCenterY: 456,
+    },
   });
   assert.deepEqual(resolveOriginalObjectivePanelLayout(1280, 720), {
     scale: 1.5,
@@ -118,8 +141,27 @@ test("scales all original rectangles uniformly and centers the 640x480 canvas", 
     frame: { x: 328, y: 121.5, width: 624, height: 354 },
     content: { x: 397, y: 202.5, width: 480, height: 186 },
     dismissButton: { x: 782.5, y: 400.5, width: 120, height: 36 },
-    text: { maxWidth: 480, firstCenterY: 249, secondCenterY: 342 },
+    text: {
+      maxWidth: 450,
+      firstCenterY: 249,
+      secondCenterY: 342,
+    },
   });
+});
+
+test("uses the same original renderer vector for requested and effective text width", () => {
+  const k01Vector = typographyVectors.layoutVectors.find(
+    ({ id }) =>
+      id === "k01-primary-supplied-synthetic-gdi-metrics-wrap",
+  );
+  assert.ok(k01Vector);
+
+  const base = resolveOriginalObjectivePanelLayout(640, 480);
+  assert.equal(k01Vector.input.requestedMaxWidth, 320);
+  assert.equal(base.text.maxWidth, k01Vector.expected.effectiveMaxWidth);
+
+  const scaled = resolveOriginalObjectivePanelLayout(1280, 960);
+  assert.equal(scaled.text.maxWidth, 2 * base.text.maxWidth);
 });
 
 test("preserves strict dismiss edges after responsive scaling", () => {

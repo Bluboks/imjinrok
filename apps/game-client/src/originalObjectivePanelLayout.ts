@@ -54,7 +54,7 @@ export interface OriginalObjectivePanelOwnerFrame {
 const FRAME_RECT: Readonly<OriginalObjectivePanelRect> = { x: 112, y: 81, width: 416, height: 236 };
 const CONTENT_RECT: Readonly<OriginalObjectivePanelRect> = { x: 158, y: 135, width: 320, height: 124 };
 const DISMISS_BUTTON_RECT: Readonly<OriginalObjectivePanelRect> = { x: 415, y: 267, width: 80, height: 24 };
-const TEXT_MAX_WIDTH = 320;
+const TEXT_EFFECTIVE_MAX_WIDTH = 300;
 const FIRST_TEXT_CENTER_Y = 166;
 const SECOND_TEXT_CENTER_Y = 228;
 
@@ -84,7 +84,7 @@ export function resolveOriginalObjectivePanelLayout(
     content: scaleRect(CONTENT_RECT, scale, offsetX, offsetY),
     dismissButton: scaleRect(DISMISS_BUTTON_RECT, scale, offsetX, offsetY),
     text: {
-      maxWidth: TEXT_MAX_WIDTH * scale,
+      maxWidth: TEXT_EFFECTIVE_MAX_WIDTH * scale,
       firstCenterY: offsetY + FIRST_TEXT_CENTER_Y * scale,
       secondCenterY: offsetY + SECOND_TEXT_CENTER_Y * scale,
     },
