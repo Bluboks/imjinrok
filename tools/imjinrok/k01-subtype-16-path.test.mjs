@@ -211,7 +211,8 @@ test("preserves exact widths, reached-only ordering, no-op, and failure boundari
     bufferWord: 1, currentHealth: 1,
   }));
   assert.throws(() => reproduceFinalDamage({
-    effectKind: 2, targetActive: true, payload: 1, selectionModeByte: 2, sameOwner: false,
+    effectKind: 9, targetActive: true, payload: 1,
+    selectionModeByte: "unreachable", sameOwner: "unreachable",
     targetClassByte: 1, targetGenerationMatches: false, targetModeDword: "unreachable",
     defenseWord50: "unreachable", defenseWord44: "unreachable", targetByteBa: "unreachable",
     writerGlobalWord: 1, targetOwnerByte: "reached", playerOwnerGateByte: 1,

@@ -3,7 +3,7 @@
   "sourceFunctionsSha256": "c10ea2de1f4998411d52443419c9a7f52ff7f9c18e79bd4115ba197d2f5bebc3",
   "sourceReferencesSha256": "df11ff3713988ef22b3390b5b0ae7b4a87464b5de547a4866e1c8ec8a0bcaf4c",
   "sourceJumpTablesSha256": "0ae517eb172f61b974ca7a4411e64c1cc42065c462ed53b3065ab2da633dfe2f",
-  "expectedProjectionSha256": "6a8713716e169ba4ca17018458650a49322e9545aec528896367bbfffb3a5e38",
+  "expectedProjectionSha256": "9f8448b9210017ae406088ab55ff573e5dfdceb5c1b977c93635ab36c35406d7",
   "payloadVectors": [
     {
       "id": "zero-upper-basic",
@@ -265,9 +265,9 @@
       "expected": { "healthWriteReached": false, "noWriteReason": "target-class-95-special-callback", "scaledPayload": 92, "defenseWord": null, "defense": null, "damage": null, "bufferWord": null, "currentHealth": null, "writerReturn": null, "nextFunction": null }
     },
     {
-      "id": "full-reference-generation-mismatch-calls-writer-with-zero",
-      "input": { "effectKind": 2, "targetActive": true, "payload": 185, "selectionModeByte": 2, "sameOwner": true, "targetClassByte": 1, "targetGenerationMatches": false, "targetModeDword": "unreachable", "defenseWord50": "unreachable", "defenseWord44": "unreachable", "targetByteBa": "unreachable", "writerGlobalWord": 0, "targetOwnerByte": "unreachable", "playerOwnerGateByte": "unreachable", "bufferWord": 7, "currentHealth": 100 },
-      "expected": { "healthWriteReached": true, "noWriteReason": null, "scaledPayload": 92, "defenseWord": null, "defense": null, "damage": 0, "bufferWord": 7, "currentHealth": 100, "writerReturn": 1, "nextFunction": "FUN_00439400" }
+      "id": "direct-kind-9-full-reference-generation-mismatch-calls-writer-with-zero",
+      "input": { "effectKind": 9, "targetActive": true, "payload": 185, "selectionModeByte": "unreachable", "sameOwner": "unreachable", "targetClassByte": 1, "targetGenerationMatches": false, "targetModeDword": "unreachable", "defenseWord50": "unreachable", "defenseWord44": "unreachable", "targetByteBa": "unreachable", "writerGlobalWord": 0, "targetOwnerByte": "unreachable", "playerOwnerGateByte": "unreachable", "bufferWord": 7, "currentHealth": 100 },
+      "expected": { "healthWriteReached": true, "noWriteReason": null, "scaledPayload": null, "defenseWord": null, "defense": null, "damage": 0, "bufferWord": 7, "currentHealth": 100, "writerReturn": 1, "nextFunction": "FUN_00439400" }
     },
     {
       "id": "writer-owner-gate-zero-preserves-buffer-and-health",
