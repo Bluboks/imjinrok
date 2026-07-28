@@ -22,7 +22,7 @@
 
 `tools/imjinrok/extract-k01-mode-reachability.mjs`는 JSON parse 전에 위 artifact의 exact
 length/SHA-256 및 embedded `sourceSha256`을 검사한다. 이어 함수 instruction count/hash, main
-state/stage jump-table 목적지, 5개 direct call edge, guard direct-write reference 5개, 15개 raw-byte
+state/stage jump-table 목적지, 5개 direct call edge, guard direct-write reference 5개, 16개 raw-byte
 anchor를 검사한다. 다른 hash의 분석 결과를 이 근거에 섞을 수 없다.
 
 ```bash
