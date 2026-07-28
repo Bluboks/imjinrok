@@ -61,10 +61,37 @@ test("reproduces normal, lock-failure, and gate-failure panel-blit boundaries", 
   }
 });
 
-test("refuses unrepresentable source-domain gate values", () => {
+test("does not inspect malformed or absent later inputs after an earlier source gate skips them", () => {
+  assert.deepEqual(
+    reproducePannelHudBlit({ selectedRecordGate: 1, globalGate: -1, panelGate: -1, surfaceLockSucceeded: "not-reached" }),
+    fixture.vectors[2].expected,
+  );
+  assert.deepEqual(
+    reproducePannelHudBlit({ selectedRecordGate: 0, globalGate: 1, panelGate: -1, surfaceLockSucceeded: "not-reached" }),
+    fixture.vectors[3].expected,
+  );
+  assert.deepEqual(
+    reproducePannelHudBlit({ selectedRecordGate: 0, globalGate: 0, panelGate: 1, surfaceLockSucceeded: "not-reached" }),
+    fixture.vectors[4].expected,
+  );
+});
+
+test("refuses noncanonical or unrepresentable source-domain gate values when reached", () => {
   assert.throws(
     () => reproducePannelHudBlit({ selectedRecordGate: 0x1_0000, globalGate: 0, panelGate: 0, surfaceLockSucceeded: true }),
-    /selectedRecordGate must fit the original WORD field/u,
+    /selectedRecordGate must be an unsigned original WORD value/u,
+  );
+  assert.throws(
+    () => reproducePannelHudBlit({ selectedRecordGate: -1 }),
+    /selectedRecordGate must be an unsigned original WORD value/u,
+  );
+  assert.throws(
+    () => reproducePannelHudBlit({ selectedRecordGate: 0, globalGate: -1 }),
+    /globalGate must be an unsigned original WORD value/u,
+  );
+  assert.throws(
+    () => reproducePannelHudBlit({ selectedRecordGate: 0, globalGate: 0, panelGate: 0x1_0000 }),
+    /panelGate must be an unsigned original WORD value/u,
   );
   assert.throws(
     () => reproducePannelHudBlit({ selectedRecordGate: 0, globalGate: 0, panelGate: 0, surfaceLockSucceeded: 1 }),

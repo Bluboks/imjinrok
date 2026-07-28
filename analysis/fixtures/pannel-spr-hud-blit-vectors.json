@@ -35,13 +35,35 @@
       }
     },
     {
-      "id": "nonzero-panel-gate-skips-lock-and-blit",
-      "input": { "selectedRecordGate": 0, "globalGate": 0, "panelGate": 1, "surfaceLockSucceeded": true },
+      "id": "selected-record-gate-skips-unreached-later-inputs",
+      "input": { "selectedRecordGate": 1 },
+      "expected": {
+        "selectedRecordGate": 1,
+        "operations": [
+          { "type": "skip-selected-record-gate" },
+          { "type": "later-selection-command-renderer", "function": "FUN_0045ad90" }
+        ]
+      }
+    },
+    {
+      "id": "global-gate-skips-unreached-panel-and-lock-inputs",
+      "input": { "selectedRecordGate": 0, "globalGate": 1 },
+      "expected": {
+        "selectedRecordGate": 0,
+        "globalGate": 1,
+        "operations": [
+          { "type": "skip-global-gate" },
+          { "type": "later-selection-command-renderer", "function": "FUN_0045ad90" }
+        ]
+      }
+    },
+    {
+      "id": "panel-gate-skips-unreached-lock-input",
+      "input": { "selectedRecordGate": 0, "globalGate": 0, "panelGate": 1 },
       "expected": {
         "selectedRecordGate": 0,
         "globalGate": 0,
         "panelGate": 1,
-        "surfaceLockSucceeded": true,
         "operations": [
           { "type": "skip-panel-gate" },
           { "type": "later-selection-command-renderer", "function": "FUN_0045ad90" }

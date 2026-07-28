@@ -141,13 +141,16 @@ export function extractPannelSprHudBlit({
 export function reproducePannelHudBlit(input) {
   assertRecord(input, "input");
   const selectedRecordGate = assertWord(input.selectedRecordGate, "selectedRecordGate");
-  const globalGate = assertWord(input.globalGate, "globalGate");
-  const panelGate = assertWord(input.panelGate, "panelGate");
-  const surfaceLockSucceeded = assertBoolean(input.surfaceLockSucceeded, "surfaceLockSucceeded");
-  const output = { selectedRecordGate, globalGate, panelGate, surfaceLockSucceeded, operations: [] };
+  const output = { selectedRecordGate, operations: [] };
   if (selectedRecordGate !== 0) return skipped(output, "skip-selected-record-gate");
+  const globalGate = assertWord(input.globalGate, "globalGate");
+  output.globalGate = globalGate;
   if (globalGate !== 0) return skipped(output, "skip-global-gate");
+  const panelGate = assertWord(input.panelGate, "panelGate");
+  output.panelGate = panelGate;
   if (panelGate !== 0) return skipped(output, "skip-panel-gate");
+  const surfaceLockSucceeded = assertBoolean(input.surfaceLockSucceeded, "surfaceLockSucceeded");
+  output.surfaceLockSucceeded = surfaceLockSucceeded;
   output.operations.push({ type: "lock-hud-panel-surface", handle: "DAT_0054926c", state: "DAT_00559418" });
   if (!surfaceLockSucceeded) return skipped(output, "skip-surface-lock-failure");
   output.operations.push({ type: "blit-indexed-sprite", callsite: "0x00447a0f", destination: { x: 0, y: 0, width: 640, height: 163 } });
@@ -185,8 +188,8 @@ function assertBoolean(value, label) {
 }
 
 function assertWord(value, label) {
-  if (!Number.isInteger(value) || value < -0x8000 || value > 0xffff) {
-    throw new RangeError(`${label} must fit the original WORD field`);
+  if (!Number.isInteger(value) || value < 0 || value > 0xffff) {
+    throw new RangeError(`${label} must be an unsigned original WORD value (0..65535)`);
   }
   return value;
 }

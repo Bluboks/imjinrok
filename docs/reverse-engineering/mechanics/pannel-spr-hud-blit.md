@@ -128,14 +128,18 @@ loader 또는 DirectDraw failure의 image result도 추론하지 않는다.
 
 ## 재현 벡터와 현재 구현 경계
 
-fixture는 서로 독립적인 source-domain outcome 세 가지를 고정한다.
+fixture는 source branch 순서대로 validation하는 서로 독립적인 source-domain outcome 다섯 가지를 고정한다.
 
 - all three gate words zero plus successful lock: lock → full `640×163` blit at `(0,0)` → unlock → later grid;
 - all gates zero plus failed lock: lock attempt → no payload blit or unlock → later grid;
 - nonzero panel gate: no lock/blit → later grid.
+- nonzero selected-record gate: global/panel/lock input을 읽지 않고 later grid.
+- nonzero global gate: panel/lock input을 읽지 않고 later grid.
 
-focused test는 WORD 밖 gate value, non-boolean lock input, changed EXE·SPR file, stale structured reference
-export도 거부한다. command-line extractor 두 번 실행은 byte-identical JSON을 낸다.
+focused test는 reached gate에 한해 unsigned raw WORD `0..65535` 밖 value와 non-boolean lock input을
+거부한다. 앞선 nonzero gate가 branch하면 malformed 또는 없는 later input을 읽지 않는 것도 검증한다.
+changed EXE·SPR file과 stale structured reference export도 거부하며, command-line extractor 두 번 실행은
+byte-identical JSON을 낸다.
 
 이 slice에는 product file change가 없다. 따라서 이 source-bound analysis는 현재 responsive selection
 panel의 "original-game parity" 주장이 아니다. 이 질문의 유일한 remaining direct edge는
