@@ -42,6 +42,7 @@
 - [gameplay selection/command grid](reverse-engineering/mechanics/gameplay-selection-command-panel.md)
 - [command-grid cell-size common-loader 결합](reverse-engineering/mechanics/command-grid-cell-size-binding.md)
 - [`pannel.spr` HUD blit 결합](reverse-engineering/mechanics/pannel-spr-hud-blit.md)
+- [단일 선택 renderer dispatch의 lock·호출 순서](reverse-engineering/mechanics/single-selection-renderer-dispatch.md)
 - [선택 패널 slot dispatcher](reverse-engineering/mechanics/selection-panel-slot-dispatch.md)
 - [선택 패널로 탐색한 SPEECH slot lifecycle](reverse-engineering/mechanics/selection-panel-slot-lifecycle.md)
 - [고정 선택 패널 후보를 반증한 transient formatted overlay](reverse-engineering/mechanics/transient-formatted-overlay.md)

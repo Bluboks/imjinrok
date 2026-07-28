@@ -220,6 +220,7 @@
 | ---: | --- | ---: | --- |
 | `0x00428530` | `0x00428530-0x00428579` | 28 | FIFO pop wrapper; 제거 뒤 constant 20으로 redelivery 시도 |
 | `0x00428580` | `0x00428580-0x004285c9` | 28 | hero-filtered pop wrapper; 제거 뒤 constant 30으로 redelivery 시도 |
+| `0x00421390` | `0x00421390-0x004213fb` | 35 | sole exact-one single-selection dispatch의 lock, owner WORD copy, opaque subcall 순서, flag-gated optional call, success-only unlock과 unconditional final helper; subrenderer 의미는 미확정 |
 | `0x004196e0` | 비연속 body 10개, `0x004196e0-0x0041a018` | 665 | player `+0x254c` nonzero에서 9-class 자동 특수행동 case를 선택; class 78 case는 target·actions 40/59까지 정적 확정 |
 | `0x0041c870` | `0x0041c870-0x0041c990` | 101 | class 78 action 40의 적 team·저체력·flags·resource target admission |
 | `0x00426740` | `0x00426740-0x004267fe` | 44 | `+0x266..+0x273` 14-byte pending 영역 store; origin 1 auto가 non-idle origin 0 manual pending을 덮지 못함 |
