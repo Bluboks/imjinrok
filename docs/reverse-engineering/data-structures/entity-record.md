@@ -45,6 +45,7 @@ K01의 봉화대 검색과 영웅 생존 확인에서 사용되는 레코드 관
 | `+0x38` | signed byte | owner player index | class 78 enemy-team 검사·owner transfer 범위 `정적 확정` |
 | `+0x3c` | signed word | 최대 체력 | 클래스 49·52 체력 분기와 class 78 `trunc(max*2/3)` 범위 `정적 확정` |
 | `+0x3e` | signed word | 현재 체력 | 클래스 49·52 체력 분기와 registry 생존·저체력 검사 범위 `정적 확정` |
+| `+0x44/+0x50` | word | 방어 합의 두 입력 | kind 1/2/9 `FUN_00413070` 소비 범위 `정적 확정`, 일반 명칭 미확정 |
 | `+0x46` | word | 타입 정의에서 복사된 기본 공격 payload | 클래스 76·78 일반 공격 범위 `정적 확정` |
 | `+0x4a` | word | 임시 공격 payload 보정 후보 | 클래스 76·78 소비는 `정적 확정`, 생산자 의미는 미확정 |
 | `+0x68` | byte | class 78 action 59 fallback selector | exact 2 비교 범위 `정적 확정`, 범용 명칭 미확정 |
@@ -52,11 +53,11 @@ K01의 봉화대 검색과 영웅 생존 확인에서 사용되는 레코드 관
 | `+0x6f` | byte | phase 내부 갱신 카운터 | 클래스 76·78 일반 공격 범위 `정적 확정` |
 | `+0x74` | dword | 타입·행동 flags | 기존 범위와 class 78 target bits 1/`0x80000` 범위 `정적 확정` |
 | `+0x7c` | dword | 일반 공격 전달 분기값 | 클래스 76의 `0x13`, 클래스 78의 `9` 범위 `정적 확정` |
-| `+0x80` | dword | 직접 피해 class 보정 분류 | effect kind 1 계산 범위 `정적 확정`, 사람용 명칭은 미확정 |
+| `+0x80` | dword | effect별 payload 보정 mode | kind 1 기존 분기와 kind 9의 4→30%·5→50% 범위 `정적 확정`; kind 2는 미사용 |
 | `+0x88` | dword | 행동 내부 하위 상태 | 행동 상태 5 일반 공격 범위 `정적 확정` |
 | `+0x8c` | byte | 건설 진행 정수 백분율 | 클래스 49·52 건설·체력 분기 범위 `정적 확정` |
-| `+0x90` | word | 체력보다 먼저 피해를 받는 완충 수치 | 직접 피해 적용 범위 `정적 확정`, 게임 내 명칭은 미확정 |
-| `+0xba` | byte | 상태 2 이동 비주얼 선택자 | 클래스 2 일반 이동 함수 범위 `정적 확정` |
+| `+0x90` | word | 피해 buffer | damage 이상이면 buffer만 감소; 부족하면 0 뒤 원 damage 전량 체력 차감 범위 `정적 확정`, 게임 내 명칭은 미확정 |
+| `+0xba` | byte | 이동 variant와 방어 보정 gate | 클래스 2 상태 2 선택 및 kind 2/9에서 exact 1이면 signed defense 절반 추가 범위 `정적 확정` |
 | `+0x122` | dword | 공격 대상 인덱스·세대 참조 | 클래스 76·78 일반 공격 범위 `정적 확정` |
 | `+0x138` | word | 주 공격 회복 임계값 | 클래스 76·78 값 2 범위 `정적 확정` |
 | `+0x13a` | word | 주 공격 회복 카운터 | 짝수 전역 틱 증가·사이클 종료 시 0, 클래스 76·78 범위 `정적 확정` |
@@ -89,6 +90,44 @@ K01의 봉화대 검색과 영웅 생존 확인에서 사용되는 레코드 관
 위 `정적 확정`은 각 파일럿이 다룬 클래스와 분기에 한정한다. 같은 오프셋이 모든 엔티티 종류에서 같은
 의미라는 일반 구조체 판정은 아직 하지 않는다.
 
+## fixed effect record
+
+entity record와 별개인 `0x00aa85e8` base, `0x3a0` stride의 100-slot 고정 레코드 배열이 있다.
+fixed-slot admission helper가 반환하는 slot은 1..99이고 slot 0은 반환하지 않는다.
+registry `0x00842500`의 nonzero
+WORD가 active admission이며 값은 slot이 아니라 subtype이다. 다음 필드는 subtype `0x0c`와
+`0x10` 경로 범위에서 `정적 확정`이다.
+
+| 오프셋 | 크기 | 제한된 의미 |
+| ---: | ---: | --- |
+| `+0x16` | word | tick 3분주 내부 phase |
+| `+0x22` | word | active state, 생성 시 1 |
+| `+0x24` | word | fixed slot index |
+| `+0x26` | word | subtype; registry에 기록되는 값 |
+| `+0x2e` | byte | mode/selection-mode 인자; action 59에서는 2 |
+| `+0x3c` | signed byte | `+0x16` phase divisor |
+| `+0x9a/+0x9c` | dword | context/target reference의 low index/high generation |
+| `+0x9e` | word | 생성 call payload DWORD의 low WORD |
+| `+0xa0` | dword | source reference |
+| `+0xa4` | signed word | live source entity `BYTE +0x38`의 signed owner 또는 `-1` |
+| `+0xa6/+0xa8` | word | path current/end index |
+| `+0x114` | word | tracking exact-one gate |
+| `+0x116` | word | tracking count |
+| `+0x11c/+0x25c` | word[160] | path X `+0x11c..+0x25c`, Y `+0x25c..+0x39c` end-exclusive; 정상 read index 0..159 |
+
+생성은 레코드 전체 `0x3a0`바이트를 zero한다. outer updater cleanup과 100-slot bulk reset은
+registry WORD만 clear하며 record bytes와 `+0x9a/+0xa0`은 그 시점에 다시 zero하지 않는다.
+최종 effect admission은 `+0x9a` low index active를 먼저 검사하고, damage calculator가 active
+entity의 low/high WORD를 이 full reference와 다시 비교한다. 따라서 stale generation은
+inactive admission과 별개로 damage 0 writer 호출 경로를 만든다.
+
+관련 live entity consumer에서 `BYTE +0x37 == 95`는 class-special callback gate이고,
+`BYTE +0x38` owner는 `FUN_00438130`의 global exact-one 상태에서 player-table no-write gate를
+선택하는 데도 쓰인다.
+자세한 생성·비행·
+subtype 12/16 종료 분기는
+[K01 action 59 subtype 0x10 경로](../mechanics/k01-subtype-16-path.md)를 따른다.
+
 ## 확인해야 할 사항
 
 - 두 관점이 같은 객체의 서로 다른 하위 구조인지, 별도 테이블인지
@@ -100,7 +139,7 @@ K01의 봉화대 검색과 영웅 생존 확인에서 사용되는 레코드 관
 - 클래스 2 상태 1 특수 분기의 미설정 base와 런타임 flags 변경 가능성
 - 타입 정의 표의 나머지 필드와 모든 클래스에서의 공통성
 - 원본 전역 틱 `0x007c5f80` 한 단위의 초 환산과 공격 회복 카운터의 프로젝트 시간축 대응
-- 유성룡 attack attribute 9가 만드는 subtype `0x0c` 투사체의 충돌 레코드
+- fixed effect record의 renderer-only field와 `FUN_00464cc0` map byte/table 의미
 
 타입 정의 표의 이름·슬롯·기본 프레임·raw flags·자원 경로는
 [원본 엔티티 타입 카탈로그](entity-type-catalog.md)에서 클래스 1~95 전수 범위를 정적 확정했다.

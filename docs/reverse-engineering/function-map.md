@@ -21,9 +21,9 @@
 | `0x00411cb0` | `FUN_00411cb0`, `0x00411cb0-0x00411ccc` | 1 / 9 | 컨트롤 signed WORD X·Y와 이전 버튼 DWORD를 vtable+0x30에 전달 | 목표 모달의 실제 target `FUN_00411cd0`과 닫기 입력 경로 정적 확정 |
 | `0x00411cd0` | `FUN_00411cd0`, `0x00411cd0-0x00411d86` | 14 / 57 | 활성 검사, strict-edge hit test 호출, 현재·이전 버튼 상태와 sound latch 처리 | 목표 모달 내부 해제 종료 경로 정적 확정; hit-test target은 `0x00411df0-0x00411e37` |
 | `0x00412e40` | `FUN_00412e40`, `0x00412e40-0x00412fbf` | 7 / 94 | 공통 button SPR 객체를 고정 순서로 로드 | `buttons201.spr`→`0x00529428` 결합 정적 확정; 런타임 실패 결과는 정적-only |
-| `0x00413070` | `FUN_00413070`, `0x00413070-0x0041362d` | 160 / 442 | 공격 kind·defender class별 payload 보정과 방어 백분율 차감 | effect kind 1·권율 직접 피해 범위 정적 확정 |
-| `0x00413700` | `FUN_00413700`, `0x00413700-0x00413b02` | 61 / 329 | 공격 effect kind별 단일·범위 대상 전달 | kind 1→단일 defender 경로 정적 확정 |
-| `0x00413b30` | `FUN_00413b30`, `0x00413b30-0x00413ddd` | 30 / 208 | defender 피해 계산·체력 적용·사망 후속 처리 | 권율 직접 피해 호출 순서 정적 확정 |
+| `0x00413070` | `FUN_00413070`, `0x00413070-0x0041362d` | 160 / 442 | full-reference generation 재검사 뒤 공격 kind별 payload·방어 계산; mismatch는 damage 0 | kind 1과 kind 2/9 제한 범위 정적 확정 |
+| `0x00413700` | `FUN_00413700`, `0x00413700-0x00413b02` | 61 / 329 | low-index active admission과 공격 effect kind별 대상 전달; action 59 mode 2 kind 2는 supplied target/full payload 강제 | kind 1 및 action 59 kind 2 제한 범위 정적 확정 |
+| `0x00413b30` | `FUN_00413b30`, `0x00413b30-0x00413ddd` | 30 / 208 | class 95 special callback 또는 피해 계산·writer·사망 후속 처리 | 권율 직접 피해와 subtype 16 제한 경로 정적 확정 |
 | `0x00416c70` | `FUN_00416c70`, `0x00416c70-0x0041737e` | 84 / 555 | 행동 상태 5의 대상 검증·접근·일반 공격 하위 상태와 `0x00416f6e` 자동 특수행동 dispatcher 호출 | 하위 상태 3→공격 resolver와 [class 78 자동 마법](mechanics/k01-ryu-auto-magic-path.md)의 return-1 short-circuit 정적 확정 |
 | `0x00417430` | `FUN_00417430`, `0x00417430-0x004196de` | 272 / 2,468 | 일반 공격 readiness·phase·효과 전달·사이클 완료 | K01 권율·유성룡 phase·전달 분기 정적 확정 |
 | `0x0041a9e0` | `FUN_0041a9e0`, `0x0041a9e0-0x0041aa33` | 6 / 23 | 상태 12에서 slot `+0x0a`, frame `+0x0c` 선택 | 조선 본영 범위 정적 확정, 다른 건물 base frame |
@@ -38,7 +38,7 @@
 | `0x00425b20` | `FUN_00425b20`, `0x00425b20-0x004262df` | 일반 이동 전체 경로 | 방향·좌표·phase 갱신과 상태 1·2 선택 | 상태 2 조건의 원본 사람용 명칭 |
 | `0x004291d0` | `FUN_004291d0` | 클래스 점프 테이블 포함 | 내부 클래스별 애니메이션 설정 초기화 | class 2·49·76·78의 문서화된 범위 정적 확정 |
 | `0x00437650` | `FUN_00437650`, `0x00437650-0x00438025` | 39 / 539 | 엔티티 초기화와 건설 진행도·체력 초기값 설정 | 조선 본영 관련 필드 범위 정적 확정 |
-| `0x00438130` | `FUN_00438130`, `0x00438130-0x0043819d` | 9 / 29 | 완충 수치 우선 소모 뒤 현재 체력 차감·0 고정 | 권율 직접 피해 범위 정적 확정 |
+| `0x00438130` | `FUN_00438130`, `0x00438130-0x0043819d` | 9 / 29 | global/owner table gate 0이면 no-write return 1; 아니면 zero buffer는 health 직행, nonzero signed buffer≥signed damage면 buffer 감소, 그 외 signed-negative 포함 buffer clear 뒤 원 damage 전량 체력 차감 | kind 1/2/9 제한 범위 정적 확정 |
 | `0x0043b4d0` | `FUN_0043b4d0`, `0x0043b4d0-0x0043c2f5` | 238 / 1,018 | 엔티티 주기 갱신과 건물 유효 체력→반파 상태 | 조선 본영 체력 분기 범위 정적 확정 |
 | `0x0043c300` | `FUN_0043c300`, `0x0043c300-0x0043c9b1` | 90 / 524 | player record `+0x254e` WORD가 exact 1이면 hero-filtered pop을 먼저 시도하고 실패 시 FIFO fallback | [영웅 생산 queue 우선순위](mechanics/hero-priority-queue-gate.md) 정적 확정 |
 | `0x0043c9c0` | `FUN_0043c9c0`, `0x0043c9c0-0x0043d35f` | 143 / 684 | `+0x1b0` 상위 행동 상태 dispatcher | 상태 5→일반 공격 경로 정적 확정 |
@@ -126,7 +126,19 @@
 | `0x0041c870` | `0x0041c870-0x0041c990` | 101 | class 78 action 40의 적 team·저체력·flags·resource target admission |
 | `0x00426740` | `0x00426740-0x004267fe` | 44 | `+0x266..+0x273` 14-byte pending 영역 store; origin 1 auto가 non-idle origin 0 manual pending을 덮지 못함 |
 | `0x00426c20` | `0x00426c20-0x00428154` | 1,428 | actions 2..69 pending consumer; class 78 actions 40/59 admission·state handoff·consume 확정 |
-| `0x00416600` | `0x00416600-0x00416860` | 174 | state 59 charge decrement·negative `+0x448` clamp와 중심 제외 최대 8개 subtype 16 creation call |
+| `0x00416600` | `0x00416600-0x00416860` | 174 | state 59 charge decrement·negative `+0x448` clamp, 중심 제외 최대 8개 subtype 16 creation call과 payload-construction-reached attempt 사이 EDI 상위 WORD 누적 |
+| `0x00411160` | `0x00411160-0x00411180` | 10 | fixed effect registry slot 1..99의 first-zero admission; full이면 0 |
+| `0x00411190` | `0x00411190-0x004111a5` | 10 | `FUN_00411180`으로 registry slots 0..99 bulk clear; record bytes는 유지 |
+| `0x004111b0` | `0x004111b0-0x0041122a` | 44 | supplied slot의 `0x3a0`-byte record 생성·초기화·subtype registry write wrapper |
+| `0x0040c6c0` | `0x0040c6c0-0x0040c96f` | 165 | fixed record 전체 zero와 subtype·payload low WORD·source·path field 초기화 |
+| `0x00410cc0` | `0x00410cc0-0x0041115c` | 347 | tick%3 phase wrap, generation tracking, non-end index 증가와 current slot의 subtype 1 full-reference 재초기화 |
+| `0x0040f9b0` | `0x0040f9b0-0x0040fc8f` | 242 | 160-WORD X/Y storage의 promoted path end 0..159 기록; tracking reset 뒤 `+0xa6`은 유지 |
+| `0x0040eab0` | `0x0040eab0-0x0040ebc5` | 90 | same-slot 전환된 subtype 1 final에서 radius 1·effect kind 2로 `FUN_00413700` 호출 |
+| `0x004426f0` | `0x004426f0-0x0044274a` | 35 | source/candidate invalid면 0, 둘 다 live면 same-team 결과; subtype 16 caller는 0을 accept |
+| `0x00438e30` | `0x00438e30-0x00438e48` | 7 | generation 검증 뒤 tracking target 좌표 read helper |
+| `0x00447360` | `0x00447360-0x0044759a` | 156 | 100-slot outer updater; updater가 0일 때만 registry WORD cleanup |
+| `0x00413700` | `0x00413700-0x00413b03` | 329 | subtype 12 kind 9 direct target와 subtype 16/1 mode 2 kind 2 supplied-target/full-payload dispatcher |
+| `0x00413b30` | `0x00413b30-0x00413dde` | 208 | class 95 special callback, full-generation 재검사·damage writer 반환 0→`FUN_00442b10`, 1→`FUN_00439400`; 이후 death/reference invalidation은 미재현 |
 | `0x0041cb10` | `0x0041cb10-0x0041ccc4` | 128 | state 40 effect phase의 resource 70 차감·target status·owner transfer |
 | `0x00478320` | `0x00478320-0x004783a4` | 43 | source 검증 뒤 pending store; reached store 결과와 무관한 return-1 core |
 | `0x004784c0` / `0x004788b0` | `0x004784c0-0x004784f0` / `0x004788b0-0x004788d4` | 17 / 13 | action 40/59 payload를 고정하고 core 결과와 무관하게 1을 반환하는 wrapper |

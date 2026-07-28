@@ -157,8 +157,13 @@ nonzero에서 정확히 9개 class의 자동 특수행동 dispatcher를 허용�
 toggle임을 정적 확정했다. 이어 K01 class 78은 cadence·target admission, action 40의 적 저체력
 대상 소유권 이전, action 59의 중심을 제외한 최대 8개 subtype 16 creation call, auto/manual
 pending-store와 일반 공격 short-circuit까지 정적 확정하고 좁은 projection을 부분 재현했다.
-subtype 16의 충돌·최종 효과와 outer
-input/entity-update scheduling은 남겼다. remembered right-click reservation의 실제
+후속 정적 분석은 action 59 payload-construction-reached attempt 사이 loop-carried full DWORD와 fixed record admission·초기화·100-slot reset,
+tick phase·generation tracking·cleanup, subtype 16 helper-zero strict-nearest와 current-slot subtype 1 재초기화,
+mode 2 kind 2/9의 low-active·class-95·full-generation·writer gate와 defense·buffer/health write,
+subtype 12 종료를 source-hash-bound projection으로 부분 재현했다. generic mode 1 kind 2 callback,
+재경로 좌표 결과, death/reference invalidation,
+`FUN_00464cc0` map field 의미와 outer input/entity-update scheduling은 남겼다. remembered
+right-click reservation의 실제
 action/owner는 계속 독립 미확정이다.
 
 후속 프로젝트 구조 감사는 기존 `game.events` HUD view 경계를 확장해 K01 HUD objective button에서

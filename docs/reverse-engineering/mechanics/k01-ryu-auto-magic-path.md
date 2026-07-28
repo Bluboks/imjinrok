@@ -127,10 +127,13 @@ u16((entity raw WORD +0x46) * 3
 `FUN_00411160`과 `FUN_00464cc0`의 더 깊은 의미는 이 slice에서 고정하지 않았다. 재현은 각 주변
 후보에 supplied synthetic `accepted` gate 하나를 두며, 정확한 표현은 “8개 주변 후보 중
 accepted인 후보에서 최대 8개 subtype-16 creation call”이다.
-원본은 `push edi`로 DWORD를 전달하지만, 이번 synthetic output은
-`subtypePayloadLowWord`만 투영한다. 16-bit IMUL 뒤 EDI의 전체 DWORD 상위 부분과 최종 전달값은
-이번 재현에서 고정하지 않는다.
-`FUN_004111b0` 이후 subtype 16의 비행·충돌·최종 효과는 이 slice에서 닫히지 않았다.
+이 문서의 fixture는 기존 호환을 위해 `subtypePayloadLowWord`만 투영한다. 후속
+[subtype 0x10 분석](k01-subtype-16-path.md)은 signed owner에서 계산한 EDX 상위 half,
+payload construction까지 도달한 attempt 사이 loop-carried EDI 상위 half와 low-half carry를
+포함한 full `push edi` DWORD,
+`FUN_004111b0` fixed record의 WORD truncation,
+subtype 16 helper-zero nearest-candidate/same-slot subtype 1 전환/kind 2 final 경로를 별도 source-hash-bound fixture로
+정적 확정·부분 재현했다.
 
 ## delivery와 pending command
 
@@ -243,6 +246,7 @@ Noto/Canvas adaptation은 의도적 superset으로 유지한다.
 global magic toggle, hero-priority toggle, remembered production-button right-click persistent HUD pinning은
 계속 독립적이다. 이 결과는 pinning action/owner를 확정하지 않는다.
 
-fixture의 각 항목은 선언한 좁은 projection에 대해 complete expected output을 갖지만, subtype 16
-downstream effect, action 40의 bookkeeping/callback 전체, outer scheduling이 빠져 있으므로 slice
-전체 재현 상태는 `부분 재현`이다.
+fixture의 각 항목은 선언한 좁은 projection에 대해 complete expected output을 갖지만, action 40의
+bookkeeping/callback 전체와 outer scheduling이 빠져 있으므로 이 slice 전체 재현 상태는
+`부분 재현`이다. subtype 16 downstream의 승격 범위와 남은 generic mode 1 kind 2 callback은 후속
+문서를 따른다.

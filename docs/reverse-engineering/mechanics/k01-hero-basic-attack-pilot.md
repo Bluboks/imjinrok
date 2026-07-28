@@ -83,8 +83,9 @@ defense = min(defenseBase + defenseModifier, 90)
 damage = max(1, modified - trunc(defense * modified / 100))
 ```
 
-`FUN_00438130`은 먼저 defender `WORD +0x90`의 별도 완충 수치를 소모하고, 남은 피해를 현재
-체력 `WORD +0x3e`에서 빼며 0 미만은 0으로 고정한다.
+`FUN_00438130`은 defender `WORD +0x90` buffer가 damage 이상이면 buffer만 줄인다. buffer가
+0보다 크지만 damage보다 작으면 buffer를 0으로 만들고 잔여가 아니라 원 damage 전량을 현재
+체력 `WORD +0x3e`에서 빼며 signed-positive가 아니면 0으로 고정한다.
 
 ## 유성룡 투사체 경계
 
@@ -92,9 +93,10 @@ damage = max(1, modified - trunc(defense * modified / 100))
 `FUN_004111b0`을 subtype `0x0c`로 호출하고, 기본 payload 45와 `+0x4a` 보정값을 투사체
 레코드에 전달한다.
 
-이 파일럿은 투사체 생성까지 정적 확정했다. subtype `0x0c`의 이동·충돌 함수와 충돌 시
-`FUN_00413700`에 넘기는 최종 effect kind는 아직 추적하지 않았으므로, 유성룡의 최종 체력
-감소 수식을 권율과 같다고 일반화하지 않는다.
+후속 [subtype `0x10` 경로 분석](k01-subtype-16-path.md)은 공유 fixed record·path updater와
+subtype `0x0c`의 final dispatcher를 추적했다. subtype `0x0c`는 path end에서 effect kind 9를
+`FUN_00413700`에 넘기고 cleanup되며, 선택된 target health write는 부분 재현됐다. kind 9의 모든
+callback과 공격 전 target 탐색·사거리는 이 파일럿 전체 범위에서 계속 미완료다.
 
 ## 재현
 
@@ -117,7 +119,8 @@ node --test tools/imjinrok/k01-hero-basic-attack-pilot.test.mjs
 
 ## 다음 경계
 
-다음 정적 분석 우선순위는 유성룡 subtype `0x0c` 투사체의 dispatcher·충돌·최종 피해 경로다.
-그 다음 원본 전역 틱 생산자와 메인 루프의 시간 단위를 복원해 이 phase 벡터를 프로젝트 simulation과
+subtype `0x0c` dispatcher·kind 9·선택 health write는 후속 분석에서 닫혔다. 다음 정적 분석
+우선순위는 kind 9 callback 전수와 공격 전 대상 탐색·사거리다. 그 다음 원본 전역 틱 생산자와
+메인 루프의 시간 단위를 복원해 이 phase 벡터를 프로젝트 simulation과
 클립 FPS에 같은 기준으로 이식한다. 대상 검색·사거리와 사망·참조 정리는 공격 주기 파일럿의 남은
 단계로 유지한다.
