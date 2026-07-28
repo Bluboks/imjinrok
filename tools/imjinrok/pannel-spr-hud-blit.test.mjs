@@ -49,6 +49,14 @@ test("binds the pannel loader record and final HUD blit to the exact source arti
   });
   assert.equal(report.finalBlit.consumer.callsite, "0x00447a0f");
   assert.equal(report.finalBlit.destination.bytePlane, "DAT_00559418 + 0x1510");
+  assert.deepEqual(
+    report.rawCodeRanges.find((range) => range.id === "common-spr-object-loader"),
+    {
+      id: "common-spr-object-loader",
+      byteRange: "0x004434a0-0x0044357f (end exclusive)",
+      bodySha256: "ab4c32302ba6ba9c56fad040df9689aad63a8e03eb33cdeab7b5972368170cf0",
+    },
+  );
   assert.deepEqual(report.finalBlit.ordering.slice(-2), [
     "unlock DAT_0054926c through FUN_0044ada0",
     "later call FUN_0045ad90 renders the common selection-command grid",

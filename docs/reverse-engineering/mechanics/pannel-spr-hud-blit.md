@@ -37,7 +37,7 @@ clock, 또는 현재 웹 selection panel의 원작 일치는 다루지 않는다
 | id | VA range, end exclusive | SHA-256 |
 | --- | --- | --- |
 | common SPR loader | `0x00443360-0x0044343d` | `80805e69437098006c8e2efce33121e9b98a1cf279f9baa19e7c4f9e2255694f` |
-| common SPR object loader | `0x004434a0-0x0044357e` | `5b2309dfc44ad98c823e8e425ecef62c69d720e14760ca01d151b9cabee084b2` |
+| common SPR object loader | `0x004434a0-0x0044357f` | `ab4c32302ba6ba9c56fad040df9689aad63a8e03eb33cdeab7b5972368170cf0` |
 | gameplay HUD frame root | `0x004475a0-0x00447bb9` | `81e6e28cf3a20e2ecd6d1f2e7ede44e646f044fbf86aa581620baa41f67f9f9c` |
 | indexed sprite blitter | `0x0044dc70-0x0044dd01` | `484f8032c602d26037a2606aa0d22262e0b9688fe70415cbb4870f04824643da` |
 
