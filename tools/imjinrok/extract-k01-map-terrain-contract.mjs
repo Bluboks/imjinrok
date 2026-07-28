@@ -16,6 +16,8 @@ export const EXPECTED_K01_MAP_SHA256 = "43ec3a173032f74c12d3cce1db1078b076b651ed
 export const EXPECTED_K01_MAP_SIZE = 1_097_100;
 export const EXPECTED_EXECUTABLE_SHA256 = "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e";
 export const EXPECTED_EXECUTABLE_SIZE = 843_833;
+export const EXPECTED_K01_PORT_SOURCE_SHA256 = "6ea348459a0782b6359e346e0e995f59148349ce105726de08255d42ede10b0b";
+export const EXPECTED_K01_PORT_SOURCE_SIZE = 15_920;
 
 export const K01_RAW_VALUE_PROJECTION = {
   width: 60,
@@ -29,6 +31,8 @@ export const K01_RAW_VALUE_PROJECTION = {
 
 const DEFAULT_MAP_PATH = "original/imjinrok2/stagemap/k01.map";
 const DEFAULT_EXECUTABLE_PATH = "original/imjinrok2/imjinrok2.exe";
+const DEFAULT_PORT_SOURCE_PATH = "packages/shared/src/imjinrokMaps.ts";
+const K01_PORT_TERRAIN_LITERAL = "K01_TERRAIN_RLE";
 const MAP_LOAD_EVIDENCE = {
   va: 0x00462b11,
   bytes: "56 6a 01 68 8c bd 10 00 57 e8 25 b4 04 00",
@@ -45,11 +49,16 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
   const report = extractK01MapTerrainContract({
     mapPath: args.map ?? DEFAULT_MAP_PATH,
     executablePath: args.executable ?? DEFAULT_EXECUTABLE_PATH,
+    portSourcePath: args.portSource ?? DEFAULT_PORT_SOURCE_PATH,
   });
   process.stdout.write(`${JSON.stringify(report, null, 2)}\n`);
 }
 
-export function extractK01MapTerrainContract({ mapPath, executablePath }) {
+export function extractK01MapTerrainContract({
+  mapPath = DEFAULT_MAP_PATH,
+  executablePath = DEFAULT_EXECUTABLE_PATH,
+  portSourcePath = DEFAULT_PORT_SOURCE_PATH,
+} = {}) {
   const { buffer: mapBuffer, ...map } = readVerifiedSource(mapPath, {
     label: "K01 map",
     expectedSize: EXPECTED_K01_MAP_SIZE,
@@ -60,7 +69,13 @@ export function extractK01MapTerrainContract({ mapPath, executablePath }) {
     expectedSize: EXPECTED_EXECUTABLE_SIZE,
     expectedSha256: EXPECTED_EXECUTABLE_SHA256,
   });
+  const { buffer: portSourceBuffer, ...portSource } = readVerifiedSource(portSourcePath, {
+    label: "K01 port source",
+    expectedSize: EXPECTED_K01_PORT_SOURCE_SIZE,
+    expectedSha256: EXPECTED_K01_PORT_SOURCE_SHA256,
+  });
   const executableEvidence = verifyExecutableEvidence(executableBuffer, executablePath);
+  const portSourceBinding = extractNamedStringLiteral(portSourceBuffer, K01_PORT_TERRAIN_LITERAL);
   const header = parseMapHeader(mapBuffer, mapPath);
 
   if (header.width !== K01_RAW_VALUE_PROJECTION.width || header.height !== K01_RAW_VALUE_PROJECTION.height) {
@@ -70,6 +85,10 @@ export function extractK01MapTerrainContract({ mapPath, executablePath }) {
   }
 
   const values = projectK01RawValues(mapBuffer);
+  const rle = encodeTerrainMaskRle(values);
+  if (portSourceBinding.value !== rle) {
+    throw new Error(`${K01_PORT_TERRAIN_LITERAL} does not equal the hash-bound K01 raw-value projection`);
+  }
   const vectors = [
     toVector(mapBuffer, 0, 0),
     toVector(mapBuffer, 59, 0),
@@ -88,6 +107,7 @@ export function extractK01MapTerrainContract({ mapPath, executablePath }) {
     sources: {
       map,
       executable,
+      portSource,
     },
     parserProvenance: {
       mapLoad: executableEvidence.mapLoad,
@@ -115,8 +135,13 @@ export function extractK01MapTerrainContract({ mapPath, executablePath }) {
       sha256: sha256(Buffer.from(values)),
       count: values.length,
       counts: countValues(values),
-      rle: encodeTerrainMaskRle(values),
+      rle,
       representativeVectors: vectors,
+    },
+    portSourceBinding: {
+      namedLiteral: K01_PORT_TERRAIN_LITERAL,
+      rle: portSourceBinding.value,
+      equalsRawProjection: true,
     },
     interpretationLimits: {
       rawValueLabels: "unassigned",
@@ -187,6 +212,32 @@ function readVerifiedSource(path, { label, expectedSize, expectedSha256 }) {
 
 function toVector(buffer, x, y) {
   return readK01RawValue(buffer, x, y);
+}
+
+function extractNamedStringLiteral(buffer, identifier) {
+  const source = buffer.toString("utf8");
+  const escapedIdentifier = identifier.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const literalPattern = new RegExp(
+    `(?:^|\\n)const\\s+${escapedIdentifier}\\s*=\\s*("(?:[^"\\\\]|\\\\.)*")\\s*;`,
+    "m",
+  );
+  const match = source.match(literalPattern);
+  if (!match?.[1]) {
+    throw new Error(`Could not extract named string literal ${identifier} from hash-bound port source`);
+  }
+
+  let value;
+  try {
+    value = JSON.parse(match[1]);
+  } catch (error) {
+    throw new Error(`Could not decode named string literal ${identifier}: ${error.message}`);
+  }
+
+  if (typeof value !== "string") {
+    throw new Error(`Named string literal ${identifier} did not decode to a string`);
+  }
+
+  return { value };
 }
 
 function verifyExecutableEvidence(buffer, executablePath) {
@@ -268,7 +319,7 @@ function parseArgs(argv) {
 
   for (let index = 0; index < argv.length; index += 1) {
     const arg = argv[index];
-    if (arg === "--map" || arg === "--executable") {
+    if (arg === "--map" || arg === "--executable" || arg === "--port-source") {
       const value = argv[index + 1];
       if (!value) {
         throw new Error(`${arg} requires a path`);

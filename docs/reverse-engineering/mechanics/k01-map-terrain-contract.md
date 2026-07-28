@@ -74,6 +74,14 @@ byte `12`다. 한 논리 행의 stride는 180바이트라서 다음 행은 11 re
 fixture의 RLE와 그 SHA-256이다. 이는 현재 포트의 `K01_TERRAIN_RLE` 문자열과 정확히 같지만,
 문자열 일치는 값의 원본 지형 의미를 증명하지 않는다.
 
+이 포트 접점도 수동 비교가 아니다. 추출기는
+`packages/shared/src/imjinrokMaps.ts`의 기준 크기 `15,920`과 SHA-256
+`6ea348459a0782b6359e346e0e995f59148349ce105726de08255d42ede10b0b`를 먼저 검증하고, 그
+해시 고정 소스에서 이름이 정확히 `K01_TERRAIN_RLE`인 문자열 literal만 추출한다. 추출한 literal은
+원시 투영 RLE와 byte-for-byte 같아야 한다. 따라서 MAP·EXE·포트 소스 중 어느 하나가 바뀌거나,
+명명된 literal이 달라지면 report와 fixture test가 실패한다. 이 binding은 현재 포트 데이터와의
+정확한 동일성만 고정하며, 원본 지형 의미의 증거가 아니다.
+
 ## 원시 값과 포트 지형 이름의 분리
 
 현재 포트는 `packages/shared/src/imjinrokMaps.ts`에서 다음 프로젝트 매핑을 적용한다.
@@ -113,9 +121,10 @@ node --test tools/imjinrok/k01-map-terrain-contract.test.mjs
 ```
 
 도구는 K01 MAP과 EXE의 크기와 SHA-256을 해석 전에 검증한다. 바이트 하나라도 바뀐 stale/tampered
-MAP은 거부한다. 투영에 필요한 `978000`바이트보다 짧은 Buffer와 범위 밖·비정수 좌표도 거부한다.
-fixture `analysis/fixtures/k01-map-terrain-contract.json`은 입력 해시, 완전 RLE, 값 digest, 경계와
-대표 record-crossing 벡터를 고정한다.
+MAP 또는 EXE는 거부한다. 포트 source hash가 달라져도 named-literal 추출 전에 거부한다. 투영에 필요한
+`978000`바이트보다 짧은 Buffer와 범위 밖·비정수 좌표도 거부한다. fixture
+`analysis/fixtures/k01-map-terrain-contract.json`은 세 입력 해시, 완전 RLE, 값 digest, 포트 literal
+binding, 경계와 대표 record-crossing 벡터를 고정한다.
 
 ## 다음 분석 작업
 
