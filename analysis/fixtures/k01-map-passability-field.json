@@ -1,0 +1,66 @@
+{
+  "sources": {
+    "map": { "size": 1097100, "sha256": "43ec3a173032f74c12d3cce1db1078b076b651ed79070a0914673a5b65da99cb" },
+    "executable": { "size": 843833, "sha256": "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e" }
+  },
+  "header": { "width": 60, "height": 60 },
+  "field": {
+    "baseOffset": 837900,
+    "auxiliaryBaseOffset": 902700,
+    "width": 60,
+    "height": 60,
+    "elementWidthBytes": 1,
+    "signedness": "unsigned",
+    "coordinateOrder": "column-major padded storage: offset = baseOffset + x * 180 + y",
+    "xStrideBytes": 180,
+    "yStrideBytes": 1,
+    "extentEndExclusive": 848580
+  },
+  "values": {
+    "sha256": "d78d6da683882d1b8b1458892fa35832584021d9454013ae287aeadf61b9af42",
+    "count": 3600,
+    "counts": [{ "value": 0, "count": 3203 }, { "value": 1, "count": 103 }, { "value": 2, "count": 77 }, { "value": 3, "count": 206 }, { "value": 7, "count": 1 }, { "value": 9, "count": 1 }, { "value": 11, "count": 3 }, { "value": 14, "count": 6 }]
+  },
+  "auxiliaryValues": {
+    "sha256": "99bbc610d334ca65676f089a1caeec46bbaf00470f67b56ffb01a750a271ab63",
+    "count": 3600,
+    "counts": [{ "value": 0, "count": 3201 }, { "value": 1, "count": 14 }, { "value": 40, "count": 23 }, { "value": 60, "count": 54 }, { "value": 100, "count": 103 }, { "value": 200, "count": 205 }]
+  },
+  "representativeVectors": [
+    { "primary": { "x": 0, "y": 0, "value": 3, "offset": 837900, "offsetHex": "0x000cc90c" }, "auxiliary": { "x": 0, "y": 0, "value": 200, "offset": 902700, "offsetHex": "0x000dc62c" }, "sourceGateResult": "rejects-before-later-checks" },
+    { "primary": { "x": 0, "y": 7, "value": 0, "offset": 837907, "offsetHex": "0x000cc913" }, "auxiliary": { "x": 0, "y": 7, "value": 0, "offset": 902707, "offsetHex": "0x000dc633" }, "sourceGateResult": "continues-to-later-checks" },
+    { "primary": { "x": 14, "y": 4, "value": 1, "offset": 840424, "offsetHex": "0x000cd2e8" }, "auxiliary": { "x": 14, "y": 4, "value": 100, "offset": 905224, "offsetHex": "0x000dd008" }, "sourceGateResult": "rejects-before-later-checks" },
+    { "primary": { "x": 0, "y": 41, "value": 2, "offset": 837941, "offsetHex": "0x000cc935" }, "auxiliary": { "x": 0, "y": 41, "value": 60, "offset": 902741, "offsetHex": "0x000dc655" }, "sourceGateResult": "rejects-before-later-checks" },
+    { "primary": { "x": 8, "y": 15, "value": 7, "offset": 839355, "offsetHex": "0x000ccebb" }, "auxiliary": { "x": 8, "y": 15, "value": 1, "offset": 904155, "offsetHex": "0x000dcbdb" }, "sourceGateResult": "rejects-before-later-checks" },
+    { "primary": { "x": 59, "y": 59, "value": 0, "offset": 848579, "offsetHex": "0x000cf2c3" }, "auxiliary": { "x": 59, "y": 59, "value": 0, "offset": 913379, "offsetHex": "0x000defe3" }, "sourceGateResult": "continues-to-later-checks" }
+  ],
+  "sourceGateVectors": [
+    { "primaryValue": 0, "auxiliaryValue": 255, "result": "continues-to-later-checks" },
+    { "primaryValue": 3, "auxiliaryValue": 0, "result": "continues-to-later-checks" },
+    { "primaryValue": 3, "auxiliaryValue": 1, "result": "rejects-before-later-checks" },
+    { "primaryValue": 1, "auxiliaryValue": 0, "result": "rejects-before-later-checks" },
+    { "primaryValue": 255, "auxiliaryValue": 0, "result": "rejects-before-later-checks" }
+  ],
+  "executableEvidence": [
+    { "id": "map-load-size", "va": "0x00462b11", "bytes": "56 6a 01 68 8c bd 10 00 57 e8 25 b4 04 00" },
+    { "id": "passability-gate-base-and-inner-strides", "va": "0x00464b83", "bytes": "8d ae 0c c9 0c 00 8d 9e f4 27 02 00" },
+    { "id": "passability-gate-value-three-branch", "va": "0x00464ba3", "bytes": "80 7d 00 03" },
+    { "id": "passability-gate-inner-strides", "va": "0x00464bde", "bytes": "81 c3 68 01 00 00 81 c5 b4 00 00 00" },
+    { "id": "passability-gate-outer-strides", "va": "0x00464c00", "bytes": "40 83 c3 02 45" },
+    { "id": "passability-predicate-primary-field", "va": "0x004659a2", "bytes": "8d 94 80 eb 5a 00 00 8d 14 d2 8d 14 96 8a 14 0a 80 fa 03" },
+    { "id": "passability-predicate-auxiliary-field", "va": "0x004659b7", "bytes": "8d 94 80 f3 61 00 00 8d 14 d2 8d 14 96 80 3c 0a 00" },
+    { "id": "passability-predicate-nonzero-reject", "va": "0x004659d1", "bytes": "84 d2 75 f5" },
+    { "id": "heuristic-stream-cleared-after-initialization", "va": "0x00464c72", "bytes": "8d be 4c c3 0e 00 8b 8e a0 2d 00 00 33 c0 85 c9 7e 16 8b cf c6 01 00" }
+  ],
+  "fieldConstant": {
+    "baseOffset": 837900,
+    "auxiliaryBaseOffset": 902700,
+    "width": 60,
+    "height": 60,
+    "elementWidthBytes": 1,
+    "signedness": "unsigned",
+    "coordinateOrder": "column-major padded storage: offset = baseOffset + x * 180 + y",
+    "xStrideBytes": 180,
+    "yStrideBytes": 1
+  }
+}
