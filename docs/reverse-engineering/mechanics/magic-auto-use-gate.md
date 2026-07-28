@@ -170,6 +170,6 @@ hero-production-priority `+0x254e`와 이번 magic auto-use `+0x254c`는 인접�
 actions, consumer가 독립이다. 생산 버튼 right-click persistent HUD reservation/pinning도 계속
 별도 미확정 lead다.
 
-다음 가장 작은 정적 질문은 9개 case 중 K01에 직접 등장하는 유성룡 class 78의
-`FUN_0041c870→FUN_004784c0/FUN_004788b0` target·delivery 전체를 닫아, auto-use가 실제로
-발행하는 effect와 일반 공격/수동 명령 충돌 경계를 재현하는 것이다.
+K01 유성룡 class 78의 `FUN_0041c870→FUN_004784c0/FUN_004788b0` 후속은
+[K01 유성룡 class 78 자동 마법 경로](k01-ryu-auto-magic-path.md)에서 닫았다. 나머지 8개
+class effect와 class 78 subtype 16 projectile 이후 효과는 계속 별도 질문이다.

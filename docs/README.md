@@ -45,6 +45,7 @@
 - [selection action·생산 queue dispatch·조건부 seven-slot owner 경계](reverse-engineering/mechanics/persistent-selection-action-boundary.md)
 - [player-scoped 영웅 생산 queue 우선순위 toggle](reverse-engineering/mechanics/hero-priority-queue-gate.md)
 - [player-scoped 마법 자동사용 toggle](reverse-engineering/mechanics/magic-auto-use-gate.md)
+- [K01 유성룡 class 78 자동 마법 경로](reverse-engineering/mechanics/k01-ryu-auto-magic-path.md)
 - [조선 창병·내부 클래스 2 애니메이션 파일럿](reverse-engineering/mechanics/unit-animation-pilot.md)
 - [K01 권율·유성룡 핵심 애니메이션 파일럿](reverse-engineering/mechanics/k01-hero-animation-pilot.md)
 - [K01 권율·유성룡 일반 공격 phase 파일럿](reverse-engineering/mechanics/k01-hero-basic-attack-pilot.md)

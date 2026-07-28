@@ -16,7 +16,7 @@
 | 게임 틱과 메인 루프 | 미확인 | 미재현 | 프로젝트 구현 존재 | 원본 업데이트 순서와 시간 단위 복원 |
 | K01 봉화대 트리거 | 추정 | 미재현 | 프로토타입 | 전체 CFG와 합성 레코드 테스트 |
 | K01 승패 판정 | 추정 | 미재현 | 프로토타입 | 결과 함수 전체 분기와 경계 테스트 |
-| 전투·피해 | K01 권율·유성룡의 공격 상태 이후 phase·효과 시점·회복, 권율 직접 피해와 유성룡 투사체 생성 정적 확정 | 해당 phase·회복·권율 직접 피해 벡터 재현 | 프로토타입, 아직 미이식 | 유성룡 투사체 충돌, 대상 검색·사거리, 원본 틱 시간 단위 |
+| 전투·피해 | K01 권율·유성룡 일반 공격과 class 78 자동 action 40 소유권 이전·action 59 최대 8개 주변 subtype 16 creation call 정적 확정 | 일반 공격 제한 범위와 class 78 cadence·target·delivery·선택 effect 필드 부분 재현 | 프로토타입, 자동 마법은 미이식 | subtype 12/16 투사체 충돌·최종 효과, 일반 공격 대상 검색·사거리, 원본 틱 시간 단위 |
 | 이동·경로 탐색 | 추정 | 미재현 | 프로토타입 | 좌표·경로 레코드와 실패 경로 복원 |
 | 생산·건설·연구 | 조선 본영·봉화대 표시 진행도 정적 확정; SPEECH 결합 가설 반증; action 115 admission/removal와 player-scoped hero-priority gate·actions 63/64·exact 16-action named-hero filter 정적 확정; queue-count marker와 state 0x0f type 76 handoff/dispatch도 static-only로 확인 | 건물 프레임, SPEECH lifecycle, bounded input/action 115 dispatch·action 107 early exit와 hero-priority control/write/filtered·FIFO pop 재현; marker와 state update/dispatch는 static-only | 메커니즘은 프로토타입, responsive·다중 선택 selection panel은 프로젝트 superset | remembered right-click reservation action/owner, full production state update/post-dispatch, deeper redelivery, original construction/research producer와 project contract 비교 |
 | AI | 미확인 | 미재현 | 프로젝트 구현 | 원본 의사결정 함수 지도 |
@@ -25,7 +25,7 @@
 | 브리핑 초상화 | 정적 확정 | 재현 완료 | 원본 기반 | 새 원본 변형에도 추출기·클라이언트 교차 검증 적용 |
 | `SPEECH` 대화 레이아웃 | 정적 확정 | 재현 완료 | 확정 좌표 원본 기반 | 제목·목표·버튼·글꼴을 별도 분석 |
 | K01 공통 임무 목표 모달 결합 | frame/content/dismiss·K01 text·strict release·ordered dispatcher와 GDI font 요청·CP949 byte renderer·유효 폭 300 규칙 정적 확정 | lifecycle 재현 완료; typography 제어 흐름은 공급한 synthetic GDI metrics 아래 부분 재현; 프로젝트 lifecycle 테스트 | 검증된 raster·기하·text·strict release와 base wrap width 300은 원본 기반; HUD trigger/event는 프로젝트 전용, font realization·glyph 측정·Korean wrap·backdrop·Escape·responsive blocker는 의도적 적응 | gameplay-panel 표시 정체, mechanism source, 원본 실현 font/metrics·빈 문자열 `SIZE.cy`·dismiss visual·sound |
-| UI·입력 | 임무 목표 모달·SPEECH lifecycle 확정; transient 후보 반증; selected action queue-count marker, selection-count-zero slot 1 hero-priority와 slot 0 player-global magic-auto-use toggle·9-class 영향 집합 정적 확정 | 목표 모달, SPEECH, transient/base-text, bounded selection/input transport·action dispatch, hero-priority queue removal과 magic-auto-use control/hit·gate write·case admission 재현; marker/state handoff·magic cadence/deeper effects는 static-only | selection panel의 반응형·다중 선택·mana·추가 상태는 의도적 프로젝트 UI | remembered right-click reservation action/owner, magic-auto-use class별 effect 전체, 실행 중 목표 추적 입력 복원 |
+| UI·입력 | 기존 범위에 더해 class 78 auto origin 1과 manual origin 0의 pending-store 우선순위·일반 공격 short-circuit 확정 | class 78 자동 action 40/59 record와 manual-block/replace·source-invalid·no-op 경계 부분 재현 | selection panel의 반응형·다중 선택·mana·추가 상태는 의도적 프로젝트 UI | remembered right-click reservation action/owner, 나머지 8개 magic-auto class effect, outer input/entity update 순서 |
 | 음향·연출 | 미확인 | 미재현 | 부분 구현 | 이벤트와 자원 매핑 복원 |
 
 ## 주의

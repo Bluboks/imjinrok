@@ -24,7 +24,7 @@
 | `0x00413070` | `FUN_00413070`, `0x00413070-0x0041362d` | 160 / 442 | 공격 kind·defender class별 payload 보정과 방어 백분율 차감 | effect kind 1·권율 직접 피해 범위 정적 확정 |
 | `0x00413700` | `FUN_00413700`, `0x00413700-0x00413b02` | 61 / 329 | 공격 effect kind별 단일·범위 대상 전달 | kind 1→단일 defender 경로 정적 확정 |
 | `0x00413b30` | `FUN_00413b30`, `0x00413b30-0x00413ddd` | 30 / 208 | defender 피해 계산·체력 적용·사망 후속 처리 | 권율 직접 피해 호출 순서 정적 확정 |
-| `0x00416c70` | `FUN_00416c70`, `0x00416c70-0x0041737e` | 84 / 555 | 행동 상태 5의 대상 검증·접근·일반 공격 하위 상태와 `0x00416f6e` 자동 특수행동 dispatcher 호출 | 하위 상태 3→공격 resolver와 [마법 자동사용 gate](mechanics/magic-auto-use-gate.md) sole caller 범위 정적 확정 |
+| `0x00416c70` | `FUN_00416c70`, `0x00416c70-0x0041737e` | 84 / 555 | 행동 상태 5의 대상 검증·접근·일반 공격 하위 상태와 `0x00416f6e` 자동 특수행동 dispatcher 호출 | 하위 상태 3→공격 resolver와 [class 78 자동 마법](mechanics/k01-ryu-auto-magic-path.md)의 return-1 short-circuit 정적 확정 |
 | `0x00417430` | `FUN_00417430`, `0x00417430-0x004196de` | 272 / 2,468 | 일반 공격 readiness·phase·효과 전달·사이클 완료 | K01 권율·유성룡 phase·전달 분기 정적 확정 |
 | `0x0041a9e0` | `FUN_0041a9e0`, `0x0041a9e0-0x0041aa33` | 6 / 23 | 상태 12에서 slot `+0x0a`, frame `+0x0c` 선택 | 조선 본영 범위 정적 확정, 다른 건물 base frame |
 | `0x0041aa90` | `FUN_0041aa90`, `0x0041aa90-0x0041ad8b` | 44 / 219 | 건설 진행도 `+0x8c`→8단계 phase | 조선 본영 범위 정적 확정 |
@@ -122,7 +122,17 @@
 | ---: | --- | ---: | --- |
 | `0x00428530` | `0x00428530-0x00428579` | 28 | FIFO pop wrapper; 제거 뒤 constant 20으로 redelivery 시도 |
 | `0x00428580` | `0x00428580-0x004285c9` | 28 | hero-filtered pop wrapper; 제거 뒤 constant 30으로 redelivery 시도 |
-| `0x004196e0` | 비연속 body 10개, `0x004196e0-0x0041a018` | 665 | player `+0x254c` nonzero에서 9-class 자동 특수행동 case를 선택; cadence·deeper effect는 static-only |
+| `0x004196e0` | 비연속 body 10개, `0x004196e0-0x0041a018` | 665 | player `+0x254c` nonzero에서 9-class 자동 특수행동 case를 선택; class 78 case는 target·actions 40/59까지 정적 확정 |
+| `0x0041c870` | `0x0041c870-0x0041c990` | 101 | class 78 action 40의 적 team·저체력·flags·resource target admission |
+| `0x00426740` | `0x00426740-0x004267fe` | 44 | `+0x266..+0x273` 14-byte pending 영역 store; origin 1 auto가 non-idle origin 0 manual pending을 덮지 못함 |
+| `0x00426c20` | `0x00426c20-0x00428154` | 1,428 | actions 2..69 pending consumer; class 78 actions 40/59 admission·state handoff·consume 확정 |
+| `0x00416600` | `0x00416600-0x00416860` | 174 | state 59 charge decrement·negative `+0x448` clamp와 중심 제외 최대 8개 subtype 16 creation call |
+| `0x0041cb10` | `0x0041cb10-0x0041ccc4` | 128 | state 40 effect phase의 resource 70 차감·target status·owner transfer |
+| `0x00478320` | `0x00478320-0x004783a4` | 43 | source 검증 뒤 pending store; reached store 결과와 무관한 return-1 core |
+| `0x004784c0` / `0x004788b0` | `0x004784c0-0x004784f0` / `0x004788b0-0x004788d4` | 17 / 13 | action 40/59 payload를 고정하고 core 결과와 무관하게 1을 반환하는 wrapper |
+| `0x00441db0` | `0x00441db0-0x00441dd8` | 12 | registry WORD slot nonzero·common entity signed health `+0x3e` positive 검사 |
+| `0x00441e40` | `0x00441e40-0x00441e7a` | 19 | 위 검사에 common entity active gate `+0x1f0` nonzero를 추가한 target admission |
+| `0x004426a0` | `0x004426a0-0x004426e1` | 23 | 두 player record team BYTE `+0x05` equality |
 | `0x0045b3a0` | `0x0045b3a0-0x0045b419` | 40 | selection-count-zero slot 0에 magic actions `61/62`, slot 1에 hero-priority actions `63/64` control 생산 |
 | `0x004767a0` | `0x004767a0-0x004767d1` | 13 | 20-byte action definition의 flags·produced-type 등 여섯 필드 writer |
 | `0x004767e0` | `0x004767e0-0x004767f1` | 6 | action flags WORD에 공급된 mask가 모두 설정됐는지 검사 |

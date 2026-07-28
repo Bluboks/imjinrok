@@ -154,9 +154,12 @@ player-scoped hero-priority queue toggle을 정적 확정했다. synthetic contr
 filtered/FIFO record removal·fallback은 full-result vector로 재현했고 deeper redelivery는
 범위 밖이다. 이어 인접 slot 0 actions `61/62`가 player record `+0x254c`를 `1/0`으로 쓰고
 nonzero에서 정확히 9개 class의 자동 특수행동 dispatcher를 허용하는 global magic auto-use
-toggle임을 정적 확정했다. control/hit·writer·case admission은 부분 재현하고 class별
-cadence·target·delivery는 static-only로 남겼다. 다음 질문은 remembered right-click
-reservation의 실제 action/owner 또는 K01 class 78 auto-use effect 전체를 독립적으로 닫는다.
+toggle임을 정적 확정했다. 이어 K01 class 78은 cadence·target admission, action 40의 적 저체력
+대상 소유권 이전, action 59의 중심을 제외한 최대 8개 subtype 16 creation call, auto/manual
+pending-store와 일반 공격 short-circuit까지 정적 확정하고 좁은 projection을 부분 재현했다.
+subtype 16의 충돌·최종 효과와 outer
+input/entity-update scheduling은 남겼다. remembered right-click reservation의 실제
+action/owner는 계속 독립 미확정이다.
 
 후속 프로젝트 구조 감사는 기존 `game.events` HUD view 경계를 확장해 K01 HUD objective button에서
 숫자 상태 없는 semantic action을 발행하고 `UIScene`의 queue·private active request까지 한 번

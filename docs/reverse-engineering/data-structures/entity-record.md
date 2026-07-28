@@ -42,13 +42,15 @@ K01의 봉화대 검색과 영웅 생존 확인에서 사용되는 레코드 관
 | `+0x20` | word | 그리기 Y 후보 | 의미 미확인 |
 | `+0x34` | word | 애니메이션 frame phase | 건설 상태 12 범위 `정적 확정` |
 | `+0x37` | byte | 내부 엔티티 클래스 | 클래스 switch·타입 정의 인덱스 범위 `정적 확정` |
-| `+0x3c` | word | 최대 체력 | 클래스 49·52 체력 분기 범위 `정적 확정` |
-| `+0x3e` | word | 현재 체력 | 클래스 49·52 체력 분기 범위 `정적 확정` |
+| `+0x38` | signed byte | owner player index | class 78 enemy-team 검사·owner transfer 범위 `정적 확정` |
+| `+0x3c` | signed word | 최대 체력 | 클래스 49·52 체력 분기와 class 78 `trunc(max*2/3)` 범위 `정적 확정` |
+| `+0x3e` | signed word | 현재 체력 | 클래스 49·52 체력 분기와 registry 생존·저체력 검사 범위 `정적 확정` |
 | `+0x46` | word | 타입 정의에서 복사된 기본 공격 payload | 클래스 76·78 일반 공격 범위 `정적 확정` |
 | `+0x4a` | word | 임시 공격 payload 보정 후보 | 클래스 76·78 소비는 `정적 확정`, 생산자 의미는 미확정 |
+| `+0x68` | byte | class 78 action 59 fallback selector | exact 2 비교 범위 `정적 확정`, 범용 명칭 미확정 |
 | `+0x6e` | byte | 애니메이션 phase 전진에 필요한 내부 갱신 수 | 클래스 76·78 일반 공격 범위 `정적 확정` |
 | `+0x6f` | byte | phase 내부 갱신 카운터 | 클래스 76·78 일반 공격 범위 `정적 확정` |
-| `+0x74` | dword | 타입·행동 flags | 클래스 2 방향 분기와 클래스 49·52 체력 분기 범위 `정적 확정` |
+| `+0x74` | dword | 타입·행동 flags | 기존 범위와 class 78 target bits 1/`0x80000` 범위 `정적 확정` |
 | `+0x7c` | dword | 일반 공격 전달 분기값 | 클래스 76의 `0x13`, 클래스 78의 `9` 범위 `정적 확정` |
 | `+0x80` | dword | 직접 피해 class 보정 분류 | effect kind 1 계산 범위 `정적 확정`, 사람용 명칭은 미확정 |
 | `+0x88` | dword | 행동 내부 하위 상태 | 행동 상태 5 일반 공격 범위 `정적 확정` |
@@ -65,10 +67,20 @@ K01의 봉화대 검색과 영웅 생존 확인에서 사용되는 레코드 관
 | `+0x1b0` | word | 상위 행동 상태 | 값 5가 일반 공격인 범위 `정적 확정` |
 | `+0x1b2` | word | 애니메이션 phase | 클래스 2·49·52 파일럿 범위 `정적 확정` |
 | `+0x1b5` | byte | 좌우 mirror 선택자 | 클래스 2 파일럿 범위 `정적 확정` |
+| `+0x1bc` | word | action 40 target X 전달값 | absolute `0x00635414`, packed payload low WORD 범위 `정적 확정`, 좌표계 미확정 |
+| `+0x1be` | word | action 40 target Y 전달값 | absolute `0x00635416`, packed payload high WORD 범위 `정적 확정`, 좌표계 미확정 |
 | `+0x1e6` | word | 일반 방향 값 | 클래스 2 상태 1 일반 분기·상태 2 범위 `정적 확정` |
 | `+0x1e8` | word | 상태 1 특수 방향 값 | 분기표 정적 복원, 클래스 2 전체 base 초기화는 미확정 |
+| `+0x1f0` | byte | class 78 target active gate | `FUN_00441e40` nonzero 검사 범위 `정적 확정`, 범용 명칭 미확정 |
 | `+0x1f1` | byte | 공격 처리 중 표시·상태 후보 | 일반 공격 진입·완료 쓰기는 `정적 확정`, 일반 명칭은 미확정 |
 | `+0x250` | word | 정상 0·반파 1 본체 상태 | 클래스 49·52 범위 `정적 확정` |
+| `+0x252` | word | action 40 target status | exact 1 write 범위 `정적 확정`, 범용 명칭 미확정 |
+| `+0x254` | word | 위 status phase/counter | status 1 진입 시 0 write 범위 `정적 확정` |
+| `+0x266` | word | pending auxiliary WORD | actions 40/59 값 1 store 범위 `정적 확정`, 범용 의미 미확정 |
+| `+0x268` | word | pending action | actions 40/59 store·consume 범위 `정적 확정` |
+| `+0x26a` | byte | pending origin | 자동 1·selected manual 0 충돌 범위 `정적 확정` |
+| `+0x26c` | dword | pending payload | actions 40/59 delivery 범위 `정적 확정` |
+| `+0x270` | dword | pending context | actions 40/59 delivery 범위 `정적 확정` |
 | `+0x456` | word | 프레임 소스 후보 | setter 경로 |
 | `+0x48e` | word | 두 번째 프레임 소스 후보 | setter 경로 |
 | `+0x4b2` | word | 건설 상태 sprite slot 설정 | 클래스 49·52 범위 `정적 확정` |

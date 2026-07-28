@@ -39,7 +39,7 @@ K02는 이 단기 MVP의 완료 조건이 아니다. 기존 K02 프로토타입�
 | 엔티티 정체·자원 | 고유 연결 표시 이름 반영, 봉화대·K01 영웅 자원 수정 | 클래스 1~95 명칭·슬롯·기본 프레임·flags·경로 전수 확정 | 연속성·대표 타입·공유 경로·입력 해시 테스트 | 타입 정체 정적 확정, 행동·수치 의미는 별도 |
 | K01 캠페인 | 처음부터 결과까지 프로토타입 존재 | 브리핑 일부 확정, 봉화대·승패 부분 분석 | 구현 테스트와 일부 정적 벡터 | 단기 팬 리마스터 MVP, 아직 미완료 |
 | K02 캠페인 | 프로토타입 존재 | 제한적 | 원본 재현 없음 | K01 이후로 연기 |
-| 전투 | 프로토타입 구현 존재 | K01 권율·유성룡 공격 효과 phase·회복, 권율 직접 피해와 유성룡 투사체 생성 확정 | 두 영웅 phase·회복과 권율 직접 피해 벡터 재현 | K01 영웅 제한 범위 부분 재현, 아직 미이식 |
+| 전투 | 프로토타입 구현 존재 | K01 권율·유성룡 일반 공격 phase·회복, 권율 직접 피해·유성룡 투사체 생성과 유성룡 자동 action 40 소유권 이전·action 59 최대 8개 주변 subtype 16 생성 call 확정 | 두 영웅 일반 공격 범위와 class 78 자동 선택·pending 충돌·선택 effect 필드 부분 재현 | K01 영웅 제한 범위 부분 재현, 자동 마법은 분석-only |
 | 이동·경로 탐색 | 구현 존재 | 후보 함수 존재 | 원본 재현 없음 | 미검증 |
 | AI | 구현 존재 | 체계적 함수 지도 없음 | 원본 재현 없음 | 미검증 |
 | 생산·건설·연구 | 구현 존재 | 본영·봉화대 표시 상태만 복원 | 표시 프레임 재현 | 메커니즘은 미검증 |
@@ -48,7 +48,7 @@ K02는 이 단기 MVP의 완료 조건이 아니다. 기존 K02 프로토타입�
 | 브리핑 초상화 | 17개 ID·`hero.spr` 프레임 이식 | 파서→조회→프레임 표→그리기 정적 확정 | 추출기·클라이언트 교차 테스트 | 원본 기반 |
 | `SPEECH` 대화 레이아웃 | 숫자 슬롯·초상화·대사 공통 배치 이식 | 640×480 슬롯 4개와 대사 좌표 정적 확정 | 추출기·배율 변환 테스트 | 확정 범위 원본 기반 |
 | K01 공통 임무 목표 모달 결합 | 검증된 raster·기하·K0110 텍스트·strict release와 유효 base wrap 폭 300을 독립 presenter에 연결; HUD button/event는 프로젝트 전용 | 진입·dispatcher에 더해 GDI `Arial` height 12/HANGEUL_CHARSET 요청, CP949 byte chunk·strict wrap·배치·실패 경로 정적 확정 | lifecycle 재현 완료; typography 제어 흐름은 공급한 synthetic GDI metrics 아래 부분 재현 | frame/content/dismiss·action·text·유효 폭은 원본 기반; 실제 font realization·glyph 폭·Korean wrap·빈 문자열 `SIZE.cy`, gameplay-panel 정체, mechanism source, dismiss visual·sound 미확정 |
-| UI·입력 | 반응형 목표 추적 HUD 존재 | 임무 목표 모달 확정; transient overlay 후보 반증; action 115 admission/removal, queue-count marker·type 76 state handoff와 player-scoped hero-priority·magic-auto-use gates, 각 selection-count-zero control과 영향 집합 정적 확정 | 임무 목표 모달 완료; transient/base-text, bounded selection/input transport·action dispatch, hero-priority queue removal과 magic-auto-use control/write/case admission 재현; marker/state update·magic cadence/deeper effects는 static-only | original raw queue/state/gate는 이식하지 않고 목표 추적 HUD·responsive selection UI를 포함한 나머지는 의도적 프로젝트 UI |
+| UI·입력 | 반응형 목표 추적 HUD 존재 | 임무 목표 모달 확정; transient overlay 후보 반증; action 115 admission/removal, queue-count marker·type 76 state handoff와 player-scoped hero-priority·magic-auto-use gates, class 78 auto/manual pending-store·일반 공격 경계 정적 확정 | 기존 범위와 class 78 cadence·target admission·action 40/59 delivery·manual pending 충돌 부분 재현 | original raw queue/state/gate는 이식하지 않고 목표 추적 HUD·responsive selection UI를 포함한 나머지는 의도적 프로젝트 UI |
 | VM 동적 분석 | 과거 도구·기록 존재 | 다수 시행착오 기록 | 원시 증거가 저장소에 없음 | 보관, 기본 경로에서 제외 |
 
 ## 신뢰할 수 있는 출발점
@@ -76,7 +76,8 @@ K02는 이 단기 MVP의 완료 조건이 아니다. 기존 K02 프로토타입�
 ## 현재 최우선 작업
 
 1. 유성룡 subtype `0x0c` 투사체의 비행·충돌·최종 피해를 정적으로 복원
-2. 공격 전 대상 유효성·탐색·사거리와 피격·사망·대상 참조 정리를 정적으로 복원
+2. 자동 action 59 subtype `0x10` 투사체와 일반 공격 subtype `0x0c`의 비행·충돌·최종 효과를
+   각각 정적으로 복원하고, 공격 전 대상 유효성·탐색·사거리를 닫기
 3. K01 봉화대·증원·영웅 보호·승패 경로를 합성 입력으로 재현
 4. K01 HUD, 선택 패널, 목표·진행 표시와 미션 대화 전체 레이아웃을 정적으로 복원 — 공통 임무
    목표 모달 자체와 `0x3f0` handler 반환 생산 경로, K01 인덱스 1→K0110 목표 텍스트 결합은
