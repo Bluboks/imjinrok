@@ -128,7 +128,7 @@ function auditScenarioImplementation(context) {
 
 function auditSimulationCoverage(context) {
   const evidence = textEvidence(context.simulationTests, "packages/simulation/src/simulation.test.ts", [
-    "imjinrok K01 adapted reinforcement event uses the configured requested positions when open",
+    "imjinrok K01 reinforcement preserves its static-proven requested coordinates through an occupied anchor",
     "protect-units objective can delay defeat after a protected unit is lost",
   ]);
 
