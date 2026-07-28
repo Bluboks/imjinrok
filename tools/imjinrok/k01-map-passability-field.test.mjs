@@ -16,6 +16,8 @@ import {
 const repositoryRoot = join(dirname(fileURLToPath(import.meta.url)), "../..");
 const mapPath = join(repositoryRoot, "original/imjinrok2/stagemap/k01.map");
 const executablePath = join(repositoryRoot, "original/imjinrok2/imjinrok2.exe");
+const functionsPath = join(repositoryRoot, "analysis/generated/imjinrok2/functions.json");
+const referencesPath = join(repositoryRoot, "analysis/generated/imjinrok2/references.json");
 const extractorPath = join(dirname(fileURLToPath(import.meta.url)), "extract-k01-map-passability-field.mjs");
 const fixture = JSON.parse(readFileSync(join(repositoryRoot, "analysis/fixtures/k01-map-passability-field.json"), "utf8"));
 
@@ -42,12 +44,20 @@ test("K01 passability field rejects stale inputs and field boundaries", () => {
   const directory = mkdtempSync(join(tmpdir(), "k01-passability-field-"));
   const tamperedMapPath = join(directory, "k01.map");
   const tamperedExecutablePath = join(directory, "imjinrok2.exe");
+  const tamperedFunctionsPath = join(directory, "functions.json");
+  const tamperedReferencesPath = join(directory, "references.json");
   const map = readFileSync(mapPath);
   const executable = readFileSync(executablePath);
+  const functions = readFileSync(functionsPath);
+  const references = readFileSync(referencesPath);
   map[0] ^= 0x01;
   executable[0] ^= 0x01;
+  functions[functions.length - 1] ^= 0x01;
+  references[references.length - 1] ^= 0x01;
   writeFileSync(tamperedMapPath, map);
   writeFileSync(tamperedExecutablePath, executable);
+  writeFileSync(tamperedFunctionsPath, functions);
+  writeFileSync(tamperedReferencesPath, references);
 
   try {
     assert.throws(
@@ -57,6 +67,14 @@ test("K01 passability field rejects stale inputs and field boundaries", () => {
     assert.throws(
       () => extractK01MapPassabilityField({ mapPath, executablePath: tamperedExecutablePath }),
       /original executable SHA-256 mismatch/,
+    );
+    assert.throws(
+      () => extractK01MapPassabilityField({ mapPath, executablePath, functionsPath: tamperedFunctionsPath }),
+      /static functions SHA-256 mismatch/,
+    );
+    assert.throws(
+      () => extractK01MapPassabilityField({ mapPath, executablePath, referencesPath: tamperedReferencesPath }),
+      /static references SHA-256 mismatch/,
     );
   } finally {
     rmSync(directory, { recursive: true, force: true });
@@ -100,6 +118,28 @@ function pickReport(report) {
     field: report.field,
     values: report.values,
     auxiliaryValues: report.auxiliaryValues,
+    staticAnalysis: {
+      functions: {
+        size: report.staticAnalysis.functions.size,
+        sha256: report.staticAnalysis.functions.sha256,
+        sourceSha256: report.staticAnalysis.functions.sourceSha256,
+        functionProvenance: report.staticAnalysis.functions.functionProvenance.map(
+          ({ entry, bodyRange, bodySize, rawBodySha256, instructionSha256 }) => ({
+            entry,
+            bodyRange,
+            bodySize,
+            rawBodySha256,
+            instructionSha256,
+          }),
+        ),
+      },
+      references: {
+        size: report.staticAnalysis.references.size,
+        sha256: report.staticAnalysis.references.sha256,
+        sourceSha256: report.staticAnalysis.references.sourceSha256,
+        requiredCallEdges: report.staticAnalysis.references.requiredCallEdges,
+      },
+    },
     representativeVectors: report.representativeVectors,
     sourceGateVectors: report.sourceGateVectors,
     executableEvidence: report.executableEvidence.map(({ id, va, bytes }) => ({ id, va, bytes })),

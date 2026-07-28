@@ -10,6 +10,8 @@ export const EXPECTED_K01_MAP_SHA256 = "43ec3a173032f74c12d3cce1db1078b076b651ed
 export const EXPECTED_K01_MAP_SIZE = 1_097_100;
 export const EXPECTED_EXECUTABLE_SHA256 = "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e";
 export const EXPECTED_EXECUTABLE_SIZE = 843_833;
+export const EXPECTED_FUNCTIONS_SHA256 = "c10ea2de1f4998411d52443419c9a7f52ff7f9c18e79bd4115ba197d2f5bebc3";
+export const EXPECTED_REFERENCES_SHA256 = "df11ff3713988ef22b3390b5b0ae7b4a87464b5de547a4866e1c8ec8a0bcaf4c";
 
 export const K01_PASSABILITY_GATE_FIELD = {
   baseOffset: 0x000cc90c,
@@ -25,6 +27,84 @@ export const K01_PASSABILITY_GATE_FIELD = {
 
 const DEFAULT_MAP_PATH = "original/imjinrok2/stagemap/k01.map";
 const DEFAULT_EXECUTABLE_PATH = "original/imjinrok2/imjinrok2.exe";
+const DEFAULT_FUNCTIONS_PATH = "analysis/generated/imjinrok2/functions.json";
+const DEFAULT_REFERENCES_PATH = "analysis/generated/imjinrok2/references.json";
+const FUNCTION_PROVENANCE = [
+  {
+    entry: "0x00462af0",
+    bodyRange: "0x00462af0-0x00462b7b",
+    bodySize: 140,
+    bodySha256: "c462e822540d7bede0c75eeeab2661001164209cd831f639c99e1ab8401fe6e0",
+    instructionSha256: "9210aac0f05703a63f1e216905ead5434195183e26233c80cb4c9be36c5985fa",
+    callees: ["0x004ad725", "0x004ad7cd", "0x004adf44"],
+  },
+  {
+    entry: "0x004adf44",
+    bodyRange: "0x004adf44-0x004ae02b",
+    bodySize: 232,
+    bodySha256: "98a6266b6c4f467c2e79fb664e8ca3e539073f51231e4aa1ea37f87499279591",
+    instructionSha256: "fe0ad64c5560c39b91dba24186e3903c462d30504ebb825531af71a6acea9208",
+    callers: [
+      "0x0043f6e0",
+      "0x00440fd0",
+      "0x00442ef0",
+      "0x004434a0",
+      "0x0044b0a0",
+      "0x00462af0",
+      "0x00466030",
+      "0x00481bc0",
+      "0x00481c50",
+    ],
+  },
+  {
+    entry: "0x004648e0",
+    bodyRange: "0x004648e0-0x00464cb2",
+    bodySize: 979,
+    bodySha256: "e8bba48e9c6925826914eab6f55a038ee275500831e70ec496b1bcc7dfd63112",
+    instructionSha256: "e6f8db32835296fb67b09de507b8aef2ddd6dbe6ce359922ed1abf159fb35c5b",
+    callees: [
+      "0x00462090",
+      "0x00462300",
+      "0x00462720",
+      "0x004627b0",
+      "0x00463a10",
+      "0x00463a50",
+      "0x004644d0",
+      "0x00464cc0",
+      "0x004663a0",
+      "0x004a1150",
+    ],
+  },
+  {
+    entry: "0x00465960",
+    bodyRange: "0x00465960-0x00465a12",
+    bodySize: 179,
+    bodySha256: "2b1f10655b34fce18f72a990661788d7298f0dc6e8c1ef9f99feb4e23e9a45d0",
+    instructionSha256: "36b8864d7c2aadb9d0a93172caa5d01d3c6a2d3921880334ce4547f452703ac0",
+    callers: ["0x00465d50", "0x0046e450"],
+  },
+  {
+    entry: "0x00465d50",
+    bodyRange: "0x00465d50-0x00465dde",
+    bodySize: 143,
+    bodySha256: "11ff70b95110d01f0c2b5f6682918f0698edeb0629289afaf0811f028a16a67e",
+    instructionSha256: "ffd4bdffebd31752e887c915d76db0745605892f35eeac58d951a941130b980a",
+    callees: ["0x00465960"],
+  },
+  {
+    entry: "0x0046e450",
+    bodyRange: "0x0046e450-0x0046e49d",
+    bodySize: 78,
+    bodySha256: "cdc40bba56aabb8a66b40ea69c14ecb8fd6fd55ba568b945344dbe2a13b36ad0",
+    instructionSha256: "6d14b5a7a91d3e799cd9bf300721c9a511a06f174be2fc02ec1b110c7858ef5c",
+    callees: ["0x00465960"],
+  },
+];
+const REQUIRED_CALL_EDGES = [
+  { from: "0x00462b1a", fromFunctionEntry: "0x00462af0", to: "0x004adf44" },
+  { from: "0x00465da2", fromFunctionEntry: "0x00465d50", to: "0x00465960" },
+  { from: "0x0046e472", fromFunctionEntry: "0x0046e450", to: "0x00465960" },
+];
 const EXECUTABLE_EVIDENCE = [
   {
     id: "map-load-size",
@@ -86,7 +166,12 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
   const args = parseArgs(process.argv.slice(2));
   process.stdout.write(
     `${JSON.stringify(
-      extractK01MapPassabilityField({ mapPath: args.map, executablePath: args.executable }),
+      extractK01MapPassabilityField({
+        mapPath: args.map,
+        executablePath: args.executable,
+        functionsPath: args.functions,
+        referencesPath: args.references,
+      }),
       null,
       2,
     )}\n`,
@@ -96,6 +181,8 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
 export function extractK01MapPassabilityField({
   mapPath = DEFAULT_MAP_PATH,
   executablePath = DEFAULT_EXECUTABLE_PATH,
+  functionsPath = DEFAULT_FUNCTIONS_PATH,
+  referencesPath = DEFAULT_REFERENCES_PATH,
 } = {}) {
   const { buffer: mapBuffer, ...map } = readVerifiedSource(mapPath, {
     label: "K01 map",
@@ -116,6 +203,7 @@ export function extractK01MapPassabilityField({
   }
 
   const image = parsePeImage(executableBuffer, executablePath);
+  const staticAnalysis = verifyStaticAnalysis({ executableBuffer, image, functionsPath, referencesPath });
   const executableEvidence = EXECUTABLE_EVIDENCE.map((evidence) => verifyByteEvidence(executableBuffer, image, evidence));
   const values = projectK01PassabilityGateValues(mapBuffer);
   const auxiliaryValues = projectK01PassabilityAuxiliaryValues(mapBuffer);
@@ -127,6 +215,7 @@ export function extractK01MapPassabilityField({
     reproductionStatus: "complete-for-hash-bound-field-addressing-and-source-branch-vectors",
     implementationStatus: "no-product-port-in-this-extractor",
     sources: { map, executable },
+    staticAnalysis,
     header: { width: header.width, height: header.height },
     field: {
       ...K01_PASSABILITY_GATE_FIELD,
@@ -137,7 +226,7 @@ export function extractK01MapPassabilityField({
     },
     sourceControlFlow: {
       producer:
-        "FUN_00462af0 passes the map destination, element count 0x10bd8c, element size 1, and opened map stream to FUN_004adf44 before FUN_004648e0 reads this field; this report does not assign an independent decoder role to that transfer helper.",
+        "Hash-bound whole-function provenance and the 0x00462b1a structured call edge bind FUN_00462af0's successful path: push stream, 1, 0x10bd8c, destination; call FUN_004adf44; close stream; then zero only runtime grids. This report does not assign an independent decoder role to FUN_004adf44.",
       initializer:
         "FUN_004648e0 scans x=0..width-1 and y=0..height-1, branches on field_0x000cc90c(x,y) == 3, and updates a separate derived flag grid at map+0x000227f4.",
       predicate:
@@ -278,6 +367,144 @@ function verifyByteEvidence(buffer, image, evidence) {
   return { id: evidence.id, va: `0x${evidence.va.toString(16).padStart(8, "0")}`, bytes: evidence.bytes, meaning: evidence.meaning, matched: true };
 }
 
+function verifyStaticAnalysis({ executableBuffer, image, functionsPath, referencesPath }) {
+  const functionsSource = readVerifiedStaticJson(functionsPath, {
+    label: "static functions",
+    expectedSha256: EXPECTED_FUNCTIONS_SHA256,
+  });
+  const referencesSource = readVerifiedStaticJson(referencesPath, {
+    label: "static references",
+    expectedSha256: EXPECTED_REFERENCES_SHA256,
+  });
+  const functions = functionsSource.parsed.functions;
+  const references = referencesSource.parsed.references;
+
+  if (!Array.isArray(functions) || !Array.isArray(references)) {
+    throw new Error("Static analysis functions or references payload is not an array");
+  }
+
+  const functionProvenance = FUNCTION_PROVENANCE.map((specification) =>
+    verifyFunctionProvenance(functions, executableBuffer, image, specification),
+  );
+  const requiredCallEdges = REQUIRED_CALL_EDGES.map((edge) => verifyRequiredCallEdge(references, edge));
+
+  return {
+    functions: {
+      path: functionsSource.path,
+      size: functionsSource.size,
+      sha256: functionsSource.sha256,
+      sourceSha256: functionsSource.parsed.sourceSha256,
+      functionProvenance,
+    },
+    references: {
+      path: referencesSource.path,
+      size: referencesSource.size,
+      sha256: referencesSource.sha256,
+      sourceSha256: referencesSource.parsed.sourceSha256,
+      requiredCallEdges,
+    },
+  };
+}
+
+function readVerifiedStaticJson(path, { label, expectedSha256 }) {
+  const buffer = readFileSync(path);
+  const actualSha256 = sha256(buffer);
+  if (actualSha256 !== expectedSha256) {
+    throw new Error(`${label} SHA-256 mismatch: expected ${expectedSha256}, got ${actualSha256}`);
+  }
+
+  let parsed;
+  try {
+    parsed = JSON.parse(buffer.toString("utf8"));
+  } catch (error) {
+    throw new Error(`Could not parse ${label}: ${error.message}`);
+  }
+  if (parsed.sourceSha256 !== EXPECTED_EXECUTABLE_SHA256) {
+    throw new Error(
+      `${label} source SHA-256 mismatch: expected ${EXPECTED_EXECUTABLE_SHA256}, got ${parsed.sourceSha256}`,
+    );
+  }
+
+  return { path, size: buffer.length, sha256: actualSha256, parsed };
+}
+
+function verifyFunctionProvenance(functions, executableBuffer, image, specification) {
+  const functionRecord = functions.find(({ entry }) => entry === specification.entry);
+  if (!functionRecord) {
+    throw new Error(`Static functions does not contain ${specification.entry}`);
+  }
+  const expectedBodyRanges = [specification.bodyRange];
+  if (
+    functionRecord.bodySize !== specification.bodySize ||
+    functionRecord.instructionSha256 !== specification.instructionSha256 ||
+    !sameArray(functionRecord.bodyRanges, expectedBodyRanges)
+  ) {
+    throw new Error(`Static function provenance mismatch for ${specification.entry}`);
+  }
+  if (specification.callers && !sameArray(functionRecord.callers, specification.callers)) {
+    throw new Error(`Static function caller set mismatch for ${specification.entry}`);
+  }
+  if (specification.callees && !sameArray(functionRecord.callees, specification.callees)) {
+    throw new Error(`Static function callee set mismatch for ${specification.entry}`);
+  }
+
+  const start = Number.parseInt(specification.entry, 16);
+  const rawOffset = image.vaToRawOffset(start);
+  if (rawOffset === undefined) {
+    throw new Error(`Function ${specification.entry} is outside mapped PE sections`);
+  }
+  const rawBody = executableBuffer.subarray(rawOffset, rawOffset + specification.bodySize);
+  const rawBodySha256 = sha256(rawBody);
+  if (rawBodySha256 !== specification.bodySha256) {
+    throw new Error(`Raw function body SHA-256 mismatch for ${specification.entry}`);
+  }
+
+  return {
+    entry: specification.entry,
+    bodyRange: specification.bodyRange,
+    bodySize: specification.bodySize,
+    rawBodySha256,
+    instructionSha256: specification.instructionSha256,
+    callers: functionRecord.callers,
+    callees: functionRecord.callees,
+  };
+}
+
+function verifyRequiredCallEdge(references, expected) {
+  const matches = references.filter(
+    (reference) =>
+      reference.from === expected.from &&
+      reference.fromFunctionEntry === expected.fromFunctionEntry &&
+      reference.to === expected.to &&
+      reference.type === "UNCONDITIONAL_CALL",
+  );
+  if (matches.length !== 1) {
+    throw new Error(
+      `Expected exactly one unconditional call ${expected.fromFunctionEntry}:${expected.from}->${expected.to}, got ${matches.length}`,
+    );
+  }
+  const [reference] = matches;
+  if (
+    reference.source !== "DEFAULT" ||
+    reference.operandIndex !== 0 ||
+    reference.primary !== true ||
+    reference.fromBlock !== ".text" ||
+    reference.toBlock !== ".text"
+  ) {
+    throw new Error(`Static call provenance mismatch at ${expected.from}`);
+  }
+  return {
+    from: reference.from,
+    fromFunctionEntry: reference.fromFunctionEntry,
+    to: reference.to,
+    type: reference.type,
+  };
+}
+
+function sameArray(actual, expected) {
+  return Array.isArray(actual) && actual.length === expected.length && actual.every((value, index) => value === expected[index]);
+}
+
 function validateFieldBuffer(buffer, baseOffset) {
   if (!Buffer.isBuffer(buffer)) {
     throw new Error("K01 passability field expects a Buffer");
@@ -314,7 +541,7 @@ function parseArgs(argv) {
   const args = {};
   for (let index = 0; index < argv.length; index += 1) {
     const arg = argv[index];
-    if (arg === "--map" || arg === "--executable") {
+    if (arg === "--map" || arg === "--executable" || arg === "--functions" || arg === "--references") {
       const value = argv[index + 1];
       if (!value) {
         throw new Error(`${arg} requires a path`);

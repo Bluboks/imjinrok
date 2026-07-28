@@ -38,7 +38,42 @@ K01 헤더의 EXE 소비 차원은 `map+0x2da0=60`, `map+0x2da4=60`이다. 아�
 | 직접 호출자 | `FUN_00465d50`, `FUN_0046e450` | 각각 셀 영역/국소 영역을 순회하며 `FUN_00465960` 반환값이 false이면 즉시 false를 반환한다. 사람용 함수명은 미확정이다. |
 
 `FUN_004adf44`의 내부 전송 구현에 별도의 디코더라는 역할 이름을 붙이지 않았다. 이 문서가 확정하는
-것은 해당 고정 map image가 이후 같은 map object의 상대 오프셋으로 소비된다는 데이터 흐름이다.
+것은 `FUN_00462af0`의 성공 경로가 stream, element size `1`, element count `0x10bd8c`, destination을
+순서대로 push한 뒤 `FUN_004adf44`를 호출하고 stream을 닫으며, 뒤의 초기화·predicate가 그 destination
+base의 상대 오프셋을 읽는다는 좁은 데이터 흐름이다.
+
+## 구조화 정적 근거 고정
+
+추출기는 EXE 해시만 확인한 뒤 사람이 적은 주소를 믿지 않는다. 아래의 커밋된 Ghidra 산출물도 파일 전체
+SHA-256과 `sourceSha256`을 검사하며, 둘 다 위 EXE SHA-256과 같지 않으면 거부한다.
+
+| 산출물 | 파일 SHA-256 | `sourceSha256` |
+| --- | --- | --- |
+| `analysis/generated/imjinrok2/functions.json` | `c10ea2de1f4998411d52443419c9a7f52ff7f9c18e79bd4115ba197d2f5bebc3` | `25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e` |
+| `analysis/generated/imjinrok2/references.json` | `df11ff3713988ef22b3390b5b0ae7b4a87464b5de547a4866e1c8ec8a0bcaf4c` | `25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e` |
+
+다음 여섯 함수는 `functions.json`의 entry/body range/body size/instruction SHA-256/caller 또는 callee
+set을 정확히 비교하고, EXE에서 같은 body range의 raw SHA-256도 다시 계산한다. 따라서 같은 EXE 안에서
+짧은 anchor만 우연히 남아 함수 경계나 CFG 범위가 바뀌는 경우를 허용하지 않는다.
+
+| 함수 | 전체 body 범위 | raw body SHA-256 |
+| --- | --- | --- |
+| `FUN_00462af0` | `0x00462af0-0x00462b7b` | `c462e822540d7bede0c75eeeab2661001164209cd831f639c99e1ab8401fe6e0` |
+| `FUN_004adf44` | `0x004adf44-0x004ae02b` | `98a6266b6c4f467c2e79fb664e8ca3e539073f51231e4aa1ea37f87499279591` |
+| `FUN_004648e0` | `0x004648e0-0x00464cb2` | `e8bba48e9c6925826914eab6f55a038ee275500831e70ec496b1bcc7dfd63112` |
+| `FUN_00465960` | `0x00465960-0x00465a12` | `2b1f10655b34fce18f72a990661788d7298f0dc6e8c1ef9f99feb4e23e9a45d0` |
+| `FUN_00465d50` | `0x00465d50-0x00465dde` | `11ff70b95110d01f0c2b5f6682918f0698edeb0629289afaf0811f028a16a67e` |
+| `FUN_0046e450` | `0x0046e450-0x0046e49d` | `cdc40bba56aabb8a66b40ea69c14ecb8fd6fd55ba568b945344dbe2a13b36ad0` |
+
+`references.json`에서는 다음 `UNCONDITIONAL_CALL` edge가 각각 정확히 하나여야 한다. 이 조건과
+`FUN_00465960`의 정확한 caller set `{FUN_00465d50, FUN_0046e450}`를 함께 확인하므로, 두 “direct caller”
+주장은 함수명 문자열이나 부분 바이트가 아니라 source-bound call graph에 묶인다.
+
+| callsite | caller | callee |
+| --- | --- | --- |
+| `0x00462b1a` | `FUN_00462af0` | `FUN_004adf44` |
+| `0x00465da2` | `FUN_00465d50` | `FUN_00465960` |
+| `0x0046e472` | `FUN_0046e450` | `FUN_00465960` |
 
 ## 확정한 필드와 주소식
 
@@ -188,8 +223,9 @@ node tools/imjinrok/extract-k01-map-passability-field.mjs
 node --test tools/imjinrok/k01-map-passability-field.test.mjs
 ```
 
-추출기는 MAP·EXE 크기와 SHA-256을 해석 전에 검증하고, EXE의 모든 위 byte evidence가 맞는지
-확인한다. stale/tampered MAP 또는 EXE는 거부한다. `field_0x000cc90c`의 필요 끝 `848580`보다 작은
+추출기는 MAP·EXE 크기와 SHA-256을 해석 전에 검증하고, EXE의 모든 위 byte evidence, functions/references
+산출물의 전체 SHA-256·source SHA·함수 body·caller/callee set·필수 call edge가 맞는지 확인한다.
+stale/tampered MAP·EXE·정적 산출물은 모두 거부한다. `field_0x000cc90c`의 필요 끝 `848580`보다 작은
 Buffer, 범위 밖 좌표, 비정수 좌표, `uint8` 밖의 분기 벡터도 거부한다.
 
 `analysis/fixtures/k01-map-passability-field.json`은 입력 해시, 정확한 field formula, 전체 값 digest와
