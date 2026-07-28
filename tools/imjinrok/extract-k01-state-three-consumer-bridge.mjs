@@ -41,6 +41,8 @@ const REQUIRED_CALLS = [
   [0x004601c3, 0x0045f9c0, 0x004932c0], [0x004601d6, 0x0045f9c0, 0x004932d0],
 ];
 const ANCHORS = [
+  ["main-loop-relay-bx", 0x0045fc83, "bb 8c 00 00 00", "main loop initializes EBX to raw relay state 0x8c before the state switch"],
+  ["main-loop-scheduler-esi", 0x0045fd1e, "be 01 00 00 00", "main loop initializes ESI to one before the state switch; raw-23 fallback stores SI as target"],
   ["state-minus-one-low-switch", 0x0045fd36, "0f bf 05 c8 df 4b 00 83 f8 28 0f 8f be 06 00 00 0f 84 a5 06 00 00 48 83 f8 22 0f 87 32 ff ff ff ff 24 85 b0", "main switch loads WORD state, decrements it, then indexes table 0x004607b0"],
   ["state-22-to-23", 0x004602be, "6a 02 e8 ab f5 00 00 83 c4 04 e8 23 8d fe ff 66 c7 05 c8 df 4b 00 17 00", "raw 22 calls 0x0046f870 and FUN_00448ff0, then writes raw 23"],
   ["state-23-scheduler-poll-and-guard", 0x004602db, "66 39 35 20 6e c0 00 75 05 e8 d7 78 fe ff e8 a2 8d fe ff 66 83 3d c8 df 4b 00 17 0f bf f0", "raw 23 conditionally calls scheduler, always polls, then requires current state remain 23 before dispatch"],
@@ -105,7 +107,7 @@ export function replayRaw23Bridge(input) {
   if (pollOutcome === 0) return { currentStateWord: 23, targetStateWord: undefined, schedulerCalled, pollOutcome, dispatchSkipped: false };
   if (pollOutcome === 3) return { currentStateWord: 3, targetStateWord: undefined, schedulerCalled, pollOutcome, dispatchSkipped: false };
   if (pollOutcome === 8) return routeEight(input, schedulerCalled, pollOutcome);
-  if (pollOutcome === 32) return relay(32, schedulerCalled, pollOutcome, "source-32");
+  if (pollOutcome === 32) return relay(1, schedulerCalled, pollOutcome, "source-32");
   return routeTen(input, schedulerCalled, pollOutcome);
 }
 
@@ -120,7 +122,7 @@ export function replayStateThreeConsumers(input) {
   return { currentStateWord: 0x8c, targetStateWord: wrapperTarget, branch: "presentation-complete" };
 }
 
-function routeEight(input, schedulerCalled, pollOutcome) { dword(input.externalModeDword, "externalModeDword"); if (input.externalModeDword !== 1) return relay(8, schedulerCalled, pollOutcome, "source-8-fallthrough"); dword(input.progressCounterDword, "progressCounterDword"); return relay(0x140, schedulerCalled, pollOutcome, input.progressCounterDword < 1000 ? "source-8-external-low" : "source-8-external-high"); }
+function routeEight(input, schedulerCalled, pollOutcome) { dword(input.externalModeDword, "externalModeDword"); if (input.externalModeDword !== 1) return relay(1, schedulerCalled, pollOutcome, "source-8-fallthrough"); dword(input.progressCounterDword, "progressCounterDword"); return relay(0x140, schedulerCalled, pollOutcome, input.progressCounterDword < 1000 ? "source-8-external-low" : "source-8-external-high"); }
 function routeTen(input, schedulerCalled, pollOutcome) { dword(input.raw634ac0, "raw634ac0"); dword(input.rawC06e38, "rawC06e38"); if (input.rawC06e38 === 1) return relay(0x1c, schedulerCalled, pollOutcome, input.raw634ac0 === 1 ? "source-10-exact-one-and-1c" : "source-10-1c"); return relay(10, schedulerCalled, pollOutcome, input.raw634ac0 === 1 ? "source-10-exact-one-and-0a" : "source-10-0a"); }
 function relay(targetStateWord, schedulerCalled, pollOutcome, branch) { return { currentStateWord: 0x8c, targetStateWord, schedulerCalled, pollOutcome, dispatchSkipped: false, branch }; }
 function readWord(input, key) { const value = input[key]; word(value, key); return value; }
@@ -128,7 +130,7 @@ function vectors() { return [
   { id: "state-22-to-23", result: replayStateThreeConsumers({ currentStateWord: 22 }), expected: { currentStateWord: 23, targetStateWord: undefined, branch: "22-to-23" } },
   { id: "scheduler-changes-state-before-poll-dispatch", result: replayRaw23Bridge({ currentStateWord: 23, schedulerModeWord: 1, stateAfterSchedulerWord: 24, pollSourceOutcomeDword: 3 }), expected: { currentStateWord: 24, targetStateWord: undefined, schedulerCalled: true, pollOutcome: 3, dispatchSkipped: true } },
   { id: "poll-domain", result: [3, 8, 10, 32, 5, 0xffffffff].map(mapRaw23PollOutcome), expected: [3, 8, 10, 32, 0, 0] },
-  { id: "state-23-secondary-targets", result: [replayRaw23Bridge({ currentStateWord: 23, schedulerModeWord: 0, pollSourceOutcomeDword: 3 }), replayRaw23Bridge({ currentStateWord: 23, schedulerModeWord: 0, pollSourceOutcomeDword: 8, externalModeDword: 1, progressCounterDword: 999 }), replayRaw23Bridge({ currentStateWord: 23, schedulerModeWord: 0, pollSourceOutcomeDword: 10, raw634ac0: 1, rawC06e38: 1 }), replayRaw23Bridge({ currentStateWord: 23, schedulerModeWord: 0, pollSourceOutcomeDword: 32 })], expected: [{ currentStateWord: 3, targetStateWord: undefined, schedulerCalled: false, pollOutcome: 3, dispatchSkipped: false }, { currentStateWord: 0x8c, targetStateWord: 0x140, schedulerCalled: false, pollOutcome: 8, dispatchSkipped: false, branch: "source-8-external-low" }, { currentStateWord: 0x8c, targetStateWord: 0x1c, schedulerCalled: false, pollOutcome: 10, dispatchSkipped: false, branch: "source-10-exact-one-and-1c" }, { currentStateWord: 0x8c, targetStateWord: 32, schedulerCalled: false, pollOutcome: 32, dispatchSkipped: false, branch: "source-32" }] },
+  { id: "state-23-secondary-targets", result: [replayRaw23Bridge({ currentStateWord: 23, schedulerModeWord: 0, pollSourceOutcomeDword: 3 }), replayRaw23Bridge({ currentStateWord: 23, schedulerModeWord: 0, pollSourceOutcomeDword: 8, externalModeDword: 1, progressCounterDword: 999 }), replayRaw23Bridge({ currentStateWord: 23, schedulerModeWord: 0, pollSourceOutcomeDword: 10, raw634ac0: 1, rawC06e38: 1 }), replayRaw23Bridge({ currentStateWord: 23, schedulerModeWord: 0, pollSourceOutcomeDword: 32 })], expected: [{ currentStateWord: 3, targetStateWord: undefined, schedulerCalled: false, pollOutcome: 3, dispatchSkipped: false }, { currentStateWord: 0x8c, targetStateWord: 0x140, schedulerCalled: false, pollOutcome: 8, dispatchSkipped: false, branch: "source-8-external-low" }, { currentStateWord: 0x8c, targetStateWord: 0x1c, schedulerCalled: false, pollOutcome: 10, dispatchSkipped: false, branch: "source-10-exact-one-and-1c" }, { currentStateWord: 0x8c, targetStateWord: 1, schedulerCalled: false, pollOutcome: 32, dispatchSkipped: false, branch: "source-32" }] },
   { id: "result-state-consumers-cross-check-final-wrapper", result: [replayStateThreeConsumers({ currentStateWord: 24 }), replayStateThreeConsumers({ currentStateWord: 26 }), replayStateThreeConsumers({ currentStateWord: 25, presentationPollResultEax: 0 }), replayStateThreeConsumers({ currentStateWord: 27, presentationPollResultEax: 1 })], expected: [{ currentStateWord: 25, targetStateWord: undefined, branch: "24-to-25" }, { currentStateWord: 27, targetStateWord: undefined, branch: "26-to-27" }, { currentStateWord: 25, targetStateWord: undefined, branch: "presentation-pending" }, { currentStateWord: 0x8c, targetStateWord: 0x1c, branch: "presentation-complete" }] },
 ]; }
 
