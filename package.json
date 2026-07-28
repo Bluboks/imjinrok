@@ -23,6 +23,7 @@
     "imjinrok:inspect-map-records": "node tools/imjinrok/inspect-map-records.mjs",
     "imjinrok:export-map": "node tools/imjinrok/export-map-definition.mjs",
     "imjinrok:extract-terrain-mask": "node tools/imjinrok/extract-map-terrain-mask.mjs",
+    "imjinrok:extract-k01-global-mask-boundary": "node tools/imjinrok/extract-k01-global-mask-boundary.mjs",
     "imjinrok:extract-mission-portraits": "node tools/imjinrok/extract-mission-portrait-mapping.mjs --json",
     "imjinrok:extract-speech-layout": "node tools/imjinrok/extract-speech-layout-evidence.mjs --json",
     "imjinrok:extract-objective-panel-layout": "node tools/imjinrok/extract-objective-panel-layout-evidence.mjs --json",

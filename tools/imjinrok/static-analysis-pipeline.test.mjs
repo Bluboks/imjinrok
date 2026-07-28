@@ -24,13 +24,13 @@ test("committed Ghidra analysis artifacts are internally consistent", () => {
 
   assert.equal(summary.sourceSha256, EXPECTED_IMJINROK_EXE_SHA256);
   assert.equal(summary.ghidraVersion, "12.1.2");
-  assert.equal(summary.functionCount, 2_448);
+  assert.equal(summary.functionCount, 2_449);
   assert.equal(summary.stringCount, 1_545);
   assert.equal(summary.referenceCount, 57_572);
   assert.equal(summary.computedJumpCount, 268);
   assert.equal(summary.jumpTableCount, 234);
-  assert.equal(summary.seedCount, 198);
-  assert.equal(summary.seedFunctionCount, 190);
+  assert.equal(summary.seedCount, 199);
+  assert.equal(summary.seedFunctionCount, 191);
 });
 
 test("validator rejects a source hash mismatch instead of accepting stale evidence", (t) => {

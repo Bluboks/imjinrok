@@ -327768,7 +327768,7 @@
       "fromFunctionEntry": null,
       "fromBlock": ".text",
       "toBlock": ".text",
-      "toSymbol": "LAB_0045f0f0"
+      "toSymbol": "FUN_0045f0f0"
     },
     {
       "from": "0x0045f0f0",
@@ -327777,7 +327777,7 @@
       "source": "DEFAULT",
       "operandIndex": 1,
       "primary": true,
-      "fromFunctionEntry": null,
+      "fromFunctionEntry": "0x0045f0f0",
       "fromBlock": ".text",
       "toBlock": ".data",
       "toSymbol": "DAT_004bdfd0"
@@ -327789,7 +327789,7 @@
       "source": "DEFAULT",
       "operandIndex": 0,
       "primary": true,
-      "fromFunctionEntry": null,
+      "fromFunctionEntry": "0x0045f0f0",
       "fromBlock": ".text",
       "toBlock": ".data",
       "toSymbol": "DAT_00aa3fe8"
