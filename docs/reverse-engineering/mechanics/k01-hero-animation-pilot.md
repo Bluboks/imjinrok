@@ -99,13 +99,19 @@ pnpm imjinrok:audit-sprite-mappings
 - 테스트는 두 정체, 다섯 원본 SPR, 상태별 frame 범위, 8방향·phase·미러, flags 분기와 변조된
   SPR 거부를 검사한다.
 - 스프라이트 감사는 한 비주얼 디렉터리의 여러 원본 manifest를 합쳐 검증하며 두 영웅을
-  `static-proven-core-state-frames`로 분류한다. 초 단위 재생 속도·pivot·피격·사망 표시
-  수명주기는 계속 미확정 범위로 남긴다.
+  `static-proven-core-state-frames`로 분류한다. 사망 phase·record 해제의 accepted
+  entity-update 단위는 후속 문서에서 복원했지만 초 단위 재생 속도·pivot·프로젝트 수명주기는
+  계속 미확정이다.
 
 ## 다음 경계
 
 공격 효과 phase `+0x143`, 사이클 종료와 회복 카운터는
-[K01 영웅 일반 공격 파일럿](k01-hero-basic-attack-pilot.md)에서 후속 복원했다. 다음 우선순위는
-유성룡 투사체 충돌과 원본 전역 틱의 초 단위를 확인해 이 phase를 프로젝트 공격 이벤트·클립 FPS와
-같은 시간축에 놓는 일이다. 그 뒤 피격 상태와 사망 클립 재생 후 제거 수명주기를 분리한다. 이 작업
-전까지 현재 FPS는 프로젝트 재생값이며 원본 초 단위 타이밍 parity로 주장하지 않는다.
+[K01 영웅 일반 공격 파일럿](k01-hero-basic-attack-pilot.md)에서 후속 복원했다.
+[K01 유성룡 투사체 subtype `0x0c` 파일럿](k01-ryu-projectile-pilot.md)은 생성 뒤 보수적인
+좌표 accepted subset `0..32767`의 정수 경로, 도착 충돌과 최종 피해까지 복원했다. 원본 caller
+전체 signed-WORD 좌표 범위는 미확정이다.
+[K01 권율·유성룡 대상 선택과 사거리](k01-hero-targeting-range.md)는 공격 전 target 경계를,
+[K01 영웅 사망 수명주기](k01-hero-death-lifecycle.md)는 signed health 0부터 행동 6 phase,
+runtime flags에 따른 행동 7 유지/active slot 해제까지를 후속 복원했다. 원본 entity-update
+단위를 초·프로젝트 24 Hz로
+바꾸는 exact mapping은 여전히 없으므로 현재 FPS를 원본 타이밍 일치로 주장하지 않는다.

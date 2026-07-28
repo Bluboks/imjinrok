@@ -254,6 +254,47 @@ export interface UnitDefinition {
   selectedMinimapRadius: number;
 }
 
+// Project gameplay adapters shared by several distinct source-backed Japanese identities.
+// These values, including portrait glyph/colors and group-border color, are project gameplay/UI
+// fallbacks, not evidence for the original classes' stats, category, collision, behavior, or UI.
+const japaneseSwordsmanAdaptedGameplay = {
+  category: "infantry",
+  actionIds: infantryActionIds,
+  populationCost: 1,
+  footprint: { width: 1, height: 1, blocksMovement: true },
+  baseAttributes: { health: 55, mana: 0, movementSpeed: 4.0 },
+  portraitGlyph: "JS",
+  portraitColor: 0xbc7b6f,
+  groupBorderColor: 0xd69b8e,
+  combat: { damage: 9, range: 1.5, cooldownTicks: 18, aggroRange: 7 },
+  renderRadius: 6,
+  selectionRadius: 6,
+  hitRadius: 16,
+  sightRadius: 7,
+  minimapShape: "circle",
+  minimapRadius: 2.9,
+  selectedMinimapRadius: 4.2,
+} as const satisfies Omit<UnitDefinition, "id" | "displayName">;
+
+const japaneseGunnerAdaptedGameplay = {
+  category: "infantry",
+  actionIds: infantryActionIds,
+  populationCost: 1,
+  footprint: { width: 1, height: 1, blocksMovement: true },
+  baseAttributes: { health: 38, mana: 0, movementSpeed: 3.8 },
+  portraitGlyph: "JG",
+  portraitColor: 0xbd8c62,
+  groupBorderColor: 0xd6ae7f,
+  combat: { damage: 7, range: 5.5, cooldownTicks: 24, aggroRange: 8 },
+  renderRadius: 6,
+  selectionRadius: 6,
+  hitRadius: 16,
+  sightRadius: 8,
+  minimapShape: "circle",
+  minimapRadius: 2.9,
+  selectedMinimapRadius: 4.2,
+} as const satisfies Omit<UnitDefinition, "id" | "displayName">;
+
 export const unitDefinitions = {
   "town-center": {
     id: "town-center",
@@ -413,42 +454,27 @@ export const unitDefinitions = {
   "japanese-swordsman": {
     id: "japanese-swordsman",
     displayName: "일본 창병",
-    category: "infantry",
-    actionIds: infantryActionIds,
-    populationCost: 1,
-    footprint: { width: 1, height: 1, blocksMovement: true },
-    baseAttributes: { health: 55, mana: 0, movementSpeed: 4.0 },
-    portraitGlyph: "JS",
-    portraitColor: 0xbc7b6f,
-    groupBorderColor: 0xd69b8e,
-    combat: { damage: 9, range: 1.5, cooldownTicks: 18, aggroRange: 7 },
-    renderRadius: 6,
-    selectionRadius: 6,
-    hitRadius: 16,
-    sightRadius: 7,
-    minimapShape: "circle",
-    minimapRadius: 2.9,
-    selectedMinimapRadius: 4.2,
+    ...japaneseSwordsmanAdaptedGameplay,
+  },
+  "japanese-samurai": {
+    id: "japanese-samurai",
+    displayName: "일본 사무라이",
+    ...japaneseSwordsmanAdaptedGameplay,
+  },
+  "japanese-turtle-tank": {
+    id: "japanese-turtle-tank",
+    displayName: "일본 귀갑차",
+    ...japaneseSwordsmanAdaptedGameplay,
   },
   "japanese-gunner": {
     id: "japanese-gunner",
     displayName: "일본 조총병",
-    category: "infantry",
-    actionIds: infantryActionIds,
-    populationCost: 1,
-    footprint: { width: 1, height: 1, blocksMovement: true },
-    baseAttributes: { health: 38, mana: 0, movementSpeed: 3.8 },
-    portraitGlyph: "JG",
-    portraitColor: 0xbd8c62,
-    groupBorderColor: 0xd6ae7f,
-    combat: { damage: 7, range: 5.5, cooldownTicks: 24, aggroRange: 8 },
-    renderRadius: 6,
-    selectionRadius: 6,
-    hitRadius: 16,
-    sightRadius: 8,
-    minimapShape: "circle",
-    minimapRadius: 2.9,
-    selectedMinimapRadius: 4.2,
+    ...japaneseGunnerAdaptedGameplay,
+  },
+  "japanese-konishi": {
+    id: "japanese-konishi",
+    displayName: "일본 고니시",
+    ...japaneseGunnerAdaptedGameplay,
   },
   "japanese-camp-house": {
     id: "japanese-camp-house",

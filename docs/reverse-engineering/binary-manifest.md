@@ -49,7 +49,7 @@ objdump -x original/imjinrok2/imjinrok2.exe
 | compiler spec | `windows` |
 | 자동 분석 함수 | `2448` |
 | 정의된 문자열 | `1545` |
-| seed 주소 / 포함 함수 | `64` / `63` |
+| seed 주소 / 포함 함수 | `149` / `148` |
 | 구조화 산출물 | `analysis/generated/imjinrok2/` |
 
 도구 배포 URL과 SHA-256은 `tools/imjinrok/static-analysis-versions.env`에 고정했다. 원본 EXE 해시가
@@ -61,7 +61,8 @@ pnpm imjinrok:analyze-exe
 pnpm imjinrok:verify-static-analysis
 ```
 
-2026-07-26에 깨끗한 임시 Ghidra 프로젝트로 전체 분석을 두 번 실행했고, `manifest.json`,
+2026-07-27에 K01 mission-entry timer-reset seed를 포함해 깨끗한 임시 Ghidra 프로젝트로
+전체 분석을 두 번 실행했고, `manifest.json`,
 `functions.json`, `strings.json`, `references.json`, `jump-tables.json`, `seeds.json`의
 SHA-256이 모두 일치했다. 생성 파일별 현재 해시는
 `analysis/generated/imjinrok2/SHA256SUMS`에 있다.
@@ -87,6 +88,11 @@ Ghidra의 메모리 지도에는 PE 네 섹션 외에 헤더와 분석용 `tdb` 
 | `char/hqk.spr` | `17e5640a7b34f8aaf1063d210bd087b8ba59d769e194f5025e92941e422c2d4e` | 조선 본영 본체 frame 0~8 |
 | `char/firehousek.spr` | `ac6621124bbf2106a5d9309499da7701a5c4e5223692dd2f4f51e2e9c1ab97aa` | 조선 봉화대 본체 frame 0~8 |
 | `yfnt/hero.spr` | `a701bd0a66ec30dfd0bbc33ad7e78b937e725292fd37e9cae983ca28ad6af853` | `SPEECH` 초상화 17개 |
+| `script/K0120` | `6d9b8043f4634c8b8f1696e6d9b49b17dff99b53280b9934c1dfbd998be6054d` | 519-byte CP949/EUC-KR, 봉화대 match 뒤 `SPEECH` 3개 |
+| `yfnt/winlogo.spr` | `045b64ce026386413098f339681e8ac859e641c2e28d86d6dc2a25e4fa84851e` | result selector 1, 250×100·28-frame header |
+| `yfnt/loselogo.spr` | `94a33a66783eaa9ab4f458542707cc5fa81ea29c0057eabb3a659fdc39d78ad7` | result selector non-one, 250×100·28-frame header |
+| `music/win.YAV` | `d50d4146bd5c423b78ea41ac83d6cd737b083586afff48a7761024dfee1bc61d` | result selector 1 initializer path |
+| `music/lose.YAV` | `deb38aae3e4d034774d79953189cfa51408a61d25232abb72f72affca80833e6` | result selector non-one initializer path |
 
 향후 매니페스트에는 다음을 포함한다.
 

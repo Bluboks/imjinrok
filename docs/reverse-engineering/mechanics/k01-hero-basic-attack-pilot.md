@@ -75,7 +75,8 @@ base WORD [attacker+0x46] = 80
 
 방어 합은 defender `WORD +0x44`와 `WORD +0x50`을 더한 뒤 최대 90으로 제한한다. defender
 `DWORD +0x80` 값이 1이면 payload를 10%, 3 또는 6이면 30% 올리고, 그 외에는 보정하지
-않는다. 정수 나눗셈의 소수부를 버린 원본 수식은 다음과 같다.
+않는다. 정수 나눗셈의 소수부를 버린 정상 범위 벡터의 수식 요약은 다음과 같다. WORD
+wrap·signed 경계는 후속 subtype `0x0c` 파일럿에서 명령 단위로 분리한다.
 
 ```text
 modified = payload + trunc(payload * classModifierPercent / 100)
@@ -83,8 +84,9 @@ defense = min(defenseBase + defenseModifier, 90)
 damage = max(1, modified - trunc(defense * modified / 100))
 ```
 
-`FUN_00438130`은 먼저 defender `WORD +0x90`의 별도 완충 수치를 소모하고, 남은 피해를 현재
-체력 `WORD +0x3e`에서 빼며 0 미만은 0으로 고정한다.
+`FUN_00438130`은 raw mode/table gate를 먼저 평가한 뒤 defender `WORD +0x90`의 별도
+완충 수치와 현재 체력 `WORD +0x3e`를 signed-WORD 분기로 처리한다. gate와 wrap 경계의
+완전한 증거·벡터는 후속 subtype `0x0c` 파일럿을 따른다.
 
 ## 유성룡 투사체 경계
 
@@ -92,9 +94,11 @@ damage = max(1, modified - trunc(defense * modified / 100))
 `FUN_004111b0`을 subtype `0x0c`로 호출하고, 기본 payload 45와 `+0x4a` 보정값을 투사체
 레코드에 전달한다.
 
-이 파일럿은 투사체 생성까지 정적 확정했다. subtype `0x0c`의 이동·충돌 함수와 충돌 시
-`FUN_00413700`에 넘기는 최종 effect kind는 아직 추적하지 않았으므로, 유성룡의 최종 체력
-감소 수식을 권율과 같다고 일반화하지 않는다.
+이 파일럿의 독립 범위는 투사체 생성까지다. 후속
+[유성룡 투사체 subtype `0x0c` 파일럿](k01-ryu-projectile-pilot.md)에서 보수적인 좌표 accepted
+subset `0..32767`의 signed-word 경로, 도착 dispatcher, effect kind `9`, 대상 소멸·세대
+불일치와 최종 피해 수식을 별도로 정적 확정·재현했다. 원본 caller 전체 signed-WORD 좌표 범위는
+미확정이다. 권율 kind `1`과 유성룡 kind `9`의 수식은 서로 다르다.
 
 ## 재현
 
@@ -117,7 +121,7 @@ node --test tools/imjinrok/k01-hero-basic-attack-pilot.test.mjs
 
 ## 다음 경계
 
-다음 정적 분석 우선순위는 유성룡 subtype `0x0c` 투사체의 dispatcher·충돌·최종 피해 경로다.
-그 다음 원본 전역 틱 생산자와 메인 루프의 시간 단위를 복원해 이 phase 벡터를 프로젝트 simulation과
-클립 FPS에 같은 기준으로 이식한다. 대상 검색·사거리와 사망·참조 정리는 공격 주기 파일럿의 남은
-단계로 유지한다.
+유성룡 subtype `0x0c` dispatcher·충돌·최종 피해는 후속 파일럿에서 완료했다. 다음 정적 분석
+우선순위는 공격 전 대상 유효성·탐색·사거리 경계다. 그 뒤 원본 전역 틱과 좌표 변환을 복원해 phase와
+투사체 벡터를 프로젝트 simulation·클립 FPS에 같은 기준으로 연결한다. 사망·참조 정리는 공격 주기
+파일럿의 남은 단계로 유지한다.

@@ -30,11 +30,25 @@ VM에서 원본 게임을 플레이하며 화면 변화를 따라가는 방식�
   교체했다. K01 권율·유성룡도 전용 `generalk11/12/13.spr`·`generalk31/32.spr`와 상태 8
   idle·1 일반 이동·4 공격·7 사망의 프레임·방향·미러를 복원해 사명대사 공유 비주얼과 임시
   상태 프레임을 제거했다. 두 영웅의 일반 공격 효과 phase·사이클 종료·회복 카운터도 정적
-  복원했으며 권율 직접 피해와 유성룡 투사체 생성까지 재현했다. 초 단위 재생 속도와 유성룡 투사체
-  충돌은 다음 전투 파일럿 경계에 남아 있다.
-- 3단계: 시작 전. 자동 함수 경계와 후보 주소가 있으며 메커니즘 역할은 아직 `추정`이다.
-- 4단계: 부분 진행. K01 영웅의 공격 상태 진입 이후 phase·효과 시점·회복은 완료했지만 대상
-  검색·사거리·유성룡 투사체 충돌·사망 정리는 미확정이다.
+  복원했으며 권율 직접 피해와 유성룡 subtype `0x0c`의 생성·보수적인 port accepted 좌표 subset
+  `0..32767` 비행·도착 충돌·effect kind `9` WORD 피해·raw 적용 gate·실패 경로까지 재현했다.
+  원본 caller 전체 signed-WORD 좌표 범위와 원본 좌표·틱의 프로젝트 변환은 다음 전투 통합
+  경계에 남아 있다.
+- 3단계: 진행 중. K01 raw-relation blocker→1,200-slot 완성 봉화대 scan→flag·K0120
+  busy·loader `0/1` 무검사·void start→native 증원·raw post-effect→조건부 post-state 반환
+  범위와, general/영웅 loss latch→strict timer→dispatcher→distinct raw-tick commit 범위를
+  정적 확정·재현했다. commit된 `0x18/0x1a` 뒤 shared teardown, win/loss SPR·YAV
+  initializer, unsigned cadence/completion, relay와 external/stage final route도 정적
+  확정·재현했다. 표준 main state 1의 broad DWORD zero fill이 win/loss timer를 지운 뒤
+  stage 1 K01 map source를 선택하는 반개구간·순서도 정적 확정·재현했다.
+  native class/SPR와 K01 요청 좌표는 9개 모두 확인했고 class 12·13·14·82를 고유 kind의
+  exact static identity/source binding으로 연결했다. descriptor의 slot 선택·OOB·exact create·1×1
+  mode-1 occupancy overwrite도 정적 확정·재현했고 K01 action에 exact-position create를 부분 이식했다.
+  trigger flag의 전체 reset lifecycle, 증원 행동·animation, 원본 1,200-slot/generation/occupancy-owner
+  저장 모델의 이후 소비·movement와 raw clock/result/asset transition mapping은 남아 있다.
+- 4단계: 부분 진행. K01 영웅의 대상 검색·사거리, 공격 phase·피해·투사체와 signed-health
+  사망·slot/reference 정리는 정적 확정·재현했다. 원본 identity·좌표·accepted update 단위의
+  프로젝트 변환과 실제 opt-in 연결은 미확정이다.
 
 ## K01 MVP 완료 조건
 
@@ -100,8 +114,8 @@ VM에서 원본 게임을 플레이하며 화면 변화를 따라가는 방식�
    `조선 창병`·슬롯 100으로 식별, 상태 1·2 이동 의미와 방향식 완료, 상태 1 일반 이동 이식;
    상태 2 통합·특수 분기 base·idle·전투는 미확정
    - K01 영웅 확장: 클래스 76 `조선 권율`과 78 `조선 유성룡`의 전용 SPR·상태 8 idle·
-     1 일반 이동·4 공격·7 사망 이식 완료; 공격 효과 phase 7은 정적 확정, 초 단위 재생 속도·
-     피격·사망 표시 수명은 미확정
+     1 일반 이동·4 공격·7 사망 이식 완료; 공격 효과 phase 7과 원본 accepted update 단위의
+     사망 phase·slot 해제는 정적 확정, 초 단위 재생 속도와 프로젝트 사망 수명 이식은 미확정
 2. 건물의 건설·정상·피해→본체·오버레이 프레임 식 — 본체 2개 완료: 조선 본영과 조선 봉화대
    frame 0~7·정상 7·반파 8; 각 자원의 나머지 프레임과 오버레이는 미확정
 3. `SPEECH` 초상화 ID→자원·프레임 식 — 완료: `hero.spr`의 17개 ID 표
@@ -123,6 +137,42 @@ VM에서 원본 게임을 플레이하며 화면 변화를 따라가는 방식�
 - 원샷 플래그와 후속 효과
 - 보호 영웅 생존 조건
 - 승리·패배 타이머와 결과 전환
+
+현재 완료한 하위 단위:
+
+- 봉화대 trigger의 blocker·flag scan gate, active/owner/class/progress match
+- match 선행 flag write, script busy와 무검사 loader `0/1`·void start
+- 같은 scan 복수 match의 native block 반복
+- signed-WORD descriptor 증원, selector 5 raw byte-grid와 두 raw global write
+- descriptor의 inactive slot 1..1199 signed reuse-age 선택·WORD wrap, allocate-before-bounds,
+  slot failure/OOB/terminator, exact record x/y와 1×1 mode-1 occupancy overwrite; K01-only
+  exact-position create 부분 이식
+- native class 12·13·14·82의 원본 정체·SPR, K01 요청 좌표와 프로젝트 exact static
+  identity/source 9/9 연결; class 12·13 상태 8/1/4/7과 class 14 상태 8/1/4 grid animation 이식,
+  class-14 intermediate 16-ring·creation-default transient destruction 정적 확정·재현,
+  class 82 상태 8/1/4/7은 세 source SPR의 grid frame·mirror로 격리 이식
+- flag exact 1과 script context `+8 == 0`의 caller 전달 return 1
+- general presence→beacon bypass→class 76/78 loss latch와 zero-clock 재기록
+- win-first strict `0x7d0` timer, signed DWORD wrap/overflow와 동시 timer 우선순위
+- dispatcher pre-gate/timer 우선과 distinct raw global tick result code commit
+- shared teardown exact order와 win/loss SPR·YAV presentation 초기화
+- unsigned cadence/completion, cleanup, `0x8c→0x96→0x1c` relay
+- external-mode 우선, special stage·WORD wrap·transient overwrite final route
+- 표준 main state 1→`[0x007c5ed8,0x00843980)` DWORD zero fill→stage 1 K01 map copy 순서
+
+아직 포함하지 않은 하위 단위:
+
+- 표준 entry broad zero 밖의 K01 trigger flag reset/consumer lifecycle
+- final destination `0x140/0x64/0x10/0x20/raw WORD`별 후속 lifecycle
+- class 12 state-2 project policy, class 14 generic Facing/runtime transient tick mapping, 네 class 행동·stats,
+  raw owner, 원본 1,200-slot/generation/occupancy-owner 저장 모델의 이후 소비·movement/pathfinding
+- raw clocks와 프로젝트 24 Hz·result/asset/identity policy의 exact mapping
+
+별도 후속 질문:
+
+- `user-reported/unverified`: 완성 봉화가 하나 이상이면 미니맵 enable, 마지막 봉화 제거 시
+  disable된다는 일반 수명주기. K01 selector 5/raw global effect와 연결하기 전에 원본 writer/
+  clearer/consumer를 독립 정적 분석한다.
 
 통과 조건:
 
@@ -146,13 +196,34 @@ K01 종단 검증까지 통과해야 한다.
 7. 사망과 대상 참조 정리
 8. 재사용 대기와 다음 상태
 
-현재 K01 영웅 제한 범위에서는 3·4·6·8의 일부를 완료했다. 권율은 8-phase 중 phase 7에서
+현재 K01 영웅 제한 범위에서는 1·2·3·4·6·7·8의 일부를 완료했다. raw 현재 대상 writer와
+low-WORD 검사, Y-major 자동 scan, 권율의 inclusive footprint 사거리와 유성룡의 strict
+squared 사거리 및 out-of-range 접근·missing 취소를 정적 복원·재현했다. 원본 참조·좌표·
+footprint를 프로젝트 모델로 옮기는 exact mapping은 미확정이라 simulation에는 연결하지 않았다.
+권율은 8-phase 중 phase 7에서
 직접 피해 kind 1, 유성룡은 10-phase 중 phase 7에서 subtype `0x0c` 투사체를 생성한다.
 두 영웅 모두 phase가 0으로 돌아오면 주 회복 카운터를 초기화하고 짝수 전역 틱 두 번 뒤 다시
-준비된다. 권율의 기본 payload 80과 직접 피해 수식은 재현했으며 유성룡의 최종 충돌 피해는 남아
-있다. 자세한 범위는
-[K01 영웅 일반 공격 파일럿](reverse-engineering/mechanics/k01-hero-basic-attack-pilot.md)을
+준비된다. 권율의 기본 payload 80과 직접 피해 수식에 이어 유성룡의 subtype `0x0c`는 보수적인
+좌표 accepted subset `0..32767`에서 경로·도착·effect kind `9` 피해를 재현했다. 원본 caller
+전체 signed-WORD 좌표 범위는 미확정이다. 자세한 생성 phase는
+[K01 영웅 일반 공격 파일럿](reverse-engineering/mechanics/k01-hero-basic-attack-pilot.md),
+후속 수명과 피해는
+[K01 유성룡 투사체 파일럿](reverse-engineering/mechanics/k01-ryu-projectile-pilot.md)을 따른다.
+풀 갱신기는 [K01 투사체 풀 cadence](reverse-engineering/mechanics/k01-projectile-pool-cadence.md)에서
+accepted original step마다 정확히 한 번 호출됨을 복원했다. 다만 original step은 Windows
+message queue와 가변 millisecond gate를 따르므로 24 Hz에 연결할 exact multiplier는 없고,
+실제 연결은 명시적인 port scheduling 정책을 정하기 전까지 보류한다.
+대상 생산·탐색·사거리의 상세 경계는
+[K01 권율·유성룡 대상 선택과 사거리](reverse-engineering/mechanics/k01-hero-targeting-range.md)를
 따른다.
+signed health 0 뒤 행동 6의 parameterized 8-phase 진행, 행동 7/`0x16` 경계, 조건부
+outer active-list 해제와
+stale target의 health→slot→generation 무효화 순서는
+[K01 영웅 사망 수명주기](reverse-engineering/mechanics/k01-hero-death-lifecycle.md)에서
+생성 기본 configuration 범위로 정적 확정·재현했다. 확인한 사망·해제 경로에서 다른 record의
+`+0x122` direct eager clear는 없지만 runtime flag writer 도달과 alias write는 미확정이다.
+다만 accepted
+entity-update 단위와 프로젝트 24 Hz·identity의 exact mapping이 없어 runtime에는 연결하지 않았다.
 
 통과 조건:
 

@@ -13,11 +13,16 @@ import { fileURLToPath } from "node:url";
 
 import { MISSION_PORTRAIT_IMAGE_CUES } from "../../apps/game-client/src/missionPortraits.ts";
 import { unitDefinitions } from "../../packages/shared/src/content.ts";
+import { k01ReinforcementAdapter } from "../../packages/shared/src/scenarios.ts";
 import { defaultTheme } from "../../packages/shared/src/themes.ts";
 import { extractBeaconStatePilot } from "./extract-beacon-state-pilot.mjs";
 import { extractBuildingStatePilot } from "./extract-building-state-pilot.mjs";
 import { extractEntityTypeCatalog } from "./extract-entity-type-catalog.mjs";
 import { extractK01HeroMovementPilot } from "./extract-k01-hero-movement-pilot.mjs";
+import { extractK01SamuraiAnimationPilot } from "./extract-k01-samurai-animation-pilot.mjs";
+import { extractK01TurtleTankAnimationPilot } from "./extract-k01-turtle-tank-animation-pilot.mjs";
+import { extractK01KonishiAnimationPilot } from "./extract-k01-konishi-animation-pilot.mjs";
+import { extractK01NormalReinforcementAnimationBatch } from "./extract-k01-normal-reinforcement-animation-batch.mjs";
 import { extractMissionPortraitMapping } from "./extract-mission-portrait-mapping.mjs";
 import { extractUnitAnimationPilot } from "./extract-unit-animation-pilot.mjs";
 
@@ -54,6 +59,22 @@ const k01HeroMovementPilotPath = join(
   repositoryRoot,
   "tools/imjinrok/extract-k01-hero-movement-pilot.mjs",
 );
+const k01SamuraiAnimationPilotPath = join(
+  repositoryRoot,
+  "tools/imjinrok/extract-k01-samurai-animation-pilot.mjs",
+);
+const k01TurtleTankAnimationPilotPath = join(
+  repositoryRoot,
+  "tools/imjinrok/extract-k01-turtle-tank-animation-pilot.mjs",
+);
+const k01KonishiAnimationPilotPath = join(
+  repositoryRoot,
+  "tools/imjinrok/extract-k01-konishi-animation-pilot.mjs",
+);
+const k01NormalReinforcementAnimationBatchPath = join(
+  repositoryRoot,
+  "tools/imjinrok/extract-k01-normal-reinforcement-animation-batch.mjs",
+);
 const buildingStatePilotPath = join(
   repositoryRoot,
   "tools/imjinrok/extract-building-state-pilot.mjs",
@@ -80,6 +101,11 @@ const outputPath = resolve(
 );
 const unitAnimationPilot = extractUnitAnimationPilot();
 const k01HeroMovementPilot = extractK01HeroMovementPilot();
+const k01SamuraiAnimationPilot = extractK01SamuraiAnimationPilot();
+const k01TurtleTankAnimationPilot =
+  extractK01TurtleTankAnimationPilot();
+const k01KonishiAnimationPilot = extractK01KonishiAnimationPilot();
+const k01NormalReinforcementAnimationBatch = extractK01NormalReinforcementAnimationBatch();
 const buildingStatePilot = extractBuildingStatePilot();
 const beaconStatePilot = extractBeaconStatePilot();
 const entityTypeCatalog = extractEntityTypeCatalog();
@@ -137,6 +163,8 @@ for (const visual of Object.values(defaultTheme.visuals)
     visualId: visual.id,
     category,
     assetPath: visual.assetPath,
+    render: visual.render,
+    defaults: visual.defaults,
     evidenceStatus: staticEvidence.status,
     staticEvidence,
     source: primaryResource.source,
@@ -163,7 +191,7 @@ const report = {
   policy: {
     semanticStatus: "mixed",
     acceptedEvidence:
-      "All 95 original type identities, uniquely matched current visual source identities, SPEECH portraits, Korean HQ and signal-beacon body states, class-2 Korean spearman normal movement, and the K01 heroes' idle, movement, attack, and death frame/direction mappings are statically proven in their documented scopes.",
+      "All 95 original type identities, uniquely matched current visual source identities, SPEECH portraits, Korean HQ and signal-beacon body states, class-2 Korean spearman normal movement, K01 class-12 Japanese gunner and class-13/82 reinforcement core states, class-14 Japanese turtle-tank idle/move/attack grid states plus its non-theme 16-ring turn and creation-default transient destruction contracts, and the K01 heroes' idle, movement, attack, and death frame/direction mappings are statically proven in their documented scopes.",
     parityUse:
       "A unique source identity proves the original name and SPR binding only. Only explicitly listed frame scopes may be used for animation parity; all other direction, action, layer, and body mappings remain quarantined.",
   },
@@ -177,6 +205,10 @@ const report = {
     sourceFileRecord(missionPortraitExtractorPath),
     sourceFileRecord(unitAnimationPilotPath),
     sourceFileRecord(k01HeroMovementPilotPath),
+    sourceFileRecord(k01SamuraiAnimationPilotPath),
+    sourceFileRecord(k01TurtleTankAnimationPilotPath),
+    sourceFileRecord(k01KonishiAnimationPilotPath),
+    sourceFileRecord(k01NormalReinforcementAnimationBatchPath),
     sourceFileRecord(buildingStatePilotPath),
     sourceFileRecord(beaconStatePilotPath),
     sourceFileRecord(entityTypeCatalogExtractorPath),
@@ -231,6 +263,21 @@ const report = {
     summary: entityTypeCatalog.summary,
     projectBindings: projectBindings.bindings,
   },
+  k01ReinforcementAdapter: k01ReinforcementAdapter.map(
+    ({
+      originalClass,
+      rawOwnerWord,
+      offset,
+      projectKind,
+      identityMapping,
+    }) => ({
+      originalClass,
+      rawOwnerWord,
+      offset,
+      projectKind,
+      identityMapping,
+    }),
+  ),
   portraits: {
     evidenceStatus: "static-proven",
     source: portraitAudit.source,
@@ -415,6 +462,109 @@ function buildVisualStaticEvidence(visual, identityCandidates) {
     };
   }
 
+  if (visual.id === "japanese-gunner") {
+    const states = k01NormalReinforcementAnimationBatch.states;
+    return {
+      status: "mixed",
+      ...identityEvidence,
+      animationStateMapping: "static-proven-core-state-frames",
+      confirmedAnimationScope:
+        "project idle, move/walk, attack, and death use the statically recovered class-12 state 8, 1, 4, and 7 slots, frames, direction order, and mirroring; class-12 state 2 remains quarantined",
+      stateFrameRanges: {
+        idle: states.idle.frameRange,
+        move: states.move.frameRange,
+        walk: states.move.frameRange,
+        attack: states.attack.frameRange,
+        death: states.death.frameRange,
+      },
+      stateSources: {
+        idle: states.idle.sourcePath,
+        move: states.move.sourcePath,
+        walk: states.move.sourcePath,
+        attack: states.attack.sourcePath,
+        death: states.death.sourcePath,
+      },
+      unresolvedScope:
+        "state 2 is a statically proven movement variant but its environment label and project policy are unresolved; exact timing, pivot, later flags, hit reaction, and death lifetime remain unresolved",
+    };
+  }
+
+  if (visual.id === "japanese-samurai") {
+    return {
+      status: "mixed",
+      ...identityEvidence,
+      animationStateMapping: "static-proven-core-state-frames",
+      confirmedAnimationScope:
+        "project idle, move/walk, attack, and death use the statically recovered class-13 state 8, 1, 4, and 7 sprite slots, frames, direction order, and mirroring",
+      stateFrameRanges: {
+        idle: k01SamuraiAnimationPilot.states.idle.frameRange,
+        move: k01SamuraiAnimationPilot.states.move.frameRange,
+        walk: k01SamuraiAnimationPilot.states.move.frameRange,
+        attack: k01SamuraiAnimationPilot.states.attack.frameRange,
+        death: k01SamuraiAnimationPilot.states.death.frameRange,
+      },
+      stateSources: {
+        idle: k01SamuraiAnimationPilot.states.idle.sourcePath,
+        move: k01SamuraiAnimationPilot.states.move.sourcePath,
+        walk: k01SamuraiAnimationPilot.states.move.sourcePath,
+        attack: k01SamuraiAnimationPilot.states.attack.sourcePath,
+        death: k01SamuraiAnimationPilot.states.death.sourcePath,
+      },
+      unresolvedScope:
+        "exact seconds-per-phase playback timing, hit reaction, pivot, later runtime flag mutation, and project-side death playback before removal remain unresolved",
+    };
+  }
+
+  if (visual.id === "japanese-turtle-tank") {
+    return {
+      status: "mixed",
+      ...identityEvidence,
+      animationStateMapping: "static-proven-core-state-frames",
+      confirmedAnimationScope:
+        "project idle, move/walk, and attack use the statically recovered class-14 state 8, 1, and 4 grid-direction frames and mirroring",
+      stateFrameRanges: {
+        idle: k01TurtleTankAnimationPilot.states.idle.frameRange,
+        move: k01TurtleTankAnimationPilot.states.move.frameRange,
+        walk: k01TurtleTankAnimationPilot.states.move.frameRange,
+        attack: k01TurtleTankAnimationPilot.states.attack.frameRange,
+      },
+      stateSources: {
+        idle: k01TurtleTankAnimationPilot.states.idle.sourcePath,
+        move: k01TurtleTankAnimationPilot.states.move.sourcePath,
+        walk: k01TurtleTankAnimationPilot.states.move.sourcePath,
+        attack: k01TurtleTankAnimationPilot.states.attack.sourcePath,
+      },
+      unresolvedScope:
+        "the raw 1000..1007 values are statically resolved as intermediate 16-ring turn positions, but their generic Facing mapping and project-side transient destruction/tick mapping remain unresolved; frames 81..87 are not the creation-default death path, while their other use remains unresolved",
+    };
+  }
+
+  if (visual.id === "japanese-konishi") {
+    return {
+      status: "mixed",
+      ...identityEvidence,
+      animationStateMapping: "static-proven-core-state-frames",
+      confirmedAnimationScope:
+        "project idle, move/walk, attack, and death use the statically recovered class-82 state 8, 1, 4, and 7 sprite slots, grid-direction frames, and mirroring",
+      stateFrameRanges: {
+        idle: k01KonishiAnimationPilot.states.idle.frameRange,
+        move: k01KonishiAnimationPilot.states.move.frameRange,
+        walk: k01KonishiAnimationPilot.states.move.frameRange,
+        attack: k01KonishiAnimationPilot.states.attack.frameRange,
+        death: k01KonishiAnimationPilot.states.death.frameRange,
+      },
+      stateSources: {
+        idle: k01KonishiAnimationPilot.states.idle.sourcePath,
+        move: k01KonishiAnimationPilot.states.move.sourcePath,
+        walk: k01KonishiAnimationPilot.states.move.sourcePath,
+        attack: k01KonishiAnimationPilot.states.attack.sourcePath,
+        death: k01KonishiAnimationPilot.states.death.sourcePath,
+      },
+      unresolvedScope:
+        "unused tail frames, generalj14, exact seconds-per-phase playback timing, hit reaction and other states, pivot, later runtime flag mutation, and project-side death playback before removal remain unresolved",
+    };
+  }
+
   const k01Hero = k01HeroMovementPilot.heroes.find(
     (hero) => hero.projectVisualId === visual.id,
   );
@@ -542,6 +692,21 @@ function buildProjectBindingAudit(visuals) {
     const binding = {
       entityId,
       projectDisplayName: definition.displayName,
+      projectGameplayAdapter: {
+        category: definition.category,
+        actionIds: definition.actionIds,
+        populationCost: definition.populationCost,
+        footprint: definition.footprint,
+        baseAttributes: definition.baseAttributes,
+        combat: definition.combat,
+        renderRadius: definition.renderRadius,
+        selectionRadius: definition.selectionRadius,
+        hitRadius: definition.hitRadius,
+        sightRadius: definition.sightRadius,
+        minimapShape: definition.minimapShape,
+        minimapRadius: definition.minimapRadius,
+        selectedMinimapRadius: definition.selectedMinimapRadius,
+      },
       visualId,
       visualSourcePath: visual.source.path,
       identityStatus: visual.staticEvidence.identity,
@@ -751,6 +916,18 @@ function hasStaticDirectionEvidence(visualId, scope, stateName) {
   }
   if (visualId === "korean-swordsman") {
     return stateName === "move" || stateName === "walk";
+  }
+  if (visualId === "japanese-gunner") {
+    return ["idle", "move", "walk", "attack", "death"].includes(stateName);
+  }
+  if (visualId === "japanese-samurai") {
+    return ["idle", "move", "walk", "attack", "death"].includes(stateName);
+  }
+  if (visualId === "japanese-turtle-tank") {
+    return ["idle", "move", "walk", "attack"].includes(stateName);
+  }
+  if (visualId === "japanese-konishi") {
+    return ["idle", "move", "walk", "attack", "death"].includes(stateName);
   }
   return (
     ["korean-gwon-yul", "korean-ryu-seong-ryong"].includes(visualId) &&

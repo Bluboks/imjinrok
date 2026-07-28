@@ -1,0 +1,361 @@
+{
+  "source": "original/imjinrok2/char/ghosttankj.spr",
+  "layout": "spr",
+  "width": 70,
+  "height": 60,
+  "frameCount": 88,
+  "exportedFrames": [
+    {
+      "index": 0,
+      "fileName": "ghosttankj_0000.png"
+    },
+    {
+      "index": 1,
+      "fileName": "ghosttankj_0001.png"
+    },
+    {
+      "index": 2,
+      "fileName": "ghosttankj_0002.png"
+    },
+    {
+      "index": 3,
+      "fileName": "ghosttankj_0003.png"
+    },
+    {
+      "index": 4,
+      "fileName": "ghosttankj_0004.png"
+    },
+    {
+      "index": 5,
+      "fileName": "ghosttankj_0005.png"
+    },
+    {
+      "index": 6,
+      "fileName": "ghosttankj_0006.png"
+    },
+    {
+      "index": 7,
+      "fileName": "ghosttankj_0007.png"
+    },
+    {
+      "index": 8,
+      "fileName": "ghosttankj_0008.png"
+    },
+    {
+      "index": 9,
+      "fileName": "ghosttankj_0009.png"
+    },
+    {
+      "index": 10,
+      "fileName": "ghosttankj_0010.png"
+    },
+    {
+      "index": 11,
+      "fileName": "ghosttankj_0011.png"
+    },
+    {
+      "index": 12,
+      "fileName": "ghosttankj_0012.png"
+    },
+    {
+      "index": 13,
+      "fileName": "ghosttankj_0013.png"
+    },
+    {
+      "index": 14,
+      "fileName": "ghosttankj_0014.png"
+    },
+    {
+      "index": 15,
+      "fileName": "ghosttankj_0015.png"
+    },
+    {
+      "index": 16,
+      "fileName": "ghosttankj_0016.png"
+    },
+    {
+      "index": 17,
+      "fileName": "ghosttankj_0017.png"
+    },
+    {
+      "index": 18,
+      "fileName": "ghosttankj_0018.png"
+    },
+    {
+      "index": 19,
+      "fileName": "ghosttankj_0019.png"
+    },
+    {
+      "index": 20,
+      "fileName": "ghosttankj_0020.png"
+    },
+    {
+      "index": 21,
+      "fileName": "ghosttankj_0021.png"
+    },
+    {
+      "index": 22,
+      "fileName": "ghosttankj_0022.png"
+    },
+    {
+      "index": 23,
+      "fileName": "ghosttankj_0023.png"
+    },
+    {
+      "index": 24,
+      "fileName": "ghosttankj_0024.png"
+    },
+    {
+      "index": 25,
+      "fileName": "ghosttankj_0025.png"
+    },
+    {
+      "index": 26,
+      "fileName": "ghosttankj_0026.png"
+    },
+    {
+      "index": 27,
+      "fileName": "ghosttankj_0027.png"
+    },
+    {
+      "index": 28,
+      "fileName": "ghosttankj_0028.png"
+    },
+    {
+      "index": 29,
+      "fileName": "ghosttankj_0029.png"
+    },
+    {
+      "index": 30,
+      "fileName": "ghosttankj_0030.png"
+    },
+    {
+      "index": 31,
+      "fileName": "ghosttankj_0031.png"
+    },
+    {
+      "index": 32,
+      "fileName": "ghosttankj_0032.png"
+    },
+    {
+      "index": 33,
+      "fileName": "ghosttankj_0033.png"
+    },
+    {
+      "index": 34,
+      "fileName": "ghosttankj_0034.png"
+    },
+    {
+      "index": 35,
+      "fileName": "ghosttankj_0035.png"
+    },
+    {
+      "index": 36,
+      "fileName": "ghosttankj_0036.png"
+    },
+    {
+      "index": 37,
+      "fileName": "ghosttankj_0037.png"
+    },
+    {
+      "index": 38,
+      "fileName": "ghosttankj_0038.png"
+    },
+    {
+      "index": 39,
+      "fileName": "ghosttankj_0039.png"
+    },
+    {
+      "index": 40,
+      "fileName": "ghosttankj_0040.png"
+    },
+    {
+      "index": 41,
+      "fileName": "ghosttankj_0041.png"
+    },
+    {
+      "index": 42,
+      "fileName": "ghosttankj_0042.png"
+    },
+    {
+      "index": 43,
+      "fileName": "ghosttankj_0043.png"
+    },
+    {
+      "index": 44,
+      "fileName": "ghosttankj_0044.png"
+    },
+    {
+      "index": 45,
+      "fileName": "ghosttankj_0045.png"
+    },
+    {
+      "index": 46,
+      "fileName": "ghosttankj_0046.png"
+    },
+    {
+      "index": 47,
+      "fileName": "ghosttankj_0047.png"
+    },
+    {
+      "index": 48,
+      "fileName": "ghosttankj_0048.png"
+    },
+    {
+      "index": 49,
+      "fileName": "ghosttankj_0049.png"
+    },
+    {
+      "index": 50,
+      "fileName": "ghosttankj_0050.png"
+    },
+    {
+      "index": 51,
+      "fileName": "ghosttankj_0051.png"
+    },
+    {
+      "index": 52,
+      "fileName": "ghosttankj_0052.png"
+    },
+    {
+      "index": 53,
+      "fileName": "ghosttankj_0053.png"
+    },
+    {
+      "index": 54,
+      "fileName": "ghosttankj_0054.png"
+    },
+    {
+      "index": 55,
+      "fileName": "ghosttankj_0055.png"
+    },
+    {
+      "index": 56,
+      "fileName": "ghosttankj_0056.png"
+    },
+    {
+      "index": 57,
+      "fileName": "ghosttankj_0057.png"
+    },
+    {
+      "index": 58,
+      "fileName": "ghosttankj_0058.png"
+    },
+    {
+      "index": 59,
+      "fileName": "ghosttankj_0059.png"
+    },
+    {
+      "index": 60,
+      "fileName": "ghosttankj_0060.png"
+    },
+    {
+      "index": 61,
+      "fileName": "ghosttankj_0061.png"
+    },
+    {
+      "index": 62,
+      "fileName": "ghosttankj_0062.png"
+    },
+    {
+      "index": 63,
+      "fileName": "ghosttankj_0063.png"
+    },
+    {
+      "index": 64,
+      "fileName": "ghosttankj_0064.png"
+    },
+    {
+      "index": 65,
+      "fileName": "ghosttankj_0065.png"
+    },
+    {
+      "index": 66,
+      "fileName": "ghosttankj_0066.png"
+    },
+    {
+      "index": 67,
+      "fileName": "ghosttankj_0067.png"
+    },
+    {
+      "index": 68,
+      "fileName": "ghosttankj_0068.png"
+    },
+    {
+      "index": 69,
+      "fileName": "ghosttankj_0069.png"
+    },
+    {
+      "index": 70,
+      "fileName": "ghosttankj_0070.png"
+    },
+    {
+      "index": 71,
+      "fileName": "ghosttankj_0071.png"
+    },
+    {
+      "index": 72,
+      "fileName": "ghosttankj_0072.png"
+    },
+    {
+      "index": 73,
+      "fileName": "ghosttankj_0073.png"
+    },
+    {
+      "index": 74,
+      "fileName": "ghosttankj_0074.png"
+    },
+    {
+      "index": 75,
+      "fileName": "ghosttankj_0075.png"
+    },
+    {
+      "index": 76,
+      "fileName": "ghosttankj_0076.png"
+    },
+    {
+      "index": 77,
+      "fileName": "ghosttankj_0077.png"
+    },
+    {
+      "index": 78,
+      "fileName": "ghosttankj_0078.png"
+    },
+    {
+      "index": 79,
+      "fileName": "ghosttankj_0079.png"
+    },
+    {
+      "index": 80,
+      "fileName": "ghosttankj_0080.png"
+    },
+    {
+      "index": 81,
+      "fileName": "ghosttankj_0081.png"
+    },
+    {
+      "index": 82,
+      "fileName": "ghosttankj_0082.png"
+    },
+    {
+      "index": 83,
+      "fileName": "ghosttankj_0083.png"
+    },
+    {
+      "index": 84,
+      "fileName": "ghosttankj_0084.png"
+    },
+    {
+      "index": 85,
+      "fileName": "ghosttankj_0085.png"
+    },
+    {
+      "index": 86,
+      "fileName": "ghosttankj_0086.png"
+    },
+    {
+      "index": 87,
+      "fileName": "ghosttankj_0087.png"
+    }
+  ]
+}

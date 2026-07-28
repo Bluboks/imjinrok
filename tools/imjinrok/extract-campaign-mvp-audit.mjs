@@ -128,7 +128,7 @@ function auditScenarioImplementation(context) {
 
 function auditSimulationCoverage(context) {
   const evidence = textEvidence(context.simulationTests, "packages/simulation/src/simulation.test.ts", [
-    "imjinrok K01 reinforcement wave follows beacon construction like the source script",
+    "imjinrok K01 reinforcement preserves its static-proven requested coordinates through an occupied anchor",
     "protect-units objective can delay defeat after a protected unit is lost",
   ]);
 

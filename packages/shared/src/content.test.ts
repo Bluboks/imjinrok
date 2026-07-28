@@ -14,9 +14,13 @@ test("uses statically recovered names for uniquely bound original sprites", () =
       japaneseFirehouse:
         unitDefinitions["japanese-camp-firehouse"].displayName,
       japaneseGunner: unitDefinitions["japanese-gunner"].displayName,
+      japaneseKonishi: unitDefinitions["japanese-konishi"].displayName,
       japaneseHouse: unitDefinitions["japanese-camp-house"].displayName,
+      japaneseSamurai: unitDefinitions["japanese-samurai"].displayName,
       japaneseSwordsman:
         unitDefinitions["japanese-swordsman"].displayName,
+      japaneseTurtleTank:
+        unitDefinitions["japanese-turtle-tank"].displayName,
       japaneseTower: unitDefinitions["japanese-camp-tower"].displayName,
       gwonYul: unitDefinitions["gwon-yul"].displayName,
       royalCart: unitDefinitions["royal-cart"].displayName,
@@ -33,8 +37,11 @@ test("uses statically recovered names for uniquely bound original sprites", () =
       japaneseBarracks: "일본 훈련소",
       japaneseFirehouse: "일본 관측소",
       japaneseGunner: "일본 조총병",
+      japaneseKonishi: "일본 고니시",
       japaneseHouse: "일본 시장",
+      japaneseSamurai: "일본 사무라이",
       japaneseSwordsman: "일본 창병",
+      japaneseTurtleTank: "일본 귀갑차",
       japaneseTower: "일본 망루",
       gwonYul: "조선 권율",
       royalCart: "조선 선조의 어가",
@@ -62,3 +69,26 @@ test("uses statically recovered names for uniquely bound original sprites", () =
     },
   );
 });
+
+test("new Japanese identity kinds preserve their explicit project gameplay adapters", () => {
+  assert.deepEqual(
+    omitIdentity(unitDefinitions["japanese-samurai"]),
+    omitIdentity(unitDefinitions["japanese-swordsman"]),
+  );
+  assert.deepEqual(
+    omitIdentity(unitDefinitions["japanese-turtle-tank"]),
+    omitIdentity(unitDefinitions["japanese-swordsman"]),
+  );
+  assert.deepEqual(
+    omitIdentity(unitDefinitions["japanese-konishi"]),
+    omitIdentity(unitDefinitions["japanese-gunner"]),
+  );
+});
+
+function omitIdentity({
+  id: _id,
+  displayName: _displayName,
+  ...adaptedGameplay
+}: (typeof unitDefinitions)[keyof typeof unitDefinitions]) {
+  return adaptedGameplay;
+}

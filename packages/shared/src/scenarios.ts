@@ -120,6 +120,7 @@ export interface ScenarioSpawnUnitsActionDefinition {
   playerId: string;
   origin: GridPoint;
   units: StartingUnitDefinition[];
+  placementPolicy?: "requested-position-exact";
   order?: ScenarioUnitOrderDefinition;
 }
 
@@ -334,19 +335,45 @@ const joseonBriefingTitleSequence = [
   { sourceAsset: "ybriefingfnt/k01/k0111.spr", durationMs: 15 },
 ] as const satisfies readonly ScenarioBriefingTitleFrameDefinition[];
 
-// K0120 fires when the original executable sees the K01 beacon unit type 0x34 at full construction.
-// It then creates original type ids 0x52, 0x0d, 0x0e, and 0x0c around 55,53.
-const k01OriginalReinforcementWave: StartingUnitDefinition[] = [
-  { kind: "japanese-swordsman", idSuffix: "k0120-reinforcement-0x0d-1", offset: { x: -2, y: -2 } },
-  { kind: "japanese-gunner", idSuffix: "k0120-reinforcement-0x52", offset: { x: 0, y: -2 } },
-  { kind: "japanese-swordsman", idSuffix: "k0120-reinforcement-0x0d-2", offset: { x: 2, y: -2 } },
-  { kind: "japanese-swordsman", idSuffix: "k0120-reinforcement-0x0e-1", offset: { x: -2, y: 0 } },
-  { kind: "japanese-swordsman", idSuffix: "k0120-reinforcement-0x0e-2", offset: { x: 0, y: 0 } },
-  { kind: "japanese-swordsman", idSuffix: "k0120-reinforcement-0x0e-3", offset: { x: 2, y: 0 } },
-  { kind: "japanese-swordsman", idSuffix: "k0120-reinforcement-0x0c-1", offset: { x: -2, y: 2 } },
-  { kind: "japanese-swordsman", idSuffix: "k0120-reinforcement-0x0c-2", offset: { x: 0, y: 2 } },
-  { kind: "japanese-swordsman", idSuffix: "k0120-reinforcement-0x0c-3", offset: { x: 2, y: 2 } },
-];
+export type K01ReinforcementIdentityMapping =
+  | "exact-static-identity-source"
+  | "proxy";
+
+export interface K01ReinforcementAdapterRecord {
+  originalClass: 12 | 13 | 14 | 82;
+  rawOwnerWord: 1;
+  offset: GridPoint;
+  projectKind:
+    | "japanese-gunner"
+    | "japanese-samurai"
+    | "japanese-turtle-tank"
+    | "japanese-konishi";
+  identityMapping: K01ReinforcementIdentityMapping;
+  idSuffix: string;
+}
+
+export const k01ReinforcementOwnerAdapter = {
+  rawOwnerWord: 1,
+  projectPlayerId: "cpu-1",
+} as const;
+
+// K01-only adapter for the native descriptors created at 0x0048a7ae. The owner-to-player,
+// trigger, order, stats, collision, and behavior are project adaptations; generic spawn semantics remain unchanged.
+export const k01ReinforcementAdapter = [
+  { originalClass: 13, rawOwnerWord: 1, offset: { x: -2, y: -2 }, projectKind: "japanese-samurai", identityMapping: "exact-static-identity-source", idSuffix: "k0120-reinforcement-0x0d-1" },
+  { originalClass: 82, rawOwnerWord: 1, offset: { x: 0, y: -2 }, projectKind: "japanese-konishi", identityMapping: "exact-static-identity-source", idSuffix: "k0120-reinforcement-0x52" },
+  { originalClass: 13, rawOwnerWord: 1, offset: { x: 2, y: -2 }, projectKind: "japanese-samurai", identityMapping: "exact-static-identity-source", idSuffix: "k0120-reinforcement-0x0d-2" },
+  { originalClass: 14, rawOwnerWord: 1, offset: { x: -2, y: 0 }, projectKind: "japanese-turtle-tank", identityMapping: "exact-static-identity-source", idSuffix: "k0120-reinforcement-0x0e-1" },
+  { originalClass: 14, rawOwnerWord: 1, offset: { x: 0, y: 0 }, projectKind: "japanese-turtle-tank", identityMapping: "exact-static-identity-source", idSuffix: "k0120-reinforcement-0x0e-2" },
+  { originalClass: 14, rawOwnerWord: 1, offset: { x: 2, y: 0 }, projectKind: "japanese-turtle-tank", identityMapping: "exact-static-identity-source", idSuffix: "k0120-reinforcement-0x0e-3" },
+  { originalClass: 12, rawOwnerWord: 1, offset: { x: -2, y: 2 }, projectKind: "japanese-gunner", identityMapping: "exact-static-identity-source", idSuffix: "k0120-reinforcement-0x0c-1" },
+  { originalClass: 12, rawOwnerWord: 1, offset: { x: 0, y: 2 }, projectKind: "japanese-gunner", identityMapping: "exact-static-identity-source", idSuffix: "k0120-reinforcement-0x0c-2" },
+  { originalClass: 12, rawOwnerWord: 1, offset: { x: 2, y: 2 }, projectKind: "japanese-gunner", identityMapping: "exact-static-identity-source", idSuffix: "k0120-reinforcement-0x0c-3" },
+] as const satisfies readonly K01ReinforcementAdapterRecord[];
+
+const k01ReinforcementWave: StartingUnitDefinition[] = k01ReinforcementAdapter.map(
+  ({ projectKind: kind, idSuffix, offset }) => ({ kind, idSuffix, offset }),
+);
 
 const k02OccupationScan = { origin: { x: 0, y: 65 }, width: 7, height: 13, yStep: 2 } as const;
 
@@ -701,9 +728,10 @@ export const imjinrokK01Scenario = {
       actions: [
         {
           type: "spawn-units",
-          playerId: "cpu-1",
+          playerId: k01ReinforcementOwnerAdapter.projectPlayerId,
           origin: { x: 55, y: 53 },
-          units: k01OriginalReinforcementWave,
+          units: k01ReinforcementWave,
+          placementPolicy: "requested-position-exact",
           order: { type: "attack-move", target: { x: 10, y: 10 } },
         },
         {

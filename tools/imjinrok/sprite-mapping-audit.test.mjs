@@ -44,24 +44,24 @@ test("sprite mapping audit is deterministic and current", (t) => {
 
 test("frame mappings stay quarantined outside statically proven scopes while identities are cataloged", () => {
   assert.deepEqual(report.summary, {
-    visualCount: 18,
-    unitVisualCount: 9,
+    visualCount: 21,
+    unitVisualCount: 12,
     buildingVisualCount: 9,
-    stateMappingCount: 62,
-    clipCount: 382,
-    frameReferenceCount: 2_616,
+    stateMappingCount: 77,
+    clipCount: 517,
+    frameReferenceCount: 3_633,
     missingFrameReferenceCount: 0,
     unverifiedVisualCount: 2,
-    mixedVisualCount: 14,
+    mixedVisualCount: 17,
     scopedStaticProvenVisualCount: 2,
-    staticIdentityVisualCount: 16,
+    staticIdentityVisualCount: 19,
     ambiguousIdentityVisualCount: 1,
     unboundIdentityVisualCount: 1,
-    projectBindingCount: 17,
+    projectBindingCount: 20,
     projectBindingConflictCount: 0,
     portraitCueCount: 17,
     unverifiedPortraitCueCount: 0,
-    findingCount: 67,
+    findingCount: 57,
   });
   assert.equal(
     report.visuals.filter((visual) => visual.evidenceStatus === "unverified").length,
@@ -103,6 +103,132 @@ test("frame mappings stay quarantined outside statically proven scopes while ide
           finding.code === "mirrored-facing-unverified"),
     ).length,
     4,
+  );
+  const japaneseSamurai = report.visuals.find(
+    (visual) => visual.visualId === "japanese-samurai",
+  );
+  const japaneseGunner = report.visuals.find(
+    (visual) => visual.visualId === "japanese-gunner",
+  );
+  assert.equal(japaneseGunner?.evidenceStatus, "mixed");
+  assert.equal(
+    japaneseGunner?.staticEvidence.animationStateMapping,
+    "static-proven-core-state-frames",
+  );
+  assert.deepEqual(japaneseGunner?.staticEvidence.stateSources, {
+    idle: "char\\gunj1.spr",
+    move: "char\\gunj1.spr",
+    walk: "char\\gunj1.spr",
+    attack: "char\\gunj2.spr",
+    death: "char\\gunj3.spr",
+  });
+  assert.equal(
+    report.findings.filter(
+      (finding) =>
+        finding.visualId === "japanese-gunner" &&
+        (finding.code === "direction-order-unverified" ||
+          finding.code === "mirrored-facing-unverified"),
+    ).length,
+    0,
+  );
+  assert.equal(japaneseSamurai?.staticEvidence.internalClass, 13);
+  assert.equal(
+    japaneseSamurai?.staticEvidence.originalGameplayName,
+    "일본 사무라이",
+  );
+  assert.equal(
+    japaneseSamurai?.staticEvidence.animationStateMapping,
+    "static-proven-core-state-frames",
+  );
+  assert.deepEqual(
+    japaneseSamurai?.staticEvidence.stateFrameRanges,
+    {
+      idle: [0, 39],
+      move: [0, 39],
+      walk: [0, 39],
+      attack: [50, 89],
+      death: [40, 47],
+    },
+  );
+  assert.deepEqual(
+    japaneseSamurai?.staticEvidence.stateSources,
+    {
+      idle: "char\\horseswordj2.spr",
+      move: "char\\horseswordj1.spr",
+      walk: "char\\horseswordj1.spr",
+      attack: "char\\horseswordj1.spr",
+      death: "char\\horseswordj1.spr",
+    },
+  );
+  assert.equal(
+    report.findings.some(
+      (finding) =>
+        finding.visualId === "japanese-samurai" &&
+        (finding.code === "direction-order-unverified" ||
+          finding.code === "mirrored-facing-unverified"),
+    ),
+    false,
+  );
+  const turtleTank = report.visuals.find(
+    (visual) => visual.visualId === "japanese-turtle-tank",
+  );
+  assert.equal(turtleTank?.staticEvidence.internalClass, 14);
+  assert.equal(turtleTank?.staticEvidence.originalGameplayName, "일본 귀갑차");
+  assert.equal(
+    turtleTank?.staticEvidence.animationStateMapping,
+    "static-proven-core-state-frames",
+  );
+  assert.deepEqual(turtleTank?.staticEvidence.stateFrameRanges, {
+    idle: [0, 64],
+    move: [0, 71],
+    walk: [0, 71],
+    attack: [72, 80],
+  });
+  assert.deepEqual(turtleTank?.staticEvidence.stateSources, {
+    idle: "char\\ghosttankj.spr",
+    move: "char\\ghosttankj.spr",
+    walk: "char\\ghosttankj.spr",
+    attack: "char\\ghosttankj.spr",
+  });
+  assert.equal(
+    report.findings.some(
+      (finding) =>
+        finding.visualId === "japanese-turtle-tank" &&
+        (finding.code === "direction-order-unverified" ||
+          finding.code === "mirrored-facing-unverified"),
+    ),
+    false,
+  );
+  const konishi = report.visuals.find(
+    (visual) => visual.visualId === "japanese-konishi",
+  );
+  assert.equal(konishi?.staticEvidence.internalClass, 82);
+  assert.equal(
+    konishi?.staticEvidence.animationStateMapping,
+    "static-proven-core-state-frames",
+  );
+  assert.deepEqual(konishi?.staticEvidence.stateFrameRanges, {
+    idle: [0, 29],
+    move: [0, 39],
+    walk: [0, 39],
+    attack: [0, 49],
+    death: [40, 47],
+  });
+  assert.deepEqual(konishi?.staticEvidence.stateSources, {
+    idle: "char\\generalj12.spr",
+    move: "char\\generalj11.spr",
+    walk: "char\\generalj11.spr",
+    attack: "char\\generalj13.spr",
+    death: "char\\generalj11.spr",
+  });
+  assert.equal(
+    report.findings.some(
+      (finding) =>
+        finding.visualId === "japanese-konishi" &&
+        (finding.code === "direction-order-unverified" ||
+          finding.code === "mirrored-facing-unverified"),
+    ),
+    false,
   );
   const japaneseSpearman = report.visuals.find(
     (visual) => visual.visualId === "japanese-swordsman",
@@ -293,7 +419,7 @@ test("frame mappings stay quarantined outside statically proven scopes while ide
       K6: 17,
     },
   );
-  assert.ok(
+  assert.equal(
     report.findings.some(
       (finding) =>
         finding.code === "distinct-state-frame-collision" &&
@@ -301,6 +427,7 @@ test("frame mappings stay quarantined outside statically proven scopes while ide
         finding.states.includes("attack") &&
         finding.states.includes("move"),
     ),
+    false,
   );
   assert.equal(
     report.findings.filter(

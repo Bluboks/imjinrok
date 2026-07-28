@@ -21,6 +21,17 @@ test("campaign MVP audit separates source-backed implementation from partial ori
   assert.equal(requirementsById.get("source-script-dialogue-coverage")?.status, "achieved-without-runtime");
   assert.equal(requirementsById.get("client-scenario-definition-source-parity")?.status, "achieved-without-runtime");
   assert.equal(requirementsById.get("simulation-runtime-model-coverage")?.status, "achieved-without-runtime");
+  assert.deepEqual(
+    requirementsById.get("simulation-runtime-model-coverage")?.evidence.find((item) =>
+      item.detail === "imjinrok K01 reinforcement preserves its static-proven requested coordinates through an occupied anchor"
+    ),
+    {
+      id: "text:imjinrok K01 reinforcement preserves its static-proven requested coordinates through an occupied anchor",
+      present: true,
+      source: "packages/simulation/src/simulation.test.ts",
+      detail: "imjinrok K01 reinforcement preserves its static-proven requested coordinates through an occupied anchor",
+    },
+  );
   assert.equal(requirementsById.get("original-executable-k01-runtime-observation")?.status, "partial-runtime-observation");
 });
 
