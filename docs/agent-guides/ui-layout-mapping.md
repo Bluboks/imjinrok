@@ -133,6 +133,14 @@ definition의 교집합인 16개 named-hero production action을 FIFO보다 먼�
 재현했지만 deeper redelivery와 resource 파일명은 포함하지 않는다. 이 compatibility slice를
 project selection panel의 public contract나 고정 원본 layout으로 일반화하지 않는다.
 
+[인접 slot 0 후속 분석](../reverse-engineering/mechanics/magic-auto-use-gate.md)은 actions
+`61/62`가 player record `+0x254c` WORD를 `1/0`으로 쓰고, nonzero일 때 일반 공격 updater
+안의 9-class 자동 특수행동 dispatcher를 허용함을 정적 확정했다. 이는 player-global 마법
+자동사용 toggle과 일치한다. synthetic control/hit·writer와 class admission만 부분 재현했고
+class별 cadence·target·world effect는 static-only다. 인접 hero-priority gate나 remembered
+right-click pinning과 합치지 않으며, raw gate·고정 원본 slot을 project contract로 이식하지
+않는다.
+
 ## 변경 통과 조건
 
 - 원본 파일 해시와 함수·데이터 주소

@@ -24,7 +24,7 @@
 | `0x00413070` | `FUN_00413070`, `0x00413070-0x0041362d` | 160 / 442 | 공격 kind·defender class별 payload 보정과 방어 백분율 차감 | effect kind 1·권율 직접 피해 범위 정적 확정 |
 | `0x00413700` | `FUN_00413700`, `0x00413700-0x00413b02` | 61 / 329 | 공격 effect kind별 단일·범위 대상 전달 | kind 1→단일 defender 경로 정적 확정 |
 | `0x00413b30` | `FUN_00413b30`, `0x00413b30-0x00413ddd` | 30 / 208 | defender 피해 계산·체력 적용·사망 후속 처리 | 권율 직접 피해 호출 순서 정적 확정 |
-| `0x00416c70` | `FUN_00416c70`, `0x00416c70-0x0041737e` | 84 / 555 | 행동 상태 5의 대상 검증·접근·일반 공격 하위 상태 | 하위 상태 3→공격 resolver 범위 정적 확정 |
+| `0x00416c70` | `FUN_00416c70`, `0x00416c70-0x0041737e` | 84 / 555 | 행동 상태 5의 대상 검증·접근·일반 공격 하위 상태와 `0x00416f6e` 자동 특수행동 dispatcher 호출 | 하위 상태 3→공격 resolver와 [마법 자동사용 gate](mechanics/magic-auto-use-gate.md) sole caller 범위 정적 확정 |
 | `0x00417430` | `FUN_00417430`, `0x00417430-0x004196de` | 272 / 2,468 | 일반 공격 readiness·phase·효과 전달·사이클 완료 | K01 권율·유성룡 phase·전달 분기 정적 확정 |
 | `0x0041a9e0` | `FUN_0041a9e0`, `0x0041a9e0-0x0041aa33` | 6 / 23 | 상태 12에서 slot `+0x0a`, frame `+0x0c` 선택 | 조선 본영 범위 정적 확정, 다른 건물 base frame |
 | `0x0041aa90` | `FUN_0041aa90`, `0x0041aa90-0x0041ad8b` | 44 / 219 | 건설 진행도 `+0x8c`→8단계 phase | 조선 본영 범위 정적 확정 |
@@ -92,7 +92,7 @@
 | `0x0048dbe0` | `FUN_0048dbe0`, `0x0048dbe0-0x0048dda9` | 21 / 147 | `DAT_0088afcc` 기반 임무 map 로드 | K01 map 결합 정적 확정 |
 | `0x0048ddb0` | `FUN_0048ddb0`, `0x0048ddb0-0x0048deca` | 36 / 105 | `DAT_0088afcc` 기반 임무 handler dispatch | 인덱스 1→`FUN_0048a5c0` 정적 확정 |
 | `0x0048dde0` | `FUN_0048ddb0`, `0x0048ddb0-0x0048deca` | 36 / 105 | 미션 결과 소비·전환 | 호출 주기와 후속 함수 |
-| `0x0048ea90` | `FUN_0048ea90`, `0x0048ea90-0x004924b2` | 1 / 5,587 | 원본 문자열을 런타임 저장소에 초기화 | class 1~95 CP949 이름 복사와 초상화 ID 저장 범위 정적 확정 |
+| `0x0048ea90` | `FUN_0048ea90`, `0x0048ea90-0x004924b2` | 1 / 5,587 | 원본 문자열을 런타임 저장소에 초기화 | class 1~95 CP949 이름·초상화 ID와 magic controls의 `자동마법설정/해제` label 복사 정적 확정 |
 | `0x004a5730` | `FUN_004a5730`, `0x004a5730-0x004a5977` | 13 / 157 | `objectiveborder.spr` 로드, 닫기 컨트롤 `(415,267)` 80×24 초기화, K01 인덱스 1의 두 텍스트를 `FUN_004a9010` 결과로 X 158·center Y 166/228에 배치 | 목표 모달 초기화·로드·텍스트 실패 분기·호출 규약·배치 정적 확정 |
 | `0x004a5980` | `FUN_004a5980`, `0x004a5980-0x004a5ab3` | 6 / 87 | 내부 해제·외부 one-shot 종료, frame `(112,81)` 416×236 draw, 내용 RECT `(158,135)-(478,259)` present | 목표 모달 갱신·종료·잠금 실패 범위 정적 확정 |
 | `0x004a5ac0` | `FUN_004a5ac0`, `0x004a5ac0-0x004a5ada` | 3 / 7 | SPR 포인터가 있으면 해제한 뒤 조건과 무관하게 `FUN_004a5ae0`으로 tail-jump | 목표 모달 종료 정리 순서 정적 확정 |
@@ -114,19 +114,21 @@
 아래 함수는 위 `seeds.json` 표의 configured seed가 아니다. 전용 extractor가 원본 raw range를
 검증하고, 범위·명령어 수는 current
 [`functions.json`](../../analysis/generated/imjinrok2/functions.json) whole-function metadata와
-일치시킨다. 상세 제어·데이터 흐름은
-[영웅 생산 queue 우선순위](mechanics/hero-priority-queue-gate.md)를 단일 출처로 삼는다.
+일치시킨다. 상세 제어·데이터 흐름은 각 행에 연결한
+[영웅 생산 queue 우선순위](mechanics/hero-priority-queue-gate.md)와
+[마법 자동사용 gate](mechanics/magic-auto-use-gate.md)를 단일 출처로 삼는다.
 
 | 함수 | generated body 범위 | 명령어 | 정적 확정 역할·경계 |
 | ---: | --- | ---: | --- |
 | `0x00428530` | `0x00428530-0x00428579` | 28 | FIFO pop wrapper; 제거 뒤 constant 20으로 redelivery 시도 |
 | `0x00428580` | `0x00428580-0x004285c9` | 28 | hero-filtered pop wrapper; 제거 뒤 constant 30으로 redelivery 시도 |
-| `0x0045b3a0` | `0x0045b3a0-0x0045b419` | 40 | selection-count-zero slot 1에 gate off/on actions `63/64` control 생산 |
+| `0x004196e0` | 비연속 body 10개, `0x004196e0-0x0041a018` | 665 | player `+0x254c` nonzero에서 9-class 자동 특수행동 case를 선택; cadence·deeper effect는 static-only |
+| `0x0045b3a0` | `0x0045b3a0-0x0045b419` | 40 | selection-count-zero slot 0에 magic actions `61/62`, slot 1에 hero-priority actions `63/64` control 생산 |
 | `0x004767a0` | `0x004767a0-0x004767d1` | 13 | 20-byte action definition의 flags·produced-type 등 여섯 필드 writer |
 | `0x004767e0` | `0x004767e0-0x004767f1` | 6 | action flags WORD에 공급된 mask가 모두 설정됐는지 검사 |
 | `0x00476820` | `0x00476820-0x00477cb5` | 1,833 | constructor call 229개로 initialized action definition 집합 생산 |
-| `0x00477f50` | `0x00477f50-0x00478246` | 231 | player command actions `63/64`를 소비해 gate WORD `1/0` 기록 |
-| `0x0047df30` | `0x0047df30-0x0047e040` | 65 | `0x2c10`-byte player record 전체 zero reset; gate 초기값 0 포함 |
+| `0x00477f50` | `0x00477f50-0x00478246` | 231 | player command actions `61/62`와 `63/64`를 소비해 각각 `+0x254c`/`+0x254e` gate WORD `1/0` 기록 |
+| `0x0047df30` | `0x0047df30-0x0047e040` | 65 | `0x2c10`-byte player record 전체 zero reset; 두 인접 gate 초기값 0 포함 |
 | `0x0047fda0` | `0x0047fda0-0x0047fe0d` | 35 | FIFO index 0의 full 12-byte record 제거·shift·count 감소 |
 | `0x0047fe10` | `0x0047fe10-0x0047feef` | 78 | action flags bit `0x8`와 produced-type `+0x20` bit `0x8`의 첫 record 제거 |
 

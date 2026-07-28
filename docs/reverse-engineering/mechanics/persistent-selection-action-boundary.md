@@ -348,21 +348,19 @@ deeper placement/entity-constructor convention은 미확정 또는 static-only�
 synthetic state를 합치지 않았다. 기억한 right-click registration action/owner는 아직 식별하지
 않았다.
 
-## 독립 future static leads
+## 독립 후속 static leads
 
-다음 두 사용자 기억은 이번 trace의 사실이나 구현 claim이 아니다.
+다음 두 사용자 기억은 이 production-action trace의 사실이나 구현 claim이 아니었다.
 
-- selection이 없을 때 lower-left HUD에 global magic auto-use enable/disable toggle이 있다는 lead
-- unit-production queue에서 hero를 우선하는 global toggle이 있다는 lead
+- selection이 없을 때 lower-left HUD에 global magic auto-use enable/disable toggle이 있다는
+  lead는 후속 [magic auto-use 분석](magic-auto-use-gate.md)에서 별도 정적 확정했다.
+- unit-production queue에서 hero를 우선하는 global toggle이 있다는 lead는 후속
+  [hero-priority 분석](hero-priority-queue-gate.md)에서 별도 정적 확정했다.
 
-두 번째 lead는 후속
-[hero-priority queue gate 분석](hero-priority-queue-gate.md)에서 player record `+0x254e`
-WORD, actions `63/64`, selection-count-zero slot 1과 16개 named-hero action 전수 교집합으로
-정적 확정·범위 한정 재현했다. 첫 번째 lead는 인접 slot 0/actions `61/62`라는 탐색점만 얻었고,
-아직 hero gate나 seven-slot owner와 동일하다고 가정하지 않는다.
+두 후속 gate는 인접 player fields지만 서로 다른 actions·비교·consumer를 가지며 seven-slot
+owner나 remembered right-click pinning과 동일시하지 않는다.
 
 ## 다음 좁은 질문
 
-selection-count-zero slot 0의 actions `61/62`, 인접 player WORD gate, writer·consumer와
-action/type 집합을 전수 추적해 global magic auto-use toggle인지 판정한다. remembered
-right-click reservation은 이 owner와 합치지 않고 별도 질문으로 남긴다.
+remembered right-click reservation의 실제 action/owner를 식별한다. 또는 K01 class 78의
+magic auto-use target·delivery 전체를 독립적으로 닫는다. 두 질문을 합치지 않는다.

@@ -19,8 +19,9 @@ FUN_0043c300의 player-scoped production-filter queue gate는 어떤 입력·HUD
   project UI를 지배하지 않는다. Noto/Canvas typography도 의도적 프로젝트 적응이다.
 - **검토 기록:** Root Codex가 2026-07-28에 read-only review를 수행했다.
 
-global magic auto-use toggle과 생산 버튼 우클릭 persistent HUD reservation/pinning은 별도
-미확정 lead다. 인접 control이나 공통 queue record를 쓴다는 이유만으로 이 gate와 합치지 않는다.
+후속 [magic auto-use gate 분석](magic-auto-use-gate.md)은 인접 slot 0을 별도
+player-global toggle로 정적 확정했다. 생산 버튼 우클릭 persistent HUD reservation/pinning은
+계속 별도 미확정 lead다. 인접 field라는 이유만으로 두 gate나 pinning을 합치지 않는다.
 
 ## 원본 provenance
 
@@ -93,8 +94,8 @@ save/load bulk copy가 없다고 주장하지 않는다.
 | 0 | 인접 별도 gate가 0 / nonzero | `0x21` / `0x22` | 61 / 62 | 27 / 26 |
 | 1 | hero-priority gate가 0 / nonzero | `0x23` / `0x24` | 63 / 64 | 28 / 29 |
 
-slot 1이 이번 질문의 대상이다. slot 0의 actions `61/62`는 별도 gate이므로 global magic
-auto-use라는 기억과 여기서 결합하지 않는다.
+slot 1이 이번 질문의 대상이다. slot 0의 actions `61/62`는 이 문서 범위에서는 별도 gate이며,
+후속 [독립 분석](magic-auto-use-gate.md)에서 global magic auto-use로 확정했다.
 
 `FUN_00459110`의 slot rectangle은 signed WORD layout globals로 계산한다.
 
@@ -170,10 +171,9 @@ field는 loud하게 검사한다.
 - `FUN_00426740` 이후 재전달 성공/실패와 생산 entity의 후속 state update
 - frame/resource indices `28/29`의 파일 identity
 - structured direct refs 밖 save/load 또는 alias writer
-- adjacent actions `61/62` gate의 분류
+- adjacent actions `61/62` gate의 class별 deeper effect
 - 생산 버튼 우클릭 persistent HUD reservation/pinning의 실제 action/owner
 
-다음 독립 질문은 selection-count-zero slot 0의 actions `61/62`, 인접 player WORD gate,
-writer와 consumer의 action/type 집합을 전수 추적해 그것이 사용자가 기억한 global magic
-auto-use toggle인지 판정하는 것이다. 우클릭 pinning lead는 그 gate와도 합치지 않고 별도로
-유지한다.
+후속 분석은 selection-count-zero slot 0의 actions `61/62`와 인접 player WORD gate가
+사용자가 기억한 global magic auto-use toggle임을 정적 확정했다. 다음 독립 질문은 K01 class
+78의 auto-use effect 전체 또는 remembered right-click pinning의 실제 action/owner다.
