@@ -7,8 +7,8 @@
 
 | 구분 | 상태 | 범위 |
 | --- | --- | --- |
-| 분석 | 정적 확정 | `0x007c5ed8`의 9개 command slot, `3×3` 좌표, renderer/input 분기와 lock 실패 |
-| 재현 | 재현 완료 | 정상, strict-edge, disabled, lock 실패, owner index 범위의 독립 벡터 |
+| 분석 | 정적 확정 | `0x007c5ed8`의 9개 command slot, `3×3` origin/gap/formula, renderer/input 분기와 lock 실패 |
+| 재현 | 재현 완료 | parameterized cell size의 정상, strict-edge, disabled, lock 실패, owner index 범위 벡터 |
 | 구현 | 없음 | 제품 코드 변경 없음 |
 
 이는 [persistent selection/action boundary](persistent-selection-action-boundary.md)의 selected-action
@@ -19,43 +19,43 @@ mirror와 no-selection seven-slot surface를 다시 이름 붙이는 문서가 �
 
 - EXE: `original/imjinrok2/imjinrok2.exe`, SHA-256
   `25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e`
-- 함수/참조 export: 각각 SHA-256
-  `c10ea2de1f4998411d52443419c9a7f52ff7f9c18e79bd4115ba197d2f5bebc3`,
+- structured reference export: SHA-256
   `df11ff3713988ef22b3390b5b0ae7b4a87464b5de547a4866e1c8ec8a0bcaf4c`
 - 검증 추출기: `tools/imjinrok/extract-gameplay-selection-command-panel.mjs`
 - 재현 fixture: `analysis/fixtures/gameplay-selection-command-panel-vectors.json`
 - focused test: `tools/imjinrok/gameplay-selection-command-panel.test.mjs`
 
 추출기는 `FUN_004475a0`, `FUN_0045ad90`, `FUN_00459490`, `FUN_00459110`,
-`FUN_0045b3a0`, `FUN_00481ee0`, `FUN_0044a040`의 raw range hash, bytes, structured direct
-call set, 그리고 두 SPR header를 함께 확인한다. 따라서 단순 주소나 자원 이름 유사성만으로
-결론을 내린 것이 아니다.
+`FUN_0045b3a0`, `FUN_00481ee0`, `FUN_0044a040`, `FUN_00461200`의 raw range hash, bytes,
+structured direct-call set, 그리고 두 SPR header를 함께 확인한다. source artifact와 일치하지
+않는 resource hash는 extractor가 거부한다.
 
 ## owner와 canvas
 
-`FUN_0045ad90`의 9회 loop는 `0x007c5ed8`을 `ECX` owner로 놓고 index `0..8`에 대해
-`FUN_00461200`을 호출한다. loop의 storage cursor는 `0x007c66f0`에서 시작해
-`0x007c6702` 직전까지 2바이트씩 진행한다. 이 owner가 gameplay action grid의 정적 확정
-owner다.
+`FUN_0045ad90`의 loop는 `0x007c5ed8`을 `ECX` owner로 놓고 index 0에서 시작한다. storage
+cursor는 `0x007c66f0`에서 시작해 2바이트씩 증가하고 `0x007c6702` 직전까지 반복하므로 정확히
+9회다. `FUN_00461200`은 signed index `<0` 또는 `>=9`를 owner field read 전에 zero 반환으로
+막는다. 따라서 이 owner의 정적 확정 index domain은 `0..8`이다.
 
 `FUN_0044a040`은 같은 destination surface `DAT_00559418`에 width `640`, height `480`을
 기록한다. action grid는 이 좌상단 원점 shared canvas 좌표를 사용한다.
 
 common SPR loader `FUN_00443360`의 table 두 번째 항목은 내장 문자열 `fnt\pannel.spr`를
 가리킨다. 해당 원본 SPR header는 `640×163`, 1 frame이다. `fnt\button.spr` header는
-`34×34`, 289 frames이다. 이 두 header는 resource 사실이고, button cell의 `34×34`와
-일치한다. 다만 이 slice는 `pannel.spr` object에서 특정 final blit call과 `(x,y)`를 닫지
-않았다. 그러므로 `pannel.spr`가 `y=317`에 반드시 그려진다거나 원본의 전체 background draw가
-재현되었다고 주장하지 않는다.
+`34×34`, 289 frames이다. 그러나 common loader/table에서 `DAT_0089982c/0x00899830`의 runtime
+writer까지, 그리고 그 writer에서 `button.spr` header까지의 full data flow는 이 slice에서 닫지
+못했다. 따라서 button header의 `34×34`는 resource 사실일 뿐 grid cell size의 증거가 아니다.
+마찬가지로 `pannel.spr` object에서 특정 final blit call과 `(x,y)`도 닫지 않았다.
 
-## 확정된 3×3 grid
+## 확정된 parameterized 3×3 grid
 
 `FUN_00445770 → FUN_00481ee0`은 layout object `0x0088bd60`을 초기화한다.
 
 ```text
 columns = WORD[0x0088bd62] = 3
 rows    = WORD[0x0088bd60] = 3
-cell    = WORD[0x0088bd64..0x0088bd66] = 34×34
+cellW   = WORD[0x0088bd64] = WORD[0x0089982c]
+cellH   = WORD[0x0088bd66] = WORD[0x00899830]
 gap     = WORD[0x0088bd68..0x0088bd6a] = 2×2
 origin  = WORD[0x0088bd6c..0x0088bd6e] = (525,363)
 ```
@@ -65,26 +65,17 @@ origin  = WORD[0x0088bd6c..0x0088bd6e] = (525,363)
 ```text
 column = slot % 3
 row    = trunc(slot / 3)
-left   = 525 + column * 36
-top    = 363 + row * 36
-right  = left + 34
-bottom = top + 34
+left   = 525 + column * (cellW + 2)
+top    = 363 + row * (cellH + 2)
+right  = left + cellW
+bottom = top + cellH
 ```
 
-| slot | exclusive rectangle |
-| ---: | --- |
-| 0 | `(525,363)-(559,397)` |
-| 1 | `(561,363)-(595,397)` |
-| 2 | `(597,363)-(631,397)` |
-| 3 | `(525,399)-(559,433)` |
-| 4 | `(561,399)-(595,433)` |
-| 5 | `(597,399)-(631,433)` |
-| 6 | `(525,435)-(559,469)` |
-| 7 | `(561,435)-(595,469)` |
-| 8 | `(597,435)-(631,469)` |
-
-여기서 rectangle은 hit test가 사용하는 exclusive right/bottom 표현이다. 따라서 grid는 canvas의
-right/bottom에서 각각 9px/11px 떨어진다.
+`FUN_00481ee0`이 `DAT_0089982c/0x00899830`를 runtime field로 복사하고 renderer/input이 그
+field를 소비하는 것까지는 정적 확정이다. 하지만 그 runtime field의 producer를 `button.spr`
+header와 source-bind하지 못했으므로 `cellW=34`, `cellH=34`, slot별 numeric rectangle, canvas와의
+right/bottom margin은 모두 **미확정**이다. rectangle의 right/bottom은 위 formula처럼 exclusive
+comparison으로만 확정된다.
 
 ## frame draw와 no-selection
 
@@ -124,7 +115,8 @@ delivery는 이 문서 범위 밖이다.
 
 ## 재현 벡터와 남은 경계
 
-fixture는 다음을 고정한다.
+fixture는 source-derived formula에 test-local `runtimeCellWidth=34`, `runtimeCellHeight=34`를
+입력해 다음을 고정한다. 이 `34`는 model input이며 원본 runtime field의 정적 확정값이 아니다.
 
 - lock 실패: slot input 없이 command-grid path를 건너뜀
 - no-selection slot 1의 strict interior `(562,364)` 허용
@@ -136,7 +128,8 @@ fixture는 다음을 고정한다.
 원본도 renderer의 `0x78`/`0x86` read와 input의 `0x8a` read가 서로 다르므로 이들을 하나의
 “frame 값”으로 합치지 않는다.
 
-남은 불확실성은 direct `pannel.spr` final blit 위치, selected-entity renderer
-`FUN_00421390`의 전체 visual contents, action identifier별 의미, 그리고 runtime sprite/resource
-pointer failure의 화면 결과다. 따라서 현재 responsive `selectionPanel.ts`를 원작 일치 구현으로
-분류하지 않으며, 이 분석은 제품 파일을 변경하지 않는다.
+남은 불확실성은 `DAT_0089982c/0x00899830`의 producer-to-`button.spr` binding, direct
+`pannel.spr` final blit 위치, selected-entity renderer `FUN_00421390`의 전체 visual contents,
+action identifier별 의미, 그리고 runtime sprite/resource pointer failure의 화면 결과다. 따라서
+현재 responsive `selectionPanel.ts`를 원작 일치 구현으로 분류하지 않으며, 이 분석은 제품 파일을
+변경하지 않는다.

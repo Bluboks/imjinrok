@@ -8,13 +8,15 @@
         "selectionCount": 0,
         "surfaceLockSucceeded": false
       },
-      "expectedOutputSha256": "3344bb18b6b001e95bc32df3c8afd72812ef12bb7678dc6b10a84be2d7f47c8b"
+      "expectedOutputSha256": "fe95e88c0c4679cdc5e16258c25672a0bb7d14acbe7b1dc3aee7c19fbd8996d7"
     },
     {
       "id": "no-selection-admits-strict-interior-slot-one",
       "input": {
         "selectionCount": 0,
         "surfaceLockSucceeded": true,
+        "runtimeCellWidth": 34,
+        "runtimeCellHeight": 34,
         "slots": [
           { "rendererEnabled": 1, "frameOrResourceIndex": 27, "inputControlId": 33 },
           { "rendererEnabled": 1, "frameOrResourceIndex": 28, "inputControlId": 35 },
@@ -28,13 +30,15 @@
         ],
         "hitTest": { "disabled": false, "slot": 1, "pointerX": 562, "pointerY": 364 }
       },
-      "expectedOutputSha256": "53bcf96b76cd35cf9f506d5151d128e6b1fe3f38f646071b9b3e564c851b42c5"
+      "expectedOutputSha256": "286e5d4046fcac5aa7e4a689d1f5b5fb0482adefc3db7ffda3d7d64f5cf1b01d"
     },
     {
       "id": "single-selection-rejects-top-edge",
       "input": {
         "selectionCount": 1,
         "surfaceLockSucceeded": true,
+        "runtimeCellWidth": 34,
+        "runtimeCellHeight": 34,
         "slots": [
           { "rendererEnabled": 0, "frameOrResourceIndex": 0, "inputControlId": 0 },
           { "rendererEnabled": 0, "frameOrResourceIndex": 0, "inputControlId": 0 },
@@ -48,13 +52,15 @@
         ],
         "hitTest": { "disabled": false, "slot": 8, "pointerX": 598, "pointerY": 435 }
       },
-      "expectedOutputSha256": "6e8845f3506db0a3435ab00ed210c775280c3a4540a2feb2a43eeb6b3772764a"
+      "expectedOutputSha256": "f45a68dcb81b1d515d1fc2b1c0801d1833929b441e7118dcceee0257f68e2725"
     },
     {
       "id": "multi-selection-disabled-rejects-before-geometry-admission",
       "input": {
         "selectionCount": 2,
         "surfaceLockSucceeded": true,
+        "runtimeCellWidth": 34,
+        "runtimeCellHeight": 34,
         "slots": [
           { "rendererEnabled": 0, "frameOrResourceIndex": 0, "inputControlId": 0 },
           { "rendererEnabled": 0, "frameOrResourceIndex": 0, "inputControlId": 0 },
@@ -68,13 +74,15 @@
         ],
         "hitTest": { "disabled": true, "slot": 4, "pointerX": 562, "pointerY": 400 }
       },
-      "expectedOutputSha256": "45946811d3518acdf632371b045956d6a52d8435dd7b45dfa7ec4d5dddb8fb7d"
+      "expectedOutputSha256": "588109ce32a4f6c95b648839fc1697ed44441b71d30d35b96309d979039307b6"
     },
     {
       "id": "unsupported-slot-is-rejected-by-owner-getter-boundary",
       "input": {
         "selectionCount": 2,
         "surfaceLockSucceeded": true,
+        "runtimeCellWidth": 34,
+        "runtimeCellHeight": 34,
         "slots": [
           { "rendererEnabled": 0, "frameOrResourceIndex": 0, "inputControlId": 0 },
           { "rendererEnabled": 0, "frameOrResourceIndex": 0, "inputControlId": 0 },
@@ -88,7 +96,7 @@
         ],
         "hitTest": { "disabled": false, "slot": 9, "pointerX": 0, "pointerY": 0 }
       },
-      "expectedOutputSha256": "2760bfefd2fb3c03348509d8538472c4d9d42971e8d82cee09de3224a3a00877"
+      "expectedOutputSha256": "bdecd3c95b9ef67091370ba666ccc003a667c2ef1a164edd7464d89e8b7c48a7"
     }
   ]
 }
