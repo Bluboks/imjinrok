@@ -82,6 +82,34 @@ const conversionManifestExpectations = [
     baseFrameSha256:
       "9b94fe4900a4343de2842c60caae2575e1e949bebba3e72bbdfcfc819a1caeaf",
   },
+  {
+    projectKind: "japanese-konishi-idle",
+    logicalPath:
+      "apps/game-client/public/assets/themes/default/entities/japanese-konishi/generalj12.manifest.json",
+    sha256:
+      "ca12c083547126db0342d6bb5d0e4a4c0cdc9b0241e5d4b54f623c4927e83b48",
+    source: "original/imjinrok2/char/generalj12.spr",
+    width: 140,
+    height: 108,
+    frameCount: 36,
+    stem: "generalj12",
+    baseFrameSha256:
+      "9596c5d560dbba4fe0bc54a1950c91534e31baf077718bfdf572166566325b96",
+  },
+  {
+    projectKind: "japanese-konishi-attack",
+    logicalPath:
+      "apps/game-client/public/assets/themes/default/entities/japanese-konishi/generalj13.manifest.json",
+    sha256:
+      "831e5894dc43beeaf85c14c364be57be146f1a492d667a8c405856c20b79121a",
+    source: "original/imjinrok2/char/generalj13.spr",
+    width: 140,
+    height: 108,
+    frameCount: 54,
+    stem: "generalj13",
+    baseFrameSha256:
+      "c5894457ff2daa9fa985438584d37e3441a1b96d2b073dfc9ea4261e78312081",
+  },
 ];
 
 test("extracts exact native descriptors, identities, and K01 requested coordinates", () => {
@@ -107,6 +135,22 @@ test("extracts exact native descriptors, identities, and K01 requested coordinat
     createHash("sha256")
       .update(readFileSync(spriteAuditPath))
       .digest("hex"),
+  );
+  assert.deepEqual(
+    report.sources.spriteMappingAudit.validatedSourceFiles.map(
+      ({ path }) => path,
+    ),
+    [
+      "packages/shared/src/themes.ts",
+      "packages/shared/src/visuals.ts",
+      "packages/shared/src/content.ts",
+      "packages/shared/src/scenarios.ts",
+      "analysis/generated/entity-type-catalog.json",
+      "tools/imjinrok/audit-sprite-mappings.mjs",
+      "tools/imjinrok/extract-k01-samurai-animation-pilot.mjs",
+      "tools/imjinrok/extract-k01-turtle-tank-animation-pilot.mjs",
+      "tools/imjinrok/extract-k01-konishi-animation-pilot.mjs",
+    ],
   );
   assert.deepEqual(
     report.sources.conversionManifests.map(
@@ -190,7 +234,9 @@ test("extracts exact native descriptors, identities, and K01 requested coordinat
       projectKind,
       source: `original/imjinrok2/char/${stem}.spr`,
       animationStateMapping:
-        internalClass === 13 || internalClass === 14
+        internalClass === 13 ||
+        internalClass === 14 ||
+        internalClass === 82
           ? "static-proven-core-state-frames"
           : "unverified",
       manifest: conversionManifestExpectations.find(
@@ -201,6 +247,8 @@ test("extracts exact native descriptors, identities, and K01 requested coordinat
           ? "project kind identity and source SPR binding are proven here; class-13 idle, move/walk, attack, and death animation frames/directions are separately static-proven by the K01 samurai animation pilot, while exact timing, stats, category, collision, behavior, render scale, and pivot remain unverified original semantics"
           : internalClass === 14
             ? "project kind identity and source SPR binding are proven here; class-14 idle, move/walk, and attack grid-direction frames/mirroring are separately static-proven by the K01 turtle-tank animation pilot, while opaque raw directions, death/destruction, exact timing, stats, category, collision, behavior, render scale, and pivot remain unverified original semantics"
+            : internalClass === 82
+              ? "project kind identity and primary source SPR binding are proven here; class-82 idle, move/walk, attack, and death sprite slots, grid-direction frames, and mirroring are separately static-proven by the K01 Konishi animation pilot, while unused tail frames, generalj14, exact timing, stats, category, collision, behavior, render scale, pivot, and death lifetime remain unverified original semantics"
           : "project kind identity and source SPR binding only; animation-state, direction, stats, category, collision, behavior, render scale, and pivot are unverified original semantics",
     })),
   );
@@ -232,6 +280,35 @@ test("extracts exact native descriptors, identities, and K01 requested coordinat
       { originalClass: 12, rawOwnerWord: 1, offset: { x: 2, y: 2 }, requestedPosition: { x: 57, y: 55 }, inBounds: true },
     ],
   );
+  const konishiIdentity = report.identities.find(
+    ({ internalClass }) => internalClass === 82,
+  );
+  assert.deepEqual(konishiIdentity.additionalAnimationResources, [
+    {
+      role: "idle",
+      path: "char/generalj12.spr",
+      slot: 166,
+      pointerCell: "0x004bc32c",
+      sourcePointer: "0x004bcd58",
+      sha256:
+        "914ea581e7ba8ad7d972e19f5089478de0391be1c79288a2f711a238dc28b44f",
+      width: 140,
+      height: 108,
+      frameCount: 36,
+    },
+    {
+      role: "attack",
+      path: "char/generalj13.spr",
+      slot: 167,
+      pointerCell: "0x004bc330",
+      sourcePointer: "0x004bcd44",
+      sha256:
+        "43322afcb8f5c90e63925efc2de647a36c5d3663d8a8638bc814a05c241a8b91",
+      width: 140,
+      height: 108,
+      frameCount: 54,
+    },
+  ]);
   assert.deepEqual(
     report.requestedPositions.map(
       ({ originalClass, projectKind, identityMapping }) => ({
@@ -341,7 +418,7 @@ test("extracts exact native descriptors, identities, and K01 requested coordinat
       "all four current visual pivots and render scaling",
     ],
     behaviorParity:
-      "not proven: project stats, combat behavior, and animation-state mappings are outside this evidence",
+      "not proven: project stats and combat behavior remain outside this evidence; only separately linked scoped animation-state mappings are static-proven",
   });
 });
 
@@ -503,6 +580,25 @@ test("rejects tampered catalog, map, sprite audit, manifest, and SPR inputs", as
     );
   });
 
+  await t.test("Konishi extractor sprite audit provenance", () => {
+    const path = copiedFile(
+      "sprite-mapping-audit.json",
+      spriteAuditPath,
+    );
+    const audit = JSON.parse(readFileSync(path, "utf8"));
+    const source = audit.sourceFiles.find(
+      ({ path: sourcePath }) =>
+        sourcePath ===
+        "tools/imjinrok/extract-k01-konishi-animation-pilot.mjs",
+    );
+    source.sha256 = "0".repeat(64);
+    writeFileSync(path, `${JSON.stringify(audit, null, 2)}\n`);
+    assert.throws(
+      () => extractK01ReinforcementIdentityMap({ spriteAudit: path }),
+      /sprite mapping audit provenance tools\/imjinrok\/extract-k01-konishi-animation-pilot\.mjs/,
+    );
+  });
+
   await t.test("japanese-samurai conversion manifest with matching audit SHA", () => {
     const expected = conversionManifestExpectations.find(
       ({ projectKind }) => projectKind === "japanese-samurai",
@@ -628,6 +724,45 @@ test("rejects tampered catalog, map, sprite audit, manifest, and SPR inputs", as
     );
   });
 
+  await t.test("japanese-konishi idle conversion manifest", () => {
+    const expected = conversionManifestExpectations.find(
+      ({ projectKind }) => projectKind === "japanese-konishi-idle",
+    );
+    const manifestPath = copiedFile(
+      "generalj12.manifest.json",
+      resolve(repositoryRoot, expected.logicalPath),
+    );
+    const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
+    manifest.exportedFrames.pop();
+    writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
+    const auditPath = copiedFile(
+      "sprite-mapping-audit.json",
+      spriteAuditPath,
+    );
+    const audit = JSON.parse(readFileSync(auditPath, "utf8"));
+    const visual = audit.visuals.find(
+      ({ visualId }) => visualId === "japanese-konishi",
+    );
+    const source = visual.sources.find(
+      ({ path }) => path === expected.source,
+    );
+    source.conversionManifest.sha256 = createHash("sha256")
+      .update(readFileSync(manifestPath))
+      .digest("hex");
+    writeFileSync(auditPath, `${JSON.stringify(audit, null, 2)}\n`);
+    assert.throws(
+      () =>
+        extractK01ReinforcementIdentityMap({
+          spriteAudit: auditPath,
+          conversionManifestPathResolver: (logicalPath) =>
+            logicalPath === expected.logicalPath
+              ? manifestPath
+              : resolve(repositoryRoot, logicalPath),
+        }),
+      /japanese-konishi idle conversion manifest exported frame count/,
+    );
+  });
+
   await t.test("SPR", () => {
     const root = mkdtempSync(join(tmpdir(), "k01-reinforcement-spr-"));
     for (const source of [
@@ -635,6 +770,8 @@ test("rejects tampered catalog, map, sprite audit, manifest, and SPR inputs", as
       "char/horseswordj1.spr",
       "char/ghosttankj.spr",
       "char/generalj11.spr",
+      "char/generalj12.spr",
+      "char/generalj13.spr",
     ]) {
       const destination = resolve(root, source.replace("/", "-"));
       writeFileSync(destination, readFileSync(resolve(originalRoot, source)));

@@ -47,9 +47,9 @@ test("frame mappings stay quarantined outside statically proven scopes while ide
     visualCount: 21,
     unitVisualCount: 12,
     buildingVisualCount: 9,
-    stateMappingCount: 72,
-    clipCount: 464,
-    frameReferenceCount: 3_139,
+    stateMappingCount: 76,
+    clipCount: 508,
+    frameReferenceCount: 3_498,
     missingFrameReferenceCount: 0,
     unverifiedVisualCount: 2,
     mixedVisualCount: 17,
@@ -179,23 +179,33 @@ test("frame mappings stay quarantined outside statically proven scopes while ide
     (visual) => visual.visualId === "japanese-konishi",
   );
   assert.equal(konishi?.staticEvidence.internalClass, 82);
-  assert.equal(konishi?.staticEvidence.animationStateMapping, "unverified");
-  assert.deepEqual(konishi?.mappings, [
-    {
-      scope: "base",
-      state: "default",
-      declaredFacings: [],
-      clips: [
-        {
-          facing: "default",
-          frameFiles: ["generalj11_0000.png"],
-          frameIndexes: [0],
-          mirrorX: false,
-          missingFrames: [],
-        },
-      ],
-    },
-  ]);
+  assert.equal(
+    konishi?.staticEvidence.animationStateMapping,
+    "static-proven-core-state-frames",
+  );
+  assert.deepEqual(konishi?.staticEvidence.stateFrameRanges, {
+    idle: [0, 29],
+    move: [0, 39],
+    walk: [0, 39],
+    attack: [0, 49],
+    death: [40, 47],
+  });
+  assert.deepEqual(konishi?.staticEvidence.stateSources, {
+    idle: "char\\generalj12.spr",
+    move: "char\\generalj11.spr",
+    walk: "char\\generalj11.spr",
+    attack: "char\\generalj13.spr",
+    death: "char\\generalj11.spr",
+  });
+  assert.equal(
+    report.findings.some(
+      (finding) =>
+        finding.visualId === "japanese-konishi" &&
+        (finding.code === "direction-order-unverified" ||
+          finding.code === "mirrored-facing-unverified"),
+    ),
+    false,
+  );
   const japaneseSpearman = report.visuals.find(
     (visual) => visual.visualId === "japanese-swordsman",
   );

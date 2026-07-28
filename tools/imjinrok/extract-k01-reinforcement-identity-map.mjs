@@ -174,16 +174,56 @@ const EXPECTED_TYPES = [
     manifestStem: "generalj11",
     baseFrameSha256:
       "9b94fe4900a4343de2842c60caae2575e1e949bebba3e72bbdfcfc819a1caeaf",
+    additionalAnimationResources: [
+      {
+        role: "idle",
+        slot: 166,
+        pointerCell: "0x004bc32c",
+        sourcePointer: "0x004bcd58",
+        sourcePathNormalized: "char/generalj12.spr",
+        sha256:
+          "914ea581e7ba8ad7d972e19f5089478de0391be1c79288a2f711a238dc28b44f",
+        width: 140,
+        height: 108,
+        frameCount: 36,
+        manifestLogicalPath:
+          "apps/game-client/public/assets/themes/default/entities/japanese-konishi/generalj12.manifest.json",
+        manifestSha256:
+          "ca12c083547126db0342d6bb5d0e4a4c0cdc9b0241e5d4b54f623c4927e83b48",
+        manifestStem: "generalj12",
+        baseFrameSha256:
+          "9596c5d560dbba4fe0bc54a1950c91534e31baf077718bfdf572166566325b96",
+      },
+      {
+        role: "attack",
+        slot: 167,
+        pointerCell: "0x004bc330",
+        sourcePointer: "0x004bcd44",
+        sourcePathNormalized: "char/generalj13.spr",
+        sha256:
+          "43322afcb8f5c90e63925efc2de647a36c5d3663d8a8638bc814a05c241a8b91",
+        width: 140,
+        height: 108,
+        frameCount: 54,
+        manifestLogicalPath:
+          "apps/game-client/public/assets/themes/default/entities/japanese-konishi/generalj13.manifest.json",
+        manifestSha256:
+          "831e5894dc43beeaf85c14c364be57be146f1a492d667a8c405856c20b79121a",
+        manifestStem: "generalj13",
+        baseFrameSha256:
+          "c5894457ff2daa9fa985438584d37e3441a1b96d2b073dfc9ea4261e78312081",
+      },
+    ],
     projectGameplayAdapter: JAPANESE_GUNNER_GAMEPLAY_ADAPTER,
     visualDefaults: {
       render: { srcPxPerWu: 32, filtering: "nearest" },
       size: { w: 140, h: 108 },
       pivot: { anchor: { x: 70, y: 100 } },
     },
-    defaultStillOnly: true,
-    animationStateMapping: "unverified",
+    defaultStillOnly: false,
+    animationStateMapping: "static-proven-core-state-frames",
     scope:
-      "project kind identity and source SPR binding only; animation-state, direction, stats, category, collision, behavior, render scale, and pivot are unverified original semantics",
+      "project kind identity and primary source SPR binding are proven here; class-82 idle, move/walk, attack, and death sprite slots, grid-direction frames, and mirroring are separately static-proven by the K01 Konishi animation pilot, while unused tail frames, generalj14, exact timing, stats, category, collision, behavior, render scale, pivot, and death lifetime remain unverified original semantics",
   },
 ];
 
@@ -204,6 +244,9 @@ const REQUIRED_SPRITE_AUDIT_SOURCE_PATHS = [
   "packages/shared/src/scenarios.ts",
   "analysis/generated/entity-type-catalog.json",
   "tools/imjinrok/audit-sprite-mappings.mjs",
+  "tools/imjinrok/extract-k01-samurai-animation-pilot.mjs",
+  "tools/imjinrok/extract-k01-turtle-tank-animation-pilot.mjs",
+  "tools/imjinrok/extract-k01-konishi-animation-pilot.mjs",
 ];
 
 export function mapDescriptorsToRequestedPositions({
@@ -408,8 +451,11 @@ export function extractK01ReinforcementIdentityMap(options = {}) {
         validatedSourceFiles:
           projectStaticSourceBindings.validatedSourceFiles,
       },
-      conversionManifests: projectStaticSourceBindings.bindings.map(
-        ({ conversionManifest }) => conversionManifest,
+      conversionManifests: projectStaticSourceBindings.bindings.flatMap(
+        ({ conversionManifest, additionalConversionManifests }) => [
+          conversionManifest,
+          ...additionalConversionManifests,
+        ],
       ),
       k01Map: {
         path: paths.map,
@@ -447,10 +493,10 @@ export function extractK01ReinforcementIdentityMap(options = {}) {
         "all four current visual pivots and render scaling",
       ],
       behaviorParity:
-        "not proven: project stats, combat behavior, and animation-state mappings are outside this evidence",
+        "not proven: project stats and combat behavior remain outside this evidence; only separately linked scoped animation-state mappings are static-proven",
     },
     uncertainties: [
-      "all four animation-state mappings, combat behavior, stats, category choices, collision radii, and pivots are not original-proven",
+      "combat behavior, stats, category choices, collision radii, pivots, and animation timing are not original-proven",
       "final runtime placement can differ from native requested coordinates",
       "raw owner WORD 1 has no statically proven human-facing meaning in this unit",
     ],
@@ -678,6 +724,13 @@ function validateProjectStaticSourceBindings(
       },
       `${expected.projectKind} conversion manifest provenance`,
     );
+    const additionalConversionManifests =
+      validateAdditionalAnimationResources({
+        expected,
+        visual,
+        currentRepositoryRoot,
+        conversionManifestPathResolver,
+      });
 
     return {
       binding: expectedBinding,
@@ -708,6 +761,7 @@ function validateProjectStaticSourceBindings(
           sha256: baseFrameSha256,
         },
       },
+      additionalConversionManifests,
       scope: expected.scope,
     };
   });
@@ -794,9 +848,173 @@ function inspectIdentity(catalog, originalRoot, expected, spritePathResolver) {
       height: header.height,
       frameCount: header.frameCount,
     },
+    additionalAnimationResources: (
+      expected.additionalAnimationResources ?? []
+    ).map((resource) => {
+      const path = spritePathResolver
+        ? spritePathResolver(resource.sourcePathNormalized)
+        : resolve(originalRoot, resource.sourcePathNormalized);
+      const buffer = readFileSync(path);
+      const digest = sha256(buffer);
+      assertEqual(
+        digest,
+        resource.sha256,
+        `class ${expected.internalClass} ${resource.role} SPR SHA-256`,
+      );
+      const resourceHeader = parseSpriteLikeHeader(buffer, path);
+      assertDeepEqual(
+        {
+          width: resourceHeader.width,
+          height: resourceHeader.height,
+          frameCount: resourceHeader.frameCount,
+        },
+        {
+          width: resource.width,
+          height: resource.height,
+          frameCount: resource.frameCount,
+        },
+        `class ${expected.internalClass} ${resource.role} SPR header`,
+      );
+      return {
+        role: resource.role,
+        path: resource.sourcePathNormalized,
+        slot: resource.slot,
+        pointerCell: resource.pointerCell,
+        sourcePointer: resource.sourcePointer,
+        sha256: digest,
+        width: resourceHeader.width,
+        height: resourceHeader.height,
+        frameCount: resourceHeader.frameCount,
+      };
+    }),
     projectKind: expected.projectKind,
     identityMapping: expected.identityMapping,
   };
+}
+
+function validateAdditionalAnimationResources({
+  expected,
+  visual,
+  currentRepositoryRoot,
+  conversionManifestPathResolver,
+}) {
+  return (expected.additionalAnimationResources ?? []).map((resource) => {
+    const expectedSourcePath =
+      `original/imjinrok2/${resource.sourcePathNormalized}`;
+    const physicalPath = conversionManifestPathResolver
+      ? conversionManifestPathResolver(resource.manifestLogicalPath)
+      : resolve(currentRepositoryRoot, resource.manifestLogicalPath);
+    const buffer = readFileSync(physicalPath);
+    const digest = sha256(buffer);
+    const manifest = parseJson(buffer, physicalPath);
+    assertDeepEqual(
+      {
+        source: manifest.source,
+        width: manifest.width,
+        height: manifest.height,
+        frameCount: manifest.frameCount,
+      },
+      {
+        source: expectedSourcePath,
+        width: resource.width,
+        height: resource.height,
+        frameCount: resource.frameCount,
+      },
+      `${expected.projectKind} ${resource.role} conversion manifest header`,
+    );
+    if (!Array.isArray(manifest.exportedFrames)) {
+      throw new Error(
+        `${expected.projectKind} ${resource.role} conversion manifest exportedFrames must be an array`,
+      );
+    }
+    assertEqual(
+      manifest.exportedFrames.length,
+      resource.frameCount,
+      `${expected.projectKind} ${resource.role} conversion manifest exported frame count`,
+    );
+    assertDeepEqual(
+      manifest.exportedFrames[0],
+      { index: 0, fileName: `${resource.manifestStem}_0000.png` },
+      `${expected.projectKind} ${resource.role} conversion manifest first frame`,
+    );
+    assertDeepEqual(
+      manifest.exportedFrames.at(-1),
+      {
+        index: resource.frameCount - 1,
+        fileName: `${resource.manifestStem}_${String(resource.frameCount - 1).padStart(4, "0")}.png`,
+      },
+      `${expected.projectKind} ${resource.role} conversion manifest last frame`,
+    );
+    const baseFrameFile = manifest.exportedFrames.find(
+      ({ index }) => index === 0,
+    )?.fileName;
+    if (!baseFrameFile) {
+      throw new Error(
+        `${expected.projectKind} ${resource.role} conversion manifest is missing base frame 0`,
+      );
+    }
+    const baseFramePath = resolve(dirname(physicalPath), baseFrameFile);
+    const baseFrameSha256 = sha256(readFileSync(baseFramePath));
+    assertEqual(
+      baseFrameSha256,
+      resource.baseFrameSha256,
+      `${expected.projectKind} ${resource.role} base-frame PNG SHA-256`,
+    );
+    assertEqual(
+      digest,
+      resource.manifestSha256,
+      `${expected.projectKind} ${resource.role} conversion manifest SHA-256`,
+    );
+    const auditSource = visual.sources?.find(
+      ({ path }) => path === expectedSourcePath,
+    );
+    if (!auditSource) {
+      throw new Error(
+        `${expected.projectKind} sprite audit is missing ${resource.role} source ${expectedSourcePath}`,
+      );
+    }
+    assertDeepEqual(
+      {
+        path: auditSource.path,
+        sha256: auditSource.sha256,
+        width: auditSource.width,
+        height: auditSource.height,
+        frameCount: auditSource.frameCount,
+        conversionManifest: auditSource.conversionManifest,
+      },
+      {
+        path: expectedSourcePath,
+        sha256: resource.sha256,
+        width: resource.width,
+        height: resource.height,
+        frameCount: resource.frameCount,
+        conversionManifest: {
+          path: resource.manifestLogicalPath,
+          sha256: resource.manifestSha256,
+        },
+      },
+      `${expected.projectKind} ${resource.role} sprite audit source`,
+    );
+
+    return {
+      role: resource.role,
+      logicalPath: resource.manifestLogicalPath,
+      physicalPath,
+      sha256: digest,
+      source: manifest.source,
+      width: manifest.width,
+      height: manifest.height,
+      frameCount: manifest.frameCount,
+      exportedFrameCount: manifest.exportedFrames.length,
+      firstFrame: manifest.exportedFrames[0],
+      lastFrame: manifest.exportedFrames.at(-1),
+      baseFrameAsset: {
+        index: 0,
+        path: baseFramePath,
+        sha256: baseFrameSha256,
+      },
+    };
+  });
 }
 
 function parseJson(buffer, source) {

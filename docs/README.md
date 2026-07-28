@@ -36,6 +36,7 @@
 - [K01 권율·유성룡 핵심 애니메이션 파일럿](reverse-engineering/mechanics/k01-hero-animation-pilot.md)
 - [K01 일본 사무라이 핵심 애니메이션 파일럿](reverse-engineering/mechanics/k01-samurai-animation-pilot.md)
 - [K01 일본 귀갑차 핵심 애니메이션 파일럿](reverse-engineering/mechanics/k01-turtle-tank-animation-pilot.md)
+- [K01 일본 고니시 핵심 애니메이션 파일럿](reverse-engineering/mechanics/k01-konishi-animation-pilot.md)
 - [K01 권율·유성룡 일반 공격 phase 파일럿](reverse-engineering/mechanics/k01-hero-basic-attack-pilot.md)
 - [K01 유성룡 투사체 subtype 0x0c 파일럿](reverse-engineering/mechanics/k01-ryu-projectile-pilot.md)
 - [K01 투사체 풀 갱신 cadence](reverse-engineering/mechanics/k01-projectile-pool-cadence.md)

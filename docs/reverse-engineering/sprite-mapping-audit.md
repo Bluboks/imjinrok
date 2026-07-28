@@ -26,8 +26,8 @@ pnpm imjinrok:audit-sprite-mappings
 | 대상 | 확인한 범위 | 판정 |
 | --- | --- | --- |
 | 원본 타입 95개 | 이름·슬롯·기본 프레임·raw flags·SPR 경로 | 타입 정체·출처 전수 `정적 확정` |
-| 엔티티 비주얼 21개 | 상태 72개, 클립 464개, 프레임 참조 3,139개 | 범위 확정 2개, `mixed` 17개, 미확인 2개 |
-| 유닛 비주얼 12개 | 정체·방향·행동·미러링 | 고유 정체 11개, 모호 1개; class 13 핵심 상태와 class 14 상태 8/1/4 grid 확정, class 82는 base-frame still |
+| 엔티티 비주얼 21개 | 상태 76개, 클립 508개, 프레임 참조 3,498개 | 범위 확정 2개, `mixed` 17개, 미확인 2개 |
+| 유닛 비주얼 12개 | 정체·방향·행동·미러링 | 고유 정체 11개, 모호 1개; class 13·82 핵심 상태와 class 14 상태 8/1/4 grid 확정 |
 | 건물 비주얼 9개 | 정체·idle·construction·damaged·overlay | 본영·봉화대 본체 2개 `정적 확정`, 나머지 7개 본체 상태 `미확인` |
 | 브리핑 초상화 17개 | `K1`~`K6`·`K10`, `J1`~`J5`, `C1`~`C5` | ID→`hero.spr` 프레임 `정적 확정` |
 | 원본 내부 클래스 2 | `조선 창병`, 슬롯 100, 상태 1·2, 8방향, phase 0~7 | 두 상태의 이동 의미·프레임 식 확정, 상태 1 일반 이동 이식 |
@@ -62,7 +62,8 @@ pnpm imjinrok:audit-sprite-mappings
 - 일본 사무라이는 `horseswordj1.spr`·`horseswordj2.spr`의 상태 8/1/4/7 frame·방향·mirror를
   [별도 파일럿](mechanics/k01-samurai-animation-pilot.md)에서 확정·이식했다. 귀갑차는
   [class 14 파일럿](mechanics/k01-turtle-tank-animation-pilot.md)의 상태 8/1/4 grid
-  frame·mirror를 이식했고, 고니시만 `generalj11.spr` base frame 0 still을 사용한다.
+  frame·mirror를 이식했다. 고니시는 [class 82 파일럿](mechanics/k01-konishi-animation-pilot.md)의
+  `generalj12/11/13/11.spr` 상태 8/1/4/7 grid frame·mirror를 이식했다.
   세 visual의 FPS 또는 render size·pivot은 프로젝트 잠정값이다.
 
 따라서 사용자가 보고한 “유닛 프레임 방향이 맞지 않음”은 현재 코드 구조로 설명된다. 개별 프레임을

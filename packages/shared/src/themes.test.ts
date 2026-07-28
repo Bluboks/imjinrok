@@ -493,37 +493,65 @@ function assertDirectionalFrames(
   }
 }
 
-test("remaining identity-only Japanese visual uses only the proven base-frame still", () => {
-  const expectations = [
-    {
-      kind: "japanese-konishi",
-      manifestPath: "entities/japanese-konishi/generalj11.manifest.json",
-      source: "original/imjinrok2/char/generalj11.spr",
-      frameCount: 49,
-      frameFile: "generalj11_0000.png",
-    },
-  ] as const;
+test("Japanese Konishi uses the statically recovered core-state frame blocks", () => {
+  const manifests = [
+    ["generalj11", 49],
+    ["generalj12", 36],
+    ["generalj13", 54],
+  ].map(([stem, frameCount]) => ({
+    stem,
+    frameCount,
+    manifest: readManifest(
+      `entities/japanese-konishi/${stem}.manifest.json`,
+    ),
+  }));
+  for (const { stem, frameCount, manifest } of manifests) {
+    assert.equal(manifest.source, `original/imjinrok2/char/${stem}.spr`);
+    assert.equal(manifest.frameCount, frameCount);
+    assert.equal(manifest.exportedFrames.length, frameCount);
+  }
 
-  for (const expectation of expectations) {
-    const manifest = readManifest(expectation.manifestPath);
-    const visual = defaultTheme.visuals[
-      defaultTheme.entityBindings[expectation.kind]
-    ] as EntityVisual;
-    assert.equal(manifest.source, expectation.source);
-    assert.equal(manifest.frameCount, expectation.frameCount);
-    assert.equal(manifest.exportedFrames.length, expectation.frameCount);
-    assert.deepEqual(Object.keys(visual.states), ["default"]);
-    assert.deepEqual(Object.keys(visual.states.default?.clips ?? {}), ["default"]);
-    assert.equal(
-      visual.states.default?.clips.default?.frames[0]?.fileName,
-      expectation.frameFile,
-    );
-    assert.equal(
-      visual.states.default?.clips.default?.frames.length,
-      1,
-    );
-    assert.equal(visual.states.default?.facings, undefined);
-    assert.equal(visual.states.default?.clips.default?.mirrorX, undefined);
+  const visual = defaultTheme.visuals[
+    defaultTheme.entityBindings["japanese-konishi"]
+  ] as EntityVisual;
+  assert.deepEqual(
+    Object.keys(visual.states).sort(),
+    ["idle", "move", "walk", "attack", "death"].sort(),
+  );
+  assertDirectionalFrames(visual, "idle", {
+    stem: "generalj12",
+    phaseCount: 6,
+    frameStarts: { s: 0, sw: 6, w: 12, nw: 18, n: 12, ne: 6, e: 0, se: 24 },
+  });
+  assertDirectionalFrames(visual, "move", {
+    stem: "generalj11",
+    phaseCount: 8,
+    frameStarts: { s: 0, sw: 8, w: 16, nw: 24, n: 16, ne: 8, e: 0, se: 32 },
+  });
+  assert.deepEqual(visual.states.walk, visual.states.move);
+  assertDirectionalFrames(visual, "attack", {
+    stem: "generalj13",
+    phaseCount: 10,
+    frameStarts: { s: 0, sw: 10, w: 20, nw: 30, n: 20, ne: 10, e: 0, se: 40 },
+  });
+  assertDirectionalFrames(visual, "death", {
+    stem: "generalj11",
+    phaseCount: 8,
+    frameStarts: { s: 40, sw: 40, w: 40, nw: 40, n: 40, ne: 40, e: 40, se: 40 },
+  });
+  assert.equal(visual.states.idle?.clips.s?.loop, true);
+  assert.equal(visual.states.move?.clips.s?.loop, true);
+  assert.equal(visual.states.walk?.clips.s?.loop, true);
+  assert.equal(visual.states.attack?.clips.s?.loop, false);
+  assert.equal(visual.states.death?.clips.s?.loop, false);
+  for (const state of ["idle", "move", "walk", "attack", "death"] as const) {
+    const clips = visual.states[state]?.clips;
+    assert.equal(clips?.n?.mirrorX, true);
+    assert.equal(clips?.ne?.mirrorX, true);
+    assert.equal(clips?.e?.mirrorX, true);
+    for (const facing of ["s", "sw", "w", "nw", "se"] as const) {
+      assert.equal(clips?.[facing]?.mirrorX, undefined);
+    }
   }
 });
 

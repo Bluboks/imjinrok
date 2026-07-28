@@ -100,7 +100,8 @@ theme은 idle에 `horseswordj2`, move/walk·attack·death에 `horseswordj1`을 �
 sprite audit는 `japanese-samurai`의 identity와 이 다섯 generic state의 frame/direction만
 `static-proven-core-state-frames`로 승격한다. `japanese-turtle-tank`의 별도 상태
 8/1/4 범위는 [귀갑차 파일럿](k01-turtle-tank-animation-pilot.md)이 확정하며,
-`japanese-konishi`는 계속 identity/source base-frame still만 확정이다.
+`japanese-konishi`의 상태 8/1/4/7 범위는
+[고니시 파일럿](k01-konishi-animation-pilot.md)이 별도로 확정한다.
 
 ## 남은 불확실성
 

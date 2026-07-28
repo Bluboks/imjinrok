@@ -278,49 +278,6 @@ const sourceFiveFacingStillClips = (
   return clips;
 };
 
-interface SourceIdentityStillVisualOptions {
-  id: string;
-  assetPath: string;
-  visualId: string;
-  stem: string;
-  size: { w: number; h: number };
-  pivot: { x: number; y: number };
-}
-
-// Identity/source-only visual: frame 0 is the statically proven type base frame.
-// State meaning, animation, direction, render scale, and pivot remain project adaptations.
-const sourceIdentityStillEntityVisual = ({
-  id,
-  assetPath,
-  visualId,
-  stem,
-  size,
-  pivot,
-}: SourceIdentityStillVisualOptions): EntityVisual => ({
-  id,
-  kind: "entity",
-  assetPath,
-  render: {
-    srcPxPerWu: 32,
-    filtering: "nearest",
-  },
-  defaults: {
-    size,
-    pivot: { anchor: pivot },
-  },
-  states: {
-    default: {
-      clips: {
-        default: {
-          frames: [entityFrame(visualId, stem, 0)],
-          fps: 1,
-          loop: true,
-        },
-      },
-    },
-  },
-});
-
 const buildingConstructionClip = (
   visualId: string,
   stem: string,
@@ -766,15 +723,82 @@ export const japaneseTurtleTankEntityVisual = {
   },
 } as const satisfies EntityVisual;
 
-export const japaneseKonishiEntityVisual =
-  sourceIdentityStillEntityVisual({
-    id: "japanese-konishi",
-    assetPath: "entities/japanese-konishi",
-    visualId: "japanese_konishi",
-    stem: "generalj11",
+export const japaneseKonishiEntityVisual = {
+  id: "japanese-konishi",
+  kind: "entity",
+  assetPath: "entities/japanese-konishi",
+  render: {
+    srcPxPerWu: 32,
+    filtering: "nearest",
+  },
+  defaults: {
+    // Project display adaptation: the original pivot contract is not recovered.
     size: { w: 140, h: 108 },
-    pivot: { x: 70, y: 100 },
-  });
+    pivot: { anchor: { x: 70, y: 100 } },
+  },
+  states: {
+    idle: {
+      facings: ENTITY_FACING_ORDER,
+      clips: staticallyRecoveredDirectionalClips({
+        visualId: "japanese_konishi",
+        stem: "generalj12",
+        frameStart: 0,
+        frameStride: 6,
+        phaseCount: 6,
+        fps: PROVISIONAL_RECOVERED_ANIMATION_IDLE_FPS,
+        loop: true,
+      }),
+    },
+    move: {
+      facings: ENTITY_FACING_ORDER,
+      clips: staticallyRecoveredDirectionalClips({
+        visualId: "japanese_konishi",
+        stem: "generalj11",
+        frameStart: 0,
+        frameStride: 8,
+        phaseCount: 8,
+        fps: PROVISIONAL_RECOVERED_ANIMATION_ACTIVE_FPS,
+        loop: true,
+      }),
+    },
+    walk: {
+      facings: ENTITY_FACING_ORDER,
+      clips: staticallyRecoveredDirectionalClips({
+        visualId: "japanese_konishi",
+        stem: "generalj11",
+        frameStart: 0,
+        frameStride: 8,
+        phaseCount: 8,
+        fps: PROVISIONAL_RECOVERED_ANIMATION_ACTIVE_FPS,
+        loop: true,
+      }),
+    },
+    attack: {
+      facings: ENTITY_FACING_ORDER,
+      clips: staticallyRecoveredDirectionalClips({
+        visualId: "japanese_konishi",
+        stem: "generalj13",
+        frameStart: 0,
+        frameStride: 10,
+        phaseCount: 10,
+        fps: PROVISIONAL_RECOVERED_ANIMATION_ACTIVE_FPS,
+        loop: false,
+      }),
+    },
+    death: {
+      facings: ENTITY_FACING_ORDER,
+      clips: staticallyRecoveredDirectionalClips({
+        visualId: "japanese_konishi",
+        stem: "generalj11",
+        frameStart: 40,
+        frameStride: 0,
+        phaseCount: 8,
+        fps: PROVISIONAL_RECOVERED_ANIMATION_ACTIVE_FPS,
+        loop: false,
+      }),
+    },
+  },
+} as const satisfies EntityVisual;
 
 export const generalK4EntityVisual = {
   id: "korean-general-k4",

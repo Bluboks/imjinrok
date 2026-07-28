@@ -1,0 +1,225 @@
+{
+  "source": "original/imjinrok2/char/generalj13.spr",
+  "layout": "spr",
+  "width": 140,
+  "height": 108,
+  "frameCount": 54,
+  "exportedFrames": [
+    {
+      "index": 0,
+      "fileName": "generalj13_0000.png"
+    },
+    {
+      "index": 1,
+      "fileName": "generalj13_0001.png"
+    },
+    {
+      "index": 2,
+      "fileName": "generalj13_0002.png"
+    },
+    {
+      "index": 3,
+      "fileName": "generalj13_0003.png"
+    },
+    {
+      "index": 4,
+      "fileName": "generalj13_0004.png"
+    },
+    {
+      "index": 5,
+      "fileName": "generalj13_0005.png"
+    },
+    {
+      "index": 6,
+      "fileName": "generalj13_0006.png"
+    },
+    {
+      "index": 7,
+      "fileName": "generalj13_0007.png"
+    },
+    {
+      "index": 8,
+      "fileName": "generalj13_0008.png"
+    },
+    {
+      "index": 9,
+      "fileName": "generalj13_0009.png"
+    },
+    {
+      "index": 10,
+      "fileName": "generalj13_0010.png"
+    },
+    {
+      "index": 11,
+      "fileName": "generalj13_0011.png"
+    },
+    {
+      "index": 12,
+      "fileName": "generalj13_0012.png"
+    },
+    {
+      "index": 13,
+      "fileName": "generalj13_0013.png"
+    },
+    {
+      "index": 14,
+      "fileName": "generalj13_0014.png"
+    },
+    {
+      "index": 15,
+      "fileName": "generalj13_0015.png"
+    },
+    {
+      "index": 16,
+      "fileName": "generalj13_0016.png"
+    },
+    {
+      "index": 17,
+      "fileName": "generalj13_0017.png"
+    },
+    {
+      "index": 18,
+      "fileName": "generalj13_0018.png"
+    },
+    {
+      "index": 19,
+      "fileName": "generalj13_0019.png"
+    },
+    {
+      "index": 20,
+      "fileName": "generalj13_0020.png"
+    },
+    {
+      "index": 21,
+      "fileName": "generalj13_0021.png"
+    },
+    {
+      "index": 22,
+      "fileName": "generalj13_0022.png"
+    },
+    {
+      "index": 23,
+      "fileName": "generalj13_0023.png"
+    },
+    {
+      "index": 24,
+      "fileName": "generalj13_0024.png"
+    },
+    {
+      "index": 25,
+      "fileName": "generalj13_0025.png"
+    },
+    {
+      "index": 26,
+      "fileName": "generalj13_0026.png"
+    },
+    {
+      "index": 27,
+      "fileName": "generalj13_0027.png"
+    },
+    {
+      "index": 28,
+      "fileName": "generalj13_0028.png"
+    },
+    {
+      "index": 29,
+      "fileName": "generalj13_0029.png"
+    },
+    {
+      "index": 30,
+      "fileName": "generalj13_0030.png"
+    },
+    {
+      "index": 31,
+      "fileName": "generalj13_0031.png"
+    },
+    {
+      "index": 32,
+      "fileName": "generalj13_0032.png"
+    },
+    {
+      "index": 33,
+      "fileName": "generalj13_0033.png"
+    },
+    {
+      "index": 34,
+      "fileName": "generalj13_0034.png"
+    },
+    {
+      "index": 35,
+      "fileName": "generalj13_0035.png"
+    },
+    {
+      "index": 36,
+      "fileName": "generalj13_0036.png"
+    },
+    {
+      "index": 37,
+      "fileName": "generalj13_0037.png"
+    },
+    {
+      "index": 38,
+      "fileName": "generalj13_0038.png"
+    },
+    {
+      "index": 39,
+      "fileName": "generalj13_0039.png"
+    },
+    {
+      "index": 40,
+      "fileName": "generalj13_0040.png"
+    },
+    {
+      "index": 41,
+      "fileName": "generalj13_0041.png"
+    },
+    {
+      "index": 42,
+      "fileName": "generalj13_0042.png"
+    },
+    {
+      "index": 43,
+      "fileName": "generalj13_0043.png"
+    },
+    {
+      "index": 44,
+      "fileName": "generalj13_0044.png"
+    },
+    {
+      "index": 45,
+      "fileName": "generalj13_0045.png"
+    },
+    {
+      "index": 46,
+      "fileName": "generalj13_0046.png"
+    },
+    {
+      "index": 47,
+      "fileName": "generalj13_0047.png"
+    },
+    {
+      "index": 48,
+      "fileName": "generalj13_0048.png"
+    },
+    {
+      "index": 49,
+      "fileName": "generalj13_0049.png"
+    },
+    {
+      "index": 50,
+      "fileName": "generalj13_0050.png"
+    },
+    {
+      "index": 51,
+      "fileName": "generalj13_0051.png"
+    },
+    {
+      "index": 52,
+      "fileName": "generalj13_0052.png"
+    },
+    {
+      "index": 53,
+      "fileName": "generalj13_0053.png"
+    }
+  ]
+}
