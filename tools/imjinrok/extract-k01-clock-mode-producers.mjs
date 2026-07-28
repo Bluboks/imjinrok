@@ -16,6 +16,20 @@ const DEFAULTS = {
   referencesPath: resolve(ROOT, "analysis/generated/imjinrok2/references.json"),
   jumpTablesPath: resolve(ROOT, "analysis/generated/imjinrok2/jump-tables.json"),
 };
+const EXPECTED_GENERATED_ARTIFACTS = {
+  functions: {
+    byteLength: 1467804,
+    sha256: "c10ea2de1f4998411d52443419c9a7f52ff7f9c18e79bd4115ba197d2f5bebc3",
+  },
+  references: {
+    byteLength: 17206553,
+    sha256: "df11ff3713988ef22b3390b5b0ae7b4a87464b5de547a4866e1c8ec8a0bcaf4c",
+  },
+  jumpTables: {
+    byteLength: 607724,
+    sha256: "0ae517eb172f61b974ca7a4411e64c1cc42065c462ed53b3065ab2da633dfe2f",
+  },
+};
 
 const FUNCTION_CONTRACTS = [
   [0x0043f560, 5, "6b9beb20a706f798049e6891a9ab637878ae09daaa367b804e3cf6c980a540d7"],
@@ -68,19 +82,24 @@ export function extractK01ClockModeProducers({
   const { buffer, image } = readPeImage(executablePath);
   const sha256 = createHash("sha256").update(buffer).digest("hex");
   equal(sha256, EXPECTED_EXE_SHA256, "original EXE SHA-256");
-  const functions = readArtifact(functionsPath, sha256, "functions");
-  const references = readArtifact(referencesPath, sha256, "references");
-  const jumpTables = readArtifact(jumpTablesPath, sha256, "jump tables");
-  requireDispatchTables(jumpTables);
+  const functions = readArtifact(functionsPath, sha256, "functions", EXPECTED_GENERATED_ARTIFACTS.functions);
+  const references = readArtifact(referencesPath, sha256, "references", EXPECTED_GENERATED_ARTIFACTS.references);
+  const jumpTables = readArtifact(jumpTablesPath, sha256, "jump tables", EXPECTED_GENERATED_ARTIFACTS.jumpTables);
+  requireDispatchTables(jumpTables.document);
 
   return {
     question: "For a standard K01 single-player mission, can static producer flow fix scheduler mode WORD 0x00c06e20 or selector DWORD 0x00634acc enough to refine the accepted-update wall-clock interval, without choosing a project timing adapter?",
     source: { executablePath, sha256 },
+    generatedArtifacts: {
+      functions: functions.provenance,
+      references: references.provenance,
+      jumpTables: jumpTables.provenance,
+    },
     analysisStatus: "static-confirmed-conditional",
     reproductionStatus: "reproduction-complete",
     implementationStatus: "none",
-    functionEvidence: FUNCTION_CONTRACTS.map(([entry, instructionCount, instructionSha256]) => requireFunction(functions.functions, entry, instructionCount, instructionSha256)),
-    callEdges: REQUIRED_CALLS.map(([site, caller, callee]) => requireCall(references.references, site, caller, callee)),
+    functionEvidence: FUNCTION_CONTRACTS.map(([entry, instructionCount, instructionSha256]) => requireFunction(functions.document.functions, entry, instructionCount, instructionSha256)),
+    callEdges: REQUIRED_CALLS.map(([site, caller, callee]) => requireCall(references.document.references, site, caller, callee)),
     codeAnchors: CODE_ANCHORS.map(([id, va, bytes, meaning]) => anchor(buffer, image, { id, va, bytes, meaning })),
     fields: {
       schedulerMode: "WORD 0x00c06e20; equality comparison with 1, writers use WORD stores",
@@ -91,8 +110,8 @@ export function extractK01ClockModeProducers({
     },
     k01ModeContract: {
       k01Entry: "standard K01 is stage WORD 1 in 0x0048d410 reached from main-state 1 at 0x004600d0",
-      independentModePath: "main-state 5 at 0x0046005c reaches 0x00484130 -> 0x00485890; its mode argument is EBX assembled from earlier UI/runtime branches, not a K01 stage value",
-      result: "the recovered K01 stage-one producer/consumer CFG has no edge that proves mode WORD equals 1 or 0 at the subsequent state-3 scheduler; no K01-specific mode value is claimed",
+      independentModePath: "main-state 5 at 0x0046005c reaches 0x00484130 -> 0x00485890; its mode argument is EBX assembled from earlier UI/runtime branches examined in this slice, with no K01-stage value established in that path",
+      result: "this bounded recovered K01 stage-one producer/consumer CFG does not establish an edge proving mode WORD equals 1 or 0 at the subsequent state-3 scheduler; no K01-specific mode value is claimed",
       conditionalModeOne: "if mode WORD is exactly 1 at 0x0043f580, selector DWORD is ignored and base interval is exactly 50 ms",
       conditionalOtherMode: "if mode differs from 1, selector remains a signed-WORD-forwarded, externally produced DWORD and the 64/60/50/40/30 ms selector table remains applicable",
     },
@@ -109,7 +128,7 @@ export function extractK01ClockModeProducers({
     },
     testVectors: vectors(),
     uncertainties: [
-      "no static edge ties K01 stage-one selection to the EBX argument or 0x004bdfF4 guard consumed by the mode writer",
+      "this bounded slice does not establish an edge from K01 stage-one selection to the EBX argument or 0x004bdfF4 guard consumed by the mode writer",
       "the object+0x10 value producer is a UI/runtime object path; its K01 reachability and concrete value are not statically closed here",
       "message arrival, raw gate outcomes, and any alias writer of the periodic WORD are not a fixed wall-clock schedule",
     ],
@@ -166,10 +185,18 @@ function vectors() {
   ];
 }
 
-function readArtifact(path, sha256, label) {
-  const artifact = JSON.parse(readFileSync(resolve(path), "utf8"));
-  equal(artifact.sourceSha256, sha256, `${label} source SHA-256`);
-  return artifact;
+function readArtifact(path, sourceSha256, label, expected) {
+  const resolvedPath = resolve(path);
+  const buffer = readFileSync(resolvedPath);
+  equal(buffer.byteLength, expected.byteLength, `${label} artifact byte length`);
+  const sha256 = createHash("sha256").update(buffer).digest("hex");
+  equal(sha256, expected.sha256, `${label} artifact SHA-256`);
+  const document = JSON.parse(buffer.toString("utf8"));
+  equal(document.sourceSha256, sourceSha256, `${label} source SHA-256`);
+  return {
+    document,
+    provenance: { path: resolvedPath, byteLength: buffer.byteLength, sha256 },
+  };
 }
 
 function requireFunction(functions, entry, instructionCount, instructionSha256) {

@@ -5,29 +5,30 @@
 `64/60/50/40/30 ms` 표보다 더 좁힐 수 있는가?**
 
 - 분석 상태: `정적 확정` — 아래의 mode/selector/feedback producer와 consumer의 폭, 분기,
-  call edge 및 K01 stage-1 경로의 **부재 경계**에 한정한다.
-- 재현 상태: `재현 완료` — EXE와 canonical static artifact hash, 함수 instruction hash,
-  jump-table, call edge 및 byte anchor가 바뀌면 extractor가 실패한다.
+  call edge 및 K01 stage-1 경로의 **미확정 연결 경계**에 한정한다.
+- 재현 상태: `재현 완료` — EXE와 canonical generated artifact의 exact byte length/SHA-256,
+  함수 instruction hash, jump-table, call edge 및 byte anchor가 바뀌면 extractor가 실패한다.
 - 구현 상태: 없음 — 이 단위는 project 24 Hz adapter를 고르지 않으며 turtle-tank `raw16`
   계약을 바꾸지 않는다.
 
 결론은 의도적으로 좁다. `mode == 1`일 때 원본 base가 정확히 `50 ms`인 것은 확인했지만,
-K01 stage 1이 그 mode를 생산한다는 정적 edge는 닫히지 않았다. 따라서 **K01 실행의 base를
+이 slice에서 K01 stage 1이 그 mode를 생산한다는 정적 edge는 닫히지 않았다. 따라서 **K01 실행의 base를
 50 ms로도, selector 표의 어느 값으로도 확정하지 않는다.** 아래 feedback producer만으로도
 조건부 50 ms base는 `49/50/51 ms`가 될 수 있으므로 accepted-update를 fixed Hz라고 부를
 근거도 없다.
 
 ## 재현 입력과 검증기
 
-| 입력 | SHA-256 | 역할 |
+| 입력 | bytes / SHA-256 | 역할 |
 | --- | --- | --- |
 | `original/imjinrok2/imjinrok2.exe` | `25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e` | 원본 코드·vtable·전역 데이터 주소 |
-| `analysis/generated/imjinrok2/functions.json` | `c10ea2de1f4998411d52443419c9a7f52ff7f9c18e79bd4115ba197d2f5bebc3` | 함수 범위와 instruction hash |
-| `analysis/generated/imjinrok2/references.json` | `df11ff3713988ef22b3390b5b0ae7b4a87464b5de547a4866e1c8ec8a0bcaf4c` | 직접 call edge |
-| `analysis/generated/imjinrok2/jump-tables.json` | `0ae517eb172f61b974ca7a4411e64c1cc42065c462ed53b3065ab2da633dfe2f` | main-state와 K01 stage switch |
+| `analysis/generated/imjinrok2/functions.json` | 1,467,804 / `c10ea2de1f4998411d52443419c9a7f52ff7f9c18e79bd4115ba197d2f5bebc3` | 함수 범위와 instruction hash |
+| `analysis/generated/imjinrok2/references.json` | 17,206,553 / `df11ff3713988ef22b3390b5b0ae7b4a87464b5de547a4866e1c8ec8a0bcaf4c` | 직접 call edge |
+| `analysis/generated/imjinrok2/jump-tables.json` | 607,724 / `0ae517eb172f61b974ca7a4411e64c1cc42065c462ed53b3065ab2da633dfe2f` | main-state와 K01 stage switch |
 
-`tools/imjinrok/extract-k01-clock-mode-producers.mjs`는 위 hash, 함수 instruction hash,
-7개 call edge, K01 stage case와 15개 byte anchor를 함께 확인한다. 다음은 재현 명령이다.
+`tools/imjinrok/extract-k01-clock-mode-producers.mjs`는 위 세 generated artifact의 exact byte
+length와 SHA-256을 JSON parse 전에 확인한다. 이어 embedded EXE source hash, 함수 instruction
+hash, 7개 call edge, K01 stage case와 15개 byte anchor를 함께 확인한다. 다음은 재현 명령이다.
 
 ```bash
 node --test tools/imjinrok/k01-clock-mode-producers.test.mjs
@@ -83,7 +84,7 @@ source-bound 계약을 따른다.
 ## K01에 대해 닫힌 것과 닫히지 않은 것
 
 K01 stage-1 entry에서 `0x0048dbe0 -> 0x0048d410`까지는 닫혔고, stage 1의 K01 map case도
-닫혔다. 반면 다음 정적 edge는 이 단위에서 존재하지 않는다.
+닫혔다. 반면 이 bounded source-bound slice는 다음 정적 edge를 아직 닫거나 확립하지 않는다.
 
 ```text
 K01 stage selector/value -> 0x00484130의 EBX argument
@@ -114,9 +115,11 @@ extractor test가 아래 raw vector를 직접 replay한다.
 | mode writer | `(previous, guard, argument)=(0,0,1),(1,1,1),(1,0,2)` | result mode `1,0,1` |
 | feedback | base `50`, input `100`, selected `101,100,99` | effective interval `49,50,51 ms` |
 
-또한 test는 EXE hash, instruction hash, feedback call edge, main/state jump-table 목적지를 각각
-변조한 artifact에서 실패한다. 따라서 상수만 읽어 만든 table이 아니라 해당 CFG/data-flow의
-재현 가능성을 검증한다.
+또한 test는 functions/references/jump-tables generated artifact 각각의 같은-size 독립 변조를
+exact file SHA-256 단계에서, source hash를 바꾼 stale functions artifact를 exact byte-length
+단계에서 거부한다. canonical file을 통과한 뒤에는 EXE hash, embedded source hash,
+함수 instruction hash, feedback call edge와 main/stage jump-table 목적지를 계속 확인한다. 따라서
+상수만 읽어 만든 table이 아니라 해당 CFG/data-flow의 재현 가능성을 검증한다.
 
 ## 다음 정적 질문
 
