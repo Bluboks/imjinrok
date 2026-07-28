@@ -355,13 +355,14 @@ synthetic state를 합치지 않았다. 기억한 right-click registration actio
 - selection이 없을 때 lower-left HUD에 global magic auto-use enable/disable toggle이 있다는 lead
 - unit-production queue에서 hero를 우선하는 global toggle이 있다는 lead
 
-두 번째 lead는 이번 queue pump에서 본 player-scoped gate와 production-filtered pop을 다음
-조사의 탐색점으로 삼을 수 있지만, bit `0x8`의 모든 produced type이 hero인지, 그 gate를 쓰는
-input action/owner가 무엇인지는 아직 재현하지 않았다. 첫 번째 lead도 seven-slot owner의
-predefined button과 동일하다고 가정하지 않는다.
+두 번째 lead는 후속
+[hero-priority queue gate 분석](hero-priority-queue-gate.md)에서 player record `+0x254e`
+WORD, actions `63/64`, selection-count-zero slot 1과 16개 named-hero action 전수 교집합으로
+정적 확정·범위 한정 재현했다. 첫 번째 lead는 인접 slot 0/actions `61/62`라는 탐색점만 얻었고,
+아직 hero gate나 seven-slot owner와 동일하다고 가정하지 않는다.
 
 ## 다음 좁은 질문
 
-player-scoped queue-pump gate `playerRecord+0x82e9ce`의 complete producer/input action을 복원하고,
-production-filtered pop이 실제 hero-priority toggle인지 action/type table 전체에 대해 판정한다.
-global magic auto-use toggle은 이 owner와 합치지 않고 그 다음 독립 질문으로 남긴다.
+selection-count-zero slot 0의 actions `61/62`, 인접 player WORD gate, writer·consumer와
+action/type 집합을 전수 추적해 global magic auto-use toggle인지 판정한다. remembered
+right-click reservation은 이 owner와 합치지 않고 별도 질문으로 남긴다.

@@ -126,6 +126,12 @@ count marker를 그리지만 이것이 사용자 기억의 persistent right-clic
 fixture의 재현 완료 범위는 bounded selection/input transport와 action dispatch뿐이다.
 queue pump·queue-count marker·state `0x0f` handoff와 `FUN_0042de00`의
 progress/completion/post-dispatch 전체 결과는 static-only다.
+별도 후속 slice는 selection-count-zero slot 1의 actions `63/64`가 player record
+`+0x254e` WORD를 on/off하고, exact-one gate가 229개 initialized action과 95개 type
+definition의 교집합인 16개 named-hero production action을 FIFO보다 먼저 제거함을
+정적 확정했다. synthetic control/hit·gate write·filtered/FIFO record removal은 범위 한정
+재현했지만 deeper redelivery와 resource 파일명은 포함하지 않는다. 이 compatibility slice를
+project selection panel의 public contract나 고정 원본 layout으로 일반화하지 않는다.
 
 ## 변경 통과 조건
 

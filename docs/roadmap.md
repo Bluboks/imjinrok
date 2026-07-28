@@ -140,15 +140,20 @@ slot도 contained-object identifier container다. 별도 action 115 path는 inte
 add/assign bookkeeping, non-one은 reservation과 해당 write를 건너뛰고
 common player/type writes 뒤 state-WORD-one direct start/non-one queue append,
 right-release payload `1`의 matching removal without caller refund 또는 no-match
-refund/bookkeeping까지 정적 확정·재현했다. selected-action queue-count marker와 queue pump,
-state `0x0f` type 76 handoff·produced-entity dispatch boundary는 정적 확정했지만 재현하지
-않았으며, `FUN_0042de00` progress/completion/post-dispatch 전체 결과도 미재현이다. 이 후보는
+refund/bookkeeping까지 정적 확정·재현했다. 이 action-115 fixture는 selected-action
+queue-count marker·queue pump, state `0x0f` type 76 handoff·produced-entity dispatch
+boundary를 재현하지 않았으며, `FUN_0042de00` progress/completion/post-dispatch 전체 결과도
+미재현이다. 이 후보는
 사용자 기억의 persistent
 right-click reservation 기능을 확정하지 않으며 실제 action/owner는 별도 lead다. current
 `productionQueue`와 좁은 표시 의미는
 호환되지만 original raw queue/state를 project contract로 만들지 않으며 제품 UI는 바꾸지
-않았다. 다음 질문은 remembered right-click reservation의 실제 action/owner 또는
-player-scoped production-filter queue gate를 각각 독립적으로 닫는다.
+않았다. 후속 분석은 player record `+0x254e` WORD, actions `63/64`, selection-count-zero
+slot 1과 action/type table 전수 교집합의 정확한 16개 named-hero action을 결합해
+player-scoped hero-priority queue toggle을 정적 확정했다. synthetic control/hit, gate write,
+filtered/FIFO record removal·fallback은 full-result vector로 재현했고 deeper redelivery는
+범위 밖이다. 다음 질문은 remembered right-click reservation의 실제 action/owner 또는
+인접 slot 0 actions `61/62`가 global magic auto-use toggle인지 각각 독립적으로 닫는다.
 
 후속 프로젝트 구조 감사는 기존 `game.events` HUD view 경계를 확장해 K01 HUD objective button에서
 숫자 상태 없는 semantic action을 발행하고 `UIScene`의 queue·private active request까지 한 번
