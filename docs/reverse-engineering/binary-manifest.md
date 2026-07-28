@@ -47,9 +47,9 @@ objdump -x original/imjinrok2/imjinrok2.exe
 | Java | Eclipse Temurin `21.0.12+8` |
 | Ghidra 언어 | `x86:LE:32:default` |
 | compiler spec | `windows` |
-| 자동 분석 함수 | `2448` |
+| 자동 분석 함수 | `2449` |
 | 정의된 문자열 | `1545` |
-| seed 주소 / 포함 함수 | `198` / `190` |
+| seed 주소 / 포함 함수 | `199` / `191` |
 | 구조화 산출물 | `analysis/generated/imjinrok2/` |
 
 도구 배포 URL과 SHA-256은 `tools/imjinrok/static-analysis-versions.env`에 고정했다. 원본 EXE 해시가

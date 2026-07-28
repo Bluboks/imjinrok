@@ -73,6 +73,7 @@
 - [엔티티 자료구조](reverse-engineering/data-structures/entity-record.md)
 - [K01 팬 리마스터 MVP 정적 분석 계획](reverse-engineering/mechanics/campaign/k01.md)
 - [K01 map low-nibble 표준 주소형 직접 writer](reverse-engineering/mechanics/k01-map-low-nibble-writers.md)
+- [K01 global mask source/copy boundary](reverse-engineering/mechanics/k01-global-mask-boundary.md)
 
 ### 의사결정과 작업 규칙
 
