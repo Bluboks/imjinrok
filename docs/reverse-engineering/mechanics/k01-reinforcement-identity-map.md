@@ -1,6 +1,6 @@
 # K01 native 증원 정체·요청 좌표 매핑
 
-Can original K01 reinforcement classes 12, 13, 14, and 82 receive distinct reusable project kinds and exact static identity/source-SPR bindings without claiming stats, combat behavior, owner meaning, or final-placement parity?
+Can original K01 reinforcement classes 12, 13, 14, and 82 receive distinct reusable project kinds and exact static identity/source-SPR bindings without claiming stats, combat behavior, or owner meaning?
 
 ## 범위와 상태
 
@@ -13,8 +13,9 @@ Can original K01 reinforcement classes 12, 13, 14, and 82 receive distinct reusa
   `exact-static-identity-source` binding으로 연결했다. 이 판정은 정체와 source SPR에만
   한정된다.
 
-generic simulation의 생성·충돌·배치 규칙은 변경하지 않았다. 이 문서는 원본 descriptor의
-**요청 좌표**를 확정하지만 실제 생성 후 최종 위치를 확정하지 않는다.
+이 문서는 원본 descriptor의 **요청 좌표**와 identity/source binding을 확정한다. slot 선택,
+OOB, exact create와 occupancy의 정적 근거는
+[K01 native 증원 슬롯·정확 배치 정책](k01-reinforcement-placement-policy.md)에 분리한다.
 
 ## 원본 입력과 검증 도구
 
@@ -111,7 +112,8 @@ SPR 파일에만 한정된다.
 - 9/9: class 12·13·14·82, exact static identity/source binding
 - 0/9: proxy identity
 - 9/9: K01 원본 요청 좌표 exact
-- 0/9: 이 문서만으로 최종 배치·전투 수치·행동 parity를 확정
+- 배치: slot·OOB·exact create·occupancy는 [별도 배치 정책 문서](k01-reinforcement-placement-policy.md)에서 정적 확정·재현
+- 이 문서만으로 확정하지 않음: 전투 수치·행동·raw owner 의미
 - class 13 record 2/9: 상태 8/1/4/7 frame·8방향·mirror 확정·이식
 - class 14 record 3/9: 상태 8/1/4 grid frame·mirror, intermediate 16-ring과 creation-default
   transient destruction은 확정; generic Facing·project-side tick mapping은 미이식
@@ -147,10 +149,11 @@ raw owner WORD, offset, project kind와 `exact-static-identity-source` 상태를
 - class 82의 같은 프로젝트 값을 현행 `japanese-gunner`에서 복사
 - 신규 세 visual의 `srcPxPerWu`, render size, pivot과 잠정 FPS
 
-K0120 script에는 spawn command가 없고 원본 native code가 직접 생성한다. 현재 simulation은
-`origin+offset` 요청을 map에 clamp한 뒤 `findOpenSpawnPoint`를 호출한다. 따라서 점유·경계
-상태에 따라 최종 위치가 이동하거나 생성이 생략될 수 있다. 테스트 fixture에서 열린 요청 칸에
-그대로 놓이는 결과는 generic runtime 동작의 예일 뿐 원본 최종 배치 parity 증거가 아니다.
+K0120 script에는 spawn command가 없고 원본 native code가 직접 생성한다. 현재 K01 action만
+`placementPolicy: "requested-position-exact"` opt-in으로 raw `origin+offset`의 in-bounds 요청을
+terrain/passability·occupancy·open-point 탐색 없이 그대로 만든다. 원본 1,200-slot pool,
+generation 및 explicit occupancy-owner grid는 포팅하지 않았으므로 이식 상태는 `부분 이식`이다.
+상세 근거와 차이는 [배치 정책](k01-reinforcement-placement-policy.md)을 따른다.
 
 ## 재현 벡터와 남은 gate
 
@@ -165,7 +168,7 @@ K0120 script에는 spawn command가 없고 원본 native code가 직접 생성�
   SHA 불일치
 
 남은 integration gate는 class 12·14·82의 나머지 animation state·방향, 네 class의
-stats·category·collision·전투 행동, raw owner의 사람용 의미와 원본 생성 실패/점유·최종 배치
-정책의 프로젝트 identity다. class 13도 exact timing·pivot·사망 lifetime은 미확정이다.
+stats·category·collision·전투 행동, raw owner의 사람용 의미와 원본 1,200-slot/generation/
+occupancy-owner 저장 모델 및 이후 movement다. class 13도 exact timing·pivot·사망 lifetime은 미확정이다.
 generic superset는 유지하며 이들이 별도 정적 확정·재현되기 전에는 K01 adapter를 원본 전체
 동작으로 승격하지 않는다.

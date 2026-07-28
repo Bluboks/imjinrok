@@ -204,14 +204,16 @@ scan 또는 skip 뒤 `0x0048a7f2`는 flag를 1과 정확히 비교한다.
 [native 증원 정체·요청 좌표 매핑](k01-reinforcement-identity-map.md)에서 네 class와 SPR,
 K01 60×60 map 및 아홉 요청 좌표를 별도 교차 확인했다. K01 전용 adapter는 class
 12·13·14·82 아홉 record를 고유 kind의 exact static identity/source binding으로 연결했다.
-최종 배치, owner 의미, 행동·stats·animation은 이 trigger 증거로 확정하지 않는다.
-generic spawn semantics는 바꾸지 않았으며 isolated opt-in gate는 남아 있다.
+slot·OOB·exact create·occupancy overwrite의 정적 증거와 K01-only partial port는
+[K01 native 증원 슬롯·정확 배치 정책](k01-reinforcement-placement-policy.md)에 분리한다.
+이 문서의 trigger evidence만으로 owner 의미, 행동·stats·animation 또는 trigger 전체의 원작 일치를
+주장하지 않는다.
 
 ## 남은 불확실성과 다음 질문
 
 - 표준 mission entry broad zero-fill 밖의 `WORD 0x008438dc` 전체 reset lifecycle
 - raw relation-table 값, selector 5 grids, 세 direct global write의 사람용 의미
-- 네 class의 behavior/stats/animation, owner 의미와 최종 배치 exact mapping
+- 네 class의 behavior/stats/animation, owner 의미, 원본 1,200-slot/generation/occupancy-owner 저장 모델과 이후 movement
 
 이 문서의 return 뒤 K01 loss latch, fixed-width timer와 final commit은
 [K01 미션 결과 수명주기](k01-mission-result-lifecycle.md)에서 별도 정적 확정·재현했다.
@@ -220,4 +222,5 @@ generic spawn semantics는 바꾸지 않았으며 isolated opt-in gate는 남아
 정적 확정·재현했다. 표준 entry의 timer와 trigger flag 포함 DWORD zero는
 [K01 표준 미션 진입 timer reset](k01-mission-timer-reset.md)에서 별도 확정했다.
 native 증원 class와 K01 요청 좌표의 현재 확정 범위는
-[별도 매핑 문서](k01-reinforcement-identity-map.md)에 기록했다.
+[별도 매핑 문서](k01-reinforcement-identity-map.md)에, slot·create·occupancy의 상세 근거는
+[배치 정책 문서](k01-reinforcement-placement-policy.md)에 기록했다.

@@ -42,8 +42,10 @@ VM에서 원본 게임을 플레이하며 화면 변화를 따라가는 방식�
   확정·재현했다. 표준 main state 1의 broad DWORD zero fill이 win/loss timer를 지운 뒤
   stage 1 K01 map source를 선택하는 반개구간·순서도 정적 확정·재현했다.
   native class/SPR와 K01 요청 좌표는 9개 모두 확인했고 class 12·13·14·82를 고유 kind의
-  exact static identity/source binding으로 연결했다. trigger flag의 전체 reset lifecycle,
-  증원 행동·animation·최종 생성 정책과 raw clock/result/asset transition mapping은 남아 있다.
+  exact static identity/source binding으로 연결했다. descriptor의 slot 선택·OOB·exact create·1×1
+  mode-1 occupancy overwrite도 정적 확정·재현했고 K01 action에 exact-position create를 부분 이식했다.
+  trigger flag의 전체 reset lifecycle, 증원 행동·animation, 원본 1,200-slot/generation/occupancy-owner
+  저장 모델의 이후 소비·movement와 raw clock/result/asset transition mapping은 남아 있다.
 - 4단계: 부분 진행. K01 영웅의 대상 검색·사거리, 공격 phase·피해·투사체와 signed-health
   사망·slot/reference 정리는 정적 확정·재현했다. 원본 identity·좌표·accepted update 단위의
   프로젝트 변환과 실제 opt-in 연결은 미확정이다.
@@ -142,6 +144,9 @@ VM에서 원본 게임을 플레이하며 화면 변화를 따라가는 방식�
 - match 선행 flag write, script busy와 무검사 loader `0/1`·void start
 - 같은 scan 복수 match의 native block 반복
 - signed-WORD descriptor 증원, selector 5 raw byte-grid와 두 raw global write
+- descriptor의 inactive slot 1..1199 signed reuse-age 선택·WORD wrap, allocate-before-bounds,
+  slot failure/OOB/terminator, exact record x/y와 1×1 mode-1 occupancy overwrite; K01-only
+  exact-position create 부분 이식
 - native class 12·13·14·82의 원본 정체·SPR, K01 요청 좌표와 프로젝트 exact static
   identity/source 9/9 연결; class 12·13 상태 8/1/4/7과 class 14 상태 8/1/4 grid animation 이식,
   class-14 intermediate 16-ring·creation-default transient destruction 정적 확정·재현,
@@ -159,7 +164,8 @@ VM에서 원본 게임을 플레이하며 화면 변화를 따라가는 방식�
 
 - 표준 entry broad zero 밖의 K01 trigger flag reset/consumer lifecycle
 - final destination `0x140/0x64/0x10/0x20/raw WORD`별 후속 lifecycle
-- class 12 state-2 project policy, class 14 generic Facing/runtime transient tick mapping, 네 class 행동·stats와 최종 생성 정책
+- class 12 state-2 project policy, class 14 generic Facing/runtime transient tick mapping, 네 class 행동·stats,
+  raw owner, 원본 1,200-slot/generation/occupancy-owner 저장 모델의 이후 소비·movement/pathfinding
 - raw clocks와 프로젝트 24 Hz·result/asset/identity policy의 exact mapping
 
 별도 후속 질문:
