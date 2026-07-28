@@ -22,7 +22,7 @@ const DEFAULT_REFERENCES_PATH = "analysis/generated/imjinrok2/references.json";
 export const EXPECTED_EXECUTABLE_SHA256 =
   "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e";
 export const EXPECTED_SEEDS_SHA256 =
-  "10e7104f3eb3f9dabac79b7636b3cd1b2efaa8f68ed1900a18f94a82160f58ba";
+  "325cef518b8ad459d2d1ddfefd3cb5dc960dba060e75a291736049d569b4a329";
 export const EXPECTED_FUNCTIONS_SHA256 =
   "c10ea2de1f4998411d52443419c9a7f52ff7f9c18e79bd4115ba197d2f5bebc3";
 export const EXPECTED_REFERENCES_SHA256 =
