@@ -281,7 +281,7 @@ export function extractHeroPriorityQueueGate({
     semanticConclusion:
       "Confirmed: this is a player-scoped global hero-priority toggle for production queues. It is exposed in the no-selection action HUD, action 63 enables it, action 64 disables it, and exact gate value 1 prioritizes the first queued action in the exact 16-action named-hero set before FIFO fallback. It is distinct from the adjacent actions 61/62 gate, the seven-WORD no-selection surface, and the remembered right-click persistent HUD reservation lead.",
     unresolvedBoundary:
-      "The generic pointer-release command-packing path and original resource filenames for the two control frames were not promoted to reproduction. Alias/bulk save-load paths beyond the statically closed owner reset are not claimed absent. The global magic auto-use lower-left toggle and production-button right-click persistent reservation/pinning remain independent unresolved leads; neither is identified with this hero-priority gate.",
+      "The generic pointer-release command-packing path and original resource filenames for the two control frames were not promoted to reproduction. Alias/bulk save-load paths beyond the statically closed owner reset are not claimed absent. A subsequent independent static slice confirms the adjacent global magic auto-use lower-left toggle without identifying it with this hero-priority gate. Production-button right-click persistent reservation/pinning remains a separate unresolved lead.",
   };
 }
 
@@ -502,7 +502,7 @@ function classifyFilteredActions(actionDefinitions, typeDefinitions, namesByClas
   return filteredActions;
 }
 
-function extractActionDefinitions(buffer, image, references) {
+export function extractActionDefinitions(buffer, image, references) {
   const constructorCalls = (references.references ?? [])
     .filter(
       ({ to, type }) =>

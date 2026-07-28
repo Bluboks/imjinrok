@@ -157,7 +157,10 @@ test("confirms the exact player gate, complete evidence sets, and named hero fil
     })),
   );
   assert.match(report.semanticConclusion, /^Confirmed:/u);
-  assert.match(report.unresolvedBoundary, /magic auto-use/u);
+  assert.match(
+    report.unresolvedBoundary,
+    /independent static slice confirms the adjacent global magic auto-use/u,
+  );
   assert.match(report.unresolvedBoundary, /right-click persistent reservation\/pinning/u);
 });
 

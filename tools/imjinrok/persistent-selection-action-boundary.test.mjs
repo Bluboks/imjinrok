@@ -230,7 +230,10 @@ test("verifies whole functions, exact anchors, and complete canonical caller pro
   assert.match(report.selectionValueDomains.sevenSlotStorage, /1\.\.95/u);
   assert.match(report.unresolvedBoundary, /right-click production reservation\/pinning feature is not bound/u);
   assert.match(report.unresolvedBoundary, /no-match rollback edge/u);
-  assert.match(report.unresolvedBoundary, /global magic-auto-use and hero-priority toggles remain unbound/u);
+  assert.match(
+    report.unresolvedBoundary,
+    /independent slices bind the remembered global magic-auto-use and hero-priority toggles/u,
+  );
   assert.deepEqual(extract(), report);
 });
 
