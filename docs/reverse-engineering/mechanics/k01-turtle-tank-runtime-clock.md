@@ -21,8 +21,13 @@ class 14 일본 귀갑차의 raw 16-ring 방향은 원본 scheduler가 승인한
 | 추출기 | [`extract-k01-turtle-tank-runtime-clock.mjs`](../../../tools/imjinrok/extract-k01-turtle-tank-runtime-clock.mjs) |
 | focused test | [`k01-turtle-tank-runtime-clock.test.mjs`](../../../tools/imjinrok/k01-turtle-tank-runtime-clock.test.mjs) |
 
-추출기는 EXE hash, canonical `functions.json`/`references.json`/`jump-tables.json`의 source hash,
-16개 함수의 instruction count/hash, 19개 direct-call edge와 9개 raw byte anchor를 함께 검증한다.
+이 문서는 [기존 turtle-tank animation pilot](k01-turtle-tank-animation-pilot.md)의 class-14
+16-ring/consumer 해석 위에 scheduler 경계를 추가한다. runtime-clock extractor도 그 의존을
+암묵적으로 두지 않는다. EXE hash, canonical `functions.json`/`references.json`/`jump-tables.json`와
+`seeds.json`의 source hash, class-14 type record `0x00884038`, raw flags `0x80143205`, special mask
+`0x80000008→0x80000000`, creation-default cadence 2의 type `+0x48`→runtime `+0x71` copy를 직접
+검증한다. 또한 18개 함수의 instruction count/hash, 19개 direct-call edge와 12개 raw byte anchor를
+함께 검증한다.
 주요 function contract는 다음과 같다.
 
 | 함수 | body range | instructions / SHA-256 |
@@ -37,8 +42,9 @@ class 14 일본 귀갑차의 raw 16-ring 방향은 원본 scheduler가 승인한
 | `FUN_0041e370` | `0x0041e370-0x0041e3bd`, `0x0041e3f0-0x0041e5db` | 115 / `aa96086d04f698f4965205fa74803f0cc7d7db9a05ee610834a0ccffac293a61` |
 
 나머지 chain function(`0x0045f9c0`, `0x00416c60`, `0x00416c70`, `0x00416ad0`,
-`0x00425af0`, `0x00425b20`, `0x004262e0`, `0x004381a0`)의 body/hash도 extractor output에서
-같이 고정한다. 테스트는 EXE와 functions/reference/jump-table artifact 각각의 변조를 거부한다.
+`0x00425af0`, `0x00425b20`, `0x004262e0`, `0x004381a0`, `0x0045bd00`, `0x00437650`)의 body/hash도
+extractor output에서 같이 고정한다. 테스트는 EXE와 functions/reference/jump-table/seeds artifact
+각각의 변조를 거부한다.
 
 ## accepted update에서 helper까지
 
@@ -97,8 +103,9 @@ cadence step은 다음 순서로 관찰된다.
 다음 cadence step이 grid에 착지한 뒤에야 attack consumer도 새 grid 값을 받는다.
 
 예를 들어 current `1`, target `5`, counter `0`, limit `2`이면 helper invocation 네 번의
-결과는 `1` no-step → `1000` (move만 새 intermediate) → `1000` no-step → `5`
-(move/attack 모두 새 grid)다. equality는 cadence를 reset하지 않으며 `+0x1f1`만 clear한다.
+**stateful replay** 결과는 `1` no-step → `1000` (move만 새 intermediate) → `1000` no-step → `5`
+(move/attack 모두 새 grid)다. 이 vector는 앞 step의 current/normal/cadence state를 다음 step의
+입력으로 실제 전달한다. equality는 cadence를 reset하지 않으며 `+0x1f1`만 clear한다.
 
 이는 helper 이후의 **필드 관찰 가능성**을 확정한다. recovered scheduler/renderer 전체 순서가
 아니므로 특정 화면 frame에서 같은 update 직후 반드시 draw가 일어난다는 별도 주장은 하지 않는다.

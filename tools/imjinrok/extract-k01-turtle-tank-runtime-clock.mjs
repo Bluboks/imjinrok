@@ -8,6 +8,7 @@ import { fileURLToPath } from "node:url";
 import {
   evaluateOriginalSchedulerAttempt,
 } from "./extract-k01-projectile-pool-cadence.mjs";
+import { extractEntityTypeCatalog } from "./extract-entity-type-catalog.mjs";
 import { replayTurtleTankTurn } from "./extract-k01-turtle-tank-animation-pilot.mjs";
 import { readPeImage, toHex } from "./pe-image.mjs";
 
@@ -16,6 +17,7 @@ const DEFAULT_EXECUTABLE_PATH = "original/imjinrok2/imjinrok2.exe";
 const DEFAULT_FUNCTIONS_PATH = "analysis/generated/imjinrok2/functions.json";
 const DEFAULT_REFERENCES_PATH = "analysis/generated/imjinrok2/references.json";
 const DEFAULT_JUMP_TABLES_PATH = "analysis/generated/imjinrok2/jump-tables.json";
+const DEFAULT_SEEDS_PATH = "analysis/generated/imjinrok2/seeds.json";
 
 const FUNCTION_CONTRACTS = [
   ["0x0045f9c0", 801, "b694ee213a1b5f189ed7455e00690dcb29d970eca6ea87ef1f59c42c611cfb24"],
@@ -34,6 +36,8 @@ const FUNCTION_CONTRACTS = [
   ["0x004381c0", 84, "3bda3c12b28b9cd641aa3d8af3d133754554800f3212d45c778e538ea022be4d"],
   ["0x0041efa0", 140, "0dd6b72b3f73f96672d22ceac55b7565cb93e92e3bc38598fa25a7b55013a646"],
   ["0x0041e370", 115, "aa96086d04f698f4965205fa74803f0cc7d7db9a05ee610834a0ccffac293a61"],
+  ["0x0045bd00", 103, "6561fe98f630ac5f7f0765426c257c4bc3900aae6d2964afa649447cb5030e8a"],
+  ["0x00437650", 539, "4605056775f6f43c9b2065ea5a4ddff5570137eb87587f4a09d2018618e13c28"],
 ];
 
 const REQUIRED_CALL_EDGES = [
@@ -68,6 +72,9 @@ const CODE_ANCHORS = [
   ["turn-conditional-normal-copy", 0x004382df, "66 8b 91 e8 01 00 00 66 81 fa e8 03 7d 07 66 89 91 e6 01 00 00 88 41 04", "a step always writes extended WORD +0x1e8 and dirty +0x04, but copies normal WORD +0x1e6 only below 1000"],
   ["move-consumes-extended-direction", 0x0041efa0, "f7 41 74 08 00 00 80 0f 84 d8 01 00 00 66 0f b6 81 a7 00 00 00 66 89 41 0a 0f bf 81 e8 01 00 00", "the special movement consumer reads WORD entity+0x1e8"],
   ["attack-consumes-normal-direction", 0x0041e3f0, "66 8b 81 46 01 00 00 66 89 41 0a 0f bf 81 e6 01 00 00", "the class-14 special attack consumer reads WORD entity+0x1e6"],
+  ["class14-type-writer-defaults", 0x0045c7e6, "6a 08 6a 00 68 05 32 14 80 56 6a 02 6a 03 6a 02 6a 02 6a 02", "class 14 supplies raw flags 0x80143205 and zero-based argument 35 value 2"],
+  ["type-writer-cadence-field", 0x0045be40, "66 8b 94 24 90 00 00 00 66 89 41 46 66 8b 84 24 94 00 00 00 66 89 51 48", "the type writer stores zero-based argument 35 in type WORD +0x48"],
+  ["entity-init-cadence-limit-copy", 0x00437e2a, "8a 88 56 2e 88 00 88 8e 21 01 00 00 8a 90 58 2e 88 00 88 56 71", "the entity initializer copies type +0x48 low byte to runtime BYTE +0x71"],
 ];
 
 export function extractK01TurtleTankRuntimeClock({
@@ -75,6 +82,7 @@ export function extractK01TurtleTankRuntimeClock({
   functionsPath = DEFAULT_FUNCTIONS_PATH,
   referencesPath = DEFAULT_REFERENCES_PATH,
   jumpTablesPath = DEFAULT_JUMP_TABLES_PATH,
+  seedsPath = DEFAULT_SEEDS_PATH,
 } = {}) {
   const { buffer, image } = readPeImage(executablePath);
   const executableSha256 = sha256(buffer);
@@ -82,6 +90,8 @@ export function extractK01TurtleTankRuntimeClock({
   const functions = readArtifact(functionsPath, executableSha256, "functions");
   const references = readArtifact(referencesPath, executableSha256, "references");
   const jumpTables = readArtifact(jumpTablesPath, executableSha256, "jump tables");
+  const typeCatalog = extractEntityTypeCatalog({ executablePath, seedsPath });
+  const class14Binding = requireClass14Binding(typeCatalog);
   const actionFive = requireActionFive(jumpTables);
 
   return {
@@ -101,6 +111,7 @@ export function extractK01TurtleTankRuntimeClock({
       validateAnchor(buffer, image, { id, va, bytes, meaning }),
     ),
     actionFive,
+    class14Binding,
     scheduler: {
       acceptedUpdateCounter: "DWORD 0x007c5f80",
       currentMilliseconds: "DWORD 0x00882e04",
@@ -151,6 +162,35 @@ export function replayTurtleTankAcceptedUpdate({ scheduler, turn, invokeTurnHelp
   };
 }
 
+export function replayTurtleTankAcceptedTurnSequence({ scheduler, initialTurn, targetDirections }) {
+  if (!Array.isArray(targetDirections) || targetDirections.length === 0) {
+    throw new TypeError("targetDirections must be a non-empty array");
+  }
+  let acceptedStepCounter = scheduler.acceptedStepCounter;
+  let currentTurn = { ...initialTurn };
+  const steps = [];
+  for (const targetDirection of targetDirections) {
+    const result = replayTurtleTankAcceptedUpdate({
+      scheduler: { ...scheduler, acceptedStepCounter },
+      turn: { ...currentTurn, targetDirection },
+    });
+    if (!result.scheduler.accepted || result.helperInvocationCount !== 1) {
+      throw new Error("stateful turn sequence requires an accepted helper invocation at every step");
+    }
+    acceptedStepCounter = result.scheduler.acceptedStepCounter;
+    currentTurn = {
+      currentDirection: result.turn.currentDirection,
+      normalDirection: result.turn.normalDirection,
+      cadenceCounter: result.turn.cadenceCounter,
+      cadenceLimit: result.turn.cadenceLimit,
+      turnPending: result.turn.turnPending,
+      dirty: result.turn.dirty,
+    };
+    steps.push({ acceptedStepCounter, ...result.turn });
+  }
+  return steps;
+}
+
 function createVectors() {
   const baseScheduler = {
     transitionGuardWord: 0, mainStateWord: 3, preUpdateReturn: 0,
@@ -158,22 +198,40 @@ function createVectors() {
   };
   return [
     { id: "rejected-clock-gate-does-not-touch-turn", result: replayTurtleTankAcceptedUpdate({ scheduler: { ...baseScheduler, clockGateReturn: 0, acceptedStepCounter: 7 }, turn: turn(1, 5, 1, 1) }) },
-    { id: "grid-to-intermediate-to-grid", result: replaySequence(baseScheduler, [turn(1, 5, 1, 0), turn(1, 5, 1, 1), turn(1000, 5, 1, 0), turn(1000, 5, 1, 1)]) },
+    { id: "grid-to-intermediate-to-grid", result: replayTurtleTankAcceptedTurnSequence({ scheduler: { ...baseScheduler, acceptedStepCounter: 0 }, initialTurn: turn(1, 5, 1, 0), targetDirections: [5, 5, 5, 5] }) },
     { id: "equality-no-step", result: replayTurtleTankAcceptedUpdate({ scheduler: { ...baseScheduler, acceptedStepCounter: 10 }, turn: turn(1, 1, 1, 1, 1) }) },
     { id: "opposite-tie-steps-backward", result: replayTurtleTankAcceptedUpdate({ scheduler: { ...baseScheduler, acceptedStepCounter: 10 }, turn: turn(1, 16, 1, 1) }) },
     { id: "cadence-byte-wrap", result: replayTurtleTankAcceptedUpdate({ scheduler: { ...baseScheduler, acceptedStepCounter: 0xffffffff }, turn: turn(1, 5, 1, 0xff) }) },
   ];
 }
 
-function replaySequence(baseScheduler, turns) {
-  return turns.reduce((state, nextTurn) => {
-    const result = replayTurtleTankAcceptedUpdate({ scheduler: { ...baseScheduler, acceptedStepCounter: state.acceptedStepCounter }, turn: nextTurn });
-    return { acceptedStepCounter: result.scheduler.acceptedStepCounter, turns: [...state.turns, result.turn] };
-  }, { acceptedStepCounter: 0, turns: [] });
-}
-
 function turn(currentDirection, targetDirection, normalDirection, cadenceCounter, turnPending = 0) {
   return { currentDirection, targetDirection, normalDirection, cadenceCounter, cadenceLimit: 2, turnPending, dirty: 0 };
+}
+
+function requireClass14Binding(typeCatalog) {
+  const type = typeCatalog.types.find(({ internalClass }) => internalClass === 14);
+  if (!type) throw new Error("type catalog is missing class 14");
+  assertEqual(type.definition.recordAddress, "0x00884038", "class 14 type record address");
+  assertEqual(type.definition.flags, "0x80143205", "class 14 raw flags");
+  const flags = Number.parseInt(type.definition.flags, 16) >>> 0;
+  const specialMask = 0x80000008;
+  assertEqual((flags & specialMask) >>> 0, 0x80000000, "class 14 special turn mask value");
+  return {
+    internalClass: 14,
+    typeRecordAddress: type.definition.recordAddress,
+    rawFlags: type.definition.flags,
+    specialTurnMask: "0x80000008",
+    specialTurnMaskValue: "0x80000000",
+    cadenceDefault: 2,
+    cadenceTypeField: "+0x48 WORD",
+    cadenceRuntimeField: "+0x71 BYTE",
+    provenance: {
+      typeInitializerCall: type.definition.initializerCallAddress,
+      seedsPath: typeCatalog.source.seedsPath,
+      seedsSourceSha256: typeCatalog.source.seedsSourceSha256,
+    },
+  };
 }
 
 function readArtifact(path, sourceSha256, label) {

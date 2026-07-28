@@ -7,6 +7,7 @@ import test, { after } from "node:test";
 import {
   extractK01TurtleTankRuntimeClock,
   replayTurtleTankAcceptedUpdate,
+  replayTurtleTankAcceptedTurnSequence,
 } from "./extract-k01-turtle-tank-runtime-clock.mjs";
 
 const root = resolve(import.meta.dirname, "../..");
@@ -15,6 +16,7 @@ const paths = {
   functionsPath: resolve(root, "analysis/generated/imjinrok2/functions.json"),
   referencesPath: resolve(root, "analysis/generated/imjinrok2/references.json"),
   jumpTablesPath: resolve(root, "analysis/generated/imjinrok2/jump-tables.json"),
+  seedsPath: resolve(root, "analysis/generated/imjinrok2/seeds.json"),
 };
 const temporaryDirectories = new Set();
 after(() => {
@@ -38,11 +40,26 @@ test("binds the accepted-update-to-class-14-turn chain to the original EXE", () 
   assert.equal(report.reproductionStatus, "reproduction-complete");
   assert.equal(report.implementationStatus, "not-ported-contract-only");
   assert.equal(report.source.sha256, "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e");
-  assert.equal(report.functionEvidence.length, 16);
+  assert.equal(report.functionEvidence.length, 18);
   assert.equal(report.callEdges.length, 19);
   assert.ok(report.codeAnchors.every((anchor) => anchor.matched));
   assert.deepEqual(report.actionFive, {
     switchAddress: "0x0043cda3", action: 5, destination: "0x0043d153",
+  });
+  assert.deepEqual(report.class14Binding, {
+    internalClass: 14,
+    typeRecordAddress: "0x00884038",
+    rawFlags: "0x80143205",
+    specialTurnMask: "0x80000008",
+    specialTurnMaskValue: "0x80000000",
+    cadenceDefault: 2,
+    cadenceTypeField: "+0x48 WORD",
+    cadenceRuntimeField: "+0x71 BYTE",
+    provenance: {
+      typeInitializerCall: "0x0045c843",
+      seedsPath: paths.seedsPath,
+      seedsSourceSha256: "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e",
+    },
   });
   assert.deepEqual(report.scheduler.acceptedOrder, [
     "0x00447e10 returns nonzero",
@@ -116,6 +133,16 @@ test("replays rejected scheduling, cadence, consumer visibility, equality, and w
   assert.equal(wrapped.scheduler.acceptedStepCounter, 0, "accepted DWORD wraps");
   assert.equal(wrapped.turn.cadenceCounter, 0, "cadence BYTE wraps before comparison");
   assert.equal(wrapped.turn.stepped, false);
+
+  const sequence = replayTurtleTankAcceptedTurnSequence({
+    scheduler: { ...acceptedScheduler, acceptedStepCounter: 0 },
+    initialTurn: turn(1, 5, 1, 0),
+    targetDirections: [5, 5, 5, 5],
+  });
+  assert.deepEqual(sequence.map(({ acceptedStepCounter }) => acceptedStepCounter), [1, 2, 3, 4]);
+  assert.deepEqual(sequence.map(({ currentDirection }) => currentDirection), [1, 1000, 1000, 5]);
+  assert.deepEqual(sequence.map(({ normalDirection }) => normalDirection), [1, 1, 1, 5]);
+  assert.deepEqual(sequence.map(({ stepped }) => stepped), [false, true, false, true]);
 });
 
 test("does not invent a turn when an accepted entity action does not reach the helper", () => {
@@ -147,6 +174,17 @@ test("rejects tampered source-bound analysis evidence", () => {
     table.cases.find(({ label }) => label === 5).destination = "0x0043d322";
   });
   assert.throws(() => extractK01TurtleTankRuntimeClock({ ...paths, jumpTablesPath }), /action 5 dispatcher destination/);
+
+  const seedsPath = copiedJson(paths.seedsPath, (artifact) => {
+    const initializer = artifact.functions.find(({ entry }) => entry === "0x0045bf50");
+    initializer.instructions.find(({ address }) => address === "0x0045c7ea").text = "PUSH 0x80143201";
+  });
+  assert.throws(() => extractK01TurtleTankRuntimeClock({ ...paths, seedsPath }), /class 14 raw flags/);
+
+  const cadenceFunctionsPath = copiedJson(paths.functionsPath, (artifact) => {
+    artifact.functions.find(({ entry }) => entry === "0x0045bd00").instructionSha256 = "1".repeat(64);
+  });
+  assert.throws(() => extractK01TurtleTankRuntimeClock({ ...paths, functionsPath: cadenceFunctionsPath }), /0x0045bd00 instruction SHA-256/);
 });
 
 function copiedJson(source, mutate) {
