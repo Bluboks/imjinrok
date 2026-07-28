@@ -156,10 +156,12 @@ tampered 또는 stale provenance를 실패시킨다. 이 vector는 unreachable K
 
 ## 현재 구현과 다음 작업
 
-현재 구현과 비교하거나 runtime cadence를 변경하지 않았다. active state-3 scheduler의 transitive
-direct-call closure가 state `22/24/26`만 직접 쓰고 state-5 writer/guard/mode routine edge를 갖지
-않는 더 좁은 boundary는 [K01 active state-3 mode 경계](k01-state-three-mode-boundary.md)에
-고정했다. 다음 정적 질문은 scheduler return 뒤 또는 state `22/24/26` consumer가 state `5`, guard,
-mode routine으로 이어지는지를 source-bound하는 것이다. indirect/alias와 후속 result-state 경계는
-여전히 미확정이므로 mode `0/1`, selector table, fixed Hz 또는 project 24 Hz adapter를 K01의
-확정값으로 사용할 수 없다.
+현재 구현과 비교하거나 runtime cadence를 변경하지 않았다. active state-3 scheduler closure의
+entire canonical direct write set은 state `22/24/26`뿐이며, 이어지는 direct consumer bridge도 raw
+state `5`/guard/mode routine edge를 만들지 않는다는 범위는
+[K01 active state-3 mode 경계](k01-state-three-mode-boundary.md)와
+[K01 state-3 후속 main-state consumer bridge](k01-state-three-consumer-bridge.md)에 각각 고정했다.
+다음 정적 질문은 pre-stage-1/session-entry의 mode selector/global producer와 persistence이며,
+별도 `FUN_004a5070 → FUN_00485890` caller를 포함한다. indirect/alias와 전역 session 범위는 여전히
+미확정이므로 mode `0/1`, selector table, fixed Hz 또는 project 24 Hz adapter를 K01의 확정값으로
+사용할 수 없다.

@@ -63,8 +63,9 @@ transitively 닫으면 정확히 1,070 entries다. sorted entry array의 SHA-256
 
 ## 상태 write와 branch 순서
 
-closure 안에서 target `WORD 0x004bdfc8`인 canonical direct `WRITE`는 정확히 세 개다. sorted
-normalized set SHA-256은 `cc3cd3124c0188f28d84d660fc4a21022f76476273ed8e705b5e79739b6807cc`이다.
+closure 안에서 target `WORD 0x004bdfc8`인 canonical direct `WRITE`의 **entire direct-call-closure
+set**은 정확히 세 개다. sorted normalized set SHA-256은
+`cc3cd3124c0188f28d84d660fc4a21022f76476273ed8e705b5e79739b6807cc`이다.
 
 | site | caller | reached condition | direct write |
 | --- | --- | --- | --- |
@@ -110,6 +111,9 @@ WORD/DWORD malformed input과 functions/references/jump-tables의 independent sa
 artifact를 검사한다. 특히 `3/22/24/26` vector는 state `3` active invocation 안에서만 의미를
 고정한다.
 
-다음 좁은 질문은 scheduler가 return한 뒤 또는 state `22/24/26` consumer가 다음 raw main state를
-어떻게 쓰는지, 그 경로가 state `5`/guard/mode routine에 도달하는지를 source-bound하는 것이다.
-그 전에는 K01 전체 session의 state-5 도달 여부나 mode persistence를 결론내리지 않는다.
+post-state-3 direct consumer bridge는
+[K01 state-3 후속 main-state consumer bridge](k01-state-three-consumer-bridge.md)에서 닫혔다.
+그 bridge도 raw state `5`/guard/mode routine direct edge를 만들지 않는다. 다음 좁은 질문은
+**pre-stage-1/session-entry의 mode selector/global producer와 persistence**이며, 별도
+`FUN_004a5070 → FUN_00485890` caller를 포함한다. 그 전에는 K01 전체 session의 state-5 도달 여부나
+indirect/alias mode persistence를 결론내리지 않는다.
