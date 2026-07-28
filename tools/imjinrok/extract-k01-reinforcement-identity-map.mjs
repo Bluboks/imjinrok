@@ -150,7 +150,7 @@ const EXPECTED_TYPES = [
     defaultStillOnly: false,
     animationStateMapping: "static-proven-core-state-frames",
     scope:
-      "project kind identity and source SPR binding are proven here; class-14 idle, move/walk, and attack grid-direction frames/mirroring are separately static-proven by the K01 turtle-tank animation pilot, while opaque raw directions, death/destruction, exact timing, stats, category, collision, behavior, render scale, and pivot remain unverified original semantics",
+      "project kind identity and source SPR binding are proven here; class-14 idle, move/walk, attack grid frames/mirroring, intermediate 16-ring raw turn positions, and its creation-default destruction effect path are separately static-proven by the K01 turtle-tank animation pilot. Generic Facing, project-side transient destruction/tick mapping, exact timing, stats, category, collision, behavior, render scale, and pivot remain unresolved",
   },
   {
     internalClass: 82,

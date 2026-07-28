@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "policy": {
     "semanticStatus": "mixed",
-    "acceptedEvidence": "All 95 original type identities, uniquely matched current visual source identities, SPEECH portraits, Korean HQ and signal-beacon body states, class-2 Korean spearman normal movement, K01 class-13 Japanese samurai core states, K01 class-14 Japanese turtle-tank idle/move/attack grid states, K01 class-82 Japanese Konishi core states, and the K01 heroes' idle, movement, attack, and death frame/direction mappings are statically proven in their documented scopes.",
+    "acceptedEvidence": "All 95 original type identities, uniquely matched current visual source identities, SPEECH portraits, Korean HQ and signal-beacon body states, class-2 Korean spearman normal movement, K01 class-13 Japanese samurai core states, K01 class-14 Japanese turtle-tank idle/move/attack grid states plus its non-theme 16-ring turn and creation-default transient destruction contracts, K01 class-82 Japanese Konishi core states, and the K01 heroes' idle, movement, attack, and death frame/direction mappings are statically proven in their documented scopes.",
     "parityUse": "A unique source identity proves the original name and SPR binding only. Only explicitly listed frame scopes may be used for animation parity; all other direction, action, layer, and body mappings remain quarantined."
   },
   "sourceFiles": [
@@ -48,7 +48,7 @@
     },
     {
       "path": "tools/imjinrok/extract-k01-turtle-tank-animation-pilot.mjs",
-      "sha256": "dead2d393c4ae28733630b85e8fd39a9c1e13d223d1eeba040996ad333169530"
+      "sha256": "6d703c2eb3f3fe9d8268e36e3d577a285fe3df698ecb8e50177c79472025318a"
     },
     {
       "path": "tools/imjinrok/extract-k01-konishi-animation-pilot.mjs",
@@ -72,7 +72,7 @@
     },
     {
       "path": "tools/imjinrok/audit-sprite-mappings.mjs",
-      "sha256": "020925ab8a94991ffafdf8be656b85410b5ce7107e3c292e992cc9889b8fd4fe"
+      "sha256": "0763a96d511ec418aba7e85190a10e851d665e91bc5de1b3b0f5e667e7e27e32"
     },
     {
       "path": "apps/game-client/public/assets/themes/default/ui/mission-portraits/hero.manifest.json",
@@ -5205,7 +5205,7 @@
           "walk": "char\\ghosttankj.spr",
           "attack": "char\\ghosttankj.spr"
         },
-        "unresolvedScope": "exact seconds-per-phase playback timing, opaque raw direction 1000..1007 project mapping, hit/death/destruction states, frames 81..87, pivot, later runtime flag mutation, and display lifetime remain unresolved"
+        "unresolvedScope": "the raw 1000..1007 values are statically resolved as intermediate 16-ring turn positions, but their generic Facing mapping and project-side transient destruction/tick mapping remain unresolved; frames 81..87 are not the creation-default death path, while their other use remains unresolved"
       },
       "source": {
         "path": "original/imjinrok2/char/ghosttankj.spr",

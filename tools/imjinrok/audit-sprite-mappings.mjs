@@ -185,7 +185,7 @@ const report = {
   policy: {
     semanticStatus: "mixed",
     acceptedEvidence:
-      "All 95 original type identities, uniquely matched current visual source identities, SPEECH portraits, Korean HQ and signal-beacon body states, class-2 Korean spearman normal movement, K01 class-13 Japanese samurai core states, K01 class-14 Japanese turtle-tank idle/move/attack grid states, K01 class-82 Japanese Konishi core states, and the K01 heroes' idle, movement, attack, and death frame/direction mappings are statically proven in their documented scopes.",
+      "All 95 original type identities, uniquely matched current visual source identities, SPEECH portraits, Korean HQ and signal-beacon body states, class-2 Korean spearman normal movement, K01 class-13 Japanese samurai core states, K01 class-14 Japanese turtle-tank idle/move/attack grid states plus its non-theme 16-ring turn and creation-default transient destruction contracts, K01 class-82 Japanese Konishi core states, and the K01 heroes' idle, movement, attack, and death frame/direction mappings are statically proven in their documented scopes.",
     parityUse:
       "A unique source identity proves the original name and SPR binding only. Only explicitly listed frame scopes may be used for animation parity; all other direction, action, layer, and body mappings remain quarantined.",
   },
@@ -501,7 +501,7 @@ function buildVisualStaticEvidence(visual, identityCandidates) {
         attack: k01TurtleTankAnimationPilot.states.attack.sourcePath,
       },
       unresolvedScope:
-        "exact seconds-per-phase playback timing, opaque raw direction 1000..1007 project mapping, hit/death/destruction states, frames 81..87, pivot, later runtime flag mutation, and display lifetime remain unresolved",
+        "the raw 1000..1007 values are statically resolved as intermediate 16-ring turn positions, but their generic Facing mapping and project-side transient destruction/tick mapping remain unresolved; frames 81..87 are not the creation-default death path, while their other use remains unresolved",
     };
   }
 

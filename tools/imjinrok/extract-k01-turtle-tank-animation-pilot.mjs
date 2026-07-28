@@ -12,13 +12,15 @@ import {
 } from "./extract-entity-type-catalog.mjs";
 import { extractOriginalSpriteTable } from "./extract-sprite-table.mjs";
 import { extractUnitAnimationPilot } from "./extract-unit-animation-pilot.mjs";
-import { readPeImage, toHex } from "./pe-image.mjs";
+import { readCString, readPeImage, toHex } from "./pe-image.mjs";
 
 const DEFAULT_EXECUTABLE_PATH = "original/imjinrok2/imjinrok2.exe";
 const DEFAULT_FUNCTIONS_PATH = "analysis/generated/imjinrok2/functions.json";
 const DEFAULT_JUMP_TABLES_PATH = "analysis/generated/imjinrok2/jump-tables.json";
 const DEFAULT_SEEDS_PATH = "analysis/generated/imjinrok2/seeds.json";
 const DEFAULT_SPRITE_PATH = "original/imjinrok2/char/ghosttankj.spr";
+const DEFAULT_EXP1_SPRITE_PATH = "original/imjinrok2/fnt/exp1.spr";
+const DEFAULT_EXP2_SPRITE_PATH = "original/imjinrok2/fnt/exp2.spr";
 
 export const EXPECTED_TURTLE_TANK = {
   internalClass: 14,
@@ -49,7 +51,7 @@ export const TURTLE_TANK_GRID_PROFILES = [
   { facing: "se", direction: 65, deltaX: 1, deltaY: 1, configuredBaseIndex: 0, mirrorX: false },
 ];
 
-export const TURTLE_TANK_OPAQUE_PROFILES = [
+export const TURTLE_TANK_INTERMEDIATE_TURN_PROFILES = [
   { direction: 1000, configuredBaseIndex: 3, mirrorX: false },
   { direction: 1001, configuredBaseIndex: 5, mirrorX: false },
   { direction: 1002, configuredBaseIndex: 7, mirrorX: false },
@@ -59,6 +61,8 @@ export const TURTLE_TANK_OPAQUE_PROFILES = [
   { direction: 1006, configuredBaseIndex: 1, mirrorX: true },
   { direction: 1007, configuredBaseIndex: 1, mirrorX: false },
 ];
+// Kept as a source-compatible export for older focused consumers.
+export const TURTLE_TANK_OPAQUE_PROFILES = TURTLE_TANK_INTERMEDIATE_TURN_PROFILES;
 
 const CLASS_INITIALIZER_FUNCTION = 0x004291d0;
 const CLASS_SWITCH_ADDRESS = 0x004292b3;
@@ -73,6 +77,9 @@ const ATTACK_GRID_SWITCH = 0x0041e425;
 const ATTACK_OPAQUE_SWITCH = 0x0041e513;
 const IDLE_FUNCTION = 0x0041d870;
 const IDLE_GRID_SWITCH = 0x0041d8a5;
+const ACTION_DISPATCH_FUNCTION = 0x0043c9c0;
+const ACTION_DISPATCH_SWITCH = 0x0043cda3;
+const ACTION_7_DESTINATION = 0x0043ce6e;
 const STATE_1_SPECIAL_MASK = 0x80000008;
 const ALTERNATE_MOVEMENT_MASK = 0x04000000;
 const IDLE_SPECIAL_MASK = 0x00000008;
@@ -81,11 +88,31 @@ const FUNCTION_CONTRACTS = [
   ["0x004291d0", ["0x004291d0-0x0042c547"], 4156, "1c05959938219ae4fa918ba3061b1856dcfb575f007a1a48281dd316709a7e96"],
   ["0x0041e370", ["0x0041e370-0x0041e3bd", "0x0041e3f0-0x0041e5db"], 115, "aa96086d04f698f4965205fa74803f0cc7d7db9a05ee610834a0ccffac293a61"],
   ["0x0041d870", ["0x0041d870-0x0041d976", "0x0041d9f0-0x0041dbdc"], 149, "725ef4a43130d35f9001bbd0b96ab9868b54ee4c000a49de36b96eccce7cdfc2"],
+  ["0x0041d700", ["0x0041d700-0x0041d7f5"], 49, "4efa54b7c845a61fe9aae4a14f62d0d1d2bab44c2b3e26db4cb524003bbc1af3"],
   ["0x0041efa0", ["0x0041efa0-0x0041f272"], 140, "0dd6b72b3f73f96672d22ceac55b7565cb93e92e3bc38598fa25a7b55013a646"],
   ["0x00438e80", ["0x00438e80-0x00438e9e"], 6, "870ed439ab165b6aef1ba7c7406f30b089809a389d42ede44a4e00371fdf7d0f"],
   ["0x00438f20", ["0x00438f20-0x00438f4e"], 24, "3bc91bd78040f10b1dd0bbfd140e85f6bf284a0ae0b99172faa667b79bf4e49f"],
+  ["0x00438fa0", ["0x00438fa0-0x00438fbe"], 6, "2da5a68ba80b3afe8bc617a8f8b0977da82dd62a0339d25fa7ea3b99eeaf04a6"],
+  ["0x00438ff0", ["0x00438ff0-0x0043901e"], 24, "4bb786a729f1f05a50fd96f4f3b63e9a7359aa571a98ddc6336980dec88a3d1b"],
   ["0x00439110", ["0x00439110-0x0043913e"], 24, "67e1b441220f1c64d444eab72f46fe1eceefb70912f321bf79769337a5bfe925"],
   ["0x004381a0", ["0x004381a0-0x004381bd"], 6, "3374eae851c0b4f466dda2bdbc72047cd09e08da36fc0dd6fd41b1e905f1fed4"],
+  ["0x004381c0", ["0x004381c0-0x00438300"], 84, "3bda3c12b28b9cd641aa3d8af3d133754554800f3212d45c778e538ea022be4d"],
+  ["0x0043d450", ["0x0043d450-0x0043d472"], 10, "68070666ba954c3ee6d0b5fc857e6bdbb5fe86416ad724e22eb1986cc0724ced"],
+  ["0x0045bd00", ["0x0045bd00-0x0045bef8"], 103, "6561fe98f630ac5f7f0765426c257c4bc3900aae6d2964afa649447cb5030e8a"],
+  ["0x00437650", ["0x00437650-0x00438025"], 539, "4605056775f6f43c9b2065ea5a4ddff5570137eb87587f4a09d2018618e13c28"],
+  ["0x00401000", ["0x00401000-0x00401037"], 13, "8e8430b40d9e5d090d58cf25a5a2ac7448f92067f079cfa44e5082e27aad8ffb"],
+  ["0x00401040", ["0x00401040-0x0040136e"], 297, "b661208c820b3511cab26655ba2ef8ba976b29b2d52f02fd7f4250d45d3ca0ee"],
+  ["0x00401390", ["0x00401390-0x00401428"], 38, "4255f9070783a65edcccf0eee0bb113b51e845ce6c0c16fa7615b721dc75d315"],
+  ["0x00401430", ["0x00401430-0x0040143f"], 4, "789748ef1874b86fdd5ab7a92020c6b1be3de0c5be0f0a4e6993ea1b3853c0e5"],
+  ["0x00401440", ["0x00401440-0x004014aa"], 35, "3f4f6e1fb58eb526b13dc2f958ce180f3007b9d4626bd2fff34c3c0df8ffc761"],
+  ["0x00401710", ["0x00401710-0x00401a99"], 303, "bd56ffda69bcb5d6ccb9363312ae9c94f6618e6a695021f76d276777f81e2836"],
+  ["0x00401aa0", ["0x00401aa0-0x00401abf"], 10, "12e5503e54d816a0b80d573ad2f3407b1faea0558344218c9fd21b8ac329fbc0"],
+  ["0x00401b70", ["0x00401b70-0x00401bad"], 21, "e1dc7a4eeec8ddf3839bc5335e650266b0a343b9750e57ec852978e181332ae4"],
+  ["0x00401bb0", ["0x00401bb0-0x00401bed"], 21, "356133a54a4668d3a1a784fdb3476df6e5baec62d5f99dd163edc396e18a6061"],
+  ["0x004233f0", ["0x004233f0-0x0042373d"], 273, "0d7a09841ec0e8a288a93496102037c1d56ec5c9328ed12255c4ff2cb8d92115"],
+  ["0x0043c9c0", ["0x0043c9c0-0x0043d35f"], 684, "eb1c7c21a9af5a2099a2d716ad1253db65fff75ef0befcae871e3462f4d3bcfa"],
+  ["0x00443360", ["0x00443360-0x0044343c"], 75, "8fb6ff5d2ca2dd9428e6087a2b27fcb4d408d4dd7d8140b42e13b727575de018"],
+  ["0x00447360", ["0x00447360-0x00447599"], 156, "8700298d4e2900a0f2833b1f9e1143c47d324478ef5fa419170e7945de7dd772"],
 ].map(([entry, bodyRanges, instructionCount, instructionSha256]) => ({
   entry,
   bodyRanges,
@@ -180,6 +207,33 @@ const EVIDENCE = [
     bytes: "8a 57 6f 8a 4f 6e fe c2 c6 47 03 04",
     meaning: "the target-driven attack producer selects raw animation state 4",
   },
+  { id: "turn-ring-full-table", va: 0x004381d1, bytes: "b8 01 00 00 00 66 3b f7 66 89 44 24 08 66 c7 44 24 0a e8 03 66 c7 44 24 0c 05 00 66 c7 44 24 0e e9 03 66 c7 44 24 10 04 00 66 c7 44 24 12 ea 03 66 c7 44 24 14 14 00 66 c7 44 24 16 eb 03 66 c7 44 24 18 10 00 66 c7 44 24 1a ec 03 66 c7 44 24 1c 50 00 66 c7 44 24 1e ed 03 66 c7 44 24 20 40 00 66 c7 44 24 22 ee 03 66 c7 44 24 24 41 00 66 c7 44 24 26 ef 03 75 0f", meaning: "all 16 WORD 16-ring entries are 1,1000,5,1001,4,1002,20,1003,16,1004,80,1005,64,1006,65,1007" },
+  { id: "turn-equality-and-cadence", va: 0x00438247, bytes: "75 0f 5f c6 81 f1 01 00 00 00 5e 83 c4 20 c2 04 00 8a 51 70 fe c2 3a 51 71 88 51 70", meaning: "equality clears +0x1f1; otherwise BYTE +0x70 increments then compares +0x71" },
+  { id: "turn-write-contract", va: 0x00438269, bytes: "55 c6 41 70 00 88 81 f1 01 00 00 33 d2", meaning: "cadence step resets +0x70 and sets +0x1f1" },
+  { id: "turn-shortest-forward-and-backward-tie", va: 0x004382a4, bytes: "66 83 fe 08 5d 7d 15 42 81 e2 0f 00 00 80 79 05 4a 83 ca f0 42 66 8b 54 54 08 eb 18 8d 72 ff 83 fe ff 75 0b 66 c7 81 e8 01 00 00 ef 03 eb 0c 66 8b 54 54 06 66 89 91 e8 01 00 00", meaning: "forward distance <8 increments; distance >=8, including the opposite tie, decrements with wrap before writing +0x1e8" },
+  { id: "turn-normal-copy-only", va: 0x004382df, bytes: "66 8b 91 e8 01 00 00 66 81 fa e8 03 7d 07 66 89 91 e6 01 00 00 88 41 04", meaning: "new +0x1e8 below 1000 copies to +0x1e6, then marks BYTE +0x04 dirty" },
+  { id: "class14-type-writer-defaults", va: 0x0045c7e6, bytes: "6a 08 6a 00 68 05 32 14 80 56 6a 02 6a 03 6a 02 6a 02 6a 02", meaning: "class-14 type writer call supplies zero-based arg 35 value 2 for cadence and arg 39 value 8 for action flags" },
+  { id: "type-writer-cadence-field-0x48", va: 0x0045be40, bytes: "66 8b 94 24 90 00 00 00 66 89 41 46 66 8b 84 24 94 00 00 00 66 89 51 48", meaning: "type writer stores DX loaded from zero-based arg 35 at [ESP+0x90] to type WORD +0x48" },
+  { id: "type-writer-action-flags-field-0x54", va: 0x0045be6d, bytes: "8b 94 24 a0 00 00 00 89 41 50 8b 84 24 a4 00 00 00 89 51 54", meaning: "type writer stores zero-based arg 39 from [ESP+0xa0] to type DWORD +0x54" },
+  { id: "entity-init-action-flags-copy", va: 0x00437bc0, bytes: "66 8b 0c 85 64 2e 88 00 33 c0 66 89 8e 84 00 00 00", meaning: "entity initializer copies class type action flags at +0x54 to runtime WORD +0x84" },
+  { id: "entity-init-cadence-limit-copy", va: 0x00437e2a, bytes: "8a 88 56 2e 88 00 88 8e 21 01 00 00 8a 90 58 2e 88 00 88 56 71", meaning: "entity initializer copies type cadence byte at +0x48 to runtime BYTE +0x71" },
+  { id: "destruction-effect-branch", va: 0x0042360d, bytes: "f6 c3 08 74 7a e8 89 e4 fd ff 8b c8 66 85 c9 74 62 a1 8c 5f 7c 00 bf fb ff 00 00", meaning: "action 6 bit 0x08 allocates before reading/updating PRNG" },
+  { id: "destruction-effect-selection", va: 0x00423639, bytes: "f7 f7 f6 c2 01 89 15 8c 5f 7c 00 74 23", meaning: "PRNG remainder parity selects kind 2 or 4 and stores state only after allocation" },
+  { id: "effect-pool-first-free", va: 0x00401aa0, bytes: "b8 01 00 00 00 b9 ca 25 84 00 66 83 39 00 74 0f 83 c1 02 40 81 f9 40 26 84 00 7c ee 66 33 c0", meaning: "effect pool scans indices 1..59; slot 0 is reserved" },
+  { id: "effect-kind2-config", va: 0x00401056, bytes: "6a 01 6a 00 6a 00 6a 12 6a 00 6a 05 b9 e8 a1 4c 00 e8 94 ff ff ff", meaning: "effect config index 5 has base 0, phase count 18, repeat 0" },
+  { id: "effect-kind4-config", va: 0x00401082, bytes: "6a 01 6a 00 6a 00 6a 03 6a 00 6a 06 b9 00 a2 4c 00 e8 68 ff ff ff", meaning: "effect config index 6 has base 0, phase count 3, repeat 0" },
+  { id: "effect-kind2-materializer", va: 0x00401b70, bytes: "8b 4c 24 04 56 0f bf c1 8d 14 c5 00 00 00 00 2b d0 8b 44 24 14 50 8b 44 24 10 8d 34 d5 f0 70 94 00 8b 54 24 14 52 50 51 6a 02", meaning: "helper materializes effect kind 2" },
+  { id: "effect-kind4-materializer", va: 0x00401bb0, bytes: "8b 4c 24 04 56 0f bf c1 8d 14 c5 00 00 00 00 2b d0 8b 44 24 14 50 8b 44 24 10 8d 34 d5 f0 70 94 00 8b 54 24 14 52 50 51 6a 04", meaning: "helper materializes effect kind 4" },
+  { id: "effect-update-tick", va: 0x00401440, bytes: "56 8b f1 0f bf 46 0e 48 75 48 66 83 7e 34 01 75 05 66 83 46 2c fe 8b 4e 10 66 c7 46 04 06 00 a1 80 5f 7c 00 2b c8 83 f9 02 72 07 66 ff 46 06 89 46 10", meaning: "effect phase advances iff unsigned lastTick-currentTick is at least 2" },
+  { id: "state7-renderer-fields", va: 0x004236a4, bytes: "66 8b 8e 8c 01 00 00 33 c0 66 3b c8 c6 46 6f 00 c6 46 03 07", meaning: "standard state-7 branch reads WORD +0x18c" },
+  { id: "state7-renderer-table-fields", va: 0x0041d700, bytes: "66 8b 81 92 01 00 00 66 89 41 0a 0f bf 81 e6 01 00 00 48 83 f8 4f 0f 87 ce 00 00 00", meaning: "canonical state-7 renderer reads slot WORD +0x192" },
+  { id: "state7-renderer-base-fields", va: 0x0041d72b, bytes: "66 8b 81 b2 01 00 00 c6 81 b5 01 00 00 00 66 03 81 94 01 00 00 66 89 41 0c c3", meaning: "state-7 renderer reads frame base +0x194; sibling branches read +0x196..+0x19c" },
+  { id: "class14-ancillary-helper", va: 0x00438fa0, bytes: "8a 44 24 08 0f bf 54 24 04 88 81 d1 00 00 00 66 8b 44 24 0c 66 89 84 51 d2 00 00 00 c2 10 00", meaning: "class-14 ancillary helper writes +0xd1/+0xd2, not state-7 fields" },
+  { id: "action6-next-action7", va: 0x0043ce03, bytes: "e8 e8 65 fe ff 83 f8 01 0f 85 ba 04 00 00 8a 86 84 00 00 00 24 19 f6 d8 1b c0 24 f1 83 c0 16 66 89 86 b0 01 00 00", meaning: "action 6 return 1 dispatches to action 7 when +0x84&0x19 is nonzero" },
+  { id: "action7-release-return-zero", va: 0x0043ce6e, bytes: "8b ce e8 cb 68 fe ff 66 8b 86 7a 04 00 00 66 3b c5 74 1e", meaning: "action 7 calls its helper before the retain gate" },
+  { id: "action7-default-release-gate", va: 0x0043ce9f, bytes: "f6 46 74 80 0f 84 6c 04 00 00", meaning: "action 7 with +0x74 bit 0x80 clear jumps to return-0" },
+  { id: "action7-return-zero", va: 0x0043d315, bytes: "5f 5e 5d 33 c0 5b 81 c4 80 00 00 00 c3", meaning: "action dispatcher returns zero" },
+  { id: "active-list-release", va: 0x00447499, bytes: "e8 22 55 ff ff 85 c0 75 0c 66 8b 16 52 e8 f5 c5 03 00", meaning: "active list calls dispatcher and releases slot when return is zero" },
 ];
 
 const GRID_DESTINATIONS = {
@@ -202,6 +256,8 @@ export function extractK01TurtleTankAnimationPilot({
   jumpTablesPath = DEFAULT_JUMP_TABLES_PATH,
   seedsPath = DEFAULT_SEEDS_PATH,
   spritePath = DEFAULT_SPRITE_PATH,
+  exp1SpritePath = DEFAULT_EXP1_SPRITE_PATH,
+  exp2SpritePath = DEFAULT_EXP2_SPRITE_PATH,
 } = {}) {
   const { buffer, image } = readPeImage(executablePath);
   const executableSha256 = sha256(buffer);
@@ -213,7 +269,9 @@ export function extractK01TurtleTankAnimationPilot({
   const jumpTables = readArtifact(jumpTablesPath, executableSha256, "jump tables");
   validateCase(jumpTables, CLASS_INITIALIZER_FUNCTION, CLASS_SWITCH_ADDRESS, 14, CLASS_DESTINATION, "class 14 initializer");
   validateCase(jumpTables, ATTACK_FUNCTION, ATTACK_SWITCH_ADDRESS, 14, ATTACK_DESTINATION, "class 14 attack wrapper");
+  validateCase(jumpTables, ACTION_DISPATCH_FUNCTION, ACTION_DISPATCH_SWITCH, 7, ACTION_7_DESTINATION, "action 7 dispatcher");
   validateDirectionSwitches(jumpTables);
+  const seeds = readArtifact(seedsPath, executableSha256, "seeds");
 
   const commonPilot = extractUnitAnimationPilot({
     executablePath,
@@ -227,6 +285,9 @@ export function extractK01TurtleTankAnimationPilot({
   if (!type) throw new Error("entity catalog is missing class 14");
   validateType(type);
   const sprite = inspectSprite(executablePath, spritePath);
+  const destruction = inspectDestructionEvidence({ buffer, image, exp1SpritePath, exp2SpritePath });
+  const initializerWriteScan = scanClass14InitializerWrites(seeds);
+  validateClass14InitializerScan(initializerWriteScan);
   const evidencePoints = EVIDENCE.map((point) => readEvidencePoint(buffer, image, point));
   requireAllEvidence(evidencePoints);
 
@@ -237,9 +298,9 @@ export function extractK01TurtleTankAnimationPilot({
   };
   const flags = EXPECTED_TURTLE_TANK.typeFlags >>> 0;
   return {
-    schemaVersion: 1,
+    schemaVersion: 2,
     question:
-      "원본 내부 class 14 일본 귀갑차의 상태 8 idle, 상태 1 일반 이동, 상태 4 target-driven 공격이 어느 SPR 슬롯·프레임·8방향·mirror를 선택하는가?",
+      "원본 내부 class 14 일본 귀갑차의 core frame, intermediate 16-ring turn, creation-default action-6 transient destruction/release contract는 무엇인가?",
     analysisStatus: "static-confirmed",
     reproductionStatus: "reproduction-complete",
     implementationStatus: "theme-level-mapping",
@@ -247,8 +308,9 @@ export function extractK01TurtleTankAnimationPilot({
       executable: { path: executablePath, sha256: executableSha256 },
       functions: { path: functionsPath, sourceSha256: functions.sourceSha256 },
       jumpTables: { path: jumpTablesPath, sourceSha256: jumpTables.sourceSha256 },
-      seeds: { path: seedsPath, sourceSha256: executableSha256 },
+      seeds: { path: seedsPath, sourceSha256: seeds.sourceSha256 },
       sprite,
+      destruction: destruction.resources,
     },
     identity: {
       internalClass: type.internalClass,
@@ -274,18 +336,146 @@ export function extractK01TurtleTankAnimationPilot({
       attack: { producer: "0x00423837", wrapper: "0x0041e370", consumer: "0x0041e3f0", directionField: "+0x1e6" },
     },
     states,
-    opaqueDirections: {
-      humanMeaning: "unresolved",
+    intermediateTurnDirections: {
+      humanMeaning: "intermediate 16-ring turn direction; generic Facing mapping unresolved",
       acceptedByStates: ["move", "attack"],
-      profiles: TURTLE_TANK_OPAQUE_PROFILES,
+      profiles: TURTLE_TANK_INTERMEDIATE_TURN_PROFILES,
     },
     functionEvidence,
     evidencePoints,
+    turnContract: {
+      ring: [1, 1000, 5, 1001, 4, 1002, 20, 1003, 16, 1004, 80, 1005, 64, 1006, 65, 1007],
+      cadenceDefault: 2,
+      fieldContract: { normalDirection: "+0x1e6 WORD", extendedDirection: "+0x1e8 WORD", cadence: "+0x70 BYTE/+0x71 BYTE", turnPending: "+0x1f1 BYTE", dirty: "+0x04 BYTE" },
+    },
+    destruction,
+    initializerWriteScan,
     acceptedInputScope:
-      "creation-default class-14 gate patterns, all eight recovered grid directions, phases within each configured count, and opaque raw directions 1000..1007 only for the two special consumers",
+      "creation-default class-14 state frames, all eight grid directions, intermediate 16-ring turn directions, action-6 bit-0x08 transient destruction, and effect phases within each recovered count",
     unresolvedScope:
-      "frames 81..87, state 7/death and +0xd0/+0xec initializer fields, opaque-direction human meanings and generic Facing mapping, exact seconds per phase, original update-to-24-Hz mapping, pivot, hit reaction, later flag mutation, and display lifetime",
+      "generic Facing mapping for intermediate 16-ring turn directions, frames 81..87 outside the refuted creation-default death path, exact seconds per phase, original update-to-24-Hz mapping, pivot, hit reaction, later flag mutation, and project-side transient destruction/tick mapping",
   };
+}
+
+export function replayTurtleTankTurn({
+  currentDirection,
+  targetDirection,
+  normalDirection,
+  cadenceCounter,
+  cadenceLimit,
+  turnPending = 0,
+  dirty = 0,
+}) {
+  validateUnsignedWord(currentDirection, "currentDirection");
+  validateUnsignedWord(targetDirection, "targetDirection");
+  validateUnsignedWord(normalDirection, "normalDirection");
+  validateUnsignedByte(cadenceCounter, "cadenceCounter");
+  validateUnsignedByte(cadenceLimit, "cadenceLimit");
+  validateUnsignedByte(turnPending, "turnPending");
+  validateUnsignedByte(dirty, "dirty");
+  const ring = [1, 1000, 5, 1001, 4, 1002, 20, 1003, 16, 1004, 80, 1005, 64, 1006, 65, 1007];
+  const currentIndex = ring.indexOf(currentDirection);
+  const targetIndex = ring.indexOf(targetDirection);
+  if (currentIndex < 0 || targetIndex < 0) {
+    throw new RangeError("currentDirection and targetDirection must be recovered 16-ring WORD values");
+  }
+  if (currentDirection === targetDirection) {
+    return { returned: 1, currentDirection, normalDirection, cadenceCounter, cadenceLimit, turnPending: 0, dirty, stepped: false };
+  }
+  const incremented = (cadenceCounter + 1) & 0xff;
+  if (incremented < cadenceLimit) {
+    return { returned: 0, currentDirection, normalDirection, cadenceCounter: incremented, cadenceLimit, turnPending, dirty, stepped: false };
+  }
+  const forwardDistance = (targetIndex - currentIndex + ring.length) % ring.length;
+  const nextIndex = forwardDistance < 8 ? (currentIndex + 1) % ring.length : (currentIndex + ring.length - 1) % ring.length;
+  const nextDirection = ring[nextIndex];
+  return { returned: 0, currentDirection: nextDirection, normalDirection: nextDirection < 1000 ? nextDirection : normalDirection, cadenceCounter: 0, cadenceLimit, turnPending: 1, dirty: 1, stepped: true, forwardDistance };
+}
+
+export function replayTurtleTankDestruction({
+  flags,
+  effectPool,
+  prngState,
+  x,
+  y,
+  ownerByte,
+  runtimeFlags = 0x05,
+}) {
+  validateUnsignedWord(flags, "flags");
+  validateUnsignedDword(prngState, "prngState");
+  validateSignedWord(x, "x");
+  validateSignedWord(y, "y");
+  validateUnsignedByte(ownerByte, "ownerByte");
+  validateUnsignedDword(runtimeFlags, "runtimeFlags");
+  if (!Array.isArray(effectPool) || effectPool.length !== 60 || effectPool.some((value) => !Number.isInteger(value) || value < 0 || value > 0xffff)) {
+    throw new RangeError("effectPool must contain exactly 60 unsigned WORD active values");
+  }
+  if ((flags & 0x02) !== 0 || (flags & 0x01) !== 0 || (flags & 0x08) === 0) {
+    throw new RangeError("flags must select the recovered action-6 bit-0x08 branch");
+  }
+  const slot = effectPool.slice(1).findIndex((value) => value === 0);
+  const nextAction = (flags & 0x10) !== 0 || (flags & 0x08) !== 0 ? 7 : null;
+  const releasesOnNextAcceptedUpdate = nextAction === 7 && (runtimeFlags & 0x80) === 0;
+  if (slot < 0) {
+    return { returned: 1, effect: null, prngState, nextAction, releasesOnNextAcceptedUpdate };
+  }
+  const nextPrngState = (Math.imul(prngState, 0xff83) >>> 0) % 0xfffb;
+  const kind = (nextPrngState & 1) === 1 ? 2 : 4;
+  return {
+    returned: 1,
+    prngState: nextPrngState,
+    effect: {
+      slot: slot + 1,
+      kind,
+      x,
+      y,
+      ownerByte,
+      resourceSlot: kind === 2 ? 5 : 6,
+      baseFrame: 0,
+      phaseCount: kind === 2 ? 18 : 3,
+      repeatCounter: 0,
+      repeatLimit: 0,
+    },
+    nextAction,
+    releasesOnNextAcceptedUpdate,
+  };
+}
+
+export function selectTransientEffectFrame({ kind, phase, phaseCount }) {
+  if (![2, 4].includes(kind)) throw new RangeError("kind must be 2 or 4");
+  validateUnsignedWord(phase, "phase");
+  validateUnsignedWord(phaseCount, "phaseCount");
+  const expectedPhaseCount = kind === 2 ? 18 : 3;
+  if (phaseCount !== expectedPhaseCount || phase >= phaseCount) throw new RangeError("phaseCount/phase is outside the recovered effect configuration");
+  return { kind, phase, phaseCount, frameIndex: phase };
+}
+
+export function replayTransientEffectUpdate({
+  kind,
+  phase,
+  phaseCount,
+  repeatCounter = 0,
+  repeatLimit = 0,
+  lastTick,
+  currentTick,
+}) {
+  selectTransientEffectFrame({ kind, phase, phaseCount });
+  validateUnsignedWord(repeatCounter, "repeatCounter");
+  validateUnsignedWord(repeatLimit, "repeatLimit");
+  validateUnsignedDword(lastTick, "lastTick");
+  validateUnsignedDword(currentTick, "currentTick");
+  const elapsed = (lastTick - currentTick) >>> 0;
+  if (elapsed < 2) {
+    return { returned: 1, phase, frameIndex: phase, phaseCount, repeatCounter, repeatLimit, lastTick, currentTick, advanced: false };
+  }
+  const nextPhase = phase + 1;
+  if (nextPhase !== phaseCount) {
+    return { returned: 1, phase: nextPhase, frameIndex: nextPhase, phaseCount, repeatCounter, repeatLimit, lastTick: currentTick, currentTick, advanced: true };
+  }
+  if (repeatCounter < repeatLimit) {
+    return { returned: 1, phase: 0, frameIndex: 0, phaseCount, repeatCounter: repeatCounter + 1, repeatLimit, lastTick: currentTick, currentTick, advanced: true };
+  }
+  return { returned: 0, phase: nextPhase, frameIndex: null, phaseCount, repeatCounter, repeatLimit, lastTick: currentTick, currentTick, advanced: true };
 }
 
 export function selectTurtleTankFrame({
@@ -306,11 +496,11 @@ export function selectTurtleTankFrame({
   }
   validateReplayGates(stateName, entityFlags >>> 0, attackPhaseCount);
   const grid = TURTLE_TANK_GRID_PROFILES.find((profile) => profile.direction === direction);
-  const opaque = TURTLE_TANK_OPAQUE_PROFILES.find((profile) => profile.direction === direction);
-  if (!grid && !(opaque && stateName !== "idle")) {
+  const intermediate = TURTLE_TANK_INTERMEDIATE_TURN_PROFILES.find((profile) => profile.direction === direction);
+  if (!grid && !(intermediate && stateName !== "idle")) {
     throw new RangeError(`direction ${direction} is outside the recovered ${stateName} set`);
   }
-  const profile = grid ?? opaque;
+  const profile = grid ?? intermediate;
   const frameIndex =
     stateName === "attack"
       ? 72 + profile.configuredBaseIndex
@@ -322,7 +512,7 @@ export function selectTurtleTankFrame({
     state,
     stateName,
     direction,
-    ...(grid ? { facing: grid.facing } : { facing: null, directionMeaning: "opaque" }),
+    ...(grid ? { facing: grid.facing } : { facing: null, directionMeaning: "intermediate-turn" }),
     phase,
     spriteSlot: 104,
     sourcePath: EXPECTED_TURTLE_TANK.sprite.sourcePath,
@@ -380,7 +570,7 @@ function validateCommonGridDirections(pilot) {
 }
 
 function validateDirectionSwitches(artifact) {
-  for (const [state, functionEntry, gridSwitch, opaqueSwitch] of [
+  for (const [state, functionEntry, gridSwitch, intermediateSwitch] of [
     ["idle", IDLE_FUNCTION, IDLE_GRID_SWITCH, undefined],
     ["move", MOVE_FUNCTION, MOVE_GRID_SWITCH, MOVE_OPAQUE_SWITCH],
     ["attack", ATTACK_FUNCTION, ATTACK_GRID_SWITCH, ATTACK_OPAQUE_SWITCH],
@@ -389,10 +579,10 @@ function validateDirectionSwitches(artifact) {
     for (const [label, destination] of GRID_DESTINATIONS[state]) {
       assertEqual(requireCase(grid, label).destination, toHex(destination), `${state} raw direction ${label}`);
     }
-    if (opaqueSwitch !== undefined) {
-      const opaque = requireSwitch(artifact, functionEntry, opaqueSwitch);
+    if (intermediateSwitch !== undefined) {
+      const intermediate = requireSwitch(artifact, functionEntry, intermediateSwitch);
       for (const [label, destination] of OPAQUE_DESTINATIONS[state]) {
-        assertEqual(requireCase(opaque, label).destination, toHex(destination), `${state} opaque direction ${label}`);
+        assertEqual(requireCase(intermediate, label).destination, toHex(destination), `${state} intermediate turn direction ${label}`);
       }
     }
   }
@@ -430,6 +620,84 @@ function inspectSprite(executablePath, spritePath) {
     pointerCell: table.tableVa,
     sourcePath: table.sourcePath,
   };
+}
+
+function inspectDestructionEvidence({ buffer, image, exp1SpritePath, exp2SpritePath }) {
+  const resources = [
+    { kind: 2, slot: 5, pointerCell: 0x004bc0a8, pointer: 0x004bd900, sourcePath: "fnt\\exp1.spr", path: exp1SpritePath, sha256: "51eecc60551b018ffd2729b7d30c69104d8231c89542a833bd0fc9906a613918", width: 100, height: 100, frameCount: 36, frameRange: [0, 17] },
+    { kind: 4, slot: 6, pointerCell: 0x004bc0ac, pointer: 0x004bd8f0, sourcePath: "fnt\\exp2.spr", path: exp2SpritePath, sha256: "6442030d5fd4a2cd74ee10438ed9cf0a88760e6bbb7b80303f1858acbb248957", width: 32, height: 32, frameCount: 300, frameRange: [0, 2] },
+  ].map((resource) => {
+    const cellOffset = image.vaToRawOffset(resource.pointerCell);
+    const pointer = cellOffset === undefined ? undefined : buffer.readUInt32LE(cellOffset);
+    assertEqual(pointer, resource.pointer, `${toHex(resource.pointerCell)} pointer`);
+    const stringOffset = image.vaToRawOffset(pointer);
+    assertEqual(readCString(buffer, stringOffset), resource.sourcePath, `${toHex(resource.pointer)} source path`);
+    const bytes = readFileSync(resource.path);
+    assertEqual(sha256(bytes), resource.sha256, `${resource.path} SHA-256`);
+    const header = parseSpriteLikeHeader(bytes, resource.path);
+    for (const key of ["width", "height", "frameCount"]) assertEqual(header[key], resource[key], `${resource.path} ${key}`);
+    return { ...resource, pointerCell: toHex(resource.pointerCell), pointer: toHex(resource.pointer) };
+  });
+  return {
+    creationDefaults: {
+      cadence: { typeWriterArgument: 35, value: 2, typeField: "+0x48 WORD", runtimeField: "+0x71 BYTE" },
+      actionFlags: { typeWriterArgument: 39, value: 8, typeField: "+0x54 DWORD", runtimeField: "+0x84 WORD" },
+    },
+    action: { action: 6, flagsMask: "0x0008", returns: 1, fullPool: "completes without effect or PRNG write", dispatcherNextAction: 7, releaseGate: "next accepted update: BYTE +0x74 low byte 0x05 lacks 0x80" },
+    pool: { recordCount: 60, reservedSlot: 0, allocationRange: [1, 59], firstFree: true },
+    prng: { formula: "((Math.imul(state, 0xff83) >>> 0) % 0xfffb)", global: "0x007c5f8c", oddKind: 2, evenKind: 4 },
+    effectUpdate: { tickRule: "unsigned (lastTick-currentTick) mod 2^32 >= 2", noSecondsOrFpsConversion: true, terminalOnPhaseEqualsCountWhenRepeatCounterEqualsLimit: true },
+    resources,
+  };
+}
+
+function scanClass14InitializerWrites(seeds) {
+  const start = 0x0042bae1;
+  const endExclusive = 0x0042bb8d;
+  const initializer = seeds.functions?.find(({ entry }) => entry === "0x004291d0");
+  if (!initializer?.instructions) throw new Error("seeds artifact is missing canonical instructions for 0x004291d0");
+  const instructions = initializer.instructions.filter(({ address }) => {
+    const value = Number.parseInt(address, 16);
+    return value >= start && value < endExclusive;
+  });
+  const directWrites = instructions.flatMap((instruction) => {
+    const match = /^([A-Z]+) (?:(byte|word|dword) ptr )?\[ESI \+ 0x([0-9a-f]+)\](?:,|$)/.exec(instruction.text);
+    if (!match) return [];
+    return [{ va: instruction.address, operation: match[1], field: `+0x${match[3]}`, width: match[2] ?? "unspecified", text: instruction.text }];
+  });
+  const helperCalls = instructions.flatMap((instruction) => {
+    const match = /^CALL (0x[0-9a-f]+)$/.exec(instruction.text);
+    return match ? [{ va: instruction.address, target: match[1] }] : [];
+  });
+  return {
+    provenance: { functionEntry: initializer.entry, sourceSha256: seeds.sourceSha256 },
+    range: `${toHex(start)}-${toHex(endExclusive - 1)}`,
+    rangeConvention: "inclusive",
+    directWrites,
+    helperCalls,
+    state7Fields: ["+0x18c", "+0x192", "+0x194", "+0x196", "+0x198", "+0x19a", "+0x19c"],
+    state7FieldWrites: directWrites.filter(({ field }) => ["+0x18c", "+0x192", "+0x194", "+0x196", "+0x198", "+0x19a", "+0x19c"].includes(field)),
+  };
+}
+
+function validateClass14InitializerScan(scan) {
+  assertDeepEqual(
+    scan.directWrites.map(({ operation, field, width }) => ({ operation, field, width })),
+    [
+      { operation: "MOV", field: "+0x92", width: "byte" },
+      { operation: "MOV", field: "+0xa6", width: "byte" },
+      { operation: "MOV", field: "+0x144", width: "word" },
+      { operation: "MOV", field: "+0xd0", width: "byte" },
+      { operation: "MOV", field: "+0xec", width: "byte" },
+    ],
+    "class 14 initializer direct writes",
+  );
+  assertDeepEqual(
+    scan.helperCalls.map(({ target }) => target),
+    ["0x00438e80", "0x00438e80", "0x00438e80", "0x00438e80", "0x00438e80", "0x00438f20", "0x00439110", "0x00438ff0", "0x00438ff0"],
+    "class 14 initializer helper calls",
+  );
+  assertDeepEqual(scan.state7FieldWrites, [], "class 14 initializer state-7 field writes");
 }
 
 function readArtifact(path, sourceSha256, label) {
@@ -484,6 +752,9 @@ function validateUnsignedDword(value, label) {
 function validateUnsignedWord(value, label) {
   if (!Number.isInteger(value) || value < 0 || value > 0xffff) throw new RangeError(`${label} must be an unsigned WORD`);
 }
+function validateUnsignedByte(value, label) {
+  if (!Number.isInteger(value) || value < 0 || value > 0xff) throw new RangeError(`${label} must be an unsigned BYTE`);
+}
 function validateSignedWord(value, label) {
   if (!Number.isInteger(value) || value < -0x8000 || value > 0x7fff) throw new RangeError(`${label} must be a signed WORD`);
 }
@@ -501,7 +772,7 @@ function formatBytes(bytes) {
 }
 function parseArgs(argv) {
   const result = {};
-  const options = new Map([["--input", "executablePath"], ["--functions", "functionsPath"], ["--jump-tables", "jumpTablesPath"], ["--seeds", "seedsPath"], ["--sprite", "spritePath"]]);
+  const options = new Map([["--input", "executablePath"], ["--functions", "functionsPath"], ["--jump-tables", "jumpTablesPath"], ["--seeds", "seedsPath"], ["--sprite", "spritePath"], ["--exp1-sprite", "exp1SpritePath"], ["--exp2-sprite", "exp2SpritePath"]]);
   for (let index = 0; index < argv.length; index += 1) {
     const argument = argv[index];
     if (argument === "--json") continue;
