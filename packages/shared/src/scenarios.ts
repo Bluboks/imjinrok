@@ -120,6 +120,7 @@ export interface ScenarioSpawnUnitsActionDefinition {
   playerId: string;
   origin: GridPoint;
   units: StartingUnitDefinition[];
+  placementPolicy?: "requested-position-exact";
   order?: ScenarioUnitOrderDefinition;
 }
 
@@ -730,6 +731,7 @@ export const imjinrokK01Scenario = {
           playerId: k01ReinforcementOwnerAdapter.projectPlayerId,
           origin: { x: 55, y: 53 },
           units: k01ReinforcementWave,
+          placementPolicy: "requested-position-exact",
           order: { type: "attack-move", target: { x: 10, y: 10 } },
         },
         {

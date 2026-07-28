@@ -1422,14 +1422,21 @@ test("built-in campaign objective routes are reachable on imported map scaffolds
   }
 });
 
-test("imjinrok K01 adapted reinforcement event uses the configured requested positions when open", () => {
-  const scenario = imjinrokCampaignScenarios.find((candidate) => candidate.id === "imjinrok-k01-opening");
+test("imjinrok K01 reinforcement preserves its static-proven requested coordinates through an occupied anchor", () => {
+  const scenario = imjinrokCampaignScenarios.find(
+    (candidate) => candidate.id === "imjinrok-k01-opening",
+  );
   assert.ok(scenario, "K01 scenario should be registered");
 
   const map = createMapDefinitionFromId(scenario.mapId);
   assert.ok(map, "K01 map should load");
 
-  const state = createInitialWorldState(map, getScenarioLaunchPlayerIds(scenario), scenario, getScenarioLaunchPlayerTeams(scenario));
+  const state = createInitialWorldState(
+    map,
+    getScenarioLaunchPlayerIds(scenario),
+    scenario,
+    getScenarioLaunchPlayerTeams(scenario),
+  );
 
   advanceTicks(state, 600);
 
@@ -1439,6 +1446,17 @@ test("imjinrok K01 adapted reinforcement event uses the configured requested pos
   assert.equal(state.scenario.scriptedEvents["k01-reinforcement-wave"]?.status, "pending");
   assert.equal(state.units["cpu-1-k0120-reinforcement-0x52"], undefined);
   assert.equal(state.scenario.status, "running");
+  const runtimeK01Spawn = state.scenario.scriptedEvents[
+    "k01-reinforcement-wave"
+  ]?.actions.find((action) => action.type === "spawn-units");
+  assert.equal(runtimeK01Spawn?.placementPolicy, "requested-position-exact");
+
+  state.units["local-player-reinforcement-blocker"] = createUnitState(
+    "local-player-reinforcement-blocker",
+    "local-player",
+    "swordsman",
+    { x: 53, y: 51 },
+  );
 
   state.units["local-player-test-beacon"] = createUnitState(
     "local-player-test-beacon",
@@ -1453,14 +1471,25 @@ test("imjinrok K01 adapted reinforcement event uses the configured requested pos
   assert.equal(state.scenario.scriptedEvents["k01-reinforcement-wave"]?.status, "executed");
   assert.equal(state.scenario.scriptedEvents["k01-reinforcement-wave"]?.executedAtTick, state.tick);
   assert.equal(state.scenario.objectives["withdraw-after-reinforcements"]?.status, "completed");
-  // These final positions equal the requests only because this fixture leaves each requested tile open.
-  // Generic clamping/open-point search may relocate or skip them in other world states.
-  assert.deepEqual(state.units["cpu-1-k0120-reinforcement-0x0d-1"]?.position, { x: 53, y: 51 });
+  assert.deepEqual(
+    state.units["local-player-reinforcement-blocker"]?.position,
+    { x: 53, y: 51 },
+  );
+  assert.deepEqual(
+    state.units["cpu-1-k0120-reinforcement-0x0d-1"]?.position,
+    { x: 53, y: 51 },
+  );
   assert.equal(state.units["cpu-1-k0120-reinforcement-0x0d-1"]?.kind, "japanese-samurai");
   assert.equal(state.units["cpu-1-k0120-reinforcement-0x52"]?.kind, "japanese-konishi");
-  assert.deepEqual(state.units["cpu-1-k0120-reinforcement-0x52"]?.position, { x: 55, y: 51 });
+  assert.deepEqual(
+    state.units["cpu-1-k0120-reinforcement-0x52"]?.position,
+    { x: 55, y: 51 },
+  );
   assert.equal(state.units["cpu-1-k0120-reinforcement-0x0d-2"]?.kind, "japanese-samurai");
-  assert.deepEqual(state.units["cpu-1-k0120-reinforcement-0x0d-2"]?.position, { x: 57, y: 51 });
+  assert.deepEqual(
+    state.units["cpu-1-k0120-reinforcement-0x0d-2"]?.position,
+    { x: 57, y: 51 },
+  );
   assert.equal(state.units["cpu-1-k0120-reinforcement-0x0e-1"]?.kind, "japanese-turtle-tank");
   assert.equal(state.units["cpu-1-k0120-reinforcement-0x0e-2"]?.kind, "japanese-turtle-tank");
   assert.equal(state.units["cpu-1-k0120-reinforcement-0x0e-3"]?.kind, "japanese-turtle-tank");
@@ -1468,12 +1497,38 @@ test("imjinrok K01 adapted reinforcement event uses the configured requested pos
   assert.equal(state.units["cpu-1-k0120-reinforcement-0x0c-1"]?.kind, "japanese-gunner");
   assert.equal(state.units["cpu-1-k0120-reinforcement-0x0c-2"]?.kind, "japanese-gunner");
   assert.equal(state.units["cpu-1-k0120-reinforcement-0x0c-3"]?.kind, "japanese-gunner");
+  assert.deepEqual(
+    Object.values(state.units)
+      .filter(
+        (unit) =>
+          unit.playerId === "cpu-1" && unit.id.includes("k0120-reinforcement"),
+      )
+      .map((unit) => unit.position)
+      .sort((left, right) => left.y - right.y || left.x - right.x),
+    [
+      { x: 53, y: 51 },
+      { x: 55, y: 51 },
+      { x: 57, y: 51 },
+      { x: 53, y: 53 },
+      { x: 55, y: 53 },
+      { x: 57, y: 53 },
+      { x: 53, y: 55 },
+      { x: 55, y: 55 },
+      { x: 57, y: 55 },
+    ],
+  );
   assert.equal(
-    Object.values(state.units).filter((unit) => unit.playerId === "cpu-1" && unit.id.includes("k0120-reinforcement")).length,
+    Object.values(state.units).filter(
+      (unit) =>
+        unit.playerId === "cpu-1" && unit.id.includes("k0120-reinforcement"),
+    ).length,
     9,
   );
   assert.equal(
-    Object.values(state.units).some((unit) => unit.playerId === "cpu-1" && unit.id.startsWith("cpu-1-source-")),
+    Object.values(state.units).some(
+      (unit) =>
+        unit.playerId === "cpu-1" && unit.id.startsWith("cpu-1-source-"),
+    ),
     true,
   );
   assert.equal(state.scenario.status, "running");
@@ -2200,6 +2255,89 @@ test("scripted spawn event fires once and assigns a unit order", () => {
     Object.values(state.units).filter((unit) => unit.playerId === "p2").map((unit) => unit.id).sort(),
     ["p2-wave-swordsman-1", "p2-wave-swordsman-2"],
   );
+});
+
+test("scripted exact spawn bypasses project placement gates while default spawn still relocates", () => {
+  const map = createBlankMap({ width: 6, height: 6 });
+  map.layers[0]!.tiles[getTileIndex(map.width, 2, 2)] = {
+    terrain: "water",
+    elevation: 0,
+  };
+  const scenario: ScenarioDefinition = {
+    ...defaultSkirmishScenario,
+    id: "scripted-exact-placement-policy",
+    mapId: map.id,
+    startingUnits: [],
+    playerStarts: { p1: { startingUnits: [] }, p2: { startingUnits: [] } },
+    objectives: [],
+    scriptedEvents: [
+      {
+        id: "exact-wave",
+        trigger: { type: "tick", tick: 1 },
+        actions: [
+          {
+            type: "spawn-units",
+            playerId: "p2",
+            origin: { x: 1, y: 1 },
+            placementPolicy: "requested-position-exact",
+            units: [
+              {
+                kind: "swordsman",
+                idSuffix: "exact-occupied",
+                offset: { x: 0, y: 0 },
+              },
+              {
+                kind: "swordsman",
+                idSuffix: "exact-water",
+                offset: { x: 1, y: 1 },
+              },
+              {
+                kind: "swordsman",
+                idSuffix: "exact-oob",
+                offset: { x: -2, y: 0 },
+              },
+            ],
+          },
+          {
+            type: "spawn-units",
+            playerId: "p2",
+            origin: { x: 1, y: 1 },
+            units: [
+              {
+                kind: "swordsman",
+                idSuffix: "default-occupied",
+                offset: { x: 0, y: 0 },
+              },
+              {
+                kind: "swordsman",
+                idSuffix: "default-water",
+                offset: { x: 1, y: 1 },
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  };
+  const state = createInitialWorldState(map, ["p1", "p2"], scenario);
+  state.units["p1-blocker"] = createUnitState(
+    "p1-blocker",
+    "p1",
+    "swordsman",
+    { x: 1, y: 1 },
+  );
+
+  advanceWorldTick(state);
+
+  assert.deepEqual(state.units["p1-blocker"]?.position, { x: 1, y: 1 });
+  assert.deepEqual(state.units["p2-exact-occupied"]?.position, { x: 1, y: 1 });
+  assert.deepEqual(state.units["p2-exact-water"]?.position, { x: 2, y: 2 });
+  assert.equal(state.units["p2-exact-oob"], undefined);
+  assert.notDeepEqual(state.units["p2-default-occupied"]?.position, { x: 1, y: 1 });
+  assert.notDeepEqual(state.units["p2-default-water"]?.position, { x: 2, y: 2 });
+  const defaultWaterUnit = state.units["p2-default-water"];
+  assert.ok(defaultWaterUnit);
+  assert.equal(isTilePassableForUnit(state, defaultWaterUnit, defaultWaterUnit.position), true);
 });
 
 test("tick-zero scripted events run during initial world creation without firing area triggers", () => {

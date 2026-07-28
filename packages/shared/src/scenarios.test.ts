@@ -130,6 +130,10 @@ test("imjinrok K01 and K02 retain source battle script beats", () => {
     status: "completed",
   });
   assert.deepEqual(k01ReinforcementSpawn?.origin, { x: 55, y: 53 });
+  assert.equal(
+    k01ReinforcementSpawn?.placementPolicy,
+    "requested-position-exact",
+  );
   assert.deepEqual(k01ReinforcementOwnerAdapter, {
     rawOwnerWord: 1,
     projectPlayerId: "cpu-1",
@@ -249,6 +253,7 @@ test("imjinrok K01 and K02 retain source battle script beats", () => {
   assert.equal(k02OpeningDialogue?.focusPoint, undefined);
   assert.deepEqual(k02RoyalCartSpawnEvent?.trigger, { type: "tick", tick: 0 });
   assert.equal(k02RoyalCartSpawnEvent?.sourceScript, "script/K0220");
+  assert.equal(k02RoyalCartSpawn?.placementPolicy, undefined);
   assert.deepEqual(k02RoyalCartSpawn, {
     type: "spawn-units",
     playerId: "local-player",

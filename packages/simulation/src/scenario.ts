@@ -161,6 +161,9 @@ function cloneScriptedEventAction(action: ScenarioScriptedEventActionDefinition)
           idSuffix: unit.idSuffix,
           offset: { ...unit.offset },
         })),
+        ...(action.placementPolicy
+          ? { placementPolicy: action.placementPolicy }
+          : {}),
         ...(action.order
           ? { order: cloneScenarioUnitOrder(action.order) }
           : {}),
@@ -343,18 +346,21 @@ function applySpawnUnitsAction(
   }
 
   for (const unitDefinition of action.units) {
-    const requestedPosition = clampMapPoint(state, {
+    const requestedPosition = {
       x: action.origin.x + unitDefinition.offset.x,
       y: action.origin.y + unitDefinition.offset.y,
-    });
+    };
     const unitId = createScriptedUnitId(state, action.playerId, unitDefinition.idSuffix);
-    const probe = createUnitState(unitId, action.playerId, unitDefinition.kind, requestedPosition);
-    const position = findOpenSpawnPoint(state, probe, requestedPosition);
-
+    const position = resolveScriptedSpawnPosition(
+      state,
+      action,
+      unitId,
+      unitDefinition.kind,
+      requestedPosition,
+    );
     if (!position) {
       continue;
     }
-
     const unit = createUnitState(unitId, action.playerId, unitDefinition.kind, position);
 
     applyCompletedResearchToUnit(state, unit);
@@ -363,6 +369,22 @@ function applySpawnUnitsAction(
       applyScriptedUnitOrder(state, unit, action.order);
     }
   }
+}
+
+function resolveScriptedSpawnPosition(
+  state: WorldState,
+  action: Extract<ScenarioScriptedEventActionDefinition, { type: "spawn-units" }>,
+  unitId: string,
+  kind: UnitState["kind"],
+  requestedPosition: GridPoint,
+): GridPoint | null {
+  if (action.placementPolicy === "requested-position-exact") {
+    return isPointInsideMap(state, requestedPosition) ? requestedPosition : null;
+  }
+
+  const clampedPosition = clampMapPoint(state, requestedPosition);
+  const probe = createUnitState(unitId, action.playerId, kind, clampedPosition);
+  return findOpenSpawnPoint(state, probe, clampedPosition);
 }
 
 function applyScriptedUnitOrder(
