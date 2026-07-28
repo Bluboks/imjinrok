@@ -4,6 +4,8 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseSpriteLikeHeader } from "./codec.mjs";
+import { extractCommandGridCellSizeBinding } from "./extract-command-grid-cell-size-binding.mjs";
+import { extractPannelSprHudBlit } from "./extract-pannel-spr-hud-blit.mjs";
 import { readPeImage } from "./pe-image.mjs";
 import {
   assertEqual,
@@ -38,7 +40,9 @@ export const ACTION_GRID = Object.freeze({
   verticalGap: 2,
   cellWidthSource: "signed WORD[0x0089982c]",
   cellHeightSource: "signed WORD[0x00899830]",
-  cellSizeStatus: "unresolved-runtime-source-binding",
+  cellWidth: 34,
+  cellHeight: 34,
+  cellSizeStatus: "source-bound-at-successful-button-loader-initialization",
 });
 
 const RAW_CODE_RANGES = [
@@ -101,21 +105,66 @@ export function extractGameplaySelectionCommandPanel({ executablePath = DEFAULT_
   const button = parseSpriteLikeHeader(buttonBytes, buttonPath);
   assertDeepEqual({ width: panel.width, height: panel.height, frameCount: panel.frameCount }, { width: 640, height: 163, frameCount: 1 }, "pannel.spr header");
   assertDeepEqual({ width: button.width, height: button.height, frameCount: button.frameCount }, { width: 34, height: 34, frameCount: 289 }, "button.spr header");
+  const cellSizeBinding = extractCommandGridCellSizeBinding({ executablePath, buttonPath, referencesPath });
+  const panelHudBlit = extractPannelSprHudBlit({ executablePath, panelPath, referencesPath });
+  assertDeepEqual(
+    cellSizeBinding.fields.gridInitializer.values,
+    {
+      rawLowWords: { cellWidth: ACTION_GRID.cellWidth, cellHeight: ACTION_GRID.cellHeight },
+      effectiveSignedInt16: { cellWidth: ACTION_GRID.cellWidth, cellHeight: ACTION_GRID.cellHeight },
+    },
+    "source-bound button cell size",
+  );
+  assertDeepEqual(
+    panelHudBlit.finalBlit.rectangle,
+    { x: 0, y: 0, width: panel.width, height: panel.height, right: panel.width, bottom: panel.height, coordinateSystem: "top-left shared 640×480 HUD canvas" },
+    "source-bound pannel HUD blit rectangle",
+  );
+  const exactRectangles = createExactCommandGridRectangles();
   return {
     question: "What statically provable object owns the gameplay selection/command action grid, and what are its shared-640×480 canvas, statically closed grid formula, no-selection dispatch, draw and strict-input bounds?",
-    analysisStatus: "static-confirmed-for-owner-and-parametric-command-grid",
-    reproductionStatus: "reproduction-complete-for-parametric-grid-formula-and-slot-admission",
-    implementationStatus: "analysis-only-no-product-change",
+    analysisStatus: "static-confirmed-for-owner-and-exact-command-grid",
+    reproductionStatus: "reproduction-complete-for-source-bound-grid-geometry-and-slot-admission",
+    implementationStatus: "K01-scenario-gated-grid-geometry; action-labels-and-semantics-remain-project-adaptations",
     sources: { executableSha256: EXPECTED_EXECUTABLE_SHA256, referencesSha256: EXPECTED_REFERENCES_SHA256, panel: { path: panelPath, sha256: EXPECTED_PANEL_SHA256, width: panel.width, height: panel.height, frameCount: panel.frameCount }, button: { path: buttonPath, sha256: EXPECTED_BUTTON_SHA256, width: button.width, height: button.height, frameCount: button.frameCount } },
     owner: { address: "0x007c5ed8", actionSlots: "nine indexed command slots read by FUN_0045ad90 through owner methods; no-selection producer FUN_0045b3a0 writes the same owner", unrelatedOwners: ["0x005e3680 is SPEECH portrait/label state", "0x00bcdd58 is the refuted transient formatted overlay"] },
-    geometry: { sharedCanvas: SHARED_CANVAS, panelAsset: PANEL_ASSET_BOUNDS, actionGrid: ACTION_GRID, actionSlotFormula: "left=525+(slot%3)*(runtimeCellWidth+2); top=363+trunc(slot/3)*(runtimeCellHeight+2); right=left+runtimeCellWidth; bottom=top+runtimeCellHeight", exactRectangles: "unresolved because the producer binding of DAT_0089982c/0x00899830 is not closed to fnt\\button.spr" },
+    geometry: {
+      sharedCanvas: SHARED_CANVAS,
+      panelAsset: PANEL_ASSET_BOUNDS,
+      panelHudBlit: {
+        rectangle: panelHudBlit.finalBlit.rectangle,
+        ordering: panelHudBlit.finalBlit.ordering,
+        unresolvedBoundary: panelHudBlit.unresolvedBoundary,
+      },
+      actionGrid: ACTION_GRID,
+      actionSlotFormula: "left=525+(slot%3)*(34+2); top=363+trunc(slot/3)*(34+2); right=left+34; bottom=top+34",
+      exactRectangles,
+    },
+    sourceBindings: {
+      commandGridCellSize: {
+        analysisStatus: cellSizeBinding.analysisStatus,
+        loader: cellSizeBinding.loader,
+        fields: cellSizeBinding.fields,
+        rawCodeRanges: cellSizeBinding.rawCodeRanges,
+        referenceSets: cellSizeBinding.referenceSets,
+        unresolvedBoundary: cellSizeBinding.unresolvedBoundary,
+      },
+      panelHudBlit: {
+        analysisStatus: panelHudBlit.analysisStatus,
+        loader: panelHudBlit.loader,
+        finalBlit: panelHudBlit.finalBlit,
+        rawCodeRanges: panelHudBlit.rawCodeRanges,
+        referenceSets: panelHudBlit.referenceSets,
+        unresolvedBoundary: panelHudBlit.unresolvedBoundary,
+      },
+    },
     slotBoundary: { renderer: "FUN_0045ad90 increments slot index from 0 while cursor 0x007c66f0 advances by 2 to exclusive 0x007c6702: exactly 9 iterations", getter: "FUN_00461200 returns zero for signed index <0 or >=9 before owner storage read", ownerIndexDomain: "0..8" },
     render: { rootCallsite: "0x00447aba", renderer: "FUN_0045ad90", order: ["selection-count branch", "exact-one selected entity delegate or no-selection seven-type delegate", "destination lock", "owner command slots 0..8", "later SPEECH slot dispatcher", "later transient formatted overlay"], lockGate: "DAT_00559418 lock result must equal 1; otherwise the bounded command-grid slot reads/draws do not occur", noSelection: "selection count raw WORD exactly 0 selects FUN_0045b8b0 before the common nine command-slot loop", exactOne: "exactly one searches selected record and delegates to FUN_00421390", multiSelection: "other nonzero counts skip both of those delegates but continue to the bounded command-grid draw path" },
     input: { function: "FUN_00459110", disabledWhen: "DAT_00c06e70 == 1", presenceGate: "owner slot control identifier must be nonzero", bounds: "left < pointerX < right and top < pointerY < bottom", unsupportedSlot: "FUN_00461200 rejects signed indices below 0 or at least 9 by returning zero before the owner field read", downstreamBoundary: "A successful hit only establishes slot admission here; FUN_00459490's later left/right release and command delivery are separately bounded evidence." },
     rawCodeRanges: RAW_CODE_RANGES.map((range) => verifyRawCodeRange(buffer, image, range)),
     evidencePoints: EVIDENCE.map((point) => verifyEvidencePoint(buffer, image, point)),
     referenceSets: REFERENCE_SPECS.map(([label, key, value, count, digest]) => verifyReferenceSet(references, { label, key, value, count, digest })),
-    unresolvedBoundary: "This closes the shared 640×480 canvas, common pannel.spr resource dimensions, nine-slot owner/index boundary, and parametric grid formula. It does not close a producer-to-runtime-field binding that fixes DAT_0089982c/0x00899830 to fnt\\button.spr, so 34×34 cells and exact slot rectangles are not static-confirmed. It also does not close a direct pannel.spr-to-final-blit callsite or coordinate, rename every command identifier, infer the selected-entity renderer FUN_00421390's complete contents, or claim a product selectionPanel parity mapping. Indirect runtime surface method results after a null/missing resource pointer are static-only and are represented as unsafe downstream calls, not fabricated success.",
+    unresolvedBoundary: "This closes the successful common-loader record-18 -> fnt\\button.spr 34×34 DWORD -> low-WORD layout -> signed-int16 command-grid geometry contract, all nine exact rectangles, and pannel.spr's indexed (0,0) HUD blit before the grid. It does not prove the absence of a later computed-alias writer after initialization, rename command identifiers, infer FUN_00421390's complete selected-entity contents, identify DAT_0054926c/DAT_00559418's concrete DirectDraw/vtable semantic owner, or prescribe product HUD/background placement. Indirect runtime surface method results after a null/missing resource pointer remain static-only rather than fabricated success.",
   };
 }
 
@@ -151,6 +200,8 @@ export function reproduceGameplayCommandGrid(input) {
 }
 
 function commandSlotRect(slot, runtimeCellSize) { const column = slot % ACTION_GRID.columns; const row = Math.trunc(slot / ACTION_GRID.columns); const left = ACTION_GRID.left + column * (runtimeCellSize.width + ACTION_GRID.horizontalGap); const top = ACTION_GRID.top + row * (runtimeCellSize.height + ACTION_GRID.verticalGap); return { left, top, right: left + runtimeCellSize.width, bottom: top + runtimeCellSize.height, width: runtimeCellSize.width, height: runtimeCellSize.height }; }
+function createExactCommandGridRectangles() { return Array.from({ length: 9 }, (_, slot) => ({ slot, ...toExactRectangle(commandSlotRect(slot, { width: ACTION_GRID.cellWidth, height: ACTION_GRID.cellHeight })) })); }
+function toExactRectangle(rectangle) { return { x: rectangle.left, y: rectangle.top, width: rectangle.width, height: rectangle.height, right: rectangle.right, bottom: rectangle.bottom }; }
 function verifyReferenceSet(references, spec) { const rows = references.references.filter((entry) => entry[spec.key] === spec.value && (spec.key !== "to" || entry.type === "UNCONDITIONAL_CALL")).map(({ from, to, type, fromFunctionEntry }) => ({ from, to, type, fromFunctionEntry })).sort((a, b) => JSON.stringify(a).localeCompare(JSON.stringify(b))); const digest = createHash("sha256").update(JSON.stringify(rows)).digest("hex"); assertEqual(rows.length, spec.count, `${spec.label} count`); assertEqual(digest, spec.digest, `${spec.label} digest`); return { label: spec.label, count: rows.length, digest, references: rows }; }
 function assertSlots(value) {
   if (!Array.isArray(value) || value.length !== 9) throw new TypeError("slots must be an array of exactly nine command-slot records");
