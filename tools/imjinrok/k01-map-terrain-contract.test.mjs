@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
+import { spawnSync } from "node:child_process";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
 import {
@@ -15,6 +16,7 @@ const repositoryRoot = join(dirname(fileURLToPath(import.meta.url)), "../..");
 const mapPath = join(repositoryRoot, "original/imjinrok2/stagemap/k01.map");
 const executablePath = join(repositoryRoot, "original/imjinrok2/imjinrok2.exe");
 const portSourcePath = join(repositoryRoot, "packages/shared/src/imjinrokMaps.ts");
+const extractorPath = join(dirname(fileURLToPath(import.meta.url)), "extract-k01-map-terrain-contract.mjs");
 const fixture = JSON.parse(readFileSync(join(repositoryRoot, "analysis/fixtures/k01-map-terrain-contract.json"), "utf8"));
 
 test("K01 hash-bound raw projection reproduces the complete RLE and record-crossing vectors", () => {
@@ -80,6 +82,25 @@ test("K01 raw projection rejects a port source whose hash no longer binds the na
       () => extractK01MapTerrainContract({ mapPath, executablePath, portSourcePath: tamperedPortSourcePath }),
       /K01 port source SHA-256 mismatch/,
     );
+  } finally {
+    rmSync(directory, { recursive: true, force: true });
+  }
+});
+
+test("K01 terrain contract CLI consumes an explicit hash-bound port-source path", () => {
+  const directory = mkdtempSync(join(tmpdir(), "k01-port-source-cli-"));
+  const copiedPortSourcePath = join(directory, "imjinrokMaps.ts");
+  writeFileSync(copiedPortSourcePath, readFileSync(portSourcePath));
+
+  try {
+    const result = spawnSync(process.execPath, [extractorPath, "--port-source", copiedPortSourcePath], {
+      cwd: repositoryRoot,
+      encoding: "utf8",
+    });
+
+    assert.equal(result.status, 0, result.stderr);
+    const report = JSON.parse(result.stdout);
+    assert.equal(report.sources.portSource.path, copiedPortSourcePath);
   } finally {
     rmSync(directory, { recursive: true, force: true });
   }

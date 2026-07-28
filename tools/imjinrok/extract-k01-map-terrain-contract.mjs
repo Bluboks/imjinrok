@@ -324,7 +324,7 @@ function parseArgs(argv) {
       if (!value) {
         throw new Error(`${arg} requires a path`);
       }
-      args[arg.slice(2)] = value;
+      args[arg.slice(2).replace(/-([a-z])/g, (_match, letter) => letter.toUpperCase())] = value;
       index += 1;
       continue;
     }
