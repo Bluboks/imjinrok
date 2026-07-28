@@ -7,7 +7,7 @@ import test, { after } from "node:test";
 import { extractK01ModeReachability, replayK01StageOneLifecycle, replayModeWriter } from "./extract-k01-mode-reachability.mjs";
 
 const root = resolve(import.meta.dirname, "../..");
-const paths = Object.fromEntries(["executable", "functions", "references", "jumpTables", "seeds"].map((name) => [
+const paths = Object.fromEntries(["executable", "functions", "references", "jumpTables"].map((name) => [
   `${name}Path`, name === "executable" ? resolve(root, "original/imjinrok2/imjinrok2.exe") : resolve(root, `analysis/generated/imjinrok2/${name === "jumpTables" ? "jump-tables" : name}.json`),
 ]));
 const temporaryDirectories = new Set();
@@ -20,7 +20,9 @@ test("binds EBX, guard writers, and K01 state-one continuation to static inputs"
   assert.equal(report.source.byteLength, 843833);
   assert.equal(report.functionEvidence.length, 9);
   assert.equal(report.callEdges.length, 5);
-  assert.deepEqual(report.guardDirectWrites.map(({ site }) => site), ["0x0045fbfc", "0x00474845", "0x00474929", "0x00486585", "0x004865ca"]);
+  assert.deepEqual(report.guardDirectWrites.entries.map(({ site }) => site), ["0x0045fbfc", "0x00474845", "0x00474929", "0x00486585", "0x004865ca"]);
+  assert.equal(report.guardDirectWrites.sha256, "9a90b182cdbdf55dbeea5a41ec612115912c210a4daa0c8ddece3a647f0d520d");
+  assert.deepEqual(report.modeRoutineDirectCallers.entries, [{ site: "0x0046005c", caller: "0x0045f9c0", target: "0x00484130", type: "UNCONDITIONAL_CALL" }]);
   assert.ok(report.codeAnchors.every(({ matched }) => matched));
   assert.match(report.k01Lifecycle.result, /not assigned scheduler mode 0 or 1/);
   assert.match(report.k01Lifecycle.firstUnresolvedEdge, /state 3 to raw main state 5/);
@@ -33,6 +35,10 @@ test("replays WORD guard, low-WORD EBX, no-write, and stage boundaries", () => {
   assert.equal(replayModeWriter({ previousModeWord: 1, guardWord: 0, argumentDword: 2 }).write, null);
   assert.equal(replayModeWriter({ previousModeWord: 1, guardWord: 0, argumentDword: 0x10001 }).modeWord, 1);
   assert.deepEqual(replayK01StageOneLifecycle({ mainStateWord: 1, stageWord: 1 }), { stageEntryReached: true, stageOneCaseReached: true, nextMainStateWord: 3, schedulerReached: true, modeRoutineReached: false });
+  assert.deepEqual(replayK01StageOneLifecycle({ mainStateWord: 5 }), { stageEntryReached: false, stageOneCaseReached: false, nextMainStateWord: 5, schedulerReached: false, modeRoutineReached: true });
+  assert.deepEqual(replayK01StageOneLifecycle({ mainStateWord: 5, get stageWord() { throw new Error("unreachable stage read"); } }), { stageEntryReached: false, stageOneCaseReached: false, nextMainStateWord: 5, schedulerReached: false, modeRoutineReached: true });
+  assert.deepEqual(replayModeWriter({ previousModeWord: 0, argumentDword: 0xffffffff, get guardWord() { throw new Error("unreachable guard read"); } }), { invoked: false, argumentWord: 0xffff, modeWord: 0, write: null });
+  assert.throws(() => replayModeWriter({ previousModeWord: 0, guardWord: -1, argumentDword: 2 }), /guardWord/);
   assert.throws(() => replayModeWriter({ previousModeWord: 0x10000, guardWord: 0, argumentDword: 1 }), /previousModeWord/);
   assert.throws(() => replayK01StageOneLifecycle({ mainStateWord: 1, stageWord: -1 }), /stageWord/);
 });
@@ -40,13 +46,10 @@ test("replays WORD guard, low-WORD EBX, no-write, and stage boundaries", () => {
 test("rejects independently tampered and stale provenance artifacts", () => {
   const functionsPath = tamper(paths.functionsPath, "d44b4995e2906aa527ee362b7f6aee774bef7cd3fdf966aabc09a5fefdd13b73", "0".repeat(64));
   assert.throws(() => extractK01ModeReachability({ ...paths, functionsPath }), /functions artifact SHA-256/);
-  const referencesPath = tamper(paths.referencesPath, '"to": "0x00484130"', '"to": "0x00484131"');
+  const referencesPath = tamper(paths.referencesPath, '"to": "0x004bdff4"', '"to": "0x004bdff5"');
   assert.throws(() => extractK01ModeReachability({ ...paths, referencesPath }), /references artifact SHA-256/);
   const jumpTablesPath = tamper(paths.jumpTablesPath, '"destination": "0x0046005c"', '"destination": "0x0046005d"');
   assert.throws(() => extractK01ModeReachability({ ...paths, jumpTablesPath }), /jump tables artifact SHA-256/);
-  const seedsPath = jsonCopy(paths.seedsPath, (artifact) => { artifact.sourceSha256 = "0".repeat(64); });
-  assert.throws(() => extractK01ModeReachability({ ...paths, seedsPath }), /seeds artifact byte length/);
 });
 
 function tamper(source, expected, replacement) { assert.equal(expected.length, replacement.length); const directory = mkdtempSync(join(tmpdir(), "k01-mode-reachability-")); temporaryDirectories.add(directory); const destination = join(directory, "artifact.json"); const text = readFileSync(source, "utf8"); assert.ok(text.includes(expected)); writeFileSync(destination, text.replace(expected, replacement)); return destination; }
-function jsonCopy(source, mutate) { const directory = mkdtempSync(join(tmpdir(), "k01-mode-reachability-")); temporaryDirectories.add(directory); const destination = join(directory, "artifact.json"); const artifact = JSON.parse(readFileSync(source, "utf8")); mutate(artifact); writeFileSync(destination, `${JSON.stringify(artifact)}\n`); return destination; }

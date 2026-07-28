@@ -18,11 +18,11 @@
 | `analysis/generated/imjinrok2/functions.json` | 1,467,804 / `c10ea2de1f4998411d52443419c9a7f52ff7f9c18e79bd4115ba197d2f5bebc3` | 함수 body range·instruction hash |
 | `analysis/generated/imjinrok2/references.json` | 17,206,553 / `df11ff3713988ef22b3390b5b0ae7b4a87464b5de547a4866e1c8ec8a0bcaf4c` | direct call·guard direct write reference |
 | `analysis/generated/imjinrok2/jump-tables.json` | 607,724 / `0ae517eb172f61b974ca7a4411e64c1cc42065c462ed53b3065ab2da633dfe2f` | main-state와 signed stage switch |
-| `analysis/generated/imjinrok2/seeds.json` | 8,019,560 / `eb559198f7c9082ff9402d185a679f73b4f723208a977796f0ca9340490c2b1e` | EXE source hash가 포함된 canonical generated provenance |
 
 `tools/imjinrok/extract-k01-mode-reachability.mjs`는 JSON parse 전에 위 artifact의 exact
 length/SHA-256 및 embedded `sourceSha256`을 검사한다. 이어 함수 instruction count/hash, main
-state/stage jump-table 목적지, 5개 direct call edge, guard direct-write reference 5개, 16개 raw-byte
+state/stage jump-table 목적지, 5개 direct call edge, `0x004bdfF4` complete direct-WRITE set과
+`FUN_00484130` complete direct-caller set의 count/normalized entry/SHA-256, 16개 raw-byte
 anchor를 검사한다. 다른 hash의 분석 결과를 이 근거에 섞을 수 없다.
 
 ```bash
@@ -91,7 +91,9 @@ guard는 equality-one이 아니라 zero/nonzero test다. 이전 mode 값은 mode
 
 ## guard producer와 persistence 경계
 
-`WORD 0x004bdfF4`의 이 질문에 관련된 recovered direct `WRITE` reference set은 정확히 다음 5개다.
+`WORD 0x004bdfF4`의 canonical `references.json` direct `WRITE` reference set은 정확히 다음 5개다.
+extractor는 target/type로 전체 subset을 먼저 고른 뒤 count `5`, normalized entry set 및 SHA-256
+`9a90b182cdbdf55dbeea5a41ec612115912c210a4daa0c8ddece3a647f0d520d`를 검사한다.
 
 | store site | caller function | reached 값/조건 |
 | --- | --- | --- |
@@ -114,7 +116,9 @@ main state `1`은 `0x004600cb`에서 mission-entry wrapper, `FUN_0048dbe0`, post
 `0x0048d429` case로 `FUN_0048d740` map copier를 호출하고, 이 recovered invocation은 raw main state
 `3`으로 계속된다. State 3은 scheduler `FUN_00447bc0`을 direct-call한다.
 
-반면 `FUN_00484130`은 main-state table의 raw state `5` (`0x0046005c`)에서만 direct-call된다. 따라서
+반면 `FUN_00484130`의 canonical direct-call subset은 `0x0046005c`/`FUN_0045f9c0` 한 개뿐이며,
+normalized SHA-256은 `384cd7bdb004d0920217171e39922de2ea316325a2ad05947920524b14c1e201`이다. 즉 main-state
+table의 raw state `5` (`0x0046005c`)가 이 함수의 유일한 **direct** caller다. 따라서
 이 slice에서 닫힌 경로는 다음이다.
 
 ```text
@@ -146,7 +150,7 @@ focused test는 다음 raw input/output을 재생한다.
 | main state `1`, stage `1` | K01 case, next state `3`, scheduler reached, mode routine 미도달 |
 | main state `5`, stage `0xffff` | K01 stage input을 읽지 않으며 mode routine state만 reached |
 
-또한 invalid WORD/DWORD input과 functions/references/jump-tables/seeds artifact 각각의 independently
+또한 invalid WORD/DWORD input과 functions/references/jump-tables artifact 각각의 independently
 tampered 또는 stale provenance를 실패시킨다. 이 vector는 unreachable K01 stage input을 해석하지
 않고 state branch가 실제로 도달했을 때만 그 값을 검사한다.
 

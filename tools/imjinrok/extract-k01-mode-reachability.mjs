@@ -15,13 +15,11 @@ const DEFAULTS = {
   functionsPath: resolve(ROOT, "analysis/generated/imjinrok2/functions.json"),
   referencesPath: resolve(ROOT, "analysis/generated/imjinrok2/references.json"),
   jumpTablesPath: resolve(ROOT, "analysis/generated/imjinrok2/jump-tables.json"),
-  seedsPath: resolve(ROOT, "analysis/generated/imjinrok2/seeds.json"),
 };
 const ARTIFACTS = {
   functions: [1467804, "c10ea2de1f4998411d52443419c9a7f52ff7f9c18e79bd4115ba197d2f5bebc3"],
   references: [17206553, "df11ff3713988ef22b3390b5b0ae7b4a87464b5de547a4866e1c8ec8a0bcaf4c"],
   jumpTables: [607724, "0ae517eb172f61b974ca7a4411e64c1cc42065c462ed53b3065ab2da633dfe2f"],
-  seeds: [8019560, "eb559198f7c9082ff9402d185a679f73b4f723208a977796f0ca9340490c2b1e"],
 };
 const FUNCTION_CONTRACTS = [
   [0x0045f190, 42, "a69bbff3a7935d129f2786c5e0d56db59441fe460b7951b40e2b8ca637456b8b"],
@@ -48,6 +46,10 @@ const GUARD_DIRECT_WRITES = [
   [0x00486585, 0x00486430],
   [0x004865ca, 0x00486430],
 ];
+const GUARD_DIRECT_WRITE_SET_SHA256 =
+  "9a90b182cdbdf55dbeea5a41ec612115912c210a4daa0c8ddece3a647f0d520d";
+const MODE_ROUTINE_DIRECT_CALL_SET_SHA256 =
+  "384cd7bdb004d0920217171e39922de2ea316325a2ad05947920524b14c1e201";
 const ANCHORS = [
   ["main-loop-initial-guard-zero", 0x0045fbfc, "66 89 2d f4 df 4b 00", "startup stores EBP=0 to WORD guard 0x004bdfF4 before its dispatch loop"],
   ["state-one-k01-entry-and-continuation", 0x004600cb, "e8 a0 56 fe ff e8 0b db 02 00 e8 f6 56 fe ff 66 89 3d c8 df 4b 00", "state 1 calls standard mission entry then stores DI as the next raw main state"],
@@ -67,7 +69,7 @@ const ANCHORS = [
   ["guard-writer-branch-values", 0x00486585, "66 89 2d f4 df 4b 00", "branch stores zero from BP; sibling at 0x004865ca stores WORD one"],
 ];
 
-export function extractK01ModeReachability({ executablePath = DEFAULTS.executablePath, functionsPath = DEFAULTS.functionsPath, referencesPath = DEFAULTS.referencesPath, jumpTablesPath = DEFAULTS.jumpTablesPath, seedsPath = DEFAULTS.seedsPath } = {}) {
+export function extractK01ModeReachability({ executablePath = DEFAULTS.executablePath, functionsPath = DEFAULTS.functionsPath, referencesPath = DEFAULTS.referencesPath, jumpTablesPath = DEFAULTS.jumpTablesPath } = {}) {
   const { buffer, image } = readPeImage(executablePath);
   const sourceSha256 = createHash("sha256").update(buffer).digest("hex");
   equal(sourceSha256, EXPECTED_EXE_SHA256, "original EXE SHA-256");
@@ -75,12 +77,21 @@ export function extractK01ModeReachability({ executablePath = DEFAULTS.executabl
     functions: readArtifact(functionsPath, sourceSha256, "functions", ARTIFACTS.functions),
     references: readArtifact(referencesPath, sourceSha256, "references", ARTIFACTS.references),
     jumpTables: readArtifact(jumpTablesPath, sourceSha256, "jump tables", ARTIFACTS.jumpTables),
-    seeds: readArtifact(seedsPath, sourceSha256, "seeds", ARTIFACTS.seeds),
   };
   const references = artifacts.references.document.references;
   requireMainStateTable(artifacts.jumpTables.document);
-  const guardWrites = GUARD_DIRECT_WRITES.map(([site, caller]) => requireReference(references, site, caller, 0x004bdfF4, "WRITE"));
-  equal(guardWrites.length, 5, "bounded direct guard writer count");
+  const guardWrites = requireExactReferenceSet(
+    references.filter((value) => value.to === "0x004bdff4" && value.type === "WRITE"),
+    GUARD_DIRECT_WRITES.map(([site, caller]) => ({ site: toHex(site), caller: toHex(caller), target: "0x004bdff4", type: "WRITE" })),
+    GUARD_DIRECT_WRITE_SET_SHA256,
+    "direct guard write set",
+  );
+  const modeRoutineDirectCallers = requireExactReferenceSet(
+    references.filter((value) => value.to === "0x00484130" && value.type.endsWith("CALL")),
+    [{ site: "0x0046005c", caller: "0x0045f9c0", target: "0x00484130", type: "UNCONDITIONAL_CALL" }],
+    MODE_ROUTINE_DIRECT_CALL_SET_SHA256,
+    "direct FUN_00484130 caller set",
+  );
 
   return {
     question: "Can the standard K01 stage-one lifecycle source-bind a concrete 0 or 1 write to scheduler mode WORD 0x00c06e20 through FUN_00484130 and FUN_00485890, without tracing the option-object selector producer?",
@@ -91,7 +102,8 @@ export function extractK01ModeReachability({ executablePath = DEFAULTS.executabl
     implementationStatus: "none",
     functionEvidence: FUNCTION_CONTRACTS.map(([entry, count, sha256]) => requireFunction(artifacts.functions.document.functions, entry, count, sha256)),
     callEdges: REQUIRED_CALLS.map(([site, caller, callee]) => requireCall(references, site, caller, callee)),
-    guardDirectWrites: guardWrites,
+    guardDirectWrites: { referenceArtifact: artifacts.references.provenance, entries: guardWrites, sha256: GUARD_DIRECT_WRITE_SET_SHA256 },
+    modeRoutineDirectCallers: { referenceArtifact: artifacts.references.provenance, entries: modeRoutineDirectCallers, sha256: MODE_ROUTINE_DIRECT_CALL_SET_SHA256 },
     codeAnchors: ANCHORS.map(([id, va, bytes, meaning]) => anchor(buffer, image, id, va, bytes, meaning)),
     ebxContract: {
       width: "FUN_00484130 pushes DWORD EBX; FUN_00485890 reads only stack WORD [ESP+4], so its dispatch is the low unsigned WORD BX.",
@@ -117,17 +129,24 @@ export function extractK01ModeReachability({ executablePath = DEFAULTS.executabl
   };
 }
 
-export function replayModeWriter({ previousModeWord, guardWord, argumentDword }) {
-  word(previousModeWord, "previousModeWord"); word(guardWord, "guardWord"); dword(argumentDword, "argumentDword");
+export function replayModeWriter(input) {
+  const previousModeWord = input.previousModeWord;
+  const argumentDword = input.argumentDword;
+  word(previousModeWord, "previousModeWord"); dword(argumentDword, "argumentDword");
   const argumentWord = argumentDword & 0xffff;
   if (argumentWord === 0xffff) return { invoked: false, argumentWord, modeWord: previousModeWord, write: null };
+  const guardWord = input.guardWord;
+  word(guardWord, "guardWord");
   if (argumentWord !== 1) return { invoked: true, argumentWord, modeWord: previousModeWord, write: null };
   return { invoked: true, argumentWord, modeWord: guardWord === 0 ? 1 : 0, write: guardWord === 0 ? 1 : 0 };
 }
 
-export function replayK01StageOneLifecycle({ mainStateWord, stageWord }) {
-  word(mainStateWord, "mainStateWord"); word(stageWord, "stageWord");
+export function replayK01StageOneLifecycle(input) {
+  const mainStateWord = input.mainStateWord;
+  word(mainStateWord, "mainStateWord");
   if (mainStateWord !== 1) return { stageEntryReached: false, stageOneCaseReached: false, nextMainStateWord: mainStateWord, schedulerReached: false, modeRoutineReached: mainStateWord === 5 };
+  const stageWord = input.stageWord;
+  word(stageWord, "stageWord");
   if (stageWord !== 1) return { stageEntryReached: true, stageOneCaseReached: false, nextMainStateWord: 3, schedulerReached: true, modeRoutineReached: false };
   return { stageEntryReached: true, stageOneCaseReached: true, nextMainStateWord: 3, schedulerReached: true, modeRoutineReached: false };
 }
@@ -153,7 +172,8 @@ function readArtifact(path, sourceSha256, label, [byteLength, sha256]) {
 }
 function requireFunction(functions, entry, count, sha256) { const found = functions.find((value) => value.entry === toHex(entry)); if (!found) throw new Error(`functions artifact is missing ${toHex(entry)}`); equal(found.instructionCount, count, `${toHex(entry)} instruction count`); equal(found.instructionSha256, sha256, `${toHex(entry)} instruction SHA-256`); return { entry: found.entry, bodyRanges: found.bodyRanges, instructionCount: count, instructionSha256: sha256 }; }
 function requireCall(references, site, caller, callee) { const found = references.find((value) => value.type.endsWith("CALL") && value.from === toHex(site) && value.fromFunctionEntry === toHex(caller) && value.to === toHex(callee)); if (!found) throw new Error(`required call ${toHex(site)} is missing`); return { callsite: found.from, caller: found.fromFunctionEntry, callee: found.to }; }
-function requireReference(references, site, caller, target, type) { const found = references.find((value) => value.from === toHex(site) && value.fromFunctionEntry === toHex(caller) && value.to === toHex(target) && value.type === type); if (!found) throw new Error(`required ${type} reference ${toHex(site)} is missing`); return { site: found.from, caller: found.fromFunctionEntry, target: found.to, type: found.type }; }
+function requireExactReferenceSet(references, expectedEntries, expectedSha256, label) { const actual = normalizeReferenceSet(references); const expected = [...expectedEntries].sort((left, right) => left.site.localeCompare(right.site)); equal(actual.length, expected.length, `${label} count`); equal(JSON.stringify(actual), JSON.stringify(expected), `${label} entries`); const sha256 = createHash("sha256").update(JSON.stringify(actual)).digest("hex"); equal(sha256, expectedSha256, `${label} SHA-256`); return actual; }
+function normalizeReferenceSet(references) { return references.map((value) => ({ site: value.from, caller: value.fromFunctionEntry, target: value.to, type: value.type })).sort((left, right) => left.site.localeCompare(right.site)); }
 function requireMainStateTable(report) { const table = Object.values(report.tables).find((value) => value.functionEntry === "0x0045f9c0" && value.switchAddress === "0x0045fd56"); if (!table) throw new Error("main-state switch is missing"); equal(table.cases.find((value) => value.label === 0)?.destination, "0x004600cb", "state one destination"); equal(table.cases.find((value) => value.label === 4)?.destination, "0x0046005c", "state five destination"); const stage = Object.values(report.tables).find((value) => value.functionEntry === "0x0048d410" && value.switchAddress === "0x0048d422"); if (!stage) throw new Error("stage switch is missing"); equal(stage.cases.find((value) => value.label === 1)?.destination, "0x0048d429", "stage one destination"); }
 function anchor(buffer, image, id, va, bytes, meaning) { const raw = image.vaToRawOffset(va); if (raw === undefined) throw new RangeError(`${toHex(va)} is not file-backed`); const expected = Buffer.from(bytes.replaceAll(" ", ""), "hex"); if (Buffer.compare(buffer.subarray(raw, raw + expected.length), expected) !== 0) throw new Error(`code anchor ${id} mismatch at ${toHex(va)}`); return { id, va: toHex(va), rawOffset: toHex(raw), bytes, meaning, matched: true }; }
 function word(value, label) { if (!Number.isInteger(value) || value < 0 || value > 0xffff) throw new RangeError(`${label} must be an unsigned WORD; got ${value}`); }
