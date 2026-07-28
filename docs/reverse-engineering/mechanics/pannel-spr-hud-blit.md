@@ -25,7 +25,7 @@ clock, 또는 현재 웹 selection panel의 원작 일치는 다루지 않는다
   - header: width `640`, height `163`, frame count `1`
 - consumed structured reference export:
   `analysis/generated/imjinrok2/references.json`
-  - SHA-256: `df11ff3713988ef22b3390b5b0ae7b4a87464b5de547a4866e1c8ec8a0bcaf4c`
+  - SHA-256: `f64cfa6f04bc39573552f42a8b7bdd5b08fea1ba774d05865162d1d80daaf9a5`
   - embedded `sourceSha256` is the same EXE hash.
 - extractor: `tools/imjinrok/extract-pannel-spr-hud-blit.mjs`
 - vector fixture: `analysis/fixtures/pannel-spr-hud-blit-vectors.json`

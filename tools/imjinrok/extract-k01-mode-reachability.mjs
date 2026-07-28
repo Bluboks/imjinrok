@@ -17,8 +17,8 @@ const DEFAULTS = {
   jumpTablesPath: resolve(ROOT, "analysis/generated/imjinrok2/jump-tables.json"),
 };
 const ARTIFACTS = {
-  functions: [1467804, "c10ea2de1f4998411d52443419c9a7f52ff7f9c18e79bd4115ba197d2f5bebc3"],
-  references: [17206553, "df11ff3713988ef22b3390b5b0ae7b4a87464b5de547a4866e1c8ec8a0bcaf4c"],
+  functions: [1468333, "7e071fdfe425d22447780c265fe1d3fd271a1bedd1773682bebcb8ddc6d2e16e"],
+  references: [17206569, "f64cfa6f04bc39573552f42a8b7bdd5b08fea1ba774d05865162d1d80daaf9a5"],
   jumpTables: [607724, "0ae517eb172f61b974ca7a4411e64c1cc42065c462ed53b3065ab2da633dfe2f"],
 };
 const FUNCTION_CONTRACTS = [
