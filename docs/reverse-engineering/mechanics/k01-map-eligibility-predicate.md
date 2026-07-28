@@ -40,6 +40,9 @@ contact로 사용하며, 이 문서는 그것을 추출·문서화하여 중복�
 함수는 entry stack에서 두 좌표 word를 읽고 `MOVSX`한다. 따라서 evaluator 입력 `x`, `y`는 canonical
 `int16`이다. `-32768..32767` 밖의 값은 이 함수 ABI의 값이 아니다. 경계는 signed 음수 검사 뒤,
 sign-extended `int32`와 map runtime DWORD `width=map+0x2da0`, `height=map+0x2da4`를 `>=` 비교한다.
+`CMP` 뒤의 branch가 `JGE`이므로 이 비교는 signed다: input은 canonical raw `uint32` DWORD로 보존하되,
+비교할 때 `int32(width)` 및 `int32(height)`로 해석한다. 따라서 raw `0x80000000..0xffffffff` dimension은
+음수여서 nonnegative coordinate를 즉시 reject한다.
 
 ```text
 index = x * 180 + y
@@ -62,9 +65,9 @@ globalMaskWord= uint16[0x004bdfd0]
 
 ```text
 if x < 0: return false
-if x >= width: return false
+if x >= int32(widthRawDword): return false
 if y < 0: return false
-if y >= height: return false
+if y >= int32(heightRawDword): return false
 
 index = x * 180 + y
 if occupancyWord != 0: return false
@@ -117,7 +120,7 @@ predicate.
 
 ## reproduction vectors
 
-The fixture contains complete evaluator inputs and outputs for: `x=-1`, `x=width`, `y=-1`, `y=height`, nonzero
+The fixture contains complete evaluator inputs and outputs for: `x=-1`, `x=width`, high-bit raw `width`, `y=-1`, `y=height`, high-bit raw `height`, nonzero
 occupancy, primary `3` with nonzero auxiliary, other primary nonzero, both `0` and `3/0` locked-gate continuation,
 low nibble `0xf1`, final mask rejection, and success. The focused test additionally proves that getters for
 unreachable later inputs are never read, rejects malformed reached int16/uint8/uint16/uint32 values, rejects each

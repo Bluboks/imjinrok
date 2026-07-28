@@ -1,7 +1,7 @@
 {
   "sources": { "executable": { "size": 843833, "sha256": "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e" } },
   "predicate": {
-    "functionEntry": "0x00465960", "coordinateInput": "x and y are signed int16 values read from the two stack argument words", "coordinateIndex": "index = x * 180 + y",
+    "functionEntry": "0x00465960", "coordinateInput": "x and y are signed int16 values read from the two stack argument words; width and height are raw uint32 DWORDs compared as signed int32 by JGE", "coordinateIndex": "index = x * 180 + y",
     "occupancy": { "baseOffset": 11700, "elementWidthBytes": 2, "signedness": "bit-pattern uint16", "xStrideElements": 180, "yStrideElements": 1 },
     "primaryGate": { "baseOffset": 837900, "elementWidthBytes": 1, "signedness": "uint8", "xStrideBytes": 180, "yStrideBytes": 1 },
     "auxiliaryGate": { "baseOffset": 902700, "elementWidthBytes": 1, "signedness": "uint8", "xStrideBytes": 180, "yStrideBytes": 1 },
@@ -38,12 +38,14 @@
     { "id": "primary-nonzero-reject-and-low-nibble", "va": "0x004659d1", "bytes": "84 d2 75 f5 8d 84 80 5d 16 00 00 8d 04 c0 8d 14 86 8a 04 0a 24 0f 66 0f be c0 66 3d 01 00 74 d9" },
     { "id": "derived-flags-final-boolean", "va": "0x004659f1", "bytes": "66 8b 15 d0 df 4b 00 66 8b 84 79 f4 27 02 00 66 81 ca 04 20 5f 66 23 c2 5e 66 f7 d8 1b c0 40 c2 08 00" }
   ],
-  "orderedPredicate": ["reject if x < 0", "reject if x >= width", "reject if y < 0", "reject if y >= height", "reject if occupancyWord != 0", "for primary == 3 reject if auxiliaryValue != 0; for primary != 0 and != 3 reject", "reject if (lowNibbleField & 0x0f) == 1", "return (derivedFlags & (globalMaskWord | 0x2004)) == 0"],
+  "orderedPredicate": ["reject if x < 0", "reject if x >= int32(widthRawDword)", "reject if y < 0", "reject if y >= int32(heightRawDword)", "reject if occupancyWord != 0", "for primary == 3 reject if auxiliaryValue != 0; for primary != 0 and != 3 reject", "reject if (lowNibbleField & 0x0f) == 1", "return (derivedFlags & (globalMaskWord | 0x2004)) == 0"],
   "syntheticVectors": [
     { "id": "x-negative", "input": { "x": -1, "y": 0, "width": 60, "height": 60, "occupancyWord": 0, "primaryValue": 0, "auxiliaryValue": 0, "lowNibbleField": 0, "globalMaskWord": 0, "derivedFlags": 0 }, "result": false },
     { "id": "x-at-width", "input": { "x": 60, "y": 0, "width": 60, "height": 60, "occupancyWord": 0, "primaryValue": 0, "auxiliaryValue": 0, "lowNibbleField": 0, "globalMaskWord": 0, "derivedFlags": 0 }, "result": false },
+    { "id": "x-high-bit-width", "input": { "x": 0, "y": 0, "width": 2147483648, "height": 60, "occupancyWord": 0, "primaryValue": 0, "auxiliaryValue": 0, "lowNibbleField": 0, "globalMaskWord": 0, "derivedFlags": 0 }, "result": false },
     { "id": "y-negative", "input": { "x": 0, "y": -1, "width": 60, "height": 60, "occupancyWord": 0, "primaryValue": 0, "auxiliaryValue": 0, "lowNibbleField": 0, "globalMaskWord": 0, "derivedFlags": 0 }, "result": false },
     { "id": "y-at-height", "input": { "x": 0, "y": 60, "width": 60, "height": 60, "occupancyWord": 0, "primaryValue": 0, "auxiliaryValue": 0, "lowNibbleField": 0, "globalMaskWord": 0, "derivedFlags": 0 }, "result": false },
+    { "id": "y-high-bit-height", "input": { "x": 0, "y": 0, "width": 60, "height": 4294967295, "occupancyWord": 0, "primaryValue": 0, "auxiliaryValue": 0, "lowNibbleField": 0, "globalMaskWord": 0, "derivedFlags": 0 }, "result": false },
     { "id": "occupied", "input": { "x": 0, "y": 0, "width": 60, "height": 60, "occupancyWord": 1, "primaryValue": 0, "auxiliaryValue": 0, "lowNibbleField": 0, "globalMaskWord": 0, "derivedFlags": 0 }, "result": false },
     { "id": "primary-three-aux-nonzero", "input": { "x": 0, "y": 0, "width": 60, "height": 60, "occupancyWord": 0, "primaryValue": 3, "auxiliaryValue": 1, "lowNibbleField": 0, "globalMaskWord": 0, "derivedFlags": 0 }, "result": false },
     { "id": "primary-other-nonzero", "input": { "x": 0, "y": 0, "width": 60, "height": 60, "occupancyWord": 0, "primaryValue": 2, "auxiliaryValue": 0, "lowNibbleField": 0, "globalMaskWord": 0, "derivedFlags": 0 }, "result": false },

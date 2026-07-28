@@ -31,7 +31,8 @@ test("FUN_00465960 source-bound report fixes every predicate reference, field wi
 
 test("FUN_00465960 reproduces every ordered reject branch and its final boolean", () => {
   const vectors = [
-    [{ ...base, x: -1 }, false], [{ ...base, x: 60 }, false], [{ ...base, y: -1 }, false], [{ ...base, y: 60 }, false],
+    [{ ...base, x: -1 }, false], [{ ...base, x: 60 }, false], [{ ...base, width: 0x80000000 }, false],
+    [{ ...base, y: -1 }, false], [{ ...base, y: 60 }, false], [{ ...base, height: 0xffffffff }, false],
     [{ ...base, occupancyWord: 1 }, false], [{ ...base, primaryValue: 3, auxiliaryValue: 1 }, false],
     [{ ...base, primaryValue: 2 }, false], [{ ...base, primaryValue: 0, lowNibbleField: 0xf1 }, false],
     [{ ...base, primaryValue: 3, auxiliaryValue: 0, lowNibbleField: 1 }, false],
@@ -43,6 +44,8 @@ test("FUN_00465960 reproduces every ordered reject branch and its final boolean"
 
 test("FUN_00465960 does not inspect unreachable synthetic inputs", () => {
   assert.equal(evaluateK01MapEligibilityPredicate(unreachableAfter({ ...base, x: -1 }, ["width", "y", "height", "occupancyWord", "primaryValue", "auxiliaryValue", "lowNibbleField", "globalMaskWord", "derivedFlags"])), false);
+  assert.equal(evaluateK01MapEligibilityPredicate(unreachableAfter({ ...base, width: 0x80000000 }, ["y", "height", "occupancyWord", "primaryValue", "auxiliaryValue", "lowNibbleField", "globalMaskWord", "derivedFlags"])), false);
+  assert.equal(evaluateK01MapEligibilityPredicate(unreachableAfter({ ...base, height: 0xffffffff }, ["occupancyWord", "primaryValue", "auxiliaryValue", "lowNibbleField", "globalMaskWord", "derivedFlags"])), false);
   assert.equal(evaluateK01MapEligibilityPredicate(unreachableAfter({ ...base, occupancyWord: 1 }, ["primaryValue", "auxiliaryValue", "lowNibbleField", "globalMaskWord", "derivedFlags"])), false);
   assert.equal(evaluateK01MapEligibilityPredicate(unreachableAfter({ ...base, primaryValue: 2 }, ["auxiliaryValue", "lowNibbleField", "globalMaskWord", "derivedFlags"])), false);
   assert.equal(evaluateK01MapEligibilityPredicate(unreachableAfter({ ...base, lowNibbleField: 1 }, ["globalMaskWord", "derivedFlags"])), false);
@@ -52,6 +55,8 @@ test("FUN_00465960 does not inspect unreachable synthetic inputs", () => {
 test("FUN_00465960 rejects malformed reached canonical values", () => {
   assert.throws(() => evaluateK01MapEligibilityPredicate({ ...base, x: -32769 }), /signed int16/);
   assert.throws(() => evaluateK01MapEligibilityPredicate({ ...base, width: -1 }), /unsigned dword/);
+  assert.throws(() => evaluateK01MapEligibilityPredicate({ ...base, width: 0x1_0000_0000 }), /unsigned dword/);
+  assert.throws(() => evaluateK01MapEligibilityPredicate({ ...base, height: 0x1_0000_0000 }), /unsigned dword/);
   assert.throws(() => evaluateK01MapEligibilityPredicate({ ...base, occupancyWord: 0x10000 }), /unsigned word/);
   assert.throws(() => evaluateK01MapEligibilityPredicate({ ...base, primaryValue: 256 }), /unsigned byte/);
   assert.throws(() => evaluateK01MapEligibilityPredicate({ ...base, primaryValue: 3, auxiliaryValue: -1 }), /unsigned byte/);

@@ -12,7 +12,7 @@ export const EXPECTED_REFERENCES_SHA256 = "df11ff3713988ef22b3390b5b0ae7b4a87464
 
 export const K01_MAP_ELIGIBILITY_PREDICATE = {
   functionEntry: "0x00465960",
-  coordinateInput: "x and y are signed int16 values read from the two stack argument words",
+  coordinateInput: "x and y are signed int16 values read from the two stack argument words; width and height are raw uint32 DWORDs compared as signed int32 by JGE",
   coordinateIndex: "index = x * 180 + y",
   occupancy: { baseOffset: 0x00002db4, elementWidthBytes: 2, signedness: "bit-pattern uint16", xStrideElements: 180, yStrideElements: 1 },
   primaryGate: { baseOffset: 0x000cc90c, elementWidthBytes: 1, signedness: "uint8", xStrideBytes: 180, yStrideBytes: 1 },
@@ -61,7 +61,7 @@ const REQUIRED_PREDICATE_REFERENCES = [
 const EXECUTABLE_EVIDENCE = [
   { id: "map-load-and-runtime-grid-clear", va: 0x00462b11, bytes: "56 6a 01 68 8c bd 10 00 57 e8 25 b4 04 00 56 e8 00 ac 04 00 83 c4 14 8d 97 b4 2d 00 00 be b4 00 00 00", meaning: "The successful map load copies 0x10bd8c bytes, then begins clearing map+0x2db4 as a 180-wide runtime grid." },
   { id: "derived-flags-runtime-grid-clear", va: 0x00462b4d, bytes: "8d 97 f4 27 02 00 be b4 00 00 00 8b c2 b9 b4 00 00 00 66 c7 00 00 00 05 68 01 00 00", meaning: "The same successful load path separately clears map+0x227f4 as a 180-wide runtime grid." },
-  { id: "signed-coordinate-bounds", va: 0x00465960, bytes: "66 8b 44 24 04 56 66 85 c0 57 7c 5e 8b 91 a0 2d 00 00 0f bf c0 3b c2 7d 51 66 8b 54 24 10 66 85 d2 7c 47 0f bf f2 3b b1 a4 2d 00 00 7d 3c", meaning: "Each stack argument is read as a word, tested signed-negative, sign-extended, and compared with the map runtime width or height DWORD." },
+  { id: "signed-coordinate-bounds", va: 0x00465960, bytes: "66 8b 44 24 04 56 66 85 c0 57 7c 5e 8b 91 a0 2d 00 00 0f bf c0 3b c2 7d 51 66 8b 54 24 10 66 85 d2 7c 47 0f bf f2 3b b1 a4 2d 00 00 7d 3c", meaning: "Each stack argument is read as a word, tested signed-negative, sign-extended, then compared by signed JGE with the raw map runtime width or height DWORD." },
   { id: "occupancy-grid-reject", va: 0x0046598e, bytes: "8d 14 80 8d 14 d2 8d 3c 96 66 83 bc 79 b4 2d 00 00 00 75 28", meaning: "index=x*180+y; a nonzero WORD at map+0x2db4+index*2 returns false before the primary gate." },
   { id: "primary-and-auxiliary-gate-contact", va: 0x004659a2, bytes: "8d 94 80 eb 5a 00 00 8d 14 d2 8d 14 96 8a 14 0a 80 fa 03 75 1a 8d 94 80 f3 61 00 00 8d 14 d2 8d 14 96 80 3c 0a 00 74 0b", meaning: "The locked primary 0/3 gate is reached only after occupancy; primary 3 requires zero auxiliary before the suffix." },
   { id: "primary-nonzero-reject-and-low-nibble", va: 0x004659d1, bytes: "84 d2 75 f5 8d 84 80 5d 16 00 00 8d 04 c0 8d 14 86 8a 04 0a 24 0f 66 0f be c0 66 3d 01 00 74 d9", meaning: "A primary byte other than 0 or 3 rejects; then map+0x32514+x*180+y uint8 low nibble equal to 1 rejects." },
@@ -87,7 +87,7 @@ export function extractK01MapEligibilityPredicate({ executablePath = DEFAULT_EXE
     staticAnalysis,
     executableEvidence: EXECUTABLE_EVIDENCE.map((evidence) => verifyByteEvidence(executable.buffer, image, evidence)),
     producerBoundary: {
-      dimensions: "map+0x2da0 and map+0x2da4 are runtime DWORDs; the K01 loader's successful direct-read path copies the whole map image before these reads, but this extractor accepts width and height as runtime inputs.",
+      dimensions: "map+0x2da0 and map+0x2da4 are raw runtime DWORDs; the JGE instructions compare their signed int32 interpretations with sign-extended int16 coordinates. The K01 loader copies the whole map image before these reads, but this extractor accepts the raw DWORDs as runtime inputs.",
       occupancy: "map+0x2db4 is a 180x180 uint16 runtime grid explicitly zeroed after map load; its later population is outside this bounded function, so occupancyWord is synthetic.",
       derivedFlags: "map+0x227f4 is a distinct 180x180 uint16 runtime grid explicitly zeroed after map load; later writers are outside this bounded function, so derivedFlags is synthetic.",
       lowNibbleField: "map+0x32514 lies in the copied map image, but this bounded trace does not close post-load writers; lowNibbleField is synthetic and no raw K01.map byte is substituted for it.",
@@ -95,7 +95,7 @@ export function extractK01MapEligibilityPredicate({ executablePath = DEFAULT_EXE
       firstUnresolvedEdge: "the first unresolved value producer reached after the primary gate is field_0x00032514(x,y), followed by the global mask word and runtime derived-flag writers",
     },
     orderedPredicate: [
-      "reject if x < 0", "reject if x >= width", "reject if y < 0", "reject if y >= height", "reject if occupancyWord != 0",
+      "reject if x < 0", "reject if x >= int32(widthRawDword)", "reject if y < 0", "reject if y >= int32(heightRawDword)", "reject if occupancyWord != 0",
       "for primary == 3 reject if auxiliaryValue != 0; for primary != 0 and != 3 reject",
       "reject if (lowNibbleField & 0x0f) == 1", "return (derivedFlags & (globalMaskWord | 0x2004)) == 0",
     ],
@@ -106,12 +106,12 @@ export function extractK01MapEligibilityPredicate({ executablePath = DEFAULT_EXE
 export function evaluateK01MapEligibilityPredicate(input) {
   const x = readInt16(input, "x");
   if (x < 0) return false;
-  const width = readUInt32(input, "width");
-  if (x >= width) return false;
+  const widthRawDword = readUInt32(input, "width");
+  if (x >= toInt32(widthRawDword)) return false;
   const y = readInt16(input, "y");
   if (y < 0) return false;
-  const height = readUInt32(input, "height");
-  if (y >= height) return false;
+  const heightRawDword = readUInt32(input, "height");
+  if (y >= toInt32(heightRawDword)) return false;
   if (readUInt16(input, "occupancyWord") !== 0) return false;
   const primaryValue = readUInt8(input, "primaryValue");
   if (primaryValue === 3) {
@@ -128,7 +128,8 @@ export function evaluateK01MapEligibilityPredicate(input) {
 function syntheticVectors() {
   const base = { x: 0, y: 0, width: 60, height: 60, occupancyWord: 0, primaryValue: 0, auxiliaryValue: 0, lowNibbleField: 0, globalMaskWord: 0, derivedFlags: 0 };
   return [
-    ["x-negative", { ...base, x: -1 }], ["x-at-width", { ...base, x: 60 }], ["y-negative", { ...base, y: -1 }], ["y-at-height", { ...base, y: 60 }],
+    ["x-negative", { ...base, x: -1 }], ["x-at-width", { ...base, x: 60 }], ["x-high-bit-width", { ...base, width: 0x80000000 }],
+    ["y-negative", { ...base, y: -1 }], ["y-at-height", { ...base, y: 60 }], ["y-high-bit-height", { ...base, height: 0xffffffff }],
     ["occupied", { ...base, occupancyWord: 1 }], ["primary-three-aux-nonzero", { ...base, primaryValue: 3, auxiliaryValue: 1 }],
     ["primary-other-nonzero", { ...base, primaryValue: 2 }], ["primary-zero-continues", base], ["primary-three-continues", { ...base, primaryValue: 3 }],
     ["low-nibble-one", { ...base, lowNibbleField: 0xf1 }], ["derived-mask-reject", { ...base, globalMaskWord: 0x136a, derivedFlags: 0x2000 }], ["success", { ...base, globalMaskWord: 0x136a, derivedFlags: 0x0080 }],
@@ -197,6 +198,7 @@ function readInt16(input, name) { const value = input?.[name]; if (!Number.isInt
 function readUInt8(input, name) { const value = input?.[name]; if (!Number.isInteger(value) || value < 0 || value > 0xff) throw new Error(`${name} must be an unsigned byte: ${value}`); return value; }
 function readUInt16(input, name) { const value = input?.[name]; if (!Number.isInteger(value) || value < 0 || value > 0xffff) throw new Error(`${name} must be an unsigned word: ${value}`); return value; }
 function readUInt32(input, name) { const value = input?.[name]; if (!Number.isInteger(value) || value < 0 || value > 0xffffffff) throw new Error(`${name} must be an unsigned dword: ${value}`); return value; }
+function toInt32(rawDword) { return rawDword > 0x7fffffff ? rawDword - 0x1_0000_0000 : rawDword; }
 function sameArray(actual, expected) { return Array.isArray(actual) && actual.length === expected.length && actual.every((value, index) => JSON.stringify(value) === JSON.stringify(expected[index])); }
 function omitBuffer({ buffer, parsed, ...value }) { return value; }
 function sha256(buffer) { return createHash("sha256").update(buffer).digest("hex"); }
