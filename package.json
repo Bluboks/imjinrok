@@ -34,6 +34,7 @@
     "imjinrok:extract-selection-panel-slot-lifecycle": "node tools/imjinrok/extract-selection-panel-slot-lifecycle.mjs --json",
     "imjinrok:extract-transient-formatted-overlay": "node tools/imjinrok/extract-transient-formatted-overlay.mjs --json",
     "imjinrok:extract-persistent-selection-action-boundary": "node tools/imjinrok/extract-persistent-selection-action-boundary.mjs --json",
+    "imjinrok:extract-hero-priority-queue-gate": "node tools/imjinrok/extract-hero-priority-queue-gate.mjs --json",
     "imjinrok:extract-unit-animation-pilot": "node tools/imjinrok/extract-unit-animation-pilot.mjs --json",
     "imjinrok:extract-k01-hero-movement-pilot": "node tools/imjinrok/extract-k01-hero-movement-pilot.mjs --json",
     "imjinrok:extract-k01-hero-basic-attack-pilot": "node tools/imjinrok/extract-k01-hero-basic-attack-pilot.mjs --json",
