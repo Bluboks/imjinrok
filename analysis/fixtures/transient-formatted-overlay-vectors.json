@@ -1,0 +1,308 @@
+{
+  "sourceExecutableSha256": "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e",
+  "scopeNotice": "All GDI SIZE values and post-call RECT values are supplied synthetic inputs used only to reproduce the statically recovered control flow. They do not establish original glyph widths, font realization, indirect RECT mutation or failure behavior, producer-table semantics, or a fixed bottom selection panel.",
+  "initialState": {
+    "dirtyWord": 0,
+    "coordinateX": 0,
+    "coordinateY": 0,
+    "baseText": "",
+    "primaryText": "retained-primary",
+    "values": [0, 0, 0, 0],
+    "selectorByte": 0,
+    "extraLines": [
+      { "activeState": 0, "text": "retained-extra-0" },
+      { "activeState": 0, "text": "retained-extra-1" },
+      { "activeState": 0, "text": "retained-extra-2" }
+    ]
+  },
+  "producerVectors": [
+    {
+      "id": "writer-populates-all-reached-fields",
+      "input": {
+        "coordinateX": 320,
+        "coordinateY": 400,
+        "primaryText": "Kwon",
+        "baseText": "notice",
+        "values": [12, 0, -3, 0],
+        "selectorByte": 0,
+        "extraTexts": ["line", null, null]
+      },
+      "expectedOutputSha256": "d4cdd3dadc5563c71eac37df8aee3323d6ddeec65064b41bf1134121d5fad195"
+    },
+    {
+      "id": "null-primary-retains-buffer-while-null-base-becomes-empty",
+      "input": {
+        "coordinateX": -32768,
+        "coordinateY": 32767,
+        "primaryText": null,
+        "baseText": null,
+        "values": [-32768, 32767, 0, 1],
+        "selectorByte": -1,
+        "extraTexts": [null, "replacement", null]
+      },
+      "expectedOutputSha256": "619eaea9557e930a576602f46390044f3abdd4a6b44c6add8a17fe1303c903af"
+    }
+  ],
+  "renderVectors": [
+    {
+      "id": "synthetic-metrics-normal-layout-with-one-icon-lock-failure",
+      "producerVectorId": "writer-populates-all-reached-fields",
+      "input": {
+        "initialHdcAcquired": true,
+        "drawHdcAcquired": true,
+        "iconWidth": 8,
+        "iconHeight": 8,
+        "postCallRect": { "left": 0, "top": 0, "right": 89, "bottom": 48 },
+        "screenWidth": 640,
+        "screenHeight": 480,
+        "baseTextCurrentContext": 10,
+        "baseTextCache": { "context": 9, "text": "old" },
+        "baseTextHdcAcquired": true,
+        "numericIconLockSucceeded": [true, true, false, true],
+        "numericHdcReacquired": [true, true, true, true],
+        "measurements": [
+          { "text": "Kwon", "width": 40, "height": 12 },
+          { "text": " 12 ", "width": 30, "height": 10 },
+          { "text": " -3 ", "width": 28, "height": 10 },
+          { "text": "line", "width": 50, "height": 11 },
+          { "text": "Kwon", "width": 40, "height": 12 },
+          { "text": " 12 ", "width": 30, "height": 10 },
+          { "text": " -3 ", "width": 28, "height": 10 },
+          { "text": "line", "width": 50, "height": 11 }
+        ]
+      },
+      "expectedOutputSha256": "dae84f20279265d0ed015307496196c0179290061efb242ff42129f932114724"
+    },
+    {
+      "id": "synthetic-suffix-segments-and-near-edge-clamp",
+      "stateOverrides": {
+        "dirtyWord": 1,
+        "coordinateX": 5,
+        "coordinateY": 10,
+        "baseText": "",
+        "primaryText": "A",
+        "values": [0, 0, 0, 0],
+        "selectorByte": 75,
+        "extraLines": [
+          { "activeState": 0, "text": "unreachable" },
+          { "activeState": 2, "text": "unreachable" },
+          { "activeState": 4294967295, "text": "unreachable" }
+        ]
+      },
+      "input": {
+        "initialHdcAcquired": true,
+        "drawHdcAcquired": true,
+        "iconWidth": 8,
+        "iconHeight": 8,
+        "postCallRect": { "left": 0, "top": 0, "right": 47, "bottom": 27 },
+        "screenWidth": 640,
+        "screenHeight": 480,
+        "numericIconLockSucceeded": [true, true, true, true],
+        "numericHdcReacquired": [true, true, true, true],
+        "measurements": [
+          { "text": "A(K)", "width": 32, "height": 12 },
+          { "text": "A", "width": 8, "height": 12 },
+          { "text": "(", "width": 8, "height": 12 },
+          { "text": "K", "width": 8, "height": 12 },
+          { "text": ")", "width": 8, "height": 12 },
+          { "text": "A(K)", "width": 32, "height": 12 }
+        ]
+      },
+      "expectedOutputSha256": "92897c473ce08135c8f9f1fa11fe3999eda43af7917875c18a8d03ef909e7931"
+    },
+    {
+      "id": "initial-hdc-failure-does-not-read-content-fields",
+      "stateOverrides": {
+        "dirtyWord": 1,
+        "coordinateX": 100,
+        "coordinateY": 100,
+        "baseText": "base",
+        "primaryText": 7,
+        "values": "unreachable",
+        "selectorByte": "unreachable",
+        "extraLines": "unreachable"
+      },
+      "input": {
+        "initialHdcAcquired": false,
+        "drawHdcAcquired": false,
+        "postCallRect": { "left": 0, "top": 0, "right": 15, "bottom": 15 },
+        "screenWidth": 640,
+        "screenHeight": 480,
+        "baseTextCurrentContext": 5,
+        "baseTextCache": { "context": 5, "text": "different" },
+        "measurements": []
+      },
+      "expectedOutputSha256": "c980230d95b2a90757ce9a9da21e8959aa13c3fe4d85f803d259f646552410a0"
+    },
+    {
+      "id": "draw-hdc-failure-still-invokes-base-helper-and-blits",
+      "producerVectorId": "writer-populates-all-reached-fields",
+      "input": {
+        "initialHdcAcquired": true,
+        "drawHdcAcquired": false,
+        "iconWidth": 8,
+        "iconHeight": 8,
+        "postCallRect": { "left": 0, "top": 0, "right": 89, "bottom": 48 },
+        "screenWidth": 640,
+        "screenHeight": 480,
+        "baseTextCurrentContext": 12,
+        "baseTextCache": { "context": 12, "text": "notice" },
+        "baseTextHdcAcquired": true,
+        "measurements": [
+          { "text": "Kwon", "width": 40, "height": 12 },
+          { "text": " 12 ", "width": 30, "height": 10 },
+          { "text": " -3 ", "width": 28, "height": 10 },
+          { "text": "line", "width": 50, "height": 11 }
+        ]
+      },
+      "expectedOutputSha256": "b03562ccaa31809e2223d51d5b09d2fe467daa469d736229fe2fbe985496efe1"
+    },
+    {
+      "id": "synthetic-post-call-rect-separate-half-rounding-and-block-left-extra-line",
+      "stateOverrides": {
+        "dirtyWord": 1,
+        "coordinateX": 100,
+        "coordinateY": 100,
+        "baseText": "",
+        "primaryText": "wide",
+        "values": [0, 0, 0, 0],
+        "selectorByte": 0,
+        "extraLines": [
+          { "activeState": 1, "text": "n" },
+          { "activeState": 0, "text": "unreachable" },
+          { "activeState": 0, "text": "unreachable" }
+        ]
+      },
+      "input": {
+        "initialHdcAcquired": true,
+        "drawHdcAcquired": true,
+        "iconWidth": 0,
+        "iconHeight": 0,
+        "postCallRect": { "left": 2, "top": 4, "right": 10, "bottom": 10 },
+        "screenWidth": 640,
+        "screenHeight": 480,
+        "numericIconLockSucceeded": [true, true, true, true],
+        "numericHdcReacquired": [true, true, true, true],
+        "measurements": [
+          { "text": "wide", "width": 5, "height": 2 },
+          { "text": "n", "width": 3, "height": 3 },
+          { "text": "wide", "width": 5, "height": 2 },
+          { "text": "n", "width": 3, "height": 3 }
+        ]
+      },
+      "expectedOutputSha256": "f63f1782a8f57ff9585d88a8e3ed46b4dd3fc3daa370413b72f56f4992feaf1c"
+    },
+    {
+      "id": "far-edge-clamp-keeps-one-pixel-margin",
+      "stateOverrides": {
+        "dirtyWord": 1,
+        "coordinateX": 32767,
+        "coordinateY": 32767,
+        "baseText": "",
+        "primaryText": "A",
+        "values": [0, 0, 0, 0],
+        "selectorByte": 0,
+        "extraLines": [
+          { "activeState": 0, "text": "unreachable" },
+          { "activeState": 0, "text": "unreachable" },
+          { "activeState": 0, "text": "unreachable" }
+        ]
+      },
+      "input": {
+        "initialHdcAcquired": true,
+        "drawHdcAcquired": false,
+        "iconWidth": 0,
+        "iconHeight": 0,
+        "postCallRect": { "left": 0, "top": 0, "right": 25, "bottom": 25 },
+        "screenWidth": 640,
+        "screenHeight": 480,
+        "measurements": [
+          { "text": "A", "width": 10, "height": 10 }
+        ]
+      },
+      "expectedOutputSha256": "83598d47bd1c83eaa575c5f92ee66bb616815ca493c166d07fd56be131a952f3"
+    },
+    {
+      "id": "post-call-rect-larger-than-runtime-clamps-to-zero",
+      "stateOverrides": {
+        "dirtyWord": 1,
+        "coordinateX": 32767,
+        "coordinateY": 32767,
+        "baseText": "",
+        "primaryText": "A",
+        "values": [0, 0, 0, 0],
+        "selectorByte": 0,
+        "extraLines": [
+          { "activeState": 0, "text": "unreachable" },
+          { "activeState": 0, "text": "unreachable" },
+          { "activeState": 0, "text": "unreachable" }
+        ]
+      },
+      "input": {
+        "initialHdcAcquired": true,
+        "drawHdcAcquired": false,
+        "iconWidth": 0,
+        "iconHeight": 0,
+        "postCallRect": { "left": -2, "top": -3, "right": 25, "bottom": 25 },
+        "screenWidth": 20,
+        "screenHeight": 20,
+        "measurements": [
+          { "text": "A", "width": 10, "height": 10 }
+        ]
+      },
+      "expectedOutputSha256": "985b71ee9df7db144e9e829506b47dbf1178990c638c84fafb6593a7ee5097ca"
+    },
+    {
+      "id": "base-cache-update-survives-hdc-acquisition-failure",
+      "stateOverrides": {
+        "dirtyWord": 1,
+        "coordinateX": 100,
+        "coordinateY": 100,
+        "baseText": "cache-me",
+        "primaryText": "A",
+        "values": [0, 0, 0, 0],
+        "selectorByte": 0,
+        "extraLines": [
+          { "activeState": 0, "text": "unreachable" },
+          { "activeState": 0, "text": "unreachable" },
+          { "activeState": 0, "text": "unreachable" }
+        ]
+      },
+      "input": {
+        "initialHdcAcquired": true,
+        "drawHdcAcquired": false,
+        "iconWidth": 0,
+        "iconHeight": 0,
+        "postCallRect": { "left": 0, "top": 0, "right": 25, "bottom": 25 },
+        "screenWidth": 640,
+        "screenHeight": 480,
+        "baseTextCurrentContext": 8,
+        "baseTextCache": { "context": 7, "text": "old" },
+        "baseTextHdcAcquired": false,
+        "measurements": [
+          { "text": "A", "width": 10, "height": 10 }
+        ]
+      },
+      "expectedOutputSha256": "ec1fd0d0dd68328ffff54953fc8942454d451106ff96f39ef7878d0391629737"
+    },
+    {
+      "id": "dirty-zero-does-not-read-any-downstream-field",
+      "stateOverrides": {
+        "dirtyWord": 0,
+        "coordinateX": "unreachable",
+        "coordinateY": "unreachable",
+        "baseText": "unreachable",
+        "primaryText": "unreachable",
+        "values": "unreachable",
+        "selectorByte": "unreachable",
+        "extraLines": "unreachable"
+      },
+      "input": {
+        "initialHdcAcquired": "unreachable",
+        "drawHdcAcquired": "unreachable",
+        "measurements": "unreachable"
+      },
+      "expectedOutputSha256": "01afd97534c8bf00a4d63df98ca39c36add757778cc2958c4a8279b5ca808a24"
+    }
+  ]
+}

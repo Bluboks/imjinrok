@@ -37,10 +37,6 @@ test("client UI layout audit routes provisional surfaces to original binary trac
     "mouse-interface-primary",
     "mouse-interface-secondary",
   ]);
-  assertTraceTargets(probesById.get("action-grid-layout"), [
-    "mouse-interface-primary",
-    "mouse-interface-secondary",
-  ]);
   assertTraceTargets(probesById.get("selection-panel-layout"), [
     "mouse-interface-primary",
     "mouse-interface-secondary",
@@ -50,6 +46,30 @@ test("client UI layout audit routes provisional surfaces to original binary trac
     "mouse-interface-primary",
     "mouse-interface-secondary",
   ]);
+  const actionGridLayout = probesById.get("action-grid-layout");
+  assert.ok(actionGridLayout);
+  assert.equal(
+    actionGridLayout.currentBasis,
+    "static-proven-K01-command-grid-geometry-with-client-generic-grid-adaptations",
+  );
+  assert.equal(
+    actionGridLayout.originalEvidenceStatus,
+    "static-proven-K01-grid-geometry-and-strict-hit;unproven-generic-4x3-labels-actions-and-HUD-placement",
+  );
+  assert.deepEqual(actionGridLayout.originalTraceTargets, [
+    "FUN_00443360",
+    "FUN_00481ee0",
+    "FUN_0045ad90",
+    "FUN_00459110",
+    "FUN_00447a0f",
+  ]);
+  assert.match(actionGridLayout.followUp, /K01-only nine-slot geometry and strict hit/u);
+  assert.equal(
+    actionGridLayout.patterns.every(
+      (pattern) => pattern.present && Number.isInteger(pattern.line),
+    ),
+    true,
+  );
   const dialogueLayout = probesById.get("campaign-dialogue-layout");
   assert.ok(dialogueLayout);
   assert.deepEqual(dialogueLayout.originalTraceTargets, [

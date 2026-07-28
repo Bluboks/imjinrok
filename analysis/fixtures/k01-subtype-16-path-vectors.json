@@ -1,0 +1,278 @@
+{
+  "sourceExecutableSha256": "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e",
+  "sourceFunctionsSha256": "c10ea2de1f4998411d52443419c9a7f52ff7f9c18e79bd4115ba197d2f5bebc3",
+  "sourceReferencesSha256": "df11ff3713988ef22b3390b5b0ae7b4a87464b5de547a4866e1c8ec8a0bcaf4c",
+  "sourceJumpTablesSha256": "0ae517eb172f61b974ca7a4411e64c1cc42065c462ed53b3065ab2da633dfe2f",
+  "expectedProjectionSha256": "9f8448b9210017ae406088ab55ff573e5dfdceb5c1b977c93635ab36c35406d7",
+  "payloadVectors": [
+    {
+      "id": "zero-upper-basic",
+      "input": { "previousEdiDword": 0, "ownerByte": 0, "entityPayloadWord": 45, "classModifierWord": 2 },
+      "expected": { "previousEdiDword": 0, "ediUpperWordBeforeAttempt": 0, "ownerSigned": 0, "ownerProduct": 0, "attackTimes3": 135, "classTimes25": 50, "ediBeforeAdd": 50, "edxDword": 135, "payloadDword": 185, "nextEdiDword": 185, "payloadStoredSignedWord": 185 }
+    },
+    {
+      "id": "signed-negative-owner-upper-preserved",
+      "input": { "previousEdiDword": 0, "ownerByte": 255, "entityPayloadWord": 45, "classModifierWord": 2 },
+      "expected": { "previousEdiDword": 0, "ediUpperWordBeforeAttempt": 0, "ownerSigned": -1, "ownerProduct": 4294966591, "attackTimes3": 135, "classTimes25": 50, "ediBeforeAdd": 50, "edxDword": 4294901895, "payloadDword": 4294901945, "nextEdiDword": 4294901945, "payloadStoredSignedWord": 185 }
+    },
+    {
+      "id": "low-word-multiply-wrap",
+      "input": { "previousEdiDword": 0, "ownerByte": 0, "entityPayloadWord": 65535, "classModifierWord": 0 },
+      "expected": { "previousEdiDword": 0, "ediUpperWordBeforeAttempt": 0, "ownerSigned": 0, "ownerProduct": 0, "attackTimes3": 65533, "classTimes25": 0, "ediBeforeAdd": 0, "edxDword": 65533, "payloadDword": 65533, "nextEdiDword": 65533, "payloadStoredSignedWord": -3 }
+    },
+    {
+      "id": "low-word-add-carry",
+      "input": { "previousEdiDword": 0, "ownerByte": 0, "entityPayloadWord": 21845, "classModifierWord": 1 },
+      "expected": { "previousEdiDword": 0, "ediUpperWordBeforeAttempt": 0, "ownerSigned": 0, "ownerProduct": 0, "attackTimes3": 65535, "classTimes25": 25, "ediBeforeAdd": 25, "edxDword": 65535, "payloadDword": 65560, "nextEdiDword": 65560, "payloadStoredSignedWord": 24 }
+    },
+    {
+      "id": "signed-owner-full-dword-wrap",
+      "input": { "previousEdiDword": 0, "ownerByte": 255, "entityPayloadWord": 21845, "classModifierWord": 1 },
+      "expected": { "previousEdiDword": 0, "ediUpperWordBeforeAttempt": 0, "ownerSigned": -1, "ownerProduct": 4294966591, "attackTimes3": 65535, "classTimes25": 25, "ediBeforeAdd": 25, "edxDword": 4294967295, "payloadDword": 24, "nextEdiDword": 24, "payloadStoredSignedWord": 24 }
+    }
+  ],
+  "payloadAttemptVectors": [
+    {
+      "id": "pre-payload-rejection-preserves-prior-reached-attempt-edi",
+      "input": { "attempts": [{ "payloadConstructionReached": true, "ownerByte": 0, "entityPayloadWord": 21845, "classModifierWord": 1 }, { "payloadConstructionReached": false, "ownerByte": "unreachable", "entityPayloadWord": "unreachable", "classModifierWord": "unreachable" }] },
+      "expected": {
+        "initialEdiDword": 0,
+        "attempts": [
+          { "payloadConstructionReached": true, "previousEdiDword": 0, "ediUpperWordBeforeAttempt": 0, "ownerSigned": 0, "ownerProduct": 0, "attackTimes3": 65535, "classTimes25": 25, "ediBeforeAdd": 25, "edxDword": 65535, "payloadDword": 65560, "nextEdiDword": 65560, "payloadStoredSignedWord": 24 },
+          { "payloadConstructionReached": false, "ediUpperWordBeforeAttempt": 1, "payloadDword": null, "nextEdiDword": 65560 }
+        ],
+        "finalEdiDword": 65560
+      }
+    },
+    {
+      "id": "two-accepted-attempts-accumulate-low-half-carry",
+      "input": { "attempts": [{ "payloadConstructionReached": true, "ownerByte": 0, "entityPayloadWord": 21845, "classModifierWord": 1 }, { "payloadConstructionReached": true, "ownerByte": 0, "entityPayloadWord": 21845, "classModifierWord": 1 }] },
+      "expected": {
+        "initialEdiDword": 0,
+        "attempts": [
+          { "payloadConstructionReached": true, "previousEdiDword": 0, "ediUpperWordBeforeAttempt": 0, "ownerSigned": 0, "ownerProduct": 0, "attackTimes3": 65535, "classTimes25": 25, "ediBeforeAdd": 25, "edxDword": 65535, "payloadDword": 65560, "nextEdiDword": 65560, "payloadStoredSignedWord": 24 },
+          { "payloadConstructionReached": true, "previousEdiDword": 65560, "ediUpperWordBeforeAttempt": 1, "ownerSigned": 0, "ownerProduct": 0, "attackTimes3": 65535, "classTimes25": 25, "ediBeforeAdd": 65561, "edxDword": 65535, "payloadDword": 131096, "nextEdiDword": 131096, "payloadStoredSignedWord": 24 }
+        ],
+        "finalEdiDword": 131096
+      }
+    },
+    {
+      "id": "signed-owner-upper-half-wraps-loop-carried-edi",
+      "input": { "attempts": [{ "payloadConstructionReached": true, "ownerByte": 0, "entityPayloadWord": 21845, "classModifierWord": 1 }, { "payloadConstructionReached": true, "ownerByte": 255, "entityPayloadWord": 0, "classModifierWord": 0 }] },
+      "expected": {
+        "initialEdiDword": 0,
+        "attempts": [
+          { "payloadConstructionReached": true, "previousEdiDword": 0, "ediUpperWordBeforeAttempt": 0, "ownerSigned": 0, "ownerProduct": 0, "attackTimes3": 65535, "classTimes25": 25, "ediBeforeAdd": 25, "edxDword": 65535, "payloadDword": 65560, "nextEdiDword": 65560, "payloadStoredSignedWord": 24 },
+          { "payloadConstructionReached": true, "previousEdiDword": 65560, "ediUpperWordBeforeAttempt": 1, "ownerSigned": -1, "ownerProduct": 4294966591, "attackTimes3": 0, "classTimes25": 0, "ediBeforeAdd": 65536, "edxDword": 4294901760, "payloadDword": 0, "nextEdiDword": 0, "payloadStoredSignedWord": 0 }
+        ],
+        "finalEdiDword": 0
+      }
+    }
+  ],
+  "creationVectors": [
+    {
+      "id": "first-slot-created",
+      "registry": { "occupied": [] },
+      "input": { "subtype": 16, "selectionModeByte": 2, "targetOrContextReferenceDword": 305397767, "payloadDword": 4294901945, "sourceReference": 305419896, "sourceLive": true, "sourceOwnerByte": 3 },
+      "expected": {
+        "created": true,
+        "slot": 1,
+        "registryWrite": { "slot": 1, "value": 16 },
+        "record": { "baseAddress": "0x00aa8988", "clearedBytes": 928, "activeState": 1, "slot": 1, "subtype": 16, "selectionModeByte": 2, "targetOrContextReferenceDword": 305397767, "payloadSignedWord": 185, "sourceReference": 305419896, "sourceOwnerSigned": 3, "pathIndex": 0 }
+      }
+    },
+    {
+      "id": "first-gap-created",
+      "registry": { "occupied": [1, 2, 3] },
+      "input": { "subtype": 12, "selectionModeByte": 0, "targetOrContextReferenceDword": 7, "payloadDword": 45, "sourceReference": 7, "sourceLive": false, "sourceOwnerByte": "unreachable" },
+      "expected": {
+        "created": true,
+        "slot": 4,
+        "registryWrite": { "slot": 4, "value": 12 },
+        "record": { "baseAddress": "0x00aa9468", "clearedBytes": 928, "activeState": 1, "slot": 4, "subtype": 12, "selectionModeByte": 0, "targetOrContextReferenceDword": 7, "payloadSignedWord": 45, "sourceReference": 7, "sourceOwnerSigned": -1, "pathIndex": 0 }
+      }
+    },
+    {
+      "id": "full-pool-no-op",
+      "registry": { "occupiedRange": [1, 99] },
+      "input": { "subtype": "unreachable", "selectionModeByte": "unreachable", "targetOrContextReferenceDword": "unreachable", "payloadDword": "unreachable", "sourceReference": "unreachable", "sourceLive": "unreachable", "sourceOwnerByte": "unreachable" },
+      "expected": { "created": false, "slot": 0, "registryWrite": null, "record": null }
+    }
+  ],
+  "resetVectors": [
+    {
+      "id": "reset-sparse-registry-including-boundaries",
+      "registry": { "occupied": [0, 1, 99] },
+      "expected": { "clearedSlotCount": 100, "firstClearedSlot": 0, "lastClearedSlot": 99, "registryAfter": { "wordCount": 100, "uniqueWords": [0] }, "fixedRecordBytesCleared": false, "staleReferenceOffsets": ["0x9a", "0xa0"] }
+    },
+    {
+      "id": "reset-all-max-word-boundary",
+      "registry": { "fill": 65535 },
+      "expected": { "clearedSlotCount": 100, "firstClearedSlot": 0, "lastClearedSlot": 99, "registryAfter": { "wordCount": 100, "uniqueWords": [0] }, "fixedRecordBytesCleared": false, "staleReferenceOffsets": ["0x9a", "0xa0"] }
+    }
+  ],
+  "flightVectors": [
+    {
+      "id": "tick-phase-wrap-valid-generation-repath-non-end",
+      "input": { "globalTick": 6, "phaseWord": 4, "phaseDivisorByte": 3, "trackingEnabledWord": 1, "pathIndex": 3, "pathEnd": 9, "trackingCount": 14, "targetReferenceDword": 305397767, "targetLive": true, "activeTargetReferenceDword": 305397767, "repathPathEnd": 2 },
+      "expected": { "phaseWord": 2, "trackingGateReached": true, "targetLiveChecked": true, "generationMatched": true, "targetCoordinatesRead": true, "targetIndex": 7, "targetGeneration": 4660, "trackingCount": 15, "pathIndicesResetBeforeRepath": true, "pathIndexBeforeStep": 0, "nonEndUpdate": true, "pathIndexAfterUpdate": 1 }
+    },
+    {
+      "id": "invalid-generation-skips-coordinate-read-but-increments-non-end",
+      "input": { "globalTick": 7, "phaseWord": 65535, "phaseDivisorByte": "unreachable", "trackingEnabledWord": 1, "pathIndex": 4, "pathEnd": 6, "trackingCount": 0, "targetReferenceDword": 305397767, "targetLive": true, "activeTargetReferenceDword": 1450704903, "repathPathEnd": "unreachable" },
+      "expected": { "phaseWord": 65535, "trackingGateReached": true, "targetLiveChecked": true, "generationMatched": false, "targetCoordinatesRead": false, "targetIndex": 7, "targetGeneration": 4660, "trackingCount": 0, "pathIndicesResetBeforeRepath": false, "pathIndexBeforeStep": 4, "nonEndUpdate": true, "pathIndexAfterUpdate": 5 }
+    },
+    {
+      "id": "signed-phase-divisor-wrap-at-path-end",
+      "input": { "globalTick": 0, "phaseWord": 65534, "phaseDivisorByte": 253, "trackingEnabledWord": 0, "pathIndex": 0, "pathEnd": 0, "trackingCount": "unreachable", "targetReferenceDword": "unreachable", "targetLive": "unreachable", "activeTargetReferenceDword": "unreachable", "repathPathEnd": "unreachable" },
+      "expected": { "phaseWord": 65535, "trackingGateReached": false, "targetLiveChecked": false, "generationMatched": false, "targetCoordinatesRead": false, "targetIndex": null, "targetGeneration": null, "trackingCount": null, "pathIndicesResetBeforeRepath": false, "pathIndexBeforeStep": 0, "nonEndUpdate": false, "pathIndexAfterUpdate": 0 }
+    },
+    {
+      "id": "tracking-count-15-gate-boundary",
+      "input": { "globalTick": 1, "phaseWord": 0, "phaseDivisorByte": "unreachable", "trackingEnabledWord": 1, "pathIndex": 3, "pathEnd": 3, "trackingCount": 15, "targetReferenceDword": "unreachable", "targetLive": "unreachable", "activeTargetReferenceDword": "unreachable", "repathPathEnd": "unreachable" },
+      "expected": { "phaseWord": 0, "trackingGateReached": false, "targetLiveChecked": false, "generationMatched": false, "targetCoordinatesRead": false, "targetIndex": null, "targetGeneration": null, "trackingCount": 15, "pathIndicesResetBeforeRepath": false, "pathIndexBeforeStep": 3, "nonEndUpdate": false, "pathIndexAfterUpdate": 3 }
+    },
+    {
+      "id": "path-storage-upper-normal-non-end-boundary",
+      "input": { "globalTick": 1, "phaseWord": 0, "phaseDivisorByte": "unreachable", "trackingEnabledWord": 0, "pathIndex": 158, "pathEnd": 159, "trackingCount": "unreachable", "targetReferenceDword": "unreachable", "targetLive": "unreachable", "activeTargetReferenceDword": "unreachable", "repathPathEnd": "unreachable" },
+      "expected": { "phaseWord": 0, "trackingGateReached": false, "targetLiveChecked": false, "generationMatched": false, "targetCoordinatesRead": false, "targetIndex": null, "targetGeneration": null, "trackingCount": null, "pathIndicesResetBeforeRepath": false, "pathIndexBeforeStep": 158, "nonEndUpdate": true, "pathIndexAfterUpdate": 159 }
+    }
+  ],
+  "endpointVectors": [
+    {
+      "id": "subtype-0x0c-direct-kind-9-cleanup",
+      "input": { "subtype": 12 },
+      "expected": { "updaterReturn": 0, "cleanupRegistry": true, "finalEffectKind": 9, "sameSlotTransition": null }
+    },
+    {
+      "id": "subtype-0x10-no-candidate-fallback",
+      "input": { "subtype": 16, "candidates": [], "geometryAccepted": "unreachable", "currentSlot": "unreachable", "payloadDword": "unreachable" },
+      "expected": { "updaterReturn": 0, "cleanupRegistry": true, "finalEffectKind": 2, "sameSlotTransition": null }
+    },
+    {
+      "id": "subtype-0x10-candidate-reached-order-and-helper-same-rejected",
+      "input": {
+        "subtype": 16,
+        "candidates": [
+          { "registryActive": false, "chebyshevDistance": "unreachable", "teamHelperReturnedSame": "unreachable", "reference": "unreachable" },
+          { "registryActive": true, "chebyshevDistance": 5, "teamHelperReturnedSame": "unreachable", "reference": "unreachable" },
+          { "registryActive": true, "chebyshevDistance": 1, "teamHelperReturnedSame": true, "reference": "unreachable" }
+        ],
+        "geometryAccepted": "unreachable", "currentSlot": "unreachable", "payloadDword": "unreachable"
+      },
+      "expected": { "updaterReturn": 0, "cleanupRegistry": true, "finalEffectKind": 2, "sameSlotTransition": null }
+    },
+    {
+      "id": "subtype-0x10-strict-nearest-first-tie",
+      "input": {
+        "subtype": 16,
+        "candidates": [
+          { "registryActive": true, "chebyshevDistance": 4, "teamHelperReturnedSame": false, "reference": 20 },
+          { "registryActive": true, "chebyshevDistance": 2, "teamHelperReturnedSame": false, "reference": 305397781 },
+          { "registryActive": true, "chebyshevDistance": 2, "teamHelperReturnedSame": false, "reference": 22 }
+        ],
+        "geometryAccepted": true, "currentSlot": 9, "payloadDword": 4294901945
+      },
+      "expected": {
+        "updaterReturn": 1,
+        "cleanupRegistry": false,
+        "finalEffectKind": null,
+        "sameSlotTransition": { "slot": 9, "subtype": 1, "registryWrite": { "slot": 9, "value": 1 }, "targetReference": 305397781, "selectedCandidateIndex": 1, "payloadSignedWord": 185 }
+      }
+    },
+    {
+      "id": "subtype-0x10-geometry-rejected-fallback",
+      "input": {
+        "subtype": 16,
+        "candidates": [{ "registryActive": true, "chebyshevDistance": 1, "teamHelperReturnedSame": false, "reference": 30 }],
+        "geometryAccepted": false, "currentSlot": "unreachable", "payloadDword": "unreachable"
+      },
+      "expected": { "updaterReturn": 0, "cleanupRegistry": true, "finalEffectKind": 2, "sameSlotTransition": null }
+    },
+    {
+      "id": "subtype-0x10-same-slot-99-transition-boundary",
+      "input": {
+        "subtype": 16,
+        "candidates": [{ "registryActive": true, "chebyshevDistance": 1, "teamHelperReturnedSame": false, "reference": 305397760 }],
+        "geometryAccepted": true, "currentSlot": 99, "payloadDword": 185
+      },
+      "expected": { "updaterReturn": 1, "cleanupRegistry": false, "finalEffectKind": null, "sameSlotTransition": { "slot": 99, "subtype": 1, "registryWrite": { "slot": 99, "value": 1 }, "targetReference": 305397760, "selectedCandidateIndex": 0, "payloadSignedWord": 185 } }
+    },
+    {
+      "id": "subtype-0x10-full-dword-zero-selected-sentinel-fallback",
+      "input": {
+        "subtype": 16,
+        "candidates": [{ "registryActive": true, "chebyshevDistance": 1, "teamHelperReturnedSame": false, "reference": 0 }],
+        "geometryAccepted": "unreachable", "currentSlot": "unreachable", "payloadDword": "unreachable"
+      },
+      "expected": { "updaterReturn": 0, "cleanupRegistry": true, "finalEffectKind": 2, "sameSlotTransition": null }
+    }
+  ],
+  "finalDamageVectors": [
+    {
+      "id": "kind-2-mode-2-full-payload",
+      "input": { "effectKind": 2, "targetActive": true, "payload": 185, "selectionModeByte": 2, "sameOwner": false, "targetClassByte": 1, "targetGenerationMatches": true, "targetModeDword": "unreachable", "defenseWord50": 20, "defenseWord44": 0, "targetByteBa": 0, "writerGlobalWord": 0, "targetOwnerByte": "unreachable", "playerOwnerGateByte": "unreachable", "bufferWord": 0, "currentHealth": 200 },
+      "expected": { "healthWriteReached": true, "noWriteReason": null, "scaledPayload": 185, "defenseWord": 20, "defense": 20, "damage": 148, "bufferWord": 0, "currentHealth": 52, "writerReturn": 1, "nextFunction": "FUN_00439400" }
+    },
+    {
+      "id": "kind-2-full-payload-partial-buffer-deducts-full-damage",
+      "input": { "effectKind": 2, "targetActive": true, "payload": 93, "selectionModeByte": 2, "sameOwner": false, "targetClassByte": 1, "targetGenerationMatches": true, "targetModeDword": "unreachable", "defenseWord50": 0, "defenseWord44": 0, "targetByteBa": 0, "writerGlobalWord": 0, "targetOwnerByte": "unreachable", "playerOwnerGateByte": "unreachable", "bufferWord": 50, "currentHealth": 100 },
+      "expected": { "healthWriteReached": true, "noWriteReason": null, "scaledPayload": 93, "defenseWord": 0, "defense": 0, "damage": 93, "bufferWord": 0, "currentHealth": 7, "writerReturn": 1, "nextFunction": "FUN_00439400" }
+    },
+    {
+      "id": "kind-9-mode-4-thirty-percent-defense-cap",
+      "input": { "effectKind": 9, "targetActive": true, "payload": 45, "selectionModeByte": "unreachable", "sameOwner": "unreachable", "targetClassByte": 1, "targetGenerationMatches": true, "targetModeDword": 4, "defenseWord50": 80, "defenseWord44": 20, "targetByteBa": 0, "writerGlobalWord": 0, "targetOwnerByte": "unreachable", "playerOwnerGateByte": "unreachable", "bufferWord": 0, "currentHealth": 20 },
+      "expected": { "healthWriteReached": true, "noWriteReason": null, "scaledPayload": 58, "defenseWord": 100, "defense": 90, "damage": 6, "bufferWord": 0, "currentHealth": 14, "writerReturn": 1, "nextFunction": "FUN_00439400" }
+    },
+    {
+      "id": "minimum-damage-buffer-retained",
+      "input": { "effectKind": 2, "targetActive": true, "payload": 1, "selectionModeByte": 2, "sameOwner": false, "targetClassByte": 1, "targetGenerationMatches": true, "targetModeDword": "unreachable", "defenseWord50": 90, "defenseWord44": 0, "targetByteBa": 0, "writerGlobalWord": 0, "targetOwnerByte": "unreachable", "playerOwnerGateByte": "unreachable", "bufferWord": 3, "currentHealth": 100 },
+      "expected": { "healthWriteReached": true, "noWriteReason": null, "scaledPayload": 1, "defenseWord": 90, "defense": 90, "damage": 1, "bufferWord": 2, "currentHealth": 100, "writerReturn": 1, "nextFunction": "FUN_00439400" }
+    },
+    {
+      "id": "kind-2-mode-2-same-owner-halves-full-payload",
+      "input": { "effectKind": 2, "targetActive": true, "payload": 185, "selectionModeByte": 2, "sameOwner": true, "targetClassByte": 1, "targetGenerationMatches": true, "targetModeDword": "unreachable", "defenseWord50": 0, "defenseWord44": 0, "targetByteBa": 0, "writerGlobalWord": 0, "targetOwnerByte": "unreachable", "playerOwnerGateByte": "unreachable", "bufferWord": 0, "currentHealth": 200 },
+      "expected": { "healthWriteReached": true, "noWriteReason": null, "scaledPayload": 92, "defenseWord": 0, "defense": 0, "damage": 92, "bufferWord": 0, "currentHealth": 108, "writerReturn": 1, "nextFunction": "FUN_00439400" }
+    },
+    {
+      "id": "kind-9-mode-5-fifty-percent-byte-ba-defense-adjustment",
+      "input": { "effectKind": 9, "targetActive": true, "payload": 45, "selectionModeByte": "unreachable", "sameOwner": "unreachable", "targetClassByte": 1, "targetGenerationMatches": true, "targetModeDword": 5, "defenseWord50": 40, "defenseWord44": 20, "targetByteBa": 1, "writerGlobalWord": 0, "targetOwnerByte": "unreachable", "playerOwnerGateByte": "unreachable", "bufferWord": 0, "currentHealth": 10 },
+      "expected": { "healthWriteReached": true, "noWriteReason": null, "scaledPayload": 67, "defenseWord": 90, "defense": 90, "damage": 7, "bufferWord": 0, "currentHealth": 3, "writerReturn": 1, "nextFunction": "FUN_00439400" }
+    },
+    {
+      "id": "defense-word-sum-wrap-and-health-clamp",
+      "input": { "effectKind": 2, "targetActive": true, "payload": 10, "selectionModeByte": 2, "sameOwner": false, "targetClassByte": 1, "targetGenerationMatches": true, "targetModeDword": "unreachable", "defenseWord50": 65535, "defenseWord44": 2, "targetByteBa": 1, "writerGlobalWord": 0, "targetOwnerByte": "unreachable", "playerOwnerGateByte": "unreachable", "bufferWord": 0, "currentHealth": 5 },
+      "expected": { "healthWriteReached": true, "noWriteReason": null, "scaledPayload": 10, "defenseWord": 1, "defense": 1, "damage": 10, "bufferWord": 0, "currentHealth": 0, "writerReturn": 0, "nextFunction": "FUN_00442b10" }
+    },
+    {
+      "id": "kind-9-mode-6-no-modifier-signed-negative-buffer-cleared",
+      "input": { "effectKind": 9, "targetActive": true, "payload": 45, "selectionModeByte": "unreachable", "sameOwner": "unreachable", "targetClassByte": 1, "targetGenerationMatches": true, "targetModeDword": 6, "defenseWord50": 0, "defenseWord44": 0, "targetByteBa": 0, "writerGlobalWord": 0, "targetOwnerByte": "unreachable", "playerOwnerGateByte": "unreachable", "bufferWord": 65535, "currentHealth": 100 },
+      "expected": { "healthWriteReached": true, "noWriteReason": null, "scaledPayload": 45, "defenseWord": 0, "defense": 0, "damage": 45, "bufferWord": 0, "currentHealth": 55, "writerReturn": 1, "nextFunction": "FUN_00439400" }
+    },
+    {
+      "id": "kind-9-mode-4-signed-word-wrap-clamps-damage-to-one",
+      "input": { "effectKind": 9, "targetActive": true, "payload": 32767, "selectionModeByte": "unreachable", "sameOwner": "unreachable", "targetClassByte": 1, "targetGenerationMatches": true, "targetModeDword": 4, "defenseWord50": 0, "defenseWord44": 0, "targetByteBa": 0, "writerGlobalWord": 0, "targetOwnerByte": "unreachable", "playerOwnerGateByte": "unreachable", "bufferWord": 1, "currentHealth": 100 },
+      "expected": { "healthWriteReached": true, "noWriteReason": null, "scaledPayload": -22939, "defenseWord": 0, "defense": 0, "damage": 1, "bufferWord": 0, "currentHealth": 100, "writerReturn": 1, "nextFunction": "FUN_00439400" }
+    },
+    {
+      "id": "target-inactive-stops-before-final-consumer",
+      "input": { "effectKind": 2, "targetActive": false, "payload": "unreachable", "selectionModeByte": "unreachable", "sameOwner": "unreachable", "targetClassByte": "unreachable", "targetGenerationMatches": "unreachable", "targetModeDword": "unreachable", "defenseWord50": "unreachable", "defenseWord44": "unreachable", "targetByteBa": "unreachable", "writerGlobalWord": "unreachable", "targetOwnerByte": "unreachable", "playerOwnerGateByte": "unreachable", "bufferWord": "unreachable", "currentHealth": "unreachable" },
+      "expected": { "healthWriteReached": false, "noWriteReason": "target-inactive-before-FUN_00413b30", "scaledPayload": null, "defenseWord": null, "defense": null, "damage": null, "bufferWord": null, "currentHealth": null, "writerReturn": null, "nextFunction": null }
+    },
+    {
+      "id": "kind-2-class-95-special-callback-after-same-owner-scaling",
+      "input": { "effectKind": 2, "targetActive": true, "payload": 185, "selectionModeByte": 2, "sameOwner": true, "targetClassByte": 95, "targetGenerationMatches": "unreachable", "targetModeDword": "unreachable", "defenseWord50": "unreachable", "defenseWord44": "unreachable", "targetByteBa": "unreachable", "writerGlobalWord": "unreachable", "targetOwnerByte": "unreachable", "playerOwnerGateByte": "unreachable", "bufferWord": "unreachable", "currentHealth": "unreachable" },
+      "expected": { "healthWriteReached": false, "noWriteReason": "target-class-95-special-callback", "scaledPayload": 92, "defenseWord": null, "defense": null, "damage": null, "bufferWord": null, "currentHealth": null, "writerReturn": null, "nextFunction": null }
+    },
+    {
+      "id": "direct-kind-9-full-reference-generation-mismatch-calls-writer-with-zero",
+      "input": { "effectKind": 9, "targetActive": true, "payload": 185, "selectionModeByte": "unreachable", "sameOwner": "unreachable", "targetClassByte": 1, "targetGenerationMatches": false, "targetModeDword": "unreachable", "defenseWord50": "unreachable", "defenseWord44": "unreachable", "targetByteBa": "unreachable", "writerGlobalWord": 0, "targetOwnerByte": "unreachable", "playerOwnerGateByte": "unreachable", "bufferWord": 7, "currentHealth": 100 },
+      "expected": { "healthWriteReached": true, "noWriteReason": null, "scaledPayload": null, "defenseWord": null, "defense": null, "damage": 0, "bufferWord": 7, "currentHealth": 100, "writerReturn": 1, "nextFunction": "FUN_00439400" }
+    },
+    {
+      "id": "writer-owner-gate-zero-preserves-buffer-and-health",
+      "input": { "effectKind": 9, "targetActive": true, "payload": 45, "selectionModeByte": "unreachable", "sameOwner": "unreachable", "targetClassByte": 1, "targetGenerationMatches": true, "targetModeDword": 0, "defenseWord50": 0, "defenseWord44": 0, "targetByteBa": 0, "writerGlobalWord": 1, "targetOwnerByte": 3, "playerOwnerGateByte": 0, "bufferWord": "unreachable", "currentHealth": "unreachable" },
+      "expected": { "healthWriteReached": false, "noWriteReason": "FUN_00438130-owner-gate-zero", "scaledPayload": 45, "defenseWord": 0, "defense": 0, "damage": 45, "bufferWord": null, "currentHealth": null, "writerReturn": 1, "nextFunction": "FUN_00439400" }
+    }
+  ]
+}

@@ -1,0 +1,889 @@
+{
+  "sourceExecutableSha256": "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e",
+  "sourceButtons201Sha256": "4e55d6592b515fe8a9ebcc059fc6e2a487a3ed5db6affd0f516537a392741eec",
+  "sourceGameMenuBorderSha256": "48f60d170a8305fbfc2a08d41b3de96bf19dfe99d9d3460996037df41ed6a8ed",
+  "escapeVectors": [
+    {
+      "id": "successful-VK_ESCAPE-request",
+      "input": {
+        "message": 256,
+        "virtualKey": 27,
+        "openRequestValue": 0,
+        "applicationState": 3,
+        "gameTime": 4,
+        "scriptBusy": false
+      },
+      "expected": {
+        "nextOpenRequestValue": 1,
+        "externalDismissRequested": false,
+        "soundIds": [2],
+        "events": ["dispatch-VK_ESCAPE", "play-sound-2", "write-open-request-1"]
+      }
+    },
+    {
+      "id": "existing-request-signals-dismiss",
+      "input": {
+        "message": 256,
+        "virtualKey": 27,
+        "openRequestValue": 1,
+        "applicationState": 3,
+        "gameTime": 4,
+        "scriptBusy": false
+      },
+      "expected": {
+        "nextOpenRequestValue": 1,
+        "externalDismissRequested": true,
+        "soundIds": [],
+        "events": ["dispatch-VK_ESCAPE", "request-common-ui-external-dismiss"]
+      }
+    },
+    {
+      "id": "application-state-gate",
+      "input": {
+        "message": 256,
+        "virtualKey": 27,
+        "openRequestValue": 0,
+        "applicationState": 2,
+        "gameTime": 4,
+        "scriptBusy": false
+      },
+      "expected": {
+        "nextOpenRequestValue": 0,
+        "externalDismissRequested": false,
+        "soundIds": [],
+        "events": ["dispatch-VK_ESCAPE", "reject-application-state-not-3"]
+      }
+    },
+    {
+      "id": "game-time-boundary-three",
+      "input": {
+        "message": 256,
+        "virtualKey": 27,
+        "openRequestValue": 0,
+        "applicationState": 3,
+        "gameTime": 3,
+        "scriptBusy": false
+      },
+      "expected": {
+        "nextOpenRequestValue": 0,
+        "externalDismissRequested": false,
+        "soundIds": [],
+        "events": ["dispatch-VK_ESCAPE", "reject-game-time-not-greater-than-3"]
+      }
+    },
+    {
+      "id": "script-busy-gate",
+      "input": {
+        "message": 256,
+        "virtualKey": 27,
+        "openRequestValue": 0,
+        "applicationState": 3,
+        "gameTime": 4,
+        "scriptBusy": true
+      },
+      "expected": {
+        "nextOpenRequestValue": 0,
+        "externalDismissRequested": false,
+        "soundIds": [],
+        "events": ["dispatch-VK_ESCAPE", "reject-script-busy"]
+      }
+    },
+    {
+      "id": "non-keydown-message",
+      "input": {
+        "message": 257,
+        "virtualKey": 27,
+        "openRequestValue": 0,
+        "applicationState": 3,
+        "gameTime": 4,
+        "scriptBusy": false
+      },
+      "expected": {
+        "nextOpenRequestValue": 0,
+        "externalDismissRequested": false,
+        "soundIds": [],
+        "events": []
+      }
+    },
+    {
+      "id": "non-escape-key",
+      "input": {
+        "message": 256,
+        "virtualKey": 32,
+        "openRequestValue": 0,
+        "applicationState": 3,
+        "gameTime": 4,
+        "scriptBusy": false
+      },
+      "expected": {
+        "nextOpenRequestValue": 0,
+        "externalDismissRequested": false,
+        "soundIds": [],
+        "events": []
+      }
+    }
+  ],
+  "gameplayPanelVectors": [
+    {
+      "id": "press-inside-arms-release",
+      "input": {
+        "pointerX": 139,
+        "pointerY": 458,
+        "disabledValue": 0,
+        "primaryButtonState": 1,
+        "armedLatch": 0,
+        "pressedInsideLatch": 0,
+        "openRequestValue": 0
+      },
+      "expected": {
+        "hit": true,
+        "nextOpenRequestValue": 0,
+        "nextArmedLatch": 1,
+        "nextPressedInsideLatch": 1,
+        "selectionValue": null,
+        "soundIds": [14],
+        "events": ["press-inside-play-sound-14", "arm-panel-release"]
+      }
+    },
+    {
+      "id": "release-inside-writes-request",
+      "input": {
+        "pointerX": 139,
+        "pointerY": 458,
+        "disabledValue": 0,
+        "primaryButtonState": 0,
+        "armedLatch": 1,
+        "pressedInsideLatch": 1,
+        "openRequestValue": 0
+      },
+      "expected": {
+        "hit": true,
+        "nextOpenRequestValue": 1,
+        "nextArmedLatch": 0,
+        "nextPressedInsideLatch": 1,
+        "selectionValue": -1,
+        "soundIds": [],
+        "events": ["release-inside-write-open-request-1", "clear-armed-latch"]
+      }
+    },
+    {
+      "id": "release-without-press-does-not-write",
+      "input": {
+        "pointerX": 139,
+        "pointerY": 458,
+        "disabledValue": 0,
+        "primaryButtonState": 0,
+        "armedLatch": 0,
+        "pressedInsideLatch": 0,
+        "openRequestValue": 0
+      },
+      "expected": {
+        "hit": true,
+        "nextOpenRequestValue": 0,
+        "nextArmedLatch": 0,
+        "nextPressedInsideLatch": 0,
+        "selectionValue": null,
+        "soundIds": [],
+        "events": []
+      }
+    },
+    {
+      "id": "left-edge-excluded",
+      "input": {
+        "pointerX": 138,
+        "pointerY": 458,
+        "disabledValue": 0,
+        "primaryButtonState": 0,
+        "armedLatch": 1,
+        "pressedInsideLatch": 1,
+        "openRequestValue": 0
+      },
+      "expected": {
+        "hit": false,
+        "nextOpenRequestValue": 0,
+        "nextArmedLatch": 0,
+        "nextPressedInsideLatch": 1,
+        "selectionValue": null,
+        "soundIds": [],
+        "events": ["outside-clear-armed-latch"]
+      }
+    },
+    {
+      "id": "right-edge-excluded",
+      "input": {
+        "pointerX": 166,
+        "pointerY": 458,
+        "disabledValue": 0,
+        "primaryButtonState": 0,
+        "armedLatch": 1,
+        "pressedInsideLatch": 1,
+        "openRequestValue": 0
+      },
+      "expected": {
+        "hit": false,
+        "nextOpenRequestValue": 0,
+        "nextArmedLatch": 0,
+        "nextPressedInsideLatch": 1,
+        "selectionValue": null,
+        "soundIds": [],
+        "events": ["outside-clear-armed-latch"]
+      }
+    },
+    {
+      "id": "top-edge-excluded",
+      "input": {
+        "pointerX": 139,
+        "pointerY": 457,
+        "disabledValue": 0,
+        "primaryButtonState": 0,
+        "armedLatch": 1,
+        "pressedInsideLatch": 1,
+        "openRequestValue": 0
+      },
+      "expected": {
+        "hit": false,
+        "nextOpenRequestValue": 0,
+        "nextArmedLatch": 0,
+        "nextPressedInsideLatch": 1,
+        "selectionValue": null,
+        "soundIds": [],
+        "events": ["outside-clear-armed-latch"]
+      }
+    },
+    {
+      "id": "bottom-edge-excluded",
+      "input": {
+        "pointerX": 139,
+        "pointerY": 472,
+        "disabledValue": 0,
+        "primaryButtonState": 0,
+        "armedLatch": 1,
+        "pressedInsideLatch": 1,
+        "openRequestValue": 0
+      },
+      "expected": {
+        "hit": false,
+        "nextOpenRequestValue": 0,
+        "nextArmedLatch": 0,
+        "nextPressedInsideLatch": 1,
+        "selectionValue": null,
+        "soundIds": [],
+        "events": ["outside-clear-armed-latch"]
+      }
+    },
+    {
+      "id": "disabled-value-one-blocks-input",
+      "input": {
+        "pointerX": 139,
+        "pointerY": 458,
+        "disabledValue": 1,
+        "primaryButtonState": 1,
+        "armedLatch": 1,
+        "pressedInsideLatch": 1,
+        "openRequestValue": 0
+      },
+      "expected": {
+        "hit": false,
+        "nextOpenRequestValue": 0,
+        "nextArmedLatch": 0,
+        "nextPressedInsideLatch": 1,
+        "selectionValue": null,
+        "soundIds": [],
+        "events": ["disabled-clear-armed-latch"]
+      }
+    }
+  ],
+  "applicationTransitionVectors": [
+    {
+      "id": "request-one-in-gameplay-enters-0x16",
+      "input": { "openRequestValue": 1, "applicationState": 3 },
+      "expected": {
+        "transitioned": true,
+        "nextApplicationState": 22,
+        "soundIds": [2],
+        "events": [
+          "play-sound-2",
+          "call-FUN_004400b0-with-0x005e20b8",
+          "write-application-state-0x16",
+          "return-early-from-FUN_00447bc0"
+        ]
+      }
+    },
+    {
+      "id": "request-zero-does-not-transition",
+      "input": { "openRequestValue": 0, "applicationState": 3 },
+      "expected": {
+        "transitioned": false,
+        "nextApplicationState": 3,
+        "soundIds": [],
+        "events": []
+      }
+    },
+    {
+      "id": "request-one-outside-gameplay-does-not-transition",
+      "input": { "openRequestValue": 1, "applicationState": 23 },
+      "expected": {
+        "transitioned": false,
+        "nextApplicationState": 23,
+        "soundIds": [],
+        "events": []
+      }
+    }
+  ],
+  "initializationVectors": [
+    {
+      "id": "K01-mode-one-objective-control-active",
+      "input": {
+        "selectedStageIndex": 1,
+        "alternateModeFlag": 0,
+        "networkModeWord": 0,
+        "multiplayerFlag": 0
+      },
+      "expected": {
+        "mode": 1,
+        "active": true,
+        "rectangle": {
+          "left": 264,
+          "top": 110,
+          "right": 376,
+          "bottom": 138,
+          "width": 112,
+          "height": 28
+        },
+        "events": ["select-common-ui-mode-1", "activate-objective-control"]
+      }
+    },
+    {
+      "id": "mode-two-objective-control-inactive",
+      "input": {
+        "selectedStageIndex": 0,
+        "alternateModeFlag": 1,
+        "networkModeWord": 0,
+        "multiplayerFlag": 0
+      },
+      "expected": {
+        "mode": 2,
+        "active": false,
+        "rectangle": {
+          "left": 264,
+          "top": 110,
+          "right": 376,
+          "bottom": 138,
+          "width": 112,
+          "height": 28
+        },
+        "events": ["select-common-ui-mode-2", "deactivate-objective-control"]
+      }
+    },
+    {
+      "id": "mode-three-objective-control-inactive",
+      "input": {
+        "selectedStageIndex": 0,
+        "alternateModeFlag": 0,
+        "networkModeWord": 1,
+        "multiplayerFlag": 1
+      },
+      "expected": {
+        "mode": 3,
+        "active": false,
+        "rectangle": {
+          "left": 264,
+          "top": 110,
+          "right": 376,
+          "bottom": 138,
+          "width": 112,
+          "height": 28
+        },
+        "events": [
+          "select-common-ui-mode-3",
+          "deactivate-objective-control",
+          "deactivate-multiplayer-only-control-0x00552b88"
+        ]
+      }
+    },
+    {
+      "id": "mode-zero-keeps-initial-active-state",
+      "input": {
+        "selectedStageIndex": 0,
+        "alternateModeFlag": 0,
+        "networkModeWord": 0,
+        "multiplayerFlag": 0
+      },
+      "expected": {
+        "mode": 0,
+        "active": true,
+        "rectangle": {
+          "left": 264,
+          "top": 110,
+          "right": 376,
+          "bottom": 138,
+          "width": 112,
+          "height": 28
+        },
+        "events": [
+          "select-common-ui-mode-0",
+          "preserve-constructor-initialized-active-objective-control"
+        ]
+      }
+    }
+  ],
+  "objectiveControlVectors": [
+    {
+      "id": "outside-normal-frame",
+      "input": {
+        "active": true,
+        "pointerX": 263,
+        "pointerY": 120,
+        "currentPrimaryButton": 0,
+        "previousPrimaryButton": 0,
+        "pressSoundLatch": 0,
+        "insideLatch": 0,
+        "surfaceLockSucceeded": true,
+        "state3eeControlActivated": false,
+        "state3ecControlActivated": false,
+        "state3eaControlActivated": false
+      },
+      "expected": {
+        "hit": false,
+        "activated": false,
+        "nextPressSoundLatch": 0,
+        "nextInsideLatch": 0,
+        "soundIds": [],
+        "handlerReturn": 0,
+        "ownerStateAfterReturnWrite": null,
+        "draw": {
+          "surfaceLockAttempted": true,
+          "surfaceLockSucceeded": true,
+          "buttonDrawAttempted": true,
+          "buttonDrawn": true,
+          "frame": 3
+        },
+        "events": ["outside-clear-control-latches", "draw-buttons201-frame-3"]
+      }
+    },
+    {
+      "id": "hover-inside-frame-four",
+      "input": {
+        "active": true,
+        "pointerX": 265,
+        "pointerY": 111,
+        "currentPrimaryButton": 0,
+        "previousPrimaryButton": 0,
+        "pressSoundLatch": 0,
+        "insideLatch": 0,
+        "surfaceLockSucceeded": true,
+        "state3eeControlActivated": false,
+        "state3ecControlActivated": false,
+        "state3eaControlActivated": false
+      },
+      "expected": {
+        "hit": true,
+        "activated": false,
+        "nextPressSoundLatch": 0,
+        "nextInsideLatch": 1,
+        "soundIds": [],
+        "handlerReturn": 0,
+        "ownerStateAfterReturnWrite": null,
+        "draw": {
+          "surfaceLockAttempted": true,
+          "surfaceLockSucceeded": true,
+          "buttonDrawAttempted": true,
+          "buttonDrawn": true,
+          "frame": 4
+        },
+        "events": ["set-control-inside-latch", "draw-buttons201-frame-4"]
+      }
+    },
+    {
+      "id": "held-inside-frame-five",
+      "input": {
+        "active": true,
+        "pointerX": 265,
+        "pointerY": 111,
+        "currentPrimaryButton": 1,
+        "previousPrimaryButton": 0,
+        "pressSoundLatch": 0,
+        "insideLatch": 0,
+        "surfaceLockSucceeded": true,
+        "state3eeControlActivated": false,
+        "state3ecControlActivated": false,
+        "state3eaControlActivated": false
+      },
+      "expected": {
+        "hit": true,
+        "activated": false,
+        "nextPressSoundLatch": 1,
+        "nextInsideLatch": 1,
+        "soundIds": [15],
+        "handlerReturn": 0,
+        "ownerStateAfterReturnWrite": null,
+        "draw": {
+          "surfaceLockAttempted": true,
+          "surfaceLockSucceeded": true,
+          "buttonDrawAttempted": true,
+          "buttonDrawn": true,
+          "frame": 5
+        },
+        "events": [
+          "press-inside-play-sound-15",
+          "set-control-inside-latch",
+          "draw-buttons201-frame-5"
+        ]
+      }
+    },
+    {
+      "id": "release-inside-produces-0x3f0",
+      "input": {
+        "active": true,
+        "pointerX": 265,
+        "pointerY": 111,
+        "currentPrimaryButton": 0,
+        "previousPrimaryButton": 1,
+        "pressSoundLatch": 1,
+        "insideLatch": 1,
+        "surfaceLockSucceeded": true,
+        "state3eeControlActivated": false,
+        "state3ecControlActivated": false,
+        "state3eaControlActivated": false
+      },
+      "expected": {
+        "hit": true,
+        "activated": true,
+        "nextPressSoundLatch": 0,
+        "nextInsideLatch": 1,
+        "soundIds": [],
+        "handlerReturn": 1008,
+        "ownerStateAfterReturnWrite": 1008,
+        "draw": {
+          "surfaceLockAttempted": true,
+          "surfaceLockSucceeded": true,
+          "buttonDrawAttempted": true,
+          "buttonDrawn": true,
+          "frame": 4
+        },
+        "events": [
+          "release-inside-activate-objective-control",
+          "objective-control-set-pending-0x3f0",
+          "write-handler-return-to-DAT_00552998",
+          "draw-buttons201-frame-4"
+        ]
+      }
+    },
+    {
+      "id": "previous-primary-two-does-not-release",
+      "input": {
+        "active": true,
+        "pointerX": 265,
+        "pointerY": 111,
+        "currentPrimaryButton": 0,
+        "previousPrimaryButton": 2,
+        "pressSoundLatch": 1,
+        "insideLatch": 1,
+        "surfaceLockSucceeded": true,
+        "state3eeControlActivated": false,
+        "state3ecControlActivated": false,
+        "state3eaControlActivated": false
+      },
+      "expected": {
+        "hit": true,
+        "activated": false,
+        "nextPressSoundLatch": 1,
+        "nextInsideLatch": 1,
+        "soundIds": [],
+        "handlerReturn": 0,
+        "ownerStateAfterReturnWrite": null,
+        "draw": {
+          "surfaceLockAttempted": true,
+          "surfaceLockSucceeded": true,
+          "buttonDrawAttempted": true,
+          "buttonDrawn": true,
+          "frame": 4
+        },
+        "events": ["set-control-inside-latch", "draw-buttons201-frame-4"]
+      }
+    },
+    {
+      "id": "release-inside-surface-lock-failure-still-produces-state",
+      "input": {
+        "active": true,
+        "pointerX": 265,
+        "pointerY": 111,
+        "currentPrimaryButton": 0,
+        "previousPrimaryButton": 1,
+        "pressSoundLatch": 1,
+        "insideLatch": 1,
+        "surfaceLockSucceeded": false,
+        "state3eeControlActivated": false,
+        "state3ecControlActivated": false,
+        "state3eaControlActivated": false
+      },
+      "expected": {
+        "hit": true,
+        "activated": true,
+        "nextPressSoundLatch": 0,
+        "nextInsideLatch": 1,
+        "soundIds": [],
+        "handlerReturn": 1008,
+        "ownerStateAfterReturnWrite": 1008,
+        "draw": {
+          "surfaceLockAttempted": true,
+          "surfaceLockSucceeded": false,
+          "buttonDrawAttempted": false,
+          "buttonDrawn": false,
+          "frame": null
+        },
+        "events": [
+          "release-inside-activate-objective-control",
+          "objective-control-set-pending-0x3f0",
+          "write-handler-return-to-DAT_00552998",
+          "surface-lock-failed-skip-common-ui-draws"
+        ]
+      }
+    },
+    {
+      "id": "inactive-control-rejects-input-but-draws-normal",
+      "input": {
+        "active": false,
+        "pointerX": 265,
+        "pointerY": 111,
+        "currentPrimaryButton": 0,
+        "previousPrimaryButton": 1,
+        "pressSoundLatch": 1,
+        "insideLatch": 1,
+        "surfaceLockSucceeded": true,
+        "state3eeControlActivated": false,
+        "state3ecControlActivated": false,
+        "state3eaControlActivated": false
+      },
+      "expected": {
+        "hit": false,
+        "activated": false,
+        "nextPressSoundLatch": 0,
+        "nextInsideLatch": 0,
+        "soundIds": [],
+        "handlerReturn": 0,
+        "ownerStateAfterReturnWrite": null,
+        "draw": {
+          "surfaceLockAttempted": true,
+          "surfaceLockSucceeded": true,
+          "buttonDrawAttempted": true,
+          "buttonDrawn": true,
+          "frame": 3
+        },
+        "events": ["inactive-clear-control-latches", "draw-buttons201-frame-3"]
+      }
+    },
+    {
+      "id": "later-0x3ec-control-replaces-objective-state",
+      "input": {
+        "active": true,
+        "pointerX": 265,
+        "pointerY": 111,
+        "currentPrimaryButton": 0,
+        "previousPrimaryButton": 1,
+        "pressSoundLatch": 1,
+        "insideLatch": 1,
+        "surfaceLockSucceeded": true,
+        "state3eeControlActivated": false,
+        "state3ecControlActivated": true,
+        "state3eaControlActivated": false
+      },
+      "expected": {
+        "hit": true,
+        "activated": true,
+        "nextPressSoundLatch": 0,
+        "nextInsideLatch": 1,
+        "soundIds": [],
+        "handlerReturn": 1004,
+        "ownerStateAfterReturnWrite": 1004,
+        "draw": {
+          "surfaceLockAttempted": true,
+          "surfaceLockSucceeded": true,
+          "buttonDrawAttempted": true,
+          "buttonDrawn": true,
+          "frame": 4
+        },
+        "events": [
+          "release-inside-activate-objective-control",
+          "objective-control-set-pending-0x3f0",
+          "later-control-overwrite-0x3f0-with-0x3ec",
+          "write-handler-return-to-DAT_00552998",
+          "draw-buttons201-frame-4"
+        ]
+      }
+    },
+    {
+      "id": "all-later-controls-end-at-0x3ea",
+      "input": {
+        "active": true,
+        "pointerX": 265,
+        "pointerY": 111,
+        "currentPrimaryButton": 0,
+        "previousPrimaryButton": 1,
+        "pressSoundLatch": 1,
+        "insideLatch": 1,
+        "surfaceLockSucceeded": true,
+        "state3eeControlActivated": true,
+        "state3ecControlActivated": true,
+        "state3eaControlActivated": true
+      },
+      "expected": {
+        "hit": true,
+        "activated": true,
+        "nextPressSoundLatch": 0,
+        "nextInsideLatch": 1,
+        "soundIds": [],
+        "handlerReturn": 1002,
+        "ownerStateAfterReturnWrite": 1002,
+        "draw": {
+          "surfaceLockAttempted": true,
+          "surfaceLockSucceeded": true,
+          "buttonDrawAttempted": true,
+          "buttonDrawn": true,
+          "frame": 4
+        },
+        "events": [
+          "release-inside-activate-objective-control",
+          "objective-control-set-pending-0x3f0",
+          "later-control-overwrite-0x3f0-with-0x3ee",
+          "later-control-overwrite-0x3ee-with-0x3ec",
+          "later-control-overwrite-0x3ec-with-0x3ea",
+          "write-handler-return-to-DAT_00552998",
+          "draw-buttons201-frame-4"
+        ]
+      }
+    },
+    {
+      "id": "left-edge-excluded",
+      "input": {
+        "active": true,
+        "pointerX": 264,
+        "pointerY": 111,
+        "currentPrimaryButton": 0,
+        "previousPrimaryButton": 1,
+        "pressSoundLatch": 1,
+        "insideLatch": 1,
+        "surfaceLockSucceeded": true,
+        "state3eeControlActivated": false,
+        "state3ecControlActivated": false,
+        "state3eaControlActivated": false
+      },
+      "expected": {
+        "hit": false,
+        "activated": false,
+        "nextPressSoundLatch": 0,
+        "nextInsideLatch": 0,
+        "soundIds": [],
+        "handlerReturn": 0,
+        "ownerStateAfterReturnWrite": null,
+        "draw": {
+          "surfaceLockAttempted": true,
+          "surfaceLockSucceeded": true,
+          "buttonDrawAttempted": true,
+          "buttonDrawn": true,
+          "frame": 3
+        },
+        "events": ["outside-clear-control-latches", "draw-buttons201-frame-3"]
+      }
+    },
+    {
+      "id": "right-edge-excluded",
+      "input": {
+        "active": true,
+        "pointerX": 376,
+        "pointerY": 111,
+        "currentPrimaryButton": 0,
+        "previousPrimaryButton": 1,
+        "pressSoundLatch": 1,
+        "insideLatch": 1,
+        "surfaceLockSucceeded": true,
+        "state3eeControlActivated": false,
+        "state3ecControlActivated": false,
+        "state3eaControlActivated": false
+      },
+      "expected": {
+        "hit": false,
+        "activated": false,
+        "nextPressSoundLatch": 0,
+        "nextInsideLatch": 0,
+        "soundIds": [],
+        "handlerReturn": 0,
+        "ownerStateAfterReturnWrite": null,
+        "draw": {
+          "surfaceLockAttempted": true,
+          "surfaceLockSucceeded": true,
+          "buttonDrawAttempted": true,
+          "buttonDrawn": true,
+          "frame": 3
+        },
+        "events": ["outside-clear-control-latches", "draw-buttons201-frame-3"]
+      }
+    },
+    {
+      "id": "top-edge-excluded",
+      "input": {
+        "active": true,
+        "pointerX": 265,
+        "pointerY": 110,
+        "currentPrimaryButton": 0,
+        "previousPrimaryButton": 1,
+        "pressSoundLatch": 1,
+        "insideLatch": 1,
+        "surfaceLockSucceeded": true,
+        "state3eeControlActivated": false,
+        "state3ecControlActivated": false,
+        "state3eaControlActivated": false
+      },
+      "expected": {
+        "hit": false,
+        "activated": false,
+        "nextPressSoundLatch": 0,
+        "nextInsideLatch": 0,
+        "soundIds": [],
+        "handlerReturn": 0,
+        "ownerStateAfterReturnWrite": null,
+        "draw": {
+          "surfaceLockAttempted": true,
+          "surfaceLockSucceeded": true,
+          "buttonDrawAttempted": true,
+          "buttonDrawn": true,
+          "frame": 3
+        },
+        "events": ["outside-clear-control-latches", "draw-buttons201-frame-3"]
+      }
+    },
+    {
+      "id": "bottom-edge-excluded",
+      "input": {
+        "active": true,
+        "pointerX": 265,
+        "pointerY": 138,
+        "currentPrimaryButton": 0,
+        "previousPrimaryButton": 1,
+        "pressSoundLatch": 1,
+        "insideLatch": 1,
+        "surfaceLockSucceeded": true,
+        "state3eeControlActivated": false,
+        "state3ecControlActivated": false,
+        "state3eaControlActivated": false
+      },
+      "expected": {
+        "hit": false,
+        "activated": false,
+        "nextPressSoundLatch": 0,
+        "nextInsideLatch": 0,
+        "soundIds": [],
+        "handlerReturn": 0,
+        "ownerStateAfterReturnWrite": null,
+        "draw": {
+          "surfaceLockAttempted": true,
+          "surfaceLockSucceeded": true,
+          "buttonDrawAttempted": true,
+          "buttonDrawn": true,
+          "frame": 3
+        },
+        "events": ["outside-clear-control-latches", "draw-buttons201-frame-3"]
+      }
+    }
+  ]
+}

@@ -1,0 +1,144 @@
+{
+  "schemaVersion": 2,
+  "sourceExecutableSha256": "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e",
+  "sourceButtonSha256": "cfe7bab02f2cb8a1f97a3161075e617ace22d6ecf5a976546263a7c67e4efbb4",
+  "sourcePanelSha256": "18a58466dd95fab6d946ed6dfb0647d8a315733a6a9bfb1b069c0e3a8d81b42e",
+  "expectedStatus": {
+    "analysisStatus": "static-confirmed-for-owner-and-exact-command-grid",
+    "reproductionStatus": "reproduction-complete-for-source-bound-grid-geometry-and-slot-admission",
+    "implementationStatus": "K01-scenario-gated-grid-geometry; action-labels-and-semantics-remain-project-adaptations"
+  },
+  "canonicalGeometry": {
+    "actionGrid": {
+      "columns": 3,
+      "rows": 3,
+      "left": 525,
+      "top": 363,
+      "horizontalGap": 2,
+      "verticalGap": 2,
+      "cellWidthSource": "signed WORD[0x0089982c]",
+      "cellHeightSource": "signed WORD[0x00899830]",
+      "cellWidth": 34,
+      "cellHeight": 34,
+      "cellSizeStatus": "source-bound-at-successful-button-loader-initialization"
+    },
+    "exactRectangles": [
+      { "slot": 0, "x": 525, "y": 363, "width": 34, "height": 34, "right": 559, "bottom": 397 },
+      { "slot": 1, "x": 561, "y": 363, "width": 34, "height": 34, "right": 595, "bottom": 397 },
+      { "slot": 2, "x": 597, "y": 363, "width": 34, "height": 34, "right": 631, "bottom": 397 },
+      { "slot": 3, "x": 525, "y": 399, "width": 34, "height": 34, "right": 559, "bottom": 433 },
+      { "slot": 4, "x": 561, "y": 399, "width": 34, "height": 34, "right": 595, "bottom": 433 },
+      { "slot": 5, "x": 597, "y": 399, "width": 34, "height": 34, "right": 631, "bottom": 433 },
+      { "slot": 6, "x": 525, "y": 435, "width": 34, "height": 34, "right": 559, "bottom": 469 },
+      { "slot": 7, "x": 561, "y": 435, "width": 34, "height": 34, "right": 595, "bottom": 469 },
+      { "slot": 8, "x": 597, "y": 435, "width": 34, "height": 34, "right": 631, "bottom": 469 }
+    ],
+    "panelHudBlitRectangle": {
+      "x": 0,
+      "y": 0,
+      "width": 640,
+      "height": 163,
+      "right": 640,
+      "bottom": 163,
+      "coordinateSystem": "top-left shared 640×480 HUD canvas"
+    }
+  },
+  "vectors": [
+    {
+      "id": "surface-lock-failure-skips-slot-reads",
+      "input": {
+        "selectionCount": 0,
+        "surfaceLockSucceeded": false
+      },
+      "expectedOutputSha256": "ea5acc87d646300aab0d8b05edcf21d43b4ea608a055f2ccd602201fc43f2206"
+    },
+    {
+      "id": "no-selection-admits-strict-interior-slot-one",
+      "input": {
+        "selectionCount": 0,
+        "surfaceLockSucceeded": true,
+        "runtimeCellWidth": 34,
+        "runtimeCellHeight": 34,
+        "slots": [
+          { "rendererEnabled": 1, "frameOrResourceIndex": 27, "inputControlId": 33 },
+          { "rendererEnabled": 1, "frameOrResourceIndex": 28, "inputControlId": 35 },
+          { "rendererEnabled": 0, "frameOrResourceIndex": 0, "inputControlId": 0 },
+          { "rendererEnabled": 0, "frameOrResourceIndex": 0, "inputControlId": 0 },
+          { "rendererEnabled": 0, "frameOrResourceIndex": 0, "inputControlId": 0 },
+          { "rendererEnabled": 0, "frameOrResourceIndex": 0, "inputControlId": 0 },
+          { "rendererEnabled": 0, "frameOrResourceIndex": 0, "inputControlId": 0 },
+          { "rendererEnabled": 0, "frameOrResourceIndex": 0, "inputControlId": 0 },
+          { "rendererEnabled": 0, "frameOrResourceIndex": 0, "inputControlId": 0 }
+        ],
+        "hitTest": { "disabled": false, "slot": 1, "pointerX": 562, "pointerY": 364 }
+      },
+      "expectedOutputSha256": "e9d6bdc78bbd014e07eb12530089a78fdba541cf0ffde102ed50a340bedb7ddf"
+    },
+    {
+      "id": "single-selection-rejects-top-edge",
+      "input": {
+        "selectionCount": 1,
+        "surfaceLockSucceeded": true,
+        "runtimeCellWidth": 34,
+        "runtimeCellHeight": 34,
+        "slots": [
+          { "rendererEnabled": 0, "frameOrResourceIndex": 0, "inputControlId": 0 },
+          { "rendererEnabled": 0, "frameOrResourceIndex": 0, "inputControlId": 0 },
+          { "rendererEnabled": 0, "frameOrResourceIndex": 0, "inputControlId": 0 },
+          { "rendererEnabled": 0, "frameOrResourceIndex": 0, "inputControlId": 0 },
+          { "rendererEnabled": 0, "frameOrResourceIndex": 0, "inputControlId": 0 },
+          { "rendererEnabled": 0, "frameOrResourceIndex": 0, "inputControlId": 0 },
+          { "rendererEnabled": 0, "frameOrResourceIndex": 0, "inputControlId": 0 },
+          { "rendererEnabled": 0, "frameOrResourceIndex": 0, "inputControlId": 0 },
+          { "rendererEnabled": 1, "frameOrResourceIndex": 99, "inputControlId": 7 }
+        ],
+        "hitTest": { "disabled": false, "slot": 8, "pointerX": 598, "pointerY": 435 }
+      },
+      "expectedOutputSha256": "4d7c78402f906779bd514d2650ce080031be4416f59946b3c27267e344be8d89"
+    },
+    {
+      "id": "multi-selection-disabled-rejects-before-geometry-admission",
+      "input": {
+        "selectionCount": 2,
+        "surfaceLockSucceeded": true,
+        "runtimeCellWidth": 34,
+        "runtimeCellHeight": 34,
+        "slots": [
+          { "rendererEnabled": 0, "frameOrResourceIndex": 0, "inputControlId": 0 },
+          { "rendererEnabled": 0, "frameOrResourceIndex": 0, "inputControlId": 0 },
+          { "rendererEnabled": 0, "frameOrResourceIndex": 0, "inputControlId": 0 },
+          { "rendererEnabled": 0, "frameOrResourceIndex": 0, "inputControlId": 0 },
+          { "rendererEnabled": 1, "frameOrResourceIndex": 44, "inputControlId": 9 },
+          { "rendererEnabled": 0, "frameOrResourceIndex": 0, "inputControlId": 0 },
+          { "rendererEnabled": 0, "frameOrResourceIndex": 0, "inputControlId": 0 },
+          { "rendererEnabled": 0, "frameOrResourceIndex": 0, "inputControlId": 0 },
+          { "rendererEnabled": 0, "frameOrResourceIndex": 0, "inputControlId": 0 }
+        ],
+        "hitTest": { "disabled": true, "slot": 4, "pointerX": 562, "pointerY": 400 }
+      },
+      "expectedOutputSha256": "f641d50f7887a8c76c92553c4c6b556d10b47b7b724e192afe8e637fed13ce78"
+    },
+    {
+      "id": "unsupported-slot-is-rejected-by-owner-getter-boundary",
+      "input": {
+        "selectionCount": 2,
+        "surfaceLockSucceeded": true,
+        "runtimeCellWidth": 34,
+        "runtimeCellHeight": 34,
+        "slots": [
+          { "rendererEnabled": 0, "frameOrResourceIndex": 0, "inputControlId": 0 },
+          { "rendererEnabled": 0, "frameOrResourceIndex": 0, "inputControlId": 0 },
+          { "rendererEnabled": 0, "frameOrResourceIndex": 0, "inputControlId": 0 },
+          { "rendererEnabled": 0, "frameOrResourceIndex": 0, "inputControlId": 0 },
+          { "rendererEnabled": 0, "frameOrResourceIndex": 0, "inputControlId": 0 },
+          { "rendererEnabled": 0, "frameOrResourceIndex": 0, "inputControlId": 0 },
+          { "rendererEnabled": 0, "frameOrResourceIndex": 0, "inputControlId": 0 },
+          { "rendererEnabled": 0, "frameOrResourceIndex": 0, "inputControlId": 0 },
+          { "rendererEnabled": 0, "frameOrResourceIndex": 0, "inputControlId": 0 }
+        ],
+        "hitTest": { "disabled": false, "slot": 9, "pointerX": 0, "pointerY": 0 }
+      },
+      "expectedOutputSha256": "f61dc7a78c25eb87b01c3e0d99c9da75fc4da24ad3528a125bf3c2cfe69a3e23"
+    }
+  ]
+}

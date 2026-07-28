@@ -1,0 +1,212 @@
+{
+  "sourceExecutableSha256": "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e",
+  "sourceSeedsSha256": "10e7104f3eb3f9dabac79b7636b3cd1b2efaa8f68ed1900a18f94a82160f58ba",
+  "sourceFunctionsSha256": "c10ea2de1f4998411d52443419c9a7f52ff7f9c18e79bd4115ba197d2f5bebc3",
+  "sourceReferencesSha256": "df11ff3713988ef22b3390b5b0ae7b4a87464b5de547a4866e1c8ec8a0bcaf4c",
+  "sourceJumpTablesSha256": "0ae517eb172f61b974ca7a4411e64c1cc42065c462ed53b3065ab2da633dfe2f",
+  "scopeNotice": "Control vectors use supplied synthetic signed-WORD layout coordinates and pointer positions; they reproduce slot-0 choice and strict-interior hit behavior, not original runtime coordinates or frame pixels. Consumer vectors reproduce only switch selection, reached player/gate reads, zero/nonzero admission, and the boundary before per-class cadence and deeper effects. They do not claim to reproduce the downstream helper calls or world side effects.",
+  "controlSurfaceVectors": [
+    {
+      "id": "selection-present-skips-no-selection-fields",
+      "input": {
+        "selectionCount": 1,
+        "currentPlayerIndex": "unreachable",
+        "gateWord": "unreachable"
+      },
+      "expected": {
+        "control": null,
+        "operations": [
+          { "type": "clear-nine-action-slots" }
+        ]
+      },
+      "expectedOutputSha256": "9402f183da286001dcfbd11e8deee9c31613247dd348a6dd0080d8cdfbe4797c"
+    },
+    {
+      "id": "gate-zero-shows-enable-control-and-interior-hit",
+      "input": {
+        "selectionCount": 0,
+        "currentPlayerIndex": 3,
+        "gateWord": 0,
+        "layout": {
+          "cellWidth": 30,
+          "cellHeight": 24,
+          "originX": 10,
+          "originY": 20
+        },
+        "pointer": { "x": 11, "y": 21 }
+      },
+      "expected": {
+        "control": {
+          "slotIndex": 0,
+          "controlIdentifier": 33,
+          "actionWord": 61,
+          "frameOrResourceIndex": 27,
+          "playerIndex": 3,
+          "rect": { "x": 10, "y": 20, "width": 30, "height": 24 },
+          "hit": true
+        },
+        "operations": [
+          { "type": "clear-nine-action-slots" },
+          { "type": "add-no-selection-control", "slotIndex": 0, "controlIdentifier": 33, "actionWord": 61, "frameOrResourceIndex": 27 }
+        ]
+      },
+      "expectedOutputSha256": "c97f2576c50ed7a606773e47313dc5b1290cb5714f294b2171965ab25d886163"
+    },
+    {
+      "id": "nonzero-gate-shows-disable-control-and-left-edge-miss",
+      "input": {
+        "selectionCount": 0,
+        "currentPlayerIndex": 7,
+        "gateWord": 65535,
+        "layout": {
+          "cellWidth": 30,
+          "cellHeight": 24,
+          "originX": 10,
+          "originY": 20
+        },
+        "pointer": { "x": 10, "y": 21 }
+      },
+      "expected": {
+        "control": {
+          "slotIndex": 0,
+          "controlIdentifier": 34,
+          "actionWord": 62,
+          "frameOrResourceIndex": 26,
+          "playerIndex": 7,
+          "rect": { "x": 10, "y": 20, "width": 30, "height": 24 },
+          "hit": false
+        },
+        "operations": [
+          { "type": "clear-nine-action-slots" },
+          { "type": "add-no-selection-control", "slotIndex": 0, "controlIdentifier": 34, "actionWord": 62, "frameOrResourceIndex": 26 }
+        ]
+      },
+      "expectedOutputSha256": "cb6bb5ce83c95615864647e2fa47802d4a9222bc9b3c90b90c815761482ed3e2"
+    }
+  ],
+  "gateCommandVectors": [
+    {
+      "id": "unreached-command-does-not-read-action",
+      "input": {
+        "initialGateWord": 9,
+        "commandReached": false,
+        "actionWord": "unreachable"
+      },
+      "expected": {
+        "finalGateWord": 9,
+        "commandConsumed": false,
+        "operations": []
+      },
+      "expectedOutputSha256": "36c95708c81a143e9d271833b0dadb17faf891fbd30caee876e306e9e47d1fd6"
+    },
+    {
+      "id": "action-61-enables-player-gate",
+      "input": {
+        "initialGateWord": 65535,
+        "commandReached": true,
+        "actionWord": 61
+      },
+      "expected": {
+        "finalGateWord": 1,
+        "commandConsumed": true,
+        "operations": [
+          { "type": "enable-player-magic-auto-use-gate", "actionWord": 61, "writtenWord": 1 }
+        ]
+      },
+      "expectedOutputSha256": "b74513b381b2aba9c9dc23af77388241b768d513767bb97b48988e102caf7dcd"
+    },
+    {
+      "id": "action-62-disables-player-gate",
+      "input": {
+        "initialGateWord": 1,
+        "commandReached": true,
+        "actionWord": 62
+      },
+      "expected": {
+        "finalGateWord": 0,
+        "commandConsumed": true,
+        "operations": [
+          { "type": "disable-player-magic-auto-use-gate", "actionWord": 62, "writtenWord": 0 }
+        ]
+      },
+      "expectedOutputSha256": "0be39ddebe9b25d490d8fd1d25038c62d10a3d84ad8497c134f58d429903a57a"
+    }
+  ],
+  "consumerAdmissionVectors": [
+    {
+      "id": "unsupported-class-returns-before-player-and-gate-read",
+      "input": {
+        "internalClass": 10,
+        "playerIndex": "unreachable",
+        "gateWord": "unreachable"
+      },
+      "expected": {
+        "internalClass": 10,
+        "matchedCaseEntry": null,
+        "gateEnabled": false,
+        "admittedToClassBehavior": false,
+        "operations": [
+          { "type": "return-zero-before-player-gate-read" }
+        ]
+      },
+      "expectedOutputSha256": "87f44f2ffd006dc2a0004800234ba8381c08121e5b0b7a13faa5b5af893a9bd7"
+    },
+    {
+      "id": "affected-class-zero-gate-returns-before-deeper-inputs",
+      "input": {
+        "internalClass": 11,
+        "playerIndex": 2,
+        "gateWord": 0
+      },
+      "expected": {
+        "internalClass": 11,
+        "matchedCaseEntry": "0x004197b0",
+        "gateEnabled": false,
+        "admittedToClassBehavior": false,
+        "operations": [
+          { "type": "read-player-magic-auto-use-word", "playerIndex": 2, "fieldOffset": "0x0000254c", "value": 0 },
+          { "type": "return-zero-gate-disabled" }
+        ]
+      },
+      "expectedOutputSha256": "f18276e043d1c05660cce526ddef9beed73dac23b23e8ba41e5ad3adc99de35d"
+    },
+    {
+      "id": "class-36-non-one-nonzero-gate-admits",
+      "input": {
+        "internalClass": 36,
+        "playerIndex": 4,
+        "gateWord": 65535
+      },
+      "expected": {
+        "internalClass": 36,
+        "matchedCaseEntry": "0x004198f0",
+        "gateEnabled": true,
+        "admittedToClassBehavior": true,
+        "operations": [
+          { "type": "read-player-magic-auto-use-word", "playerIndex": 4, "fieldOffset": "0x0000254c", "value": 65535 },
+          { "type": "enter-static-only-class-behavior", "internalClass": 36, "caseEntry": "0x004198f0" }
+        ]
+      },
+      "expectedOutputSha256": "46eea78d7ea1ce33d740e5b5dff444337df6a253ab1563b5b98d3dde7f160dc4"
+    },
+    {
+      "id": "class-89-exact-one-gate-admits",
+      "input": {
+        "internalClass": 89,
+        "playerIndex": 7,
+        "gateWord": 1
+      },
+      "expected": {
+        "internalClass": 89,
+        "matchedCaseEntry": "0x00419e90",
+        "gateEnabled": true,
+        "admittedToClassBehavior": true,
+        "operations": [
+          { "type": "read-player-magic-auto-use-word", "playerIndex": 7, "fieldOffset": "0x0000254c", "value": 1 },
+          { "type": "enter-static-only-class-behavior", "internalClass": 89, "caseEntry": "0x00419e90" }
+        ]
+      },
+      "expectedOutputSha256": "c2415b01af28fdf0b336e2fabf9c4166fb540fb36f37120e68c0577643fde069"
+    }
+  ]
+}

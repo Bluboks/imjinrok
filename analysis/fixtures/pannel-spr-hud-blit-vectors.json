@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 1,
+  "sourceExecutableSha256": "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e",
+  "sourcePanelSha256": "18a58466dd95fab6d946ed6dfb0647d8a315733a6a9bfb1b069c0e3a8d81b42e",
+  "vectors": [
+    {
+      "id": "eligible-lock-success-blits-full-panel-before-command-grid",
+      "input": { "selectedRecordGate": 0, "globalGate": 0, "panelGate": 0, "surfaceLockSucceeded": true },
+      "expected": {
+        "selectedRecordGate": 0,
+        "globalGate": 0,
+        "panelGate": 0,
+        "surfaceLockSucceeded": true,
+        "operations": [
+          { "type": "lock-hud-panel-surface", "handle": "DAT_0054926c", "state": "DAT_00559418" },
+          { "type": "blit-indexed-sprite", "callsite": "0x00447a0f", "destination": { "x": 0, "y": 0, "width": 640, "height": 163 } },
+          { "type": "unlock-hud-panel-surface", "handle": "DAT_0054926c", "state": "DAT_00559418" },
+          { "type": "later-selection-command-renderer", "function": "FUN_0045ad90" }
+        ]
+      }
+    },
+    {
+      "id": "eligible-lock-failure-skips-payload-blit-and-unlock",
+      "input": { "selectedRecordGate": 0, "globalGate": 0, "panelGate": 0, "surfaceLockSucceeded": false },
+      "expected": {
+        "selectedRecordGate": 0,
+        "globalGate": 0,
+        "panelGate": 0,
+        "surfaceLockSucceeded": false,
+        "operations": [
+          { "type": "lock-hud-panel-surface", "handle": "DAT_0054926c", "state": "DAT_00559418" },
+          { "type": "skip-surface-lock-failure" },
+          { "type": "later-selection-command-renderer", "function": "FUN_0045ad90" }
+        ]
+      }
+    },
+    {
+      "id": "selected-record-gate-skips-unreached-later-inputs",
+      "input": { "selectedRecordGate": 1 },
+      "expected": {
+        "selectedRecordGate": 1,
+        "operations": [
+          { "type": "skip-selected-record-gate" },
+          { "type": "later-selection-command-renderer", "function": "FUN_0045ad90" }
+        ]
+      }
+    },
+    {
+      "id": "global-gate-skips-unreached-panel-and-lock-inputs",
+      "input": { "selectedRecordGate": 0, "globalGate": 1 },
+      "expected": {
+        "selectedRecordGate": 0,
+        "globalGate": 1,
+        "operations": [
+          { "type": "skip-global-gate" },
+          { "type": "later-selection-command-renderer", "function": "FUN_0045ad90" }
+        ]
+      }
+    },
+    {
+      "id": "panel-gate-skips-unreached-lock-input",
+      "input": { "selectedRecordGate": 0, "globalGate": 0, "panelGate": 1 },
+      "expected": {
+        "selectedRecordGate": 0,
+        "globalGate": 0,
+        "panelGate": 1,
+        "operations": [
+          { "type": "skip-panel-gate" },
+          { "type": "later-selection-command-renderer", "function": "FUN_0045ad90" }
+        ]
+      }
+    }
+  ]
+}

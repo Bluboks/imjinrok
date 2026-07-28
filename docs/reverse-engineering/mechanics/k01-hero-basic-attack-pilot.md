@@ -85,8 +85,11 @@ damage = max(1, modified - trunc(defense * modified / 100))
 ```
 
 `FUN_00438130`은 raw mode/table gate를 먼저 평가한 뒤 defender `WORD +0x90`의 별도
-완충 수치와 현재 체력 `WORD +0x3e`를 signed-WORD 분기로 처리한다. gate와 wrap 경계의
-완전한 증거·벡터는 후속 subtype `0x0c` 파일럿을 따른다.
+완충 수치와 현재 체력 `WORD +0x3e`를 signed-WORD 분기로 처리한다. buffer가 damage 이상이면
+buffer만 줄인다. buffer가
+0보다 크지만 damage보다 작으면 buffer를 0으로 만들고 잔여가 아니라 원 damage 전량을 현재
+체력에서 빼며 signed-positive가 아니면 0으로 고정한다. gate와 wrap 경계의 완전한 증거·벡터는
+후속 subtype `0x0c` 파일럿을 따른다.
 
 ## 유성룡 투사체 경계
 
@@ -99,6 +102,11 @@ damage = max(1, modified - trunc(defense * modified / 100))
 subset `0..32767`의 signed-word 경로, 도착 dispatcher, effect kind `9`, 대상 소멸·세대
 불일치와 최종 피해 수식을 별도로 정적 확정·재현했다. 원본 caller 전체 signed-WORD 좌표 범위는
 미확정이다. 권율 kind `1`과 유성룡 kind `9`의 수식은 서로 다르다.
+
+후속 [subtype `0x10` 경로 분석](k01-subtype-16-path.md)은 공유 fixed record·path updater와
+subtype `0x0c`의 final dispatcher를 추적했다. subtype `0x0c`는 path end에서 effect kind 9를
+`FUN_00413700`에 넘기고 cleanup되며, 선택된 target health write는 부분 재현됐다. kind 9의 모든
+callback과 공격 전 target 탐색·사거리는 이 파일럿 전체 범위에서 계속 미완료다.
 
 ## 재현
 
@@ -121,7 +129,7 @@ node --test tools/imjinrok/k01-hero-basic-attack-pilot.test.mjs
 
 ## 다음 경계
 
-유성룡 subtype `0x0c` dispatcher·충돌·최종 피해는 후속 파일럿에서 완료했다. 다음 정적 분석
-우선순위는 공격 전 대상 유효성·탐색·사거리 경계다. 그 뒤 원본 전역 틱과 좌표 변환을 복원해 phase와
-투사체 벡터를 프로젝트 simulation·클립 FPS에 같은 기준으로 연결한다. 사망·참조 정리는 공격 주기
-파일럿의 남은 단계로 유지한다.
+유성룡 subtype `0x0c` dispatcher·충돌·kind 9·선택 health write는 후속 분석에서 닫혔다. 다음
+정적 분석 우선순위는 kind 9 callback 전수와 공격 전 대상 유효성·탐색·사거리 경계다. 원본 전역 틱
+생산자와 메인 루프 시간 단위·좌표 변환을 복원해 phase와 투사체 벡터를 프로젝트 simulation·클립
+FPS에 같은 기준으로 연결한다. 사망·참조 정리는 공격 주기 파일럿의 남은 단계로 유지한다.

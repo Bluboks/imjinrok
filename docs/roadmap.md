@@ -121,7 +121,77 @@ VM에서 원본 게임을 플레이하며 화면 변화를 따라가는 방식�
 3. `SPEECH` 초상화 ID→자원·프레임 식 — 완료: `hero.spr`의 17개 ID 표
 
 별도 UI 파일럿으로 `SPEECH` 숫자 슬롯 0~3의 초상화 사각형과 대사 좌표도 정적 확정·이식했다.
-제목·목표·버튼과 전체 HUD 레이아웃은 이 완료 범위에 포함하지 않는다.
+이어서 K01 UI 파일럿 후보로 선택한 공통 임무 목표 모달의 `objectiveborder.spr`, 640×480 frame
+`(112,81)-(528,317)`, 내용 영역, 닫기 컨트롤·strict-edge hit test와 종료·실패 경로를 정적
+확정했다. 좌표·종료 판정·draw 순서와 정상 로드 자원의 종료 cleanup(clear lock 성공·실패)만
+해당 모듈에 재현·이식했으며, SPR 로더 내부 객체 결과와 컨트롤 sound/latch는 정적-only다. 후속
+dispatcher 분석은 loader 실패 보고 뒤 `0x3f1`로 계속하는 제어 효과만 별도 재현했다. 후속 분석은
+`FUN_004495e0`의 `0x3f0` handler 반환 생산 경로와 K01 인덱스 1이 `script\k0110`의 목표
+텍스트·K01 map·handler를 선택하는 결합을 정적 확정·재현했다. 이어 state `0x16`의 complete
+structured direct-reference 생산,
+Escape·gameplay-panel request, K01 mode 1의 `buttons201.spr` 목표 컨트롤
+`(264,110)-(376,138)` strict release까지 정적 확정·재현했다. gameplay-panel의 화면상 정체와
+simulation↔UI 연결은 미확정이라 장면 연결은 보류했다. 뒤이어 ordered producer overwrite와
+`FUN_00449090`의 `0x3f0` 소비·`0x3f1` 활성·`1000` reset, scoped surface/resource 실패를
+정적 확정·재현하고 숫자 원본 상태가 없는 `open-objective-modal` UI-domain 계약을 추가했다.
+원본 mechanism 결과가 이 semantic action을 발행할 연결점은 아직 미확정이다.
+실행 중 목표 추적 HUD와 전체 HUD 루트는 이 완료 범위에 포함하지 않는다. 선택 panel로 탐색한
+`FUN_004a84e0`의 네 slot은 후속 정적 분석에서 SPEECH 화자 portrait/label producer lifecycle로
+확정했고, kind는 old/new 화자 index 불일치 boolean이다. 건설·생산·연구 결합 가설은 반증됐으므로
+현행 responsive·multi-selection·mana UI를 원본 고정 네 slot 구조로 바꾸지 않았다. 실제 gameplay
+선택 UI owner와 progress producer는 별도 질문으로 남긴다.
+`FUN_004567c0`도 고정 bottom selection panel이 아니라 producer 좌표와 supplied post-call
+RECT로 measured surface를 blit하는 흐름으로 정적 확정했다. 이어지는 `FUN_00457460`은
+비직관적 cache gate가 허용할 때 base byte string을 target `(200,350)`에 그린다. 이 고정 draw를
+포함해도 persistent panel의 resource·rect·lifecycle은 증명되지 않았다. synthetic GDI metrics와
+post-call RECT 아래 layout·failure를 재현했지만 table 값의 gameplay 개념은 미확정이다. 실제
+gameplay selection surface는 다른 owner와 지속 draw branch에서 다시 식별한다.
+후속 분석은 selected action의 right release가 zero target-mode에서 normalized DWORD command
+payload로 전달되지만 selection 없음의 일곱 slot owner는 쓰지 않음을 확정했다. 일곱 slot은
+매 update clear 뒤 predefined faction/scenario table로 다시 채워지며, 선택 entity의 별도 열
+slot도 contained-object identifier container다. 별도 action 115 path는 internal class 76
+(`조선 권율`) 생산, payload `0`의 field-`0x266` exact-one reservation 성공에서만
+add/assign bookkeeping, non-one은 reservation과 해당 write를 건너뛰고
+common player/type writes 뒤 state-WORD-one direct start/non-one queue append,
+right-release payload `1`의 matching removal without caller refund 또는 no-match
+refund/bookkeeping까지 정적 확정·재현했다. 이 action-115 fixture는 selected-action
+queue-count marker·queue pump, state `0x0f` type 76 handoff·produced-entity dispatch
+boundary를 재현하지 않았으며, `FUN_0042de00` progress/completion/post-dispatch 전체 결과도
+미재현이다. 이 후보는
+사용자 기억의 persistent
+right-click reservation 기능을 확정하지 않으며 실제 action/owner는 별도 lead다. current
+`productionQueue`와 좁은 표시 의미는
+호환되지만 original raw queue/state를 project contract로 만들지 않으며 제품 UI는 바꾸지
+않았다. 후속 분석은 player record `+0x254e` WORD, actions `63/64`, selection-count-zero
+slot 1과 action/type table 전수 교집합의 정확한 16개 named-hero action을 결합해
+player-scoped hero-priority queue toggle을 정적 확정했다. synthetic control/hit, gate write,
+filtered/FIFO record removal·fallback은 full-result vector로 재현했고 deeper redelivery는
+범위 밖이다. 이어 인접 slot 0 actions `61/62`가 player record `+0x254c`를 `1/0`으로 쓰고
+nonzero에서 정확히 9개 class의 자동 특수행동 dispatcher를 허용하는 global magic auto-use
+toggle임을 정적 확정했다. 이어 K01 class 78은 cadence·target admission, action 40의 적 저체력
+대상 소유권 이전, action 59의 중심을 제외한 최대 8개 subtype 16 creation call, auto/manual
+pending-store와 일반 공격 short-circuit까지 정적 확정하고 좁은 projection을 부분 재현했다.
+후속 정적 분석은 action 59 payload-construction-reached attempt 사이 loop-carried full DWORD와 fixed record admission·초기화·100-slot reset,
+tick phase·generation tracking·cleanup, subtype 16 helper-zero strict-nearest와 current-slot subtype 1 재초기화,
+mode 2 kind 2/9의 low-active·class-95·direct full-generation·writer gate와 defense·buffer/health
+write, subtype 12 종료를 source-hash-bound projection으로 부분 재현했다. 이어 generic mode 1
+kind 2의 Chebyshev 열거·live/dedup·payload·current-reference consumer 입력과 exclusion append
+경계를 부분 재현했다. generic consumer 이후 callback whole result와 K01 mode 1 producer,
+재경로 좌표 결과, death/reference invalidation,
+`FUN_00464cc0` map field 의미와 outer input/entity-update scheduling은 남겼다. remembered
+right-click reservation의 실제
+action/owner는 계속 독립 미확정이다.
+
+후속 프로젝트 구조 감사는 기존 `game.events` HUD view 경계를 확장해 K01 HUD objective button에서
+숫자 상태 없는 semantic action을 발행하고 `UIScene`의 queue·private active request까지 한 번
+소비하는 staged 연결을 두었다. 후속 presenter 단계는 검증된 objectiveborder raster·원본 기하·
+K0110 text·strict release를 독립 UI controller에 연결했다. typography 후속 분석은 GDI
+`Arial`/height 12/HANGEUL_CHARSET 요청, CP949 byte space-chunk와 유효 폭 300을 정적 확정하고
+제어 흐름을 공급한 synthetic GDI metrics 아래 부분 재현했다. 유효 base 폭 300만 이식했다. HUD trigger/event는
+프로젝트 전용이고 실제 Windows font realization·glyph metrics, Phaser Korean wrap·backdrop·
+Escape·responsive blocker는 의도적 적응이다. 사용자가 Noto/Canvas typography를 허용했으므로
+설치 매체 font provenance 조사는 중단한다. 원본 gameplay-panel 정체와 mechanism source,
+dismiss visual·sound는 남아 있다.
 
 통과 조건:
 

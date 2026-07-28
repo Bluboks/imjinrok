@@ -1,0 +1,288 @@
+{
+  "sourceExecutableSha256": "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e",
+  "sourceK01ScriptSha256": "d9dcc3c78d0373181677afc63fe9331ff561387e36877a62912ca66515f4aea8",
+  "sourceK02ScriptSha256": "53a0a6f03b6ff7bc8d2456b5c66712054a73a2c4b921fff6c62f765552bd4331",
+  "sourceK01MapSha256": "43ec3a173032f74c12d3cce1db1078b076b651ed79070a0914673a5b65da99cb",
+  "stateProducerVectors": [
+    {
+      "id": "no-control-activation",
+      "input": {
+        "objectiveControlActivated": false,
+        "state3eeControlActivated": false,
+        "state3ecControlActivated": false,
+        "state3eaControlActivated": false
+      },
+      "expected": {
+        "handlerReturn": 0,
+        "ownerStateAfterReturnWrite": null,
+        "events": []
+      }
+    },
+    {
+      "id": "objective-control-produces-0x3f0",
+      "input": {
+        "objectiveControlActivated": true,
+        "state3eeControlActivated": false,
+        "state3ecControlActivated": false,
+        "state3eaControlActivated": false
+      },
+      "expected": {
+        "handlerReturn": 1008,
+        "ownerStateAfterReturnWrite": 1008,
+        "events": [
+          "objective-control-set-pending-0x3f0",
+          "write-handler-return-to-DAT_00552998"
+        ]
+      }
+    },
+    {
+      "id": "objective-then-0x3ee-control",
+      "input": {
+        "objectiveControlActivated": true,
+        "state3eeControlActivated": true,
+        "state3ecControlActivated": false,
+        "state3eaControlActivated": false
+      },
+      "expected": {
+        "handlerReturn": 1006,
+        "ownerStateAfterReturnWrite": 1006,
+        "events": [
+          "objective-control-set-pending-0x3f0",
+          "later-control-overwrite-0x3f0-with-0x3ee",
+          "write-handler-return-to-DAT_00552998"
+        ]
+      }
+    },
+    {
+      "id": "objective-then-0x3ec-control",
+      "input": {
+        "objectiveControlActivated": true,
+        "state3eeControlActivated": false,
+        "state3ecControlActivated": true,
+        "state3eaControlActivated": false
+      },
+      "expected": {
+        "handlerReturn": 1004,
+        "ownerStateAfterReturnWrite": 1004,
+        "events": [
+          "objective-control-set-pending-0x3f0",
+          "later-control-overwrite-0x3f0-with-0x3ec",
+          "write-handler-return-to-DAT_00552998"
+        ]
+      }
+    },
+    {
+      "id": "objective-then-0x3ea-control",
+      "input": {
+        "objectiveControlActivated": true,
+        "state3eeControlActivated": false,
+        "state3ecControlActivated": false,
+        "state3eaControlActivated": true
+      },
+      "expected": {
+        "handlerReturn": 1002,
+        "ownerStateAfterReturnWrite": 1002,
+        "events": [
+          "objective-control-set-pending-0x3f0",
+          "later-control-overwrite-0x3f0-with-0x3ea",
+          "write-handler-return-to-DAT_00552998"
+        ]
+      }
+    },
+    {
+      "id": "later-0x3ec-control-without-objective",
+      "input": {
+        "objectiveControlActivated": false,
+        "state3eeControlActivated": false,
+        "state3ecControlActivated": true,
+        "state3eaControlActivated": false
+      },
+      "expected": {
+        "handlerReturn": 1004,
+        "ownerStateAfterReturnWrite": 1004,
+        "events": [
+          "later-control-set-pending-0x3ec",
+          "write-handler-return-to-DAT_00552998"
+        ]
+      }
+    },
+    {
+      "id": "0x3ee-then-0x3ec-last-active-wins",
+      "input": {
+        "objectiveControlActivated": true,
+        "state3eeControlActivated": true,
+        "state3ecControlActivated": true,
+        "state3eaControlActivated": false
+      },
+      "expected": {
+        "handlerReturn": 1004,
+        "ownerStateAfterReturnWrite": 1004,
+        "events": [
+          "objective-control-set-pending-0x3f0",
+          "later-control-overwrite-0x3f0-with-0x3ee",
+          "later-control-overwrite-0x3ee-with-0x3ec",
+          "write-handler-return-to-DAT_00552998"
+        ]
+      }
+    },
+    {
+      "id": "all-later-controls-active-0x3ea-wins",
+      "input": {
+        "objectiveControlActivated": true,
+        "state3eeControlActivated": true,
+        "state3ecControlActivated": true,
+        "state3eaControlActivated": true
+      },
+      "expected": {
+        "handlerReturn": 1002,
+        "ownerStateAfterReturnWrite": 1002,
+        "events": [
+          "objective-control-set-pending-0x3f0",
+          "later-control-overwrite-0x3f0-with-0x3ee",
+          "later-control-overwrite-0x3ee-with-0x3ec",
+          "later-control-overwrite-0x3ec-with-0x3ea",
+          "write-handler-return-to-DAT_00552998"
+        ]
+      }
+    }
+  ],
+  "stageIndexVectors": [
+    {
+      "id": "korean-stage-one-selects-runtime-index-one",
+      "input": {
+        "country": 1,
+        "stage": 1,
+        "previousIndex": 0
+      },
+      "expected": {
+        "wrote": true,
+        "nextIndex": 1
+      }
+    },
+    {
+      "id": "korean-stage-eight-selects-runtime-index-eight",
+      "input": {
+        "country": 1,
+        "stage": 8,
+        "previousIndex": 0
+      },
+      "expected": {
+        "wrote": true,
+        "nextIndex": 8
+      }
+    },
+    {
+      "id": "second-country-offset",
+      "input": {
+        "country": 2,
+        "stage": 1,
+        "previousIndex": 0
+      },
+      "expected": {
+        "wrote": true,
+        "nextIndex": 11
+      }
+    },
+    {
+      "id": "third-country-upper-supported-stage",
+      "input": {
+        "country": 3,
+        "stage": 7,
+        "previousIndex": 0
+      },
+      "expected": {
+        "wrote": true,
+        "nextIndex": 27
+      }
+    },
+    {
+      "id": "unsupported-country-leaves-index-unchanged",
+      "input": {
+        "country": 0,
+        "stage": 1,
+        "previousIndex": 5
+      },
+      "expected": {
+        "wrote": false,
+        "nextIndex": 5
+      }
+    },
+    {
+      "id": "negative-stage-is-stored-as-signed-word",
+      "input": {
+        "country": 1,
+        "stage": -1,
+        "previousIndex": 5
+      },
+      "expected": {
+        "wrote": true,
+        "nextIndex": -1
+      }
+    },
+    {
+      "id": "word-addition-wraps",
+      "input": {
+        "country": 3,
+        "stage": 32767,
+        "previousIndex": 0
+      },
+      "expected": {
+        "wrote": true,
+        "nextIndex": -32749
+      }
+    }
+  ],
+  "bindingVectors": [
+    {
+      "id": "active-k01-runtime-index",
+      "input": {
+        "stageIndex": 1
+      },
+      "expected": {
+        "recordAddress": "0x00abf168",
+        "recordPath": "script\\k0110",
+        "modalTextInputs": [
+          "1. 봉화대를 짓고 적군 섬멸 (유성룡, 권율은 살아 남아야 한다.)",
+          ""
+        ],
+        "mapPath": "stagemap\\k01.map",
+        "missionHandler": "0x0048a5c0",
+        "isK01Runtime": true,
+        "selectsK01ObjectiveText": true
+      }
+    },
+    {
+      "id": "neighboring-k02-runtime-index",
+      "input": {
+        "stageIndex": 2
+      },
+      "expected": {
+        "recordAddress": "0x00abf1e8",
+        "recordPath": "script\\k0210",
+        "modalTextInputs": [
+          "1. 어가를 평양성까지 대피시킨다. (유성룡은 살아 남아야 한다.)",
+          ""
+        ],
+        "mapPath": "stagemap\\k02.map",
+        "missionHandler": "0x0048a880",
+        "isK01Runtime": false,
+        "selectsK01ObjectiveText": false
+      }
+    },
+    {
+      "id": "negative-index-addresses-zeroed-object-base",
+      "input": {
+        "stageIndex": -1
+      },
+      "expected": {
+        "recordAddress": "0x00abf068",
+        "recordPath": null,
+        "modalTextInputs": null,
+        "mapPath": null,
+        "missionHandler": null,
+        "isK01Runtime": false,
+        "selectsK01ObjectiveText": false
+      }
+    }
+  ]
+}

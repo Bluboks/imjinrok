@@ -1,0 +1,322 @@
+{
+  "schemaVersion": 1,
+  "sourceExecutableSha256": "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e",
+  "sourceFunctionsSha256": "c10ea2de1f4998411d52443419c9a7f52ff7f9c18e79bd4115ba197d2f5bebc3",
+  "sourceReferencesSha256": "df11ff3713988ef22b3390b5b0ae7b4a87464b5de547a4866e1c8ec8a0bcaf4c",
+  "sourceJumpTablesSha256": "0ae517eb172f61b974ca7a4411e64c1cc42065c462ed53b3065ab2da633dfe2f",
+  "expectedProjectionSha256": "8e77e785475a8d0496e5b96226213bfaf2b4aaa3cabe08a09df93c4cc4d67265",
+  "geometryVectors": [
+    {
+      "id": "radius-one-center-then-row-major-perimeter",
+      "input": { "radiusWord": 1, "centerXWord": 2, "centerYWord": 2, "mapWidth": 5, "mapHeight": 5 },
+      "expected": {
+        "radiusInput": 1, "radius": 1, "centerX": 2, "centerY": 2, "mapWidth": 5, "mapHeight": 5,
+        "cells": [
+          { "ring": 0, "dx": 0, "dy": 0, "x": 2, "y": 2, "inBounds": true },
+          { "ring": 1, "dx": -1, "dy": -1, "x": 1, "y": 1, "inBounds": true },
+          { "ring": 1, "dx": 0, "dy": -1, "x": 2, "y": 1, "inBounds": true },
+          { "ring": 1, "dx": 1, "dy": -1, "x": 3, "y": 1, "inBounds": true },
+          { "ring": 1, "dx": -1, "dy": 0, "x": 1, "y": 2, "inBounds": true },
+          { "ring": 1, "dx": 1, "dy": 0, "x": 3, "y": 2, "inBounds": true },
+          { "ring": 1, "dx": -1, "dy": 1, "x": 1, "y": 3, "inBounds": true },
+          { "ring": 1, "dx": 0, "dy": 1, "x": 2, "y": 3, "inBounds": true },
+          { "ring": 1, "dx": 1, "dy": 1, "x": 3, "y": 3, "inBounds": true }
+        ]
+      }
+    },
+    {
+      "id": "nonpositive-radius-normalizes-and-edge-cells-stay-enumerated",
+      "input": { "radiusWord": 65535, "centerXWord": 0, "centerYWord": 0, "mapWidth": 2, "mapHeight": 2 },
+      "expected": {
+        "radiusInput": -1, "radius": 1, "centerX": 0, "centerY": 0, "mapWidth": 2, "mapHeight": 2,
+        "cells": [
+          { "ring": 0, "dx": 0, "dy": 0, "x": 0, "y": 0, "inBounds": true },
+          { "ring": 1, "dx": -1, "dy": -1, "x": -1, "y": -1, "inBounds": false },
+          { "ring": 1, "dx": 0, "dy": -1, "x": 0, "y": -1, "inBounds": false },
+          { "ring": 1, "dx": 1, "dy": -1, "x": 1, "y": -1, "inBounds": false },
+          { "ring": 1, "dx": -1, "dy": 0, "x": -1, "y": 0, "inBounds": false },
+          { "ring": 1, "dx": 1, "dy": 0, "x": 1, "y": 0, "inBounds": true },
+          { "ring": 1, "dx": -1, "dy": 1, "x": -1, "y": 1, "inBounds": false },
+          { "ring": 1, "dx": 0, "dy": 1, "x": 0, "y": 1, "inBounds": true },
+          { "ring": 1, "dx": 1, "dy": 1, "x": 1, "y": 1, "inBounds": true }
+        ]
+      }
+    }
+  ],
+  "liveGateVectors": [
+    {
+      "id": "registry-zero-short-circuit",
+      "input": { "targetIndex": 7, "registryWord": 0, "currentHealthWord": "unreachable", "activeByte": "unreachable" },
+      "expected": { "targetIndex": 7, "registryWord": 0, "currentHealth": null, "activeByte": null, "live": false, "reason": "registry-zero" }
+    },
+    {
+      "id": "health-nonpositive-short-circuit",
+      "input": { "targetIndex": 7, "registryWord": 2, "currentHealthWord": 0, "activeByte": "unreachable" },
+      "expected": { "targetIndex": 7, "registryWord": 2, "currentHealth": 0, "activeByte": null, "live": false, "reason": "health-nonpositive" }
+    },
+    {
+      "id": "active-byte-zero-short-circuit",
+      "input": { "targetIndex": 7, "registryWord": 2, "currentHealthWord": 1, "activeByte": 0 },
+      "expected": { "targetIndex": 7, "registryWord": 2, "currentHealth": 1, "activeByte": 0, "live": false, "reason": "active-byte-zero" }
+    },
+    {
+      "id": "live-helper-stops-after-active-byte",
+      "input": { "targetIndex": 7, "registryWord": 2, "currentHealthWord": 1, "activeByte": 1 },
+      "expected": { "targetIndex": 7, "registryWord": 2, "currentHealth": 1, "activeByte": 1, "live": true, "reason": null }
+    }
+  ],
+  "payloadVectors": [
+    {
+      "id": "distance-one-fifty-percent-falloff",
+      "input": { "radiusWord": 1, "distance": 1, "targetIndex": 12, "suppliedTargetReferenceDword": 2863267850, "payloadWord": 101, "sourceOwnerWord": 1, "targetOwnerByte": 2 },
+      "expected": { "radius": 1, "distance": 1, "falloffPercent": 50, "payload": 101, "reduction": 50, "falloffPayload": 51, "primaryLowIndexOverride": false, "payloadAfterPrimaryOverride": 51, "sourceOwnerSigned": 1, "targetOwnerSigned": 2, "sameOwner": false, "callbackPayload": 51 }
+    },
+    {
+      "id": "primary-override-compares-low-word-only",
+      "input": { "radiusWord": 1, "distance": 1, "targetIndex": 10, "suppliedTargetReferenceDword": 2863267850, "payloadWord": 101, "sourceOwnerWord": 1, "targetOwnerByte": 2 },
+      "expected": { "radius": 1, "distance": 1, "falloffPercent": 50, "payload": 101, "reduction": 50, "falloffPayload": 51, "primaryLowIndexOverride": true, "payloadAfterPrimaryOverride": 101, "sourceOwnerSigned": 1, "targetOwnerSigned": 2, "sameOwner": false, "callbackPayload": 101 }
+    },
+    {
+      "id": "same-owner-halves-after-primary-override",
+      "input": { "radiusWord": 1, "distance": 1, "targetIndex": 10, "suppliedTargetReferenceDword": 2863267850, "payloadWord": 101, "sourceOwnerWord": 1, "targetOwnerByte": 1 },
+      "expected": { "radius": 1, "distance": 1, "falloffPercent": 50, "payload": 101, "reduction": 50, "falloffPayload": 51, "primaryLowIndexOverride": true, "payloadAfterPrimaryOverride": 101, "sourceOwnerSigned": 1, "targetOwnerSigned": 1, "sameOwner": true, "callbackPayload": 50 }
+    },
+    {
+      "id": "negative-payload-truncates-toward-zero",
+      "input": { "radiusWord": 2, "distance": 1, "targetIndex": 12, "suppliedTargetReferenceDword": 2863267850, "payloadWord": 65435, "sourceOwnerWord": 65535, "targetOwnerByte": 255 },
+      "expected": { "radius": 2, "distance": 1, "falloffPercent": 33, "payload": -101, "reduction": -33, "falloffPayload": -68, "primaryLowIndexOverride": false, "payloadAfterPrimaryOverride": -68, "sourceOwnerSigned": -1, "targetOwnerSigned": -1, "sameOwner": true, "callbackPayload": -34 }
+    }
+  ],
+  "exclusionVectors": [
+    {
+      "id": "duplicates-do-not-call-or-append",
+      "candidates": [7, 7, 8],
+      "expected": { "resetCount": 0, "capacity": 30, "consumerCallOrder": [7, 8], "skippedDuplicates": [{ "inputIndex": 1, "targetIndex": 7 }], "capacityRejectedAppends": [], "finalCount": 2, "finalList": [7, 8] }
+    },
+    {
+      "id": "consumer-still-called-after-thirty-entry-cap",
+      "candidates": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 31],
+      "expected": {
+        "resetCount": 0,
+        "capacity": 30,
+        "consumerCallOrder": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 31],
+        "skippedDuplicates": [],
+        "capacityRejectedAppends": [{ "inputIndex": 30, "targetIndex": 31 }, { "inputIndex": 31, "targetIndex": 31 }],
+        "finalCount": 30,
+        "finalList": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30]
+      }
+    }
+  ],
+  "enumerationVectors": [
+    {
+      "id": "mode-one-map-selection-live-dedup-and-current-reference-calls",
+      "input": {
+        "effectKindWord": 2,
+        "selectionModeWord": 1,
+        "radiusWord": 1,
+        "centerXWord": 1,
+        "centerYWord": 1,
+        "mapWidth": 4,
+        "mapHeight": 4,
+        "sourceReferenceDword": 858980355,
+        "sourceOwnerWord": 1,
+        "payloadWord": 100,
+        "suppliedTargetReferenceDword": 2863267850,
+        "mapCells": [
+          { "x": 1, "y": 1, "targetIndex": 10 },
+          { "x": 0, "y": 0, "targetIndex": 11 },
+          { "x": 1, "y": 0, "targetIndex": 10 },
+          { "x": 2, "y": 0, "targetIndex": 12 },
+          { "x": 0, "y": 1, "targetIndex": 10 },
+          { "x": 2, "y": 1, "targetIndex": 12 },
+          { "x": 0, "y": 2, "targetIndex": 10 },
+          { "x": 1, "y": 2, "targetIndex": 12 },
+          { "x": 2, "y": 2, "targetIndex": 10 }
+        ],
+        "entities": [
+          { "targetIndex": 10, "registryWord": 2, "currentHealthWord": 50, "activeByte": 1, "currentActiveReferenceDword": 286326794, "ownerByte": 1 },
+          { "targetIndex": 11, "registryWord": 0, "currentHealthWord": "unreachable", "activeByte": "unreachable", "currentActiveReferenceDword": "unreachable", "ownerByte": "unreachable" },
+          { "targetIndex": 12, "registryWord": 2, "currentHealthWord": 50, "activeByte": 1, "currentActiveReferenceDword": 572653580, "ownerByte": 2 }
+        ]
+      },
+      "expected": {
+        "effectKindWord": 2,
+        "selectionModeWord": 1,
+        "normalizedRadius": 1,
+        "resetExclusionCount": 0,
+        "cellResults": [
+          { "ring": 0, "dx": 0, "dy": 0, "x": 1, "y": 1, "targetIndex": 10, "candidateSource": "map", "mapLinearIndex": 181, "status": "consumer-called", "appended": true },
+          { "ring": 1, "dx": -1, "dy": -1, "x": 0, "y": 0, "targetIndex": 11, "candidateSource": "map", "mapLinearIndex": 0, "status": "live-rejected", "liveReason": "registry-zero" },
+          { "ring": 1, "dx": 0, "dy": -1, "x": 1, "y": 0, "targetIndex": 10, "candidateSource": "map", "mapLinearIndex": 180, "status": "duplicate" },
+          { "ring": 1, "dx": 1, "dy": -1, "x": 2, "y": 0, "targetIndex": 12, "candidateSource": "map", "mapLinearIndex": 360, "status": "consumer-called", "appended": true },
+          { "ring": 1, "dx": -1, "dy": 0, "x": 0, "y": 1, "targetIndex": 10, "candidateSource": "map", "mapLinearIndex": 1, "status": "duplicate" },
+          { "ring": 1, "dx": 1, "dy": 0, "x": 2, "y": 1, "targetIndex": 12, "candidateSource": "map", "mapLinearIndex": 361, "status": "duplicate" },
+          { "ring": 1, "dx": -1, "dy": 1, "x": 0, "y": 2, "targetIndex": 10, "candidateSource": "map", "mapLinearIndex": 2, "status": "duplicate" },
+          { "ring": 1, "dx": 0, "dy": 1, "x": 1, "y": 2, "targetIndex": 12, "candidateSource": "map", "mapLinearIndex": 182, "status": "duplicate" },
+          { "ring": 1, "dx": 1, "dy": 1, "x": 2, "y": 2, "targetIndex": 10, "candidateSource": "map", "mapLinearIndex": 362, "status": "duplicate" }
+        ],
+        "calls": [
+          {
+            "callIndex": 0,
+            "cell": { "ring": 0, "x": 1, "y": 1 },
+            "targetIndex": 10,
+            "currentActiveReferenceDword": 286326794,
+            "payload": { "radius": 1, "distance": 0, "falloffPercent": 0, "payload": 100, "reduction": 0, "falloffPayload": 100, "primaryLowIndexOverride": true, "payloadAfterPrimaryOverride": 100, "sourceOwnerSigned": 1, "targetOwnerSigned": 1, "sameOwner": true, "callbackPayload": 50 },
+            "consumerArguments": { "sourceReferenceDword": 858980355, "targetReferenceDword": 286326794, "sourceOwnerSigned": 1, "effectKindWord": 2, "payloadSignedWord": 50 },
+            "consumerReturnUsed": false,
+            "postConsumerAppend": { "appended": true, "countAfter": 1 }
+          },
+          {
+            "callIndex": 1,
+            "cell": { "ring": 1, "x": 2, "y": 0 },
+            "targetIndex": 12,
+            "currentActiveReferenceDword": 572653580,
+            "payload": { "radius": 1, "distance": 1, "falloffPercent": 50, "payload": 100, "reduction": 50, "falloffPayload": 50, "primaryLowIndexOverride": false, "payloadAfterPrimaryOverride": 50, "sourceOwnerSigned": 1, "targetOwnerSigned": 2, "sameOwner": false, "callbackPayload": 50 },
+            "consumerArguments": { "sourceReferenceDword": 858980355, "targetReferenceDword": 572653580, "sourceOwnerSigned": 1, "effectKindWord": 2, "payloadSignedWord": 50 },
+            "consumerReturnUsed": false,
+            "postConsumerAppend": { "appended": true, "countAfter": 2 }
+          }
+        ],
+        "finalExclusionCount": 2,
+        "finalExclusionList": [10, 12],
+        "returnWord": 0
+      }
+    },
+    {
+      "id": "non-mode-one-reuses-supplied-target-and-deduplicates",
+      "input": {
+        "effectKindWord": 2,
+        "selectionModeWord": 2,
+        "radiusWord": 0,
+        "centerXWord": 0,
+        "centerYWord": 0,
+        "mapWidth": 2,
+        "mapHeight": 2,
+        "sourceReferenceDword": 858980355,
+        "sourceOwnerWord": 1,
+        "payloadWord": 100,
+        "suppliedTargetReferenceDword": 3435921428,
+        "mapCells": "unreachable",
+        "entities": [
+          { "targetIndex": 20, "registryWord": 2, "currentHealthWord": 50, "activeByte": 1, "currentActiveReferenceDword": 305397780, "ownerByte": 2 }
+        ]
+      },
+      "expected": {
+        "effectKindWord": 2,
+        "selectionModeWord": 2,
+        "normalizedRadius": 1,
+        "resetExclusionCount": 0,
+        "cellResults": [
+          { "ring": 0, "dx": 0, "dy": 0, "x": 0, "y": 0, "targetIndex": 20, "candidateSource": "supplied-target", "mapLinearIndex": null, "status": "consumer-called", "appended": true },
+          { "ring": 1, "dx": -1, "dy": -1, "x": -1, "y": -1, "status": "out-of-bounds" },
+          { "ring": 1, "dx": 0, "dy": -1, "x": 0, "y": -1, "status": "out-of-bounds" },
+          { "ring": 1, "dx": 1, "dy": -1, "x": 1, "y": -1, "status": "out-of-bounds" },
+          { "ring": 1, "dx": -1, "dy": 0, "x": -1, "y": 0, "status": "out-of-bounds" },
+          { "ring": 1, "dx": 1, "dy": 0, "x": 1, "y": 0, "targetIndex": 20, "candidateSource": "supplied-target", "mapLinearIndex": null, "status": "duplicate" },
+          { "ring": 1, "dx": -1, "dy": 1, "x": -1, "y": 1, "status": "out-of-bounds" },
+          { "ring": 1, "dx": 0, "dy": 1, "x": 0, "y": 1, "targetIndex": 20, "candidateSource": "supplied-target", "mapLinearIndex": null, "status": "duplicate" },
+          { "ring": 1, "dx": 1, "dy": 1, "x": 1, "y": 1, "targetIndex": 20, "candidateSource": "supplied-target", "mapLinearIndex": null, "status": "duplicate" }
+        ],
+        "calls": [
+          {
+            "callIndex": 0,
+            "cell": { "ring": 0, "x": 0, "y": 0 },
+            "targetIndex": 20,
+            "currentActiveReferenceDword": 305397780,
+            "payload": { "radius": 1, "distance": 0, "falloffPercent": 0, "payload": 100, "reduction": 0, "falloffPayload": 100, "primaryLowIndexOverride": true, "payloadAfterPrimaryOverride": 100, "sourceOwnerSigned": 1, "targetOwnerSigned": 2, "sameOwner": false, "callbackPayload": 100 },
+            "consumerArguments": { "sourceReferenceDword": 858980355, "targetReferenceDword": 305397780, "sourceOwnerSigned": 1, "effectKindWord": 2, "payloadSignedWord": 100 },
+            "consumerReturnUsed": false,
+            "postConsumerAppend": { "appended": true, "countAfter": 1 }
+          }
+        ],
+        "finalExclusionCount": 1,
+        "finalExclusionList": [20],
+        "returnWord": 0
+      }
+    },
+    {
+      "id": "all-cells-out-of-bounds-leaves-late-inputs-unreached",
+      "input": {
+        "effectKindWord": 2,
+        "selectionModeWord": "unreachable",
+        "radiusWord": 1,
+        "centerXWord": 100,
+        "centerYWord": 100,
+        "mapWidth": 2,
+        "mapHeight": 2,
+        "sourceReferenceDword": "unreachable",
+        "sourceOwnerWord": "unreachable",
+        "payloadWord": "unreachable",
+        "suppliedTargetReferenceDword": "unreachable",
+        "mapCells": "unreachable",
+        "entities": "unreachable"
+      },
+      "expected": {
+        "effectKindWord": 2,
+        "selectionModeWord": null,
+        "normalizedRadius": 1,
+        "resetExclusionCount": 0,
+        "cellResults": [
+          { "ring": 0, "dx": 0, "dy": 0, "x": 100, "y": 100, "status": "out-of-bounds" },
+          { "ring": 1, "dx": -1, "dy": -1, "x": 99, "y": 99, "status": "out-of-bounds" },
+          { "ring": 1, "dx": 0, "dy": -1, "x": 100, "y": 99, "status": "out-of-bounds" },
+          { "ring": 1, "dx": 1, "dy": -1, "x": 101, "y": 99, "status": "out-of-bounds" },
+          { "ring": 1, "dx": -1, "dy": 0, "x": 99, "y": 100, "status": "out-of-bounds" },
+          { "ring": 1, "dx": 1, "dy": 0, "x": 101, "y": 100, "status": "out-of-bounds" },
+          { "ring": 1, "dx": -1, "dy": 1, "x": 99, "y": 101, "status": "out-of-bounds" },
+          { "ring": 1, "dx": 0, "dy": 1, "x": 100, "y": 101, "status": "out-of-bounds" },
+          { "ring": 1, "dx": 1, "dy": 1, "x": 101, "y": 101, "status": "out-of-bounds" }
+        ],
+        "calls": [],
+        "finalExclusionCount": 0,
+        "finalExclusionList": [],
+        "returnWord": 0
+      }
+    },
+    {
+      "id": "mode-one-registry-zero-stops-before-late-inputs",
+      "input": {
+        "effectKindWord": 2,
+        "selectionModeWord": 1,
+        "radiusWord": 1,
+        "centerXWord": 0,
+        "centerYWord": 0,
+        "mapWidth": 1,
+        "mapHeight": 1,
+        "sourceReferenceDword": "unreachable",
+        "sourceOwnerWord": "unreachable",
+        "payloadWord": "unreachable",
+        "suppliedTargetReferenceDword": "unreachable",
+        "mapCells": [
+          { "x": "unreachable", "y": "unreachable", "targetIndex": "unreachable" },
+          { "x": 0, "y": 0, "targetIndex": 7 }
+        ],
+        "entities": [
+          { "targetIndex": "unreachable", "registryWord": "unreachable" },
+          { "targetIndex": 7, "registryWord": 0, "currentHealthWord": "unreachable", "activeByte": "unreachable", "ownerByte": "unreachable", "currentActiveReferenceDword": "unreachable" }
+        ]
+      },
+      "expected": {
+        "effectKindWord": 2,
+        "selectionModeWord": 1,
+        "normalizedRadius": 1,
+        "resetExclusionCount": 0,
+        "cellResults": [
+          { "ring": 0, "dx": 0, "dy": 0, "x": 0, "y": 0, "targetIndex": 7, "candidateSource": "map", "mapLinearIndex": 0, "status": "live-rejected", "liveReason": "registry-zero" },
+          { "ring": 1, "dx": -1, "dy": -1, "x": -1, "y": -1, "status": "out-of-bounds" },
+          { "ring": 1, "dx": 0, "dy": -1, "x": 0, "y": -1, "status": "out-of-bounds" },
+          { "ring": 1, "dx": 1, "dy": -1, "x": 1, "y": -1, "status": "out-of-bounds" },
+          { "ring": 1, "dx": -1, "dy": 0, "x": -1, "y": 0, "status": "out-of-bounds" },
+          { "ring": 1, "dx": 1, "dy": 0, "x": 1, "y": 0, "status": "out-of-bounds" },
+          { "ring": 1, "dx": -1, "dy": 1, "x": -1, "y": 1, "status": "out-of-bounds" },
+          { "ring": 1, "dx": 0, "dy": 1, "x": 0, "y": 1, "status": "out-of-bounds" },
+          { "ring": 1, "dx": 1, "dy": 1, "x": 1, "y": 1, "status": "out-of-bounds" }
+        ],
+        "calls": [],
+        "finalExclusionCount": 0,
+        "finalExclusionList": [],
+        "returnWord": 0
+      }
+    }
+  ]
+}

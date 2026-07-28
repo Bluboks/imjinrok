@@ -82,6 +82,7 @@ K02는 이 단기 MVP의 완료 조건이 아니다. 기존 K02 프로토타입�
 | K01 캠페인 | 처음부터 결과까지 프로토타입, native 증원 9개 exact static identity/source adapter와 K01-only exact-position create 부분 이식 | 표준 entry timer reset, 봉화대→K0120, native class/요청 좌표·slot/OOB/exact create·1×1 occupancy overwrite, class 13·14·82 scoped 핵심 animation와 class-14 16-ring/destruction, latch→timer→commit, result presentation→final route 범위 확정 | 요청 좌표·slot/경계/overlap/WORD-wrap·exact static identity/source 9/9, class 13·14·82 grid frame/direction, class-14 turn/effect, native effect·timer·presentation·route 경계 재현 | 단기 팬 리마스터 MVP, class 14 generic Facing/runtime tick, 증원 stats/behavior·raw owner, 원본 1,200-slot/generation/occupancy-owner 저장 모델·이후 movement, raw clock/result policy 미완료 |
 | K02 캠페인 | 프로토타입 존재 | 제한적 | 원본 재현 없음 | K01 이후로 연기 |
 | 전투 | 프로토타입, 유성룡 좌표 accepted subset `0..32767` 독립 계산 부분 이식 | K01 영웅 phase·피해·대상·사거리·투사체와 signed-health 사망·slot/reference 수명주기 확정 | 대상·투사체·scheduler 및 사망 phase·delay·stale reference 경계 재현 | 독립 단위 부분 이식; identity/좌표/24 Hz exact mapping과 opt-in 사망 정책 대기 |
+| 전투 | 프로토타입 구현 존재 | K01 일반 공격 phase·회복, action 40 소유권 이전, action 59 loop-carried full DWORD와 fixed reset·tracking·subtype 16 same-slot subtype 1 전환·mode 2 kind 2, generic mode 1 kind 2 열거/callback 입력, subtype 12 kind 9 및 direct full-generation/writer gate 경계 확정 | 일반 공격 제한 범위와 class 78 선택·pending 충돌·subtype 12/16 flight/종료·generic enumeration 입력/call 경계·선택 buffer/health write 부분 재현 | K01 영웅 제한 범위 부분 재현, generic K01 mode 1 producer 미확정, 자동 마법은 분석-only |
 | 이동·경로 탐색 | 구현 존재 | 후보 함수 존재 | 원본 재현 없음 | 미검증 |
 | AI | 구현 존재 | 체계적 함수 지도 없음 | 원본 재현 없음 | 미검증 |
 | 생산·건설·연구 | 구현 존재 | 본영·봉화대 표시 상태만 복원 | 표시 프레임 재현 | 메커니즘은 미검증 |
@@ -89,7 +90,8 @@ K02는 이 단기 MVP의 완료 조건이 아니다. 기존 K02 프로토타입�
 | 건물 상태 이미지 | 조선 본영·봉화대 건설 0~7·정상 7·반파 8 이식 | 클래스 49·52 정체와 공통 건물 진행도·체력 분기 확정 | 모든 진행도·50% 체력 경계 테스트 | 두 건물 본체 범위 원본 기반, 나머지 7개 미검증 |
 | 브리핑 초상화 | 17개 ID·`hero.spr` 프레임 이식 | 파서→조회→프레임 표→그리기 정적 확정 | 추출기·클라이언트 교차 테스트 | 원본 기반 |
 | `SPEECH` 대화 레이아웃 | 숫자 슬롯·초상화·대사 공통 배치 이식 | 640×480 슬롯 4개와 대사 좌표 정적 확정 | 추출기·배율 변환 테스트 | 확정 범위 원본 기반 |
-| UI·입력 | 반응형 UI 존재 | 자원·호출 지점 후보 존재 | 원본 구조 복원 없음 | 의도적 프로젝트 UI |
+| K01 공통 임무 목표 모달 결합 | 검증된 raster·기하·K0110 텍스트·strict release와 유효 base wrap 폭 300을 독립 presenter에 연결; HUD button/event는 프로젝트 전용 | 진입·dispatcher에 더해 GDI `Arial` height 12/HANGEUL_CHARSET 요청, CP949 byte chunk·strict wrap·배치·실패 경로 정적 확정 | lifecycle 재현 완료; typography 제어 흐름은 공급한 synthetic GDI metrics 아래 부분 재현 | frame/content/dismiss·action·text·유효 폭은 원본 기반; 실제 font realization·glyph 폭·Korean wrap·빈 문자열 `SIZE.cy`, gameplay-panel 정체, mechanism source, dismiss visual·sound 미확정 |
+| UI·입력 | 반응형 목표 추적 HUD 존재 | 임무 목표 모달 확정; transient overlay 후보 반증; action 115 admission/removal, queue-count marker·type 76 state handoff와 player-scoped hero-priority·magic-auto-use gates, class 78 auto/manual pending-store·일반 공격 경계 정적 확정 | 기존 범위와 class 78 cadence·target admission·action 40/59 delivery·manual pending 충돌 부분 재현 | original raw queue/state/gate는 이식하지 않고 목표 추적 HUD·responsive selection UI를 포함한 나머지는 의도적 프로젝트 UI |
 | VM 동적 분석 | 과거 도구·기록 존재 | 다수 시행착오 기록 | 원시 증거가 저장소에 없음 | 보관, 기본 경로에서 제외 |
 
 ## 신뢰할 수 있는 출발점
@@ -125,5 +127,41 @@ K02는 이 단기 MVP의 완료 조건이 아니다. 기존 K02 프로토타입�
 사용자가 설명한 “완성 봉화가 하나라도 있으면 미니맵 enable, 마지막 봉화 제거 시 disable”은
 별도 `user-reported/unverified` 정적 분석 후속 질문이다. 현재 K01 raw effect나 원본 확정
 수명주기로 소급하지 않는다.
+1. subtype `0x0c`/`0x10`의 bounded flight·종료와 generic mode 1 kind 2 enumeration/call 입력
+   경계 뒤 consumer callback whole result, K01 mode 1 producer, 재경로 좌표 결과·
+   death/reference invalidation과 `FUN_00464cc0` map field 의미를 정적으로 닫기
+2. K01 일반 공격의 공격 전 대상 유효성·탐색·사거리와 원본 전역 틱 시간 단위를 닫기
+3. K01 봉화대·증원·영웅 보호·승패 경로를 합성 입력으로 재현
+4. K01 HUD, 선택 패널, 목표·진행 표시와 미션 대화 전체 레이아웃을 정적으로 복원 — 공통 임무
+   목표 모달 자체와 `0x3f0` handler 반환 생산 경로, K01 인덱스 1→K0110 목표 텍스트 결합은
+   복원했고 state `0x16`의 direct 생산, 목표 컨트롤 입력, ordered overwrite 뒤 dispatcher의
+   목표 모달 소비·reset까지 연결했다. 프로젝트에서는 K01 HUD objective button을 명시적 적응
+   trigger로 삼아 semantic action을 `UIScene`의 독립 presenter에 한 번 전달한다. 검증된 raster·
+   geometry·K0110 text·strict release와 renderer의 유효 base 폭 300은 원본 기반이다. GDI
+   `Arial`/height 12/HANGEUL_CHARSET 요청과 CP949 space wrap 제어는 복원했지만 실제 Windows
+   font realization·K0110 glyph metrics는 보존 입력에 없어 font family/size·Canvas 측정·
+   Korean wrap·backdrop·Escape·responsive blocker는 의도적 적응이다. 설치 매체 font
+   provenance 조사는 중단한다. 선택 panel로 탐색한 `FUN_004a84e0`의 네 slot은 후속 producer
+   분석에서 SPEECH 화자 portrait/label lifecycle로 확정됐고 kind는 화자 index 변경
+   boolean이므로 건설·생산·연구 결합 가설은 반증됐다. gameplay 선택 UI의 실제 owner/producer,
+   이어 selection 없음의 seven-slot owner와 별도로 action 115의 payload `0`이 field
+   `0x266` exact-one reservation 성공에서만 add/assign bookkeeping을 수행하며 non-one
+   bypass는 이를 건너뛰고 common player/type writes에 합류한 뒤 state WORD exact `1`에서
+   state `0x0f` direct start 또는 non-one one-entry queue append를 수행하고, right-release
+   payload `1`은 matching queue removal without caller refund 또는 no-match refund/bookkeeping
+   경로로 소비됨을 확정했다. selected action queue-count marker와 produced type 76
+   (`조선 권율`) state handoff/dispatch boundary도 정적으로 닫았다. `FUN_0042de00`의
+   progress/completion/post-dispatch 전체 결과는 미재현이다. 별도 player record `+0x254e`
+   WORD gate는 selection-count-zero slot 1의 actions `63/64`로 제어되고, action/type table
+   전수 교집합이 정확히 16개 named-hero production action이라 영웅 queue 우선순위 toggle로
+   정적 확정했다. control/hit·gate write·filtered/FIFO removal은 범위 한정 재현했다.
+   action 115 후보는 사용자가 기억한 right-click persistent reservation을 확정하지 않는다.
+   인접 player-global magic auto-use gate·actions `61/62`·9-class 영향 집합도 정적으로
+   확정했고 control/hit·writer·consumer admission을 부분 재현했다. class별 cadence·target·
+   delivery 전체 효과, remembered pinning의 실제 action/owner, deeper redelivery와
+   production state update, gameplay-panel의 전체 화면상 정체, 원본 dismiss visual·sound와
+   HUD 루트 좌표계는 남음
+5. K01에 등장하는 나머지 건물·유닛의 정체·상태·방향 매핑을 독립 복원
+6. 브리핑부터 승패 결과까지 K01 종단 적합성 시나리오를 통과
 
 세부 단계와 통과 조건은 [로드맵](roadmap.md)에 정의한다.

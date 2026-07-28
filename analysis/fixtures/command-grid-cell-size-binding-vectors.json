@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "sourceExecutableSha256": "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e",
+  "sourceButtonSha256": "cfe7bab02f2cb8a1f97a3161075e617ace22d6ecf5a976546263a7c67e4efbb4",
+  "vectors": [
+    {
+      "id": "source-table-226-reaches-button-and-transfers-34-by-34",
+      "input": { "tableEntryCount": 226, "buttonLoadSucceeded": true, "header": { "magic": 9, "width": 34, "height": 34 }, "layoutInitializerReached": true },
+      "expected": {
+        "targetIndex": 18,
+        "tableEntryCount": 226,
+        "operations": [
+          { "type": "reach-button-table-entry", "record": "0x00899828" },
+          { "type": "copy-header-dwords-to-button-record", "byteCount": 3060 },
+          { "type": "copy-raw-low-words-to-grid-layout", "function": "FUN_00481ee0" }
+        ],
+        "runtimeRecord": { "widthDword": 34, "heightDword": 34, "rawLowWords": { "width": 34, "height": 34 } },
+        "gridCellSize": { "rawLowWords": { "width": 34, "height": 34 }, "effectiveSignedInt16": { "width": 34, "height": 34 } }
+      }
+    },
+    {
+      "id": "table-boundary-before-index-18-never-inspects-the-button-loader-input",
+      "input": { "tableEntryCount": 18, "buttonLoadSucceeded": "unreached", "header": "unreached", "layoutInitializerReached": "unreached" },
+      "expected": {
+        "targetIndex": 18,
+        "tableEntryCount": 18,
+        "operations": [{ "type": "button-record-unreached-before-table-boundary" }]
+      }
+    },
+    {
+      "id": "button-loader-failure-continues-but-does-not-invent-cell-values",
+      "input": { "tableEntryCount": 226, "buttonLoadSucceeded": false, "header": "unreached", "layoutInitializerReached": "unreached" },
+      "expected": {
+        "targetIndex": 18,
+        "tableEntryCount": 226,
+        "operations": [
+          { "type": "reach-button-table-entry", "record": "0x00899828" },
+          { "type": "button-loader-failure-continues-common-table", "runtimeCellSize": "indeterminate" }
+        ]
+      }
+    },
+    {
+      "id": "dword-header-is-copied-but-grid-consumes-only-its-low-words",
+      "input": { "tableEntryCount": 19, "buttonLoadSucceeded": true, "header": { "magic": 9, "width": 65570, "height": 131106 }, "layoutInitializerReached": true },
+      "expected": {
+        "targetIndex": 18,
+        "tableEntryCount": 19,
+        "operations": [
+          { "type": "reach-button-table-entry", "record": "0x00899828" },
+          { "type": "copy-header-dwords-to-button-record", "byteCount": 3060 },
+          { "type": "copy-raw-low-words-to-grid-layout", "function": "FUN_00481ee0" }
+        ],
+        "runtimeRecord": { "widthDword": 65570, "heightDword": 131106, "rawLowWords": { "width": 34, "height": 34 } },
+        "gridCellSize": { "rawLowWords": { "width": 34, "height": 34 }, "effectiveSignedInt16": { "width": 34, "height": 34 } }
+      }
+    },
+    {
+      "id": "high-bit-raw-words-sign-extend-for-command-grid-geometry",
+      "input": { "tableEntryCount": 19, "buttonLoadSucceeded": true, "header": { "magic": 9, "width": 32769, "height": 65535 }, "layoutInitializerReached": true },
+      "expected": {
+        "targetIndex": 18,
+        "tableEntryCount": 19,
+        "operations": [
+          { "type": "reach-button-table-entry", "record": "0x00899828" },
+          { "type": "copy-header-dwords-to-button-record", "byteCount": 3060 },
+          { "type": "copy-raw-low-words-to-grid-layout", "function": "FUN_00481ee0" }
+        ],
+        "runtimeRecord": { "widthDword": 32769, "heightDword": 65535, "rawLowWords": { "width": 32769, "height": 65535 } },
+        "gridCellSize": { "rawLowWords": { "width": 32769, "height": 65535 }, "effectiveSignedInt16": { "width": -32767, "height": -1 } }
+      }
+    }
+  ]
+}

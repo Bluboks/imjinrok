@@ -1,0 +1,336 @@
+{
+  "sourceExecutableSha256": "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e",
+  "sourceSeedsSha256": "10e7104f3eb3f9dabac79b7636b3cd1b2efaa8f68ed1900a18f94a82160f58ba",
+  "sourceFunctionsSha256": "c10ea2de1f4998411d52443419c9a7f52ff7f9c18e79bd4115ba197d2f5bebc3",
+  "sourceReferencesSha256": "df11ff3713988ef22b3390b5b0ae7b4a87464b5de547a4866e1c8ec8a0bcaf4c",
+  "scopeNotice": "The control vectors use supplied synthetic signed-WORD layout coordinates and pointer positions; they reproduce the no-selection slot-1 control choice and strict-interior hit rule, not original runtime layout values or resource pixels. Queue vectors use complete synthetic 12-byte records and reproduce only gate selection, record removal, FIFO fallback, and unobserved redelivery attempt. They do not reproduce deeper FUN_00426740 acceptance. Action/type classification is extracted separately from all 229 initialized action records and all 95 type records.",
+  "controlSurfaceVectors": [
+    {
+      "id": "selection-present-skips-no-selection-control-inputs",
+      "input": {
+        "selectionCount": 1,
+        "currentPlayerIndex": "unreachable",
+        "adjacentGateWord": "unreachable",
+        "priorityGateWord": "unreachable"
+      },
+      "expected": {
+        "controls": [],
+        "targetControl": null,
+        "operations": [
+          { "type": "clear-nine-action-slots" }
+        ]
+      },
+      "expectedOutputSha256": "136f9d5efeec507131342b8eda332bc1ce15e0706011bf9b63859cc2030be18c"
+    },
+    {
+      "id": "no-selection-disabled-gate-shows-enable-control-and-strict-interior-hit",
+      "input": {
+        "selectionCount": 0,
+        "currentPlayerIndex": 3,
+        "adjacentGateWord": 0,
+        "priorityGateWord": 0,
+        "layout": {
+          "columns": 3,
+          "cellWidth": 30,
+          "cellHeight": 24,
+          "horizontalGap": 2,
+          "verticalGap": 3,
+          "originX": 10,
+          "originY": 20
+        },
+        "pointer": {
+          "x": 43,
+          "y": 21
+        }
+      },
+      "expected": {
+        "controls": [
+          { "slotIndex": 0, "controlIdentifier": 33, "actionWord": 61, "frameOrResourceIndex": 27 },
+          { "slotIndex": 1, "controlIdentifier": 35, "actionWord": 63, "frameOrResourceIndex": 28 }
+        ],
+        "targetControl": {
+          "slotIndex": 1,
+          "controlIdentifier": 35,
+          "actionWord": 63,
+          "frameOrResourceIndex": 28,
+          "playerIndex": 3,
+          "rect": { "x": 42, "y": 20, "width": 30, "height": 24 },
+          "hit": true
+        },
+        "operations": [
+          { "type": "clear-nine-action-slots" },
+          { "type": "add-no-selection-control", "slotIndex": 0, "controlIdentifier": 33, "actionWord": 61, "frameOrResourceIndex": 27 },
+          { "type": "add-no-selection-control", "slotIndex": 1, "controlIdentifier": 35, "actionWord": 63, "frameOrResourceIndex": 28 }
+        ]
+      },
+      "expectedOutputSha256": "699dfb6e7250f88bcac94c06ed597e922a76ad0fa27d15e537f501962dab0c98"
+    },
+    {
+      "id": "no-selection-nonzero-gate-shows-disable-control-and-rejects-left-edge",
+      "input": {
+        "selectionCount": 0,
+        "currentPlayerIndex": 7,
+        "adjacentGateWord": 1,
+        "priorityGateWord": 65535,
+        "layout": {
+          "columns": 3,
+          "cellWidth": 30,
+          "cellHeight": 24,
+          "horizontalGap": 2,
+          "verticalGap": 3,
+          "originX": 10,
+          "originY": 20
+        },
+        "pointer": {
+          "x": 42,
+          "y": 21
+        }
+      },
+      "expected": {
+        "controls": [
+          { "slotIndex": 0, "controlIdentifier": 34, "actionWord": 62, "frameOrResourceIndex": 26 },
+          { "slotIndex": 1, "controlIdentifier": 36, "actionWord": 64, "frameOrResourceIndex": 29 }
+        ],
+        "targetControl": {
+          "slotIndex": 1,
+          "controlIdentifier": 36,
+          "actionWord": 64,
+          "frameOrResourceIndex": 29,
+          "playerIndex": 7,
+          "rect": { "x": 42, "y": 20, "width": 30, "height": 24 },
+          "hit": false
+        },
+        "operations": [
+          { "type": "clear-nine-action-slots" },
+          { "type": "add-no-selection-control", "slotIndex": 0, "controlIdentifier": 34, "actionWord": 62, "frameOrResourceIndex": 26 },
+          { "type": "add-no-selection-control", "slotIndex": 1, "controlIdentifier": 36, "actionWord": 64, "frameOrResourceIndex": 29 }
+        ]
+      },
+      "expectedOutputSha256": "d83a4329773bcd2e27ee0effbfd3852963e72e2aa7d9eead894941b1b1350608"
+    }
+  ],
+  "gateCommandVectors": [
+    {
+      "id": "unreached-command-does-not-read-action",
+      "input": {
+        "initialGateWord": 9,
+        "commandReached": false,
+        "actionWord": "unreachable"
+      },
+      "expected": {
+        "finalGateWord": 9,
+        "commandConsumed": false,
+        "operations": []
+      },
+      "expectedOutputSha256": "36c95708c81a143e9d271833b0dadb17faf891fbd30caee876e306e9e47d1fd6"
+    },
+    {
+      "id": "action-63-enables-player-gate",
+      "input": {
+        "initialGateWord": 65535,
+        "commandReached": true,
+        "actionWord": 63
+      },
+      "expected": {
+        "finalGateWord": 1,
+        "commandConsumed": true,
+        "operations": [
+          { "type": "enable-player-hero-priority-gate", "actionWord": 63, "writtenWord": 1 }
+        ]
+      },
+      "expectedOutputSha256": "fe73d063052c02773cb90da8f99bedce4c18b90d6438b6ce8692697a4ee6e021"
+    },
+    {
+      "id": "action-64-disables-player-gate",
+      "input": {
+        "initialGateWord": 1,
+        "commandReached": true,
+        "actionWord": 64
+      },
+      "expected": {
+        "finalGateWord": 0,
+        "commandConsumed": true,
+        "operations": [
+          { "type": "disable-player-hero-priority-gate", "actionWord": 64, "writtenWord": 0 }
+        ]
+      },
+      "expectedOutputSha256": "12c5d1ba0ff2ec71212b518477c1a9b21226c5ed99b3190edf52b14856ab81c3"
+    }
+  ],
+  "queuePumpVectors": [
+    {
+      "id": "disabled-gate-removes-fifo-even-when-hero-is-later",
+      "input": {
+        "gateWord": 0,
+        "queueRecords": [
+          [107, 11, 12],
+          [115, 21, 22]
+        ]
+      },
+      "expected": {
+        "returnValue": 1,
+        "selectionMode": "fifo-gate-disabled",
+        "selectedIndex": 0,
+        "removedRecord": [107, 11, 12],
+        "finalQueueRecords": [[115, 21, 22]],
+        "operations": [
+          { "type": "remove-full-12-byte-queue-record", "selectedIndex": 0, "selectionMode": "fifo-gate-disabled", "record": [107, 11, 12] },
+          { "type": "attempt-redelivery-after-removal", "wrapperConstant": 20, "record": [107, 11, 12], "resultObservedByWrapper": false }
+        ]
+      },
+      "expectedOutputSha256": "a76885c295a739e3a5fe1d2dec760de4075293e549dfe91b2fe8d8cccdac433e"
+    },
+    {
+      "id": "exact-one-gate-removes-first-hero-before-earlier-ordinary-records",
+      "input": {
+        "gateWord": 1,
+        "queueRecords": [
+          [107, 11, 12],
+          [63, 21, 22],
+          [115, 31, 32],
+          [130, 41, 42]
+        ]
+      },
+      "expected": {
+        "returnValue": 1,
+        "selectionMode": "hero-priority-filter",
+        "selectedIndex": 2,
+        "removedRecord": [115, 31, 32],
+        "finalQueueRecords": [[107, 11, 12], [63, 21, 22], [130, 41, 42]],
+        "operations": [
+          { "type": "scan-production-filtered-actions" },
+          { "type": "remove-full-12-byte-queue-record", "selectedIndex": 2, "selectionMode": "hero-priority-filter", "record": [115, 31, 32] },
+          { "type": "attempt-redelivery-after-removal", "wrapperConstant": 30, "record": [115, 31, 32], "resultObservedByWrapper": false }
+        ]
+      },
+      "expectedOutputSha256": "a3b918482e5a1f024b9f2b8552ec4f18935e04023ed8b690e8f35dee3b9c4a77"
+    },
+    {
+      "id": "exact-one-gate-without-hero-falls-back-to-fifo",
+      "input": {
+        "gateWord": 1,
+        "queueRecords": [
+          [107, 11, 12],
+          [63, 21, 22]
+        ]
+      },
+      "expected": {
+        "returnValue": 1,
+        "selectionMode": "fifo-fallback",
+        "selectedIndex": 0,
+        "removedRecord": [107, 11, 12],
+        "finalQueueRecords": [[63, 21, 22]],
+        "operations": [
+          { "type": "scan-production-filtered-actions" },
+          { "type": "filtered-pop-returned-zero" },
+          { "type": "remove-full-12-byte-queue-record", "selectedIndex": 0, "selectionMode": "fifo-fallback", "record": [107, 11, 12] },
+          { "type": "attempt-redelivery-after-removal", "wrapperConstant": 20, "record": [107, 11, 12], "resultObservedByWrapper": false }
+        ]
+      },
+      "expectedOutputSha256": "7c758d9faa709f0bee57d2e055db714a4877833c472a818d69376a35ee45220f"
+    },
+    {
+      "id": "non-one-nonzero-gate-is-disabled",
+      "input": {
+        "gateWord": 65535,
+        "queueRecords": [
+          [107, 11, 12],
+          [115, 21, 22]
+        ]
+      },
+      "expected": {
+        "returnValue": 1,
+        "selectionMode": "fifo-gate-disabled",
+        "selectedIndex": 0,
+        "removedRecord": [107, 11, 12],
+        "finalQueueRecords": [[115, 21, 22]],
+        "operations": [
+          { "type": "remove-full-12-byte-queue-record", "selectedIndex": 0, "selectionMode": "fifo-gate-disabled", "record": [107, 11, 12] },
+          { "type": "attempt-redelivery-after-removal", "wrapperConstant": 20, "record": [107, 11, 12], "resultObservedByWrapper": false }
+        ]
+      },
+      "expectedOutputSha256": "a76885c295a739e3a5fe1d2dec760de4075293e549dfe91b2fe8d8cccdac433e"
+    },
+    {
+      "id": "exact-one-empty-queue-returns-zero",
+      "input": {
+        "gateWord": 1,
+        "queueRecords": []
+      },
+      "expected": {
+        "returnValue": 0,
+        "selectionMode": null,
+        "selectedIndex": null,
+        "removedRecord": null,
+        "finalQueueRecords": [],
+        "operations": [
+          { "type": "scan-production-filtered-actions" },
+          { "type": "filtered-pop-returned-zero" },
+          { "type": "fifo-pop-returned-zero" }
+        ]
+      },
+      "expectedOutputSha256": "48cc50cc0ae13ee555b2ed60cd41de3fbeef15ee2919981eeb50463b0586fcc7"
+    },
+    {
+      "id": "twenty-record-boundary-removes-last-hero",
+      "input": {
+        "gateWord": 1,
+        "queueRecords": [
+          [107, 1, 101],
+          [107, 2, 102],
+          [107, 3, 103],
+          [107, 4, 104],
+          [107, 5, 105],
+          [107, 6, 106],
+          [107, 7, 107],
+          [107, 8, 108],
+          [107, 9, 109],
+          [107, 10, 110],
+          [107, 11, 111],
+          [107, 12, 112],
+          [107, 13, 113],
+          [107, 14, 114],
+          [107, 15, 115],
+          [107, 16, 116],
+          [107, 17, 117],
+          [107, 18, 118],
+          [107, 19, 119],
+          [130, 20, 120]
+        ]
+      },
+      "expected": {
+        "returnValue": 1,
+        "selectionMode": "hero-priority-filter",
+        "selectedIndex": 19,
+        "removedRecord": [130, 20, 120],
+        "finalQueueRecords": [
+          [107, 1, 101],
+          [107, 2, 102],
+          [107, 3, 103],
+          [107, 4, 104],
+          [107, 5, 105],
+          [107, 6, 106],
+          [107, 7, 107],
+          [107, 8, 108],
+          [107, 9, 109],
+          [107, 10, 110],
+          [107, 11, 111],
+          [107, 12, 112],
+          [107, 13, 113],
+          [107, 14, 114],
+          [107, 15, 115],
+          [107, 16, 116],
+          [107, 17, 117],
+          [107, 18, 118],
+          [107, 19, 119]
+        ],
+        "operations": [
+          { "type": "scan-production-filtered-actions" },
+          { "type": "remove-full-12-byte-queue-record", "selectedIndex": 19, "selectionMode": "hero-priority-filter", "record": [130, 20, 120] },
+          { "type": "attempt-redelivery-after-removal", "wrapperConstant": 30, "record": [130, 20, 120], "resultObservedByWrapper": false }
+        ]
+      },
+      "expectedOutputSha256": "651f37baf905fb78c4688c40e9bb0341fb97e07fb72c081caff71d8387b6c113"
+    }
+  ]
+}
