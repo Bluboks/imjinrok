@@ -47,9 +47,9 @@ test("frame mappings stay quarantined outside statically proven scopes while ide
     visualCount: 21,
     unitVisualCount: 12,
     buildingVisualCount: 9,
-    stateMappingCount: 65,
-    clipCount: 385,
-    frameReferenceCount: 2_619,
+    stateMappingCount: 69,
+    clipCount: 429,
+    frameReferenceCount: 2_978,
     missingFrameReferenceCount: 0,
     unverifiedVisualCount: 2,
     mixedVisualCount: 17,
@@ -104,9 +104,49 @@ test("frame mappings stay quarantined outside statically proven scopes while ide
     ).length,
     4,
   );
+  const japaneseSamurai = report.visuals.find(
+    (visual) => visual.visualId === "japanese-samurai",
+  );
+  assert.equal(japaneseSamurai?.staticEvidence.internalClass, 13);
+  assert.equal(
+    japaneseSamurai?.staticEvidence.originalGameplayName,
+    "일본 사무라이",
+  );
+  assert.equal(
+    japaneseSamurai?.staticEvidence.animationStateMapping,
+    "static-proven-core-state-frames",
+  );
+  assert.deepEqual(
+    japaneseSamurai?.staticEvidence.stateFrameRanges,
+    {
+      idle: [0, 39],
+      move: [0, 39],
+      walk: [0, 39],
+      attack: [50, 89],
+      death: [40, 47],
+    },
+  );
+  assert.deepEqual(
+    japaneseSamurai?.staticEvidence.stateSources,
+    {
+      idle: "char\\horseswordj2.spr",
+      move: "char\\horseswordj1.spr",
+      walk: "char\\horseswordj1.spr",
+      attack: "char\\horseswordj1.spr",
+      death: "char\\horseswordj1.spr",
+    },
+  );
+  assert.equal(
+    report.findings.some(
+      (finding) =>
+        finding.visualId === "japanese-samurai" &&
+        (finding.code === "direction-order-unverified" ||
+          finding.code === "mirrored-facing-unverified"),
+    ),
+    false,
+  );
   assert.deepEqual(
     [
-      ["japanese-samurai", 13, "일본 사무라이", 0],
       ["japanese-turtle-tank", 14, "일본 귀갑차", 0],
       ["japanese-konishi", 82, "일본 고니시", 0],
     ].map(([visualId, internalClass, originalGameplayName, baseFrame]) => {
@@ -125,7 +165,6 @@ test("frame mappings stay quarantined outside statically proven scopes while ide
       };
     }),
     [
-      ["japanese-samurai", 13, "일본 사무라이", "horseswordj1_0000.png"],
       ["japanese-turtle-tank", 14, "일본 귀갑차", "ghosttankj_0000.png"],
       ["japanese-konishi", 82, "일본 고니시", "generalj11_0000.png"],
     ].map(([visualId, internalClass, originalGameplayName, frameFile]) => ({

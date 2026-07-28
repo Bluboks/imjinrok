@@ -25,8 +25,8 @@ pnpm imjinrok:audit-sprite-mappings
 | 대상 | 확인한 범위 | 판정 |
 | --- | --- | --- |
 | 원본 타입 95개 | 이름·슬롯·기본 프레임·raw flags·SPR 경로 | 타입 정체·출처 전수 `정적 확정` |
-| 엔티티 비주얼 21개 | 상태 65개, 클립 385개, 프레임 참조 2,619개 | 범위 확정 2개, `mixed` 17개, 미확인 2개 |
-| 유닛 비주얼 12개 | 정체·방향·행동·미러링 | 고유 정체 11개, 모호 1개; 신규 class 13·14·82는 base-frame still만 사용 |
+| 엔티티 비주얼 21개 | 상태 69개, 클립 429개, 프레임 참조 2,978개 | 범위 확정 2개, `mixed` 17개, 미확인 2개 |
+| 유닛 비주얼 12개 | 정체·방향·행동·미러링 | 고유 정체 11개, 모호 1개; class 13 핵심 상태 확정, class 14·82는 base-frame still |
 | 건물 비주얼 9개 | 정체·idle·construction·damaged·overlay | 본영·봉화대 본체 2개 `정적 확정`, 나머지 7개 본체 상태 `미확인` |
 | 브리핑 초상화 17개 | `K1`~`K6`·`K10`, `J1`~`J5`, `C1`~`C5` | ID→`hero.spr` 프레임 `정적 확정` |
 | 원본 내부 클래스 2 | `조선 창병`, 슬롯 100, 상태 1·2, 8방향, phase 0~7 | 두 상태의 이동 의미·프레임 식 확정, 상태 1 일반 이동 이식 |
@@ -58,9 +58,10 @@ pnpm imjinrok:audit-sprite-mappings
   8방향·phase·mirror를 정적 방향식으로 이식했다. 두 영웅의 원본 효과 phase는 7로 후속
   확정했지만 프로젝트 공격 이벤트와 클립 FPS 연결은 아직 잠정값이다.
 - 일본 조총병의 `attack`은 `move`·`walk`와 완전히 같은 프레임 클립을 사용한다.
-- 일본 사무라이·귀갑차·고니시는 각각 `horseswordj1.spr`, `ghosttankj.spr`,
-  `generalj11.spr` 정체와 source binding만 반영했다. 원본 base frame 0 하나를 default still로
-  사용하며 방향·행동·FPS를 배정하지 않았다. render size와 pivot은 프로젝트 잠정값이다.
+- 일본 사무라이는 `horseswordj1.spr`·`horseswordj2.spr`의 상태 8/1/4/7 frame·방향·mirror를
+  [별도 파일럿](mechanics/k01-samurai-animation-pilot.md)에서 확정·이식했다. 귀갑차·고니시는
+  `ghosttankj.spr`, `generalj11.spr`의 base frame 0 하나만 default still로 사용한다.
+  세 visual의 FPS 또는 render size·pivot은 프로젝트 잠정값이다.
 
 따라서 사용자가 보고한 “유닛 프레임 방향이 맞지 않음”은 현재 코드 구조로 설명된다. 개별 프레임을
 눈으로 다시 배치하는 대신, 원본 상태·방향 값에서 프레임을 선택하는 테이블과 수식을 복원해야 한다.
@@ -138,6 +139,10 @@ pnpm imjinrok:audit-sprite-mappings
   158 `generalk31.spr`를 idle·이동, 슬롯 159 `generalk32.spr`를 공격·사망에 사용한다.
   자세한 방향·phase 경로는
   [K01 권율·유성룡 핵심 애니메이션 파일럿](mechanics/k01-hero-animation-pilot.md)에 기록했다.
+- 클래스 13 일본 사무라이는 slot 118 `horseswordj2.spr`를 상태 8 idle에, slot 117
+  `horseswordj1.spr`를 상태 1 이동·상태 4 공격·상태 7 사망에 사용한다. 방향·phase 식은
+  [K01 일본 사무라이 핵심 애니메이션 파일럿](mechanics/k01-samurai-animation-pilot.md)에
+  기록했다.
 - 상태 1 특수 분기는 `WORD +0x1e8`과 특수 방향 값 1000~1007까지 구조를 복원했다. 하지만
   클래스 2 초기화가 특수 분기에 필요한 base 네 개를 설정하지 않으므로 현재 도구는 이 입력을 거부한다.
 - 내부 클래스 49는 `조선 본영`, 슬롯 141, `char\hqk.spr`로 식별했다. 건설 진행도는

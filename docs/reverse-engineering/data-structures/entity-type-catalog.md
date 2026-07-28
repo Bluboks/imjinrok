@@ -66,7 +66,7 @@ EXE와 Ghidra 산출물의 입력 SHA-256이 다르면 추출을 거부한다.
 | `japanese-swordsman` | `swordj.spr` | 3 | 일본 창병 | 정체 확정, 프레임 의미 미확정 |
 | `korean-archer` | `archerk.spr` | 4 | 조선 궁수 | 정체 확정, 프레임 의미 미확정 |
 | `japanese-gunner` | `gunj1.spr` | 12 | 일본 조총병 | 정체 확정, 프레임 의미 미확정 |
-| `japanese-samurai` | `horseswordj1.spr` | 13 | 일본 사무라이 | 정체·source 확정, base-frame still 외 프레임 의미 미확정 |
+| `japanese-samurai` | `horseswordj1.spr`·`horseswordj2.spr` | 13 | 일본 사무라이 | 정체·상태 8/1/4/7 frame·8방향·mirror 확정 |
 | `japanese-turtle-tank` | `ghosttankj.spr` | 14 | 일본 귀갑차 | 정체·source 확정, base-frame still 외 프레임 의미 미확정 |
 | `japanese-konishi` | `generalj11.spr` | 82 | 일본 고니시 | 정체·source 확정, base-frame still 외 프레임 의미 미확정 |
 | `korean-general-k4` | `generalk4.spr` | 79 | 조선 사명대사 | 정체 확정, 현행 K01 영웅 바인딩 없음 |
@@ -102,6 +102,9 @@ EXE와 Ghidra 산출물의 입력 SHA-256이 다르면 추출을 거부한다.
   따른 행동 6/7·조건부 slot 해제를 원본 accepted update 단위로 확정했다. runtime writer의
   K01 도달 여부, 초 단위 재생 속도와 프로젝트 수명 이식은
   여전히 미확정이다.
+- 클래스 13 일본 사무라이는 primary slot 117 `horseswordj1.spr`와 secondary slot 118
+  `horseswordj2.spr`를 사용한다. 상태 8/1/4/7의 frame·방향·mirror는
+  [K01 일본 사무라이 파일럿](../mechanics/k01-samurai-animation-pilot.md)에 기록했다.
 
 ## 재생성과 검증
 

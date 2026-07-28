@@ -90,8 +90,8 @@ const STATICALLY_RECOVERED_DIRECTION_SOURCES = {
 } as const satisfies Record<Facing, { frameBaseIndex: number; mirrorX: boolean }>;
 const SOURCE_FRAMES_PER_FACING = 8;
 const ROYAL_CART_FRAMES_PER_FACING = 10;
-const PROVISIONAL_RECOVERED_HERO_IDLE_FPS = 4;
-const PROVISIONAL_RECOVERED_HERO_ACTIVE_FPS = 8;
+const PROVISIONAL_RECOVERED_ANIMATION_IDLE_FPS = 4;
+const PROVISIONAL_RECOVERED_ANIMATION_ACTIVE_FPS = 8;
 
 const entityFrameRange = (
   visualId: string,
@@ -612,15 +612,76 @@ export const japaneseGunnerEntityVisual = {
   },
 } as const satisfies EntityVisual;
 
-export const japaneseSamuraiEntityVisual =
-  sourceIdentityStillEntityVisual({
-    id: "japanese-samurai",
-    assetPath: "entities/japanese-samurai",
-    visualId: "japanese_samurai",
-    stem: "horseswordj1",
+export const japaneseSamuraiEntityVisual = {
+  id: "japanese-samurai",
+  kind: "entity",
+  assetPath: "entities/japanese-samurai",
+  render: {
+    srcPxPerWu: 32,
+    filtering: "nearest",
+  },
+  defaults: {
+    // Project display adaptation: the original pivot contract is not recovered.
     size: { w: 80, h: 80 },
-    pivot: { x: 40, y: 72 },
-  });
+    pivot: { anchor: { x: 40, y: 72 } },
+  },
+  states: {
+    idle: {
+      facings: ENTITY_FACING_ORDER,
+      clips: staticallyRecoveredDirectionalClips({
+        visualId: "japanese_samurai",
+        stem: "horseswordj2",
+        frameStart: 0,
+        frameStride: 8,
+        phaseCount: 8,
+        fps: PROVISIONAL_RECOVERED_ANIMATION_IDLE_FPS,
+        loop: true,
+      }),
+    },
+    move: {
+      facings: ENTITY_FACING_ORDER,
+      clips: staticallyRecoveredNormalMovementClips(
+        "japanese_samurai",
+        "horseswordj1",
+        0,
+        PROVISIONAL_RECOVERED_ANIMATION_ACTIVE_FPS,
+      ),
+    },
+    walk: {
+      facings: ENTITY_FACING_ORDER,
+      clips: staticallyRecoveredNormalMovementClips(
+        "japanese_samurai",
+        "horseswordj1",
+        0,
+        PROVISIONAL_RECOVERED_ANIMATION_ACTIVE_FPS,
+      ),
+    },
+    attack: {
+      facings: ENTITY_FACING_ORDER,
+      clips: staticallyRecoveredDirectionalClips({
+        visualId: "japanese_samurai",
+        stem: "horseswordj1",
+        frameStart: 50,
+        frameStride: 8,
+        phaseCount: 8,
+        fps: PROVISIONAL_RECOVERED_ANIMATION_ACTIVE_FPS,
+        loop: false,
+      }),
+    },
+    death: {
+      facings: ENTITY_FACING_ORDER,
+      clips: staticallyRecoveredDirectionalClips({
+        visualId: "japanese_samurai",
+        stem: "horseswordj1",
+        frameStart: 40,
+        frameStride: 0,
+        phaseCount: 8,
+        fps: PROVISIONAL_RECOVERED_ANIMATION_ACTIVE_FPS,
+        loop: false,
+      }),
+    },
+  },
+} as const satisfies EntityVisual;
 
 export const japaneseTurtleTankEntityVisual =
   sourceIdentityStillEntityVisual({
@@ -695,7 +756,7 @@ export const gwonYulEntityVisual = {
         frameStart: 0,
         frameStride: 8,
         phaseCount: 8,
-        fps: PROVISIONAL_RECOVERED_HERO_IDLE_FPS,
+        fps: PROVISIONAL_RECOVERED_ANIMATION_IDLE_FPS,
         loop: true,
       }),
     },
@@ -705,7 +766,7 @@ export const gwonYulEntityVisual = {
         "gwon_yul",
         "generalk11",
         0,
-        PROVISIONAL_RECOVERED_HERO_ACTIVE_FPS,
+        PROVISIONAL_RECOVERED_ANIMATION_ACTIVE_FPS,
       ),
     },
     walk: {
@@ -714,7 +775,7 @@ export const gwonYulEntityVisual = {
         "gwon_yul",
         "generalk11",
         0,
-        PROVISIONAL_RECOVERED_HERO_ACTIVE_FPS,
+        PROVISIONAL_RECOVERED_ANIMATION_ACTIVE_FPS,
       ),
     },
     attack: {
@@ -725,7 +786,7 @@ export const gwonYulEntityVisual = {
         frameStart: 0,
         frameStride: 10,
         phaseCount: 8,
-        fps: PROVISIONAL_RECOVERED_HERO_ACTIVE_FPS,
+        fps: PROVISIONAL_RECOVERED_ANIMATION_ACTIVE_FPS,
         loop: false,
       }),
     },
@@ -737,7 +798,7 @@ export const gwonYulEntityVisual = {
         frameStart: 40,
         frameStride: 0,
         phaseCount: 8,
-        fps: PROVISIONAL_RECOVERED_HERO_ACTIVE_FPS,
+        fps: PROVISIONAL_RECOVERED_ANIMATION_ACTIVE_FPS,
         loop: false,
       }),
     },
@@ -765,7 +826,7 @@ export const ryuSeongRyongEntityVisual = {
         frameStart: 0,
         frameStride: 8,
         phaseCount: 8,
-        fps: PROVISIONAL_RECOVERED_HERO_IDLE_FPS,
+        fps: PROVISIONAL_RECOVERED_ANIMATION_IDLE_FPS,
         loop: true,
       }),
     },
@@ -775,7 +836,7 @@ export const ryuSeongRyongEntityVisual = {
         "ryu_seong_ryong",
         "generalk31",
         40,
-        PROVISIONAL_RECOVERED_HERO_ACTIVE_FPS,
+        PROVISIONAL_RECOVERED_ANIMATION_ACTIVE_FPS,
       ),
     },
     walk: {
@@ -784,7 +845,7 @@ export const ryuSeongRyongEntityVisual = {
         "ryu_seong_ryong",
         "generalk31",
         40,
-        PROVISIONAL_RECOVERED_HERO_ACTIVE_FPS,
+        PROVISIONAL_RECOVERED_ANIMATION_ACTIVE_FPS,
       ),
     },
     attack: {
@@ -795,7 +856,7 @@ export const ryuSeongRyongEntityVisual = {
         frameStart: 0,
         frameStride: 10,
         phaseCount: 10,
-        fps: PROVISIONAL_RECOVERED_HERO_ACTIVE_FPS,
+        fps: PROVISIONAL_RECOVERED_ANIMATION_ACTIVE_FPS,
         loop: false,
       }),
     },
@@ -807,7 +868,7 @@ export const ryuSeongRyongEntityVisual = {
         frameStart: 50,
         frameStride: 0,
         phaseCount: 8,
-        fps: PROVISIONAL_RECOVERED_HERO_ACTIVE_FPS,
+        fps: PROVISIONAL_RECOVERED_ANIMATION_ACTIVE_FPS,
         loop: false,
       }),
     },

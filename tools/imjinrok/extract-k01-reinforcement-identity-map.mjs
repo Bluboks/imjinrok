@@ -82,6 +82,9 @@ const EXPECTED_TYPES = [
       pivot: { anchor: { x: 30, y: 52 } },
     },
     defaultStillOnly: false,
+    animationStateMapping: "unverified",
+    scope:
+      "project kind identity and source SPR binding only; animation-state, direction, stats, category, collision, behavior, render scale, and pivot are unverified original semantics",
   },
   {
     internalClass: 13,
@@ -111,7 +114,10 @@ const EXPECTED_TYPES = [
       size: { w: 80, h: 80 },
       pivot: { anchor: { x: 40, y: 72 } },
     },
-    defaultStillOnly: true,
+    defaultStillOnly: false,
+    animationStateMapping: "static-proven-core-state-frames",
+    scope:
+      "project kind identity and source SPR binding are proven here; class-13 idle, move/walk, attack, and death animation frames/directions are separately static-proven by the K01 samurai animation pilot, while exact timing, stats, category, collision, behavior, render scale, and pivot remain unverified original semantics",
   },
   {
     internalClass: 14,
@@ -142,6 +148,9 @@ const EXPECTED_TYPES = [
       pivot: { anchor: { x: 35, y: 52 } },
     },
     defaultStillOnly: true,
+    animationStateMapping: "unverified",
+    scope:
+      "project kind identity and source SPR binding only; animation-state, direction, stats, category, collision, behavior, render scale, and pivot are unverified original semantics",
   },
   {
     internalClass: 82,
@@ -172,6 +181,9 @@ const EXPECTED_TYPES = [
       pivot: { anchor: { x: 70, y: 100 } },
     },
     defaultStillOnly: true,
+    animationStateMapping: "unverified",
+    scope:
+      "project kind identity and source SPR binding only; animation-state, direction, stats, category, collision, behavior, render scale, and pivot are unverified original semantics",
   },
 ];
 
@@ -533,7 +545,7 @@ function validateProjectStaticSourceBindings(
         spriteSlot: expected.slot,
         sourcePath: expected.sourcePathNormalized.replace("/", "\\"),
         baseFrame: 0,
-        animationStateMapping: "unverified",
+        animationStateMapping: expected.animationStateMapping,
       },
       `${expected.projectKind} visual static evidence`,
     );
@@ -696,8 +708,7 @@ function validateProjectStaticSourceBindings(
           sha256: baseFrameSha256,
         },
       },
-      scope:
-        "project kind identity and source SPR binding only; animation-state, direction, stats, category, collision, behavior, render scale, and pivot are unverified original semantics",
+      scope: expected.scope,
     };
   });
 

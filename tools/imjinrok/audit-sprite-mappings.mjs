@@ -19,6 +19,7 @@ import { extractBeaconStatePilot } from "./extract-beacon-state-pilot.mjs";
 import { extractBuildingStatePilot } from "./extract-building-state-pilot.mjs";
 import { extractEntityTypeCatalog } from "./extract-entity-type-catalog.mjs";
 import { extractK01HeroMovementPilot } from "./extract-k01-hero-movement-pilot.mjs";
+import { extractK01SamuraiAnimationPilot } from "./extract-k01-samurai-animation-pilot.mjs";
 import { extractMissionPortraitMapping } from "./extract-mission-portrait-mapping.mjs";
 import { extractUnitAnimationPilot } from "./extract-unit-animation-pilot.mjs";
 
@@ -55,6 +56,10 @@ const k01HeroMovementPilotPath = join(
   repositoryRoot,
   "tools/imjinrok/extract-k01-hero-movement-pilot.mjs",
 );
+const k01SamuraiAnimationPilotPath = join(
+  repositoryRoot,
+  "tools/imjinrok/extract-k01-samurai-animation-pilot.mjs",
+);
 const buildingStatePilotPath = join(
   repositoryRoot,
   "tools/imjinrok/extract-building-state-pilot.mjs",
@@ -81,6 +86,7 @@ const outputPath = resolve(
 );
 const unitAnimationPilot = extractUnitAnimationPilot();
 const k01HeroMovementPilot = extractK01HeroMovementPilot();
+const k01SamuraiAnimationPilot = extractK01SamuraiAnimationPilot();
 const buildingStatePilot = extractBuildingStatePilot();
 const beaconStatePilot = extractBeaconStatePilot();
 const entityTypeCatalog = extractEntityTypeCatalog();
@@ -166,7 +172,7 @@ const report = {
   policy: {
     semanticStatus: "mixed",
     acceptedEvidence:
-      "All 95 original type identities, uniquely matched current visual source identities, SPEECH portraits, Korean HQ and signal-beacon body states, class-2 Korean spearman normal movement, and the K01 heroes' idle, movement, attack, and death frame/direction mappings are statically proven in their documented scopes.",
+      "All 95 original type identities, uniquely matched current visual source identities, SPEECH portraits, Korean HQ and signal-beacon body states, class-2 Korean spearman normal movement, K01 class-13 Japanese samurai core states, and the K01 heroes' idle, movement, attack, and death frame/direction mappings are statically proven in their documented scopes.",
     parityUse:
       "A unique source identity proves the original name and SPR binding only. Only explicitly listed frame scopes may be used for animation parity; all other direction, action, layer, and body mappings remain quarantined.",
   },
@@ -180,6 +186,7 @@ const report = {
     sourceFileRecord(missionPortraitExtractorPath),
     sourceFileRecord(unitAnimationPilotPath),
     sourceFileRecord(k01HeroMovementPilotPath),
+    sourceFileRecord(k01SamuraiAnimationPilotPath),
     sourceFileRecord(buildingStatePilotPath),
     sourceFileRecord(beaconStatePilotPath),
     sourceFileRecord(entityTypeCatalogExtractorPath),
@@ -430,6 +437,32 @@ function buildVisualStaticEvidence(visual, identityCandidates) {
         "project move and walk use the statically recovered state 1 normal movement frames, direction order, and mirroring",
       unresolvedScope:
         "idle, attack/combat states, state 2 alternate movement integration, and the state 1 masked +0x1e8 path",
+    };
+  }
+
+  if (visual.id === "japanese-samurai") {
+    return {
+      status: "mixed",
+      ...identityEvidence,
+      animationStateMapping: "static-proven-core-state-frames",
+      confirmedAnimationScope:
+        "project idle, move/walk, attack, and death use the statically recovered class-13 state 8, 1, 4, and 7 sprite slots, frames, direction order, and mirroring",
+      stateFrameRanges: {
+        idle: k01SamuraiAnimationPilot.states.idle.frameRange,
+        move: k01SamuraiAnimationPilot.states.move.frameRange,
+        walk: k01SamuraiAnimationPilot.states.move.frameRange,
+        attack: k01SamuraiAnimationPilot.states.attack.frameRange,
+        death: k01SamuraiAnimationPilot.states.death.frameRange,
+      },
+      stateSources: {
+        idle: k01SamuraiAnimationPilot.states.idle.sourcePath,
+        move: k01SamuraiAnimationPilot.states.move.sourcePath,
+        walk: k01SamuraiAnimationPilot.states.move.sourcePath,
+        attack: k01SamuraiAnimationPilot.states.attack.sourcePath,
+        death: k01SamuraiAnimationPilot.states.death.sourcePath,
+      },
+      unresolvedScope:
+        "exact seconds-per-phase playback timing, hit reaction, pivot, later runtime flag mutation, and project-side death playback before removal remain unresolved",
     };
   }
 
@@ -784,6 +817,9 @@ function hasStaticDirectionEvidence(visualId, scope, stateName) {
   }
   if (visualId === "korean-swordsman") {
     return stateName === "move" || stateName === "walk";
+  }
+  if (visualId === "japanese-samurai") {
+    return ["idle", "move", "walk", "attack", "death"].includes(stateName);
   }
   return (
     ["korean-gwon-yul", "korean-ryu-seong-ryong"].includes(visualId) &&

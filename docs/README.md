@@ -34,6 +34,7 @@
 - [`SPEECH` 대화 레이아웃](reverse-engineering/mechanics/speech-layout.md)
 - [조선 창병·내부 클래스 2 애니메이션 파일럿](reverse-engineering/mechanics/unit-animation-pilot.md)
 - [K01 권율·유성룡 핵심 애니메이션 파일럿](reverse-engineering/mechanics/k01-hero-animation-pilot.md)
+- [K01 일본 사무라이 핵심 애니메이션 파일럿](reverse-engineering/mechanics/k01-samurai-animation-pilot.md)
 - [K01 권율·유성룡 일반 공격 phase 파일럿](reverse-engineering/mechanics/k01-hero-basic-attack-pilot.md)
 - [K01 유성룡 투사체 subtype 0x0c 파일럿](reverse-engineering/mechanics/k01-ryu-projectile-pilot.md)
 - [K01 투사체 풀 갱신 cadence](reverse-engineering/mechanics/k01-projectile-pool-cadence.md)

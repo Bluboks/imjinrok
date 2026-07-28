@@ -22,7 +22,7 @@ generic simulation의 생성·충돌·배치 규칙은 변경하지 않았다. �
 | --- | --- | --- |
 | `original/imjinrok2/imjinrok2.exe` | `25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e` | native descriptor 호출·배열 |
 | `analysis/generated/entity-type-catalog.json` | `572044d9eec6162689154f3625c7572f27d7ee9030d4e4f9f51151b6a88f8745` | class 이름·SPR slot/base/path |
-| `analysis/generated/sprite-mapping-audit.json` | `71509206a9739a4b8d81a5b6f9df6ef2ca5af5e21fd851a788c0347711e9f26e` | 네 project kind→class·source SPR binding, K01 adapter, animation mapping 미확정과 관련 source provenance |
+| `analysis/generated/sprite-mapping-audit.json` | `c96b7d342029f1e4e911448f9c3afde644ff756a538cbfa1b006785db0c296b5` | 네 project kind→class·source SPR binding, K01 adapter, class 13 core-state animation과 관련 source provenance |
 | `apps/game-client/public/assets/themes/default/entities/japanese-gunner/gunj1.manifest.json` | `f156fab6f775bcf0df46a3f52356dcdbb86634447d9a674d6d9a39476178cae5` | audit가 가리키는 실제 conversion manifest, source `original/imjinrok2/char/gunj1.spr`, 선언 80 frames와 export 80개 |
 | `apps/game-client/public/assets/themes/default/entities/japanese-samurai/horseswordj1.manifest.json` | `4d2ef829d95a1b90c2e666757f29c948369e9f27c6b2b11aab992f18030bf9c9` | `horseswordj1.spr`, 80×80, 선언·export 90 frames |
 | `apps/game-client/public/assets/themes/default/entities/japanese-turtle-tank/ghosttankj.manifest.json` | `5d83ac52b270f0489bcde28e83896365c58468de340ffae3cebea64943bd7dc5` | `ghosttankj.spr`, 70×60, 선언·export 88 frames |
@@ -91,17 +91,19 @@ logical path/SHA provenance를 검사한다. 구조가 맞아도 canonical bytes
 | `japanese-turtle-tank` | `ghosttankj_0000.png` | `104517e7249550c719ccda7473720c2384bc217f56c71543894e8ace55dcf354` |
 | `japanese-konishi` | `generalj11_0000.png` | `9b94fe4900a4343de2842c60caae2575e1e949bebba3e72bbdfcfc819a1caeaf` |
 
-visual은 모두
-`mixed`, animation state mapping은 `unverified`여야 한다. 신규 세 visual은 statically proven
-base frame 0 하나만 `default` still fallback으로 참조하며 facing·mirror·action block을 만들지
-않는다. 따라서 이 binding은 class 정체와 source SPR 파일에만 정적으로 연결되어 있다.
+visual은 모두 `mixed`다. class 13 `japanese-samurai`의 animation state mapping은 별도
+[K01 일본 사무라이 파일럿](k01-samurai-animation-pilot.md)이 확정한
+`static-proven-core-state-frames`이고, class 12·14·82는 이 문서 범위에서 `unverified`다.
+class 14·82 visual은 statically proven base frame 0 하나만 `default` still fallback으로
+참조한다. identity/source binding 판정 자체는 계속 class 정체와 source SPR 파일에만 한정된다.
 
 아홉 record 기준 결과는 다음과 같다.
 
 - 9/9: class 12·13·14·82, exact static identity/source binding
 - 0/9: proxy identity
 - 9/9: K01 원본 요청 좌표 exact
-- 0/9: 이 문서만으로 최종 배치·전투 수치·행동·animation parity를 확정
+- 0/9: 이 문서만으로 최종 배치·전투 수치·행동 parity를 확정
+- class 13 record 2/9: 별도 파일럿으로 상태 8/1/4/7 frame·8방향·mirror를 확정·이식
 
 ### 프로젝트 gameplay·표시 적응
 
@@ -148,7 +150,8 @@ K0120 script에는 spawn command가 없고 원본 native code가 직접 생성�
   구조 불일치, 구조가 유효한 canonical manifest byte 변조, base-frame asset 누락·고정 PNG
   SHA 불일치
 
-남은 integration gate는 네 class의 animation state·방향·stats·category·collision·전투 행동,
-raw owner의 사람용 의미와 원본 생성 실패/점유·최종 배치 정책의 프로젝트 identity다.
+남은 integration gate는 class 12·14·82의 animation state·방향, 네 class의
+stats·category·collision·전투 행동, raw owner의 사람용 의미와 원본 생성 실패/점유·최종 배치
+정책의 프로젝트 identity다. class 13도 exact timing·pivot·사망 lifetime은 미확정이다.
 generic superset는 유지하며 이들이 별도 정적 확정·재현되기 전에는 K01 adapter를 원본 전체
 동작으로 승격하지 않는다.

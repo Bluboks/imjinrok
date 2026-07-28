@@ -47,8 +47,9 @@ unsigned DWORD 50/2000 strict poll, `0x8c→0x96→0x1c` relay와 external/stage
 native 증원의 원본 class·SPR와 K01 60×60 요청 좌표 9개도 교차 확인했다. K01 전용 adapter는
 class 12·13·14·82 아홉 record를 각각 `japanese-gunner`, `japanese-samurai`,
 `japanese-turtle-tank`, `japanese-konishi`의 exact static identity/source binding으로 연결했다.
-신규 세 visual은 base frame 0 still만 사용하며 generic open-point 배치가 최종 위치를 옮기거나
-생략할 수 있다.
+class 13 `japanese-samurai`의 상태 8/1/4/7 frame·8방향·mirror도 정적 확정·이식했고,
+class 14·82 visual은 base frame 0 still만 사용한다. generic open-point 배치가 최종 위치를
+옮기거나 생략할 수 있다.
 raw owner `1`→`cpu-1`, objective trigger와 attack-move도 프로젝트 적응이다. raw clock→24 Hz와
 result transition/identity policy mapping도 없어 승패 수명주기는 runtime에 연결하지 않았다.
 
@@ -72,13 +73,13 @@ K02는 이 단기 MVP의 완료 조건이 아니다. 기존 K02 프로토타입�
 | 원본 PE·주소 변환 | 고정 Ghidra 파이프라인 존재 | 일반 참조·점프 테이블 포함 | 2회 생성 해시 일치 | 정적 분석 1단계 완료 |
 | 스크립트·맵·SPR·YAV 파서 | 도구 존재 | 원본 파일 기반 | 파서별 편차 있음 | 재감사 후 유지 |
 | 엔티티 정체·자원 | 고유 연결 표시 이름 반영, 봉화대·K01 영웅 자원 수정 | 클래스 1~95 명칭·슬롯·기본 프레임·flags·경로 전수 확정 | 연속성·대표 타입·공유 경로·입력 해시 테스트 | 타입 정체 정적 확정, 행동·수치 의미는 별도 |
-| K01 캠페인 | 처음부터 결과까지 프로토타입, native 증원 9개 exact static identity/source adapter | 표준 entry timer reset, 봉화대→K0120, native class/요청 좌표, latch→timer→commit, result presentation→final route 범위 확정 | 요청 좌표·exact static identity/source 9/9, native effect·timer·presentation·route 경계 재현 | 단기 팬 리마스터 MVP, 증원 animation/stats/behavior·최종 배치·raw clock/result policy 미완료 |
+| K01 캠페인 | 처음부터 결과까지 프로토타입, native 증원 9개 exact static identity/source adapter | 표준 entry timer reset, 봉화대→K0120, native class/요청 좌표, class 13 핵심 animation, latch→timer→commit, result presentation→final route 범위 확정 | 요청 좌표·exact static identity/source 9/9, class 13 frame/direction, native effect·timer·presentation·route 경계 재현 | 단기 팬 리마스터 MVP, class 14·82 animation과 증원 stats/behavior·최종 배치·raw clock/result policy 미완료 |
 | K02 캠페인 | 프로토타입 존재 | 제한적 | 원본 재현 없음 | K01 이후로 연기 |
 | 전투 | 프로토타입, 유성룡 좌표 accepted subset `0..32767` 독립 계산 부분 이식 | K01 영웅 phase·피해·대상·사거리·투사체와 signed-health 사망·slot/reference 수명주기 확정 | 대상·투사체·scheduler 및 사망 phase·delay·stale reference 경계 재현 | 독립 단위 부분 이식; identity/좌표/24 Hz exact mapping과 opt-in 사망 정책 대기 |
 | 이동·경로 탐색 | 구현 존재 | 후보 함수 존재 | 원본 재현 없음 | 미검증 |
 | AI | 구현 존재 | 체계적 함수 지도 없음 | 원본 재현 없음 | 미검증 |
 | 생산·건설·연구 | 구현 존재 | 본영·봉화대 표시 상태만 복원 | 표시 프레임 재현 | 메커니즘은 미검증 |
-| 애니메이션 | 조선 창병 일반 이동과 권율·유성룡 idle·일반 이동·공격·사망 이식 | 클래스 2 상태 1·2 이동, 클래스 76·78 상태 1·4·7·8과 사망 phase/update-unit 수명 확정 | 방향·phase·상태별 슬롯·flags·사망 완료/해제 경계 테스트 | 영웅 핵심 프레임 원본 기반, 원본 update→FPS/24 Hz와 opt-in 사망 수명 이식 미확정 |
+| 애니메이션 | 조선 창병 일반 이동, class 13 일본 사무라이와 권율·유성룡 idle·일반 이동·공격·사망 이식 | 클래스 2 상태 1·2 이동, 클래스 13·76·78 상태 1·4·7·8과 영웅 사망 phase/update-unit 수명 확정 | 방향·phase·상태별 슬롯·flags·사망 완료/해제 경계 테스트 | 세 scoped kind 핵심 프레임 원본 기반, 원본 update→FPS/24 Hz와 opt-in 사망 수명 이식 미확정 |
 | 건물 상태 이미지 | 조선 본영·봉화대 건설 0~7·정상 7·반파 8 이식 | 클래스 49·52 정체와 공통 건물 진행도·체력 분기 확정 | 모든 진행도·50% 체력 경계 테스트 | 두 건물 본체 범위 원본 기반, 나머지 7개 미검증 |
 | 브리핑 초상화 | 17개 ID·`hero.spr` 프레임 이식 | 파서→조회→프레임 표→그리기 정적 확정 | 추출기·클라이언트 교차 테스트 | 원본 기반 |
 | `SPEECH` 대화 레이아웃 | 숫자 슬롯·초상화·대사 공통 배치 이식 | 640×480 슬롯 4개와 대사 좌표 정적 확정 | 추출기·배율 변환 테스트 | 확정 범위 원본 기반 |
@@ -109,7 +110,7 @@ K02는 이 단기 MVP의 완료 조건이 아니다. 기존 K02 프로토타입�
 
 ## 현재 최우선 작업
 
-1. K01 native 증원 class 13·14·82의 exact kind/asset/animation과 생성·점유 정책을 독립 복원
+1. K01 native 증원 class 14·82의 animation과 네 class 생성·점유 정책을 독립 복원
 2. 원본 raw clock/entity-update 단위와 24 Hz·identity의 exact opt-in integration policy를 별도 설계
 3. K01 HUD, 선택 패널, 목표·진행 표시와 미션 대화 전체 레이아웃을 정적으로 복원
 4. K01에 등장하는 나머지 건물·유닛의 정체·상태·방향 매핑을 독립 복원

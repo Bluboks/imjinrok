@@ -48,6 +48,7 @@ test("original executable sprite pointer table backs K01/K02 theme source sprite
     { manifestPath: "entities/japanese-camp-barracks/barrackj.manifest.json", sourcePath: "char/barrackj.spr", tableIndex: 10 },
     { manifestPath: "entities/japanese-gunner/gunj1.manifest.json", sourcePath: "char/gunj1.spr", tableIndex: 14 },
     { manifestPath: "entities/japanese-samurai/horseswordj1.manifest.json", sourcePath: "char/horseswordj1.spr", tableIndex: 17 },
+    { manifestPath: "entities/japanese-samurai/horseswordj2.manifest.json", sourcePath: "char/horseswordj2.spr", tableIndex: 18 },
     { manifestPath: "entities/japanese-turtle-tank/ghosttankj.manifest.json", sourcePath: "char/ghosttankj.spr", tableIndex: 4 },
     { manifestPath: "entities/japanese-konishi/generalj11.manifest.json", sourcePath: "char/generalj11.spr", tableIndex: 65 },
     { manifestPath: "entities/japanese-camp-house/millj.manifest.json", sourcePath: "char/millj.spr", tableIndex: 23 },
@@ -348,15 +349,106 @@ test("default theme unit frame blocks stay within their source exports", () => {
   assert.equal(royalCartVisual.states.move?.clips.se?.frames.at(-1)?.fileName, "koreanking_0039.png");
 });
 
-test("identity-only Japanese visuals use only the proven base-frame still", () => {
+test("Japanese samurai uses the statically recovered core-state frame blocks", () => {
+  const primaryManifest = readManifest(
+    "entities/japanese-samurai/horseswordj1.manifest.json",
+  );
+  const secondaryManifest = readManifest(
+    "entities/japanese-samurai/horseswordj2.manifest.json",
+  );
+  const visual = defaultTheme.visuals[
+    defaultTheme.entityBindings["japanese-samurai"]
+  ] as EntityVisual;
+
+  assert.equal(primaryManifest.source, "original/imjinrok2/char/horseswordj1.spr");
+  assert.equal(primaryManifest.frameCount, 90);
+  assert.equal(primaryManifest.exportedFrames.length, 90);
+  assert.equal(secondaryManifest.source, "original/imjinrok2/char/horseswordj2.spr");
+  assert.equal(secondaryManifest.frameCount, 70);
+  assert.equal(secondaryManifest.exportedFrames.length, 70);
+  assert.deepEqual(
+    Object.keys(visual.states).sort(),
+    ["idle", "move", "walk", "attack", "death"].sort(),
+  );
+
+  assertDirectionalFrames(visual, "idle", {
+    stem: "horseswordj2",
+    phaseCount: 8,
+    frameStarts: { s: 0, sw: 8, w: 16, nw: 24, n: 16, ne: 8, e: 0, se: 32 },
+  });
+  assertDirectionalFrames(visual, "move", {
+    stem: "horseswordj1",
+    phaseCount: 8,
+    frameStarts: { s: 0, sw: 8, w: 16, nw: 24, n: 16, ne: 8, e: 0, se: 32 },
+  });
+  assert.deepEqual(visual.states.walk, visual.states.move);
+  assertDirectionalFrames(visual, "attack", {
+    stem: "horseswordj1",
+    phaseCount: 8,
+    frameStarts: { s: 50, sw: 58, w: 66, nw: 74, n: 66, ne: 58, e: 50, se: 82 },
+  });
+  assertDirectionalFrames(visual, "death", {
+    stem: "horseswordj1",
+    phaseCount: 8,
+    frameStarts: { s: 40, sw: 40, w: 40, nw: 40, n: 40, ne: 40, e: 40, se: 40 },
+  });
+  assert.equal(visual.states.idle?.clips.s?.loop, true);
+  assert.equal(visual.states.move?.clips.s?.loop, true);
+  assert.equal(visual.states.walk?.clips.s?.loop, true);
+  assert.equal(visual.states.attack?.clips.s?.loop, false);
+  assert.equal(visual.states.death?.clips.s?.loop, false);
+
+  for (const state of ["idle", "move", "walk", "attack", "death"] as const) {
+    const clips = visual.states[state]?.clips;
+    assert.equal(clips?.n?.mirrorX, true);
+    assert.equal(clips?.ne?.mirrorX, true);
+    assert.equal(clips?.e?.mirrorX, true);
+    assert.equal(clips?.s?.mirrorX, undefined);
+    assert.equal(clips?.sw?.mirrorX, undefined);
+    assert.equal(clips?.w?.mirrorX, undefined);
+    assert.equal(clips?.nw?.mirrorX, undefined);
+    assert.equal(clips?.se?.mirrorX, undefined);
+  }
+});
+
+function assertDirectionalFrames(
+  visual: EntityVisual,
+  stateName: "idle" | "move" | "walk" | "attack" | "death",
+  expected: {
+    stem: string;
+    phaseCount: number;
+    frameStarts: Record<Facing, number>;
+  },
+): void {
+  const state = visual.states[stateName];
+  assert.ok(state);
+  const expectedFacings: Facing[] = [
+    "s",
+    "sw",
+    "w",
+    "nw",
+    "n",
+    "ne",
+    "e",
+    "se",
+  ];
+  assert.deepEqual(state.facings, expectedFacings);
+  for (const facing of expectedFacings) {
+    const clip = state.clips[facing];
+    const frameStart = expected.frameStarts[facing];
+    assert.deepEqual(
+      clip?.frames.map(({ fileName }) => fileName),
+      Array.from(
+        { length: expected.phaseCount },
+        (_value, phase) =>
+          `${expected.stem}_${String(frameStart + phase).padStart(4, "0")}.png`,
+      ),
+    );
+  }
+}
+
+test("remaining identity-only Japanese visuals use only the proven base-frame still", () => {
   const expectations = [
-    {
-      kind: "japanese-samurai",
-      manifestPath: "entities/japanese-samurai/horseswordj1.manifest.json",
-      source: "original/imjinrok2/char/horseswordj1.spr",
-      frameCount: 90,
-      frameFile: "horseswordj1_0000.png",
-    },
     {
       kind: "japanese-turtle-tank",
       manifestPath: "entities/japanese-turtle-tank/ghosttankj.manifest.json",
