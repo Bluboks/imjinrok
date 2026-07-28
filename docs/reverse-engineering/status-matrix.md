@@ -18,6 +18,7 @@
 | K01 승패 판정 | 표준 mission-entry broad timer reset→general/영웅 latch→timer→distinct-tick commit과 shared teardown→SPR/YAV poll→relay→external/stage route 범위 정적 확정 | reset 반개구간·순서, timer wrap/overflow와 result cadence·cleanup·state overwrite·WORD wrap 재현 완료 | 프로토타입, 원본 정책 미연결 | raw clock·asset/result identity policy exact mapping 뒤 isolated opt-in 연결 |
 | 전투·피해 | K01 영웅 phase·피해·대상·사거리·subtype `0x0c`, signed-health 행동 6/7·slot/reference 사망 수명주기 정적 확정 | 대상·투사체·scheduler 및 health/action/phase/delay/stale-reference 경계 재현 완료 | 프로토타입, 유성룡 독립 계산 부분 이식; 사망 수명 미이식 | 원본 참조·좌표·identity·24 Hz exact mapping과 opt-in 연결 |
 | 이동·경로 탐색 | 추정 | 미재현 | 프로토타입 | 좌표·경로 레코드와 실패 경로 복원 |
+| K01 `field_0x00032514` 표준 주소형 direct writer | 정적 확정 | 재현 완료 | 없음 | alias/computed writer, `0x004bdfd0` producer, derived flag writer와 writer ordering을 별도 분석 |
 | 생산·건설·연구 | 조선 본영·봉화대 표시 진행도 범위만 정적 확정 | 해당 프레임 선택 재현 완료 | 메커니즘은 프로토타입, 표시 일부 원본 기반 | 생산·건설 시간과 자원·완료 상태 전이 복원 |
 | AI | 미확인 | 미재현 | 프로젝트 구현 | 원본 의사결정 함수 지도 |
 | 애니메이션 | 조선 창병 상태 1·2 이동, K01 class 12 상태 8/1/2/4/7·class 13·82 상태 8/1/4/7·class 14 상태 8/1/4와 16-ring·transient destruction, 두 영웅 상태 1·4·7·8 정적 확정 | 방향·phase·상태별 슬롯·flags, class 14 turn/effect tick 경계와 K01 영웅 사망 완료/해제 경계 재현 | 조선 창병 일반 이동, class 12 상태 8/1/4/7·class 13·14·82 grid 핵심 상태와 두 영웅 핵심 상태 이식; class-12 state-2와 class-14 transient path 미이식 | 원본 update→FPS/24 Hz 변환, class-12 state-2 project policy, class 14 generic Facing/runtime tick mapping, 조선 창병 상태 2 통합과 특수 분기 base 연결 |
@@ -82,6 +83,9 @@
   정적 확정·재현·이식했다.
 - 조선 봉화대는 클래스 52·`firehousek.spr`로 바로잡고 같은 건설 경계, 정상 frame 7, 반파
   frame 8을 독립 교차 확인·이식했다.
+- K01 `field_0x00032514`의 `map+0x32514+x*180+y` 표준 주소형은 21 occurrence(16 read, 5 direct
+  writer)로 닫았다. 다섯 writer는 low nibble을 정확히 1 또는 2로 만들지만, alias/computed writer와
+  global mask·derived flag producer는 이 결과에 포함하지 않는다.
 
 ## 파일럿 승격 목표
 

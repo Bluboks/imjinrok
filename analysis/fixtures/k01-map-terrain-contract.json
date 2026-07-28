@@ -1,0 +1,35 @@
+{
+  "map": { "size": 1097100, "sha256": "43ec3a173032f74c12d3cce1db1078b076b651ed79070a0914673a5b65da99cb" },
+  "executable": { "size": 843833, "sha256": "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e" },
+  "portSource": { "size": 15920, "sha256": "6ea348459a0782b6359e346e0e995f59148349ce105726de08255d42ede10b0b" },
+  "projection": {
+    "width": 60,
+    "height": 60,
+    "coordinateOrder": "row-major: logicalIndex = y * width + x",
+    "recordRegionOffset": 48524,
+    "streamStartInRecordRegion": 918796,
+    "rowStride": 180,
+    "valueWidthBytes": 1,
+    "streamStartAbsolute": 967320,
+    "streamEndAbsoluteExclusive": 978000
+  },
+  "values": {
+    "sha256": "0dc671d29bce196b984cec3d37d00bb15cb393e8ae44f96eb329bced53d6d488",
+    "count": 3600,
+    "counts": [{ "value": 0, "count": 60 }, { "value": 1, "count": 2854 }, { "value": 2, "count": 194 }, { "value": 3, "count": 492 }],
+    "rle": "01o 11h9 22 11m 22 11k 22 11m 22 11e 2c 11c 2c 1m 22 1k 2h 1l 22 1k 2h 1l 24 1g 24 3f 1l 24 1g 24 3f 1n 24 1a 26 3h 1n 24 1a 26 3h 1p 22 18 24 3l 1p 22 18 24 3l 1p 22 18 24 3l 1p 22 18 24 3l 1p 22 12 28 3n 1p 22 12 28 3n 1p 26 3t 1p 26 3t 1r 24 3t 1r 24 3t 1r 24 3t 1r 24 3t 1p 26 3t 1p 26 3t 1p 22 3x 1p 22 3x",
+    "representativeVectors": [
+      { "x": 0, "y": 0, "logicalIndex": 0, "value": 0, "absoluteOffset": 967320, "absoluteOffsetHex": "0xec298", "relativeOffset": 918796, "record": { "index": 57424, "x": 80, "y": 224, "byteOffset": 12 } },
+      { "x": 59, "y": 0, "logicalIndex": 59, "value": 0, "absoluteOffset": 967379, "absoluteOffsetHex": "0xec2d3", "relativeOffset": 918855, "record": { "index": 57428, "x": 84, "y": 224, "byteOffset": 7 } },
+      { "x": 0, "y": 1, "logicalIndex": 60, "value": 1, "absoluteOffset": 967500, "absoluteOffsetHex": "0xec34c", "relativeOffset": 918976, "record": { "index": 57436, "x": 92, "y": 224, "byteOffset": 0 } },
+      { "x": 45, "y": 40, "logicalIndex": 2445, "value": 3, "absoluteOffset": 974565, "absoluteOffsetHex": "0xedee5", "relativeOffset": 926041, "record": { "index": 57877, "x": 21, "y": 226, "byteOffset": 9 } },
+      { "x": 57, "y": 32, "logicalIndex": 1977, "value": 2, "absoluteOffset": 973137, "absoluteOffsetHex": "0xed951", "relativeOffset": 924613, "record": { "index": 57788, "x": 188, "y": 225, "byteOffset": 5 } },
+      { "x": 59, "y": 59, "logicalIndex": 3599, "value": 3, "absoluteOffset": 977999, "absoluteOffsetHex": "0xeec4f", "relativeOffset": 929475, "record": { "index": 58092, "x": 236, "y": 226, "byteOffset": 3 } }
+    ]
+  },
+  "portSourceBinding": {
+    "namedLiteral": "K01_TERRAIN_RLE",
+    "rle": "01o 11h9 22 11m 22 11k 22 11m 22 11e 2c 11c 2c 1m 22 1k 2h 1l 22 1k 2h 1l 24 1g 24 3f 1l 24 1g 24 3f 1n 24 1a 26 3h 1n 24 1a 26 3h 1p 22 18 24 3l 1p 22 18 24 3l 1p 22 18 24 3l 1p 22 18 24 3l 1p 22 12 28 3n 1p 22 12 28 3n 1p 26 3t 1p 26 3t 1r 24 3t 1r 24 3t 1r 24 3t 1r 24 3t 1p 26 3t 1p 26 3t 1p 22 3x 1p 22 3x",
+    "equalsRawProjection": true
+  }
+}
