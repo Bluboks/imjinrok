@@ -1,0 +1,94 @@
+{
+  "schemaVersion": 1,
+  "sourceExecutableSha256": "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e",
+  "vectors": [
+    {
+      "id": "surface-lock-failure-skips-slot-reads",
+      "input": {
+        "selectionCount": 0,
+        "surfaceLockSucceeded": false
+      },
+      "expectedOutputSha256": "3344bb18b6b001e95bc32df3c8afd72812ef12bb7678dc6b10a84be2d7f47c8b"
+    },
+    {
+      "id": "no-selection-admits-strict-interior-slot-one",
+      "input": {
+        "selectionCount": 0,
+        "surfaceLockSucceeded": true,
+        "slots": [
+          { "rendererEnabled": 1, "frameOrResourceIndex": 27, "inputControlId": 33 },
+          { "rendererEnabled": 1, "frameOrResourceIndex": 28, "inputControlId": 35 },
+          { "rendererEnabled": 0, "frameOrResourceIndex": 0, "inputControlId": 0 },
+          { "rendererEnabled": 0, "frameOrResourceIndex": 0, "inputControlId": 0 },
+          { "rendererEnabled": 0, "frameOrResourceIndex": 0, "inputControlId": 0 },
+          { "rendererEnabled": 0, "frameOrResourceIndex": 0, "inputControlId": 0 },
+          { "rendererEnabled": 0, "frameOrResourceIndex": 0, "inputControlId": 0 },
+          { "rendererEnabled": 0, "frameOrResourceIndex": 0, "inputControlId": 0 },
+          { "rendererEnabled": 0, "frameOrResourceIndex": 0, "inputControlId": 0 }
+        ],
+        "hitTest": { "disabled": false, "slot": 1, "pointerX": 562, "pointerY": 364 }
+      },
+      "expectedOutputSha256": "53bcf96b76cd35cf9f506d5151d128e6b1fe3f38f646071b9b3e564c851b42c5"
+    },
+    {
+      "id": "single-selection-rejects-top-edge",
+      "input": {
+        "selectionCount": 1,
+        "surfaceLockSucceeded": true,
+        "slots": [
+          { "rendererEnabled": 0, "frameOrResourceIndex": 0, "inputControlId": 0 },
+          { "rendererEnabled": 0, "frameOrResourceIndex": 0, "inputControlId": 0 },
+          { "rendererEnabled": 0, "frameOrResourceIndex": 0, "inputControlId": 0 },
+          { "rendererEnabled": 0, "frameOrResourceIndex": 0, "inputControlId": 0 },
+          { "rendererEnabled": 0, "frameOrResourceIndex": 0, "inputControlId": 0 },
+          { "rendererEnabled": 0, "frameOrResourceIndex": 0, "inputControlId": 0 },
+          { "rendererEnabled": 0, "frameOrResourceIndex": 0, "inputControlId": 0 },
+          { "rendererEnabled": 0, "frameOrResourceIndex": 0, "inputControlId": 0 },
+          { "rendererEnabled": 1, "frameOrResourceIndex": 99, "inputControlId": 7 }
+        ],
+        "hitTest": { "disabled": false, "slot": 8, "pointerX": 598, "pointerY": 435 }
+      },
+      "expectedOutputSha256": "6e8845f3506db0a3435ab00ed210c775280c3a4540a2feb2a43eeb6b3772764a"
+    },
+    {
+      "id": "multi-selection-disabled-rejects-before-geometry-admission",
+      "input": {
+        "selectionCount": 2,
+        "surfaceLockSucceeded": true,
+        "slots": [
+          { "rendererEnabled": 0, "frameOrResourceIndex": 0, "inputControlId": 0 },
+          { "rendererEnabled": 0, "frameOrResourceIndex": 0, "inputControlId": 0 },
+          { "rendererEnabled": 0, "frameOrResourceIndex": 0, "inputControlId": 0 },
+          { "rendererEnabled": 0, "frameOrResourceIndex": 0, "inputControlId": 0 },
+          { "rendererEnabled": 1, "frameOrResourceIndex": 44, "inputControlId": 9 },
+          { "rendererEnabled": 0, "frameOrResourceIndex": 0, "inputControlId": 0 },
+          { "rendererEnabled": 0, "frameOrResourceIndex": 0, "inputControlId": 0 },
+          { "rendererEnabled": 0, "frameOrResourceIndex": 0, "inputControlId": 0 },
+          { "rendererEnabled": 0, "frameOrResourceIndex": 0, "inputControlId": 0 }
+        ],
+        "hitTest": { "disabled": true, "slot": 4, "pointerX": 562, "pointerY": 400 }
+      },
+      "expectedOutputSha256": "45946811d3518acdf632371b045956d6a52d8435dd7b45dfa7ec4d5dddb8fb7d"
+    },
+    {
+      "id": "unsupported-slot-is-rejected-by-owner-getter-boundary",
+      "input": {
+        "selectionCount": 2,
+        "surfaceLockSucceeded": true,
+        "slots": [
+          { "rendererEnabled": 0, "frameOrResourceIndex": 0, "inputControlId": 0 },
+          { "rendererEnabled": 0, "frameOrResourceIndex": 0, "inputControlId": 0 },
+          { "rendererEnabled": 0, "frameOrResourceIndex": 0, "inputControlId": 0 },
+          { "rendererEnabled": 0, "frameOrResourceIndex": 0, "inputControlId": 0 },
+          { "rendererEnabled": 0, "frameOrResourceIndex": 0, "inputControlId": 0 },
+          { "rendererEnabled": 0, "frameOrResourceIndex": 0, "inputControlId": 0 },
+          { "rendererEnabled": 0, "frameOrResourceIndex": 0, "inputControlId": 0 },
+          { "rendererEnabled": 0, "frameOrResourceIndex": 0, "inputControlId": 0 },
+          { "rendererEnabled": 0, "frameOrResourceIndex": 0, "inputControlId": 0 }
+        ],
+        "hitTest": { "disabled": false, "slot": 9, "pointerX": 0, "pointerY": 0 }
+      },
+      "expectedOutputSha256": "2760bfefd2fb3c03348509d8538472c4d9d42971e8d82cee09de3224a3a00877"
+    }
+  ]
+}
