@@ -1,6 +1,10 @@
 import Phaser from "phaser";
 import { actionDefinitions, researchDefinitions, unitCanPerformAction, unitDefinitions, type ActionDefinitionId, type BankResourceKind, type ResearchDefinition, type ResearchDefinitionId, type UnitDefinition, type UnitDefinitionId } from "@shared";
 import type { ActionTriggerSource, PlayerEconomyView, SelectedEntitiesView } from "../hud.js";
+import {
+  findResolvedOriginalGameplayCommandGridSlot,
+  type ResolvedOriginalGameplayCommandGridLayout,
+} from "../originalGameplayCommandGridLayout.js";
 import { drawPanelFrame, HUD_TEXT_STYLE, type PanelBounds } from "./hudPanel.js";
 
 export interface HudActionSlot {
@@ -13,6 +17,13 @@ export interface HudActionSlot {
 }
 
 export type HudActionHandler = (actionId: ActionDefinitionId, source: ActionTriggerSource) => void;
+
+export interface ActionGridSlotRect {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
 
 const TRAIN_ACTION_UNITS: Partial<Record<ActionDefinitionId, UnitDefinitionId>> = {
   "train-villager": "villager",
@@ -64,89 +75,117 @@ export function drawActionGrid(
   selectedEntities: SelectedEntitiesView,
   playerEconomy: PlayerEconomyView | null,
   onAction?: HudActionHandler,
+  originalLayout?: ResolvedOriginalGameplayCommandGridLayout,
 ): void {
   const { x, y, width, height } = bounds;
   drawPanelFrame(scene, container, graphics, bounds, "명령");
 
+  const actions = getActionSlots(selectedEntities, playerEconomy);
+  const slotRects = resolveActionGridSlotRects(bounds, originalLayout);
+
+  for (const [index, slot] of slotRects.entries()) {
+    const action = actions[index];
+
+    if (!action) {
+      continue;
+    }
+
+    const { x: slotX, y: slotY, width: renderedSlotWidth, height: renderedSlotHeight } = slot;
+    const fillColor = action.enabled ? 0x1a3034 : 0x0c1618;
+    const strokeColor = action.enabled ? 0xb89e5e : 0x31474b;
+
+    graphics.fillStyle(fillColor, action.enabled ? 0.98 : 0.62);
+    graphics.fillRoundedRect(slotX, slotY, renderedSlotWidth, renderedSlotHeight, 9);
+    graphics.lineStyle(1, strokeColor, action.enabled ? 0.9 : 0.45);
+    graphics.strokeRoundedRect(slotX, slotY, renderedSlotWidth, renderedSlotHeight, 9);
+
+    if (!action.enabled) {
+      graphics.lineStyle(1, 0x23373b, 0.65);
+      graphics.lineBetween(slotX + 8, slotY + renderedSlotHeight - 8, slotX + renderedSlotWidth - 8, slotY + 8);
+    }
+
+    if (action.enabled && action.actionId && onAction) {
+      const hitZone = scene.add
+        .zone(slotX, slotY, renderedSlotWidth, renderedSlotHeight)
+        .setOrigin(0, 0)
+        .setInteractive({ useHandCursor: true });
+
+      if (originalLayout) {
+        hitZone.on("pointerup", (pointer: Phaser.Input.Pointer) => {
+          if (findResolvedOriginalGameplayCommandGridSlot(originalLayout, pointer.x, pointer.y) === index) {
+            onAction(action.actionId as ActionDefinitionId, "button");
+          }
+        });
+      } else {
+        hitZone.on("pointerup", () => onAction(action.actionId as ActionDefinitionId, "button"));
+      }
+
+      container.add(hitZone);
+    }
+
+    container.add(scene.add
+      .text(slotX + renderedSlotWidth / 2, slotY + 10, action.icon, {
+        fontFamily: "Georgia, Times New Roman, serif",
+        fontSize: "20px",
+        color: action.enabled ? "#f1dfaa" : "#6d817a",
+        fontStyle: "bold",
+      })
+      .setOrigin(0.5, 0));
+    container.add(scene.add
+      .text(slotX + renderedSlotWidth / 2, slotY + renderedSlotHeight - 24, action.label, {
+        ...HUD_TEXT_STYLE,
+        fontSize: "10px",
+        color: action.enabled ? "#cfe0d4" : "#718980",
+        align: "center",
+        wordWrap: { width: renderedSlotWidth - 10 },
+      })
+      .setOrigin(0.5, 0));
+    container.add(scene.add.text(slotX + 7, slotY + 5, action.hotkey, {
+      ...HUD_TEXT_STYLE,
+      fontSize: "10px",
+      color: action.enabled ? "#7f9b91" : "#4e6660",
+    }));
+
+    if (!action.enabled && action.disabledReason) {
+      container.add(scene.add
+        .text(slotX + renderedSlotWidth / 2, slotY + renderedSlotHeight - 11, action.disabledReason, {
+          ...HUD_TEXT_STYLE,
+          fontSize: "9px",
+          color: "#8aa69b",
+          align: "center",
+          wordWrap: { width: renderedSlotWidth - 10 },
+        })
+        .setOrigin(0.5, 0));
+    }
+  }
+}
+
+export function resolveActionGridSlotRects(
+  bounds: PanelBounds,
+  originalLayout?: ResolvedOriginalGameplayCommandGridLayout,
+): readonly ActionGridSlotRect[] {
+  if (originalLayout) {
+    return originalLayout.slots.slice(0, 9);
+  }
+
   const columns = 4;
   const rows = 3;
   const gap = 8;
-  const gridX = x + 14;
-  const gridY = y + 46;
-  const slotWidth = (width - 28 - gap * (columns - 1)) / columns;
-  const slotHeight = (height - 60 - gap * (rows - 1)) / rows;
-  const actions = getActionSlots(selectedEntities, playerEconomy);
+  const gridX = bounds.x + 14;
+  const gridY = bounds.y + 46;
+  const slotWidth = (bounds.width - 28 - gap * (columns - 1)) / columns;
+  const slotHeight = (bounds.height - 60 - gap * (rows - 1)) / rows;
 
-  for (let row = 0; row < rows; row += 1) {
-    for (let column = 0; column < columns; column += 1) {
-      const index = row * columns + column;
-      const action = actions[index];
-
-      if (!action) {
-        continue;
-      }
-
-      const slotX = gridX + column * (slotWidth + gap);
-      const slotY = gridY + row * (slotHeight + gap);
-      const fillColor = action.enabled ? 0x1a3034 : 0x0c1618;
-      const strokeColor = action.enabled ? 0xb89e5e : 0x31474b;
-
-      graphics.fillStyle(fillColor, action.enabled ? 0.98 : 0.62);
-      graphics.fillRoundedRect(slotX, slotY, slotWidth, slotHeight, 9);
-      graphics.lineStyle(1, strokeColor, action.enabled ? 0.9 : 0.45);
-      graphics.strokeRoundedRect(slotX, slotY, slotWidth, slotHeight, 9);
-
-      if (!action.enabled) {
-        graphics.lineStyle(1, 0x23373b, 0.65);
-        graphics.lineBetween(slotX + 8, slotY + slotHeight - 8, slotX + slotWidth - 8, slotY + 8);
-      }
-
-      if (action.enabled && action.actionId && onAction) {
-        const hitZone = scene.add
-          .zone(slotX, slotY, slotWidth, slotHeight)
-          .setOrigin(0, 0)
-          .setInteractive({ useHandCursor: true })
-          .on("pointerup", () => onAction(action.actionId as ActionDefinitionId, "button"));
-
-        container.add(hitZone);
-      }
-
-      container.add(scene.add
-        .text(slotX + slotWidth / 2, slotY + 10, action.icon, {
-          fontFamily: "Georgia, Times New Roman, serif",
-          fontSize: "20px",
-          color: action.enabled ? "#f1dfaa" : "#6d817a",
-          fontStyle: "bold",
-        })
-        .setOrigin(0.5, 0));
-      container.add(scene.add
-        .text(slotX + slotWidth / 2, slotY + slotHeight - 24, action.label, {
-          ...HUD_TEXT_STYLE,
-          fontSize: "10px",
-          color: action.enabled ? "#cfe0d4" : "#718980",
-          align: "center",
-          wordWrap: { width: slotWidth - 10 },
-        })
-        .setOrigin(0.5, 0));
-      container.add(scene.add.text(slotX + 7, slotY + 5, action.hotkey, {
-        ...HUD_TEXT_STYLE,
-        fontSize: "10px",
-        color: action.enabled ? "#7f9b91" : "#4e6660",
-      }));
-
-      if (!action.enabled && action.disabledReason) {
-        container.add(scene.add
-          .text(slotX + slotWidth / 2, slotY + slotHeight - 11, action.disabledReason, {
-            ...HUD_TEXT_STYLE,
-            fontSize: "9px",
-            color: "#8aa69b",
-            align: "center",
-            wordWrap: { width: slotWidth - 10 },
-          })
-          .setOrigin(0.5, 0));
-      }
-    }
-  }
+  return Array.from({ length: columns * rows }, (_, index) => {
+    const column = index % columns;
+    const row = Math.floor(index / columns);
+    return {
+      x: gridX + column * (slotWidth + gap),
+      y: gridY + row * (slotHeight + gap),
+      width: slotWidth,
+      height: slotHeight,
+    };
+  });
 }
 
 export function getActionSlots(selectedEntities: SelectedEntitiesView, playerEconomy: PlayerEconomyView | null): HudActionSlot[] {

@@ -48,6 +48,7 @@ import type { GameLaunchContext } from "../session.js";
 import {
   ORIGINAL_OBJECTIVE_PANEL_FRAME_ASSET,
 } from "../originalObjectivePanelLayout.js";
+import { resolveOriginalGameplayCommandGridLayoutForScenario } from "../originalGameplayCommandGridLayout.js";
 import {
   createMinimapGeometry,
   createMinimapFogTexture,
@@ -584,9 +585,23 @@ export class UIScene extends Phaser.Scene {
     this.actionGridContainer = panelContainer;
     this.hudContainer.add(panelContainer);
     panelContainer.add(graphics);
-    drawActionGrid(this, panelContainer, graphics, this.actionGridBounds, this.selectedEntities, this.playerEconomy, (actionId) => {
-      this.emitActionTriggered(actionId, "button");
-    });
+    const originalLayout = resolveOriginalGameplayCommandGridLayoutForScenario(
+      this.launchContext?.scenario?.id,
+      this.scale.width,
+      this.scale.height,
+    );
+    drawActionGrid(
+      this,
+      panelContainer,
+      graphics,
+      this.actionGridBounds,
+      this.selectedEntities,
+      this.playerEconomy,
+      (actionId) => {
+        this.emitActionTriggered(actionId, "button");
+      },
+      originalLayout,
+    );
 
     return true;
   }
