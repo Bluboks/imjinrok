@@ -53,11 +53,12 @@ signed health `+0x3e`, full reference `+0x1b6/+0x1b8`을 사용한다.
 | `+0x4a` | word | 임시 공격 payload 보정 후보 | 클래스 76·78 소비는 `정적 확정`, 생산자 의미는 미확정 |
 | `+0x6e` | signed byte | 애니메이션 phase 전진에 필요한 내부 갱신 수 | 클래스 76·78 공격·사망 phase 범위 `정적 확정` |
 | `+0x6f` | signed byte | phase 내부 갱신 카운터 | 클래스 76·78 공격·사망 8-bit wrap 범위 `정적 확정` |
+| `+0x70/+0x71` | byte + byte | class-14 turn cadence counter/limit | `FUN_004381c0` wrap increment, creation-default limit 2 범위 `정적 확정` |
 | `+0x74` | dword | 타입·행동 raw flags | 클래스 2·49·52 및 클래스 76·78 action 7/`0x16` 범위 `정적 확정` |
 | `+0x7c` | dword | 일반 공격 전달 분기값 | 클래스 76의 `0x13`, 클래스 78의 `9` 범위 `정적 확정` |
 | `+0x80` | dword | 직접 피해 class 보정 분류 | effect kind 1 계산 범위 `정적 확정`, 사람용 명칭은 미확정 |
 | `+0x83` | byte | effect kind 9 조건부 half-defense raw flag | 값 1 분기 범위 `정적 확정`, 사람용 명칭은 미확정 |
-| `+0x84` | word | 행동 6 완료 raw flags | 클래스 76·78 생성 기본값 `0x0014`; runtime mutation과 action 7 선택 범위 `정적 확정` |
+| `+0x84` | word | 행동 6 완료 raw flags | 클래스 76·78 생성 기본값 `0x0014`; class-14 creation-default `0x0008` transient destruction 및 action 7 선택 범위 `정적 확정` |
 | `+0x88` | dword | 행동 내부 하위 상태 | 행동 상태 5 일반 공격 범위 `정적 확정` |
 | `+0x8c` | byte | 건설 진행 정수 백분율 | 클래스 49·52 건설·체력 분기 범위 `정적 확정` |
 | `+0x90` | word | 체력보다 먼저 피해를 받는 완충 수치 | 직접 피해 적용 범위 `정적 확정`, 게임 내 명칭은 미확정 |
@@ -70,14 +71,15 @@ signed health `+0x3e`, full reference `+0x1b6/+0x1b8`을 사용한다.
 | `+0x143` | byte | 공격 효과 발생 phase | 클래스 76·78 값 7 범위 `정적 확정` |
 | `+0x144` | word | 상태 4 공격 phase 수 | 클래스 76 값 8·클래스 78 값 10 범위 `정적 확정` |
 | `+0x18c` | signed word | 사망 visual phase count | 클래스 76·78 값 8 범위 `정적 확정` |
+| `+0x192`, `+0x194..+0x19c` | word / word[5] | standard state-7 sprite slot·frame bases | canonical state-7 renderer 소비, class-14 creation initializer direct write/helper setup 없음 범위 `정적 확정` |
 | `+0x1b0` | word | 상위 행동 상태 | 값 5 일반 공격, 6/7/`0x16` 사망 수명 범위 `정적 확정` |
 | `+0x1b2` | signed word | 애니메이션 phase | 클래스 76·78 사망 signed-IDIV/low-WORD 진행 포함 제한 범위 `정적 확정` |
 | `+0x1b5` | byte | 좌우 mirror 선택자 | 클래스 2 파일럿 범위 `정적 확정` |
 | `+0x1b6/+0x1b8` | word + word | entity slot / generation full reference | 생성·validity·release/reuse 범위 `정적 확정` |
-| `+0x1e6` | word | 일반 방향 값 | 클래스 2 상태 1 일반 분기·상태 2 범위 `정적 확정` |
-| `+0x1e8` | word | 상태 1 특수 방향 값 | 분기표 정적 복원, 클래스 2 전체 base 초기화는 미확정 |
+| `+0x1e6` | word | 일반 방향 값 | 클래스 2 상태 1 일반 분기·상태 2, class-14 16-ring grid 결과 conditional copy 범위 `정적 확정` |
+| `+0x1e8` | word | 상태 1 특수 방향 값 | class-14 intermediate 16-ring current direction과 class 2 특수 분기표 범위 `정적 확정`; generic Facing은 미확정 |
 | `+0x1f0` | byte | raw active/death-entry gate | 사망 진입은 값 1, active lookup은 nonzero 범위 `정적 확정` |
-| `+0x1f1` | byte | 공격 처리 중 표시·상태 후보 | 일반 공격 진입·완료 쓰기는 `정적 확정`, 일반 명칭은 미확정 |
+| `+0x1f1` | byte | 공격/turn pending raw flag | class-14 equality clear·cadence-step set과 일반 공격 쓰기 범위 `정적 확정`, 일반 명칭은 미확정 |
 | `+0x234/+0x236` | signed word + signed word | raw action `0x16` limit/counter | 초기 100/0, signed `JL`·equality 전이 범위 `정적 확정` |
 | `+0x250` | word | 정상 0·반파 1 본체 상태 | 클래스 49·52 범위 `정적 확정` |
 | `+0x456` | word | 프레임 소스 후보 | setter 경로 |

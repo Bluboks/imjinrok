@@ -99,7 +99,9 @@ visual은 모두 `mixed`다. class 13 `japanese-samurai`의 animation state mapp
 [K01 일본 사무라이 파일럿](k01-samurai-animation-pilot.md)이 확정한
 `static-proven-core-state-frames`다. class 14 `japanese-turtle-tank`도
 [K01 일본 귀갑차 파일럿](k01-turtle-tank-animation-pilot.md)이 상태 8/1/4 grid
-frame·mirror를 같은 상태로 확정했다. class 82는
+frame·mirror와 intermediate 16-ring raw turn position, creation-default transient destruction
+path를 정적 확정했다. generic Facing과 project-side transient destruction/tick mapping은 계속
+미확정이다. class 82는
 [K01 일본 고니시 파일럿](k01-konishi-animation-pilot.md)이 상태 8/1/4/7의
 세 SPR slot과 grid frame·mirror를 확정했다. class 12 animation은 이 문서 범위에서
 `unverified`다. identity/source binding 판정 자체는 계속 class 정체와 primary source
@@ -112,7 +114,8 @@ SPR 파일에만 한정된다.
 - 9/9: K01 원본 요청 좌표 exact
 - 0/9: 이 문서만으로 최종 배치·전투 수치·행동 parity를 확정
 - class 13 record 2/9: 상태 8/1/4/7 frame·8방향·mirror 확정·이식
-- class 14 record 3/9: 상태 8/1/4 grid frame·mirror 확정·이식; opaque 방향과 death는 미이식
+- class 14 record 3/9: 상태 8/1/4 grid frame·mirror, intermediate 16-ring과 creation-default
+  transient destruction은 확정; generic Facing·project-side tick mapping은 미이식
 - class 82 record 1/9: 상태 8/1/4/7의 세 SPR slot·frame·8방향·mirror 확정·이식
 
 ### 프로젝트 gameplay·표시 적응
@@ -162,7 +165,7 @@ K0120 script에는 spawn command가 없고 원본 native code가 직접 생성�
   구조 불일치, 구조가 유효한 canonical manifest byte 변조, base-frame asset 누락·고정 PNG
   SHA 불일치
 
-남은 integration gate는 class 12·14·82의 animation state·방향, 네 class의
+남은 integration gate는 class 12·14·82의 나머지 animation state·방향, 네 class의
 stats·category·collision·전투 행동, raw owner의 사람용 의미와 원본 생성 실패/점유·최종 배치
 정책의 프로젝트 identity다. class 13도 exact timing·pivot·사망 lifetime은 미확정이다.
 generic superset는 유지하며 이들이 별도 정적 확정·재현되기 전에는 K01 adapter를 원본 전체

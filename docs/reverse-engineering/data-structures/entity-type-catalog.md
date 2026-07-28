@@ -67,7 +67,7 @@ EXE와 Ghidra 산출물의 입력 SHA-256이 다르면 추출을 거부한다.
 | `korean-archer` | `archerk.spr` | 4 | 조선 궁수 | 정체 확정, 프레임 의미 미확정 |
 | `japanese-gunner` | `gunj1.spr` | 12 | 일본 조총병 | 정체 확정, 프레임 의미 미확정 |
 | `japanese-samurai` | `horseswordj1.spr`·`horseswordj2.spr` | 13 | 일본 사무라이 | 정체·상태 8/1/4/7 frame·8방향·mirror 확정 |
-| `japanese-turtle-tank` | `ghosttankj.spr` | 14 | 일본 귀갑차 | 정체·source와 상태 8/1/4 grid frame·mirror 확정; opaque 방향·death/destruction·timing 미확정 |
+| `japanese-turtle-tank` | `ghosttankj.spr` | 14 | 일본 귀갑차 | 정체·source와 상태 8/1/4 grid frame·mirror, intermediate 16-ring·creation-default transient destruction 확정; generic Facing·project tick mapping·tail 의미 미확정 |
 | `japanese-konishi` | `generalj11.spr` | 82 | 일본 고니시 | 정체·primary source 확정, 상태 8/1/4/7은 `generalj12/11/13/11` frame·방향 별도 확정 |
 | `korean-general-k4` | `generalk4.spr` | 79 | 조선 사명대사 | 정체 확정, 현행 K01 영웅 바인딩 없음 |
 | `korean-gwon-yul` | `generalk11.spr` | 76 | 조선 권율 | 정체·상태 8/1/4/7 대기·이동·공격·사망 확정 |

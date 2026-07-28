@@ -30,7 +30,7 @@
 | `extract-unit-animation-pilot.mjs`, `unit-animation-pilot.test.mjs` | 유지 | 조선 창병·클래스 2 식별, 상태 1·2 이동 의미·방향·phase→frame·mirror와 특수 분기 격리 |
 | `extract-k01-hero-movement-pilot.mjs`, `k01-hero-movement-pilot.test.mjs` | 유지 | K01 권율·유성룡의 클래스, 주·보조 SPR, 상태 8/1/4/7 대기·이동·공격·사망 방향·phase→frame·mirror 정적 추출 |
 | `extract-k01-samurai-animation-pilot.mjs`, `k01-samurai-animation-pilot.test.mjs` | 유지 | K01 class 13 일본 사무라이의 두 SPR slot, 상태 8/1/4/7 normal path, 8방향·phase→frame·mirror와 class-specific attack wrapper 정적 추출·재현 |
-| `extract-k01-turtle-tank-animation-pilot.mjs`, `k01-turtle-tank-animation-pilot.test.mjs` | 유지 | K01 class 14 일본 귀갑차 상태 8/1/4의 initializer·normal/special consumer gate, grid 8방향과 opaque raw direction 1000..1007 phase→frame·mirror 정적 추출·재현 |
+| `extract-k01-turtle-tank-animation-pilot.mjs`, `k01-turtle-tank-animation-pilot.test.mjs` | 유지 | K01 class 14 상태 8/1/4 grid, intermediate 16-ring·cadence, action-6 transient destruction·resource/tick·release를 EXE/SPR/function contract로 추출·재현; generic Facing/runtime mapping은 제외 |
 | `extract-k01-konishi-animation-pilot.mjs`, `k01-konishi-animation-pilot.test.mjs` | 유지 | K01 class 82 일본 고니시의 세 SPR slot, 상태 8/1/4/7 normal consumer와 class-switch 밖 attack default gate, grid 8방향·모든 phase→frame·mirror 정적 추출·재현 |
 | `extract-k01-hero-basic-attack-pilot.mjs`, `k01-hero-basic-attack-pilot.test.mjs` | 유지 | K01 두 영웅의 일반 공격 상태·효과 phase·회복 카운터·payload, 권율 직접 피해와 유성룡 투사체 생성 정적 추출·재현 |
 | `extract-k01-ryu-projectile-pilot.mjs`, `k01-ryu-projectile-pilot.test.mjs` | 유지 | 유성룡 subtype `0x0c`의 slot·레코드·보수적 port accepted 좌표 subset `0..32767`·control-word 비행 분기·도착 dispatcher·effect kind `9` WORD 피해·raw health gate와 실패 경로 정적 추출·재현; 원본 caller 전체 좌표 범위는 미확정 |

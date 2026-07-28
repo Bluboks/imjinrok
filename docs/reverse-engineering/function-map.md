@@ -19,6 +19,8 @@
 | `0x0040df10` | `FUN_0040df10`, `0x0040df10-0x0040e06f` | 27 / 150 | 투사체 subtype 1~21 도착 dispatcher | 전체 jump table과 subtype `0x0c` 분기 정적 확정 |
 | `0x0040e270` | `FUN_0040e270`, `0x0040e270-0x0040e2b5` | 1 / 20 | subtype `0x0c` 도착 시 effect kind 9 요청 | 저장 대상·payload 전달 순서 정적 확정 |
 | `0x0040f0e0` | `FUN_0040f0e0`, `0x0040f0e0-0x0040f0f0` | 1 / 4 | record subtype을 active 표 slot에 기록 | spawn 후 호출 순서 정적 확정 |
+| `0x00401000`, `0x00401040`, `0x00401390`, `0x00401430`, `0x00401440` | transient effect config/materialize/update | ? / 13; ? / 297; ? / 38; ? / 4; ? / 35 | effect kind config, 60-record materialization, unsigned raw tick phase update | class-14 action-6 kind 2/4 범위 정적 확정; seconds/FPS 의미 미확정 |
+| `0x00401aa0`, `0x00401b70`, `0x00401bb0` | transient effect pool/helper | ? / 10; ? / 21; ? / 21 | slot 1..59 first-free, kind 2/4 materialize | class-14 destruction full-pool/odd-even path 정적 확정 |
 | `0x0040f320` | `FUN_0040f190`, `0x0040f190-0x0040f98b` | 111 / 558 | 다른 투사체 이동점·궤적 계산 후보 | subtype별 호출 관계와 부동소수점 결과 |
 | `0x0040f9b0` | `FUN_0040f9b0`, `0x0040f9b0-0x0040fc8f` | 61 / 242 | signed-word Bresenham 계열 경로를 14-step으로 보존 | subtype `0x0c` 경로와 160-point 상한 정적 확정 |
 | `0x0040fd50` | `FUN_0040fd50`, `0x0040fd50-0x0040ffa9` | 24 / 169 | 현재 경로 점을 시각 위치 필드로 변환 | subtype `0x0c` 호출 순서 정적 확정 |
@@ -40,19 +42,22 @@
 | `0x0041a9e0` | `FUN_0041a9e0`, `0x0041a9e0-0x0041aa33` | 6 / 23 | 상태 12에서 slot `+0x0a`, frame `+0x0c` 선택 | 조선 본영 범위 정적 확정, 다른 건물 base frame |
 | `0x0041aa90` | `FUN_0041aa90`, `0x0041aa90-0x0041ad8b` | 44 / 219 | 건설 진행도 `+0x8c`→8단계 phase | 조선 본영 범위 정적 확정 |
 | `0x0041d210` | `FUN_0041d210`, 비연속 body 3개 | 52 / 177 | 엔티티 `BYTE +0x03` 애니메이션 상태 디스패처 | class 2 상태 1·2, class 13·76·78·82 상태 1·4·7·8과 class 14 상태 8/1/4의 scoped consumer 경로 확정; 다른 class/state는 별도 |
+| `0x0041d700` | `FUN_0041d700`, `0x0041d700-0x0041d7f5` | ? / 49 | standard state-7 slot·frame renderer | `+0x192/+0x194..+0x19c` 소비; class-14 creation initializer가 이 table을 구성하지 않음 정적 확정 |
 | `0x0041d470` | `FUN_0041d470`, `0x0041d470-0x0041d4ee` | 10 / 26 | 방향별 main entity sprite slot `+0x0a` 설정 후보 | 호출 상태와 `+0x456` 표 |
 | `0x0041d560` | `FUN_0041d560`, `0x0041d560-0x0041d67d` | 15 / 55 | 두 번째 sprite slot `+0x0a` 설정 후보 | 호출 상태와 `+0x48e` 표 |
 | `0x0041e370` | `FUN_0041e370`, 비연속 body 2개 | class 점프 테이블 / 115 | 상태 4 class wrapper; class 13은 case normal, class 14는 phase-count special, class 82는 out-of-range default gate 뒤 common normal 공격 consumer로 진입 | class 13·14·82 scoped 범위 정적 확정 |
 | `0x0041efa0` | `FUN_0041efa0` | 점프 테이블 포함 | 상태 1 방향·phase→frame·mirror | 클래스 2·13·76·78·82 normal path와 class 14 생성-default special path 정적 확정 |
 | `0x0041f380` | `FUN_0041f380` | 점프 테이블 포함 | 내부 클래스 2의 상태 2 방향·phase→frame·mirror | 정적 확정 범위는 애니메이션 파일럿 참조 |
 | `0x0041fdb0` | `FUN_0041fdb0` | 렌더 분기 포함 | main entity slot `+0x0a`, frame `+0x0c`, mirror `+0x1b5` 소비 | 나머지 draw 분기 |
-| `0x004233f0` | `FUN_004233f0`, `0x004233f0-0x0042373d` | 34 / 273 | 행동 6 raw flags·cadence·signed phase 진행 | incoming cadence/runtime flags별 사망 phase와 완료 반환 정적 확정 |
+| `0x004233f0` | `FUN_004233f0`, `0x004233f0-0x0042373d` | 34 / 273 | 행동 6 raw flags·cadence·signed phase 진행 | class-14 `+0x84&0x08`은 transient kind 2/4 path, full pool도 1 반환; state-7 table과 별도임을 정적 확정 |
 | `0x00423740` | `FUN_00423740`, `0x00423740-0x00423753` | 3 / 7 | 행동 7 helper, 조건부 call 뒤 1 반환 | dispatcher는 helper 반환을 무시하고 현재 `+0x74 & 0x80`으로 retain/release 선택 |
 | `0x00425af0` | 이동 dispatcher | 두 호출 분기 | flags `+0x74` bit `0x08`로 이동 갱신 함수 선택 | bit 설정 경로의 클래스별 적용 |
 | `0x00426bf0` | `FUN_00426bf0`, `0x00426bf0-0x00426c1f` | 1 / 9 | 현재 대상 DWORD `+0x122/+0x124` 두 WORD raw clear | direct caller 2곳; 확인한 사망·release 경로에는 direct call/write 없음 |
 | `0x00425b20` | `FUN_00425b20`, `0x00425b20-0x004262df` | 일반 이동 전체 경로 | 방향·좌표·phase 갱신과 상태 1·2 선택 | 상태 2 조건의 원본 사람용 명칭 |
 | `0x004291d0` | `FUN_004291d0` | 클래스 점프 테이블 포함 | 내부 클래스별 애니메이션 설정 초기화 | class 13→`0x0042a492`, class 82→`0x0042ae03` 상태 8/1/4/7, class 14→`0x0042bae1` 상태 8/1/4, class 76→`0x0042a9da`, 78→`0x0042ab2a` 범위 정적 확정 |
 | `0x00437650` | `FUN_00437650`, `0x00437650-0x00438025` | 39 / 539 | `0x558`-byte 엔티티 초기화·slot/generation reference 기록 | 클래스 76·78 사망 flags·cadence/delay 생성 기본값 생산 정적 확정; runtime mutation 별도 |
+| `0x004381c0`, `0x0043d450` | class-14 special turn helper/wrapper | ? / 84; ? / 10 | `+0x1e8` 16-ring turn, `0x80000008` helper selection | shortest forward `<8`, opposite backward tie, byte cadence와 conditional normal copy 정적 확정 |
+| `0x00438fa0`, `0x00438ff0` | class-14 ancillary 9-entry setup | ? / 6; ? / 24 | `+0xd1/+0xd2` record 설정 | state-7 `+0x192..+0x19c` table이 아닌 ancillary field임을 정적 확정 |
 | `0x00438130` | `FUN_00438130`, `0x00438130-0x0043819d` | 9 / 29 | raw mode/table gate 뒤 signed-WORD 완충 수치·체력 적용 | 유성룡 kind 9 gate·wrap·실패 분기 정적 확정 |
 | `0x00438c50` | `FUN_00438c50`, `0x00438c50-0x00438e22` | 26 / 165 | low-WORD active 뒤 footprint 또는 squared range 판정 | 권율 signed low-WORD `<=1`, 유성룡 signed DWORD strict `<50625`와 wrap 정적 확정 |
 | `0x00439770` | `FUN_00439770`, `0x00439770-0x00439d62` | 63 / 425 | raw gate 뒤 occupancy/list 자동 대상 후보 scan | Y-major/X-minor 순서·제외·첫 command 성공 정적 확정 |
@@ -64,7 +69,7 @@
 | `0x004430f0` | `FUN_004430f0`, `0x004430f0-0x00443146` | 12 / 30 | message record 비교 기반 interval feedback writer | DWORD `-1/+1` 및 무변경 실패 경로 정적 확정 |
 | `0x0043b4d0` | `FUN_0043b4d0`, `0x0043b4d0-0x0043c2f5` | 238 / 1,018 | 엔티티 주기 갱신과 건물 유효 체력→반파 상태 | 조선 본영 체력 분기 범위 정적 확정 |
 | `0x0043c9c0` | `FUN_0043c9c0`, `0x0043c9c0-0x0043d35f` | 143 / 684 | `+0x1b0` 상위 행동 dispatcher와 outer keep/release 반환 | 상태 5 공격 및 클래스 76·78 health-zero 행동 6/7/`0x16` 정적 확정 |
-| `0x00443360` | `FUN_00443360` | 자원 순회 | 경로 포인터 표→런타임 스프라이트 레코드 로드 | 타입 1~95의 슬롯 경로 정적 확정 |
+| `0x00443360` | `FUN_00443360` | 자원 순회 | 경로 포인터 표→런타임 스프라이트 레코드 로드 | 타입 1~95 및 effect table index 5/6 `exp1/exp2` 경로 정적 확정 |
 | `0x00446420` | `FUN_00446420`, `0x00446420-0x004464be` | 9 / 33 | shared session teardown raw write/call chain | result state write 뒤 순서와 exact-one 분기 정적 확정; opaque callee 의미 미확정, unrelated caller 존재 |
 | `0x00447360` | `FUN_00447360`, `0x00447360-0x00447599` | 35 / 156 | active entity list 뒤 투사체 slot 0~99 순회 | entity dispatcher 반환 0→`0x00483aa0`, subtype `0x0c` pool 범위 정적 확정 |
 | `0x00447bc0` | `FUN_00447bc0`, `0x00447bc0-0x00447cfa` | 21 / 75 | 원본 simulation-step scheduler | 13개 resolved direct call의 raw 조건·순서, 모든 gate 승인 뒤 pool 1회와 조건부 post-pool call 정적 확정; callee 의미 미확정 |
