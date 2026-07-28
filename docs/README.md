@@ -47,6 +47,7 @@
 - [player-scoped 마법 자동사용 toggle](reverse-engineering/mechanics/magic-auto-use-gate.md)
 - [K01 유성룡 class 78 자동 마법 경로](reverse-engineering/mechanics/k01-ryu-auto-magic-path.md)
 - [K01 action 59 subtype 0x10 고정 레코드·후속 효과](reverse-engineering/mechanics/k01-subtype-16-path.md)
+- [generic selection mode 1 · effect kind 2 다중 셀 열거와 callback 경계](reverse-engineering/mechanics/generic-mode1-kind2-enumeration.md)
 - [조선 창병·내부 클래스 2 애니메이션 파일럿](reverse-engineering/mechanics/unit-animation-pilot.md)
 - [K01 권율·유성룡 핵심 애니메이션 파일럿](reverse-engineering/mechanics/k01-hero-animation-pilot.md)
 - [K01 권율·유성룡 일반 공격 phase 파일럿](reverse-engineering/mechanics/k01-hero-basic-attack-pilot.md)

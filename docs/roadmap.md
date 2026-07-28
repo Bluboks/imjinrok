@@ -159,8 +159,10 @@ toggle임을 정적 확정했다. 이어 K01 class 78은 cadence·target admissi
 pending-store와 일반 공격 short-circuit까지 정적 확정하고 좁은 projection을 부분 재현했다.
 후속 정적 분석은 action 59 payload-construction-reached attempt 사이 loop-carried full DWORD와 fixed record admission·초기화·100-slot reset,
 tick phase·generation tracking·cleanup, subtype 16 helper-zero strict-nearest와 current-slot subtype 1 재초기화,
-mode 2 kind 2/9의 low-active·class-95·full-generation·writer gate와 defense·buffer/health write,
-subtype 12 종료를 source-hash-bound projection으로 부분 재현했다. generic mode 1 kind 2 callback,
+mode 2 kind 2/9의 low-active·class-95·direct full-generation·writer gate와 defense·buffer/health
+write, subtype 12 종료를 source-hash-bound projection으로 부분 재현했다. 이어 generic mode 1
+kind 2의 Chebyshev 열거·live/dedup·payload·current-reference consumer 입력과 exclusion append
+경계를 부분 재현했다. generic consumer 이후 callback whole result와 K01 mode 1 producer,
 재경로 좌표 결과, death/reference invalidation,
 `FUN_00464cc0` map field 의미와 outer input/entity-update scheduling은 남겼다. remembered
 right-click reservation의 실제

@@ -10,9 +10,9 @@
 
 분석 상태는 `static-confirmed-k01-subtype-16-bounded-chain`, 재현 상태는
 `부분 재현`(`partial-reproduction-bounded-projections`), 구현 상태는
-`analysis-only-no-product-change`다. 생성·분기·선택된 최종 체력 write를 재현했지만
-`FUN_00413700`의 모든 다중 대상 callback, 재경로 좌표 결과와 메인 루프 시간 단위는 전체
-재현하지 않았다.
+`analysis-only-no-product-change`다. 생성·분기·선택된 최종 체력 write를 재현했고 별도 분석이
+`FUN_00413700` 다중 대상 열거와 consumer 입력 경계를 닫았지만, consumer 이후 callback whole
+result, 재경로 좌표 결과와 메인 루프 시간 단위는 전체 재현하지 않았다.
 
 ## 근거 자산
 
@@ -22,7 +22,7 @@
 - fixture: `analysis/fixtures/k01-subtype-16-path-vectors.json`
 - focused test: `tools/imjinrok/k01-subtype-16-path.test.mjs`
 - fixture projection SHA-256:
-  `6a8713716e169ba4ca17018458650a49322e9545aec528896367bbfffb3a5e38`
+  `9f8448b9210017ae406088ab55ff573e5dfdceb5c1b977c93635ab36c35406d7`
 
 extractor는 EXE와 `functions.json`, `references.json`, `jump-tables.json`의 고정 해시, 17개 raw
 범위, 26개 complete generated function, 레코드 base/registry의 12개 complete direct reference,
@@ -198,22 +198,28 @@ active list의 strict-nearest helper-zero 후보를 고르는 별도 분기다. 
 | registry clear | final update에 수행 | fallback final update; 전환 성공 때는 value 1로 유지 |
 
 action 59의 kind 2 reached path는 record `BYTE +0x2e == 2`다. 이 mode에서는 loop의 각
-candidate가 supplied `DWORD +0x9a` target으로 강제되고 `0x00413a02`의 full-reference 비교가
-항상 primary override를 선택하므로 supplied payload 전량을 쓴다. 그 뒤 target owner
+candidate가 supplied `DWORD +0x9a`의 low WORD target으로 강제되고 `0x00413a02`의
+candidate/supplied low-WORD 비교가 항상 primary override를 선택하므로 supplied payload
+전량을 쓴다. 그 뒤 target owner
 `BYTE +0x38`이 source owner `record WORD +0xa4`와 같으면 payload WORD를 signed
-`trunc(payload/2)`로 치환한다. generic mode 1의 multi-cell enumeration과 거리 감쇠는 이
-action 59 projection에서 도달하지 않으며 미확정 경계로 남긴다.
+`trunc(payload/2)`로 치환한다. generic branch는 candidate의 current full active reference를
+새로 읽어 consumer에 넘긴다. generic mode 1의 multi-cell enumeration과 거리 감쇠는 별도
+[generic mode 1 · kind 2 분석](generic-mode1-kind2-enumeration.md)에서 정적으로 확정했지만,
+이 action 59 projection에서는 mode 1 producer가 확정되지 않아 도달하지 않는다.
 
 effect admission과 final consumer의 gate 순서는 구분해야 한다.
 
 - `FUN_00413700`의 `FUN_00441e40` admission은 supplied reference의 low index가 active인지
   검사한다. inactive면 `FUN_00413b30` 전에 끝난다.
 - active kind 2에서는 mode 2 primary override와 same-owner half가 먼저 계산된다.
+- generic branch는 candidate의 current full active reference를 `FUN_00413b30`에 넘긴다.
 - `FUN_00413b30`은 target `BYTE +0x37 == 95`이면 special callback으로 가며
   `FUN_00413070`/`FUN_00438130`을 호출하지 않는다.
 - 그 외에는 `FUN_00413070`의 `0x0041309a-0x004130b7`이 active target의 low/high WORD를
-  supplied full reference와 다시 비교한다. generation mismatch면 defense와 kind 9 mode를
-  읽지 않고 damage 0을 반환한다. `FUN_00413b30`은 damage 0으로 writer를 호출하며,
+  전달받은 full reference와 다시 비교한다. generic kind 2는 방금 재적재한 current full
+  reference를 전달하므로 동시 변경이 없으면 mismatch가 구조적으로 도달하지 않는다. raw supplied
+  full reference를 직접 넘기는 kind 9 같은 branch에서는 generation mismatch가 defense와 kind 9
+  mode를 읽지 않고 damage 0을 반환한다. 이때 `FUN_00413b30`은 damage 0으로 writer를 호출하며,
   정상 active target health-positive 경계에서는 buffer/health가 보존되고 반환 1 뒤
   `FUN_00439400`으로 간다.
 
@@ -230,15 +236,17 @@ nonzero 값은 signed-negative raw WORD를 포함해 buffer를 0으로 만들고
 전량을 current health `WORD +0x3e`에서 뺀다. 결과 health가 signed positive면 1, 아니면 0으로
 clamp하고 0을 반환한다. 다만 global WORD `0x007c6282 == 1`일 때
 target owner `BYTE +0x38`로 선택한 player table gate BYTE가 0이면 buffer/health를 쓰지 않고
-1을 반환한다. fixture는 kind 2/9 scaling, same-owner 절반 치환, low-active/class-95/full-generation
-분기, writer owner gate, 16-bit defense wrap·signed cap과 두 buffer branch를 재현한다.
+1을 반환한다. fixture는 kind 2/9 scaling, same-owner 절반 치환, low-active/class-95/direct kind 9
+full-generation 분기, writer owner gate, 16-bit defense wrap·signed cap과 두 buffer branch를
+재현한다.
 
 `FUN_00413b30`은 writer 반환 0 뒤 `FUN_00442b10`, 반환 1 뒤 `FUN_00439400`을 호출한다.
 그 이후 entity death/reference invalidation callback·clear의 whole result는 미재현이다. 이
 entity 후속 경계는 fixed effect registry cleanup과 별개다.
 
-kind 2의 complete 주변 target enumeration에 딸린 모든 callback, 상태·bookkeeping은 whole-result로
-재현하지 않았다. 따라서 “action 59 전체 효과 재현 완료”라고 부르지 않는다.
+kind 2의 target enumeration과 consumer 입력·exclusion bookkeeping 경계는 별도 문서에서
+재현했지만, consumer 뒤 모든 callback과 상태 변화는 whole-result로 재현하지 않았다. 따라서
+“action 59 전체 효과 재현 완료”라고 부르지 않는다.
 
 ## 실패·no-op·남은 경계
 
@@ -251,10 +259,12 @@ kind 2의 complete 주변 target enumeration에 딸린 모든 callback, 상태·
   kind 2 fallback 뒤 updater 0과 registry clear.
 - subtype 12 final: kind 9 뒤 updater 0과 registry clear.
 - low-index inactive target은 final consumer 전에 끝나며, class 95는 special callback으로
-  빠진다. full-generation mismatch는 이 둘과 달리 damage 0으로 writer까지 호출한다.
+  빠진다. direct kind 9의 full-generation mismatch는 이 둘과 달리 damage 0으로 writer까지
+  호출한다. generic kind 2에서는 race가 없으면 이 mismatch가 구조적으로 도달하지 않는다.
 - signed-negative payload의 최종 피해 산술은 이번 promoted projection 밖이다.
 
-미확정 경계는 `FUN_00464cc0` map byte/table의 사람용 의미, generic mode 1 kind 2 callback 결과,
+미확정 경계는 `FUN_00464cc0` map byte/table의 사람용 의미, generic mode 1 kind 2 consumer
+이후 callback whole result,
 `FUN_00438e30` 이후 재경로 좌표 결과, `FUN_00442b10`/`FUN_00439400` 이후 death/reference
 invalidation, renderer-only field 의미, global tick 초 환산이다. 이 결과로 프로젝트 runtime
 또는 public entity architecture를 변경하지 않는다.

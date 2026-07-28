@@ -21,8 +21,8 @@
 | `0x00411cb0` | `FUN_00411cb0`, `0x00411cb0-0x00411ccc` | 1 / 9 | 컨트롤 signed WORD X·Y와 이전 버튼 DWORD를 vtable+0x30에 전달 | 목표 모달의 실제 target `FUN_00411cd0`과 닫기 입력 경로 정적 확정 |
 | `0x00411cd0` | `FUN_00411cd0`, `0x00411cd0-0x00411d86` | 14 / 57 | 활성 검사, strict-edge hit test 호출, 현재·이전 버튼 상태와 sound latch 처리 | 목표 모달 내부 해제 종료 경로 정적 확정; hit-test target은 `0x00411df0-0x00411e37` |
 | `0x00412e40` | `FUN_00412e40`, `0x00412e40-0x00412fbf` | 7 / 94 | 공통 button SPR 객체를 고정 순서로 로드 | `buttons201.spr`→`0x00529428` 결합 정적 확정; 런타임 실패 결과는 정적-only |
-| `0x00413070` | `FUN_00413070`, `0x00413070-0x0041362d` | 160 / 442 | full-reference generation 재검사 뒤 공격 kind별 payload·방어 계산; mismatch는 damage 0 | kind 1과 kind 2/9 제한 범위 정적 확정 |
-| `0x00413700` | `FUN_00413700`, `0x00413700-0x00413b02` | 61 / 329 | low-index active admission과 공격 effect kind별 대상 전달; action 59 mode 2 kind 2는 supplied target/full payload 강제 | kind 1 및 action 59 kind 2 제한 범위 정적 확정 |
+| `0x00413070` | `FUN_00413070`, `0x00413070-0x0041362d` | 160 / 442 | full-reference generation 재검사 뒤 공격 kind별 payload·방어 계산; direct raw-reference mismatch는 damage 0, generic kind 2 current-reference 전달에서는 race 없이는 구조적으로 불가 | kind 1과 kind 2/9 제한 범위 정적 확정 |
+| `0x00413700` | `FUN_00413700`, `0x00413700-0x00413b02` | 61 / 329 | low-index active admission과 공격 effect kind별 대상 전달; shared multi-cell branch의 ring 열거·mode 1 map/mode 2 supplied-low·live/dedup·payload·current-reference callback 입력 | kind 1, generic kind 2 입력/call 경계 및 action 59 mode 2 제한 범위 정적 확정 |
 | `0x00413b30` | `FUN_00413b30`, `0x00413b30-0x00413ddd` | 30 / 208 | class 95 special callback 또는 피해 계산·writer·사망 후속 처리 | 권율 직접 피해와 subtype 16 제한 경로 정적 확정 |
 | `0x00416c70` | `FUN_00416c70`, `0x00416c70-0x0041737e` | 84 / 555 | 행동 상태 5의 대상 검증·접근·일반 공격 하위 상태와 `0x00416f6e` 자동 특수행동 dispatcher 호출 | 하위 상태 3→공격 resolver와 [class 78 자동 마법](mechanics/k01-ryu-auto-magic-path.md)의 return-1 short-circuit 정적 확정 |
 | `0x00417430` | `FUN_00417430`, `0x00417430-0x004196de` | 272 / 2,468 | 일반 공격 readiness·phase·효과 전달·사이클 완료 | K01 권율·유성룡 phase·전달 분기 정적 확정 |
@@ -137,8 +137,9 @@
 | `0x004426f0` | `0x004426f0-0x0044274a` | 35 | source/candidate invalid면 0, 둘 다 live면 same-team 결과; subtype 16 caller는 0을 accept |
 | `0x00438e30` | `0x00438e30-0x00438e48` | 7 | generation 검증 뒤 tracking target 좌표 read helper |
 | `0x00447360` | `0x00447360-0x0044759a` | 156 | 100-slot outer updater; updater가 0일 때만 registry WORD cleanup |
-| `0x00413700` | `0x00413700-0x00413b03` | 329 | subtype 12 kind 9 direct target와 subtype 16/1 mode 2 kind 2 supplied-target/full-payload dispatcher |
-| `0x00413b30` | `0x00413b30-0x00413dde` | 208 | class 95 special callback, full-generation 재검사·damage writer 반환 0→`FUN_00442b10`, 1→`FUN_00439400`; 이후 death/reference invalidation은 미재현 |
+| `0x00412ff0` / `0x00413000` / `0x00413040` | `0x00412ff0-0x00412ffa` / `0x00413000-0x00413032` / `0x00413040-0x00413065` | 2 / 18 / 9 | generic shared branch의 exclusion count reset, WORD list contains, signed count `<30` append |
+| `0x00413700` | `0x00413700-0x00413b03` | 329 | kinds 2/3/4/13/14/18/24/25/26/27 shared branch; kind 2의 Chebyshev 열거·mode별 후보·live/dedup·low-WORD primary override·current full reference callback 경계 |
+| `0x00413b30` | `0x00413b30-0x00413dde` | 208 | class 95 special callback, full-generation 재검사·damage writer 반환 0→`FUN_00442b10`, 1→`FUN_00439400`; generic kind 2는 current full reference를 받고 이후 death/reference invalidation은 미재현 |
 | `0x0041cb10` | `0x0041cb10-0x0041ccc4` | 128 | state 40 effect phase의 resource 70 차감·target status·owner transfer |
 | `0x00478320` | `0x00478320-0x004783a4` | 43 | source 검증 뒤 pending store; reached store 결과와 무관한 return-1 core |
 | `0x004784c0` / `0x004788b0` | `0x004784c0-0x004784f0` / `0x004788b0-0x004788d4` | 17 / 13 | action 40/59 payload를 고정하고 core 결과와 무관하게 1을 반환하는 wrapper |
