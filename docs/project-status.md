@@ -47,13 +47,14 @@ unsigned DWORD 50/2000 strict poll, `0x8c→0x96→0x1c` relay와 external/stage
 native 증원의 원본 class·SPR와 K01 60×60 요청 좌표 9개도 교차 확인했다. K01 전용 adapter는
 class 12·13·14·82 아홉 record를 각각 `japanese-gunner`, `japanese-samurai`,
 `japanese-turtle-tank`, `japanese-konishi`의 exact static identity/source binding으로 연결했다.
-class 13 `japanese-samurai`의 상태 8/1/4/7 frame·8방향·mirror와 class 14
+class 12 `japanese-gunner`의 상태 8/1/4/7 frame·8방향·mirror, class 13 `japanese-samurai`의 상태 8/1/4/7 frame·8방향·mirror와 class 14
 `japanese-turtle-tank`의 상태 8/1/4 grid frame·mirror도 정적 확정·이식했다. class 14의
 intermediate 16-ring turn과 creation-default transient destruction은 정적 확정·재현했지만
 generic Facing/runtime tick mapping에는 이식하지 않았다.
 class 82 `japanese-konishi`의 상태 8/1/4/7도 세 source SPR의 grid frame·mirror를
 정적 확정·이식했다. generic open-point 배치가 최종 위치를
 옮기거나 생략할 수 있다.
+class 12 state 2는 원본 movement variant까지만 정적 확정했으며 사람용 환경 의미와 project policy는 이식하지 않았다.
 raw owner `1`→`cpu-1`, objective trigger와 attack-move도 프로젝트 적응이다. raw clock→24 Hz와
 result transition/identity policy mapping도 없어 승패 수명주기는 runtime에 연결하지 않았다.
 

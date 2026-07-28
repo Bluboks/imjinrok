@@ -143,7 +143,7 @@ VM에서 원본 게임을 플레이하며 화면 변화를 따라가는 방식�
 - 같은 scan 복수 match의 native block 반복
 - signed-WORD descriptor 증원, selector 5 raw byte-grid와 두 raw global write
 - native class 12·13·14·82의 원본 정체·SPR, K01 요청 좌표와 프로젝트 exact static
-  identity/source 9/9 연결; class 13 상태 8/1/4/7과 class 14 상태 8/1/4 grid animation 이식,
+  identity/source 9/9 연결; class 12·13 상태 8/1/4/7과 class 14 상태 8/1/4 grid animation 이식,
   class-14 intermediate 16-ring·creation-default transient destruction 정적 확정·재현,
   class 82 상태 8/1/4/7은 세 source SPR의 grid frame·mirror로 격리 이식
 - flag exact 1과 script context `+8 == 0`의 caller 전달 return 1
@@ -159,7 +159,7 @@ VM에서 원본 게임을 플레이하며 화면 변화를 따라가는 방식�
 
 - 표준 entry broad zero 밖의 K01 trigger flag reset/consumer lifecycle
 - final destination `0x140/0x64/0x10/0x20/raw WORD`별 후속 lifecycle
-- class 14 generic Facing/runtime transient tick mapping, 네 class 행동·stats와 최종 생성 정책
+- class 12 state-2 project policy, class 14 generic Facing/runtime transient tick mapping, 네 class 행동·stats와 최종 생성 정책
 - raw clocks와 프로젝트 24 Hz·result/asset/identity policy의 exact mapping
 
 별도 후속 질문:

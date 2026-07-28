@@ -55,6 +55,7 @@
 | `0x00426bf0` | `FUN_00426bf0`, `0x00426bf0-0x00426c1f` | 1 / 9 | 현재 대상 DWORD `+0x122/+0x124` 두 WORD raw clear | direct caller 2곳; 확인한 사망·release 경로에는 direct call/write 없음 |
 | `0x00425b20` | `FUN_00425b20`, `0x00425b20-0x004262df` | 일반 이동 전체 경로 | 방향·좌표·phase 갱신과 상태 1·2 선택 | 상태 2 조건의 원본 사람용 명칭 |
 | `0x004291d0` | `FUN_004291d0` | 클래스 점프 테이블 포함 | 내부 클래스별 애니메이션 설정 초기화 | class 13→`0x0042a492`, class 82→`0x0042ae03` 상태 8/1/4/7, class 14→`0x0042bae1` 상태 8/1/4, class 76→`0x0042a9da`, 78→`0x0042ab2a` 범위 정적 확정 |
+| `0x0042a752`, `0x00438e50`, `0x00438ef0`, `0x00438f70`, `0x004390b0`, `0x004390e0` | class-12 normal reinforcement initializer/helpers | ? / block; ? / 24; ? / 24; ? / 24; ? / 6; ? / 24 | state 8/1/2/7/4 slot·base·phase setup | class 12 core state frames와 class 13/82 normal batch direction contract 정적 확정; state-2 project policy 미확정 |
 | `0x00437650` | `FUN_00437650`, `0x00437650-0x00438025` | 39 / 539 | `0x558`-byte 엔티티 초기화·slot/generation reference 기록 | 클래스 76·78 사망 flags·cadence/delay 생성 기본값 생산 정적 확정; runtime mutation 별도 |
 | `0x004381c0`, `0x0043d450` | class-14 special turn helper/wrapper | ? / 84; ? / 10 | `+0x1e8` 16-ring turn, `0x80000008` helper selection | shortest forward `<8`, opposite backward tie, byte cadence와 conditional normal copy 정적 확정 |
 | `0x00438fa0`, `0x00438ff0` | class-14 ancillary 9-entry setup | ? / 6; ? / 24 | `+0xd1/+0xd2` record 설정 | state-7 `+0x192..+0x19c` table이 아닌 ancillary field임을 정적 확정 |

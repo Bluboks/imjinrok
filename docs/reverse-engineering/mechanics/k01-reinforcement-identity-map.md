@@ -1,6 +1,6 @@
 # K01 native 증원 정체·요청 좌표 매핑
 
-Can original K01 reinforcement classes 13, 14, and 82 receive distinct reusable project kinds and exact static identity/source-SPR bindings without claiming animation, stats, combat behavior, owner meaning, or final-placement parity?
+Can original K01 reinforcement classes 12, 13, 14, and 82 receive distinct reusable project kinds and exact static identity/source-SPR bindings without claiming stats, combat behavior, owner meaning, or final-placement parity?
 
 ## 범위와 상태
 
@@ -81,8 +81,7 @@ class 12·13·14·82의 원본 이름과 고유 source SPR에 연결되고
 `nameMatchesOriginal == true`, identity `static-proven`인지 검사한다. 관련 `themes.ts`,
 `visuals.ts`, `content.ts`,
 `scenarios.ts`, 타입 카탈로그와 audit generator의 현재 SHA-256이 artifact provenance와
-다르면 실패한다. class 13·14·82의 animation 판정을 생산하는 samurai, turtle-tank,
-Konishi focused extractor 세 파일의 현재 SHA-256도 같은 provenance로 검증한다.
+다르면 실패한다. class 12의 core animation 판정은 [normal reinforcement batch](k01-normal-reinforcement-animation-batch.md)가 생산하며, class 13·14·82 focused extractor와 함께 현재 SHA-256 provenance를 검증한다.
 여섯 conversion manifest를 먼저 parse해 source·dimensions·declared/exported
 frame count·첫/마지막 index·base-frame 참조를 검사한 뒤 canonical manifest SHA와 audit의
 logical path/SHA provenance를 검사한다. 구조가 맞아도 canonical bytes가 다르면 거부한다.
