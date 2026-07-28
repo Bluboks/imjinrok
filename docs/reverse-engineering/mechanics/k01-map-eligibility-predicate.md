@@ -98,13 +98,13 @@ two separate 180×180 grids: `map+0x2db4` and `map+0x227f4`, each as 2-byte cell
 | width, height | runtime DWORD read; loader copies raw image first | later writer is not closed; supplied synthetically |
 | `occupancyWord` | runtime occupancy grid, zeroed just after load | first later occupancy population writer |
 | primary / auxiliary | locked file-field gate contact | covered by the prior contract, not re-extracted here |
-| `lowNibbleField` | address lies in the copied map image, but modeled as synthetic runtime byte | first post-load writer/absence-of-writer proof for `field_0x00032514` |
+| `lowNibbleField` | address lies in the copied map image, but modeled as synthetic runtime byte | [standard address-form direct writers](k01-map-low-nibble-writers.md)는 닫혔지만 alias/computed writer와 writer ordering은 미확인 |
 | `derivedFlags` | runtime grid, zeroed just after load | first later derived-flag writer |
 | `globalMaskWord` | external global runtime word | producer/update path for `0x004bdfd0` |
 
-The first unresolved edge reached after the primary gate is `field_0x00032514(x,y)`. Consequently this extractor
-does not read raw K01.map at that offset, and no raw map byte is asserted to be the value later consumed by the
-predicate.
+`field_0x00032514(x,y)`의 표준 주소형 direct writer set은 이제 별도 문서에서 닫았다. 그러나 그 결과는
+전역 alias/computed writer의 부재나 runtime writer 순서를 증명하지 않으므로, 이 extractor는 계속 raw
+K01.map byte를 그 값으로 대입하지 않고 synthetic input으로 둔다.
 
 ## byte anchors
 
@@ -136,6 +136,6 @@ node --test tools/imjinrok/k01-map-eligibility-predicate.test.mjs
 이 결과는 map rendering label, terrain name, final movement permission, or pathfinding result을 증명하지
 않는다. 제품 구현은 변경하지 않았다.
 
-다음 최소 작업은 `field_0x00032514`의 post-load writer set을 정적으로 닫는 것이다. 그 뒤
-`0x004bdfd0` producer와 `derivedFlags_0x000227f4` writer set을 별도 bounded unit으로 닫아야 runtime
-inputs를 source-derived facts로 승격할 수 있다.
+다음 최소 작업은 `0x004bdfd0` producer와 `derivedFlags_0x000227f4` writer set을 별도 bounded unit으로
+닫는 것이다. `field_0x00032514`는 표준 address form 밖의 alias/computed writer와 writer ordering을
+별도로 확인해야 runtime input을 source-derived fact로 더 넓게 승격할 수 있다.

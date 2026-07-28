@@ -39,6 +39,7 @@
 - [조선 봉화대 건설·체력 프레임 파일럿](reverse-engineering/mechanics/beacon-state-pilot.md)
 - [엔티티 자료구조](reverse-engineering/data-structures/entity-record.md)
 - [K01 팬 리마스터 MVP 정적 분석 계획](reverse-engineering/mechanics/campaign/k01.md)
+- [K01 map low-nibble 표준 주소형 직접 writer](reverse-engineering/mechanics/k01-map-low-nibble-writers.md)
 
 ### 의사결정과 작업 규칙
 
