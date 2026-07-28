@@ -33,7 +33,10 @@ test("source-binds common table entry 18, its loader record, and the 34 by 34 gr
   });
   assert.equal(report.loader.buttonRecord, "0x00899828");
   assert.deepEqual(report.fields.runtimeRecord.aliasWords, { width: "DAT_0089982c", height: "DAT_00899830" });
-  assert.deepEqual(report.fields.gridInitializer.values, { cellWidth: 34, cellHeight: 34 });
+  assert.deepEqual(report.fields.gridInitializer.values, {
+    rawLowWords: { cellWidth: 34, cellHeight: 34 },
+    effectiveSignedInt16: { cellWidth: 34, cellHeight: 34 },
+  });
   assert.match(report.writerScope, /nine READ references and no direct WRITE/u);
 });
 
@@ -55,6 +58,28 @@ test("rejects malformed reachable loader fields rather than fabricating a transf
   assert.throws(
     () => reproduceCommandGridCellSizeBinding({ tableEntryCount: 19, buttonLoadSucceeded: "failed", header: { magic: 9, width: 34, height: 34 }, layoutInitializerReached: true }),
     /buttonLoadSucceeded must be a boolean/u,
+  );
+  assert.throws(
+    () => reproduceCommandGridCellSizeBinding({ tableEntryCount: 19, buttonLoadSucceeded: true, header: { magic: 9, width: 34, height: 34 }, layoutInitializerReached: "reached" }),
+    /layoutInitializerReached must be a boolean/u,
+  );
+});
+
+test("does not validate malformed later values when the source table does not reach index 18", () => {
+  assert.deepEqual(
+    reproduceCommandGridCellSizeBinding({ tableEntryCount: 18, buttonLoadSucceeded: "not-reached", header: null, layoutInitializerReached: "not-reached" }),
+    { targetIndex: 18, tableEntryCount: 18, operations: [{ type: "button-record-unreached-before-table-boundary" }] },
+  );
+  assert.deepEqual(
+    reproduceCommandGridCellSizeBinding({ tableEntryCount: 19, buttonLoadSucceeded: false, header: null, layoutInitializerReached: "not-reached" }),
+    {
+      targetIndex: 18,
+      tableEntryCount: 19,
+      operations: [
+        { type: "reach-button-table-entry", record: "0x00899828" },
+        { type: "button-loader-failure-continues-common-table", runtimeCellSize: "indeterminate" },
+      ],
+    },
   );
 });
 

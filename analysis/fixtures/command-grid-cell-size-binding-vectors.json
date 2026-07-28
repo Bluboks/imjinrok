@@ -12,10 +12,10 @@
         "operations": [
           { "type": "reach-button-table-entry", "record": "0x00899828" },
           { "type": "copy-header-dwords-to-button-record", "byteCount": 3060 },
-          { "type": "copy-low-words-to-grid-layout", "function": "FUN_00481ee0" }
+          { "type": "copy-raw-low-words-to-grid-layout", "function": "FUN_00481ee0" }
         ],
-        "runtimeRecord": { "widthDword": 34, "heightDword": 34, "widthWord": 34, "heightWord": 34 },
-        "gridCellSize": { "width": 34, "height": 34 }
+        "runtimeRecord": { "widthDword": 34, "heightDword": 34, "rawLowWords": { "width": 34, "height": 34 } },
+        "gridCellSize": { "rawLowWords": { "width": 34, "height": 34 }, "effectiveSignedInt16": { "width": 34, "height": 34 } }
       }
     },
     {
@@ -48,10 +48,25 @@
         "operations": [
           { "type": "reach-button-table-entry", "record": "0x00899828" },
           { "type": "copy-header-dwords-to-button-record", "byteCount": 3060 },
-          { "type": "copy-low-words-to-grid-layout", "function": "FUN_00481ee0" }
+          { "type": "copy-raw-low-words-to-grid-layout", "function": "FUN_00481ee0" }
         ],
-        "runtimeRecord": { "widthDword": 65570, "heightDword": 131106, "widthWord": 34, "heightWord": 34 },
-        "gridCellSize": { "width": 34, "height": 34 }
+        "runtimeRecord": { "widthDword": 65570, "heightDword": 131106, "rawLowWords": { "width": 34, "height": 34 } },
+        "gridCellSize": { "rawLowWords": { "width": 34, "height": 34 }, "effectiveSignedInt16": { "width": 34, "height": 34 } }
+      }
+    },
+    {
+      "id": "high-bit-raw-words-sign-extend-for-command-grid-geometry",
+      "input": { "tableEntryCount": 19, "buttonLoadSucceeded": true, "header": { "magic": 9, "width": 32769, "height": 65535 }, "layoutInitializerReached": true },
+      "expected": {
+        "targetIndex": 18,
+        "tableEntryCount": 19,
+        "operations": [
+          { "type": "reach-button-table-entry", "record": "0x00899828" },
+          { "type": "copy-header-dwords-to-button-record", "byteCount": 3060 },
+          { "type": "copy-raw-low-words-to-grid-layout", "function": "FUN_00481ee0" }
+        ],
+        "runtimeRecord": { "widthDword": 32769, "heightDword": 65535, "rawLowWords": { "width": 32769, "height": 65535 } },
+        "gridCellSize": { "rawLowWords": { "width": 32769, "height": 65535 }, "effectiveSignedInt16": { "width": -32767, "height": -1 } }
       }
     }
   ]

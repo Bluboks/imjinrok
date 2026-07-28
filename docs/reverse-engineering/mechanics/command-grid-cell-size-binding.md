@@ -70,7 +70,8 @@ hash-bound `button.spr` header는 `magic=9`, `width DWORD=34`, `height DWORD=34`
 arm `0x0045fe89`, `0x004600cb`, `0x004600e6`은 `FUN_00445770`을 호출하고, 그 `0x004457bb` tail
 transfer는 `ECX=0x0088bd60`을 설정한 뒤 `FUN_00481ee0`으로 들어간다.
 
-`FUN_00481ee0`은 full-DWORD layout field가 아니라 16-bit load/store를 사용한다.
+`FUN_00481ee0`은 full-DWORD layout field가 아니라 16-bit load/store를 사용한다. 이 명령은 raw low
+WORD를 copy할 뿐 sign-extend하지 않는다.
 
 ```text
 0x00481eeb: AX = WORD[0x0089982c]; WORD[ECX+0x04] = AX
@@ -81,11 +82,12 @@ transfer는 `ECX=0x0088bd60`을 설정한 뒤 `FUN_00481ee0`으로 들어간다.
 0x00481f61: WORD[ECX+0x16] = DX
 ```
 
-따라서 source와 runtime record header field는 canonical DWORD이고 command-grid layout은 그 low signed
-WORD를 소비한다. 두 source DWORD는 정확히 `34`(high half zero)이므로 truncation 또는 signedness
-ambiguity가 없다. 성공한 index-18 load 뒤 이 initializer가 실행되면 `cellW=34`, `cellH=34`다. 이는
-이전 grid의 numeric rectangle 전제를 source-bound로 만드는 누락 증거이며, slot-rectangle formula는
-이 문서에서 중복하지 않는다.
+따라서 source와 runtime record header field는 canonical DWORD이고 `FUN_00481ee0`은 그 low 16 bit를
+raw WORD로 layout에 보존한다. 앞선 command-grid contract의 geometry consumer는 그 layout WORD를
+signed `int16`으로 해석한다. 두 source DWORD는 정확히 `34`(high half zero)이므로 raw WORD와 effective
+signed `int16` 모두 `34`다. 성공한 index-18 load 뒤 이 initializer가 실행되면 `cellW=34`,
+`cellH=34`다. 이는 이전 grid의 numeric rectangle 전제를 source-bound로 만드는 누락 증거이며,
+slot-rectangle formula는 이 문서에서 중복하지 않는다.
 
 ## failure, reachability 및 later-writer 경계
 
@@ -109,11 +111,13 @@ fixture는 다음을 다룬다.
 - index 18에서 끝나는 table boundary: 이후 loader input을 검사하면 안 된다;
 - common table은 계속하지만 indeterminate cell value를 내는 button loader failure;
 - low word가 34인 synthetic noncanonical header DWORD: actual original source header가 exact DWORD 34인
-  채로 initializer field width가 low WORD임을 보인다.
+  채로 initializer가 raw low WORD를 copy함을 보인다;
+- high-bit synthetic raw WORD `0x8001`/`0xffff`: geometry의 effective signed `int16`가 각각
+  `-32767`/`-1`임을 보인다.
 
 focused test는 malformed reachable value와 tampered EXE, SPR, structured reference export도 독립적으로
-거부한다. synthetic field-width vector는 representation test일 뿐 alternate original resource 존재
-주장이 아니다.
+거부하고, index-18 미도달 또는 button-load failure 뒤에는 malformed later value를 읽지 않는다. synthetic
+field-width vector는 representation test일 뿐 alternate original resource 존재 주장이 아니다.
 
 ## 현재 구현과 다음 작업
 

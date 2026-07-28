@@ -108,7 +108,7 @@ export function extractCommandGridCellSizeBinding({
   }
 
   return {
-    question: "Which source record produces DAT_0089982c/DAT_00899830 for the command-grid initializer, and are both low WORD values exactly 34?",
+    question: "Which source record produces DAT_0089982c/DAT_00899830 for the command-grid initializer, and are the copied raw WORDs and downstream signed cell sizes exactly 34?",
     analysisStatus: "static-confirmed-for-common-loader-to-command-grid-cell-size",
     reproductionStatus: "reproduction-complete-for-bounded-loader-reachability-and-cell-size-transfer",
     implementationStatus: "analysis-only-no-product-change",
@@ -132,15 +132,15 @@ export function extractCommandGridCellSizeBinding({
     fields: {
       source: { width: "DWORD[button.spr+0x04]", height: "DWORD[button.spr+0x08]", values: { width: button.width, height: button.height } },
       runtimeRecord: { width: `DWORD[${toHex(WIDTH_FIELD)}]`, height: `DWORD[${toHex(HEIGHT_FIELD)}]`, aliasWords: { width: "DAT_0089982c", height: "DAT_00899830" } },
-      gridInitializer: { function: "FUN_00481ee0", reads: ["signed WORD[DAT_0089982c] -> layout +0x04", "signed WORD[DAT_00899830] -> layout +0x06", "signed WORD[DAT_0089982c] -> layout +0x14", "signed WORD[DAT_00899830] -> layout +0x16"], values: { cellWidth: 34, cellHeight: 34 } },
-      widthRule: "The SPR header and copied runtime fields are DWORDs. The command-grid initializer deliberately consumes their low signed WORDs; both source DWORD values are 34, so their low WORDs are exactly 34 without truncation ambiguity.",
+      gridInitializer: { function: "FUN_00481ee0", copies: ["raw WORD[DAT_0089982c] -> layout +0x04", "raw WORD[DAT_00899830] -> layout +0x06", "raw WORD[DAT_0089982c] -> layout +0x14", "raw WORD[DAT_00899830] -> layout +0x16"], values: { rawLowWords: { cellWidth: 34, cellHeight: 34 }, effectiveSignedInt16: { cellWidth: 34, cellHeight: 34 } } },
+      widthRule: "The SPR header and copied runtime fields are DWORDs. FUN_00481ee0 copies the raw low 16 bits without sign extension. The locked command-grid geometry consumers interpret those layout WORDs as signed int16; both source DWORD values are 34, so the raw and effective values are each exactly 34.",
     },
     callOrder: "Within FUN_0045f9c0, 0x0045fc17 calls FUN_00443360 before the dispatcher loop. Later dispatcher arms call FUN_00445770, which tail-jumps to FUN_00481ee0 with ECX=0x0088bd60. The initializer does not check a common-loader result, so only a successful button-record load proves the numeric initialization value.",
     writerScope: "The complete structured direct-reference set for DAT_0089982c/DAT_00899830 has nine READ references and no direct WRITE reference. The initialization-time writer is the common loader's indexed record-base copy. This does not exclude a future unlocated computed-pointer alias writer after initialization.",
     rawCodeRanges: RAW_CODE_RANGES.map((range) => verifyRawCodeRange(buffer, image, range)),
     evidencePoints: EVIDENCE.map((point) => verifyEvidencePoint(buffer, image, point)),
     referenceSets: REFERENCE_SPECS.map(([label, predicate, count, digest]) => verifyReferenceSet(references, { label, predicate, count, digest })),
-    unresolvedBoundary: "The source-bound initialization contract is closed: successful common loading of entry 18 makes the grid initializer consume 34x34 low WORDs from fnt\\button.spr. The first remaining boundary is post-initialization mutation through a computed alias: no such writer appears in the complete structured direct-reference set, but this bounded analysis does not prove global absence of every possible indirect alias writer.",
+    unresolvedBoundary: "The source-bound initialization contract is closed: successful common loading of entry 18 makes FUN_00481ee0 copy raw 34x34 WORDs from fnt\\button.spr, and the command-grid geometry interprets them as signed 34x34. The first remaining boundary is post-initialization mutation through a computed alias: no such writer appears in the complete structured direct-reference set, but this bounded analysis does not prove global absence of every possible indirect alias writer.",
   };
 }
 
@@ -163,15 +163,16 @@ export function reproduceCommandGridCellSizeBinding(input) {
   if (magic !== 9) throw new RangeError("header.magic must be the original sprite DWORD value 9");
   const width = assertU32(header.width, "header.width");
   const height = assertU32(header.height, "header.height");
-  output.runtimeRecord = { widthDword: width, heightDword: height, widthWord: width & 0xffff, heightWord: height & 0xffff };
+  const rawLowWords = { width: width & 0xffff, height: height & 0xffff };
+  output.runtimeRecord = { widthDword: width, heightDword: height, rawLowWords };
   output.operations.push({ type: "copy-header-dwords-to-button-record", byteCount: 0x0bf4 });
   const layoutInitializerReached = assertBoolean(input.layoutInitializerReached, "layoutInitializerReached");
   if (!layoutInitializerReached) {
     output.operations.push({ type: "grid-layout-initializer-not-reached" });
     return output;
   }
-  output.gridCellSize = { width: width & 0xffff, height: height & 0xffff };
-  output.operations.push({ type: "copy-low-words-to-grid-layout", function: "FUN_00481ee0" });
+  output.gridCellSize = { rawLowWords, effectiveSignedInt16: { width: toSignedInt16(rawLowWords.width), height: toSignedInt16(rawLowWords.height) } };
+  output.operations.push({ type: "copy-raw-low-words-to-grid-layout", function: "FUN_00481ee0" });
   return output;
 }
 
@@ -227,6 +228,10 @@ function assertInteger(value, min, max, label) {
 
 function assertU32(value, label) {
   return assertInteger(value, 0, 0xffff_ffff, label);
+}
+
+function toSignedInt16(value) {
+  return value >= 0x8000 ? value - 0x1_0000 : value;
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
