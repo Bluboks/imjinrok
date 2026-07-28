@@ -82,9 +82,9 @@ const EXPECTED_TYPES = [
       pivot: { anchor: { x: 30, y: 52 } },
     },
     defaultStillOnly: false,
-    animationStateMapping: "unverified",
+    animationStateMapping: "static-proven-core-state-frames",
     scope:
-      "project kind identity and source SPR binding only; animation-state, direction, stats, category, collision, behavior, render scale, and pivot are unverified original semantics",
+      "project kind identity and source SPR binding are proven here; class-12 idle, move/walk, attack, and death slots, frames, directions, and mirroring are separately static-proven by the K01 normal reinforcement animation batch. State 2 project policy, timing, stats, category, collision, behavior, render scale, and pivot remain unresolved",
   },
   {
     internalClass: 13,
@@ -247,6 +247,7 @@ const REQUIRED_SPRITE_AUDIT_SOURCE_PATHS = [
   "tools/imjinrok/extract-k01-samurai-animation-pilot.mjs",
   "tools/imjinrok/extract-k01-turtle-tank-animation-pilot.mjs",
   "tools/imjinrok/extract-k01-konishi-animation-pilot.mjs",
+  "tools/imjinrok/extract-k01-normal-reinforcement-animation-batch.mjs",
 ];
 
 export function mapDescriptorsToRequestedPositions({

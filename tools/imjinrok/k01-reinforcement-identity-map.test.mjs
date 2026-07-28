@@ -150,6 +150,7 @@ test("extracts exact native descriptors, identities, and K01 requested coordinat
       "tools/imjinrok/extract-k01-samurai-animation-pilot.mjs",
       "tools/imjinrok/extract-k01-turtle-tank-animation-pilot.mjs",
       "tools/imjinrok/extract-k01-konishi-animation-pilot.mjs",
+      "tools/imjinrok/extract-k01-normal-reinforcement-animation-batch.mjs",
     ],
   );
   assert.deepEqual(
@@ -234,6 +235,7 @@ test("extracts exact native descriptors, identities, and K01 requested coordinat
       projectKind,
       source: `original/imjinrok2/char/${stem}.spr`,
       animationStateMapping:
+        internalClass === 12 ||
         internalClass === 13 ||
         internalClass === 14 ||
         internalClass === 82
@@ -243,7 +245,9 @@ test("extracts exact native descriptors, identities, and K01 requested coordinat
         (entry) => entry.projectKind === projectKind,
       ).logicalPath,
       scope:
-        internalClass === 13
+        internalClass === 12
+          ? "project kind identity and source SPR binding are proven here; class-12 idle, move/walk, attack, and death slots, frames, directions, and mirroring are separately static-proven by the K01 normal reinforcement animation batch. State 2 project policy, timing, stats, category, collision, behavior, render scale, and pivot remain unresolved"
+          : internalClass === 13
           ? "project kind identity and source SPR binding are proven here; class-13 idle, move/walk, attack, and death animation frames/directions are separately static-proven by the K01 samurai animation pilot, while exact timing, stats, category, collision, behavior, render scale, and pivot remain unverified original semantics"
           : internalClass === 14
             ? "project kind identity and source SPR binding are proven here; class-14 idle, move/walk, attack grid frames/mirroring, intermediate 16-ring raw turn positions, and its creation-default destruction effect path are separately static-proven by the K01 turtle-tank animation pilot. Generic Facing, project-side transient destruction/tick mapping, exact timing, stats, category, collision, behavior, render scale, and pivot remain unresolved"

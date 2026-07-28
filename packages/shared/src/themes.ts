@@ -560,25 +560,70 @@ export const japaneseGunnerEntityVisual = {
     filtering: "nearest",
   },
   defaults: {
+    // Project display adaptation: original timing and pivot contracts are not recovered.
     size: { w: 60, h: 60 },
     pivot: { anchor: { x: 30, y: 52 } },
   },
   states: {
     idle: {
       facings: ENTITY_FACING_ORDER,
-      clips: sourceFiveFacingStillClips("japanese_gunner", "gunj1", 0),
+      clips: staticallyRecoveredDirectionalClips({
+        visualId: "japanese_gunner",
+        stem: "gunj1",
+        frameStart: 0,
+        frameStride: 8,
+        phaseCount: 8,
+        fps: PROVISIONAL_RECOVERED_ANIMATION_IDLE_FPS,
+        loop: true,
+      }),
     },
     move: {
       facings: ENTITY_FACING_ORDER,
-      clips: sourceFiveFacingClips("japanese_gunner", "gunj1", 40, 8),
+      clips: staticallyRecoveredDirectionalClips({
+        visualId: "japanese_gunner",
+        stem: "gunj1",
+        frameStart: 40,
+        frameStride: 8,
+        phaseCount: 8,
+        fps: PROVISIONAL_RECOVERED_ANIMATION_ACTIVE_FPS,
+        loop: true,
+      }),
     },
     walk: {
       facings: ENTITY_FACING_ORDER,
-      clips: sourceFiveFacingClips("japanese_gunner", "gunj1", 40, 8),
+      clips: staticallyRecoveredDirectionalClips({
+        visualId: "japanese_gunner",
+        stem: "gunj1",
+        frameStart: 40,
+        frameStride: 8,
+        phaseCount: 8,
+        fps: PROVISIONAL_RECOVERED_ANIMATION_ACTIVE_FPS,
+        loop: true,
+      }),
     },
     attack: {
       facings: ENTITY_FACING_ORDER,
-      clips: sourceFiveFacingClips("japanese_gunner", "gunj1", 40, 8),
+      clips: staticallyRecoveredDirectionalClips({
+        visualId: "japanese_gunner",
+        stem: "gunj2",
+        frameStart: 0,
+        frameStride: 8,
+        phaseCount: 8,
+        fps: PROVISIONAL_RECOVERED_ANIMATION_ACTIVE_FPS,
+        loop: false,
+      }),
+    },
+    death: {
+      facings: ENTITY_FACING_ORDER,
+      clips: staticallyRecoveredDirectionalClips({
+        visualId: "japanese_gunner",
+        stem: "gunj3",
+        frameStart: 60,
+        frameStride: 0,
+        phaseCount: 8,
+        fps: PROVISIONAL_RECOVERED_ANIMATION_ACTIVE_FPS,
+        loop: false,
+      }),
     },
   },
 } as const satisfies EntityVisual;

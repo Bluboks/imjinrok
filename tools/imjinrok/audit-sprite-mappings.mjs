@@ -22,6 +22,7 @@ import { extractK01HeroMovementPilot } from "./extract-k01-hero-movement-pilot.m
 import { extractK01SamuraiAnimationPilot } from "./extract-k01-samurai-animation-pilot.mjs";
 import { extractK01TurtleTankAnimationPilot } from "./extract-k01-turtle-tank-animation-pilot.mjs";
 import { extractK01KonishiAnimationPilot } from "./extract-k01-konishi-animation-pilot.mjs";
+import { extractK01NormalReinforcementAnimationBatch } from "./extract-k01-normal-reinforcement-animation-batch.mjs";
 import { extractMissionPortraitMapping } from "./extract-mission-portrait-mapping.mjs";
 import { extractUnitAnimationPilot } from "./extract-unit-animation-pilot.mjs";
 
@@ -70,6 +71,10 @@ const k01KonishiAnimationPilotPath = join(
   repositoryRoot,
   "tools/imjinrok/extract-k01-konishi-animation-pilot.mjs",
 );
+const k01NormalReinforcementAnimationBatchPath = join(
+  repositoryRoot,
+  "tools/imjinrok/extract-k01-normal-reinforcement-animation-batch.mjs",
+);
 const buildingStatePilotPath = join(
   repositoryRoot,
   "tools/imjinrok/extract-building-state-pilot.mjs",
@@ -100,6 +105,7 @@ const k01SamuraiAnimationPilot = extractK01SamuraiAnimationPilot();
 const k01TurtleTankAnimationPilot =
   extractK01TurtleTankAnimationPilot();
 const k01KonishiAnimationPilot = extractK01KonishiAnimationPilot();
+const k01NormalReinforcementAnimationBatch = extractK01NormalReinforcementAnimationBatch();
 const buildingStatePilot = extractBuildingStatePilot();
 const beaconStatePilot = extractBeaconStatePilot();
 const entityTypeCatalog = extractEntityTypeCatalog();
@@ -185,7 +191,7 @@ const report = {
   policy: {
     semanticStatus: "mixed",
     acceptedEvidence:
-      "All 95 original type identities, uniquely matched current visual source identities, SPEECH portraits, Korean HQ and signal-beacon body states, class-2 Korean spearman normal movement, K01 class-13 Japanese samurai core states, K01 class-14 Japanese turtle-tank idle/move/attack grid states plus its non-theme 16-ring turn and creation-default transient destruction contracts, K01 class-82 Japanese Konishi core states, and the K01 heroes' idle, movement, attack, and death frame/direction mappings are statically proven in their documented scopes.",
+      "All 95 original type identities, uniquely matched current visual source identities, SPEECH portraits, Korean HQ and signal-beacon body states, class-2 Korean spearman normal movement, K01 class-12 Japanese gunner and class-13/82 reinforcement core states, class-14 Japanese turtle-tank idle/move/attack grid states plus its non-theme 16-ring turn and creation-default transient destruction contracts, and the K01 heroes' idle, movement, attack, and death frame/direction mappings are statically proven in their documented scopes.",
     parityUse:
       "A unique source identity proves the original name and SPR binding only. Only explicitly listed frame scopes may be used for animation parity; all other direction, action, layer, and body mappings remain quarantined.",
   },
@@ -202,6 +208,7 @@ const report = {
     sourceFileRecord(k01SamuraiAnimationPilotPath),
     sourceFileRecord(k01TurtleTankAnimationPilotPath),
     sourceFileRecord(k01KonishiAnimationPilotPath),
+    sourceFileRecord(k01NormalReinforcementAnimationBatchPath),
     sourceFileRecord(buildingStatePilotPath),
     sourceFileRecord(beaconStatePilotPath),
     sourceFileRecord(entityTypeCatalogExtractorPath),
@@ -452,6 +459,33 @@ function buildVisualStaticEvidence(visual, identityCandidates) {
         "project move and walk use the statically recovered state 1 normal movement frames, direction order, and mirroring",
       unresolvedScope:
         "idle, attack/combat states, state 2 alternate movement integration, and the state 1 masked +0x1e8 path",
+    };
+  }
+
+  if (visual.id === "japanese-gunner") {
+    const states = k01NormalReinforcementAnimationBatch.states;
+    return {
+      status: "mixed",
+      ...identityEvidence,
+      animationStateMapping: "static-proven-core-state-frames",
+      confirmedAnimationScope:
+        "project idle, move/walk, attack, and death use the statically recovered class-12 state 8, 1, 4, and 7 slots, frames, direction order, and mirroring; class-12 state 2 remains quarantined",
+      stateFrameRanges: {
+        idle: states.idle.frameRange,
+        move: states.move.frameRange,
+        walk: states.move.frameRange,
+        attack: states.attack.frameRange,
+        death: states.death.frameRange,
+      },
+      stateSources: {
+        idle: states.idle.sourcePath,
+        move: states.move.sourcePath,
+        walk: states.move.sourcePath,
+        attack: states.attack.sourcePath,
+        death: states.death.sourcePath,
+      },
+      unresolvedScope:
+        "state 2 is a statically proven movement variant but its environment label and project policy are unresolved; exact timing, pivot, later flags, hit reaction, and death lifetime remain unresolved",
     };
   }
 
@@ -882,6 +916,9 @@ function hasStaticDirectionEvidence(visualId, scope, stateName) {
   }
   if (visualId === "korean-swordsman") {
     return stateName === "move" || stateName === "walk";
+  }
+  if (visualId === "japanese-gunner") {
+    return ["idle", "move", "walk", "attack", "death"].includes(stateName);
   }
   if (visualId === "japanese-samurai") {
     return ["idle", "move", "walk", "attack", "death"].includes(stateName);

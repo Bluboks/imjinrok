@@ -47,6 +47,8 @@ test("original executable sprite pointer table backs K01/K02 theme source sprite
     { manifestPath: "entities/barracks/barrackk.manifest.json", sourcePath: "char/barrackk.spr", tableIndex: 8 },
     { manifestPath: "entities/japanese-camp-barracks/barrackj.manifest.json", sourcePath: "char/barrackj.spr", tableIndex: 10 },
     { manifestPath: "entities/japanese-gunner/gunj1.manifest.json", sourcePath: "char/gunj1.spr", tableIndex: 14 },
+    { manifestPath: "entities/japanese-gunner/gunj2.manifest.json", sourcePath: "char/gunj2.spr", tableIndex: 15 },
+    { manifestPath: "entities/japanese-gunner/gunj3.manifest.json", sourcePath: "char/gunj3.spr", tableIndex: 16 },
     { manifestPath: "entities/japanese-samurai/horseswordj1.manifest.json", sourcePath: "char/horseswordj1.spr", tableIndex: 17 },
     { manifestPath: "entities/japanese-samurai/horseswordj2.manifest.json", sourcePath: "char/horseswordj2.spr", tableIndex: 18 },
     { manifestPath: "entities/japanese-turtle-tank/ghosttankj.manifest.json", sourcePath: "char/ghosttankj.spr", tableIndex: 4 },
@@ -100,6 +102,8 @@ test("default theme unit frame blocks stay within their source exports", () => {
   const archerManifest = readManifest("entities/archer/archerk.manifest.json");
   const japaneseSwordsmanManifest = readManifest("entities/japanese-swordsman/swordj.manifest.json");
   const japaneseGunnerManifest = readManifest("entities/japanese-gunner/gunj1.manifest.json");
+  const japaneseGunnerAttackManifest = readManifest("entities/japanese-gunner/gunj2.manifest.json");
+  const japaneseGunnerDeathManifest = readManifest("entities/japanese-gunner/gunj3.manifest.json");
   const generalManifest = readManifest("entities/general-k4/generalk4.manifest.json");
   const gwonYulManifest = readManifest("entities/gwon-yul/generalk11.manifest.json");
   const gwonYulAttackManifest = readManifest("entities/gwon-yul/generalk12.manifest.json");
@@ -194,12 +198,22 @@ test("default theme unit frame blocks stay within their source exports", () => {
   assert.equal(japaneseGunnerManifest.source, "original/imjinrok2/char/gunj1.spr");
   assert.equal(japaneseGunnerManifest.frameCount, 80);
   assert.equal(japaneseGunnerManifest.exportedFrames.length, 80);
-  assert.equal(japaneseGunnerVisual.states.idle?.clips.n?.frames[0]?.fileName, "gunj1_0000.png");
-  assert.equal(japaneseGunnerVisual.states.move?.clips.n?.frames[0]?.fileName, "gunj1_0040.png");
-  assert.equal(japaneseGunnerVisual.states.move?.clips.s?.frames[0]?.fileName, "gunj1_0072.png");
-  assert.equal(japaneseGunnerVisual.states.attack?.clips.s?.frames[0]?.fileName, "gunj1_0072.png");
-  assert.equal(japaneseGunnerVisual.states.attack?.clips.w?.frames[0]?.fileName, "gunj1_0056.png");
-  assert.equal(japaneseGunnerVisual.states.attack?.clips.w?.mirrorX, true);
+  assert.equal(japaneseGunnerAttackManifest.source, "original/imjinrok2/char/gunj2.spr");
+  assert.equal(japaneseGunnerAttackManifest.exportedFrames.length, 80);
+  assert.equal(japaneseGunnerDeathManifest.source, "original/imjinrok2/char/gunj3.spr");
+  assert.equal(japaneseGunnerDeathManifest.exportedFrames.length, 80);
+  assert.equal(japaneseGunnerVisual.states.idle?.clips.n?.frames[0]?.fileName, "gunj1_0016.png");
+  assert.equal(japaneseGunnerVisual.states.idle?.clips.s?.frames[0]?.fileName, "gunj1_0000.png");
+  assert.equal(japaneseGunnerVisual.states.idle?.clips.n?.mirrorX, true);
+  assert.equal(japaneseGunnerVisual.states.move?.clips.n?.frames[0]?.fileName, "gunj1_0056.png");
+  assert.equal(japaneseGunnerVisual.states.move?.clips.s?.frames[0]?.fileName, "gunj1_0040.png");
+  assert.equal(japaneseGunnerVisual.states.attack?.clips.s?.frames[0]?.fileName, "gunj2_0000.png");
+  assert.equal(japaneseGunnerVisual.states.attack?.clips.w?.frames[0]?.fileName, "gunj2_0016.png");
+  assert.equal(japaneseGunnerVisual.states.attack?.clips.w?.mirrorX, undefined);
+  assert.equal(japaneseGunnerVisual.states.attack?.clips.e?.mirrorX, true);
+  assert.equal(japaneseGunnerVisual.states.attack?.clips.s?.loop, false);
+  assert.equal(japaneseGunnerVisual.states.death?.clips.ne?.frames[0]?.fileName, "gunj3_0060.png");
+  assert.equal(japaneseGunnerVisual.states.death?.clips.ne?.mirrorX, true);
 
   assert.equal(generalManifest.source, "original/imjinrok2/char/generalk4.spr");
   assert.equal(generalManifest.frameCount, 208);
@@ -347,6 +361,51 @@ test("default theme unit frame blocks stay within their source exports", () => {
   assert.equal(royalCartVisual.states.move?.clips.sw?.frames[0]?.fileName, "koreanking_0030.png");
   assert.equal(royalCartVisual.states.move?.clips.sw?.mirrorX, true);
   assert.equal(royalCartVisual.states.move?.clips.se?.frames.at(-1)?.fileName, "koreanking_0039.png");
+});
+
+test("Japanese gunner uses the statically recovered class-12 core-state frame blocks", () => {
+  const visual = defaultTheme.visuals[
+    defaultTheme.entityBindings["japanese-gunner"]
+  ] as EntityVisual;
+  assert.deepEqual(
+    Object.keys(visual.states).sort(),
+    ["idle", "move", "walk", "attack", "death"].sort(),
+  );
+  assertDirectionalFrames(visual, "idle", {
+    stem: "gunj1",
+    phaseCount: 8,
+    frameStarts: { s: 0, sw: 8, w: 16, nw: 24, n: 16, ne: 8, e: 0, se: 32 },
+  });
+  assertDirectionalFrames(visual, "move", {
+    stem: "gunj1",
+    phaseCount: 8,
+    frameStarts: { s: 40, sw: 48, w: 56, nw: 64, n: 56, ne: 48, e: 40, se: 72 },
+  });
+  assertDirectionalFrames(visual, "attack", {
+    stem: "gunj2",
+    phaseCount: 8,
+    frameStarts: { s: 0, sw: 8, w: 16, nw: 24, n: 16, ne: 8, e: 0, se: 32 },
+  });
+  assertDirectionalFrames(visual, "death", {
+    stem: "gunj3",
+    phaseCount: 8,
+    frameStarts: { s: 60, sw: 60, w: 60, nw: 60, n: 60, ne: 60, e: 60, se: 60 },
+  });
+  assert.deepEqual(visual.states.walk, visual.states.move);
+  for (const state of ["idle", "move", "walk", "attack", "death"] as const) {
+    const clips = visual.states[state]?.clips;
+    assert.equal(clips?.n?.mirrorX, true);
+    assert.equal(clips?.ne?.mirrorX, true);
+    assert.equal(clips?.e?.mirrorX, true);
+    for (const facing of ["s", "sw", "w", "nw", "se"] as const) {
+      assert.equal(clips?.[facing]?.mirrorX, undefined);
+    }
+  }
+  assert.equal(visual.states.idle?.clips.s?.loop, true);
+  assert.equal(visual.states.move?.clips.s?.loop, true);
+  assert.equal(visual.states.walk?.clips.s?.loop, true);
+  assert.equal(visual.states.attack?.clips.s?.loop, false);
+  assert.equal(visual.states.death?.clips.s?.loop, false);
 });
 
 test("Japanese samurai uses the statically recovered core-state frame blocks", () => {

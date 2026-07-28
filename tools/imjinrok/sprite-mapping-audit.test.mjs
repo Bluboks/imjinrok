@@ -47,9 +47,9 @@ test("frame mappings stay quarantined outside statically proven scopes while ide
     visualCount: 21,
     unitVisualCount: 12,
     buildingVisualCount: 9,
-    stateMappingCount: 76,
-    clipCount: 508,
-    frameReferenceCount: 3_498,
+    stateMappingCount: 77,
+    clipCount: 517,
+    frameReferenceCount: 3_633,
     missingFrameReferenceCount: 0,
     unverifiedVisualCount: 2,
     mixedVisualCount: 17,
@@ -61,7 +61,7 @@ test("frame mappings stay quarantined outside statically proven scopes while ide
     projectBindingConflictCount: 0,
     portraitCueCount: 17,
     unverifiedPortraitCueCount: 0,
-    findingCount: 67,
+    findingCount: 57,
   });
   assert.equal(
     report.visuals.filter((visual) => visual.evidenceStatus === "unverified").length,
@@ -106,6 +106,30 @@ test("frame mappings stay quarantined outside statically proven scopes while ide
   );
   const japaneseSamurai = report.visuals.find(
     (visual) => visual.visualId === "japanese-samurai",
+  );
+  const japaneseGunner = report.visuals.find(
+    (visual) => visual.visualId === "japanese-gunner",
+  );
+  assert.equal(japaneseGunner?.evidenceStatus, "mixed");
+  assert.equal(
+    japaneseGunner?.staticEvidence.animationStateMapping,
+    "static-proven-core-state-frames",
+  );
+  assert.deepEqual(japaneseGunner?.staticEvidence.stateSources, {
+    idle: "char\\gunj1.spr",
+    move: "char\\gunj1.spr",
+    walk: "char\\gunj1.spr",
+    attack: "char\\gunj2.spr",
+    death: "char\\gunj3.spr",
+  });
+  assert.equal(
+    report.findings.filter(
+      (finding) =>
+        finding.visualId === "japanese-gunner" &&
+        (finding.code === "direction-order-unverified" ||
+          finding.code === "mirrored-facing-unverified"),
+    ).length,
+    0,
   );
   assert.equal(japaneseSamurai?.staticEvidence.internalClass, 13);
   assert.equal(
@@ -395,7 +419,7 @@ test("frame mappings stay quarantined outside statically proven scopes while ide
       K6: 17,
     },
   );
-  assert.ok(
+  assert.equal(
     report.findings.some(
       (finding) =>
         finding.code === "distinct-state-frame-collision" &&
@@ -403,6 +427,7 @@ test("frame mappings stay quarantined outside statically proven scopes while ide
         finding.states.includes("attack") &&
         finding.states.includes("move"),
     ),
+    false,
   );
   assert.equal(
     report.findings.filter(
