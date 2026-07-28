@@ -40,7 +40,7 @@ target `0x00c06e20`, type `WRITE`로 canonical `references.json` 전체를 filte
 
 | site | caller | reached direct mode output |
 | --- | --- | --- |
-| `0x00446483` | `FUN_00446420` | mode DWORD가 정확히 `1`이면 `FUN_00474ae0` 뒤 WORD `0` |
+| `0x00446483` | `FUN_00446420` | mode WORD가 정확히 `1`이면 `FUN_00474ae0` 뒤 WORD `0` |
 | `0x00460377` | `FUN_0045f9c0` | raw-23 source-result-10 path의 exact-one mode branch에서 WORD `0` |
 | `0x0047331c` | `FUN_004732a0` | reached timeout branch의 exact-one mode branch에서 WORD `0` |
 | `0x00481e89` | `FUN_00481c50` | reached cleanup branch의 exact-one mode branch에서 WORD `0` |
