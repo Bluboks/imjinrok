@@ -30,6 +30,7 @@
     "imjinrok:extract-k01-hero-basic-attack-pilot": "node tools/imjinrok/extract-k01-hero-basic-attack-pilot.mjs --json",
     "imjinrok:extract-building-state-pilot": "node tools/imjinrok/extract-building-state-pilot.mjs --json",
     "imjinrok:extract-beacon-state-pilot": "node tools/imjinrok/extract-beacon-state-pilot.mjs --json",
+    "imjinrok:extract-k01-map-low-nibble-writers": "node tools/imjinrok/extract-k01-map-low-nibble-writers.mjs",
     "imjinrok:extract-entity-type-catalog": "node tools/imjinrok/extract-entity-type-catalog.mjs --output analysis/generated/entity-type-catalog.json",
     "imjinrok:audit-sprite-mappings": "node --import tsx tools/imjinrok/audit-sprite-mappings.mjs",
     "imjinrok:setup-static-analysis": "bash tools/imjinrok/setup-static-analysis.sh",

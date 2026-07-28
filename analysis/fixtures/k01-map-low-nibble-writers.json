@@ -1,0 +1,28 @@
+{
+  "sources": { "executable": { "size": 843833, "sha256": "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e" } },
+  "field": { "baseOffset": "0x00032514", "address": "map + 0x00032514 + x * 180 + y", "elementWidthBytes": 1, "storageOrder": "x stride 180, y stride 1" },
+  "standardAddressScan": {
+    "totalOccurrences": 21,
+    "constructions": ["0x00426133", "0x0045f566", "0x00464817", "0x00464d45", "0x00464f7c", "0x004659d5", "0x00465a9e", "0x0046708a", "0x00467c76", "0x004686e2", "0x00469370", "0x00469554", "0x00469aa9", "0x00469e49", "0x0046a1e9", "0x0046a570", "0x0046dc48", "0x0046df17", "0x0046e071", "0x0046e217", "0x0046e2d8"],
+    "readSites": [
+      { "constructionVa": "0x00426133", "classification": "read" }, { "constructionVa": "0x0045f566", "classification": "read" }, { "constructionVa": "0x00464d45", "classification": "read" }, { "constructionVa": "0x00464f7c", "classification": "read" }, { "constructionVa": "0x004659d5", "classification": "read" }, { "constructionVa": "0x00465a9e", "classification": "read" }, { "constructionVa": "0x0046708a", "classification": "read" }, { "constructionVa": "0x00467c76", "classification": "read" }, { "constructionVa": "0x004686e2", "classification": "read" }, { "constructionVa": "0x00469370", "classification": "read" }, { "constructionVa": "0x00469554", "classification": "read" }, { "constructionVa": "0x00469aa9", "classification": "read" }, { "constructionVa": "0x00469e49", "classification": "read" }, { "constructionVa": "0x0046a1e9", "classification": "read" }, { "constructionVa": "0x0046a570", "classification": "read" }, { "constructionVa": "0x0046e2d8", "classification": "read" }
+    ],
+    "directWriters": [
+      { "functionEntry": "0x004646e0", "constructionVa": "0x00464817", "storeVa": "0x0046482f", "lowNibble": 2, "bytes": "8d 84 80 5d 16 00 00 8d 14 c0 8d 04 91 8a 0c 28 03 c5 80 e1 f2 80 c9 02 88 08", "highNibblePreserved": true, "lowNibbleExact": 2 },
+      { "functionEntry": "0x0046dbc0", "constructionVa": "0x0046dc48", "storeVa": "0x0046dc5f", "lowNibble": 2, "bytes": "8d 84 bf 5d 16 00 00 8d 14 c0 8d 04 93 03 c6 8a 08 80 e1 f2 80 c9 02 88 08", "highNibblePreserved": true, "lowNibbleExact": 2 },
+      { "functionEntry": "0x0046dbc0", "constructionVa": "0x0046df17", "storeVa": "0x0046df2f", "lowNibble": 1, "bytes": "8d 84 80 5d 16 00 00 8d 14 c0 8d 04 91 8a 0c 30 03 c6 80 e1 f1 80 c9 01 88 08", "highNibblePreserved": true, "lowNibbleExact": 1 },
+      { "functionEntry": "0x0046dfd0", "constructionVa": "0x0046e071", "storeVa": "0x0046e08a", "lowNibble": 2, "bytes": "8d 84 80 5d 16 00 00 8d 04 c0 8d 0c 87 8d 04 31 8a 0c 31 80 e1 f2 80 c9 02 88 08", "highNibblePreserved": true, "lowNibbleExact": 2 },
+      { "functionEntry": "0x0046dfd0", "constructionVa": "0x0046e217", "storeVa": "0x0046e22f", "lowNibble": 1, "bytes": "8d 84 80 5d 16 00 00 8d 14 c0 8d 04 91 8a 0c 30 03 c6 80 e1 f1 80 c9 01 88 08", "highNibblePreserved": true, "lowNibbleExact": 1 }
+    ]
+  },
+  "staticAnalysis": {
+    "functions": { "size": 1467804, "sha256": "c10ea2de1f4998411d52443419c9a7f52ff7f9c18e79bd4115ba197d2f5bebc3", "sourceSha256": "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e", "entries": ["0x004646e0", "0x0046dbc0", "0x0046dfd0", "0x0046ba00"] },
+    "references": { "size": 17206553, "sha256": "df11ff3713988ef22b3390b5b0ae7b4a87464b5de547a4866e1c8ec8a0bcaf4c", "sourceSha256": "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e", "requiredCallEdges": [
+      { "from": "0x00445a33", "fromFunctionEntry": "0x00445990", "to": "0x004646e0", "type": "UNCONDITIONAL_CALL" }, { "from": "0x0046c073", "fromFunctionEntry": null, "to": "0x004646e0", "type": "UNCONDITIONAL_CALL" }, { "from": "0x0046ba17", "fromFunctionEntry": "0x0046ba00", "to": "0x0046dfd0", "type": "UNCONDITIONAL_CALL" }, { "from": "0x0046ba4e", "fromFunctionEntry": "0x0046ba00", "to": "0x0046dbc0", "type": "UNCONDITIONAL_CALL" }, { "from": "0x0046dd29", "fromFunctionEntry": "0x0046dbc0", "to": "0x0046dbc0", "type": "UNCONDITIONAL_CALL" }, { "from": "0x0046df69", "fromFunctionEntry": "0x0046dbc0", "to": "0x0046dbc0", "type": "UNCONDITIONAL_CALL" }, { "from": "0x0046e0b7", "fromFunctionEntry": "0x0046dfd0", "to": "0x0046dfd0", "type": "UNCONDITIONAL_CALL" }, { "from": "0x0046e243", "fromFunctionEntry": "0x0046dfd0", "to": "0x0046dfd0", "type": "UNCONDITIONAL_CALL" }
+    ] }
+  },
+  "transforms": {
+    "lowNibbleOne": [{ "oldValue": 0, "result": 1 }, { "oldValue": 15, "result": 1 }, { "oldValue": 165, "result": 161 }, { "oldValue": 255, "result": 241 }],
+    "lowNibbleTwo": [{ "oldValue": 0, "result": 2 }, { "oldValue": 15, "result": 2 }, { "oldValue": 165, "result": 162 }, { "oldValue": 255, "result": 242 }]
+  }
+}
