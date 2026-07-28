@@ -39,6 +39,9 @@ node tools/imjinrok/extract-k01-state-three-consumer-bridge.mjs
 
 main switch `0x0045fd36`은 current main-state WORD를 decrement한 뒤 table `0x004607b0`을 읽는다.
 따라서 canonical jump-table label은 raw state minus one이다.
+The extractor separately anchors `0x0045fc83` (`BB 8C 00 00 00`, `BX=0x8c`) and
+`0x0045fd1e` (`BE 01 00 00 00`, `SI=1`), so the `0x004603d9` relay stores are fixed-width
+register values rather than inferred labels.
 
 | raw state | label | destination | direct result |
 | ---: | ---: | --- | --- |
@@ -77,9 +80,9 @@ If current state remains `23`, secondary switch `0x00460322` only receives the a
 | ---: | --- |
 | `0` | keep `23` |
 | `3` | call `FUN_00492630`, write returned SI `3` to current state |
-| `8` | if `DWORD 0x004cc548 == 1`, `DWORD 0x007c5f80 < 1000` selects route argument `3`, otherwise `2`; then target `0x140`, current `0x8c`. If that DWORD is not 1, fall through to target `8`, current `0x8c`. |
+| `8` | if `DWORD 0x004cc548 == 1`, `DWORD 0x007c5f80 < 1000` selects route argument `3`, otherwise `2`; then target `0x140`, current `0x8c`. If that DWORD is not 1, it jumps to `0x004603d9`, which stores pre-switch `SI=1` as target and pre-switch `BX=0x8c` as current. |
 | `10` | `DWORD 0x00634ac0 == 1` causes its exact write/call prefix. Then `DWORD 0x00c06e38 == 1` selects target `0x1c`, current `0x8c`; otherwise target `0x0a`, current `0x8c`. The `0x00c06e20 == 1` subpath calls `FUN_00474ae0` and clears that mode WORD before the `0x1c` writes. |
-| `32` | target `32`, current `0x8c` |
+| `32` | the same `0x004603d9` path: target `1`, current `0x8c` |
 
 The `8/10/32` paths use the existing shared teardown call before their state relay. This document does not
 assign opaque callees or raw target codes human-facing meanings.
