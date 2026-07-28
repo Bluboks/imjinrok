@@ -39,18 +39,21 @@ export const CLIENT_UI_LAYOUT_AUDIT_PROBES = [
     id: "action-grid-layout",
     sourcePath: "apps/game-client/src/ui/actionGrid.ts",
     patterns: [
+      "if (originalLayout) {",
+      "return originalLayout.slots.slice(0, 9);",
       "const columns = 4;",
       "const rows = 3;",
       "const gap = 8;",
-      "const gridX = x + 14;",
-      "const gridY = y + 46;",
-      "const slotWidth = (width - 28 - gap * (columns - 1)) / columns;",
+      "const gridX = bounds.x + 14;",
+      "const gridY = bounds.y + 46;",
+      "const slotWidth = (bounds.width - 28 - gap * (columns - 1)) / columns;",
+      "const slotHeight = (bounds.height - 60 - gap * (rows - 1)) / rows;",
     ],
-    currentBasis: "client-command-grid-design",
-    originalEvidenceStatus: "unproven-as-original-command-panel",
-    originalTraceTargets: ["mouse-interface-primary", "mouse-interface-secondary"],
+    currentBasis: "static-proven-K01-command-grid-geometry-with-client-generic-grid-adaptations",
+    originalEvidenceStatus: "static-proven-K01-grid-geometry-and-strict-hit;unproven-generic-4x3-labels-actions-and-HUD-placement",
+    originalTraceTargets: ["FUN_00443360", "FUN_00481ee0", "FUN_0045ad90", "FUN_00459110", "FUN_00447a0f"],
     followUp:
-      "Recover original command panel slot count, slot geometry, and command icon binding before calling this command grid parity.",
+      "Keep the K01-only nine-slot geometry and strict hit separate from the generic 4x3 grid, labels/actions, and HUD placement until those adaptations have their own source-bound mappings.",
   },
   {
     id: "selection-panel-layout",
@@ -119,7 +122,7 @@ export function extractClientUiLayoutAudit(repositoryRoot = DEFAULT_REPOSITORY_R
     summary: {
       probeCount: probes.length,
       allPatternsPresent: probes.every((probe) => probe.patterns.every((pattern) => pattern.present)),
-      unprovenOriginalParityCount: probes.filter((probe) => probe.originalEvidenceStatus.startsWith("unproven")).length,
+      unprovenOriginalParityCount: probes.filter((probe) => probe.originalEvidenceStatus.includes("unproven")).length,
     },
     probes,
   };
