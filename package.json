@@ -29,6 +29,7 @@
     "imjinrok:extract-k01-hero-movement-pilot": "node tools/imjinrok/extract-k01-hero-movement-pilot.mjs --json",
     "imjinrok:extract-k01-hero-basic-attack-pilot": "node tools/imjinrok/extract-k01-hero-basic-attack-pilot.mjs --json",
     "imjinrok:extract-k01-samurai-animation-pilot": "node tools/imjinrok/extract-k01-samurai-animation-pilot.mjs --json",
+    "imjinrok:extract-k01-turtle-tank-animation-pilot": "node tools/imjinrok/extract-k01-turtle-tank-animation-pilot.mjs --json",
     "imjinrok:extract-building-state-pilot": "node tools/imjinrok/extract-building-state-pilot.mjs --json",
     "imjinrok:extract-beacon-state-pilot": "node tools/imjinrok/extract-beacon-state-pilot.mjs --json",
     "imjinrok:extract-entity-type-catalog": "node tools/imjinrok/extract-entity-type-catalog.mjs --output analysis/generated/entity-type-catalog.json",

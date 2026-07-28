@@ -1,6 +1,6 @@
 # 분석 도구 인벤토리
 
-기준일: 2026-07-27
+기준일: 2026-07-28
 
 이 문서는 `tools/imjinrok/`의 도구를 현재 정적 분석 계획에 맞게 분류한다. 분류는 도구의 존재나
 테스트 통과 여부가 아니라, 원본 동작의 근거로 사용할 수 있는 범위를 뜻한다.
@@ -30,13 +30,14 @@
 | `extract-unit-animation-pilot.mjs`, `unit-animation-pilot.test.mjs` | 유지 | 조선 창병·클래스 2 식별, 상태 1·2 이동 의미·방향·phase→frame·mirror와 특수 분기 격리 |
 | `extract-k01-hero-movement-pilot.mjs`, `k01-hero-movement-pilot.test.mjs` | 유지 | K01 권율·유성룡의 클래스, 주·보조 SPR, 상태 8/1/4/7 대기·이동·공격·사망 방향·phase→frame·mirror 정적 추출 |
 | `extract-k01-samurai-animation-pilot.mjs`, `k01-samurai-animation-pilot.test.mjs` | 유지 | K01 class 13 일본 사무라이의 두 SPR slot, 상태 8/1/4/7 normal path, 8방향·phase→frame·mirror와 class-specific attack wrapper 정적 추출·재현 |
+| `extract-k01-turtle-tank-animation-pilot.mjs`, `k01-turtle-tank-animation-pilot.test.mjs` | 유지 | K01 class 14 일본 귀갑차 상태 8/1/4의 initializer·normal/special consumer gate, grid 8방향과 opaque raw direction 1000..1007 phase→frame·mirror 정적 추출·재현 |
 | `extract-k01-hero-basic-attack-pilot.mjs`, `k01-hero-basic-attack-pilot.test.mjs` | 유지 | K01 두 영웅의 일반 공격 상태·효과 phase·회복 카운터·payload, 권율 직접 피해와 유성룡 투사체 생성 정적 추출·재현 |
 | `extract-k01-ryu-projectile-pilot.mjs`, `k01-ryu-projectile-pilot.test.mjs` | 유지 | 유성룡 subtype `0x0c`의 slot·레코드·보수적 port accepted 좌표 subset `0..32767`·control-word 비행 분기·도착 dispatcher·effect kind `9` WORD 피해·raw health gate와 실패 경로 정적 추출·재현; 원본 caller 전체 좌표 범위는 미확정 |
 | `extract-k01-projectile-pool-cadence.mjs`, `k01-projectile-pool-cadence.test.mjs` | 유지 | main message loop→scheduler→투사체 풀의 유일 call chain, scheduler의 13개 resolved direct call raw 조건·pre-clock/post-pool 순서, selector·feedback·DWORD millisecond gate와 거부 경로 재현; callee 의미·fixed FPS·24 Hz exact mapping은 확정하지 않음 |
 | `extract-k01-hero-targeting-range.mjs`, `k01-hero-targeting-range.test.mjs` | 유지 | K01 두 영웅의 full DWORD 대상 writer, low-WORD 검사, raw relation 필터, Y-major 자동 scan, WORD/DWORD wrap 사거리와 취소·이동·재검사 전이 추출·재현; 프로젝트 참조·좌표·footprint mapping은 미확정 |
 | `extract-k01-hero-death-lifecycle.mjs`, `k01-hero-death-lifecycle.test.mjs` | 유지 | K01 두 영웅의 signed-health 행동 6 진입, incoming cadence/runtime flags별 phase·행동 7/`0x16`·조건부 release, health→slot→generation 무효화와 확인한 경로의 direct eager-clear 부재를 정적 추출·재현; runtime flag 도달·alias write·24 Hz mapping은 미확정 |
 | `extract-k01-beacon-k0120-trigger.mjs`, `k01-beacon-k0120-trigger.test.mjs` | 유지 | K01 raw-relation blocker, 1,200-slot 봉화대 세 active gate·match, flag·script busy·loader 0/1·void start, 같은 scan 반복, signed-WORD 증원 descriptor, selector 5 raw grid, 조건부 post-state 반환을 정적 추출·재현; 승리 결과와 runtime mapping은 포함하지 않음 |
-| `extract-k01-reinforcement-identity-map.mjs`, `k01-reinforcement-identity-map.test.mjs` | 유지 | native descriptor, 타입 카탈로그·K01 map·네 SPR, 네 conversion manifest와 current sprite audit/K01 adapter provenance를 교차 검증해 요청 좌표·exact static identity/source 9/9를 확정; class 13 animation은 별도 파일럿을 링크하며 최종 배치·행동·stats는 포함하지 않음 |
+| `extract-k01-reinforcement-identity-map.mjs`, `k01-reinforcement-identity-map.test.mjs` | 유지 | native descriptor, 타입 카탈로그·K01 map·네 SPR, 네 conversion manifest와 current sprite audit/K01 adapter provenance를 교차 검증해 요청 좌표·exact static identity/source 9/9를 확정; class 13·14 animation은 별도 파일럿을 링크하며 최종 배치·행동·stats는 포함하지 않음 |
 | `extract-k01-mission-result-lifecycle.mjs`, `k01-mission-result-lifecycle.test.mjs` | 유지 | K01 general/영웅 loss latch, beacon bypass, strict wrapped timer, dispatcher pre-gate/stage와 distinct raw-tick final commit 추출·재현; raw clock·result transition·identity mapping은 포함하지 않음 |
 | `extract-k01-final-result-transition.mjs`, `k01-final-result-transition.test.mjs` | 유지 | result state `0x18/0x1a` 이후 shared teardown, win/loss SPR·YAV 초기화, unsigned cadence/completion, `0x8c→0x96` relay와 external/stage final route 추출·재현; phase→SPR frame, timer reset, 프로젝트 24 Hz/result policy mapping은 포함하지 않음 |
 | `extract-k01-mission-timer-reset.mjs`, `k01-mission-timer-reset.test.mjs` | 유지 | 표준 main state 1→broad `REP STOSD`→stage 1 K01 map copy의 timer zero·반개구간·순서를 sparse 입력으로 추출·재현; 다른 reset topology와 프로젝트 mapping은 포함하지 않음 |

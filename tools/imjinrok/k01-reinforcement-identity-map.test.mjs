@@ -190,7 +190,7 @@ test("extracts exact native descriptors, identities, and K01 requested coordinat
       projectKind,
       source: `original/imjinrok2/char/${stem}.spr`,
       animationStateMapping:
-        internalClass === 13
+        internalClass === 13 || internalClass === 14
           ? "static-proven-core-state-frames"
           : "unverified",
       manifest: conversionManifestExpectations.find(
@@ -199,6 +199,8 @@ test("extracts exact native descriptors, identities, and K01 requested coordinat
       scope:
         internalClass === 13
           ? "project kind identity and source SPR binding are proven here; class-13 idle, move/walk, attack, and death animation frames/directions are separately static-proven by the K01 samurai animation pilot, while exact timing, stats, category, collision, behavior, render scale, and pivot remain unverified original semantics"
+          : internalClass === 14
+            ? "project kind identity and source SPR binding are proven here; class-14 idle, move/walk, and attack grid-direction frames/mirroring are separately static-proven by the K01 turtle-tank animation pilot, while opaque raw directions, death/destruction, exact timing, stats, category, collision, behavior, render scale, and pivot remain unverified original semantics"
           : "project kind identity and source SPR binding only; animation-state, direction, stats, category, collision, behavior, render scale, and pivot are unverified original semantics",
     })),
   );

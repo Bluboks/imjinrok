@@ -147,10 +147,10 @@ const EXPECTED_TYPES = [
       size: { w: 70, h: 60 },
       pivot: { anchor: { x: 35, y: 52 } },
     },
-    defaultStillOnly: true,
-    animationStateMapping: "unverified",
+    defaultStillOnly: false,
+    animationStateMapping: "static-proven-core-state-frames",
     scope:
-      "project kind identity and source SPR binding only; animation-state, direction, stats, category, collision, behavior, render scale, and pivot are unverified original semantics",
+      "project kind identity and source SPR binding are proven here; class-14 idle, move/walk, and attack grid-direction frames/mirroring are separately static-proven by the K01 turtle-tank animation pilot, while opaque raw directions, death/destruction, exact timing, stats, category, collision, behavior, render scale, and pivot remain unverified original semantics",
   },
   {
     internalClass: 82,

@@ -1,6 +1,6 @@
 # 스프라이트 매핑 감사
 
-기준일: 2026-07-27
+기준일: 2026-07-28
 
 ## 판정
 
@@ -8,8 +8,9 @@
 비주얼 중 19개는 원본 타입 하나와 고유하게 연결된다. 조선 본영과 봉화대의 건설·정상·반파 본체는
 `scoped-static-proven`, 정체와 일부 또는 미확정 프레임이 함께 있는 17개는 `mixed`다.
 `farmerk.spr`는 두 타입이 공유하고 `advtowerj.spr`는 95개 타입 정의에 사용되지 않아 두 비주얼만
-`unverified`다. `mixed`인 조선 창병 비주얼에서는 상태 1 일반 이동, 권율·유성룡 비주얼에서는
-상태 8 idle·1 일반 이동·4 공격·7 사망의 슬롯·프레임·방향·미러를 정적 확정 범위로 승격했다.
+`unverified`다. `mixed`인 조선 창병 비주얼에서는 상태 1 일반 이동을, 일본 사무라이와
+권율·유성룡 비주얼에서는 각 문서가 확인한 상태 8 idle·1 일반 이동·4 공격·7 사망을,
+일본 귀갑차에서는 상태 8/1/4의 grid 방향만 정적 확정 범위로 승격했다.
 브리핑 `SPEECH` 초상화 17개는 `static-proven`을 유지한다.
 
 기계 생성 상세는
@@ -25,8 +26,8 @@ pnpm imjinrok:audit-sprite-mappings
 | 대상 | 확인한 범위 | 판정 |
 | --- | --- | --- |
 | 원본 타입 95개 | 이름·슬롯·기본 프레임·raw flags·SPR 경로 | 타입 정체·출처 전수 `정적 확정` |
-| 엔티티 비주얼 21개 | 상태 69개, 클립 429개, 프레임 참조 2,978개 | 범위 확정 2개, `mixed` 17개, 미확인 2개 |
-| 유닛 비주얼 12개 | 정체·방향·행동·미러링 | 고유 정체 11개, 모호 1개; class 13 핵심 상태 확정, class 14·82는 base-frame still |
+| 엔티티 비주얼 21개 | 상태 72개, 클립 464개, 프레임 참조 3,139개 | 범위 확정 2개, `mixed` 17개, 미확인 2개 |
+| 유닛 비주얼 12개 | 정체·방향·행동·미러링 | 고유 정체 11개, 모호 1개; class 13 핵심 상태와 class 14 상태 8/1/4 grid 확정, class 82는 base-frame still |
 | 건물 비주얼 9개 | 정체·idle·construction·damaged·overlay | 본영·봉화대 본체 2개 `정적 확정`, 나머지 7개 본체 상태 `미확인` |
 | 브리핑 초상화 17개 | `K1`~`K6`·`K10`, `J1`~`J5`, `C1`~`C5` | ID→`hero.spr` 프레임 `정적 확정` |
 | 원본 내부 클래스 2 | `조선 창병`, 슬롯 100, 상태 1·2, 8방향, phase 0~7 | 두 상태의 이동 의미·프레임 식 확정, 상태 1 일반 이동 이식 |
@@ -59,8 +60,9 @@ pnpm imjinrok:audit-sprite-mappings
   확정했지만 프로젝트 공격 이벤트와 클립 FPS 연결은 아직 잠정값이다.
 - 일본 조총병의 `attack`은 `move`·`walk`와 완전히 같은 프레임 클립을 사용한다.
 - 일본 사무라이는 `horseswordj1.spr`·`horseswordj2.spr`의 상태 8/1/4/7 frame·방향·mirror를
-  [별도 파일럿](mechanics/k01-samurai-animation-pilot.md)에서 확정·이식했다. 귀갑차·고니시는
-  `ghosttankj.spr`, `generalj11.spr`의 base frame 0 하나만 default still로 사용한다.
+  [별도 파일럿](mechanics/k01-samurai-animation-pilot.md)에서 확정·이식했다. 귀갑차는
+  [class 14 파일럿](mechanics/k01-turtle-tank-animation-pilot.md)의 상태 8/1/4 grid
+  frame·mirror를 이식했고, 고니시만 `generalj11.spr` base frame 0 still을 사용한다.
   세 visual의 FPS 또는 render size·pivot은 프로젝트 잠정값이다.
 
 따라서 사용자가 보고한 “유닛 프레임 방향이 맞지 않음”은 현재 코드 구조로 설명된다. 개별 프레임을

@@ -143,8 +143,8 @@ VM에서 원본 게임을 플레이하며 화면 변화를 따라가는 방식�
 - 같은 scan 복수 match의 native block 반복
 - signed-WORD descriptor 증원, selector 5 raw byte-grid와 두 raw global write
 - native class 12·13·14·82의 원본 정체·SPR, K01 요청 좌표와 프로젝트 exact static
-  identity/source 9/9 연결; class 13 상태 8/1/4/7 animation 이식, class 14·82는 base frame 0
-  still로 animation 의미 격리
+  identity/source 9/9 연결; class 13 상태 8/1/4/7과 class 14 상태 8/1/4 grid animation 이식,
+  class 82는 base frame 0 still로 animation 의미 격리
 - flag exact 1과 script context `+8 == 0`의 caller 전달 return 1
 - general presence→beacon bypass→class 76/78 loss latch와 zero-clock 재기록
 - win-first strict `0x7d0` timer, signed DWORD wrap/overflow와 동시 timer 우선순위
@@ -158,7 +158,7 @@ VM에서 원본 게임을 플레이하며 화면 변화를 따라가는 방식�
 
 - 표준 entry broad zero 밖의 K01 trigger flag reset/consumer lifecycle
 - final destination `0x140/0x64/0x10/0x20/raw WORD`별 후속 lifecycle
-- class 14·82 animation, 네 class 행동·stats와 최종 생성 정책
+- class 14 opaque/death·class 82 animation, 네 class 행동·stats와 최종 생성 정책
 - raw clocks와 프로젝트 24 Hz·result/asset/identity policy의 exact mapping
 
 별도 후속 질문:

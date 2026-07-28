@@ -411,6 +411,52 @@ test("Japanese samurai uses the statically recovered core-state frame blocks", (
   }
 });
 
+test("Japanese turtle tank uses only the statically recovered grid core-state frames", () => {
+  const manifest = readManifest(
+    "entities/japanese-turtle-tank/ghosttankj.manifest.json",
+  );
+  const visual = defaultTheme.visuals[
+    defaultTheme.entityBindings["japanese-turtle-tank"]
+  ] as EntityVisual;
+
+  assert.equal(manifest.source, "original/imjinrok2/char/ghosttankj.spr");
+  assert.equal(manifest.frameCount, 88);
+  assert.equal(manifest.exportedFrames.length, 88);
+  assert.deepEqual(
+    Object.keys(visual.states).sort(),
+    ["idle", "move", "walk", "attack"].sort(),
+  );
+  assertDirectionalFrames(visual, "idle", {
+    stem: "ghosttankj",
+    phaseCount: 1,
+    frameStarts: { s: 16, sw: 32, w: 48, nw: 64, n: 48, ne: 32, e: 16, se: 0 },
+  });
+  assertDirectionalFrames(visual, "move", {
+    stem: "ghosttankj",
+    phaseCount: 8,
+    frameStarts: { s: 16, sw: 32, w: 48, nw: 64, n: 48, ne: 32, e: 16, se: 0 },
+  });
+  assert.deepEqual(visual.states.walk, visual.states.move);
+  assertDirectionalFrames(visual, "attack", {
+    stem: "ghosttankj",
+    phaseCount: 1,
+    frameStarts: { s: 74, sw: 76, w: 78, nw: 80, n: 78, ne: 76, e: 74, se: 72 },
+  });
+  assert.equal(visual.states.idle?.clips.s?.loop, true);
+  assert.equal(visual.states.move?.clips.s?.loop, true);
+  assert.equal(visual.states.walk?.clips.s?.loop, true);
+  assert.equal(visual.states.attack?.clips.s?.loop, false);
+  for (const state of ["idle", "move", "walk", "attack"] as const) {
+    const clips = visual.states[state]?.clips;
+    assert.equal(clips?.n?.mirrorX, true);
+    assert.equal(clips?.ne?.mirrorX, true);
+    assert.equal(clips?.e?.mirrorX, true);
+    for (const facing of ["s", "sw", "w", "nw", "se"] as const) {
+      assert.equal(clips?.[facing]?.mirrorX, undefined);
+    }
+  }
+});
+
 function assertDirectionalFrames(
   visual: EntityVisual,
   stateName: "idle" | "move" | "walk" | "attack" | "death",
@@ -447,15 +493,8 @@ function assertDirectionalFrames(
   }
 }
 
-test("remaining identity-only Japanese visuals use only the proven base-frame still", () => {
+test("remaining identity-only Japanese visual uses only the proven base-frame still", () => {
   const expectations = [
-    {
-      kind: "japanese-turtle-tank",
-      manifestPath: "entities/japanese-turtle-tank/ghosttankj.manifest.json",
-      source: "original/imjinrok2/char/ghosttankj.spr",
-      frameCount: 88,
-      frameFile: "ghosttankj_0000.png",
-    },
     {
       kind: "japanese-konishi",
       manifestPath: "entities/japanese-konishi/generalj11.manifest.json",

@@ -47,9 +47,9 @@ test("frame mappings stay quarantined outside statically proven scopes while ide
     visualCount: 21,
     unitVisualCount: 12,
     buildingVisualCount: 9,
-    stateMappingCount: 69,
-    clipCount: 429,
-    frameReferenceCount: 2_978,
+    stateMappingCount: 72,
+    clipCount: 464,
+    frameReferenceCount: 3_139,
     missingFrameReferenceCount: 0,
     unverifiedVisualCount: 2,
     mixedVisualCount: 17,
@@ -145,52 +145,57 @@ test("frame mappings stay quarantined outside statically proven scopes while ide
     ),
     false,
   );
-  assert.deepEqual(
-    [
-      ["japanese-turtle-tank", 14, "일본 귀갑차", 0],
-      ["japanese-konishi", 82, "일본 고니시", 0],
-    ].map(([visualId, internalClass, originalGameplayName, baseFrame]) => {
-      const visual = report.visuals.find(
-        (candidate) => candidate.visualId === visualId,
-      );
-      return {
-        visualId,
-        internalClass: visual?.staticEvidence.internalClass,
-        originalGameplayName:
-          visual?.staticEvidence.originalGameplayName,
-        baseFrame: visual?.staticEvidence.baseFrame,
-        animationStateMapping:
-          visual?.staticEvidence.animationStateMapping,
-        mapping: visual?.mappings,
-      };
-    }),
-    [
-      ["japanese-turtle-tank", 14, "일본 귀갑차", "ghosttankj_0000.png"],
-      ["japanese-konishi", 82, "일본 고니시", "generalj11_0000.png"],
-    ].map(([visualId, internalClass, originalGameplayName, frameFile]) => ({
-      visualId,
-      internalClass,
-      originalGameplayName,
-      baseFrame: 0,
-      animationStateMapping: "unverified",
-      mapping: [
+  const turtleTank = report.visuals.find(
+    (visual) => visual.visualId === "japanese-turtle-tank",
+  );
+  assert.equal(turtleTank?.staticEvidence.internalClass, 14);
+  assert.equal(turtleTank?.staticEvidence.originalGameplayName, "일본 귀갑차");
+  assert.equal(
+    turtleTank?.staticEvidence.animationStateMapping,
+    "static-proven-core-state-frames",
+  );
+  assert.deepEqual(turtleTank?.staticEvidence.stateFrameRanges, {
+    idle: [0, 64],
+    move: [0, 71],
+    walk: [0, 71],
+    attack: [72, 80],
+  });
+  assert.deepEqual(turtleTank?.staticEvidence.stateSources, {
+    idle: "char\\ghosttankj.spr",
+    move: "char\\ghosttankj.spr",
+    walk: "char\\ghosttankj.spr",
+    attack: "char\\ghosttankj.spr",
+  });
+  assert.equal(
+    report.findings.some(
+      (finding) =>
+        finding.visualId === "japanese-turtle-tank" &&
+        (finding.code === "direction-order-unverified" ||
+          finding.code === "mirrored-facing-unverified"),
+    ),
+    false,
+  );
+  const konishi = report.visuals.find(
+    (visual) => visual.visualId === "japanese-konishi",
+  );
+  assert.equal(konishi?.staticEvidence.internalClass, 82);
+  assert.equal(konishi?.staticEvidence.animationStateMapping, "unverified");
+  assert.deepEqual(konishi?.mappings, [
+    {
+      scope: "base",
+      state: "default",
+      declaredFacings: [],
+      clips: [
         {
-          scope: "base",
-          state: "default",
-          declaredFacings: [],
-          clips: [
-            {
-              facing: "default",
-              frameFiles: [frameFile],
-              frameIndexes: [0],
-              mirrorX: false,
-              missingFrames: [],
-            },
-          ],
+          facing: "default",
+          frameFiles: ["generalj11_0000.png"],
+          frameIndexes: [0],
+          mirrorX: false,
+          missingFrames: [],
         },
       ],
-    })),
-  );
+    },
+  ]);
   const japaneseSpearman = report.visuals.find(
     (visual) => visual.visualId === "japanese-swordsman",
   );

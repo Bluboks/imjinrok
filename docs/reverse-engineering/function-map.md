@@ -42,8 +42,8 @@
 | `0x0041d210` | `FUN_0041d210`, 비연속 body 3개 | 52 / 177 | 엔티티 `BYTE +0x03` 애니메이션 상태 디스패처 | class 2 상태 1·2, class 13·76·78 상태 1·4·7·8의 scoped normal consumer 경로 확정; 다른 class/state는 별도 |
 | `0x0041d470` | `FUN_0041d470`, `0x0041d470-0x0041d4ee` | 10 / 26 | 방향별 main entity sprite slot `+0x0a` 설정 후보 | 호출 상태와 `+0x456` 표 |
 | `0x0041d560` | `FUN_0041d560`, `0x0041d560-0x0041d67d` | 15 / 55 | 두 번째 sprite slot `+0x0a` 설정 후보 | 호출 상태와 `+0x48e` 표 |
-| `0x0041e370` | `FUN_0041e370`, 비연속 body 2개 | class 점프 테이블 / 115 | 상태 4 class wrapper; class 13은 flags high bit clear·phase count nonzero일 때 normal 공격 frame consumer로 진입 | class 13 범위 정적 확정, 다른 class 의미는 별도 |
-| `0x0041efa0` | `FUN_0041efa0` | 점프 테이블 포함 | 상태 1 방향·phase→frame·mirror | 클래스 2·13·76·78 일반 이동의 scoped normal path 정적 확정 |
+| `0x0041e370` | `FUN_0041e370`, 비연속 body 2개 | class 점프 테이블 / 115 | 상태 4 class wrapper; class 13은 normal, class 14는 phase count nonzero일 때 special 공격 frame consumer로 진입 | class 13·14 scoped 범위 정적 확정 |
+| `0x0041efa0` | `FUN_0041efa0` | 점프 테이블 포함 | 상태 1 방향·phase→frame·mirror | 클래스 2·13·76·78 normal path와 class 14 생성-default special path 정적 확정 |
 | `0x0041f380` | `FUN_0041f380` | 점프 테이블 포함 | 내부 클래스 2의 상태 2 방향·phase→frame·mirror | 정적 확정 범위는 애니메이션 파일럿 참조 |
 | `0x0041fdb0` | `FUN_0041fdb0` | 렌더 분기 포함 | main entity slot `+0x0a`, frame `+0x0c`, mirror `+0x1b5` 소비 | 나머지 draw 분기 |
 | `0x004233f0` | `FUN_004233f0`, `0x004233f0-0x0042373d` | 34 / 273 | 행동 6 raw flags·cadence·signed phase 진행 | incoming cadence/runtime flags별 사망 phase와 완료 반환 정적 확정 |
@@ -51,7 +51,7 @@
 | `0x00425af0` | 이동 dispatcher | 두 호출 분기 | flags `+0x74` bit `0x08`로 이동 갱신 함수 선택 | bit 설정 경로의 클래스별 적용 |
 | `0x00426bf0` | `FUN_00426bf0`, `0x00426bf0-0x00426c1f` | 1 / 9 | 현재 대상 DWORD `+0x122/+0x124` 두 WORD raw clear | direct caller 2곳; 확인한 사망·release 경로에는 direct call/write 없음 |
 | `0x00425b20` | `FUN_00425b20`, `0x00425b20-0x004262df` | 일반 이동 전체 경로 | 방향·좌표·phase 갱신과 상태 1·2 선택 | 상태 2 조건의 원본 사람용 명칭 |
-| `0x004291d0` | `FUN_004291d0` | 클래스 점프 테이블 포함 | 내부 클래스별 애니메이션 설정 초기화 | class 13→`0x0042a492` 상태 8/1/4/7, class 76→`0x0042a9da`, 78→`0x0042ab2a` 범위 정적 확정 |
+| `0x004291d0` | `FUN_004291d0` | 클래스 점프 테이블 포함 | 내부 클래스별 애니메이션 설정 초기화 | class 13→`0x0042a492` 상태 8/1/4/7, class 14→`0x0042bae1` 상태 8/1/4, class 76→`0x0042a9da`, 78→`0x0042ab2a` 범위 정적 확정 |
 | `0x00437650` | `FUN_00437650`, `0x00437650-0x00438025` | 39 / 539 | `0x558`-byte 엔티티 초기화·slot/generation reference 기록 | 클래스 76·78 사망 flags·cadence/delay 생성 기본값 생산 정적 확정; runtime mutation 별도 |
 | `0x00438130` | `FUN_00438130`, `0x00438130-0x0043819d` | 9 / 29 | raw mode/table gate 뒤 signed-WORD 완충 수치·체력 적용 | 유성룡 kind 9 gate·wrap·실패 분기 정적 확정 |
 | `0x00438c50` | `FUN_00438c50`, `0x00438c50-0x00438e22` | 26 / 165 | low-WORD active 뒤 footprint 또는 squared range 판정 | 권율 signed low-WORD `<=1`, 유성룡 signed DWORD strict `<50625`와 wrap 정적 확정 |
