@@ -1,16 +1,16 @@
-# K01 시작 유닛 class 11·12·13·16·31 binding
+# K01 시작 유닛 class 7·11·12·13·16·31 binding
 
-질문: **원본 `k01.map`의 class 11·12·13·16 시작 레코드를 해당 고유 project kind와
+질문: **원본 `k01.map`의 class 7·11·12·13·16·31 시작 레코드를 해당 고유 project kind와
 정적으로 확정한 핵심 상태 프레임에만 정확히 연결할 수 있는가?**
 
 ## 상태와 범위
 
 - 분석 상태: `정적 확정` — canonical EXE/catalog/map/SPR와 class switch·initializer helper를
-  함께 재검증한 class 11·16의 상태 8/1/4/7, 그리고 기존 class 12·13 범위에 한정한다.
-- 재현 상태: `재현 완료` — class 11·16의 slot/frame/direction/mirror, map 좌표와 canonical
+  함께 재검증한 class 7·11·16 및 class 31의 확인된 core state 범위, 그리고 기존 class 12·13 범위에 한정한다.
+- 재현 상태: `재현 완료` — class 7·11·16·31의 slot/frame/direction/mirror, map 좌표와 canonical
   function·initializer·map·SPR 변조 거부 vector를 검사한다.
-- 구현 상태: `부분 이식` — class 11은 `korean-monk`, class 16은
-  `japanese-shrine-maiden` 고유 visual을 선택한다. gameplay·stats·owner 의미는 이식하지 않는다.
+- 구현 상태: `부분 이식` — class 7은 `villager`, class 11은 `korean-monk`, class 16은
+  `japanese-shrine-maiden`, class 31은 `japanese-farmer` 고유 visual을 선택한다. gameplay·stats·owner 의미는 이식하지 않는다.
 
 ## 원본과 정체 근거
 
@@ -28,10 +28,12 @@ map header의 source entity 배열은 type/x/y/owner signed-WORD 배열이며 �
 
 | class | 원본 이름 | primary SPR | 기존 project kind | core-frame 근거 |
 | ---: | --- | --- | --- | --- |
+| 7 | 조선 농부 | `char/farmerk.spr` | `villager` | [Korean farmer core frames](k01-korean-farmer-core-frames.md)의 source-created `+0x47a==0` 상태 8/1/7 |
 | 12 | 일본 조총병 | `char/gunj1.spr` | `japanese-gunner` | [normal reinforcement batch](k01-normal-reinforcement-animation-batch.md)의 상태 8/1/4/7 |
 | 13 | 일본 사무라이 | `char/horseswordj1.spr` | `japanese-samurai` | [samurai pilot](k01-samurai-animation-pilot.md)의 상태 8/1/4/7 |
 | 11 | 조선 승병 | `char/budak.spr` | `korean-monk` | `0x0042a520..0x0042a5d4`, 상태 8/1/4/7 |
 | 16 | 일본 무녀 | `char/advbudaj.spr` | `japanese-shrine-maiden` | `0x0042a5d5..0x0042a689`, 상태 8/1/4/7 |
+| 31 | 일본 농부 | `char/farmerj.spr` | `japanese-farmer` | [Japanese farmer frames](k01-japanese-farmer-frames.md)의 source-created `+0x47a==0` 상태 8/1/7 |
 
 ## 재현 벡터와 구현 binding
 
@@ -51,8 +53,8 @@ K01 owner 1의 해당 active record는 정확히 여섯 개다.
 `identityMapping`은 class→project kind→source identity만 기록하며 animation completeness를 뜻하지
 않는다. class 2 조선 창병, class 3 일본 창병, class 4 조선 궁수는 상태 8/1/4/7의 핵심
 frame·방향·mirror까지 정적 확정·이식했지만, 상태 2는 정적으로 복원한 alternate movement를
-프로젝트에 매핑하지 않고 격리한다. class 7 조선 농부는 `villager`의
-`exact-static-identity-source`만 확정했다. class 7은 공유
+프로젝트에 매핑하지 않고 격리한다. class 7 조선 농부와 class 31 일본 농부는 source-created
+`+0x47a==0` 상태 8/1/7 core frame·direction·mirror까지 정적 확정·이식했다. class 7은 공유
 `farmerk.spr`만으로 정체를 고른 것이 아니라 canonical catalog의 class 7 `조선 농부`와 K01 map의
 owner 0 class-7 record `(7,6)`, `(8,6)`를 focused vector에서 함께 검사한다.
 
@@ -81,13 +83,11 @@ node --test tools/imjinrok/k01-opening-unit-bindings.test.mjs tools/imjinrok/k01
 
 이 시작 binding으로 K01 전체 unit mapping 또는 original simulation parity를 주장하지 않는다.
 
-1. class 31 일본 농부의 source identity와 state 8/1/7 core frame은
-   [별도 파일럿](k01-japanese-farmer-frames.md)에서 확정했다. state 4와 `+0x47a != 0` branch는
+1. class 7 조선 농부와 class 31 일본 농부는 state 4와 `+0x47a != 0` branch, FPS·pivot·stats·behavior가
    계속 미확인이다.
-2. class 7 조선 농부의 core states를 별도 정적 분석한다. 현재는 identity/source만 확정했다.
-3. class 2/3/4 state 2의 project policy를 결정한다. alternate movement frame은 정적 확정했지만
+2. class 2/3/4 state 2의 project policy를 결정한다. alternate movement frame은 정적 확정했지만
    제품에 매핑하지 않았다.
-4. genuinely mismatched K01 start building class 48/49/51, 58/60, 63은 proxy다. 자원·state·project kind를
+3. genuinely mismatched K01 start building class 48/49/51, 58/60, 63은 proxy다. 자원·state·project kind를
    시각적 유사성으로 교체하지 않는다.
 
 class 12 state 2 policy, class 11·12·13·16의 tick→FPS·pivot, 모든 unit stats·combat behavior, raw owner의
