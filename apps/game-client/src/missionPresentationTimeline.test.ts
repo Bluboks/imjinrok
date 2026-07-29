@@ -57,6 +57,10 @@ test("K01 delayed K1 line is revealed before a click can advance past it", () =>
   assert.equal(getMissionBriefingClickAction(true, false, true), "hold-line");
 });
 
+test("the final briefing line is held for the explicit game-start button", () => {
+  assert.equal(getMissionBriefingClickAction(true, false, true), "hold-line");
+});
+
 test("dialogue clicks advance each line and finish only after the final line", () => {
   assert.equal(getMissionDialogueClickAction(0, 3), "advance-line");
   assert.equal(getMissionDialogueClickAction(1, 3), "advance-line");

@@ -4476,9 +4476,8 @@ export class SkirmishScene extends Phaser.Scene {
 
     const briefing = this.launchContext?.scenario?.briefing;
 
-    if (!briefing || this.missionBriefingLineIndex + 1 >= briefing.lines.length) {
-      this.hideMissionBriefingOverlay();
-      return true;
+    if (!briefing) {
+      return false;
     }
 
     this.advanceMissionBriefingLine();
