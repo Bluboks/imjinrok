@@ -17,6 +17,51 @@ const reportPath = join(
 );
 const report = JSON.parse(readFileSync(reportPath, "utf8"));
 
+function expectedResourceWorkDirectionFrames(frameStart, sharedBand = false) {
+  return [
+    ["s", 1, 0, false],
+    ["sw", 5, 1, false],
+    ["w", 4, 2, false],
+    ["nw", 20, 3, false],
+    ["n", 16, 2, true],
+    ["ne", 80, 1, true],
+    ["e", 64, 0, true],
+    ["se", 65, 4, false],
+  ].map(([facing, direction, frameBaseIndex, mirrorX]) => {
+    const frameBase = sharedBand ? frameStart : frameStart + frameBaseIndex * 8;
+    return {
+      facing,
+      direction,
+      frameBase,
+      frameRange: [frameBase, frameBase + 7],
+      mirrorX: sharedBand ? [16, 80, 64, 65].includes(direction) : mirrorX,
+    };
+  });
+}
+
+function assertFarmerResourceWorkEvidence(visual, sourcePath, frameStarts) {
+  const resourceWork = visual?.staticEvidence.resourceWork;
+  assert.equal(resourceWork?.analysisStatus, "static-confirmed");
+  assert.equal(resourceWork?.reproductionStatus, "reproduction-complete");
+  assert.deepEqual(resourceWork?.projectAdapter, {
+    projectState: "gather",
+    originalAnimationState: 10,
+    implementationStatus: "partially-implemented",
+    confirmedAnimationScope:
+      "generic project gather intentionally adapts the recovered original state-10 source layout only",
+    boundary:
+      "This adapter does not map project resource names to selector identities and does not establish product mappings or human-readable meanings for original states 11/16.",
+  });
+  for (const [state, frameStart] of Object.entries(frameStarts)) {
+    const sharedBand = state === "10";
+    assert.deepEqual(resourceWork?.originalStates[state], {
+      sourcePath,
+      frameRange: sharedBand ? [frameStart, frameStart + 7] : [frameStart, frameStart + 39],
+      directionFrames: expectedResourceWorkDirectionFrames(frameStart, sharedBand),
+    });
+  }
+}
+
 test("sprite mapping audit is deterministic and current", (t) => {
   const temporaryDirectory = mkdtempSync(join(tmpdir(), "sprite-mapping-audit-"));
   const regeneratedPath = join(temporaryDirectory, "audit.json");
@@ -47,9 +92,9 @@ test("frame mappings stay quarantined outside statically proven scopes while ide
     visualCount: 26,
     unitVisualCount: 15,
     buildingVisualCount: 11,
-    stateMappingCount: 98,
-    clipCount: 706,
-    frameReferenceCount: 5_365,
+    stateMappingCount: 99,
+    clipCount: 715,
+    frameReferenceCount: 5_437,
     missingFrameReferenceCount: 0,
     unverifiedVisualCount: 1,
     mixedVisualCount: 23,
@@ -61,7 +106,7 @@ test("frame mappings stay quarantined outside statically proven scopes while ide
     projectBindingConflictCount: 0,
     portraitCueCount: 17,
     unverifiedPortraitCueCount: 0,
-    findingCount: 30,
+    findingCount: 28,
   });
   assert.equal(
     report.visuals.filter((visual) => visual.evidenceStatus === "unverified").length,
@@ -122,7 +167,17 @@ test("frame mappings stay quarantined outside statically proven scopes while ide
   assert.equal(japaneseFarmer?.staticEvidence.internalClass, 31);
   assert.equal(japaneseFarmer?.staticEvidence.originalGameplayName, "일본 농부");
   assert.deepEqual(japaneseFarmer?.staticEvidence.stateFrameRanges, {
-    idle: [0, 39], move: [160, 199], walk: [160, 199], death: [240, 247],
+    idle: [0, 39], move: [160, 199], walk: [160, 199], death: [240, 247], gather: [40, 47],
+  });
+  assert.deepEqual(japaneseFarmer?.staticEvidence.stateSources.gather, "char\\farmerj.spr");
+  assert.deepEqual(
+    japaneseFarmer?.staticEvidence.directionFrames.gather,
+    expectedResourceWorkDirectionFrames(40, true),
+  );
+  assertFarmerResourceWorkEvidence(japaneseFarmer, "char\\farmerj.spr", {
+    10: 40,
+    11: 80,
+    16: 120,
   });
   assert.deepEqual(japaneseFarmer?.staticEvidence.nonzeroResourceBranch, {
     condition: "unsigned WORD entity +0x47a != 0",
@@ -167,7 +222,7 @@ test("frame mappings stay quarantined outside statically proven scopes while ide
     report.findings.some(
       (finding) =>
         finding.visualId === "japanese-farmer" &&
-        ["carry", "carry-idle"].includes(finding.state) &&
+        ["gather", "carry", "carry-idle"].includes(finding.state) &&
         (finding.code === "direction-order-unverified" ||
           finding.code === "mirrored-facing-unverified"),
     ),
@@ -436,8 +491,18 @@ test("frame mappings stay quarantined outside statically proven scopes while ide
   assert.equal(currentVillager?.staticEvidence.animationStateMapping, "static-proven-core-state-frames");
   assert.deepEqual(
     currentVillager?.staticEvidence.stateFrameRanges,
-    { idle: [0, 39], move: [40, 79], walk: [40, 79], death: [240, 247] },
+    { idle: [0, 39], move: [40, 79], walk: [40, 79], death: [240, 247], gather: [120, 127] },
   );
+  assert.deepEqual(currentVillager?.staticEvidence.stateSources.gather, "char\\farmerk.spr");
+  assert.deepEqual(
+    currentVillager?.staticEvidence.directionFrames.gather,
+    expectedResourceWorkDirectionFrames(120, true),
+  );
+  assertFarmerResourceWorkEvidence(currentVillager, "char\\farmerk.spr", {
+    10: 120,
+    11: 160,
+    16: 200,
+  });
   assert.deepEqual(currentVillager?.staticEvidence.nonzeroResourceBranch, {
     condition: "unsigned WORD entity +0x47a != 0",
     analysisStatus: "static-confirmed",
@@ -471,12 +536,23 @@ test("frame mappings stay quarantined outside statically proven scopes while ide
     report.findings.some(
       (finding) =>
         finding.visualId === "villager-korean-farmer" &&
-        ["carry", "carry-idle"].includes(finding.state) &&
+        ["gather", "carry", "carry-idle"].includes(finding.state) &&
         (finding.code === "direction-order-unverified" ||
           finding.code === "mirrored-facing-unverified"),
     ),
     false,
   );
+  for (const state of ["build", "repair"]) {
+    assert.equal(
+      report.findings.some(
+        (finding) =>
+          finding.visualId === "villager-korean-farmer" &&
+          finding.state === state &&
+          ["direction-order-unverified", "mirrored-facing-unverified"].includes(finding.code),
+      ),
+      true,
+    );
+  }
   const unboundAdvancedTower = report.visuals.find(
     (visual) => visual.visualId === "japanese-camp-advanced-tower",
   );
