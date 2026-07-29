@@ -134,6 +134,7 @@ import { createSessionTransport, type SessionTransport } from "../net/SessionTra
 import { getMissionLineDurationMs, normalizeMissionVoiceId } from "../missionVoiceTiming.js";
 import {
   beginPresentationPause,
+  createMissionBriefingReplayState,
   getMissionBriefingClickAction,
   getMissionDialogueClickAction,
   getMissionBriefingIntroFrameAlphas,
@@ -1947,13 +1948,15 @@ export class SkirmishScene extends Phaser.Scene {
     const replayX = startX - buttonGap - buttonWidth;
 
     this.addMissionBriefingButton(container, graphics, replayX, buttonY, buttonWidth, "다시보기", () => {
-      this.missionBriefingLineIndex = 0;
-      this.missionBriefingLineRevealAt = null;
-      this.missionBriefingNextLineAt = null;
-      this.missionBriefingLineScheduled = false;
-      this.missionBriefingIntroCompleted = false;
+      const replay = createMissionBriefingReplayState(this.time.now);
+
+      this.missionBriefingLineIndex = replay.lineIndex;
+      this.missionBriefingLineRevealAt = replay.lineRevealAt;
+      this.missionBriefingNextLineAt = replay.nextLineAt;
+      this.missionBriefingLineScheduled = replay.lineScheduled;
+      this.missionBriefingIntroCompleted = replay.introCompleted;
       this.introducedMissionPortraitKeys.clear();
-      this.missionBriefingBackdropStartedAt = this.time.now;
+      this.missionBriefingBackdropStartedAt = replay.introStartedAt;
       this.redrawMissionBriefingOverlay();
     });
     this.addMissionBriefingButton(container, graphics, startX, buttonY, buttonWidth, "게임 시작", () => {
@@ -2070,7 +2073,27 @@ export class SkirmishScene extends Phaser.Scene {
         .zone(x, y, width, height)
         .setOrigin(0, 0)
         .setInteractive({ useHandCursor: true })
-        .on("pointerup", onClick),
+        .on(
+          "pointerdown",
+          (
+            _pointer: Phaser.Input.Pointer,
+            _localX: number,
+            _localY: number,
+            event: Phaser.Types.Input.EventData,
+          ) => event.stopPropagation(),
+        )
+        .on(
+          "pointerup",
+          (
+            _pointer: Phaser.Input.Pointer,
+            _localX: number,
+            _localY: number,
+            event: Phaser.Types.Input.EventData,
+          ) => {
+            event.stopPropagation();
+            onClick();
+          },
+        ),
     );
   }
 

@@ -14,6 +14,15 @@ export interface MissionBriefingIntroFrameAlphas {
   completed: number;
 }
 
+export interface MissionBriefingReplayState {
+  introStartedAt: number;
+  introCompleted: false;
+  lineIndex: 0;
+  lineRevealAt: null;
+  nextLineAt: null;
+  lineScheduled: false;
+}
+
 export function beginPresentationPause(playbackWasPaused: boolean): PresentationPauseOwnership {
   return { ownsPlaybackPause: !playbackWasPaused };
 }
@@ -80,6 +89,17 @@ export function getMissionBriefingIntroFrameAlphas(
   return {
     base: 1,
     completed: getMissionBriefingIntroFadeAlpha(startedAt, time, completed),
+  };
+}
+
+export function createMissionBriefingReplayState(time: number): MissionBriefingReplayState {
+  return {
+    introStartedAt: time,
+    introCompleted: false,
+    lineIndex: 0,
+    lineRevealAt: null,
+    nextLineAt: null,
+    lineScheduled: false,
   };
 }
 
