@@ -13,7 +13,8 @@ K01 internal class 7 `조선 농부`와 class 31 `일본 농부`에서 original 
 - `original/imjinrok2/char/Farmerj.spr`: `e6cc67849a872f391c977079fc04118bf06d57b99ad8b5137b02398e26d9cdc5`
 - 분석 상태: `정적 확정`
 - 재현 상태: `재현 완료`
-- 구현 상태: `없음` — 제품 adapter와 state 이름은 아직 pending이다.
+- 구현 상태: `부분 이식` — 두 농부의 generic project `gather`가 original state 10 source layout에만
+  의도적으로 적응한다. state 11/16 product mapping과 state 10/11/16의 사람용 상태명은 여전히 미확정이다.
 
 ## dispatcher·initializer·consumer
 
@@ -59,6 +60,8 @@ canonical EXE·generated functions/references/seeds·두 SPR hash/header와 raw 
 두 class × 세 state × 여덟 방향 × phase 0/7, 총 96개 재현 벡터를 고정한다. 이들은 각
 direction/frame band의 endpoint 재현이며, intermediate phase 전체를 별도로 재현한 벡터는 아니다.
 
-현재 제품에는 이 state를 연결하지 않았다. 따라서 이 문서가 `정적 확정`·`재현 완료`인 범위와 제품의
-원작 일치 주장을 혼동하지 않는다. 다음 작업은 product adapter를 제안하기 전에 state 10/11/16의
-사람용 행동 의미와 caller/consumer 경계를 더 좁히는 것이다.
+현재 제품은 두 농부의 generic `gather`만 state 10 source layout에 의도적으로 연결한다. 이는 project
+resource name을 selector identity로 매핑하지 않으며 state 11/16 product mapping 또는 state 10/11/16의
+사람용 행동 의미를 주장하지 않는다. 따라서 이 문서가 `정적 확정`·`재현 완료`인 범위와 제품의 원작
+일치 주장을 혼동하지 않는다. 다음 작업은 state 10/11/16의 사람용 행동 의미와 caller/consumer 경계를
+더 좁히는 것이다.
