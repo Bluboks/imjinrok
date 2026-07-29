@@ -13,7 +13,10 @@
     { "entry": "0x0048a5c0", "bodyRange": "0x0048a5c0-0x0048a878", "byteRange": "0x0048a5c0-0x0048a879 (end exclusive)", "blockCount": 32, "instructionCount": 181, "bodySha256": "0b78f8d459c6fa6d316d00bfa07148949a9156d182d3428726623749a0d9eed8" },
     { "entry": "0x00460ba0", "bodyRange": "0x00460ba0-0x00460e20", "byteRange": "0x00460ba0-0x00460e21 (end exclusive)", "blockCount": 17, "instructionCount": 144, "bodySha256": "47f5f8e1743260ffdbc0f378f46510ec4126c2accc74cc41e2464dd77a5f3b32" },
     { "entry": "0x004475a0", "bodyRange": "0x004475a0-0x00447bb8", "byteRange": "0x004475a0-0x00447bb9 (end exclusive)", "instructionCount": 418, "bodySha256": "81e6e28cf3a20e2ecd6d1f2e7ede44e646f044fbf86aa581620baa41f67f9f9c" },
-    { "entry": "0x0045f320", "bodyRange": "0x0045f320-0x0045f928", "byteRange": "0x0045f320-0x0045f929 (end exclusive)", "instructionCount": 479, "bodySha256": "0e1f7677a947bb9499881bb308a55adced0c1cbf516408a3fb1056428d60c469" }
+    { "entry": "0x0045f320", "bodyRange": "0x0045f320-0x0045f928", "byteRange": "0x0045f320-0x0045f929 (end exclusive)", "instructionCount": 479, "bodySha256": "0e1f7677a947bb9499881bb308a55adced0c1cbf516408a3fb1056428d60c469" },
+    { "entry": "0x004abbc0", "bodyRange": "0x004abbc0-0x004abcab", "byteRange": "0x004abbc0-0x004abcac (end exclusive)", "instructionCount": 70, "bodySha256": "f836259410483095b460877f36604666713d9f432c86e8dc9a0e460323a7bcf5" },
+    { "entry": "0x004abe50", "bodyRange": "0x004abe50-0x004abebd", "byteRange": "0x004abe50-0x004abebe (end exclusive)", "instructionCount": 36, "bodySha256": "59d03958417ea5e31fafff2f10f517faf8c41344210fdeaed1baa0ad527a3549" },
+    { "entry": "0x004abd90", "bodyRange": "0x004abd90-0x004abe48", "byteRange": "0x004abd90-0x004abe49 (end exclusive)", "instructionCount": 63, "bodySha256": "f7e991299d06f83d49733276dd14a0080a75a1890c55bd26570778fc3fcdf7e3" }
   ],
   "searchTrail": {
     "completedBeaconStateSearch": "Filtered the complete references artifact by direct target 0x008438dc; the only three results are 0x0048a731 READ, 0x0048a77a WRITE, and 0x0048a7f2 READ, all in FUN_0048a5c0.",
@@ -45,6 +48,17 @@
       "primaryGate": "continue to cadence/render control when current-player record WORD[0x0082e9d0 + signed(WORD[0x00bccc44])*0x2c10] == 0 OR WORD[0x00bcbd84] == 0; otherwise skip",
       "directConsumer": "after cadence/request control, lock via 0x0044abb0 -> call 0x004abbc0(mode WORD[0x007c6612]) -> call 0x004abe50 -> unlock via 0x0044ada0",
       "beaconInputBoundary": "the complete direct-reference set for WORD[0x008438dc] contains only 0x0048a5c0 sites; no 0x008438dc direct operand occurs in this renderer root or its recovered draw-control anchors"
+    },
+    "helpers": {
+      "terrainMapCellByteWriter": {
+        "entry": "0x004abbc0",
+        "fact": "in mode one, iterates WORD[ECX] cell entries, derives a byte from cell/table data, and writes it through the compact HUD surface destination"
+      },
+      "activeEntityMarkerProjection": {
+        "entry": "0x004abe50",
+        "fact": "iterates active-entity indices, gates on an active-record byte, then passes two record WORDs and HUD surface context to 0x004abd90",
+        "projection": "0x004abd90 derives surface coordinates and calls 0x0044ba50 for the marker pixel operation"
+      }
     },
     "mode": {
       "address": "0x007c6612",

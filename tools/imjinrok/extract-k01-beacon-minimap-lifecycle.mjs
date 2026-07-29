@@ -83,6 +83,32 @@ const ARTIFACT_FUNCTION_SPECS = [
     instructionSha256: "4fbafd1048ead3bb7cf6a527f356e619358b8aae7a89113f14840200bb84df51",
     bodySha256: "0e1f7677a947bb9499881bb308a55adced0c1cbf516408a3fb1056428d60c469",
   },
+  {
+    entry: "0x004abbc0",
+    bodyRange: "0x004abbc0-0x004abcab",
+    bodySize: 236,
+    instructionCount: 70,
+    instructionSha256: "ddce35f213714deb4b58e0726f197550ec7f8cbeaa60c9031640da3bf89ec45f",
+    bodySha256: "f836259410483095b460877f36604666713d9f432c86e8dc9a0e460323a7bcf5",
+  },
+  {
+    entry: "0x004abe50",
+    bodyRange: "0x004abe50-0x004abebd",
+    bodySize: 110,
+    instructionCount: 36,
+    instructionSha256: "4d98df782636f4a514db1ac3f854df6073aa396f73d2e0101ab4d293b3dad7da",
+    bodySha256: "59d03958417ea5e31fafff2f10f517faf8c41344210fdeaed1baa0ad527a3549",
+    requiredCallees: ["0x004abd90"],
+  },
+  {
+    entry: "0x004abd90",
+    bodyRange: "0x004abd90-0x004abe48",
+    bodySize: 185,
+    instructionCount: 63,
+    instructionSha256: "1b1c587b4b416a28edd243b90ecc9f169b1db3f3d3675134bacb673db2e41543",
+    bodySha256: "f7e991299d06f83d49733276dd14a0080a75a1890c55bd26570778fc3fcdf7e3",
+    requiredCallees: ["0x0044ba50"],
+  },
 ];
 const UNIQUE_HUD_ROOT_CALLEES = ["0x004abbc0", "0x004abe50"];
 const REQUIRED_SEEDS = [
@@ -144,6 +170,38 @@ const ANCHORS = [
       "66 83 3d c8 df 4b 00 03 0f 85 e2 01 00 00 66 83 3d 84 27 55 00 00 0f 84 d4 01 00 00 33 d2 66 c7 05 10 66 7c 00 01 00 66 39 15 12 66 7c 00 0f 94 c2 66 89 15 12 66 7c 00 e9 b3 01 00 00",
     meaning:
       "the key-9 window path, conditioned on mode WORD 3 and a nonzero prior latch, writes redraw-request one and toggles compact-map mode between zero and one",
+  },
+  {
+    id: "hud-compact-map-terrain-map-cell-byte-write",
+    va: 0x004abbe3,
+    bytes:
+      "33 f6 66 39 31 0f 8e b8 00 00 00 0f bf d2 55 89 54 24 14 0f bf c6 33 db 66 0f b6 94 81 5b 40 00 00 66 0f b6 bc 81 5c 40 00 00 0f bf d2 0f bf ff 8d 14 92 8d 14 d2 8d 3c 97 8b 54 24 14 8a 9f fe 3e 82 00 0f be af 5e 4d 7d 00 8b fb 33 db 8a 9c 81 5a 40 00 00 03 da 33 d2 0f af 1d 28 94 55 00 8a 94 81 59 40 00 00 a1 28 a9 55 00 c1 e5 08 03 c3 46 8a 9c 2f 68 40 53 00 88 1c 02",
+    meaning:
+      "mode-one helper iterates WORD[ECX] cells, derives a source byte from cell/table bytes, and stores that byte through the compact HUD surface destination base",
+  },
+  {
+    id: "hud-compact-map-terrain-mode-one-branch",
+    va: 0x004abbc0,
+    bytes:
+      "a1 20 94 55 00 8b 15 b8 cc 88 00 2b d0 8b 44 24 04 53 81 c2 86 01 00 00 56 83 f8 01 57 0f 85 88 00 00 00",
+    meaning:
+      "terrain/map-cell helper selects the byte-writing loop when its stack mode argument equals one; other modes branch to the alternate clear loop",
+  },
+  {
+    id: "hud-compact-map-active-entity-marker-projection",
+    va: 0x004abe50,
+    bytes:
+      "55 57 33 ff 8b e9 66 39 3d 38 37 84 00 7e 5c 56 0f bf c7 0f bf 34 45 d8 2d 84 00 56 e8 cf 5f f9 ff 83 c4 04 85 c0 74 38 8d 0c f6 8d 04 4e 8d 34 c0 c1 e6 03 80 be 5a 52 63 00 01 75 23 8d 8e 58 52 63 00 e8 58 d4 f8 ff 66 8b 96 16 54 63 00 50 66 8b 86 14 54 63 00 52 50 8b cd e8 e0 fe ff ff",
+    meaning:
+      "helper iterates the active-entity index list, requires an active-record byte equal to one, obtains two record WORDs, and passes them with the HUD surface context to 0x004abd90",
+  },
+  {
+    id: "hud-compact-map-marker-pixel-writer",
+    va: 0x004abd90,
+    bytes:
+      "0f bf 44 24 08 0f bf 54 24 04 53 55 56 57 8b f9 0f bf 8c 47 ba 37 03 00 8d 04 11 8b 15 b8 cc 88 00 66 0f b6 8c 47 b2 b7 03 00 66 0f b6 9c 47 b3 b7 03 00 a1 20 94 55 00 2b d0 0f bf f1 8d 84 1a 86 01 00 00 b9 18 94 55 00 0f bf e8 8b 44 24 1c 50 55 56 e8 68 fc f9 ff",
+    meaning:
+      "marker projection derives compact-surface coordinates from the two passed WORDs and calls 0x0044ba50 with the HUD surface context and a marker argument",
   },
 ];
 
@@ -259,6 +317,17 @@ export function extractK01BeaconMinimapLifecycle(options = {}) {
           "after cadence/request control, lock via 0x0044abb0 -> call 0x004abbc0(mode WORD[0x007c6612]) -> call 0x004abe50 -> unlock via 0x0044ada0",
         beaconInputBoundary:
           "the complete direct-reference set for WORD[0x008438dc] contains only 0x0048a5c0 sites; no 0x008438dc direct operand occurs in this renderer root or its recovered draw-control anchors",
+      },
+      helpers: {
+        terrainMapCellByteWriter: {
+          entry: "0x004abbc0",
+          fact: "in mode one, iterates WORD[ECX] cell entries, derives a byte from cell/table data, and writes it through the compact HUD surface destination",
+        },
+        activeEntityMarkerProjection: {
+          entry: "0x004abe50",
+          fact: "iterates active-entity indices, gates on an active-record byte, then passes two record WORDs and HUD surface context to 0x004abd90",
+          projection: "0x004abd90 derives surface coordinates and calls 0x0044ba50 for the marker pixel operation",
+        },
       },
       mode: {
         address: COMPACT_MAP_MODE_ADDRESS,

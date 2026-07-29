@@ -69,6 +69,9 @@ primary raw gate의 gameplay 의미가 아니라, 두 operand의 **모든 produc
 | `FUN_00460ba0`, `0x00460ba0-0x00460e21` | 144 | `47f5f8e1743260ffdbc0f378f46510ec4126c2accc74cc41e2464dd77a5f3b32` | standard mission-entry zero fill |
 | `FUN_004475a0`, `0x004475a0-0x00447bb9` | 418 | `81e6e28cf3a20e2ecd6d1f2e7ede44e646f044fbf86aa581620baa41f67f9f9c` | HUD compact-map gate, cadence/request, surface draw |
 | `FUN_0045f320`, `0x0045f320-0x0045f929` | 479 | `0e1f7677a947bb9499881bb308a55adced0c1cbf516408a3fb1056428d60c469` | `0x9` input의 compact-map mode/request writer |
+| `FUN_004abbc0`, `0x004abbc0-0x004abcac` | 70 | `f836259410483095b460877f36604666713d9f432c86e8dc9a0e460323a7bcf5` | role-neutral HUD compact-map terrain/map-cell byte helper |
+| `FUN_004abe50`, `0x004abe50-0x004abebe` | 36 | `59d03958417ea5e31fafff2f10f517faf8c41344210fdeaed1baa0ad527a3549` | role-neutral active-entity marker projection helper |
+| `FUN_004abd90`, `0x004abd90-0x004abe49` | 63 | `f7e991299d06f83d49733276dd14a0080a75a1890c55bd26570778fc3fcdf7e3` | two-WORD marker coordinate → HUD surface pixel-call helper |
 
 | VA / raw offset | byte 범위 | 고정한 사실 |
 | --- | --- | --- |
@@ -79,6 +82,10 @@ primary raw gate의 gameplay 의미가 아니라, 두 operand의 **모든 produc
 | `0x004478d5` / `0x000478d5` | `0x004478d5-0x00447903` | renderer primary gate |
 | `0x00447903` / `0x00047903` | `0x00447903-0x00447991` | latch/request cadence, mode read, surface lock/draw/unlock |
 | `0x0045f464` / `0x0005f464` | `0x0045f464-0x0045f49c` | key-9 mode toggle와 redraw request write |
+| `0x004abbc0` / `0x000abbc0` | `0x004abbc0-0x004abbe3` | stack mode `1`이 terrain/map-cell byte-writing loop를 선택 |
+| `0x004abbe3` / `0x000abbe3` | `0x004abbe3-0x004abc5f` | mode-one cell loop이 table/cell source byte를 HUD surface destination에 write |
+| `0x004abe50` / `0x000abe50` | `0x004abe50-0x004abeb0` | active-entity index loop, active-record byte gate, two record WORD를 `FUN_004abd90`에 전달 |
+| `0x004abd90` / `0x000abd90` | `0x004abd90-0x004abde8` | two WORD에서 compact-surface coordinate를 만들고 `0x0044ba50` pixel operation call |
 
 ## 실제 HUD 컴팩트 맵 draw/control flow
 
@@ -97,6 +104,14 @@ otherwise skip the draw block
 draw로 진행한다. draw block은 `0x0044abb0`으로 surface lock, `0x004abbc0`에
 `WORD[0x007c6612]` mode를 전달, `0x004abe50` 호출, `0x0044ada0` unlock 순서다. 이 raw surface와
 map/marker helper call chain을 이 문서에서는 HUD compact-map renderer로 한정해 부른다.
+
+이 helper label도 caller 관계만으로 정하지 않았다. `FUN_004abbc0`의 mode-one branch는
+`WORD[ECX]` count만큼 cell/table byte를 읽어 compact HUD surface destination에 byte를 write한다.
+`FUN_004abe50`은 active-entity index list를 순회하고 active-record byte가 1인 항목에서 두 record WORD와
+surface context를 `FUN_004abd90`에 넘긴다. 이어서 `FUN_004abd90`은 그 두 WORD에서 surface coordinate를
+계산해 `0x0044ba50` pixel operation을 호출한다. 그러므로 이 문서는 과도한 게임플레이 명명 없이
+**HUD compact-map terrain/map-cell byte helper**와 **active-entity marker projection helper**라는
+role-neutral label만 사용한다.
 
 `FUN_0045f320`의 `0x0045f464` key-9 path는 `WORD[0x004bdfc8] == 3` 및 prior latch nonzero일 때
 `WORD[0x007c6610]=1`을 쓰고, `WORD[0x007c6612]`를 `0`과 `1` 사이에서 toggle한다.

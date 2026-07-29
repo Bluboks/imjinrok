@@ -33,6 +33,9 @@ test("keeps the overall rule unresolved while refuting the one-shot beacon-flag 
   assert.equal(report.compactMapDrawControl.mode.directReferenceSet.length, 3);
   assert.equal(report.compactMapDrawControl.redrawRequest.directReferenceSet.length, 3);
   assert.match(report.compactMapDrawControl.renderer.beaconInputBoundary, /only 0x0048a5c0/);
+  assert.equal(report.compactMapDrawControl.helpers.terrainMapCellByteWriter.entry, "0x004abbc0");
+  assert.equal(report.compactMapDrawControl.helpers.activeEntityMarkerProjection.entry, "0x004abe50");
+  assert.match(report.compactMapDrawControl.helpers.activeEntityMarkerProjection.projection, /0x0044ba50/);
   assert.ok(report.evidence.every(({ bytes }) => bytes.length > 0));
 });
 
