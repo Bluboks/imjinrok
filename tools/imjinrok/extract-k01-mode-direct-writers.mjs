@@ -10,7 +10,7 @@ import { readPeImage, toHex } from "./pe-image.mjs";
 const ROOT = resolve(fileURLToPath(new URL("../..", import.meta.url)));
 const EXPECTED_EXE_SHA256 = "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e";
 const DEFAULTS = { executablePath: resolve(ROOT, "original/imjinrok2/imjinrok2.exe"), functionsPath: resolve(ROOT, "analysis/generated/imjinrok2/functions.json"), referencesPath: resolve(ROOT, "analysis/generated/imjinrok2/references.json"), jumpTablesPath: resolve(ROOT, "analysis/generated/imjinrok2/jump-tables.json") };
-const ARTIFACTS = { functions: [1467804, "c10ea2de1f4998411d52443419c9a7f52ff7f9c18e79bd4115ba197d2f5bebc3"], references: [17206553, "df11ff3713988ef22b3390b5b0ae7b4a87464b5de547a4866e1c8ec8a0bcaf4c"], jumpTables: [607724, "0ae517eb172f61b974ca7a4411e64c1cc42065c462ed53b3065ab2da633dfe2f"] };
+const ARTIFACTS = { functions: [1468333, "7e071fdfe425d22447780c265fe1d3fd271a1bedd1773682bebcb8ddc6d2e16e"], references: [17206569, "f64cfa6f04bc39573552f42a8b7bdd5b08fea1ba774d05865162d1d80daaf9a5"], jumpTables: [607724, "0ae517eb172f61b974ca7a4411e64c1cc42065c462ed53b3065ab2da633dfe2f"] };
 const FUNCTION_CONTRACTS = [
   [0x00446420, 33, "439694b6de69137d87c47d6687e97d8a74f2ad073c808b443606a0b42906910a"],
   [0x0045f9c0, 801, "b694ee213a1b5f189ed7455e00690dcb29d970eca6ea87ef1f59c42c611cfb24"],
