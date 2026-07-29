@@ -1,0 +1,668 @@
+{
+  "question": "What bounded source-selection, filename-table, record-stride, and cleanup contract does FUN_00443160/FUN_00443320 establish for the main tileset loader?",
+  "analysisStatus": "static-confirmed-for-main-tileset-loader-boundary",
+  "reproductionStatus": "reproduction-complete-for-selector-table-sentinel-and-cleanup-boundaries",
+  "implementationStatus": "analysis-only-no-renderer-or-map-cell-change",
+  "sources": {
+    "executable": {
+      "path": "original/imjinrok2/imjinrok2.exe",
+      "sha256": "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e"
+    },
+    "normalTilesetDirectory": "original/imjinrok2/tile/normal"
+  },
+  "loader": {
+    "function": "FUN_00443160",
+    "address": "0x00443160",
+    "selector": {
+      "firstArgument": "signed WORD",
+      "values": {
+        "0": "tile\\normal\\",
+        "1": "tile\\snow\\",
+        "2": "tile\\brown\\"
+      },
+      "fallback": "tile\\normal\\"
+    },
+    "filenameTable": {
+      "address": "0x004bc420",
+      "loadedEntryCount": 76,
+      "entries": [
+        {
+          "index": 0,
+          "tableEntry": "0x004bc420",
+          "pointer": "0x004bc8e0",
+          "fileName": "hill0.ytl"
+        },
+        {
+          "index": 1,
+          "tableEntry": "0x004bc424",
+          "pointer": "0x004bc8d4",
+          "fileName": "hill1.ytl"
+        },
+        {
+          "index": 2,
+          "tableEntry": "0x004bc428",
+          "pointer": "0x004bc8c8",
+          "fileName": "hill2.ytl"
+        },
+        {
+          "index": 3,
+          "tableEntry": "0x004bc42c",
+          "pointer": "0x004bc8bc",
+          "fileName": "hill3.ytl"
+        },
+        {
+          "index": 4,
+          "tableEntry": "0x004bc430",
+          "pointer": "0x004bc8b0",
+          "fileName": "hill4.ytl"
+        },
+        {
+          "index": 5,
+          "tableEntry": "0x004bc434",
+          "pointer": "0x004bc8a4",
+          "fileName": "hill5.ytl"
+        },
+        {
+          "index": 6,
+          "tableEntry": "0x004bc438",
+          "pointer": "0x004bc898",
+          "fileName": "hill6.ytl"
+        },
+        {
+          "index": 7,
+          "tableEntry": "0x004bc43c",
+          "pointer": "0x004bc88c",
+          "fileName": "hill7.ytl"
+        },
+        {
+          "index": 8,
+          "tableEntry": "0x004bc440",
+          "pointer": "0x004bc880",
+          "fileName": "hill8.ytl"
+        },
+        {
+          "index": 9,
+          "tableEntry": "0x004bc444",
+          "pointer": "0x004bc874",
+          "fileName": "hill9.ytl"
+        },
+        {
+          "index": 10,
+          "tableEntry": "0x004bc448",
+          "pointer": "0x004bc868",
+          "fileName": "hill10.ytl"
+        },
+        {
+          "index": 11,
+          "tableEntry": "0x004bc44c",
+          "pointer": "0x004bc85c",
+          "fileName": "hill11.ytl"
+        },
+        {
+          "index": 12,
+          "tableEntry": "0x004bc450",
+          "pointer": "0x004bc850",
+          "fileName": "hill12.ytl"
+        },
+        {
+          "index": 13,
+          "tableEntry": "0x004bc454",
+          "pointer": "0x004bc844",
+          "fileName": "hill13.ytl"
+        },
+        {
+          "index": 14,
+          "tableEntry": "0x004bc458",
+          "pointer": "0x004bc838",
+          "fileName": "hill14.ytl"
+        },
+        {
+          "index": 15,
+          "tableEntry": "0x004bc45c",
+          "pointer": "0x004bc82c",
+          "fileName": "hill15.ytl"
+        },
+        {
+          "index": 16,
+          "tableEntry": "0x004bc460",
+          "pointer": "0x004bc820",
+          "fileName": "diff1.ytl"
+        },
+        {
+          "index": 17,
+          "tableEntry": "0x004bc464",
+          "pointer": "0x004bc814",
+          "fileName": "diff2.ytl"
+        },
+        {
+          "index": 18,
+          "tableEntry": "0x004bc468",
+          "pointer": "0x004bc808",
+          "fileName": "diff3.ytl"
+        },
+        {
+          "index": 19,
+          "tableEntry": "0x004bc46c",
+          "pointer": "0x004bc7fc",
+          "fileName": "diff4.ytl"
+        },
+        {
+          "index": 20,
+          "tableEntry": "0x004bc470",
+          "pointer": "0x004bc7f0",
+          "fileName": "diff5.ytl"
+        },
+        {
+          "index": 21,
+          "tableEntry": "0x004bc474",
+          "pointer": "0x004bc7e4",
+          "fileName": "diff6.ytl"
+        },
+        {
+          "index": 22,
+          "tableEntry": "0x004bc478",
+          "pointer": "0x004bc7d8",
+          "fileName": "diff7.ytl"
+        },
+        {
+          "index": 23,
+          "tableEntry": "0x004bc47c",
+          "pointer": "0x004bc7cc",
+          "fileName": "diff8.ytl"
+        },
+        {
+          "index": 24,
+          "tableEntry": "0x004bc480",
+          "pointer": "0x004bc7c0",
+          "fileName": "diff9.ytl"
+        },
+        {
+          "index": 25,
+          "tableEntry": "0x004bc484",
+          "pointer": "0x004bc7b4",
+          "fileName": "diff10.ytl"
+        },
+        {
+          "index": 26,
+          "tableEntry": "0x004bc488",
+          "pointer": "0x004bc7a8",
+          "fileName": "diff11.ytl"
+        },
+        {
+          "index": 27,
+          "tableEntry": "0x004bc48c",
+          "pointer": "0x004bc79c",
+          "fileName": "diff12.ytl"
+        },
+        {
+          "index": 28,
+          "tableEntry": "0x004bc490",
+          "pointer": "0x004bc790",
+          "fileName": "diff13.ytl"
+        },
+        {
+          "index": 29,
+          "tableEntry": "0x004bc494",
+          "pointer": "0x004bc784",
+          "fileName": "diff14.ytl"
+        },
+        {
+          "index": 30,
+          "tableEntry": "0x004bc498",
+          "pointer": "0x004bc778",
+          "fileName": "diff15.ytl"
+        },
+        {
+          "index": 31,
+          "tableEntry": "0x004bc49c",
+          "pointer": "0x004bc76c",
+          "fileName": "grss1.ytl"
+        },
+        {
+          "index": 32,
+          "tableEntry": "0x004bc4a0",
+          "pointer": "0x004bc760",
+          "fileName": "grss2.ytl"
+        },
+        {
+          "index": 33,
+          "tableEntry": "0x004bc4a4",
+          "pointer": "0x004bc754",
+          "fileName": "grss3.ytl"
+        },
+        {
+          "index": 34,
+          "tableEntry": "0x004bc4a8",
+          "pointer": "0x004bc748",
+          "fileName": "grss4.ytl"
+        },
+        {
+          "index": 35,
+          "tableEntry": "0x004bc4ac",
+          "pointer": "0x004bc73c",
+          "fileName": "grss5.ytl"
+        },
+        {
+          "index": 36,
+          "tableEntry": "0x004bc4b0",
+          "pointer": "0x004bc730",
+          "fileName": "grss6.ytl"
+        },
+        {
+          "index": 37,
+          "tableEntry": "0x004bc4b4",
+          "pointer": "0x004bc724",
+          "fileName": "grss7.ytl"
+        },
+        {
+          "index": 38,
+          "tableEntry": "0x004bc4b8",
+          "pointer": "0x004bc718",
+          "fileName": "grss8.ytl"
+        },
+        {
+          "index": 39,
+          "tableEntry": "0x004bc4bc",
+          "pointer": "0x004bc70c",
+          "fileName": "grss9.ytl"
+        },
+        {
+          "index": 40,
+          "tableEntry": "0x004bc4c0",
+          "pointer": "0x004bc700",
+          "fileName": "grss10.ytl"
+        },
+        {
+          "index": 41,
+          "tableEntry": "0x004bc4c4",
+          "pointer": "0x004bc6f4",
+          "fileName": "grss11.ytl"
+        },
+        {
+          "index": 42,
+          "tableEntry": "0x004bc4c8",
+          "pointer": "0x004bc6e8",
+          "fileName": "grss12.ytl"
+        },
+        {
+          "index": 43,
+          "tableEntry": "0x004bc4cc",
+          "pointer": "0x004bc6dc",
+          "fileName": "grss13.ytl"
+        },
+        {
+          "index": 44,
+          "tableEntry": "0x004bc4d0",
+          "pointer": "0x004bc6d0",
+          "fileName": "grss14.ytl"
+        },
+        {
+          "index": 45,
+          "tableEntry": "0x004bc4d4",
+          "pointer": "0x004bc6c4",
+          "fileName": "grss15.ytl"
+        },
+        {
+          "index": 46,
+          "tableEntry": "0x004bc4d8",
+          "pointer": "0x004bc6b8",
+          "fileName": "sea0.ytl"
+        },
+        {
+          "index": 47,
+          "tableEntry": "0x004bc4dc",
+          "pointer": "0x004bc6ac",
+          "fileName": "sea1.ytl"
+        },
+        {
+          "index": 48,
+          "tableEntry": "0x004bc4e0",
+          "pointer": "0x004bc6a0",
+          "fileName": "sea2.ytl"
+        },
+        {
+          "index": 49,
+          "tableEntry": "0x004bc4e4",
+          "pointer": "0x004bc694",
+          "fileName": "sea3.ytl"
+        },
+        {
+          "index": 50,
+          "tableEntry": "0x004bc4e8",
+          "pointer": "0x004bc688",
+          "fileName": "newblk0.ytl"
+        },
+        {
+          "index": 51,
+          "tableEntry": "0x004bc4ec",
+          "pointer": "0x004bc67c",
+          "fileName": "newblk1.ytl"
+        },
+        {
+          "index": 52,
+          "tableEntry": "0x004bc4f0",
+          "pointer": "0x004bc670",
+          "fileName": "newblk2.ytl"
+        },
+        {
+          "index": 53,
+          "tableEntry": "0x004bc4f4",
+          "pointer": "0x004bc664",
+          "fileName": "newblk3.ytl"
+        },
+        {
+          "index": 54,
+          "tableEntry": "0x004bc4f8",
+          "pointer": "0x004bc654",
+          "fileName": "newblkgate.ytl"
+        },
+        {
+          "index": 55,
+          "tableEntry": "0x004bc4fc",
+          "pointer": "0x004bc648",
+          "fileName": "castle0.ytl"
+        },
+        {
+          "index": 56,
+          "tableEntry": "0x004bc500",
+          "pointer": "0x004bc63c",
+          "fileName": "castle1.ytl"
+        },
+        {
+          "index": 57,
+          "tableEntry": "0x004bc504",
+          "pointer": "0x004bc630",
+          "fileName": "castle2.ytl"
+        },
+        {
+          "index": 58,
+          "tableEntry": "0x004bc508",
+          "pointer": "0x004bc620",
+          "fileName": "blacktile.ytl"
+        },
+        {
+          "index": 59,
+          "tableEntry": "0x004bc50c",
+          "pointer": "0x004bc614",
+          "fileName": "shallow.spr"
+        },
+        {
+          "index": 60,
+          "tableEntry": "0x004bc510",
+          "pointer": "0x004bc608",
+          "fileName": "fog0.spr"
+        },
+        {
+          "index": 61,
+          "tableEntry": "0x004bc514",
+          "pointer": "0x004bc5fc",
+          "fileName": "fog1.spr"
+        },
+        {
+          "index": 62,
+          "tableEntry": "0x004bc518",
+          "pointer": "0x004bc5f0",
+          "fileName": "fog2.spr"
+        },
+        {
+          "index": 63,
+          "tableEntry": "0x004bc51c",
+          "pointer": "0x004bc5e4",
+          "fileName": "fog3.spr"
+        },
+        {
+          "index": 64,
+          "tableEntry": "0x004bc520",
+          "pointer": "0x004bc5d8",
+          "fileName": "fog4.spr"
+        },
+        {
+          "index": 65,
+          "tableEntry": "0x004bc524",
+          "pointer": "0x004bc5cc",
+          "fileName": "fog5.spr"
+        },
+        {
+          "index": 66,
+          "tableEntry": "0x004bc528",
+          "pointer": "0x004bc5c0",
+          "fileName": "fog6.spr"
+        },
+        {
+          "index": 67,
+          "tableEntry": "0x004bc52c",
+          "pointer": "0x004bc5b4",
+          "fileName": "fog7.spr"
+        },
+        {
+          "index": 68,
+          "tableEntry": "0x004bc530",
+          "pointer": "0x004bc5a8",
+          "fileName": "fog8.spr"
+        },
+        {
+          "index": 69,
+          "tableEntry": "0x004bc534",
+          "pointer": "0x004bc59c",
+          "fileName": "fog9.spr"
+        },
+        {
+          "index": 70,
+          "tableEntry": "0x004bc538",
+          "pointer": "0x004bc590",
+          "fileName": "fog10.spr"
+        },
+        {
+          "index": 71,
+          "tableEntry": "0x004bc53c",
+          "pointer": "0x004bc584",
+          "fileName": "fog11.spr"
+        },
+        {
+          "index": 72,
+          "tableEntry": "0x004bc540",
+          "pointer": "0x004bc578",
+          "fileName": "fog12.spr"
+        },
+        {
+          "index": 73,
+          "tableEntry": "0x004bc544",
+          "pointer": "0x004bc56c",
+          "fileName": "fog13.spr"
+        },
+        {
+          "index": 74,
+          "tableEntry": "0x004bc548",
+          "pointer": "0x004bc560",
+          "fileName": "fog14.spr"
+        },
+        {
+          "index": 75,
+          "tableEntry": "0x004bc54c",
+          "pointer": "0x004bc554",
+          "fileName": "black.spr"
+        }
+      ],
+      "sentinel": {
+        "index": 76,
+        "tableEntry": "0x004bc550",
+        "pointer": "0x004cab44",
+        "path": ""
+      }
+    },
+    "recordBase": "0x00bcdff8",
+    "recordStride": "0x0bf8"
+  },
+  "cleanup": {
+    "function": "FUN_00443320",
+    "address": "0x00443320",
+    "activePointerBase": "0x00bcebec",
+    "recordBase": "0x00bcdff8",
+    "recordStride": "0x0bf8",
+    "count": 76
+  },
+  "diskCatalog": {
+    "directory": "original/imjinrok2/tile/normal",
+    "fileCount": 78,
+    "fileNames": [
+      "black.spr",
+      "blacktile.ytl",
+      "castle0.ytl",
+      "castle1.ytl",
+      "castle2.ytl",
+      "diff1.ytl",
+      "diff10.ytl",
+      "diff11.ytl",
+      "diff12.ytl",
+      "diff13.ytl",
+      "diff13l.ytl",
+      "diff14.ytl",
+      "diff15.ytl",
+      "diff2.ytl",
+      "diff3.ytl",
+      "diff4.ytl",
+      "diff5.ytl",
+      "diff6.ytl",
+      "diff7.ytl",
+      "diff8.ytl",
+      "diff9.ytl",
+      "fog0.spr",
+      "fog1.spr",
+      "fog10.spr",
+      "fog11.spr",
+      "fog12.spr",
+      "fog13.spr",
+      "fog14.spr",
+      "fog2.spr",
+      "fog3.spr",
+      "fog4.spr",
+      "fog5.spr",
+      "fog6.spr",
+      "fog7.spr",
+      "fog8.spr",
+      "fog9.spr",
+      "grss1.ytl",
+      "grss10.ytl",
+      "grss11.ytl",
+      "grss12.ytl",
+      "grss13.ytl",
+      "grss14.ytl",
+      "grss15.ytl",
+      "grss2.ytl",
+      "grss3.ytl",
+      "grss4.ytl",
+      "grss5.ytl",
+      "grss6.ytl",
+      "grss7.ytl",
+      "grss8.ytl",
+      "grss9.ytl",
+      "hill0.ypr",
+      "hill0.ytl",
+      "hill1.ytl",
+      "hill10.ytl",
+      "hill11.ytl",
+      "hill12.ytl",
+      "hill13.ytl",
+      "hill14.ytl",
+      "hill15.ytl",
+      "hill2.ytl",
+      "hill3.ytl",
+      "hill4.ytl",
+      "hill5.ytl",
+      "hill6.ytl",
+      "hill7.ytl",
+      "hill8.ytl",
+      "hill9.ytl",
+      "newblk0.ytl",
+      "newblk1.ytl",
+      "newblk2.ytl",
+      "newblk3.ytl",
+      "newblkgate.ytl",
+      "sea0.ytl",
+      "sea1.ytl",
+      "sea2.ytl",
+      "sea3.ytl",
+      "shallow.spr"
+    ],
+    "mainLoaderFileCount": 76,
+    "outsideMainLoaderTable": [
+      "diff13l.ytl",
+      "hill0.ypr"
+    ],
+    "boundary": "diff13l.ytl and hill0.ypr are absent from this main loader table only; this extractor does not claim they are unused by every other original path."
+  },
+  "rawCodeRanges": [
+    {
+      "id": "tileset-loader",
+      "byteRange": "0x00443160-0x00443311 (end exclusive)",
+      "bodySha256": "bd0f58f89b39743bbe8b4233193ae10f4095976ef9b53088c3b7b91213d1a117"
+    },
+    {
+      "id": "tileset-cleanup",
+      "byteRange": "0x00443320-0x00443352 (end exclusive)",
+      "bodySha256": "50a4f2739aaf46cbe183597dd2e4d27c7fc922e54ff2a1c3c0398970f1401c7c"
+    },
+    {
+      "id": "tileset-filename-table",
+      "byteRange": "0x004bc420-0x004bc554 (end exclusive)",
+      "bodySha256": "1f78b6c1f65e0200f3d0927da2a73e045da273d5ef796b850dcca0631df1a2d4"
+    }
+  ],
+  "evidencePoints": [
+    {
+      "va": "0x0044317a",
+      "rawOffset": "0x0004317a",
+      "bytes": "bd 20 c4 4b 00 c7 44 24 10 f8 df bc 00",
+      "meaning": "loader initializes table 0x004bc420 and record base 0x00bcdff8"
+    },
+    {
+      "va": "0x00443187",
+      "rawOffset": "0x00043187",
+      "bytes": "0f bf 84 24 a0 00 00 00 83 e8 00 74 6e 48 74 64 48 74 5a",
+      "meaning": "first argument is signed WORD; 0/1/2 select three prefix arms and every other value falls through"
+    },
+    {
+      "va": "0x004431f4",
+      "rawOffset": "0x000431f4",
+      "bytes": "68 8c d9 4b 00 eb 0c 68 80 d9 4b 00 eb 05 68 ac d9 4b 00",
+      "meaning": "selector 2 pushes brown, selector 1 snow, selector 0/default normal"
+    },
+    {
+      "va": "0x004432bf",
+      "rawOffset": "0x000432bf",
+      "bytes": "81 c1 f8 0b 00 00 83 c5 04",
+      "meaning": "each successful or failed iteration advances record cursor by 0x0bf8 and table cursor by one DWORD"
+    },
+    {
+      "va": "0x004432d0",
+      "rawOffset": "0x000432d0",
+      "bytes": "be 44 ab 4c 00",
+      "meaning": "next table path is compared with the 0x004cab44 empty-string sentinel"
+    },
+    {
+      "va": "0x004432fe",
+      "rawOffset": "0x000432fe",
+      "bytes": "85 c0 0f 85 81 fe ff ff",
+      "meaning": "non-sentinel next path loops to the same selector/load body"
+    },
+    {
+      "va": "0x00443322",
+      "rawOffset": "0x00043322",
+      "bytes": "be ec eb bc 00 bf 4c 00 00 00",
+      "meaning": "cleanup starts at record-base plus 0x0bf4 and repeats exactly 0x4c times"
+    },
+    {
+      "va": "0x00443346",
+      "rawOffset": "0x00043346",
+      "bytes": "81 c6 f8 0b 00 00 4f 75 dd",
+      "meaning": "cleanup advances by 0x0bf8 and loops until its count reaches zero"
+    },
+    {
+      "va": "0x004bc550",
+      "rawOffset": "0x000bc550",
+      "bytes": "44 ab 4c 00",
+      "meaning": "table entry 76 points to the exact empty-string sentinel"
+    }
+  ],
+  "unresolvedBoundary": "The loader selects a directory prefix and ordered sprite-container records only. Tile/frame rendering, map-cell fields, and the selector from map data to a filename or frame remain unconfirmed."
+}
