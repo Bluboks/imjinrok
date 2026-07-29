@@ -2,13 +2,13 @@
   "schemaVersion": 2,
   "policy": {
     "semanticStatus": "mixed",
-    "acceptedEvidence": "All 95 original type identities, uniquely matched current visual source identities, SPEECH portraits, Korean HQ and signal-beacon body states, K01 opening classes 48/49/51/58/60/63 catalog base frame 7 bindings, K01 classes 2/3/4/7/11/12/13/16/31/82 normal core states in their documented limits, class-7/31 +0x47a!=0 carry/carry-idle states, class-14 Japanese turtle-tank idle/move/attack grid states plus its non-theme 16-ring turn and creation-default transient destruction contracts, and the K01 heroes' idle, movement, attack, and death frame/direction mappings are statically proven in their documented scopes.",
+    "acceptedEvidence": "All 95 original type identities, uniquely matched current visual source identities, SPEECH portraits, Korean HQ and signal-beacon body states, K01 opening classes 48/49/51/58/60/63 catalog base frame 7 bindings, K01 classes 2/3/4/7/11/12/13/16/31/82 normal core states in their documented limits, class-7/31 +0x47a!=0 carry/carry-idle states, and class-7/31 resource-work states 10/11/16 are statically proven in their documented scopes. Generic project gather intentionally adapts only original state 10; it neither maps project resource names to selector identities nor establishes product mappings or human meanings for states 11/16. Class-14 Japanese turtle-tank idle/move/attack grid states plus its non-theme 16-ring turn and creation-default transient destruction contracts, and the K01 heroes' idle, movement, attack, and death frame/direction mappings are statically proven in their documented scopes.",
     "parityUse": "A unique source identity proves the original name and SPR binding only. Only explicitly listed frame scopes may be used for animation parity; all other direction, action, layer, and body mappings remain quarantined."
   },
   "sourceFiles": [
     {
       "path": "packages/shared/src/themes.ts",
-      "sha256": "17dc4c147fc23e1f9f0d87aeeb023f061250c87724030216c5c13919dc9ef7ea"
+      "sha256": "fcffdaa6d2e8e8fa7051a93be43997466c91eaf73f82011bea5d063475841ab9"
     },
     {
       "path": "packages/shared/src/visuals.ts",
@@ -68,7 +68,11 @@
     },
     {
       "path": "tools/imjinrok/extract-k01-farmer-resource-branch-frames.mjs",
-      "sha256": "b4f7ab59ce42c78eb11a4539c4bf6cb92efec4486676f0160e18a77fa518fdff"
+      "sha256": "4a31b2069b3e4a0272559155da19e126f05a756bbba7d86ededca5139c351384"
+    },
+    {
+      "path": "tools/imjinrok/extract-k01-farmer-resource-work-frames.mjs",
+      "sha256": "44be0e00044de5ca0d082c5d51ae94644fe6b4cfc0c6cb25bbe056f236e7fd01"
     },
     {
       "path": "tools/imjinrok/extract-k01-special-unit-animations.mjs",
@@ -96,7 +100,7 @@
     },
     {
       "path": "tools/imjinrok/audit-sprite-mappings.mjs",
-      "sha256": "eaf60662b75471c46df1d16e7661a18c72998573f3ba7a4a01e95acaa708fcd1"
+      "sha256": "77eeddea1c834d46aef08385bf598f43fbe5b9264863cea158188fbc526c2708"
     },
     {
       "path": "apps/game-client/public/assets/themes/default/ui/mission-portraits/hero.manifest.json",
@@ -107,9 +111,9 @@
     "visualCount": 26,
     "unitVisualCount": 15,
     "buildingVisualCount": 11,
-    "stateMappingCount": 98,
-    "clipCount": 706,
-    "frameReferenceCount": 5365,
+    "stateMappingCount": 99,
+    "clipCount": 715,
+    "frameReferenceCount": 5437,
     "missingFrameReferenceCount": 0,
     "unverifiedVisualCount": 1,
     "mixedVisualCount": 23,
@@ -121,7 +125,7 @@
     "projectBindingConflictCount": 0,
     "portraitCueCount": 17,
     "unverifiedPortraitCueCount": 0,
-    "findingCount": 30
+    "findingCount": 28
   },
   "visuals": [
     {
@@ -702,7 +706,7 @@
         "baseFrame": 0,
         "flags": "0x00081001",
         "animationStateMapping": "static-proven-core-state-frames",
-        "confirmedAnimationScope": "project idle and move/walk and death use the statically recovered class-31 state 8, 1, and 7 frames, direction order, and mirroring; state 4 attack is deliberately absent and the existing runtime fallback selects idle",
+        "confirmedAnimationScope": "project idle and move/walk and death use the statically recovered class-31 state 8, 1, and 7 frames, direction order, and mirroring; generic project gather intentionally adapts original state 10 only; state 4 attack is deliberately absent and the existing runtime fallback selects idle",
         "stateFrameRanges": {
           "idle": [
             0,
@@ -719,13 +723,102 @@
           "death": [
             240,
             247
+          ],
+          "gather": [
+            40,
+            47
           ]
         },
         "stateSources": {
           "idle": "char\\farmerj.spr",
           "move": "char\\farmerj.spr",
           "walk": "char\\farmerj.spr",
-          "death": "char\\farmerj.spr"
+          "death": "char\\farmerj.spr",
+          "gather": "char\\farmerj.spr"
+        },
+        "directionFrames": {
+          "gather": [
+            {
+              "facing": "s",
+              "direction": 1,
+              "frameBase": 40,
+              "frameRange": [
+                40,
+                47
+              ],
+              "mirrorX": false
+            },
+            {
+              "facing": "sw",
+              "direction": 5,
+              "frameBase": 40,
+              "frameRange": [
+                40,
+                47
+              ],
+              "mirrorX": false
+            },
+            {
+              "facing": "w",
+              "direction": 4,
+              "frameBase": 40,
+              "frameRange": [
+                40,
+                47
+              ],
+              "mirrorX": false
+            },
+            {
+              "facing": "nw",
+              "direction": 20,
+              "frameBase": 40,
+              "frameRange": [
+                40,
+                47
+              ],
+              "mirrorX": false
+            },
+            {
+              "facing": "n",
+              "direction": 16,
+              "frameBase": 40,
+              "frameRange": [
+                40,
+                47
+              ],
+              "mirrorX": true
+            },
+            {
+              "facing": "ne",
+              "direction": 80,
+              "frameBase": 40,
+              "frameRange": [
+                40,
+                47
+              ],
+              "mirrorX": true
+            },
+            {
+              "facing": "e",
+              "direction": 64,
+              "frameBase": 40,
+              "frameRange": [
+                40,
+                47
+              ],
+              "mirrorX": true
+            },
+            {
+              "facing": "se",
+              "direction": 65,
+              "frameBase": 40,
+              "frameRange": [
+                40,
+                47
+              ],
+              "mirrorX": true
+            }
+          ]
         },
         "nonzeroResourceBranch": {
           "condition": "unsigned WORD entity +0x47a != 0",
@@ -918,7 +1011,288 @@
           ],
           "duplicateExplanation": "The original class-31 +0x47a!=0 state 8 idle and state 1 move configurations both select the same 200..239 directional clip; this is static evidence, not an unverified project alias."
         },
-        "unresolvedScope": "state 4 attack, exact timing, pivot, stats, commands, behavior, later runtime mutation, and death lifetime remain unresolved"
+        "resourceWork": {
+          "analysisStatus": "static-confirmed",
+          "reproductionStatus": "reproduction-complete",
+          "originalStates": {
+            "10": {
+              "sourcePath": "char\\farmerj.spr",
+              "frameRange": [
+                40,
+                47
+              ],
+              "directionFrames": [
+                {
+                  "facing": "s",
+                  "direction": 1,
+                  "frameBase": 40,
+                  "frameRange": [
+                    40,
+                    47
+                  ],
+                  "mirrorX": false
+                },
+                {
+                  "facing": "sw",
+                  "direction": 5,
+                  "frameBase": 40,
+                  "frameRange": [
+                    40,
+                    47
+                  ],
+                  "mirrorX": false
+                },
+                {
+                  "facing": "w",
+                  "direction": 4,
+                  "frameBase": 40,
+                  "frameRange": [
+                    40,
+                    47
+                  ],
+                  "mirrorX": false
+                },
+                {
+                  "facing": "nw",
+                  "direction": 20,
+                  "frameBase": 40,
+                  "frameRange": [
+                    40,
+                    47
+                  ],
+                  "mirrorX": false
+                },
+                {
+                  "facing": "n",
+                  "direction": 16,
+                  "frameBase": 40,
+                  "frameRange": [
+                    40,
+                    47
+                  ],
+                  "mirrorX": true
+                },
+                {
+                  "facing": "ne",
+                  "direction": 80,
+                  "frameBase": 40,
+                  "frameRange": [
+                    40,
+                    47
+                  ],
+                  "mirrorX": true
+                },
+                {
+                  "facing": "e",
+                  "direction": 64,
+                  "frameBase": 40,
+                  "frameRange": [
+                    40,
+                    47
+                  ],
+                  "mirrorX": true
+                },
+                {
+                  "facing": "se",
+                  "direction": 65,
+                  "frameBase": 40,
+                  "frameRange": [
+                    40,
+                    47
+                  ],
+                  "mirrorX": true
+                }
+              ]
+            },
+            "11": {
+              "sourcePath": "char\\farmerj.spr",
+              "frameRange": [
+                80,
+                119
+              ],
+              "directionFrames": [
+                {
+                  "facing": "s",
+                  "direction": 1,
+                  "frameBase": 80,
+                  "frameRange": [
+                    80,
+                    87
+                  ],
+                  "mirrorX": false
+                },
+                {
+                  "facing": "sw",
+                  "direction": 5,
+                  "frameBase": 88,
+                  "frameRange": [
+                    88,
+                    95
+                  ],
+                  "mirrorX": false
+                },
+                {
+                  "facing": "w",
+                  "direction": 4,
+                  "frameBase": 96,
+                  "frameRange": [
+                    96,
+                    103
+                  ],
+                  "mirrorX": false
+                },
+                {
+                  "facing": "nw",
+                  "direction": 20,
+                  "frameBase": 104,
+                  "frameRange": [
+                    104,
+                    111
+                  ],
+                  "mirrorX": false
+                },
+                {
+                  "facing": "n",
+                  "direction": 16,
+                  "frameBase": 96,
+                  "frameRange": [
+                    96,
+                    103
+                  ],
+                  "mirrorX": true
+                },
+                {
+                  "facing": "ne",
+                  "direction": 80,
+                  "frameBase": 88,
+                  "frameRange": [
+                    88,
+                    95
+                  ],
+                  "mirrorX": true
+                },
+                {
+                  "facing": "e",
+                  "direction": 64,
+                  "frameBase": 80,
+                  "frameRange": [
+                    80,
+                    87
+                  ],
+                  "mirrorX": true
+                },
+                {
+                  "facing": "se",
+                  "direction": 65,
+                  "frameBase": 112,
+                  "frameRange": [
+                    112,
+                    119
+                  ],
+                  "mirrorX": false
+                }
+              ]
+            },
+            "16": {
+              "sourcePath": "char\\farmerj.spr",
+              "frameRange": [
+                120,
+                159
+              ],
+              "directionFrames": [
+                {
+                  "facing": "s",
+                  "direction": 1,
+                  "frameBase": 120,
+                  "frameRange": [
+                    120,
+                    127
+                  ],
+                  "mirrorX": false
+                },
+                {
+                  "facing": "sw",
+                  "direction": 5,
+                  "frameBase": 128,
+                  "frameRange": [
+                    128,
+                    135
+                  ],
+                  "mirrorX": false
+                },
+                {
+                  "facing": "w",
+                  "direction": 4,
+                  "frameBase": 136,
+                  "frameRange": [
+                    136,
+                    143
+                  ],
+                  "mirrorX": false
+                },
+                {
+                  "facing": "nw",
+                  "direction": 20,
+                  "frameBase": 144,
+                  "frameRange": [
+                    144,
+                    151
+                  ],
+                  "mirrorX": false
+                },
+                {
+                  "facing": "n",
+                  "direction": 16,
+                  "frameBase": 136,
+                  "frameRange": [
+                    136,
+                    143
+                  ],
+                  "mirrorX": true
+                },
+                {
+                  "facing": "ne",
+                  "direction": 80,
+                  "frameBase": 128,
+                  "frameRange": [
+                    128,
+                    135
+                  ],
+                  "mirrorX": true
+                },
+                {
+                  "facing": "e",
+                  "direction": 64,
+                  "frameBase": 120,
+                  "frameRange": [
+                    120,
+                    127
+                  ],
+                  "mirrorX": true
+                },
+                {
+                  "facing": "se",
+                  "direction": 65,
+                  "frameBase": 152,
+                  "frameRange": [
+                    152,
+                    159
+                  ],
+                  "mirrorX": false
+                }
+              ]
+            }
+          },
+          "projectAdapter": {
+            "projectState": "gather",
+            "originalAnimationState": 10,
+            "implementationStatus": "partially-implemented",
+            "confirmedAnimationScope": "generic project gather intentionally adapts the recovered original state-10 source layout only",
+            "boundary": "This adapter does not map project resource names to selector identities and does not establish product mappings or human-readable meanings for original states 11/16."
+          },
+          "unresolvedScope": "Original states 11/16 have no product mapping; human-readable meanings for states 10/11/16, selector resource identities, the state-16 condition, timing/FPS, pivot, stats, behavior, and the complete resource lifecycle remain unresolved."
+        },
+        "unresolvedScope": "state 4 attack, original states 11/16 product mappings and human-readable meanings, selector resource identities, exact timing, pivot, stats, commands, behavior, later runtime mutation, and death lifetime remain unresolved"
       },
       "source": {
         "path": "original/imjinrok2/char/Farmerj.spr",
@@ -1663,6 +2037,247 @@
                 245,
                 246,
                 247
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            }
+          ]
+        },
+        {
+          "scope": "base",
+          "state": "gather",
+          "declaredFacings": [
+            "s",
+            "sw",
+            "w",
+            "nw",
+            "n",
+            "ne",
+            "e",
+            "se"
+          ],
+          "clips": [
+            {
+              "facing": "default",
+              "frameFiles": [
+                "Farmerj_0040.png",
+                "Farmerj_0041.png",
+                "Farmerj_0042.png",
+                "Farmerj_0043.png",
+                "Farmerj_0044.png",
+                "Farmerj_0045.png",
+                "Farmerj_0046.png",
+                "Farmerj_0047.png"
+              ],
+              "frameIndexes": [
+                40,
+                41,
+                42,
+                43,
+                44,
+                45,
+                46,
+                47
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "e",
+              "frameFiles": [
+                "Farmerj_0040.png",
+                "Farmerj_0041.png",
+                "Farmerj_0042.png",
+                "Farmerj_0043.png",
+                "Farmerj_0044.png",
+                "Farmerj_0045.png",
+                "Farmerj_0046.png",
+                "Farmerj_0047.png"
+              ],
+              "frameIndexes": [
+                40,
+                41,
+                42,
+                43,
+                44,
+                45,
+                46,
+                47
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            },
+            {
+              "facing": "n",
+              "frameFiles": [
+                "Farmerj_0040.png",
+                "Farmerj_0041.png",
+                "Farmerj_0042.png",
+                "Farmerj_0043.png",
+                "Farmerj_0044.png",
+                "Farmerj_0045.png",
+                "Farmerj_0046.png",
+                "Farmerj_0047.png"
+              ],
+              "frameIndexes": [
+                40,
+                41,
+                42,
+                43,
+                44,
+                45,
+                46,
+                47
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            },
+            {
+              "facing": "ne",
+              "frameFiles": [
+                "Farmerj_0040.png",
+                "Farmerj_0041.png",
+                "Farmerj_0042.png",
+                "Farmerj_0043.png",
+                "Farmerj_0044.png",
+                "Farmerj_0045.png",
+                "Farmerj_0046.png",
+                "Farmerj_0047.png"
+              ],
+              "frameIndexes": [
+                40,
+                41,
+                42,
+                43,
+                44,
+                45,
+                46,
+                47
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            },
+            {
+              "facing": "nw",
+              "frameFiles": [
+                "Farmerj_0040.png",
+                "Farmerj_0041.png",
+                "Farmerj_0042.png",
+                "Farmerj_0043.png",
+                "Farmerj_0044.png",
+                "Farmerj_0045.png",
+                "Farmerj_0046.png",
+                "Farmerj_0047.png"
+              ],
+              "frameIndexes": [
+                40,
+                41,
+                42,
+                43,
+                44,
+                45,
+                46,
+                47
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "s",
+              "frameFiles": [
+                "Farmerj_0040.png",
+                "Farmerj_0041.png",
+                "Farmerj_0042.png",
+                "Farmerj_0043.png",
+                "Farmerj_0044.png",
+                "Farmerj_0045.png",
+                "Farmerj_0046.png",
+                "Farmerj_0047.png"
+              ],
+              "frameIndexes": [
+                40,
+                41,
+                42,
+                43,
+                44,
+                45,
+                46,
+                47
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "se",
+              "frameFiles": [
+                "Farmerj_0040.png",
+                "Farmerj_0041.png",
+                "Farmerj_0042.png",
+                "Farmerj_0043.png",
+                "Farmerj_0044.png",
+                "Farmerj_0045.png",
+                "Farmerj_0046.png",
+                "Farmerj_0047.png"
+              ],
+              "frameIndexes": [
+                40,
+                41,
+                42,
+                43,
+                44,
+                45,
+                46,
+                47
+              ],
+              "mirrorX": true,
+              "missingFrames": []
+            },
+            {
+              "facing": "sw",
+              "frameFiles": [
+                "Farmerj_0040.png",
+                "Farmerj_0041.png",
+                "Farmerj_0042.png",
+                "Farmerj_0043.png",
+                "Farmerj_0044.png",
+                "Farmerj_0045.png",
+                "Farmerj_0046.png",
+                "Farmerj_0047.png"
+              ],
+              "frameIndexes": [
+                40,
+                41,
+                42,
+                43,
+                44,
+                45,
+                46,
+                47
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "w",
+              "frameFiles": [
+                "Farmerj_0040.png",
+                "Farmerj_0041.png",
+                "Farmerj_0042.png",
+                "Farmerj_0043.png",
+                "Farmerj_0044.png",
+                "Farmerj_0045.png",
+                "Farmerj_0046.png",
+                "Farmerj_0047.png"
+              ],
+              "frameIndexes": [
+                40,
+                41,
+                42,
+                43,
+                44,
+                45,
+                46,
+                47
               ],
               "mirrorX": false,
               "missingFrames": []
@@ -18744,7 +19359,7 @@
         "baseFrame": 0,
         "flags": "0x000a0801",
         "animationStateMapping": "static-proven-core-state-frames",
-        "confirmedAnimationScope": "project idle, move/walk, and death use the statically recovered K01 source-created class-7 +0x47a==0 state 8, 1, and 7 frames, direction order, and mirroring",
+        "confirmedAnimationScope": "project idle, move/walk, and death use the statically recovered K01 source-created class-7 +0x47a==0 state 8, 1, and 7 frames, direction order, and mirroring; generic project gather intentionally adapts original state 10 only",
         "stateFrameRanges": {
           "idle": [
             0,
@@ -18761,13 +19376,102 @@
           "death": [
             240,
             247
+          ],
+          "gather": [
+            120,
+            127
           ]
         },
         "stateSources": {
           "idle": "char\\farmerk.spr",
           "move": "char\\farmerk.spr",
           "walk": "char\\farmerk.spr",
-          "death": "char\\farmerk.spr"
+          "death": "char\\farmerk.spr",
+          "gather": "char\\farmerk.spr"
+        },
+        "directionFrames": {
+          "gather": [
+            {
+              "facing": "s",
+              "direction": 1,
+              "frameBase": 120,
+              "frameRange": [
+                120,
+                127
+              ],
+              "mirrorX": false
+            },
+            {
+              "facing": "sw",
+              "direction": 5,
+              "frameBase": 120,
+              "frameRange": [
+                120,
+                127
+              ],
+              "mirrorX": false
+            },
+            {
+              "facing": "w",
+              "direction": 4,
+              "frameBase": 120,
+              "frameRange": [
+                120,
+                127
+              ],
+              "mirrorX": false
+            },
+            {
+              "facing": "nw",
+              "direction": 20,
+              "frameBase": 120,
+              "frameRange": [
+                120,
+                127
+              ],
+              "mirrorX": false
+            },
+            {
+              "facing": "n",
+              "direction": 16,
+              "frameBase": 120,
+              "frameRange": [
+                120,
+                127
+              ],
+              "mirrorX": true
+            },
+            {
+              "facing": "ne",
+              "direction": 80,
+              "frameBase": 120,
+              "frameRange": [
+                120,
+                127
+              ],
+              "mirrorX": true
+            },
+            {
+              "facing": "e",
+              "direction": 64,
+              "frameBase": 120,
+              "frameRange": [
+                120,
+                127
+              ],
+              "mirrorX": true
+            },
+            {
+              "facing": "se",
+              "direction": 65,
+              "frameBase": 120,
+              "frameRange": [
+                120,
+                127
+              ],
+              "mirrorX": true
+            }
+          ]
         },
         "nonzeroResourceBranch": {
           "condition": "unsigned WORD entity +0x47a != 0",
@@ -18963,7 +19667,288 @@
             ]
           }
         },
-        "unresolvedScope": "state 4 attack, exact timing/FPS, pivot, stats, commands, behavior, later runtime mutation, and death lifetime remain unresolved; gather/build/repair remain project source-layout adaptations"
+        "resourceWork": {
+          "analysisStatus": "static-confirmed",
+          "reproductionStatus": "reproduction-complete",
+          "originalStates": {
+            "10": {
+              "sourcePath": "char\\farmerk.spr",
+              "frameRange": [
+                120,
+                127
+              ],
+              "directionFrames": [
+                {
+                  "facing": "s",
+                  "direction": 1,
+                  "frameBase": 120,
+                  "frameRange": [
+                    120,
+                    127
+                  ],
+                  "mirrorX": false
+                },
+                {
+                  "facing": "sw",
+                  "direction": 5,
+                  "frameBase": 120,
+                  "frameRange": [
+                    120,
+                    127
+                  ],
+                  "mirrorX": false
+                },
+                {
+                  "facing": "w",
+                  "direction": 4,
+                  "frameBase": 120,
+                  "frameRange": [
+                    120,
+                    127
+                  ],
+                  "mirrorX": false
+                },
+                {
+                  "facing": "nw",
+                  "direction": 20,
+                  "frameBase": 120,
+                  "frameRange": [
+                    120,
+                    127
+                  ],
+                  "mirrorX": false
+                },
+                {
+                  "facing": "n",
+                  "direction": 16,
+                  "frameBase": 120,
+                  "frameRange": [
+                    120,
+                    127
+                  ],
+                  "mirrorX": true
+                },
+                {
+                  "facing": "ne",
+                  "direction": 80,
+                  "frameBase": 120,
+                  "frameRange": [
+                    120,
+                    127
+                  ],
+                  "mirrorX": true
+                },
+                {
+                  "facing": "e",
+                  "direction": 64,
+                  "frameBase": 120,
+                  "frameRange": [
+                    120,
+                    127
+                  ],
+                  "mirrorX": true
+                },
+                {
+                  "facing": "se",
+                  "direction": 65,
+                  "frameBase": 120,
+                  "frameRange": [
+                    120,
+                    127
+                  ],
+                  "mirrorX": true
+                }
+              ]
+            },
+            "11": {
+              "sourcePath": "char\\farmerk.spr",
+              "frameRange": [
+                160,
+                199
+              ],
+              "directionFrames": [
+                {
+                  "facing": "s",
+                  "direction": 1,
+                  "frameBase": 160,
+                  "frameRange": [
+                    160,
+                    167
+                  ],
+                  "mirrorX": false
+                },
+                {
+                  "facing": "sw",
+                  "direction": 5,
+                  "frameBase": 168,
+                  "frameRange": [
+                    168,
+                    175
+                  ],
+                  "mirrorX": false
+                },
+                {
+                  "facing": "w",
+                  "direction": 4,
+                  "frameBase": 176,
+                  "frameRange": [
+                    176,
+                    183
+                  ],
+                  "mirrorX": false
+                },
+                {
+                  "facing": "nw",
+                  "direction": 20,
+                  "frameBase": 184,
+                  "frameRange": [
+                    184,
+                    191
+                  ],
+                  "mirrorX": false
+                },
+                {
+                  "facing": "n",
+                  "direction": 16,
+                  "frameBase": 176,
+                  "frameRange": [
+                    176,
+                    183
+                  ],
+                  "mirrorX": true
+                },
+                {
+                  "facing": "ne",
+                  "direction": 80,
+                  "frameBase": 168,
+                  "frameRange": [
+                    168,
+                    175
+                  ],
+                  "mirrorX": true
+                },
+                {
+                  "facing": "e",
+                  "direction": 64,
+                  "frameBase": 160,
+                  "frameRange": [
+                    160,
+                    167
+                  ],
+                  "mirrorX": true
+                },
+                {
+                  "facing": "se",
+                  "direction": 65,
+                  "frameBase": 192,
+                  "frameRange": [
+                    192,
+                    199
+                  ],
+                  "mirrorX": false
+                }
+              ]
+            },
+            "16": {
+              "sourcePath": "char\\farmerk.spr",
+              "frameRange": [
+                200,
+                239
+              ],
+              "directionFrames": [
+                {
+                  "facing": "s",
+                  "direction": 1,
+                  "frameBase": 200,
+                  "frameRange": [
+                    200,
+                    207
+                  ],
+                  "mirrorX": false
+                },
+                {
+                  "facing": "sw",
+                  "direction": 5,
+                  "frameBase": 208,
+                  "frameRange": [
+                    208,
+                    215
+                  ],
+                  "mirrorX": false
+                },
+                {
+                  "facing": "w",
+                  "direction": 4,
+                  "frameBase": 216,
+                  "frameRange": [
+                    216,
+                    223
+                  ],
+                  "mirrorX": false
+                },
+                {
+                  "facing": "nw",
+                  "direction": 20,
+                  "frameBase": 224,
+                  "frameRange": [
+                    224,
+                    231
+                  ],
+                  "mirrorX": false
+                },
+                {
+                  "facing": "n",
+                  "direction": 16,
+                  "frameBase": 216,
+                  "frameRange": [
+                    216,
+                    223
+                  ],
+                  "mirrorX": true
+                },
+                {
+                  "facing": "ne",
+                  "direction": 80,
+                  "frameBase": 208,
+                  "frameRange": [
+                    208,
+                    215
+                  ],
+                  "mirrorX": true
+                },
+                {
+                  "facing": "e",
+                  "direction": 64,
+                  "frameBase": 200,
+                  "frameRange": [
+                    200,
+                    207
+                  ],
+                  "mirrorX": true
+                },
+                {
+                  "facing": "se",
+                  "direction": 65,
+                  "frameBase": 232,
+                  "frameRange": [
+                    232,
+                    239
+                  ],
+                  "mirrorX": false
+                }
+              ]
+            }
+          },
+          "projectAdapter": {
+            "projectState": "gather",
+            "originalAnimationState": 10,
+            "implementationStatus": "partially-implemented",
+            "confirmedAnimationScope": "generic project gather intentionally adapts the recovered original state-10 source layout only",
+            "boundary": "This adapter does not map project resource names to selector identities and does not establish product mappings or human-readable meanings for original states 11/16."
+          },
+          "unresolvedScope": "Original states 11/16 have no product mapping; human-readable meanings for states 10/11/16, selector resource identities, the state-16 condition, timing/FPS, pivot, stats, behavior, and the complete resource lifecycle remain unresolved."
+        },
+        "unresolvedScope": "state 4 attack, original states 11/16 product mappings and human-readable meanings, selector resource identities, exact timing/FPS, pivot, stats, commands, behavior, later runtime mutation, and death lifetime remain unresolved; build/repair remain project source-layout adaptations"
       },
       "source": {
         "path": "original/imjinrok2/char/farmerk.spr",
@@ -19846,24 +20831,24 @@
             {
               "facing": "default",
               "frameFiles": [
-                "farmerk_0152.png",
-                "farmerk_0153.png",
-                "farmerk_0154.png",
-                "farmerk_0155.png",
-                "farmerk_0156.png",
-                "farmerk_0157.png",
-                "farmerk_0158.png",
-                "farmerk_0159.png"
+                "farmerk_0120.png",
+                "farmerk_0121.png",
+                "farmerk_0122.png",
+                "farmerk_0123.png",
+                "farmerk_0124.png",
+                "farmerk_0125.png",
+                "farmerk_0126.png",
+                "farmerk_0127.png"
               ],
               "frameIndexes": [
-                152,
-                153,
-                154,
-                155,
-                156,
-                157,
-                158,
-                159
+                120,
+                121,
+                122,
+                123,
+                124,
+                125,
+                126,
+                127
               ],
               "mirrorX": false,
               "missingFrames": []
@@ -19871,26 +20856,26 @@
             {
               "facing": "e",
               "frameFiles": [
-                "farmerk_0136.png",
-                "farmerk_0137.png",
-                "farmerk_0138.png",
-                "farmerk_0139.png",
-                "farmerk_0140.png",
-                "farmerk_0141.png",
-                "farmerk_0142.png",
-                "farmerk_0143.png"
+                "farmerk_0120.png",
+                "farmerk_0121.png",
+                "farmerk_0122.png",
+                "farmerk_0123.png",
+                "farmerk_0124.png",
+                "farmerk_0125.png",
+                "farmerk_0126.png",
+                "farmerk_0127.png"
               ],
               "frameIndexes": [
-                136,
-                137,
-                138,
-                139,
-                140,
-                141,
-                142,
-                143
+                120,
+                121,
+                122,
+                123,
+                124,
+                125,
+                126,
+                127
               ],
-              "mirrorX": false,
+              "mirrorX": true,
               "missingFrames": []
             },
             {
@@ -19915,80 +20900,80 @@
                 126,
                 127
               ],
-              "mirrorX": false,
+              "mirrorX": true,
               "missingFrames": []
             },
             {
               "facing": "ne",
               "frameFiles": [
-                "farmerk_0128.png",
-                "farmerk_0129.png",
-                "farmerk_0130.png",
-                "farmerk_0131.png",
-                "farmerk_0132.png",
-                "farmerk_0133.png",
-                "farmerk_0134.png",
-                "farmerk_0135.png"
+                "farmerk_0120.png",
+                "farmerk_0121.png",
+                "farmerk_0122.png",
+                "farmerk_0123.png",
+                "farmerk_0124.png",
+                "farmerk_0125.png",
+                "farmerk_0126.png",
+                "farmerk_0127.png"
               ],
               "frameIndexes": [
-                128,
-                129,
-                130,
-                131,
-                132,
-                133,
-                134,
-                135
-              ],
-              "mirrorX": false,
-              "missingFrames": []
-            },
-            {
-              "facing": "nw",
-              "frameFiles": [
-                "farmerk_0128.png",
-                "farmerk_0129.png",
-                "farmerk_0130.png",
-                "farmerk_0131.png",
-                "farmerk_0132.png",
-                "farmerk_0133.png",
-                "farmerk_0134.png",
-                "farmerk_0135.png"
-              ],
-              "frameIndexes": [
-                128,
-                129,
-                130,
-                131,
-                132,
-                133,
-                134,
-                135
+                120,
+                121,
+                122,
+                123,
+                124,
+                125,
+                126,
+                127
               ],
               "mirrorX": true,
               "missingFrames": []
             },
             {
-              "facing": "s",
+              "facing": "nw",
               "frameFiles": [
-                "farmerk_0152.png",
-                "farmerk_0153.png",
-                "farmerk_0154.png",
-                "farmerk_0155.png",
-                "farmerk_0156.png",
-                "farmerk_0157.png",
-                "farmerk_0158.png",
-                "farmerk_0159.png"
+                "farmerk_0120.png",
+                "farmerk_0121.png",
+                "farmerk_0122.png",
+                "farmerk_0123.png",
+                "farmerk_0124.png",
+                "farmerk_0125.png",
+                "farmerk_0126.png",
+                "farmerk_0127.png"
               ],
               "frameIndexes": [
-                152,
-                153,
-                154,
-                155,
-                156,
-                157,
-                158,
-                159
+                120,
+                121,
+                122,
+                123,
+                124,
+                125,
+                126,
+                127
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            },
+            {
+              "facing": "s",
+              "frameFiles": [
+                "farmerk_0120.png",
+                "farmerk_0121.png",
+                "farmerk_0122.png",
+                "farmerk_0123.png",
+                "farmerk_0124.png",
+                "farmerk_0125.png",
+                "farmerk_0126.png",
+                "farmerk_0127.png"
+              ],
+              "frameIndexes": [
+                120,
+                121,
+                122,
+                123,
+                124,
+                125,
+                126,
+                127
               ],
               "mirrorX": false,
               "missingFrames": []
@@ -19996,76 +20981,76 @@
             {
               "facing": "se",
               "frameFiles": [
-                "farmerk_0144.png",
-                "farmerk_0145.png",
-                "farmerk_0146.png",
-                "farmerk_0147.png",
-                "farmerk_0148.png",
-                "farmerk_0149.png",
-                "farmerk_0150.png",
-                "farmerk_0151.png"
+                "farmerk_0120.png",
+                "farmerk_0121.png",
+                "farmerk_0122.png",
+                "farmerk_0123.png",
+                "farmerk_0124.png",
+                "farmerk_0125.png",
+                "farmerk_0126.png",
+                "farmerk_0127.png"
               ],
               "frameIndexes": [
-                144,
-                145,
-                146,
-                147,
-                148,
-                149,
-                150,
-                151
+                120,
+                121,
+                122,
+                123,
+                124,
+                125,
+                126,
+                127
               ],
-              "mirrorX": false,
+              "mirrorX": true,
               "missingFrames": []
             },
             {
               "facing": "sw",
               "frameFiles": [
-                "farmerk_0144.png",
-                "farmerk_0145.png",
-                "farmerk_0146.png",
-                "farmerk_0147.png",
-                "farmerk_0148.png",
-                "farmerk_0149.png",
-                "farmerk_0150.png",
-                "farmerk_0151.png"
+                "farmerk_0120.png",
+                "farmerk_0121.png",
+                "farmerk_0122.png",
+                "farmerk_0123.png",
+                "farmerk_0124.png",
+                "farmerk_0125.png",
+                "farmerk_0126.png",
+                "farmerk_0127.png"
               ],
               "frameIndexes": [
-                144,
-                145,
-                146,
-                147,
-                148,
-                149,
-                150,
-                151
+                120,
+                121,
+                122,
+                123,
+                124,
+                125,
+                126,
+                127
               ],
-              "mirrorX": true,
+              "mirrorX": false,
               "missingFrames": []
             },
             {
               "facing": "w",
               "frameFiles": [
-                "farmerk_0136.png",
-                "farmerk_0137.png",
-                "farmerk_0138.png",
-                "farmerk_0139.png",
-                "farmerk_0140.png",
-                "farmerk_0141.png",
-                "farmerk_0142.png",
-                "farmerk_0143.png"
+                "farmerk_0120.png",
+                "farmerk_0121.png",
+                "farmerk_0122.png",
+                "farmerk_0123.png",
+                "farmerk_0124.png",
+                "farmerk_0125.png",
+                "farmerk_0126.png",
+                "farmerk_0127.png"
               ],
               "frameIndexes": [
-                136,
-                137,
-                138,
-                139,
-                140,
-                141,
-                142,
-                143
+                120,
+                121,
+                122,
+                123,
+                124,
+                125,
+                126,
+                127
               ],
-              "mirrorX": true,
+              "mirrorX": false,
               "missingFrames": []
             }
           ]
@@ -22804,14 +23789,6 @@
       "code": "direction-order-unverified",
       "visualId": "villager-korean-farmer",
       "scope": "base",
-      "state": "gather",
-      "detail": "Facing labels are assigned by a hard-coded source-frame order."
-    },
-    {
-      "severity": "blocking",
-      "code": "direction-order-unverified",
-      "visualId": "villager-korean-farmer",
-      "scope": "base",
       "state": "repair",
       "detail": "Facing labels are assigned by a hard-coded source-frame order."
     },
@@ -22877,14 +23854,6 @@
       "visualId": "villager-korean-farmer",
       "scope": "base",
       "state": "build",
-      "detail": "Three facings reuse mirrored source frames without binary/data proof."
-    },
-    {
-      "severity": "blocking",
-      "code": "mirrored-facing-unverified",
-      "visualId": "villager-korean-farmer",
-      "scope": "base",
-      "state": "gather",
       "detail": "Three facings reuse mirrored source frames without binary/data proof."
     },
     {

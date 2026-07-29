@@ -6,14 +6,16 @@
 
 원본 내부 클래스 1~95의 명칭·슬롯·기본 프레임·자원 경로를 전수 정적 확정했다. K01 source-created
 class 7 조선 농부와 class 31 일본 농부는 각각 `+0x47a==0` 상태 8 idle·1 move/walk·7 death와
-`+0x47a!=0` 상태 8 carry-idle·1 carry의 프레임·방향·mirror를 정적으로 확정했다. 조선 본영과 봉화대의 건설·정상·반파 본체는
+`+0x47a!=0` 상태 8 carry-idle·1 carry 및 resource-work 상태 10·11·16의 프레임·방향·mirror를 정적으로 확정했다. 조선 본영과 봉화대의 건설·정상·반파 본체는
 `scoped-static-proven`, 정체와 일부 또는 미확정 프레임이 함께 있는 비주얼은 `mixed`다.
 K01 시작 건물 class 48·49·51·58·60·63은 타입 카탈로그의 고유 정체·SPR·base frame 7만
 source binding에 반영했으며, class 49의 별도 본체 상태 범위를 제외한 건설·피해·오버레이는 미확정이다.
 `advtowerj.spr`는 95개 타입 정의에 사용되지 않아 `unverified`다. `mixed`인 조선 농부·일본 농부의
 상태 4, FPS·pivot·stats·behavior는 미확정으로 유지한다. nonzero branch는
-`carriedResource.amount > 0` project adapter로 carry/carry-idle frame에만 연결하며, 원본 field 의미와
-gather lifecycle을 일반화하지 않는다. 조선 창병 비주얼에서는 상태 1 일반 이동을, 일본 사무라이와
+`carriedResource.amount > 0` project adapter로 carry/carry-idle frame에만 연결한다. generic project
+`gather`는 original state 10 source layout에만 의도적으로 적응해 부분 이식했다. 이 adapter는 project
+resource name을 selector identity로 연결하지 않으며, state 11/16 product mapping·사람용 의미와 원본 field 의미,
+gather lifecycle을 확정하지 않는다. 조선 창병 비주얼에서는 상태 1 일반 이동을, 일본 사무라이와
 권율·유성룡 비주얼에서는 각 문서가 확인한 상태 8 idle·1 일반 이동·4 공격·7 사망을,
 일본 귀갑차에서는 상태 8/1/4의 grid 방향만 정적 확정 범위로 승격했다.
 브리핑 `SPEECH` 초상화 17개는 `static-proven`을 유지한다.
@@ -34,14 +36,14 @@ pnpm imjinrok:audit-sprite-mappings
 | 대상 | 확인한 범위 | 판정 |
 | --- | --- | --- |
 | 원본 타입 95개 | 이름·슬롯·기본 프레임·raw flags·SPR 경로 | 타입 정체·출처 전수 `정적 확정` |
-| 엔티티 비주얼 26개 | 상태 98개, 클립 706개, 프레임 참조 5,365개 | 범위 확정 2개, `mixed` 23개, 미확인 1개 |
+| 엔티티 비주얼 26개 | 상태 99개, 클립 715개, 프레임 참조 5,437개 | 범위 확정 2개, `mixed` 23개, 미확인 1개 |
 | 유닛 비주얼 15개 | 정체·방향·행동·미러링 | 고유 정체 15개; class 7·31 zero/nonzero branch, class 11·12·13·16·82 scoped core states와 class 14 상태 8/1/4 grid 확정 |
 | 건물 비주얼 11개 | 정체·idle·construction·damaged·overlay | 본영·봉화대 본체 2개 `정적 확정`; class 51·58·60·63은 base frame 7만 반영, 나머지 본체 상태 `미확인` |
 | 브리핑 초상화 17개 | `K1`~`K6`·`K10`, `J1`~`J5`, `C1`~`C5` | ID→`hero.spr` 프레임 `정적 확정` |
 | 원본 내부 클래스 2 | `조선 창병`, 슬롯 100, 상태 1·2, 8방향, phase 0~7 | 두 상태의 이동 의미·프레임 식 확정, 상태 1 일반 이동 이식 |
 | 원본 내부 클래스 11·16 | `조선 승병`·`일본 무녀`, 슬롯 112·124, 상태 8·1·4·7 | 각 core-state frame·8방향·mirror 확정·이식; FPS·pivot·stats·magic·state 2는 미확정 |
-| 원본 내부 클래스 7 | `조선 농부`, 슬롯 105, `farmerk.spr`, state 8·1·7 | source-created `+0x47a==0` idle/move/walk/death와 `+0x47a!=0` carry/carry-idle frame·8방향·mirror 확정; 후자는 `carriedResource.amount > 0` adapter로 부분 이식. state 4·FPS·pivot·stats·behavior·full gather lifecycle은 미확정 |
-| 원본 내부 클래스 31 | `일본 농부`, 슬롯 145, `Farmerj.spr`, state 8·1·7 | source-created `+0x47a==0` idle/move/walk/death와 `+0x47a!=0` carry/carry-idle frame·8방향·mirror 확정; 후자는 `carriedResource.amount > 0` adapter로 부분 이식. state 4·FPS·pivot·stats·behavior·full gather lifecycle은 미확정 |
+| 원본 내부 클래스 7 | `조선 농부`, 슬롯 105, `farmerk.spr`, state 8·1·7·10·11·16 | source-created `+0x47a==0` idle/move/walk/death, `+0x47a!=0` carry/carry-idle, resource-work state 10/11/16 frame·8방향·mirror 확정. generic `gather`는 state 10에만 의도적으로 적응해 부분 이식; state 11/16 product mapping·사람용 의미·selector identity, state 4·FPS·pivot·stats·behavior·full gather lifecycle은 미확정 |
+| 원본 내부 클래스 31 | `일본 농부`, 슬롯 145, `Farmerj.spr`, state 8·1·7·10·11·16 | source-created `+0x47a==0` idle/move/walk/death, `+0x47a!=0` carry/carry-idle, resource-work state 10/11/16 frame·8방향·mirror 확정. generic `gather`는 state 10에만 의도적으로 적응해 부분 이식; state 11/16 product mapping·사람용 의미·selector identity, state 4·FPS·pivot·stats·behavior·full gather lifecycle은 미확정 |
 | 원본 내부 클래스 76·78 | `조선 권율`·`조선 유성룡`, 상태 8·1·4·7, 슬롯 153~155·158~159 | idle·일반 이동·공격·사망의 SPR·8방향·phase·mirror 확정·이식 |
 | 원본 내부 클래스 49 | `조선 본영`, 슬롯 141, 건설·정상·반파 | 본체 프레임 0~8 `정적 확정`·이식 |
 | 원본 내부 클래스 52 | `조선 봉화대`, 슬롯 113, 건설·정상·반파 | `firehousek.spr` 본체 프레임 0~8 `정적 확정`·이식 |
