@@ -87,10 +87,7 @@ import {
   getOriginalSpeechSlot,
   resolveOriginalSpeechLayout,
 } from "../originalSpeechLayout";
-import {
-  isBelowOriginalBuildingDamageThreshold,
-  selectConstructionFrameIndex,
-} from "../originalBuildingVisualState";
+import { selectConstructionFrameIndex } from "../originalBuildingVisualState";
 import {
   ACTION_TRIGGERED_EVENT,
   BATTLEFIELD_SUMMARY_ACTION_EVENT,
@@ -145,6 +142,7 @@ import {
   type PresentationPauseOwnership,
 } from "../missionPresentationTimeline.js";
 import { placeStaticVisual } from "../render/placeStaticVisual.js";
+import { getEntityAnimationStateKey } from "../render/entityAnimationState.js";
 import { getAssetScale, getFrameOrigin, getFramePivot, REFERENCE_PX_PER_WU, RENDER_DEPTH_BIAS } from "../render/visualScale.js";
 import {
   createCampaignMissionLaunchContext,
@@ -8712,7 +8710,7 @@ export class SkirmishScene extends Phaser.Scene {
   }
 
   private getEntityAnimationSelection(unit: UnitState, visual: EntityVisual, facing: Facing): EntityAnimationSelection | null {
-    const stateKey = this.getEntityAnimationStateKey(unit, visual);
+    const stateKey = getEntityAnimationStateKey(unit, visual);
 
     if (!stateKey) {
       return null;
@@ -8765,7 +8763,7 @@ export class SkirmishScene extends Phaser.Scene {
     layer: EntityVisualLayer,
     facing: Facing,
   ): EntityAnimationSelection | null {
-    const stateKey = this.getEntityAnimationStateKey(unit, visual);
+    const stateKey = getEntityAnimationStateKey(unit, visual);
 
     if (!stateKey) {
       return null;
@@ -8819,48 +8817,6 @@ export class SkirmishScene extends Phaser.Scene {
       key: `${visual.id}:${stateKey}:${clipKey}:${frameIndex}`,
       clip: { frames: [frame], fps: 1, loop: false },
     };
-  }
-
-  private getEntityAnimationStateKey(unit: UnitState, visual: EntityVisual): string | null {
-    const candidates: string[] = [];
-
-    if (unit.construction) {
-      candidates.push("construction");
-    }
-
-    if (visual.states.damaged && isBelowOriginalBuildingDamageThreshold(unit.health)) {
-      candidates.push("damaged");
-    }
-
-    if ((unit.attackCooldownTicks ?? 0) > 0) {
-      candidates.push("attack");
-    }
-
-    if (unit.movementTarget || (unit.movementPath?.length ?? 0) > 0) {
-      candidates.push("move", "walk");
-    }
-
-    if (unit.currentOrder?.type === "gather") {
-      candidates.push(unit.carriedResource ? "carry" : "gather");
-    }
-
-    if (unit.currentOrder?.type === "repair") {
-      candidates.push("repair", "build");
-    }
-
-    if (unit.currentOrder?.type === "build") {
-      candidates.push("build");
-    }
-
-    candidates.push("idle");
-
-    for (const candidate of candidates) {
-      if (visual.states[candidate]) {
-        return candidate;
-      }
-    }
-
-    return Object.keys(visual.states)[0] ?? null;
   }
 
   private advanceEntityAnimation(renderable: EntityAnimationTracker, selection: EntityAnimationSelection, deltaMs: number): FrameRef | null {
