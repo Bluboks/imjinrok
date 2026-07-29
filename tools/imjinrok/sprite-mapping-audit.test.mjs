@@ -47,9 +47,9 @@ test("frame mappings stay quarantined outside statically proven scopes while ide
     visualCount: 21,
     unitVisualCount: 12,
     buildingVisualCount: 9,
-    stateMappingCount: 77,
-    clipCount: 517,
-    frameReferenceCount: 3_633,
+    stateMappingCount: 80,
+    clipCount: 544,
+    frameReferenceCount: 4_056,
     missingFrameReferenceCount: 0,
     unverifiedVisualCount: 2,
     mixedVisualCount: 17,
@@ -61,7 +61,7 @@ test("frame mappings stay quarantined outside statically proven scopes while ide
     projectBindingConflictCount: 0,
     portraitCueCount: 17,
     unverifiedPortraitCueCount: 0,
-    findingCount: 57,
+    findingCount: 37,
   });
   assert.equal(
     report.visuals.filter((visual) => visual.evidenceStatus === "unverified").length,
@@ -83,17 +83,7 @@ test("frame mappings stay quarantined outside statically proven scopes while ide
   assert.equal(koreanSpearman?.staticEvidence.originalGameplayName, "조선 창병");
   assert.equal(
     koreanSpearman?.staticEvidence.animationStateMapping,
-    "static-proven-movement-only",
-  );
-  assert.equal(
-    report.findings.some(
-      (finding) =>
-        finding.visualId === "korean-swordsman" &&
-        (finding.state === "move" || finding.state === "walk") &&
-        (finding.code === "direction-order-unverified" ||
-          finding.code === "mirrored-facing-unverified"),
-    ),
-    false,
+    "static-proven-core-state-frames",
   );
   assert.equal(
     report.findings.filter(
@@ -102,8 +92,11 @@ test("frame mappings stay quarantined outside statically proven scopes while ide
         (finding.code === "direction-order-unverified" ||
           finding.code === "mirrored-facing-unverified"),
     ).length,
-    4,
+    0,
   );
+  assert.deepEqual(koreanSpearman?.staticEvidence.stateFrameRanges, {
+    idle: [128, 177], move: [0, 39], walk: [0, 39], attack: [48, 87], death: [40, 47],
+  });
   const japaneseSamurai = report.visuals.find(
     (visual) => visual.visualId === "japanese-samurai",
   );
@@ -238,6 +231,24 @@ test("frame mappings stay quarantined outside statically proven scopes while ide
     japaneseSpearman?.staticEvidence.originalGameplayName,
     "일본 창병",
   );
+  assert.equal(japaneseSpearman?.staticEvidence.animationStateMapping, "static-proven-core-state-frames");
+  assert.deepEqual(japaneseSpearman?.staticEvidence.stateFrameRanges, {
+    idle: [0, 39], move: [40, 79], walk: [40, 79], attack: [120, 159], death: [176, 183],
+  });
+  const koreanArcher = report.visuals.find((visual) => visual.visualId === "korean-archer");
+  assert.equal(koreanArcher?.staticEvidence.animationStateMapping, "static-proven-core-state-frames");
+  assert.deepEqual(koreanArcher?.staticEvidence.stateFrameRanges, {
+    idle: [0, 39], move: [80, 119], walk: [80, 119], attack: [120, 159], death: [160, 167],
+  });
+  for (const visualId of ["korean-swordsman", "japanese-swordsman", "korean-archer"]) {
+    assert.equal(
+      report.findings.some(
+        (finding) => finding.visualId === visualId &&
+          (finding.code === "direction-order-unverified" || finding.code === "mirrored-facing-unverified"),
+      ),
+      false,
+    );
+  }
   const koreanHeadquarters = report.visuals.find((visual) => visual.visualId === "korean-hq");
   assert.equal(koreanHeadquarters?.evidenceStatus, "scoped-static-proven");
   assert.deepEqual(koreanHeadquarters?.staticEvidence.constructionFrames, [0, 1, 2, 3, 4, 5, 6, 7]);

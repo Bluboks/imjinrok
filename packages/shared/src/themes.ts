@@ -460,29 +460,47 @@ export const swordsmanEntityVisual = {
   states: {
     idle: {
       facings: ENTITY_FACING_ORDER,
-      clips: sourceFiveFacingStillClips("swordsman", "swordk", 0),
+      clips: staticallyRecoveredDirectionalClips({
+        visualId: "swordsman",
+        stem: "swordk",
+        frameStart: 128,
+        frameStride: 10,
+        phaseCount: 10,
+        fps: PROVISIONAL_RECOVERED_ANIMATION_IDLE_FPS,
+        loop: true,
+      }),
     },
     move: {
       facings: ENTITY_FACING_ORDER,
-      clips: staticallyRecoveredNormalMovementClips(
-        "swordsman",
-        "swordk",
-        0,
-        8,
-      ),
+      clips: staticallyRecoveredNormalMovementClips("swordsman", "swordk", 0, 8),
     },
     walk: {
       facings: ENTITY_FACING_ORDER,
-      clips: staticallyRecoveredNormalMovementClips(
-        "swordsman",
-        "swordk",
-        0,
-        8,
-      ),
+      clips: staticallyRecoveredNormalMovementClips("swordsman", "swordk", 0, 8),
     },
     attack: {
       facings: ENTITY_FACING_ORDER,
-      clips: sourceFiveFacingClips("swordsman", "swordk", 48, 8),
+      clips: staticallyRecoveredDirectionalClips({
+        visualId: "swordsman",
+        stem: "swordk",
+        frameStart: 48,
+        frameStride: 8,
+        phaseCount: 8,
+        fps: PROVISIONAL_RECOVERED_ANIMATION_ACTIVE_FPS,
+        loop: false,
+      }),
+    },
+    death: {
+      facings: ENTITY_FACING_ORDER,
+      clips: staticallyRecoveredDirectionalClips({
+        visualId: "swordsman",
+        stem: "swordk",
+        frameStart: 40,
+        frameStride: 0,
+        phaseCount: 8,
+        fps: PROVISIONAL_RECOVERED_ANIMATION_ACTIVE_FPS,
+        loop: false,
+      }),
     },
   },
 } as const satisfies EntityVisual;
@@ -502,19 +520,57 @@ export const japaneseSwordsmanEntityVisual = {
   states: {
     idle: {
       facings: ENTITY_FACING_ORDER,
-      clips: sourceFiveFacingStillClips("japanese_swordsman", "swordj", 0),
+      clips: staticallyRecoveredDirectionalClips({
+        visualId: "japanese_swordsman",
+        stem: "swordj",
+        frameStart: 0,
+        frameStride: 8,
+        phaseCount: 8,
+        fps: PROVISIONAL_RECOVERED_ANIMATION_IDLE_FPS,
+        loop: true,
+      }),
     },
     move: {
       facings: ENTITY_FACING_ORDER,
-      clips: sourceFiveFacingClips("japanese_swordsman", "swordj", 40, 8),
+      clips: staticallyRecoveredNormalMovementClips(
+        "japanese_swordsman",
+        "swordj",
+        40,
+        PROVISIONAL_RECOVERED_ANIMATION_ACTIVE_FPS,
+      ),
     },
     walk: {
       facings: ENTITY_FACING_ORDER,
-      clips: sourceFiveFacingClips("japanese_swordsman", "swordj", 40, 8),
+      clips: staticallyRecoveredNormalMovementClips(
+        "japanese_swordsman",
+        "swordj",
+        40,
+        PROVISIONAL_RECOVERED_ANIMATION_ACTIVE_FPS,
+      ),
     },
     attack: {
       facings: ENTITY_FACING_ORDER,
-      clips: sourceFiveFacingClips("japanese_swordsman", "swordj", 128, 8),
+      clips: staticallyRecoveredDirectionalClips({
+        visualId: "japanese_swordsman",
+        stem: "swordj",
+        frameStart: 120,
+        frameStride: 8,
+        phaseCount: 8,
+        fps: PROVISIONAL_RECOVERED_ANIMATION_ACTIVE_FPS,
+        loop: false,
+      }),
+    },
+    death: {
+      facings: ENTITY_FACING_ORDER,
+      clips: staticallyRecoveredDirectionalClips({
+        visualId: "japanese_swordsman",
+        stem: "swordj",
+        frameStart: 176,
+        frameStride: 0,
+        phaseCount: 8,
+        fps: PROVISIONAL_RECOVERED_ANIMATION_ACTIVE_FPS,
+        loop: false,
+      }),
     },
   },
 } as const satisfies EntityVisual;
@@ -534,19 +590,57 @@ export const archerEntityVisual = {
   states: {
     idle: {
       facings: ENTITY_FACING_ORDER,
-      clips: sourceFiveFacingStillClips("archer", "archerk", 120),
+      clips: staticallyRecoveredDirectionalClips({
+        visualId: "archer",
+        stem: "archerk",
+        frameStart: 0,
+        frameStride: 8,
+        phaseCount: 8,
+        fps: PROVISIONAL_RECOVERED_ANIMATION_IDLE_FPS,
+        loop: true,
+      }),
     },
     move: {
       facings: ENTITY_FACING_ORDER,
-      clips: sourceFiveFacingClips("archer", "archerk", 80, 8),
+      clips: staticallyRecoveredNormalMovementClips(
+        "archer",
+        "archerk",
+        80,
+        PROVISIONAL_RECOVERED_ANIMATION_ACTIVE_FPS,
+      ),
     },
     walk: {
       facings: ENTITY_FACING_ORDER,
-      clips: sourceFiveFacingClips("archer", "archerk", 80, 8),
+      clips: staticallyRecoveredNormalMovementClips(
+        "archer",
+        "archerk",
+        80,
+        PROVISIONAL_RECOVERED_ANIMATION_ACTIVE_FPS,
+      ),
     },
     attack: {
       facings: ENTITY_FACING_ORDER,
-      clips: sourceFiveFacingClips("archer", "archerk", 0, 8),
+      clips: staticallyRecoveredDirectionalClips({
+        visualId: "archer",
+        stem: "archerk",
+        frameStart: 120,
+        frameStride: 8,
+        phaseCount: 8,
+        fps: PROVISIONAL_RECOVERED_ANIMATION_ACTIVE_FPS,
+        loop: false,
+      }),
+    },
+    death: {
+      facings: ENTITY_FACING_ORDER,
+      clips: staticallyRecoveredDirectionalClips({
+        visualId: "archer",
+        stem: "archerk",
+        frameStart: 160,
+        frameStride: 0,
+        phaseCount: 8,
+        fps: PROVISIONAL_RECOVERED_ANIMATION_ACTIVE_FPS,
+        loop: false,
+      }),
     },
   },
 } as const satisfies EntityVisual;
