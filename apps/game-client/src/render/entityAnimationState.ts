@@ -42,6 +42,10 @@ export function getEntityAnimationStateKey(
     candidates.push("build");
   }
 
+  if (!isMoving && unit.currentOrder?.type === "gather") {
+    candidates.push("gather");
+  }
+
   if (isCarryingResource) {
     if (isMoving) {
       candidates.push("carry", "move", "walk");
@@ -51,10 +55,6 @@ export function getEntityAnimationStateKey(
   } else {
     if (isMoving) {
       candidates.push("move", "walk");
-    }
-
-    if (unit.currentOrder?.type === "gather") {
-      candidates.push("gather");
     }
   }
 
