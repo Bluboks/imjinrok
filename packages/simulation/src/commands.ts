@@ -429,7 +429,15 @@ export function applyCommand(state: WorldState, envelope: CommandEnvelope): void
 
       unit.movementPath = path;
       unit.movementTarget = path[0] ?? target;
-      unit.currentOrder = { type: envelope.command.type, target: { ...(path[path.length - 1] ?? target) } };
+      // An attack-move's target is its strategic destination. The path may
+      // temporarily end beside an occupied mobile footprint, but that routing
+      // fallback must not replace the destination used for later re-planning.
+      unit.currentOrder = {
+        type: envelope.command.type,
+        target: envelope.command.type === "attack-move"
+          ? { ...target }
+          : { ...(path[path.length - 1] ?? target) },
+      };
       return;
     }
     case "patrol": {

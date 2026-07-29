@@ -238,6 +238,27 @@ test("move orders complete when the unit reaches its final waypoint", () => {
   assert.equal(unit.currentOrder, undefined);
 });
 
+test("attack-move preserves its requested destination when routing beside a mobile target", () => {
+  const state = createInitialWorldState(createBlankMap({ width: 12, height: 12 }), ["p1", "p2"]);
+  state.units = {};
+  const attacker = createUnitState("p1-attacker", "p1", "swordsman", { x: 2, y: 2 });
+  const target = createUnitState("p2-target", "p2", "villager", { x: 8, y: 2 });
+  state.units[attacker.id] = attacker;
+  state.units[target.id] = target;
+
+  const result = issueCommand(state, {
+    sessionId: "test-session",
+    playerId: "p1",
+    issuedAtTick: state.tick,
+    command: { type: "attack-move", unitId: attacker.id, target: target.position },
+  });
+
+  assert.equal(result.ok, true);
+  assert.equal(attacker.currentOrder?.type, "attack-move");
+  assert.deepEqual(attacker.currentOrder?.target, target.position);
+  assert.notDeepEqual(attacker.movementPath?.at(-1), target.position);
+});
+
 test("terminal explicit move follow-up selects its requested target before nearby opportunistic enemies", () => {
   const state = createInitialWorldState(createBlankMap({ width: 12, height: 12 }), ["p1", "p2"]);
   state.units = {};
