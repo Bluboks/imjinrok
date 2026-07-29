@@ -526,13 +526,31 @@ export const villagerEntityVisual = {
       facings: ENTITY_FACING_ORDER,
       clips: staticallyRecoveredResourceWorkClips("villager", "farmerk", 120),
     },
+    // Project adapters: generic build/repair select the recovered original state-11 source layout.
+    // State 11's original gameplay meaning is not recovered.
     build: {
       facings: ENTITY_FACING_ORDER,
-      clips: sourceFiveFacingClips("villager", "farmerk", 160, 8),
+      clips: staticallyRecoveredDirectionalClips({
+        visualId: "villager",
+        stem: "farmerk",
+        frameStart: 160,
+        frameStride: 8,
+        phaseCount: 8,
+        fps: PROVISIONAL_RECOVERED_ANIMATION_ACTIVE_FPS,
+        loop: true,
+      }),
     },
     repair: {
       facings: ENTITY_FACING_ORDER,
-      clips: sourceFiveFacingClips("villager", "farmerk", 160, 8),
+      clips: staticallyRecoveredDirectionalClips({
+        visualId: "villager",
+        stem: "farmerk",
+        frameStart: 160,
+        frameStride: 8,
+        phaseCount: 8,
+        fps: PROVISIONAL_RECOVERED_ANIMATION_ACTIVE_FPS,
+        loop: true,
+      }),
     },
   },
 } as const satisfies EntityVisual;
