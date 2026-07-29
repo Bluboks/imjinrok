@@ -456,7 +456,8 @@ test("imjinrok K01 and K02 avoid skirmish economy starts for scripted Japanese p
     "japanese-camp-firehouse": 1,
     "japanese-camp-house": 2,
     "japanese-camp-tower": 2,
-    "japanese-gunner": 6,
+    "japanese-farmer": 3,
+    "japanese-gunner": 3,
     "japanese-samurai": 3,
     "japanese-shrine-maiden": 1,
     "japanese-swordsman": 3,
@@ -477,7 +478,7 @@ test("imjinrok K01 and K02 avoid skirmish economy starts for scripted Japanese p
   assert.equal(k02AllyStart?.startingUnits?.some((unit) => economyKinds.has(unit.kind)), false);
 });
 
-test("K01 opening adapter exposes source provenance without upgrading unresolved proxies", () => {
+test("K01 opening adapter exposes source provenance and upgrades only class 31 identity/source", () => {
   assert.equal(k01SourceOpeningAdapter.length, 36);
   assert.deepEqual(
     k01SourceOpeningAdapter
@@ -502,9 +503,6 @@ test("K01 opening adapter exposes source provenance without upgrading unresolved
       { originalClass: 49, rawOwnerWord: 0 },
       { originalClass: 48, rawOwnerWord: 0 },
       { originalClass: 51, rawOwnerWord: 0 },
-      { originalClass: 31, rawOwnerWord: 1 },
-      { originalClass: 31, rawOwnerWord: 1 },
-      { originalClass: 31, rawOwnerWord: 1 },
       { originalClass: 58, rawOwnerWord: 1 },
       { originalClass: 58, rawOwnerWord: 1 },
       { originalClass: 60, rawOwnerWord: 1 },
@@ -513,6 +511,22 @@ test("K01 opening adapter exposes source provenance without upgrading unresolved
       { originalClass: 63, rawOwnerWord: 1 },
       { originalClass: 63, rawOwnerWord: 1 },
       { originalClass: 63, rawOwnerWord: 1 },
+    ],
+  );
+  assert.deepEqual(
+    k01SourceOpeningAdapter
+      .filter(({ rawOwnerWord, originalClass }) => rawOwnerWord === 1 && originalClass === 31)
+      .map(({ originalClass, rawOwnerWord, offset, projectKind, identityMapping }) => ({
+        originalClass,
+        rawOwnerWord,
+        sourcePosition: { x: 52 + offset.x, y: 52 + offset.y },
+        projectKind,
+        identityMapping,
+      })),
+    [
+      { originalClass: 31, rawOwnerWord: 1, sourcePosition: { x: 7, y: 48 }, projectKind: "japanese-farmer", identityMapping: "exact-static-identity-source" },
+      { originalClass: 31, rawOwnerWord: 1, sourcePosition: { x: 7, y: 47 }, projectKind: "japanese-farmer", identityMapping: "exact-static-identity-source" },
+      { originalClass: 31, rawOwnerWord: 1, sourcePosition: { x: 48, y: 1 }, projectKind: "japanese-farmer", identityMapping: "exact-static-identity-source" },
     ],
   );
   assert.deepEqual(
@@ -939,7 +953,7 @@ const k01JapaneseSourceKindByTypeHex = {
   "0x0d": "japanese-samurai",
   "0x10": "japanese-shrine-maiden",
   "0x14": "japanese-swordsman",
-  "0x1f": "japanese-gunner",
+  "0x1f": "japanese-farmer",
   "0x39": "japanese-camp-house",
   "0x3a": "japanese-camp-barracks",
   "0x3c": "japanese-camp-tower",
