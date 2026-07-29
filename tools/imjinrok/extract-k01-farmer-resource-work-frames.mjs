@@ -92,7 +92,7 @@ const EVIDENCE_POINTS = [
   [0x00455882, "66 83 7e 1c 03", "state-16 fast-start requires subrecord WORD +0x1c equal to 3"],
   [0x0045588f, "66 83 7e 30 00", "state-16 fast-start requires subrecord WORD +0x30 nonzero"],
   [0x00455896, "66 83 b9 0a 54 63 00 00", "state-16 fast-start requires entity WORD +0x1b2 equal to zero"],
-  [0x004558a0, "8b 46 0c 2b c7 99 33 c2 2b c2 3d 2c 01 00 00 7e 31", "state-16 fast-start takes signed absolute DWORD tick difference and requires it to be strictly greater than 300"],
+  [0x004558a0, "8b 46 0c 2b c7 99 33 c2 2b c2 3d 2c 01 00 00 7e 31", "state-16 fast-start uses the x86 signed-absolute DWORD idiom and signed-greater-than 300; INT32_MIN remains negative"],
   [0x004558b1, "66 8b 81 3e 54 63 00 66 3d 01 00 74 12 66 3d 04 00 74 0c 66 3d 10 00 74 06 66 3d 40 00 75 12", "state-16 fast-start admits raw entity WORD +0x1e6 values 1, 4, 16, or 64"],
   [0x004558d0, "a1 90 5f 7c 00 33 d2 bb 0a 00 00 00 f7 f3 85 d2 74 0b", "state-16 fast-start requires unsigned global DWORD 0x007c5f90 modulo 10 equal to zero"],
   [0x004558e2, "66 83 7e 08 01 0f 85 02 01 00 00", "failed fast-start gates continue only with subrecord WORD +0x08 equal to one; otherwise they enter 0x004559ef"],
@@ -142,12 +142,12 @@ export function extractK01FarmerResourceWorkFrames(options = {}) {
     analysisStatus: "static-confirmed", reproductionStatus: "reproduction-complete", implementationStatus: "pending-project-adapter",
     sources: { executable: { path: paths.executablePath, sha256: EXPECTED_EXECUTABLE_SHA256 }, functions: sourceRecord(paths.functionsPath, functions), jumpTables: sourceRecord(paths.jumpTablesPath, jumpTables), references: sourceRecord(paths.referencesPath, references), seeds: sourceRecord(paths.seedsPath, seeds), farmerResourceBranch: prior.sources },
     identities: prior.identities, stateDispatch: STATE_DISPATCH, states, directions: { state10: STATE_TEN_DIRECTIONS, state11And16: NORMAL_DIRECTIONS },
-    resourceVisualStateWrites: { functionEntry: "0x004562d0", selectorCases: { 1: 10, 2: 10, 3: 11 }, alternateRoutine: { functionEntry: "0x004554c0", writeVa: "0x00455937", state: 16 }, uncertainty: "selector human-readable resource names and the internal condition that reaches the state-16 write remain unconfirmed." },
+    resourceVisualStateWrites: { functionEntry: "0x004562d0", selectorCases: { 1: 10, 2: 10, 3: 11 }, alternateRoutine: { functionEntry: "0x004554c0", writeVa: "0x00455937", state: 16 }, uncertainty: "selector human-readable resource names, raw visual state 16 human meaning, and the full resource lifecycle remain unconfirmed." },
     resourceWorkActionDispatch,
     resourceWorkCadenceContract: resourceWorkCadenceContract(),
     functionEvidence, rawCodeRanges, evidencePoints, callEdges, seedsEvidence, testVectors,
-    acceptedInputScope: "K01 classes 7/31; original visual states 10, 11, 16; recovered raw directions; phase 0..7.",
-    unresolvedScope: "Human-readable action names for states 10/11/16 (including build/repair), selector resource names, state-16 internal condition, timing/FPS, pivot, stats, behavior, complete resource lifecycle, and any product adapter remain unconfirmed or pending.",
+    acceptedInputScope: "K01 classes 7/31; original visual states 10, 11, 16; recovered raw directions; frame phase 0..7; and raw action substate 8 state-16 cadence replay with the documented fixed-width numeric inputs.",
+    unresolvedScope: "Human-readable action names for states 10/11/16 (including build/repair), selector resource names, raw visual state 16 human meaning, timing/FPS, pivot, stats, behavior, complete resource lifecycle, and any product adapter remain unconfirmed or pending.",
   };
 }
 
@@ -164,20 +164,20 @@ export function replayK01FarmerResourceWorkCadence({ rawActionSubstate, subrecor
   unsignedWord(entity.directionWord, "entity.directionWord");
   unsignedDword(globals.tickDword, "globals.tickDword");
   unsignedDword(globals.moduloDword, "globals.moduloDword");
-  const elapsedSignedMagnitude = signedAbsoluteDwordDifference(subrecord.lastTickDword, globals.tickDword);
+  const elapsedSignedAbsIdiomResult = signedAbsoluteDwordDifference(subrecord.lastTickDword, globals.tickDword);
   const fastStart = subrecord.selectorWord === 3
     && subrecord.periodWord !== 0
     && entity.phaseWord === 0
-    && elapsedSignedMagnitude > 300
+    && elapsedSignedAbsIdiomResult > 300
     && [1, 4, 16, 64].includes(entity.directionWord)
     && globals.moduloDword % 10 === 0;
-  if (!fastStart && subrecord.cadenceLatchWord !== 1) return regularResourceWorkResult("fast-start-gate-or-latch", subrecord, entity, elapsedSignedMagnitude);
+  if (!fastStart && subrecord.cadenceLatchWord !== 1) return regularResourceWorkResult("fast-start-gate-or-latch", subrecord, entity, elapsedSignedAbsIdiomResult);
 
   const cadenceCounterByte = (entity.cadenceCounterByte + 1) & 0xff;
   const result = {
     route: "state-16-cadence",
     fastStart,
-    elapsedSignedMagnitude,
+    elapsedSignedAbsIdiomResult,
     subrecord: { ...subrecord, lastTickDword: globals.tickDword, cadenceLatchWord: 1 },
     entity: { ...entity, cadenceCounterByte },
   };
@@ -226,7 +226,7 @@ function resourceWorkCadenceContract() {
       selector: "subrecord WORD +0x1c == 3",
       period: "subrecord signed WORD +0x30 != 0",
       phase: "entity WORD +0x1b2 == 0",
-      elapsed: "signed absolute DWORD difference abs(subrecord +0x0c - global DWORD 0x007c5f80) > 300",
+      elapsed: "x86 signed-absolute DWORD idiom result for subrecord +0x0c - global DWORD 0x007c5f80 is signed-greater-than 300; INT32_MIN remains negative and fails",
       direction: "entity WORD +0x1e6 is one of 1,4,16,64",
       modulo: "unsigned global DWORD 0x007c5f90 % 10 == 0",
       failedGateContinuation: "subrecord WORD +0x08 == 1 continues at 0x004558ed; otherwise enters 0x004559ef",
@@ -238,16 +238,16 @@ function resourceWorkCadenceContract() {
       thresholdWrites: ["entity BYTE +0x6f = 0", "entity BYTE +0x03 = 16", "entity WORD +0x1b2 = signed remainder after increment / signed subrecord WORD +0x30", "entity WORD +0x34 copies entity +0x1b2", "entity BYTE +0x04 = 1", "entity BYTE +0x1f1 = 1"],
       terminal: "when signed remainder equals signed period minus one, subrecord WORD +0x08 = 0 and this branch returns 1",
     },
-    acceptedNumericScope: "rawActionSubstate, ticks, and modulo source are unsigned DWORD; selector/latch/direction/phase storage are unsigned WORD; period is a signed WORD; cadence limit/counter storage are unsigned BYTE with signed-BYTE threshold views. Replay accepts all fixed-width inputs, but zero period is only accepted on routes that do not reach the original IDIV instruction.",
+    acceptedNumericScope: "rawActionSubstate, ticks, and modulo source are unsigned DWORD; selector/latch/direction/phase storage are unsigned WORD; period is a signed WORD; cadence limit/counter storage are unsigned BYTE with signed-BYTE threshold views. The signed-absolute DWORD idiom leaves INT32_MIN negative, so that overflow value fails the signed > 300 gate. Replay accepts all fixed-width inputs, but zero period is only accepted on routes that do not reach the original IDIV instruction.",
   };
 }
 
-function regularResourceWorkResult(reason, subrecord, entity, elapsedSignedMagnitude = null) {
+function regularResourceWorkResult(reason, subrecord, entity, elapsedSignedAbsIdiomResult = null) {
   return {
     route: "regular-routine",
     regularRoutineEntry: "0x004559ef",
     reason,
-    elapsedSignedMagnitude,
+    elapsedSignedAbsIdiomResult,
     cadenceThresholdReached: false,
     terminalReturn: null,
     subrecord: { ...subrecord },

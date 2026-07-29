@@ -1,56 +1,61 @@
 {
   "schemaVersion": 1,
-  "acceptedNumericScope": "rawActionSubstate/ticks/modulo unsigned DWORD; selector/latch/direction/phase storage unsigned WORD; period signed WORD; cadence limit/counter unsigned BYTE with signed-BYTE threshold views.",
+  "acceptedNumericScope": "rawActionSubstate/ticks/modulo unsigned DWORD; selector/latch/direction/phase storage unsigned WORD; period signed WORD; cadence limit/counter unsigned BYTE with signed-BYTE threshold views. The x86 signed-absolute DWORD idiom keeps INT32_MIN negative, so it fails the signed > 300 gate.",
   "vectors": [
     {
       "id": "fast-start-cardinal",
       "input": { "rawActionSubstate": 8, "subrecord": { "selectorWord": 3, "periodWord": 3, "cadenceLatchWord": 0, "lastTickDword": 100 }, "entity": { "phaseWord": 0, "cadenceLimitByte": 0, "cadenceCounterByte": 1, "directionWord": 64 }, "globals": { "tickDword": 401, "moduloDword": 20 } },
-      "expected": { "route": "state-16-cadence", "fastStart": true, "elapsedSignedMagnitude": 301, "cadenceThresholdReached": true, "terminalReturn": null, "subrecord": { "lastTickDword": 401, "cadenceLatchWord": 1 }, "entity": { "cadenceCounterByte": 0, "visualStateByte": 16, "phaseWord": 1, "phaseSignedWord": 1, "phaseCopyWord": 1, "flag04Byte": 1, "flag1f1Byte": 1 } }
+      "expected": { "route": "state-16-cadence", "fastStart": true, "elapsedSignedAbsIdiomResult": 301, "cadenceThresholdReached": true, "terminalReturn": null, "subrecord": { "lastTickDword": 401, "cadenceLatchWord": 1 }, "entity": { "cadenceCounterByte": 0, "visualStateByte": 16, "phaseWord": 1, "phaseSignedWord": 1, "phaseCopyWord": 1, "flag04Byte": 1, "flag1f1Byte": 1 } }
     },
     {
       "id": "elapsed-300-regular",
       "input": { "rawActionSubstate": 8, "subrecord": { "selectorWord": 3, "periodWord": 3, "cadenceLatchWord": 0, "lastTickDword": 100 }, "entity": { "phaseWord": 0, "cadenceLimitByte": 0, "cadenceCounterByte": 1, "directionWord": 64 }, "globals": { "tickDword": 400, "moduloDword": 20 } },
-      "expected": { "route": "regular-routine", "fastStart": null, "elapsedSignedMagnitude": 300, "cadenceThresholdReached": false, "terminalReturn": null, "subrecord": { "lastTickDword": 100, "cadenceLatchWord": 0 }, "entity": { "cadenceCounterByte": 1, "phaseWord": 0 } }
+      "expected": { "route": "regular-routine", "fastStart": null, "elapsedSignedAbsIdiomResult": 300, "cadenceThresholdReached": false, "terminalReturn": null, "subrecord": { "lastTickDword": 100, "cadenceLatchWord": 0 }, "entity": { "cadenceCounterByte": 1, "phaseWord": 0 } }
     },
     {
       "id": "elapsed-301-threshold-miss",
       "input": { "rawActionSubstate": 8, "subrecord": { "selectorWord": 3, "periodWord": 3, "cadenceLatchWord": 0, "lastTickDword": 100 }, "entity": { "phaseWord": 0, "cadenceLimitByte": 0, "cadenceCounterByte": 0, "directionWord": 64 }, "globals": { "tickDword": 401, "moduloDword": 20 } },
-      "expected": { "route": "state-16-cadence", "fastStart": true, "elapsedSignedMagnitude": 301, "cadenceThresholdReached": false, "terminalReturn": null, "subrecord": { "lastTickDword": 401, "cadenceLatchWord": 1 }, "entity": { "cadenceCounterByte": 1, "phaseWord": 0 } }
+      "expected": { "route": "state-16-cadence", "fastStart": true, "elapsedSignedAbsIdiomResult": 301, "cadenceThresholdReached": false, "terminalReturn": null, "subrecord": { "lastTickDword": 401, "cadenceLatchWord": 1 }, "entity": { "cadenceCounterByte": 1, "phaseWord": 0 } }
     },
     {
       "id": "diagonal-regular",
       "input": { "rawActionSubstate": 8, "subrecord": { "selectorWord": 3, "periodWord": 3, "cadenceLatchWord": 0, "lastTickDword": 100 }, "entity": { "phaseWord": 0, "cadenceLimitByte": 0, "cadenceCounterByte": 1, "directionWord": 65 }, "globals": { "tickDword": 401, "moduloDword": 20 } },
-      "expected": { "route": "regular-routine", "fastStart": null, "elapsedSignedMagnitude": 301, "cadenceThresholdReached": false, "terminalReturn": null, "subrecord": { "lastTickDword": 100, "cadenceLatchWord": 0 }, "entity": { "cadenceCounterByte": 1, "phaseWord": 0 } }
+      "expected": { "route": "regular-routine", "fastStart": null, "elapsedSignedAbsIdiomResult": 301, "cadenceThresholdReached": false, "terminalReturn": null, "subrecord": { "lastTickDword": 100, "cadenceLatchWord": 0 }, "entity": { "cadenceCounterByte": 1, "phaseWord": 0 } }
     },
     {
       "id": "modulo-regular",
       "input": { "rawActionSubstate": 8, "subrecord": { "selectorWord": 3, "periodWord": 3, "cadenceLatchWord": 0, "lastTickDword": 100 }, "entity": { "phaseWord": 0, "cadenceLimitByte": 0, "cadenceCounterByte": 1, "directionWord": 64 }, "globals": { "tickDword": 401, "moduloDword": 21 } },
-      "expected": { "route": "regular-routine", "fastStart": null, "elapsedSignedMagnitude": 301, "cadenceThresholdReached": false, "terminalReturn": null, "subrecord": { "lastTickDword": 100, "cadenceLatchWord": 0 }, "entity": { "cadenceCounterByte": 1, "phaseWord": 0 } }
+      "expected": { "route": "regular-routine", "fastStart": null, "elapsedSignedAbsIdiomResult": 301, "cadenceThresholdReached": false, "terminalReturn": null, "subrecord": { "lastTickDword": 100, "cadenceLatchWord": 0 }, "entity": { "cadenceCounterByte": 1, "phaseWord": 0 } }
     },
     {
       "id": "selector-regular",
       "input": { "rawActionSubstate": 8, "subrecord": { "selectorWord": 2, "periodWord": 3, "cadenceLatchWord": 0, "lastTickDword": 100 }, "entity": { "phaseWord": 0, "cadenceLimitByte": 0, "cadenceCounterByte": 1, "directionWord": 64 }, "globals": { "tickDword": 401, "moduloDword": 20 } },
-      "expected": { "route": "regular-routine", "fastStart": null, "elapsedSignedMagnitude": 301, "cadenceThresholdReached": false, "terminalReturn": null, "subrecord": { "lastTickDword": 100, "cadenceLatchWord": 0 }, "entity": { "cadenceCounterByte": 1, "phaseWord": 0 } }
+      "expected": { "route": "regular-routine", "fastStart": null, "elapsedSignedAbsIdiomResult": 301, "cadenceThresholdReached": false, "terminalReturn": null, "subrecord": { "lastTickDword": 100, "cadenceLatchWord": 0 }, "entity": { "cadenceCounterByte": 1, "phaseWord": 0 } }
     },
     {
       "id": "period-zero-regular",
       "input": { "rawActionSubstate": 8, "subrecord": { "selectorWord": 3, "periodWord": 0, "cadenceLatchWord": 0, "lastTickDword": 100 }, "entity": { "phaseWord": 0, "cadenceLimitByte": 0, "cadenceCounterByte": 1, "directionWord": 64 }, "globals": { "tickDword": 401, "moduloDword": 20 } },
-      "expected": { "route": "regular-routine", "fastStart": null, "elapsedSignedMagnitude": 301, "cadenceThresholdReached": false, "terminalReturn": null, "subrecord": { "lastTickDword": 100, "cadenceLatchWord": 0 }, "entity": { "cadenceCounterByte": 1, "phaseWord": 0 } }
+      "expected": { "route": "regular-routine", "fastStart": null, "elapsedSignedAbsIdiomResult": 301, "cadenceThresholdReached": false, "terminalReturn": null, "subrecord": { "lastTickDword": 100, "cadenceLatchWord": 0 }, "entity": { "cadenceCounterByte": 1, "phaseWord": 0 } }
     },
     {
       "id": "phase-nonzero-regular",
       "input": { "rawActionSubstate": 8, "subrecord": { "selectorWord": 3, "periodWord": 3, "cadenceLatchWord": 0, "lastTickDword": 100 }, "entity": { "phaseWord": 1, "cadenceLimitByte": 0, "cadenceCounterByte": 1, "directionWord": 64 }, "globals": { "tickDword": 401, "moduloDword": 20 } },
-      "expected": { "route": "regular-routine", "fastStart": null, "elapsedSignedMagnitude": 301, "cadenceThresholdReached": false, "terminalReturn": null, "subrecord": { "lastTickDword": 100, "cadenceLatchWord": 0 }, "entity": { "cadenceCounterByte": 1, "phaseWord": 1 } }
+      "expected": { "route": "regular-routine", "fastStart": null, "elapsedSignedAbsIdiomResult": 301, "cadenceThresholdReached": false, "terminalReturn": null, "subrecord": { "lastTickDword": 100, "cadenceLatchWord": 0 }, "entity": { "cadenceCounterByte": 1, "phaseWord": 1 } }
     },
     {
       "id": "latched-threshold-miss",
       "input": { "rawActionSubstate": 8, "subrecord": { "selectorWord": 2, "periodWord": 3, "cadenceLatchWord": 1, "lastTickDword": 100 }, "entity": { "phaseWord": 0, "cadenceLimitByte": 0, "cadenceCounterByte": 0, "directionWord": 64 }, "globals": { "tickDword": 401, "moduloDword": 20 } },
-      "expected": { "route": "state-16-cadence", "fastStart": false, "elapsedSignedMagnitude": 301, "cadenceThresholdReached": false, "terminalReturn": null, "subrecord": { "lastTickDword": 401, "cadenceLatchWord": 1 }, "entity": { "cadenceCounterByte": 1, "phaseWord": 0 } }
+      "expected": { "route": "state-16-cadence", "fastStart": false, "elapsedSignedAbsIdiomResult": 301, "cadenceThresholdReached": false, "terminalReturn": null, "subrecord": { "lastTickDword": 401, "cadenceLatchWord": 1 }, "entity": { "cadenceCounterByte": 1, "phaseWord": 0 } }
     },
     {
       "id": "latched-terminal-latch-reset",
       "input": { "rawActionSubstate": 8, "subrecord": { "selectorWord": 2, "periodWord": 3, "cadenceLatchWord": 1, "lastTickDword": 100 }, "entity": { "phaseWord": 1, "cadenceLimitByte": 0, "cadenceCounterByte": 1, "directionWord": 64 }, "globals": { "tickDword": 401, "moduloDword": 20 } },
-      "expected": { "route": "state-16-cadence", "fastStart": false, "elapsedSignedMagnitude": 301, "cadenceThresholdReached": true, "terminalReturn": 1, "subrecord": { "lastTickDword": 401, "cadenceLatchWord": 0 }, "entity": { "cadenceCounterByte": 0, "visualStateByte": 16, "phaseWord": 2, "phaseSignedWord": 2, "phaseCopyWord": 2, "flag04Byte": 1, "flag1f1Byte": 1 } }
+      "expected": { "route": "state-16-cadence", "fastStart": false, "elapsedSignedAbsIdiomResult": 301, "cadenceThresholdReached": true, "terminalReturn": 1, "subrecord": { "lastTickDword": 401, "cadenceLatchWord": 0 }, "entity": { "cadenceCounterByte": 0, "visualStateByte": 16, "phaseWord": 2, "phaseSignedWord": 2, "phaseCopyWord": 2, "flag04Byte": 1, "flag1f1Byte": 1 } }
+    },
+    {
+      "id": "signed-int32-min-regular",
+      "input": { "rawActionSubstate": 8, "subrecord": { "selectorWord": 3, "periodWord": 3, "cadenceLatchWord": 0, "lastTickDword": 0 }, "entity": { "phaseWord": 0, "cadenceLimitByte": 0, "cadenceCounterByte": 1, "directionWord": 64 }, "globals": { "tickDword": 2147483648, "moduloDword": 20 } },
+      "expected": { "route": "regular-routine", "fastStart": null, "elapsedSignedAbsIdiomResult": -2147483648, "cadenceThresholdReached": false, "terminalReturn": null, "subrecord": { "lastTickDword": 0, "cadenceLatchWord": 0 }, "entity": { "cadenceCounterByte": 1, "phaseWord": 0 } }
     }
   ]
 }

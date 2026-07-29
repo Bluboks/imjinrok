@@ -51,7 +51,8 @@ state-16 writer 경로의 raw action substate는 `entity DWORD +0x88 == 8`이다
 - subrecord `WORD +0x1c == 3`
 - subrecord `WORD +0x30 != 0`
 - entity `WORD +0x1b2 == 0`
-- `abs(signed DWORD(subrecord +0x0c - global DWORD 0x007c5f80)) > 300` (300은 불통과, 301부터 통과)
+- x86 signed-absolute idiom의 `subrecord +0x0c - global DWORD 0x007c5f80` 결과가 signed 300 초과
+  (300은 불통과, 301부터 통과; `INT32_MIN` 차이는 negative로 남아 불통과)
 - entity `WORD +0x1e6`이 raw 값 `1, 4, 16, 64` 중 하나
 - unsigned global `DWORD 0x007c5f90 % 10 == 0`
 
@@ -80,8 +81,9 @@ state 11을 write한 뒤 기존 quantity increment와 helper refresh에 이른�
 `0x00455937` state 16 alternate write가 있다. 이 extractor는 state write와 increment 전 raw range를
 함께 고정한다.
 
-이는 state 10/11/16을 사람용 행동명이나 selector 자원명으로 번역하는 근거가 아니다. state 16 write를
-도달시키는 내부 조건, full resource lifecycle, timing/FPS, pivot, stats, behavior는 미확인이다.
+이는 state 10/11/16을 사람용 행동명이나 selector 자원명으로 번역하는 근거가 아니다. state 16 write의
+위 numeric gate/cadence 범위는 정적 확정이지만, raw visual state 16의 사람용 의미, full resource
+lifecycle, timing/FPS, pivot, stats, behavior는 미확인이다.
 `+0x47a`의 좁은 carried/gathered quantity 근거와 coordinate-indexed tile WORD storage add는
 [resource-quantity 비영 분기](k01-farmer-resource-branch-frames.md)에 분리해 둔다.
 
@@ -94,8 +96,9 @@ canonical EXE·generated functions/jump-tables/references/seeds·두 SPR hash/he
 두 class × 세 state × 여덟 방향 × phase 0/7, 총 96개 재현 벡터를 고정한다. 이들은 각
 direction/frame band의 endpoint 재현이며, intermediate phase 전체를 별도로 재현한 벡터는 아니다.
 [`k01-farmer-resource-work-cadence-vectors.json`](../../../analysis/fixtures/k01-farmer-resource-work-cadence-vectors.json)은
-normal fast-start, strict elapsed 300/301, cardinal/diagonal raw direction, modulo, selector/period/phase
-gate failure, latched continuation, cadence threshold 미도달/도달과 terminal latch reset을 고정한다.
+normal fast-start, strict elapsed 300/301, `INT32_MIN` signed-absolute overflow, cardinal/diagonal raw
+direction, modulo, selector/period/phase gate failure, latched continuation, cadence threshold 미도달/도달과
+terminal latch reset을 고정한다.
 
 현재 제품은 두 농부의 generic `gather`만 state 10 source layout에 의도적으로 연결한다. 이는 project
 resource name을 selector identity로 매핑하지 않으며 state 11/16 product mapping 또는 state 10/11/16의

@@ -30,12 +30,12 @@ test("recovers K01 farmer resource-work states 10, 11, and 16 with 96 boundary v
   assert.equal(report.states[7][10].directions.find(({ direction }) => direction === 65).mirrorX, true);
   assert.deepEqual(report.resourceVisualStateWrites, {
     functionEntry: "0x004562d0", selectorCases: { 1: 10, 2: 10, 3: 11 }, alternateRoutine: { functionEntry: "0x004554c0", writeVa: "0x00455937", state: 16 },
-    uncertainty: "selector human-readable resource names and the internal condition that reaches the state-16 write remain unconfirmed.",
+    uncertainty: "selector human-readable resource names, raw visual state 16 human meaning, and the full resource lifecycle remain unconfirmed.",
   });
   assert.deepEqual(report.resourceWorkActionDispatch, {
     functionEntry: "0x004554c0", switchAddress: "0x004554ec", rawActionSubstate: 8, jumpTableLabel: 7, destination: "0x00455882",
   });
-  assert.equal(report.resourceWorkCadenceContract.fastStart.elapsed, "signed absolute DWORD difference abs(subrecord +0x0c - global DWORD 0x007c5f80) > 300");
+  assert.equal(report.resourceWorkCadenceContract.fastStart.elapsed, "x86 signed-absolute DWORD idiom result for subrecord +0x0c - global DWORD 0x007c5f80 is signed-greater-than 300; INT32_MIN remains negative and fails");
   assert.equal(report.resourceWorkCadenceContract.cadence.threshold, "signed BYTE entity +0x6f >= signed BYTE entity +0x6e + 2");
   const fixture = JSON.parse(readFileSync(fixturePath, "utf8"));
   const actual = report.testVectors.map(({ internalClass, state, direction, phase, frameIndex, mirrorX }) => [internalClass, state, direction, phase, frameIndex, mirrorX]);
@@ -50,7 +50,7 @@ test("replays the scoped raw state-16 fast-start and cadence boundaries", () => 
     const actual = {
       route: replay.route,
       fastStart: replay.fastStart ?? null,
-      elapsedSignedMagnitude: replay.elapsedSignedMagnitude,
+      elapsedSignedAbsIdiomResult: replay.elapsedSignedAbsIdiomResult,
       cadenceThresholdReached: replay.cadenceThresholdReached,
       terminalReturn: replay.terminalReturn,
       subrecord: {
