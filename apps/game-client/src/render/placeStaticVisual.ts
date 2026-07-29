@@ -1,6 +1,6 @@
 import Phaser from "phaser";
 import type { FrameRef, VisualBase } from "@shared";
-import { getAssetScale, getGroundContactPlacement, REFERENCE_PX_PER_WU } from "./visualScale.js";
+import { getGroundContactPlacement, REFERENCE_PX_PER_WU } from "./visualScale.js";
 
 export interface StaticVisualPosition {
   x: number;
@@ -25,7 +25,6 @@ export function placeStaticVisual(
     ? scene.add.image(position.x, position.y, frame.textureKey, frame.frameName)
     : scene.add.image(position.x, position.y, frame.textureKey);
   const pxPerWu = options.pxPerWu ?? REFERENCE_PX_PER_WU;
-  const assetScale = getAssetScale(visual, pxPerWu);
   const placement = getGroundContactPlacement(
     visual,
     frame,
@@ -38,7 +37,7 @@ export function placeStaticVisual(
 
   image
     .setOrigin(placement.origin.x, placement.origin.y)
-    .setScale(assetScale)
+    .setScale(placement.scale)
     .setPosition(placement.position.x, placement.position.y)
     .setDepth(options.depth + (options.depthBias ?? 0));
 

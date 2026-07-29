@@ -32,6 +32,8 @@ test("frame size and source pivot changes preserve the simulation ground-contact
 
   assert.deepEqual(first.position, groundContact);
   assert.deepEqual(second.position, groundContact);
+  assert.equal(first.scale, 1);
+  assert.equal(second.scale, 1);
   assert.notDeepEqual(first.origin, second.origin);
 });
 
@@ -44,4 +46,25 @@ test("visual lift is explicit and does not change the horizontal ground contact"
   );
 
   assert.deepEqual(placement.position, { x: 100, y: 168 });
+  assert.equal(placement.scale, 1);
+});
+
+test("base and visual layers share the local ground-contact adapter across frame pivots and lifts", () => {
+  const localGroundContact = { x: 0, y: 0 };
+  const base = getGroundContactPlacement(
+    visual,
+    { textureKey: "base", size: { w: 60, h: 60 }, pivot: { anchor: { x: 30, y: 52 } } },
+    localGroundContact,
+  );
+  const layer = getGroundContactPlacement(
+    { ...visual, render: { srcPxPerWu: 16 } },
+    { textureKey: "layer", size: { w: 96, h: 120 }, pivot: { anchor: { x: 12, y: 104 }, liftPx: 5 } },
+    localGroundContact,
+  );
+
+  assert.deepEqual(base.position, localGroundContact);
+  assert.deepEqual(layer.position, { x: 0, y: -10 });
+  assert.equal(base.scale, 1);
+  assert.equal(layer.scale, 2);
+  assert.notDeepEqual(base.origin, layer.origin);
 });
