@@ -8,9 +8,10 @@
 | 구분 | 상태 | 범위 |
 | --- | --- | --- |
 | tileset·자원·환경 source file 존재와 hash | `원본 사실` | fixture의 경로·SHA-256 |
+| representative PNG/palette manifest export | `source-backed project adaptation` | hash가 고정된 frame 0 export; 원본 선택 규칙 아님 |
 | map의 `tilesetId`·visual profile·resource visual set 선택 | `프로젝트 전용` | 명시적 registry 참조와 loud validation |
 | light curve와 dawn/day/dusk/night simulation output | `의도적 적응` | opt-in fixed-tick curve |
-| K01 원본 tile layout·palette selection/timing·resource placement | `미확인` | 구현에 강제하지 않음 |
+| K01 원본 tile layout·palette selection/timing·resource placement | `미확인` | source-backed adaptation으로도 승격하지 않고 구현에 강제하지 않음 |
 
 ## 원본 source fact
 
