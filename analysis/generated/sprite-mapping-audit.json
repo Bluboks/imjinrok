@@ -20,7 +20,7 @@
     },
     {
       "path": "packages/shared/src/scenarios.ts",
-      "sha256": "a4ca02964b404265b21a73ef01ad2b838d96364561054cb4434afab79674d761"
+      "sha256": "900ff5044616725169fc2e69a6fea31a0b4660b609c854d9b530997cb8eb0f30"
     },
     {
       "path": "apps/game-client/src/scenes/SkirmishScene.ts",

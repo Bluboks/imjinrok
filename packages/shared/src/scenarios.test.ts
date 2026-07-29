@@ -500,11 +500,7 @@ test("K01 opening adapter exposes source provenance without upgrading unresolved
       { originalClass: 49, rawOwnerWord: 0 },
       { originalClass: 48, rawOwnerWord: 0 },
       { originalClass: 51, rawOwnerWord: 0 },
-      { originalClass: 2, rawOwnerWord: 0 },
       { originalClass: 11, rawOwnerWord: 0 },
-      { originalClass: 4, rawOwnerWord: 0 },
-      { originalClass: 7, rawOwnerWord: 0 },
-      { originalClass: 7, rawOwnerWord: 0 },
       { originalClass: 11, rawOwnerWord: 0 },
       { originalClass: 31, rawOwnerWord: 1 },
       { originalClass: 31, rawOwnerWord: 1 },
@@ -518,6 +514,24 @@ test("K01 opening adapter exposes source provenance without upgrading unresolved
       { originalClass: 63, rawOwnerWord: 1 },
       { originalClass: 63, rawOwnerWord: 1 },
       { originalClass: 63, rawOwnerWord: 1 },
+    ],
+  );
+  assert.deepEqual(
+    k01SourceOpeningAdapter
+      .filter(
+        ({ rawOwnerWord, originalClass }) =>
+          rawOwnerWord === 0 && [2, 4, 7].includes(originalClass),
+      )
+      .map(({ originalClass, projectKind, identityMapping }) => ({
+        originalClass,
+        projectKind,
+        identityMapping,
+      })),
+    [
+      { originalClass: 2, projectKind: "swordsman", identityMapping: "exact-static-identity-source" },
+      { originalClass: 4, projectKind: "archer", identityMapping: "exact-static-identity-source" },
+      { originalClass: 7, projectKind: "villager", identityMapping: "exact-static-identity-source" },
+      { originalClass: 7, projectKind: "villager", identityMapping: "exact-static-identity-source" },
     ],
   );
 });

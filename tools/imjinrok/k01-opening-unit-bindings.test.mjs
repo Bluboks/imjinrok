@@ -20,10 +20,15 @@ test("recovers all six K01 class-12/13 opening records and their proven project 
 
   assert.equal(report.evidenceStatus, "exact-static-identity-source");
   assert.deepEqual(report.identities, [
+    { internalClass: 7, originalGameplayName: "조선 농부", sourcePathNormalized: "char/farmerk.spr", projectKind: "villager" },
     { internalClass: 12, originalGameplayName: "일본 조총병", sourcePathNormalized: "char/gunj1.spr", projectKind: "japanese-gunner" },
     { internalClass: 13, originalGameplayName: "일본 사무라이", sourcePathNormalized: "char/horseswordj1.spr", projectKind: "japanese-samurai" },
   ]);
   assert.deepEqual(report.bindings, K01_PROVEN_OPENING_UNIT_BINDINGS);
+  assert.deepEqual(report.supplementalExactIdentityBindings, [
+    { originalClass: 7, rawOwnerWord: 0, sourcePosition: { x: 7, y: 6 }, projectKind: "villager", identityMapping: "exact-static-identity-source" },
+    { originalClass: 7, rawOwnerWord: 0, sourcePosition: { x: 8, y: 6 }, projectKind: "villager", identityMapping: "exact-static-identity-source" },
+  ]);
 });
 
 test("rejects a tampered K01 opening class binding", () => {

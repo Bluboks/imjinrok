@@ -46,6 +46,12 @@ K01 owner 1의 해당 active record는 정확히 여섯 개다.
 
 `packages/shared/src/scenarios.ts`의 `k01SourceOpeningAdapter`는 local owner `0`와 enemy owner
 `1` record 모두에 original class, raw owner, offset, project kind, identity status를 보존한다.
+`identityMapping`은 class→project kind→source identity만 기록하며 animation completeness를 뜻하지
+않는다. 따라서 class 2 조선 창병, class 4 조선 궁수, class 7 조선 농부도 각각
+`swordsman`·`archer`·`villager`의 `exact-static-identity-source`다. class 7은 공유
+`farmerk.spr`만으로 정체를 고른 것이 아니라 canonical catalog의 class 7 `조선 농부`와 K01 map의
+owner 0 class-7 record `(7,6)`, `(8,6)`를 focused vector에서 함께 검사한다.
+
 일반 `StartingUnitDefinition[]`은 이 K01 전용 표에서 파생하므로 원본 전용 필드를 generic scenario
 타입에 추가하지 않는다.
 
@@ -64,12 +70,12 @@ node --test tools/imjinrok/k01-opening-unit-bindings.test.mjs
 
 1. class 31 일본 농부와 class 16 일본 무녀는 현재 `japanese-gunner` proxy다. 고유 kind·frame
    mapping을 만들지 않는다.
-2. local class 11 조선 승병과 class 2/4/7의 current project kind는 proxy다. 특히 class 2의
-   일부 이동 근거를 다른 K01 local identity에 일반화하지 않는다.
-3. class 3 일본 창병은 identity/source binding만 유지하며, class 12·13처럼 K01 core frame
-   states가 정적 확정된 것은 아니다.
-4. K01 시작 building proxy class 48/49/51, 58/60, 63은 이 단위 밖이다. 자원·state·project kind를
+2. local class 11 조선 승병과 genuinely mismatched K01 start building class 48/49/51, 58/60,
+   63은 proxy다. 자원·state·project kind를
    시각적 유사성으로 교체하지 않는다.
+3. class 2는 일반 이동만 정적 확정·이식했고, idle·attack과 state 2 project policy는 별도다.
+   class 3 일본 창병과 class 4 조선 궁수·class 7 조선 농부는 identity/source binding만
+   `exact-static-identity-source`이며 remaining animation states는 current audit에서 미확정이다.
 
 class 12 state 2 policy, class 12·13의 tick→FPS·pivot, 모든 unit stats·combat behavior, raw owner의
 사람용 의미와 이후 movement/placement는 계속 별도 근거가 필요하다.

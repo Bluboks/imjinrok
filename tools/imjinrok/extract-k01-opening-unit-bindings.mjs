@@ -25,6 +25,12 @@ export const K01_PROVEN_OPENING_UNIT_BINDINGS = [
 
 const EXPECTED_IDENTITIES = [
   {
+    internalClass: 7,
+    originalGameplayName: "조선 농부",
+    sourcePathNormalized: "char/farmerk.spr",
+    projectKind: "villager",
+  },
+  {
     internalClass: 12,
     originalGameplayName: "일본 조총병",
     sourcePathNormalized: "char/gunj1.spr",
@@ -36,6 +42,11 @@ const EXPECTED_IDENTITIES = [
     sourcePathNormalized: "char/horseswordj1.spr",
     projectKind: "japanese-samurai",
   },
+];
+
+const EXPECTED_CLASS_7_OPENING_RECORDS = [
+  { originalClass: 7, rawOwnerWord: 0, sourcePosition: { x: 7, y: 6 } },
+  { originalClass: 7, rawOwnerWord: 0, sourcePosition: { x: 8, y: 6 } },
 ];
 
 export function extractK01OpeningUnitBindings({
@@ -95,6 +106,21 @@ export function extractK01OpeningUnitBindings({
   assertEqual(sourceRecords.length, 6, "K01 owner-1 class-12/13 source record count");
   assertBindings(bindings, "provided K01 opening bindings");
   assertBindings(sourceRecordsToBindings(sourceRecords), "K01 map class-12/13 source records");
+  const class7SourceRecords = extractMapEntities(mapBuffer, header).entities
+    .filter(
+      (entity) =>
+        entity.active && entity.ownerId === 0 && entity.typeId === 7,
+    )
+    .map((entity) => ({
+      originalClass: entity.typeId,
+      rawOwnerWord: entity.ownerId,
+      sourcePosition: { x: entity.x, y: entity.y },
+    }));
+  assertEqual(
+    JSON.stringify(class7SourceRecords),
+    JSON.stringify(EXPECTED_CLASS_7_OPENING_RECORDS),
+    "K01 map class-7 source records",
+  );
 
   return {
     evidenceStatus: "exact-static-identity-source",
@@ -104,6 +130,11 @@ export function extractK01OpeningUnitBindings({
     },
     identities,
     bindings: [...bindings],
+    supplementalExactIdentityBindings: class7SourceRecords.map((record) => ({
+      ...record,
+      projectKind: "villager",
+      identityMapping: "exact-static-identity-source",
+    })),
   };
 }
 
