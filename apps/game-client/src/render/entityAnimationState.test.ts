@@ -24,19 +24,18 @@ const unit = (
 });
 
 const carryingFood = { kind: "food", amount: 1 } as const;
-const moveOrder = { type: "move", target: { x: 2, y: 3 } } as const;
 const gatherOrder = { type: "gather", resourceId: "rice", target: { x: 2, y: 3 } } as const;
 const repairOrder = { type: "repair", targetUnitId: "damaged-building" } as const;
 const buildOrder = { type: "build", building: "house", target: { x: 2, y: 3 } } as const;
 
-test("carried resources select carried movement and idle states independently of order type", () => {
+test("stationary gathering takes priority over carried idle while moving gathering keeps carried movement", () => {
   const visual = visualWithStates("carry", "carry-idle", "move", "walk", "gather", "idle");
 
   assert.equal(
     getEntityAnimationStateKey(
       unit({
         carriedResource: carryingFood,
-        currentOrder: moveOrder,
+        currentOrder: gatherOrder,
         movementTarget: { x: 2, y: 3 },
       }),
       visual,
@@ -44,8 +43,8 @@ test("carried resources select carried movement and idle states independently of
     "carry",
   );
   assert.equal(
-    getEntityAnimationStateKey(unit({ carriedResource: carryingFood, currentOrder: moveOrder }), visual),
-    "carry-idle",
+    getEntityAnimationStateKey(unit({ carriedResource: carryingFood, currentOrder: gatherOrder }), visual),
+    "gather",
   );
 });
 
@@ -60,6 +59,26 @@ test("carried-resource state selection falls back to existing movement and idle 
     "move",
   );
   assert.equal(getEntityAnimationStateKey(unit({ carriedResource: carryingFood }), visual), "idle");
+});
+
+test("stationary gathering falls back when a visual has no gather state", () => {
+  const visualWithCarryIdle = visualWithStates("carry-idle", "idle");
+  const visualWithOnlyIdle = visualWithStates("idle");
+
+  assert.equal(
+    getEntityAnimationStateKey(
+      unit({ carriedResource: carryingFood, currentOrder: gatherOrder }),
+      visualWithCarryIdle,
+    ),
+    "carry-idle",
+  );
+  assert.equal(
+    getEntityAnimationStateKey(
+      unit({ carriedResource: carryingFood, currentOrder: gatherOrder }),
+      visualWithOnlyIdle,
+    ),
+    "idle",
+  );
 });
 
 test("stationary repair and build states take priority over carried-resource idle states", () => {
