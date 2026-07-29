@@ -409,7 +409,7 @@ export const unitDefinitions = {
   },
   villager: {
     id: "villager",
-    displayName: "농민",
+    displayName: "조선 농부",
     category: "worker",
     actionIds: workerActionIds,
     cost: { food: 50 },

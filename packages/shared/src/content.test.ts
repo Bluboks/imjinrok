@@ -29,6 +29,7 @@ test("uses statically recovered names for uniquely bound original sprites", () =
       ryuSeongRyong:
         unitDefinitions["ryu-seong-ryong"].displayName,
       swordsman: unitDefinitions.swordsman.displayName,
+      villager: unitDefinitions.villager.displayName,
       koreanMonk: unitDefinitions["korean-monk"].displayName,
       townCenter: unitDefinitions["town-center"].displayName,
     },
@@ -52,6 +53,7 @@ test("uses statically recovered names for uniquely bound original sprites", () =
       royalCart: "조선 선조의 어가",
       ryuSeongRyong: "조선 유성룡",
       swordsman: "조선 창병",
+      villager: "조선 농부",
       koreanMonk: "조선 승병",
       townCenter: "조선 본영",
     },
