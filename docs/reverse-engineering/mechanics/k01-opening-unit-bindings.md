@@ -49,8 +49,10 @@ K01 owner 1의 해당 active record는 정확히 여섯 개다.
 `packages/shared/src/scenarios.ts`의 `k01SourceOpeningAdapter`는 local owner `0`와 enemy owner
 `1` record 모두에 original class, raw owner, offset, project kind, identity status를 보존한다.
 `identityMapping`은 class→project kind→source identity만 기록하며 animation completeness를 뜻하지
-않는다. 따라서 class 2 조선 창병, class 4 조선 궁수, class 7 조선 농부도 각각
-`swordsman`·`archer`·`villager`의 `exact-static-identity-source`다. class 7은 공유
+않는다. class 2 조선 창병, class 3 일본 창병, class 4 조선 궁수는 상태 8/1/4/7의 핵심
+frame·방향·mirror까지 정적 확정·이식했지만, 상태 2는 정적으로 복원한 alternate movement를
+프로젝트에 매핑하지 않고 격리한다. class 7 조선 농부는 `villager`의
+`exact-static-identity-source`만 확정했다. class 7은 공유
 `farmerk.spr`만으로 정체를 고른 것이 아니라 canonical catalog의 class 7 `조선 농부`와 K01 map의
 owner 0 class-7 record `(7,6)`, `(8,6)`를 focused vector에서 함께 검사한다.
 
@@ -77,15 +79,15 @@ node --test tools/imjinrok/k01-opening-unit-bindings.test.mjs tools/imjinrok/k01
 
 ## 남은 우선순위와 경계
 
-이 여섯 binding으로 K01 전체 unit mapping 또는 original simulation parity를 주장하지 않는다.
+이 시작 binding으로 K01 전체 unit mapping 또는 original simulation parity를 주장하지 않는다.
 
-1. class 31 일본 농부는 현재 `japanese-gunner` proxy다. creation-default branch와 고유 kind·frame
-   mapping을 만들지 않는다.
-2. genuinely mismatched K01 start building class 48/49/51, 58/60, 63은 proxy다. 자원·state·project kind를
+1. class 31 일본 농부의 creation-default branch와 source-backed core-state evidence를 먼저
+   확보한다. 그 전에는 `japanese-gunner` proxy를 유지한다.
+2. class 7 조선 농부의 core states를 별도 정적 분석한다. 현재는 identity/source만 확정했다.
+3. class 2/3/4 state 2의 project policy를 결정한다. alternate movement frame은 정적 확정했지만
+   제품에 매핑하지 않았다.
+4. genuinely mismatched K01 start building class 48/49/51, 58/60, 63은 proxy다. 자원·state·project kind를
    시각적 유사성으로 교체하지 않는다.
-3. class 2는 일반 이동만 정적 확정·이식했고, idle·attack과 state 2 project policy는 별도다.
-   class 3 일본 창병과 class 4 조선 궁수·class 7 조선 농부는 identity/source binding만
-   `exact-static-identity-source`이며 remaining animation states는 current audit에서 미확정이다.
 
-class 12 state 2 policy, class 12·13의 tick→FPS·pivot, 모든 unit stats·combat behavior, raw owner의
+class 12 state 2 policy, class 11·12·13·16의 tick→FPS·pivot, 모든 unit stats·combat behavior, raw owner의
 사람용 의미와 이후 movement/placement는 계속 별도 근거가 필요하다.

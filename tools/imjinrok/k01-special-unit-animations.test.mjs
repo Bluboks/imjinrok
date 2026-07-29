@@ -56,8 +56,10 @@ test("replays exact normal direction frame and mirror selection for the scoped s
 test("rejects tampered canonical function, initializer, map, and source sprite evidence", (t) => {
   const temporaryDirectory = mkdtempSync(join(tmpdir(), "k01-special-unit-"));
   t.after(() => rmSync(temporaryDirectory, { recursive: true, force: true }));
+  let artifactIndex = 0;
   const copyJson = (source, mutate) => {
-    const path = join(temporaryDirectory, `${Math.random()}.json`);
+    const path = join(temporaryDirectory, `artifact-${artifactIndex}.json`);
+    artifactIndex += 1;
     const value = JSON.parse(readFileSync(source, "utf8"));
     mutate(value);
     writeFileSync(path, `${JSON.stringify(value)}\n`);

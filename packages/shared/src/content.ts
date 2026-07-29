@@ -300,10 +300,12 @@ const japaneseGunnerAdaptedGameplay = {
 const koreanMonkAdaptedGameplay = {
   category: "infantry",
   actionIds: infantryActionIds,
+  cost: { food: 60, gold: 20 },
+  trainTimeTicks: 300,
   populationCost: 1,
   footprint: { width: 1, height: 1, blocksMovement: true },
   baseAttributes: { health: 55, mana: 0, movementSpeed: 4.0 },
-  portraitGlyph: "KM",
+  portraitGlyph: "Sp",
   portraitColor: 0x9dada2,
   groupBorderColor: 0xb7c4bb,
   combat: { damage: 9, range: 1.5, cooldownTicks: 18, aggroRange: 7 },

@@ -74,7 +74,11 @@ test("uses statically recovered names for uniquely bound original sprites", () =
   );
 });
 
-test("new Japanese identity kinds preserve their explicit project gameplay adapters", () => {
+test("new source identity kinds preserve their explicit project gameplay adapters", () => {
+  assert.deepEqual(
+    omitIdentity(unitDefinitions["korean-monk"]),
+    omitIdentity(unitDefinitions.swordsman),
+  );
   assert.deepEqual(
     omitIdentity(unitDefinitions["japanese-samurai"]),
     omitIdentity(unitDefinitions["japanese-swordsman"]),
