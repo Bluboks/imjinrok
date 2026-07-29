@@ -20,7 +20,7 @@ mirror와 no-selection seven-slot surface를 다시 이름 붙이는 문서가 �
 - EXE: `original/imjinrok2/imjinrok2.exe`, SHA-256
   `25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e`
 - structured reference export: SHA-256
-  `df11ff3713988ef22b3390b5b0ae7b4a87464b5de547a4866e1c8ec8a0bcaf4c`
+  `f64cfa6f04bc39573552f42a8b7bdd5b08fea1ba774d05865162d1d80daaf9a5`
 - 검증 추출기: `tools/imjinrok/extract-gameplay-selection-command-panel.mjs`
 - 재현 fixture: `analysis/fixtures/gameplay-selection-command-panel-vectors.json`
 - focused test: `tools/imjinrok/gameplay-selection-command-panel.test.mjs`

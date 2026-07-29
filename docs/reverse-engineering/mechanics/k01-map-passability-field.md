@@ -49,8 +49,8 @@ SHA-256과 `sourceSha256`을 검사하며, 둘 다 위 EXE SHA-256과 같지 않
 
 | 산출물 | 파일 SHA-256 | `sourceSha256` |
 | --- | --- | --- |
-| `analysis/generated/imjinrok2/functions.json` | `c10ea2de1f4998411d52443419c9a7f52ff7f9c18e79bd4115ba197d2f5bebc3` | `25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e` |
-| `analysis/generated/imjinrok2/references.json` | `df11ff3713988ef22b3390b5b0ae7b4a87464b5de547a4866e1c8ec8a0bcaf4c` | `25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e` |
+| `analysis/generated/imjinrok2/functions.json` | `7e071fdfe425d22447780c265fe1d3fd271a1bedd1773682bebcb8ddc6d2e16e` | `25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e` |
+| `analysis/generated/imjinrok2/references.json` | `f64cfa6f04bc39573552f42a8b7bdd5b08fea1ba774d05865162d1d80daaf9a5` | `25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e` |
 
 다음 여섯 함수는 `functions.json`의 entry/body range/body size/instruction SHA-256/caller 또는 callee
 set을 정확히 비교하고, EXE에서 같은 body range의 raw SHA-256도 다시 계산한다. 따라서 같은 EXE 안에서

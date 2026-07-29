@@ -22,7 +22,7 @@ resource 또는 post-initialization alias writer의 전역 탐색은 범위 밖�
 - 원본 SPR: `original/imjinrok2/fnt/button.spr`, SHA-256
   `cfe7bab02f2cb8a1f97a3161075e617ace22d6ecf5a976546263a7c67e4efbb4`
 - structured reference export: `analysis/generated/imjinrok2/references.json`, SHA-256
-  `df11ff3713988ef22b3390b5b0ae7b4a87464b5de547a4866e1c8ec8a0bcaf4c`
+  `f64cfa6f04bc39573552f42a8b7bdd5b08fea1ba774d05865162d1d80daaf9a5`
 - extractor: `tools/imjinrok/extract-command-grid-cell-size-binding.mjs`
 - fixture: `analysis/fixtures/command-grid-cell-size-binding-vectors.json`
 - focused test: `tools/imjinrok/command-grid-cell-size-binding.test.mjs`

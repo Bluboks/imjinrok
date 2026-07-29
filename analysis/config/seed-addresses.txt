@@ -105,6 +105,7 @@
 0x0043e620 campaign-stage-selection-controller
 0x004495e0 common-ui-control-handler
 0x0045f9c0 application-state-loop
+0x0045f0f0 global-mask-runtime-copy
 0x0045bd00 entity-type-definition-writer
 0x0045bf30 attack-stat-selector
 0x0045bf40 defense-stat-selector

@@ -22,11 +22,11 @@ const DEFAULT_REFERENCES_PATH = "analysis/generated/imjinrok2/references.json";
 export const EXPECTED_EXECUTABLE_SHA256 =
   "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e";
 export const EXPECTED_SEEDS_SHA256 =
-  "325cef518b8ad459d2d1ddfefd3cb5dc960dba060e75a291736049d569b4a329";
+  "8e7c8821e9c84c5d0877bb977b119b3b878271502b36bf75e7426b570507bfb7";
 export const EXPECTED_FUNCTIONS_SHA256 =
-  "c10ea2de1f4998411d52443419c9a7f52ff7f9c18e79bd4115ba197d2f5bebc3";
+  "7e071fdfe425d22447780c265fe1d3fd271a1bedd1773682bebcb8ddc6d2e16e";
 export const EXPECTED_REFERENCES_SHA256 =
-  "df11ff3713988ef22b3390b5b0ae7b4a87464b5de547a4866e1c8ec8a0bcaf4c";
+  "f64cfa6f04bc39573552f42a8b7bdd5b08fea1ba774d05865162d1d80daaf9a5";
 
 const QUESTION =
   "FUN_0043c300의 player-scoped production-filter queue gate는 어떤 입력·HUD control·writer·reset 경로를 가지며, FUN_00428580/FUN_0047fe10이 우선 추출하는 action/type 집합은 사용자가 기억한 unit-production queue의 global hero-priority toggle과 정확히 일치하는가?";

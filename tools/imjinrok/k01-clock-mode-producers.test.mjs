@@ -32,8 +32,8 @@ test("binds K01 clock-mode, selector forwarder, and feedback evidence to the ori
   assert.equal(report.implementationStatus, "none");
   assert.equal(report.source.sha256, "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e");
   assert.deepEqual(report.generatedArtifacts, {
-    functions: { path: paths.functionsPath, byteLength: 1467804, sha256: "c10ea2de1f4998411d52443419c9a7f52ff7f9c18e79bd4115ba197d2f5bebc3" },
-    references: { path: paths.referencesPath, byteLength: 17206553, sha256: "df11ff3713988ef22b3390b5b0ae7b4a87464b5de547a4866e1c8ec8a0bcaf4c" },
+    functions: { path: paths.functionsPath, byteLength: 1468333, sha256: "7e071fdfe425d22447780c265fe1d3fd271a1bedd1773682bebcb8ddc6d2e16e" },
+    references: { path: paths.referencesPath, byteLength: 17206569, sha256: "f64cfa6f04bc39573552f42a8b7bdd5b08fea1ba774d05865162d1d80daaf9a5" },
     jumpTables: { path: paths.jumpTablesPath, byteLength: 607724, sha256: "0ae517eb172f61b974ca7a4411e64c1cc42065c462ed53b3065ab2da633dfe2f" },
   });
   assert.equal(report.functionEvidence.length, 11);

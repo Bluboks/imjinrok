@@ -12,13 +12,13 @@
   "imageBase": "0x00400000",
   "minimumAddress": "0x00400000",
   "maximumAddress": "0xffdfffff",
-  "functionCount": 2448,
+  "functionCount": 2449,
   "stringCount": 1545,
   "referenceCount": 57572,
   "computedJumpCount": 268,
   "jumpTableCount": 234,
-  "seedCount": 198,
-  "seedFunctionCount": 190,
+  "seedCount": 199,
+  "seedFunctionCount": 191,
   "memoryBlocks": [
     {
       "name": "Headers",

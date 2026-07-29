@@ -20,9 +20,9 @@ const DEFAULT_REFERENCES_PATH = "analysis/generated/imjinrok2/references.json";
 export const EXPECTED_EXECUTABLE_SHA256 =
   "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e";
 export const EXPECTED_FUNCTIONS_SHA256 =
-  "c10ea2de1f4998411d52443419c9a7f52ff7f9c18e79bd4115ba197d2f5bebc3";
+  "7e071fdfe425d22447780c265fe1d3fd271a1bedd1773682bebcb8ddc6d2e16e";
 export const EXPECTED_REFERENCES_SHA256 =
-  "df11ff3713988ef22b3390b5b0ae7b4a87464b5de547a4866e1c8ec8a0bcaf4c";
+  "f64cfa6f04bc39573552f42a8b7bdd5b08fea1ba774d05865162d1d80daaf9a5";
 
 const QUESTION =
   "`FUN_004475a0`의 refuted call 0x00447b23→FUN_004567c0을 제외한 다른 draw/input branches 가운데, 어떤 owner·resource·slot lifecycle이 gameplay 하단 HUD에 지속적으로 남는 selection/production surface를 구성하며, 그 producer/consumer 경계가 실제 production action 또는 current project construction/production/research view data와 의미상 결합되는가?";

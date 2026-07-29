@@ -58,6 +58,7 @@
 | `extract-k01-mission-result-lifecycle.mjs`, `k01-mission-result-lifecycle.test.mjs` | 유지 | K01 general/영웅 loss latch, beacon bypass, strict wrapped timer, dispatcher pre-gate/stage와 distinct raw-tick final commit 추출·재현; raw clock·result transition·identity mapping은 포함하지 않음 |
 | `extract-k01-final-result-transition.mjs`, `k01-final-result-transition.test.mjs` | 유지 | result state `0x18/0x1a` 이후 shared teardown, win/loss SPR·YAV 초기화, unsigned cadence/completion, `0x8c→0x96` relay와 external/stage final route 추출·재현; phase→SPR frame, timer reset, 프로젝트 24 Hz/result policy mapping은 포함하지 않음 |
 | `extract-k01-mission-timer-reset.mjs`, `k01-mission-timer-reset.test.mjs` | 유지 | 표준 main state 1→broad `REP STOSD`→stage 1 K01 map copy의 timer zero·반개구간·순서를 sparse 입력으로 추출·재현; 다른 reset topology와 프로젝트 mapping은 포함하지 않음 |
+| `extract-k01-global-mask-boundary.mjs`, `k01-global-mask-boundary.test.mjs` | 유지 | global mask initial/copy/direct-reference boundary; alias/computed/loader/runtime mutation 부재는 주장하지 않음 |
 | `extract-building-state-pilot.mjs`, `building-state-pilot.test.mjs` | 유지 | 조선 본영·클래스 49·슬롯 141의 건설 진행도와 정상·반파 본체 프레임 정적 파일럿 |
 | `extract-entity-type-catalog.mjs`, `entity-type-catalog.test.mjs` | 유지 | 클래스 1~95의 원본 이름·슬롯·기본 프레임·flags·SPR 경로 전수 추출과 결정론 검증 |
 | `extract-beacon-state-pilot.mjs`, `beacon-state-pilot.test.mjs` | 유지 | 조선 봉화대·클래스 52·`firehousek.spr` 정체와 건설·정상·반파 본체 프레임 정적 파일럿 |

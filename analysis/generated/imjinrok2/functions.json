@@ -16714,6 +16714,23 @@
       "callees": ["0x004ace21"]
     },
     {
+      "entry": "0x0045f0f0",
+      "name": "FUN_0045f0f0",
+      "nameSource": "DEFAULT",
+      "prototype": "undefined FUN_0045f0f0()",
+      "callingConvention": "unknown",
+      "returnType": "undefined",
+      "parameterCount": 0,
+      "external": false,
+      "thunk": false,
+      "bodySize": 13,
+      "instructionCount": 3,
+      "instructionSha256": "bdd071fbd2563105b8984a1b3a67630fe46022ea2185dfc5d2facaa7d3e2bd1e",
+      "bodyRanges": ["0x0045f0f0-0x0045f0fc"],
+      "callers": [],
+      "callees": []
+    },
+    {
       "entry": "0x0045f190",
       "name": "FUN_0045f190",
       "nameSource": "DEFAULT",

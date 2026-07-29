@@ -43,7 +43,7 @@ canonical 분석을 깨끗한 임시 Ghidra 프로젝트로 두 번 전체 생�
 | --- | --- |
 | `SHA256SUMS` | `b74f06eca72e5d22695a907bd20b9f4dd459ead0d7224b0f05dbfbed9540bb3d` |
 | `manifest.json` | `f5f2d972d9447ecf052ce71359f02874bc081c63c19ff1fa5783f2fd62ed48dd` |
-| `seeds.json` | `eb559198f7c9082ff9402d185a679f73b4f723208a977796f0ca9340490c2b1e` |
+| `seeds.json` | `8e7c8821e9c84c5d0877bb977b119b3b878271502b36bf75e7426b570507bfb7` |
 
 현재 canonical count는 seed 주소 149개, 포함 함수 148개다.
 

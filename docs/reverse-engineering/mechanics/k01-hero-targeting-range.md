@@ -23,7 +23,7 @@ low WORD 활성 상태와 raw category/flag 조건을 검사한다. `0x00439770`
 현재 `seeds.json` SHA-256은
 `f01e8aa183df722b2e5412d98dff6a730d995c8588808b814e7b457e77bf0471`,
 `functions.json` SHA-256은
-`c10ea2de1f4998411d52443419c9a7f52ff7f9c18e79bd4115ba197d2f5bebc3`다.
+`7e071fdfe425d22447780c265fe1d3fd271a1bedd1773682bebcb8ddc6d2e16e`다.
 독립 추출기는 `tools/imjinrok/extract-k01-hero-targeting-range.mjs`, 재현 테스트는
 `tools/imjinrok/k01-hero-targeting-range.test.mjs`다. 추출기는 33개 관련 seed 함수,
 35개 direct call edge, 17개 VA/raw-byte anchor를 요구하고 입력 해시·분석 해시·누락

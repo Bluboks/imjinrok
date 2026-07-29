@@ -31,7 +31,7 @@ callback이 아니라 message-loop polling이므로 accumulator·resampling·배
 | --- | --- |
 | 원본 EXE SHA-256 | `25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e` |
 | `seeds.json` SHA-256 | `88d91d582ac0b864cb3f0448e2600df16878351bde1c7c91e6e96465df2b49f9` |
-| `references.json` SHA-256 | `df11ff3713988ef22b3390b5b0ae7b4a87464b5de547a4866e1c8ec8a0bcaf4c` |
+| `references.json` SHA-256 | `f64cfa6f04bc39573552f42a8b7bdd5b08fea1ba774d05865162d1d80daaf9a5` |
 | `jump-tables.json` SHA-256 | `0ae517eb172f61b974ca7a4411e64c1cc42065c462ed53b3065ab2da633dfe2f` |
 | 독립 추출기 | `tools/imjinrok/extract-k01-projectile-pool-cadence.mjs` |
 | 재현 테스트 | `tools/imjinrok/k01-projectile-pool-cadence.test.mjs` |

@@ -22,8 +22,8 @@
 | 입력 | bytes / SHA-256 | 역할 |
 | --- | --- | --- |
 | `original/imjinrok2/imjinrok2.exe` | `25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e` | 원본 코드·vtable·전역 데이터 주소 |
-| `analysis/generated/imjinrok2/functions.json` | 1,467,804 / `c10ea2de1f4998411d52443419c9a7f52ff7f9c18e79bd4115ba197d2f5bebc3` | 함수 범위와 instruction hash |
-| `analysis/generated/imjinrok2/references.json` | 17,206,553 / `df11ff3713988ef22b3390b5b0ae7b4a87464b5de547a4866e1c8ec8a0bcaf4c` | 직접 call edge |
+| `analysis/generated/imjinrok2/functions.json` | 1,468,333 / `7e071fdfe425d22447780c265fe1d3fd271a1bedd1773682bebcb8ddc6d2e16e` | 함수 범위와 instruction hash |
+| `analysis/generated/imjinrok2/references.json` | 17,206,569 / `f64cfa6f04bc39573552f42a8b7bdd5b08fea1ba774d05865162d1d80daaf9a5` | 직접 call edge |
 | `analysis/generated/imjinrok2/jump-tables.json` | 607,724 / `0ae517eb172f61b974ca7a4411e64c1cc42065c462ed53b3065ab2da633dfe2f` | main-state와 K01 stage switch |
 
 `tools/imjinrok/extract-k01-clock-mode-producers.mjs`는 위 세 generated artifact의 exact byte

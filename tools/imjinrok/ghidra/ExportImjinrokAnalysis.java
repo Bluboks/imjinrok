@@ -71,11 +71,14 @@ public class ExportImjinrokAnalysis extends GhidraScript {
 
         Files.createDirectories(outputDirectory);
 
+        List<SeedEntry> seeds = readSeedEntries(seedFile);
+        ensureSeedFunctions(seeds);
+
         DocumentResult functions = buildFunctionsDocument(sourceSha256);
         DocumentResult strings = buildStringsDocument(sourceSha256);
         DocumentResult references = buildReferencesDocument(sourceSha256);
         JumpTableDocumentResult jumpTables = buildJumpTablesDocument(sourceSha256);
-        SeedDocumentResult seeds = buildSeedsDocument(sourceSha256, seedFile);
+        SeedDocumentResult seedsDocument = buildSeedsDocument(sourceSha256, seeds);
         String manifest = buildManifestDocument(
             sourceSha256,
             sourceId,
@@ -84,8 +87,8 @@ public class ExportImjinrokAnalysis extends GhidraScript {
             references.recordCount,
             jumpTables.candidateCount,
             jumpTables.tableCount,
-            seeds.seedCount,
-            seeds.functionCount
+            seedsDocument.seedCount,
+            seedsDocument.functionCount
         );
 
         writeDocument(outputDirectory.resolve("manifest.json"), manifest);
@@ -93,13 +96,13 @@ public class ExportImjinrokAnalysis extends GhidraScript {
         writeDocument(outputDirectory.resolve("strings.json"), strings.json);
         writeDocument(outputDirectory.resolve("references.json"), references.json);
         writeDocument(outputDirectory.resolve("jump-tables.json"), jumpTables.json);
-        writeDocument(outputDirectory.resolve("seeds.json"), seeds.json);
+        writeDocument(outputDirectory.resolve("seeds.json"), seedsDocument.json);
 
         println(
             "Exported " + functions.recordCount + " functions, " +
             strings.recordCount + " strings, " + references.recordCount + " references, " +
             jumpTables.candidateCount + " computed jumps, " + jumpTables.tableCount +
-            " recovered jump tables, and " + seeds.seedCount + " seeds to " + outputDirectory
+            " recovered jump tables, and " + seedsDocument.seedCount + " seeds to " + outputDirectory
         );
     }
 
@@ -523,8 +526,7 @@ public class ExportImjinrokAnalysis extends GhidraScript {
         json.append(padding).append("}");
     }
 
-    private SeedDocumentResult buildSeedsDocument(String sourceSha256, Path seedFile) throws Exception {
-        List<SeedEntry> seeds = readSeedEntries(seedFile);
+    private SeedDocumentResult buildSeedsDocument(String sourceSha256, List<SeedEntry> seeds) throws Exception {
         Map<String, Function> uniqueFunctions = new LinkedHashMap<>();
 
         for (SeedEntry seed : seeds) {
@@ -581,6 +583,26 @@ public class ExportImjinrokAnalysis extends GhidraScript {
         json.append("  ]\n");
         json.append("}\n");
         return new SeedDocumentResult(json.toString(), seeds.size(), sortedFunctions.size());
+    }
+
+    private void ensureSeedFunctions(List<SeedEntry> seeds) throws Exception {
+        for (SeedEntry seed : seeds) {
+            if (findContainingFunction(seed.address) != null) {
+                continue;
+            }
+            if (currentProgram.getListing().getInstructionAt(seed.address) == null) {
+                throw new IllegalArgumentException(
+                    "Seed does not start at an instruction and is not in a function: " +
+                    formatAddress(seed.address)
+                );
+            }
+            Function function = createFunction(seed.address, null);
+            if (function == null || !function.getEntryPoint().equals(seed.address)) {
+                throw new IllegalStateException(
+                    "Could not create a function for seed " + formatAddress(seed.address)
+                );
+            }
+        }
     }
 
     private void appendFunctionSummary(StringBuilder json, Function function, int indent) throws Exception {

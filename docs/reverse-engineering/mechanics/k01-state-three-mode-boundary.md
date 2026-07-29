@@ -21,8 +21,8 @@ state `24/26`의 후속 consumer는 이 범위 밖이다.
 | 입력 | bytes / SHA-256 | 용도 |
 | --- | --- | --- |
 | `original/imjinrok2/imjinrok2.exe` | 843,833 / `25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e` | 원본 x86 bytes와 VA→raw offset |
-| `analysis/generated/imjinrok2/functions.json` | 1,467,804 / `c10ea2de1f4998411d52443419c9a7f52ff7f9c18e79bd4115ba197d2f5bebc3` | function range·instruction hash·closure entry universe |
-| `analysis/generated/imjinrok2/references.json` | 17,206,553 / `df11ff3713988ef22b3390b5b0ae7b4a87464b5de547a4866e1c8ec8a0bcaf4c` | canonical call/reference relation과 direct write set |
+| `analysis/generated/imjinrok2/functions.json` | 1,468,333 / `7e071fdfe425d22447780c265fe1d3fd271a1bedd1773682bebcb8ddc6d2e16e` | function range·instruction hash·closure entry universe |
+| `analysis/generated/imjinrok2/references.json` | 17,206,569 / `f64cfa6f04bc39573552f42a8b7bdd5b08fea1ba774d05865162d1d80daaf9a5` | canonical call/reference relation과 direct write set |
 | `analysis/generated/imjinrok2/jump-tables.json` | 607,724 / `0ae517eb172f61b974ca7a4411e64c1cc42065c462ed53b3065ab2da633dfe2f` | main-state switch의 raw state `3` destination |
 
 `tools/imjinrok/extract-k01-state-three-mode-boundary.mjs`는 JSON parse 전에 EXE와 세
