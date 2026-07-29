@@ -1,11 +1,11 @@
 import Phaser from "phaser";
 import { actionDefinitions, researchDefinitions, unitCanPerformAction, unitDefinitions, type ActionDefinitionId, type BankResourceKind, type ResearchDefinition, type ResearchDefinitionId, type UnitDefinition, type UnitDefinitionId } from "@shared";
 import type { ActionTriggerSource, PlayerEconomyView, SelectedEntitiesView } from "../hud.js";
-import {
-  findResolvedOriginalGameplayCommandGridSlot,
-  type ResolvedOriginalGameplayCommandGridLayout,
-} from "../originalGameplayCommandGridLayout.js";
 import { drawPanelFrame, HUD_TEXT_STYLE, type PanelBounds } from "./hudPanel.js";
+import {
+  ADAPTIVE_ACTION_GRID_LAYOUT,
+  type ActionGridLayoutPolicy,
+} from "./actionGridLayoutPolicy.js";
 
 export interface HudActionSlot {
   actionId?: ActionDefinitionId;
@@ -75,13 +75,13 @@ export function drawActionGrid(
   selectedEntities: SelectedEntitiesView,
   playerEconomy: PlayerEconomyView | null,
   onAction?: HudActionHandler,
-  originalLayout?: ResolvedOriginalGameplayCommandGridLayout,
+  layout: ActionGridLayoutPolicy = ADAPTIVE_ACTION_GRID_LAYOUT,
 ): void {
   const { x, y, width, height } = bounds;
   drawPanelFrame(scene, container, graphics, bounds, "명령");
 
   const actions = getActionSlots(selectedEntities, playerEconomy);
-  const slotRects = resolveActionGridSlotRects(bounds, originalLayout);
+  const slotRects = resolveActionGridSlotRects(bounds, layout);
 
   for (const [index, slot] of slotRects.entries()) {
     const action = actions[index];
@@ -110,15 +110,7 @@ export function drawActionGrid(
         .setOrigin(0, 0)
         .setInteractive({ useHandCursor: true });
 
-      if (originalLayout) {
-        hitZone.on("pointerup", (pointer: Phaser.Input.Pointer) => {
-          if (findResolvedOriginalGameplayCommandGridSlot(originalLayout, pointer.x, pointer.y) === index) {
-            onAction(action.actionId as ActionDefinitionId, "button");
-          }
-        });
-      } else {
-        hitZone.on("pointerup", () => onAction(action.actionId as ActionDefinitionId, "button"));
-      }
+      hitZone.on("pointerup", () => onAction(action.actionId as ActionDefinitionId, "button"));
 
       container.add(hitZone);
     }
@@ -162,23 +154,17 @@ export function drawActionGrid(
 
 export function resolveActionGridSlotRects(
   bounds: PanelBounds,
-  originalLayout?: ResolvedOriginalGameplayCommandGridLayout,
+  layout: ActionGridLayoutPolicy = ADAPTIVE_ACTION_GRID_LAYOUT,
 ): readonly ActionGridSlotRect[] {
-  if (originalLayout) {
-    return originalLayout.slots.slice(0, 9);
-  }
-
-  const columns = 4;
-  const rows = 3;
   const gap = 8;
   const gridX = bounds.x + 14;
   const gridY = bounds.y + 46;
-  const slotWidth = (bounds.width - 28 - gap * (columns - 1)) / columns;
-  const slotHeight = (bounds.height - 60 - gap * (rows - 1)) / rows;
+  const slotWidth = (bounds.width - 28 - gap * (layout.columns - 1)) / layout.columns;
+  const slotHeight = (bounds.height - 60 - gap * (layout.rows - 1)) / layout.rows;
 
-  return Array.from({ length: columns * rows }, (_, index) => {
-    const column = index % columns;
-    const row = Math.floor(index / columns);
+  return Array.from({ length: layout.slotCount }, (_, index) => {
+    const column = index % layout.columns;
+    const row = Math.floor(index / layout.columns);
     return {
       x: gridX + column * (slotWidth + gap),
       y: gridY + row * (slotHeight + gap),

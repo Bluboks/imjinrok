@@ -55,7 +55,10 @@ export function resolveOriginalGameplayCommandGridLayout(
   };
 }
 
-/** Product-only scenario gate; action labels and commands remain project adaptations. */
+/**
+ * Research-only scenario helper for the source-bound original grid. Product
+ * runtime layout is selected by `actionGridLayoutPolicy` instead.
+ */
 export function resolveOriginalGameplayCommandGridLayoutForScenario(
   scenarioId: string | undefined,
   viewportWidth: number,

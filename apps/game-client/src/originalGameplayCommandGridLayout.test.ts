@@ -70,7 +70,7 @@ test("rejects invalid viewports and pointer coordinates", () => {
   );
 });
 
-test("enables the original layout only for the K01 opening scenario", () => {
+test("keeps the original layout available for the K01 research scenario", () => {
   assert.equal(
     resolveOriginalGameplayCommandGridLayoutForScenario("imjinrok-k01-opening", 640, 480)?.slots.length,
     9,

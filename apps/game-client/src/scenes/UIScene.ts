@@ -48,7 +48,6 @@ import type { GameLaunchContext } from "../session.js";
 import {
   ORIGINAL_OBJECTIVE_PANEL_FRAME_ASSET,
 } from "../originalObjectivePanelLayout.js";
-import { resolveOriginalGameplayCommandGridLayoutForScenario } from "../originalGameplayCommandGridLayout.js";
 import {
   createMinimapGeometry,
   createMinimapFogTexture,
@@ -63,6 +62,7 @@ import {
   type MinimapGeometry,
 } from "../ui/minimap.js";
 import { drawActionGrid, getEnabledActionForHotkey } from "../ui/actionGrid.js";
+import { resolveProductActionGridLayoutForScenario } from "../ui/actionGridLayoutPolicy.js";
 import { drawPanelFrame, HUD_TEXT_STYLE, type PanelBounds } from "../ui/hudPanel.js";
 import {
   emitK01ObjectiveModalActionRequest,
@@ -585,11 +585,7 @@ export class UIScene extends Phaser.Scene {
     this.actionGridContainer = panelContainer;
     this.hudContainer.add(panelContainer);
     panelContainer.add(graphics);
-    const originalLayout = resolveOriginalGameplayCommandGridLayoutForScenario(
-      this.launchContext?.scenario?.id,
-      this.scale.width,
-      this.scale.height,
-    );
+    const layout = resolveProductActionGridLayoutForScenario(this.launchContext?.scenario?.id);
     drawActionGrid(
       this,
       panelContainer,
@@ -600,7 +596,7 @@ export class UIScene extends Phaser.Scene {
       (actionId) => {
         this.emitActionTriggered(actionId, "button");
       },
-      originalLayout,
+      layout,
     );
 
     return true;
