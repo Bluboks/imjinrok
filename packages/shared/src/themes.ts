@@ -575,6 +575,25 @@ export const japaneseSwordsmanEntityVisual = {
   },
 } as const satisfies EntityVisual;
 
+export const koreanMonkEntityVisual = {
+  id: "korean-monk",
+  kind: "entity",
+  assetPath: "entities/korean-monk",
+  render: { srcPxPerWu: 32, filtering: "nearest" },
+  defaults: {
+    // Source dimensions are recovered; pivot and timing remain project display adaptations.
+    size: { w: 65, h: 50 },
+    pivot: { anchor: { x: 32, y: 44 } },
+  },
+  states: {
+    idle: { facings: ENTITY_FACING_ORDER, clips: staticallyRecoveredDirectionalClips({ visualId: "korean_monk", stem: "budak", frameStart: 100, frameStride: 8, phaseCount: 8, fps: PROVISIONAL_RECOVERED_ANIMATION_IDLE_FPS, loop: true }) },
+    move: { facings: ENTITY_FACING_ORDER, clips: staticallyRecoveredNormalMovementClips("korean_monk", "budak", 0, PROVISIONAL_RECOVERED_ANIMATION_ACTIVE_FPS) },
+    walk: { facings: ENTITY_FACING_ORDER, clips: staticallyRecoveredNormalMovementClips("korean_monk", "budak", 0, PROVISIONAL_RECOVERED_ANIMATION_ACTIVE_FPS) },
+    attack: { facings: ENTITY_FACING_ORDER, clips: staticallyRecoveredDirectionalClips({ visualId: "korean_monk", stem: "budak", frameStart: 50, frameStride: 10, phaseCount: 10, fps: PROVISIONAL_RECOVERED_ANIMATION_ACTIVE_FPS, loop: false }) },
+    death: { facings: ENTITY_FACING_ORDER, clips: staticallyRecoveredDirectionalClips({ visualId: "korean_monk", stem: "budak", frameStart: 40, frameStride: 0, phaseCount: 8, fps: PROVISIONAL_RECOVERED_ANIMATION_ACTIVE_FPS, loop: false }) },
+  },
+} as const satisfies EntityVisual;
+
 export const archerEntityVisual = {
   id: "korean-archer",
   kind: "entity",
@@ -719,6 +738,25 @@ export const japaneseGunnerEntityVisual = {
         loop: false,
       }),
     },
+  },
+} as const satisfies EntityVisual;
+
+export const japaneseShrineMaidenEntityVisual = {
+  id: "japanese-shrine-maiden",
+  kind: "entity",
+  assetPath: "entities/japanese-shrine-maiden",
+  render: { srcPxPerWu: 32, filtering: "nearest" },
+  defaults: {
+    // Source dimensions are recovered; pivot and timing remain project display adaptations.
+    size: { w: 50, h: 50 },
+    pivot: { anchor: { x: 25, y: 44 } },
+  },
+  states: {
+    idle: { facings: ENTITY_FACING_ORDER, clips: staticallyRecoveredDirectionalClips({ visualId: "japanese_shrine_maiden", stem: "advbudaj", frameStart: 120, frameStride: 8, phaseCount: 8, fps: PROVISIONAL_RECOVERED_ANIMATION_IDLE_FPS, loop: true }) },
+    move: { facings: ENTITY_FACING_ORDER, clips: staticallyRecoveredNormalMovementClips("japanese_shrine_maiden", "advbudaj", 0, PROVISIONAL_RECOVERED_ANIMATION_ACTIVE_FPS) },
+    walk: { facings: ENTITY_FACING_ORDER, clips: staticallyRecoveredNormalMovementClips("japanese_shrine_maiden", "advbudaj", 0, PROVISIONAL_RECOVERED_ANIMATION_ACTIVE_FPS) },
+    attack: { facings: ENTITY_FACING_ORDER, clips: staticallyRecoveredDirectionalClips({ visualId: "japanese_shrine_maiden", stem: "advbudaj", frameStart: 60, frameStride: 10, phaseCount: 10, fps: PROVISIONAL_RECOVERED_ANIMATION_ACTIVE_FPS, loop: false }) },
+    death: { facings: ENTITY_FACING_ORDER, clips: staticallyRecoveredDirectionalClips({ visualId: "japanese_shrine_maiden", stem: "advbudaj", frameStart: 40, frameStride: 0, phaseCount: 8, fps: PROVISIONAL_RECOVERED_ANIMATION_ACTIVE_FPS, loop: false }) },
   },
 } as const satisfies EntityVisual;
 
@@ -1331,9 +1369,11 @@ export const defaultTheme = {
     hill0: hill0TerrainVisual,
     "villager-korean-farmer": villagerEntityVisual,
     "korean-swordsman": swordsmanEntityVisual,
+    "korean-monk": koreanMonkEntityVisual,
     "japanese-swordsman": japaneseSwordsmanEntityVisual,
     "korean-archer": archerEntityVisual,
     "japanese-gunner": japaneseGunnerEntityVisual,
+    "japanese-shrine-maiden": japaneseShrineMaidenEntityVisual,
     "japanese-samurai": japaneseSamuraiEntityVisual,
     "japanese-turtle-tank": japaneseTurtleTankEntityVisual,
     "japanese-konishi": japaneseKonishiEntityVisual,
@@ -1357,9 +1397,11 @@ export const defaultTheme = {
   entityBindings: {
     villager: "villager-korean-farmer",
     swordsman: "korean-swordsman",
+    "korean-monk": "korean-monk",
     archer: "korean-archer",
     "japanese-swordsman": "japanese-swordsman",
     "japanese-gunner": "japanese-gunner",
+    "japanese-shrine-maiden": "japanese-shrine-maiden",
     "japanese-samurai": "japanese-samurai",
     "japanese-turtle-tank": "japanese-turtle-tank",
     "japanese-konishi": "japanese-konishi",

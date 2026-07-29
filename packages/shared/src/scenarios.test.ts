@@ -389,8 +389,9 @@ test("imjinrok K01 starts with a source-derived established Joseon base", () => 
     barracks: 1,
     "gwon-yul": 1,
     house: 3,
+    "korean-monk": 2,
     "ryu-seong-ryong": 1,
-    swordsman: 3,
+    swordsman: 1,
     villager: 2,
   });
   assert.deepEqual(
@@ -455,8 +456,9 @@ test("imjinrok K01 and K02 avoid skirmish economy starts for scripted Japanese p
     "japanese-camp-firehouse": 1,
     "japanese-camp-house": 2,
     "japanese-camp-tower": 2,
-    "japanese-gunner": 7,
+    "japanese-gunner": 6,
     "japanese-samurai": 3,
+    "japanese-shrine-maiden": 1,
     "japanese-swordsman": 3,
   });
   assert.equal(k01CpuStart?.startingUnits?.length, 24);
@@ -500,12 +502,9 @@ test("K01 opening adapter exposes source provenance without upgrading unresolved
       { originalClass: 49, rawOwnerWord: 0 },
       { originalClass: 48, rawOwnerWord: 0 },
       { originalClass: 51, rawOwnerWord: 0 },
-      { originalClass: 11, rawOwnerWord: 0 },
-      { originalClass: 11, rawOwnerWord: 0 },
       { originalClass: 31, rawOwnerWord: 1 },
       { originalClass: 31, rawOwnerWord: 1 },
       { originalClass: 31, rawOwnerWord: 1 },
-      { originalClass: 16, rawOwnerWord: 1 },
       { originalClass: 58, rawOwnerWord: 1 },
       { originalClass: 58, rawOwnerWord: 1 },
       { originalClass: 60, rawOwnerWord: 1 },
@@ -520,7 +519,7 @@ test("K01 opening adapter exposes source provenance without upgrading unresolved
     k01SourceOpeningAdapter
       .filter(
         ({ rawOwnerWord, originalClass }) =>
-          rawOwnerWord === 0 && [2, 4, 7].includes(originalClass),
+          rawOwnerWord === 0 && [2, 4, 7, 11].includes(originalClass),
       )
       .map(({ originalClass, projectKind, identityMapping }) => ({
         originalClass,
@@ -529,9 +528,11 @@ test("K01 opening adapter exposes source provenance without upgrading unresolved
       })),
     [
       { originalClass: 2, projectKind: "swordsman", identityMapping: "exact-static-identity-source" },
+      { originalClass: 11, projectKind: "korean-monk", identityMapping: "exact-static-identity-source" },
       { originalClass: 4, projectKind: "archer", identityMapping: "exact-static-identity-source" },
       { originalClass: 7, projectKind: "villager", identityMapping: "exact-static-identity-source" },
       { originalClass: 7, projectKind: "villager", identityMapping: "exact-static-identity-source" },
+      { originalClass: 11, projectKind: "korean-monk", identityMapping: "exact-static-identity-source" },
     ],
   );
 });
@@ -546,7 +547,7 @@ test("imjinrok K01 and K02 player starts cover every active source map entity", 
       },
     }),
     collectSourceMapEntityPlacements("k01.map", {
-      0: { playerId: "local-player", kindByTypeHex: joseonSourceKindByTypeHex },
+      0: { playerId: "local-player", kindByTypeHex: k01JoseonSourceKindByTypeHex },
       1: { playerId: "cpu-1", kindByTypeHex: k01JapaneseSourceKindByTypeHex },
     }),
   );
@@ -936,7 +937,7 @@ const k01JapaneseSourceKindByTypeHex = {
   "0x03": "japanese-swordsman",
   "0x0c": "japanese-gunner",
   "0x0d": "japanese-samurai",
-  "0x10": "japanese-gunner",
+  "0x10": "japanese-shrine-maiden",
   "0x14": "japanese-swordsman",
   "0x1f": "japanese-gunner",
   "0x39": "japanese-camp-house",
@@ -946,10 +947,16 @@ const k01JapaneseSourceKindByTypeHex = {
   "0x3f": "japanese-camp-advanced-tower",
 } as const;
 
+const k01JoseonSourceKindByTypeHex = {
+  ...joseonSourceKindByTypeHex,
+  "0x0b": "korean-monk",
+} as const;
+
 const k02JapaneseSourceKindByTypeHex = {
   ...k01JapaneseSourceKindByTypeHex,
   "0x0c": "japanese-swordsman",
   "0x0d": "japanese-swordsman",
+  "0x10": "japanese-gunner",
 } as const;
 
 interface SourceOwnerMapping {

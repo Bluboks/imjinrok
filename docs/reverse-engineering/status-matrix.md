@@ -15,14 +15,14 @@
 | 엔티티 자료구조 | 추정 | 미재현 | 별도 프로젝트 모델 존재 | 생성·읽기·쓰기 경로 교차 확인 |
 | 게임 틱과 메인 루프 | 투사체 pool 범위의 message-loop→scheduler, millisecond gate와 accepted-step 호출 수 정적 확정; 그 밖의 subsystem update 순서는 미확인 | 해당 raw selector·feedback·wrap·거부 벡터 재현 완료 | 독립 포트와 24 Hz loop는 미연결 | 다른 subsystem 업데이트 순서와 24 Hz port scheduling 정책 결정 |
 | K01 봉화대 트리거 | raw-relation blocker→1,200-slot 완성 record scan→flag·K0120·native effect→post-state 반환과 descriptor slot/OOB/exact create·1×1 occupancy overwrite 정적 확정 | trigger 분기·descriptor·selector·return, slot/경계/overlap/WORD-wrap 및 타입/SPR·요청 좌표 9개 재현 완료 | K01 adapter 9개 exact static identity/source; K01-only in-bounds exact request-position create 부분 이식; 핵심 animation 일부 이식 | class 12 state-2·class 14 generic Facing/runtime tick, 네 class stats/behavior, raw owner, 원본 1,200-slot/generation/occupancy-owner 저장 모델·이후 movement |
-| K01 시작 유닛 class 12·13 binding | K01 map owner 1 active class 12·13 여섯 record와 catalog 정체·primary SPR, 이미 이식한 class 12·13 core state frame을 정적 확정 범위로 결합; local class 7은 catalog+map record로 source identity 교차 검증 | record 수·좌표·class→kind 및 binding/catalog 변조 거부 재현 완료 | 여섯 visible binding을 `japanese-gunner`·`japanese-samurai`로 부분 이식; class 2/3/4/7은 identity/source exact, animation coverage는 별도; genuine mismatches만 proxy | class 31/16, local class 11, source building proxy, class 2 remaining states·class 3/4/7 animation states, stats/owner/movement을 별도 정적 분석 |
+| K01 시작 유닛 class 11·12·13·16 binding | K01 map active class 11·12·13·16 record, catalog 정체·primary SPR와 class 11·16 initializer/helper의 상태 8/1/4/7 slot·frame·방향·mirror를 정적 확정 범위로 결합; class 2/3/4도 상태 8/1/4/7 core frame을 정적 확정·이식했고, local class 7은 catalog+map record로 source identity만 교차 검증 | class 11·16의 canonical function·initializer·map·SPR 변조 거부와 record·frame vector 재현 완료 | class 11 `korean-monk`, class 16 `japanese-shrine-maiden`, class 2/3/4·12·13의 core-state visual을 부분 이식; class 2/3/4 state 2는 격리·미매핑, class 7은 identity/source only, genuine mismatches만 proxy | class 31 일본 농부 evidence, class 7 core states, class 2/3/4 state 2 policy, source building proxy, stats/owner/movement을 별도 정적 분석 |
 | K01 승패 판정 | 표준 mission-entry broad timer reset→general/영웅 latch→timer→distinct-tick commit과 shared teardown→SPR/YAV poll→relay→external/stage route, scheduler mode WORD의 complete direct writer set과 argument-2 no-write path 범위 정적 확정 | reset 반개구간·순서, timer wrap/overflow와 result cadence·cleanup·state overwrite·WORD wrap 및 mode writer fixed-width vector 재현 완료 | 프로토타입, 원본 정책 미연결 | concrete argument-1 producer 또는 other-writer persistence/order와 raw clock·asset/result identity policy exact mapping 뒤 isolated opt-in 연결 |
 | 전투·피해 | K01 영웅 phase·피해·대상·사거리·subtype `0x0c`, class 78 action 40/59·fixed reset/tracking·subtype 12/16·generic kind 2 enumeration 및 signed-health 행동 6/7·slot/reference 수명주기 정적 확정 | 대상·투사체·scheduler, delivery·flight/종료·buffer/health write·stale-reference 경계 재현 완료 | 프로토타입, 유성룡 독립 계산 부분 이식; 자동 마법·사망 수명 미이식 | generic consumer callback, K01 mode 1 producer, 좌표·identity·24 Hz mapping과 opt-in 연결 |
 | 이동·경로 탐색 | 추정 | 미재현 | 프로토타입 | 좌표·경로 레코드와 실패 경로 복원 |
 | K01 map field·global mask boundary | 정적 확정 | 재현 완료 | 없음 | alias/computed writer, global producer, loader/runtime mutation, derived flag writer와 ordering 분석 |
 | 생산·건설·연구 | 조선 본영·봉화대 표시 진행도, action 115 admission/removal와 hero-priority gate·16-action named-hero filter 정적 확정; SPEECH 결합 가설 반증 | 건물 프레임, SPEECH lifecycle, bounded input/action 115 dispatch·hero-priority control/write/filtered FIFO pop 재현 | 메커니즘은 프로토타입, responsive·다중 선택 selection panel은 프로젝트 superset | remembered reservation owner, full production state/post-dispatch와 original construction/research producer 복원 |
 | AI | 미확인 | 미재현 | 프로젝트 구현 | 원본 의사결정 함수 지도 |
-| 애니메이션 | 조선 창병 상태 1·2 이동, K01 class 12 상태 8/1/2/4/7·class 13·82 상태 8/1/4/7·class 14 상태 8/1/4와 16-ring·transient destruction, 두 영웅 상태 1·4·7·8 정적 확정 | 방향·phase·상태별 슬롯·flags, class 14 turn/effect tick 경계와 K01 영웅 사망 완료/해제 경계 재현 | 조선 창병 일반 이동, class 12 상태 8/1/4/7·class 13·14·82 grid 핵심 상태와 두 영웅 핵심 상태 이식; class-12 state-2와 class-14 transient path 미이식 | 원본 update→FPS/24 Hz 변환, class-12 state-2 project policy, class 14 generic Facing/runtime tick mapping, 조선 창병 상태 2 통합과 특수 분기 base 연결 |
+| 애니메이션 | K01 class 2·3·4·11·12·13·16·82 상태 8/1/4/7, class 14 상태 8/1/4와 16-ring·transient destruction, 두 영웅 상태 1·4·7·8 정적 확정; class 2/3/4의 state 2 alternate movement도 정적 복원했으나 제품 정책은 미결 | 방향·phase·상태별 슬롯·flags, class 14 turn/effect tick 경계와 K01 영웅 사망 완료/해제 경계 재현 | class 2·3·4·11·12·13·14·16·82 grid 핵심 상태와 두 영웅 핵심 상태 이식; class 2/3/4·12 state 2와 class 14 transient path 미이식 | class 31·7 core-state evidence, class 2/3/4·12 state 2 project policy, 원본 update→FPS/24 Hz 변환, class 14 generic Facing/runtime tick mapping, source building proxies |
 | 건물 상태 이미지 | 조선 본영·봉화대 본체 건설·정상·반파 범위 정적 확정 | 모든 진행도·50% 경계 재현 완료 | 두 건물 본체 원본 기반 | 나머지 프레임·오버레이와 다른 7개 건물 복원 |
 | 브리핑 초상화 | 정적 확정 | 재현 완료 | 원본 기반 | 새 원본 변형에도 추출기·클라이언트 교차 검증 적용 |
 | `SPEECH` 대화 레이아웃 | 정적 확정 | 재현 완료 | 확정 좌표 원본 기반 | 제목·목표·버튼·글꼴을 별도 분석 |
@@ -141,11 +141,12 @@
 
 ### 스프라이트 매핑
 
-- 내부 클래스 2는 `조선 창병`으로 식별 완료; 상태 1·2 이동 의미와 일반 이동 이식 완료
+- 내부 클래스 2 `조선 창병`, 3 `일본 창병`, 4 `조선 궁수`는 상태 8/1/4/7 core frame·방향·mirror를
+  정적 확정·이식했다. 세 클래스의 상태 2 alternate movement는 정적 복원했지만 제품에 매핑하지 않았다.
 - 클래스 76 `조선 권율`과 78 `조선 유성룡`의 전용 SPR와 상태 8 idle·1 일반 이동·4 공격·
   7 사망 이식 완료
-- 영웅 효과 phase 7은 정적 확정·재현 완료; 원본 틱→FPS 변환·피격·사망 표시 수명, 조선
-  창병 상태 2 프로젝트 통합과 상태 1 특수 분기의 클래스 2 base는 다음 단계
+- 영웅 효과 phase 7은 정적 확정·재현 완료; 원본 틱→FPS 변환·피격·사망 표시 수명, class 31·7
+  core-state evidence와 class 2/3/4 state 2 project policy는 다음 단계
 - 클래스 1~95 타입 정체·자원 카탈로그 완료
 - 조선 본영과 봉화대의 건설·정상·피해 본체 프레임 선택은 `재현 완료`·이식 완료
 - `SPEECH` 초상화 ID 계산식은 `hero.spr` 기준으로 `정적 확정`·이식 완료
