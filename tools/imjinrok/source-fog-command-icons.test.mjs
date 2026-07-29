@@ -13,6 +13,10 @@ test("exports the hash-bound command frames and normal fog frame zero determinis
   const two = extractSourceFogCommandIcons({ outputRoot: second });
   assert.deepEqual(one.button.header, fixture.button.header);
   assert.deepEqual(one.button.frames.map(({ index }) => index), fixture.button.exportedFrames);
+  assert.deepEqual(
+    Object.fromEntries(one.button.frames.map(({ index, sha256 }) => [index, sha256])),
+    fixture.button.exportedPngSha256,
+  );
   assert.equal(one.normalFog.length, fixture.normalFog.sourceCount);
   assert.deepEqual(one.normalFog.map(({ index, header, frames }) => [index, header, frames.map(({ index: frame }) => frame)]), NORMAL_FOG_SOURCES.map(({ index, header }) => [index, header, [0]]));
   assert.deepEqual(one, two);
