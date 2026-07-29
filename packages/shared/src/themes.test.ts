@@ -785,22 +785,6 @@ test("default theme maps source-exported building construction frames", () => {
       idleFrame: "millj_0008.png",
     },
     {
-      binding: "japanese-camp-barracks",
-      manifestPath: "entities/japanese-camp-barracks/barrackj.manifest.json",
-      source: "original/imjinrok2/char/barrackj.spr",
-      frameCount: 24,
-      idleFrame: "barrackj_0009.png",
-      completeFrame: "barrackj_0007.png",
-      constructionFrameCount: 8,
-    },
-    {
-      binding: "japanese-camp-tower",
-      manifestPath: "entities/japanese-camp-tower/towerj.manifest.json",
-      source: "original/imjinrok2/char/towerj.spr",
-      frameCount: 40,
-      idleFrame: "towerj_0008.png",
-    },
-    {
       binding: "japanese-camp-firehouse",
       manifestPath: "entities/japanese-camp-firehouse/firehousej.manifest.json",
       source: "original/imjinrok2/char/firehousej.spr",
@@ -847,6 +831,20 @@ test("default theme binds newly identified opening buildings to only their prove
       source: "original/imjinrok2/char/jhq.spr",
       dimensions: { width: 120, height: 133 },
       idleFrame: "jhq_0007.png",
+    },
+    {
+      binding: "japanese-camp-barracks",
+      manifestPath: "entities/japanese-camp-barracks/barrackj.manifest.json",
+      source: "original/imjinrok2/char/barrackj.spr",
+      dimensions: { width: 125, height: 110 },
+      idleFrame: "barrackj_0007.png",
+    },
+    {
+      binding: "japanese-camp-tower",
+      manifestPath: "entities/japanese-camp-tower/towerj.manifest.json",
+      source: "original/imjinrok2/char/towerj.spr",
+      dimensions: { width: 71, height: 98 },
+      idleFrame: "towerj_0007.png",
     },
   ] as const;
 
@@ -899,17 +897,12 @@ test("default theme applies the statically recovered Korean beacon identity and 
 
 test("default theme animates Japanese camp building idle frames from source sprites", () => {
   const houseVisual = defaultTheme.visuals[defaultTheme.entityBindings["japanese-camp-house"]] as EntityVisual;
-  const barracksVisual = defaultTheme.visuals[defaultTheme.entityBindings["japanese-camp-barracks"]] as EntityVisual;
   const firehouseVisual = defaultTheme.visuals[defaultTheme.entityBindings["japanese-camp-firehouse"]] as EntityVisual;
   const houseOverlay = houseVisual.layers?.find((layer) => layer.id === "idle-overlay");
 
   assert.deepEqual(
     houseOverlay?.states.idle?.clips.default?.frames.map((frame) => frame.fileName),
     frameNames("millj", 9, 18),
-  );
-  assert.deepEqual(
-    barracksVisual.states.idle?.clips.default?.frames.map((frame) => frame.fileName),
-    frameNames("barrackj", 9, 17),
   );
   assert.deepEqual(
     firehouseVisual.states.idle?.clips.default?.frames.map((frame) => frame.fileName),

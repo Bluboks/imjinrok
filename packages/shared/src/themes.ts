@@ -1395,20 +1395,16 @@ export const japaneseCampHouseEntityVisual = sourceBuildingEntityVisual({
   idleOverlayFrameCount: 10,
 });
 
-export const japaneseCampBarracksEntityVisual = sourceBuildingEntityVisual({
+export const japaneseCampBarracksEntityVisual = sourceBaseBuildingEntityVisual({
   id: "japanese-camp-barracks",
   assetPath: "entities/japanese-camp-barracks",
   visualId: "japanese_camp_barracks",
   stem: "barrackj",
   size: { w: 125, h: 110 },
   pivot: { x: 63, y: 86 },
-  completeFrameIndex: 7,
-  idleFrameStart: 9,
-  idleFrameCount: 9,
-  idleFps: 8,
 });
 
-export const japaneseCampTowerEntityVisual = sourceBuildingEntityVisual({
+export const japaneseCampTowerEntityVisual = sourceBaseBuildingEntityVisual({
   id: "japanese-camp-tower",
   assetPath: "entities/japanese-camp-tower",
   visualId: "japanese_camp_tower",

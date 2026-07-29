@@ -743,10 +743,12 @@ function buildVisualStaticEvidence(visual, identityCandidates) {
     };
   }
 
-  if (
-    visual.id === "korean-training-command" ||
-    visual.id === "japanese-hq"
-  ) {
+  if ([
+    "korean-training-command",
+    "japanese-hq",
+    "japanese-camp-barracks",
+    "japanese-camp-tower",
+  ].includes(visual.id)) {
     return {
       status: "mixed",
       ...identityEvidence,

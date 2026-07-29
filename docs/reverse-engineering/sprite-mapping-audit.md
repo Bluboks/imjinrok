@@ -29,9 +29,9 @@ pnpm imjinrok:audit-sprite-mappings
 | 대상 | 확인한 범위 | 판정 |
 | --- | --- | --- |
 | 원본 타입 95개 | 이름·슬롯·기본 프레임·raw flags·SPR 경로 | 타입 정체·출처 전수 `정적 확정` |
-| 엔티티 비주얼 26개 | 상태 97개, 클립 681개, 프레임 참조 5,237개 | 범위 확정 2개, `mixed` 23개, 미확인 1개 |
+| 엔티티 비주얼 26개 | 상태 95개, 클립 679개, 프레임 참조 5,212개 | 범위 확정 2개, `mixed` 23개, 미확인 1개 |
 | 유닛 비주얼 15개 | 정체·방향·행동·미러링 | 고유 정체 15개; class 7·11·12·13·16·31·82 scoped core states와 class 14 상태 8/1/4 grid 확정 |
-| 건물 비주얼 11개 | 정체·idle·construction·damaged·overlay | 본영·봉화대 본체 2개 `정적 확정`; class 51·58은 base frame 7만 반영, 나머지 본체 상태 `미확인` |
+| 건물 비주얼 11개 | 정체·idle·construction·damaged·overlay | 본영·봉화대 본체 2개 `정적 확정`; class 51·58·60·63은 base frame 7만 반영, 나머지 본체 상태 `미확인` |
 | 브리핑 초상화 17개 | `K1`~`K6`·`K10`, `J1`~`J5`, `C1`~`C5` | ID→`hero.spr` 프레임 `정적 확정` |
 | 원본 내부 클래스 2 | `조선 창병`, 슬롯 100, 상태 1·2, 8방향, phase 0~7 | 두 상태의 이동 의미·프레임 식 확정, 상태 1 일반 이동 이식 |
 | 원본 내부 클래스 11·16 | `조선 승병`·`일본 무녀`, 슬롯 112·124, 상태 8·1·4·7 | 각 core-state frame·8방향·mirror 확정·이식; FPS·pivot·stats·magic·state 2는 미확정 |
@@ -86,11 +86,12 @@ pnpm imjinrok:audit-sprite-mappings
 - 본체와 깃발·불꽃 같은 오버레이 구분도 프레임 위치로 추정했다.
 - 조선 본영과 봉화대를 제외하면 현재 체력·최대 체력·건설 진행도에서 프레임을 선택하는 확정 경로가
   없다.
-- K01 시작의 class 51 `advbarrackk.spr`와 class 58 `jhq.spr`는 전체 변환 자산을 보존하되,
+- K01 시작의 class 51 `advbarrackk.spr`, class 58 `jhq.spr`, class 60 `barrackj.spr`, class 63
+  `towerj.spr`는 전체 변환 자산을 보존하되,
   `themes.ts`는 catalog base frame 7만 idle로 사용한다. 원본 SPR 치수는 렌더 size로 옮겼고 foot
   anchor는 프로젝트 적응이다. construction·damaged·overlay를 원작 의미로 추가하지 않는다.
 - class 48 `millk.spr`의 idle은 catalog base frame 7로 바로잡았다. class 60 `barrackj.spr`와
-  class 63 `towerj.spr`도 K01 record를 기존 고유 visual로 다시 연결했다. 이 source binding은
+  class 63 `towerj.spr`도 K01 record를 기존 고유 visual의 base frame 7로 다시 연결했다. 이 source binding은
   gameplay stats·commands·behavior를 확정하지 않는다.
 
 조선 본영은 기존 idle frame 8이 원본의 반파 이미지임을 확인해 정상 frame 7로 수정했고, 진행도

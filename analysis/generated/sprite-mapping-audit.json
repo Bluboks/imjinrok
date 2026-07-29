@@ -8,7 +8,7 @@
   "sourceFiles": [
     {
       "path": "packages/shared/src/themes.ts",
-      "sha256": "ebee19d3eab537db47bff12d49b08c6eb0f1d4da2a4ee61703b9371a940fcc2f"
+      "sha256": "5e9e98c81f3ae0c1d4e9372f5d09606c8377b7ea4d0109578f7dd0feaaa0a27d"
     },
     {
       "path": "packages/shared/src/visuals.ts",
@@ -92,7 +92,7 @@
     },
     {
       "path": "tools/imjinrok/audit-sprite-mappings.mjs",
-      "sha256": "5d6ecabb70da936056189dfa469ccbc6d1009e9097b410e58d3b0426e04bfc76"
+      "sha256": "a04c5cdc905cdda24edd01135071ce71f2fd8418c49946d3f9616c8e61bea33e"
     },
     {
       "path": "apps/game-client/public/assets/themes/default/ui/mission-portraits/hero.manifest.json",
@@ -103,9 +103,9 @@
     "visualCount": 26,
     "unitVisualCount": 15,
     "buildingVisualCount": 11,
-    "stateMappingCount": 97,
-    "clipCount": 681,
-    "frameReferenceCount": 5237,
+    "stateMappingCount": 95,
+    "clipCount": 679,
+    "frameReferenceCount": 5212,
     "missingFrameReferenceCount": 0,
     "unverifiedVisualCount": 1,
     "mixedVisualCount": 23,
@@ -257,7 +257,9 @@
         "sourcePath": "char\\barrackj.spr",
         "baseFrame": 7,
         "flags": "0x00510042",
-        "bodyStateMapping": "unverified"
+        "bodyStateMapping": "static-proven-base-frame",
+        "confirmedBodyScope": "project idle uses the catalog-proven source base frame 7 only",
+        "unresolvedScope": "construction, damaged/health body states, overlays, timing, pivot, stats, commands, behavior, and later runtime mutation remain unresolved; size is source dimensions and the foot anchor is a project rendering adaptation"
       },
       "source": {
         "path": "original/imjinrok2/char/barrackj.spr",
@@ -287,64 +289,16 @@
       "mappings": [
         {
           "scope": "base",
-          "state": "construction",
-          "declaredFacings": [],
-          "clips": [
-            {
-              "facing": "default",
-              "frameFiles": [
-                "barrackj_0000.png",
-                "barrackj_0001.png",
-                "barrackj_0002.png",
-                "barrackj_0003.png",
-                "barrackj_0004.png",
-                "barrackj_0005.png",
-                "barrackj_0006.png",
-                "barrackj_0007.png"
-              ],
-              "frameIndexes": [
-                0,
-                1,
-                2,
-                3,
-                4,
-                5,
-                6,
-                7
-              ],
-              "mirrorX": false,
-              "missingFrames": []
-            }
-          ]
-        },
-        {
-          "scope": "base",
           "state": "idle",
           "declaredFacings": [],
           "clips": [
             {
               "facing": "default",
               "frameFiles": [
-                "barrackj_0009.png",
-                "barrackj_0010.png",
-                "barrackj_0011.png",
-                "barrackj_0012.png",
-                "barrackj_0013.png",
-                "barrackj_0014.png",
-                "barrackj_0015.png",
-                "barrackj_0016.png",
-                "barrackj_0017.png"
+                "barrackj_0007.png"
               ],
               "frameIndexes": [
-                9,
-                10,
-                11,
-                12,
-                13,
-                14,
-                15,
-                16,
-                17
+                7
               ],
               "mirrorX": false,
               "missingFrames": []
@@ -663,7 +617,9 @@
         "sourcePath": "char\\towerj.spr",
         "baseFrame": 7,
         "flags": "0x00112006",
-        "bodyStateMapping": "unverified"
+        "bodyStateMapping": "static-proven-base-frame",
+        "confirmedBodyScope": "project idle uses the catalog-proven source base frame 7 only",
+        "unresolvedScope": "construction, damaged/health body states, overlays, timing, pivot, stats, commands, behavior, and later runtime mutation remain unresolved; size is source dimensions and the foot anchor is a project rendering adaptation"
       },
       "source": {
         "path": "original/imjinrok2/char/towerj.spr",
@@ -693,50 +649,16 @@
       "mappings": [
         {
           "scope": "base",
-          "state": "construction",
-          "declaredFacings": [],
-          "clips": [
-            {
-              "facing": "default",
-              "frameFiles": [
-                "towerj_0000.png",
-                "towerj_0001.png",
-                "towerj_0002.png",
-                "towerj_0003.png",
-                "towerj_0004.png",
-                "towerj_0005.png",
-                "towerj_0006.png",
-                "towerj_0007.png",
-                "towerj_0008.png"
-              ],
-              "frameIndexes": [
-                0,
-                1,
-                2,
-                3,
-                4,
-                5,
-                6,
-                7,
-                8
-              ],
-              "mirrorX": false,
-              "missingFrames": []
-            }
-          ]
-        },
-        {
-          "scope": "base",
           "state": "idle",
           "declaredFacings": [],
           "clips": [
             {
               "facing": "default",
               "frameFiles": [
-                "towerj_0008.png"
+                "towerj_0007.png"
               ],
               "frameIndexes": [
-                8
+                7
               ],
               "mirrorX": false,
               "missingFrames": []
@@ -21687,26 +21609,9 @@
       "visualId": "japanese-camp-barracks",
       "detail": "Idle/full-health and construction/damage semantics are inferred from frame positions.",
       "idleFrameIndexes": [
-        9,
-        10,
-        11,
-        12,
-        13,
-        14,
-        15,
-        16,
-        17
-      ],
-      "constructionFrameIndexes": [
-        0,
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
         7
-      ]
+      ],
+      "constructionFrameIndexes": []
     },
     {
       "severity": "blocking",
@@ -21774,19 +21679,9 @@
       "visualId": "japanese-camp-tower",
       "detail": "Idle/full-health and construction/damage semantics are inferred from frame positions.",
       "idleFrameIndexes": [
-        8
+        7
       ],
-      "constructionFrameIndexes": [
-        0,
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8
-      ]
+      "constructionFrameIndexes": []
     },
     {
       "severity": "blocking",

@@ -47,9 +47,9 @@ test("frame mappings stay quarantined outside statically proven scopes while ide
     visualCount: 26,
     unitVisualCount: 15,
     buildingVisualCount: 11,
-    stateMappingCount: 97,
-    clipCount: 681,
-    frameReferenceCount: 5_237,
+    stateMappingCount: 95,
+    clipCount: 679,
+    frameReferenceCount: 5_212,
     missingFrameReferenceCount: 0,
     unverifiedVisualCount: 1,
     mixedVisualCount: 23,
@@ -279,6 +279,8 @@ test("frame mappings stay quarantined outside statically proven scopes while ide
   for (const [visualId, internalClass, name, sourcePath] of [
     ["korean-training-command", 51, "조선 훈련도감", "char\\advbarrackk.spr"],
     ["japanese-hq", 58, "일본 본영", "char\\jhq.spr"],
+    ["japanese-camp-barracks", 60, "일본 훈련소", "char\\barrackj.spr"],
+    ["japanese-camp-tower", 63, "일본 망루", "char\\towerj.spr"],
   ]) {
     const visual = report.visuals.find((candidate) => candidate.visualId === visualId);
 
