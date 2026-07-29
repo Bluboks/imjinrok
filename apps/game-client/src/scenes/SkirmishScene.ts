@@ -137,6 +137,7 @@ import {
   createMissionBriefingReplayState,
   getMissionBriefingClickAction,
   getMissionDialogueClickAction,
+  getMissionDialoguePointerAdvance,
   getMissionBriefingIntroFrameAlphas,
   getMissionBriefingIntroStage,
   isPresentationExternallyPaused,
@@ -594,7 +595,7 @@ export class SkirmishScene extends Phaser.Scene {
   private activeMissionDialogue: ActiveMissionDialogue | null = null;
   private missionDialoguePausedAt: number | null = null;
   private missionDialoguePauseOwnership: PresentationPauseOwnership | null = null;
-  private missionDialoguePointerUpTime: number | null = null;
+  private missionDialogueConsumedPointerId: number | null = null;
   private readonly introducedMissionPortraitKeys = new Set<string>();
   private readonly triggeredMissionDialogueIds = new Set<string>();
   private isPointerLocked = false;
@@ -696,7 +697,7 @@ export class SkirmishScene extends Phaser.Scene {
     this.missionBriefingIntroCompleted = false;
     this.missionBriefingLineScheduled = false;
     this.missionDialoguePauseOwnership = null;
-    this.missionDialoguePointerUpTime = null;
+    this.missionDialogueConsumedPointerId = null;
     this.introducedMissionPortraitKeys.clear();
     this.triggeredMissionDialogueIds.clear();
     this.processedCombatEventIds.clear();
@@ -880,6 +881,10 @@ export class SkirmishScene extends Phaser.Scene {
 
   private setupMouseControls(): void {
     this.input.on("pointerdown", (pointer: Phaser.Input.Pointer) => {
+      if (this.missionDialogueConsumedPointerId === pointer.id && !this.activeMissionDialogue) {
+        this.missionDialogueConsumedPointerId = null;
+      }
+
       if (this.isBlockingModalOpen()) {
         return;
       }
@@ -926,8 +931,8 @@ export class SkirmishScene extends Phaser.Scene {
     });
 
     this.input.on("pointerup", (pointer: Phaser.Input.Pointer) => {
-      if (this.missionDialoguePointerUpTime === pointer.upTime) {
-        this.missionDialoguePointerUpTime = null;
+      if (this.missionDialogueConsumedPointerId === pointer.id) {
+        this.missionDialogueConsumedPointerId = null;
         return;
       }
 
@@ -2585,7 +2590,30 @@ export class SkirmishScene extends Phaser.Scene {
         .zone(0, 0, width, height)
         .setOrigin(0, 0)
         .setInteractive({ useHandCursor: true })
-        .on("pointerup", (pointer: Phaser.Input.Pointer) => this.advanceMissionDialogueLineFromPointer(pointer)),
+        .on(
+          "pointerdown",
+          (
+            pointer: Phaser.Input.Pointer,
+            _localX: number,
+            _localY: number,
+            event: Phaser.Types.Input.EventData,
+          ) => {
+            this.missionDialogueConsumedPointerId = pointer.id;
+            event.stopPropagation();
+          },
+        )
+        .on(
+          "pointerup",
+          (
+            pointer: Phaser.Input.Pointer,
+            _localX: number,
+            _localY: number,
+            event: Phaser.Types.Input.EventData,
+          ) => {
+            event.stopPropagation();
+            this.advanceMissionDialogueLineFromPointer(pointer);
+          },
+        ),
     );
 
     container.setAlpha(0);
@@ -2751,7 +2779,13 @@ export class SkirmishScene extends Phaser.Scene {
   }
 
   private advanceMissionDialogueLineFromPointer(pointer: Phaser.Input.Pointer): void {
-    this.missionDialoguePointerUpTime = pointer.upTime;
+    const active = this.activeMissionDialogue;
+
+    if (!active || !getMissionDialoguePointerAdvance(active.lineIndex, active.dialogue.lines.length).consumesWorldInput) {
+      return;
+    }
+
+    this.missionDialogueConsumedPointerId = pointer.id;
     this.advanceMissionDialogueLine();
   }
 
