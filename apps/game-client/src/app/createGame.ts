@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 import { BootScene } from "../scenes/BootScene.js";
 import { MainMenuScene } from "../scenes/MainMenuScene.js";
+import { MissionBriefingScene } from "../scenes/MissionBriefingScene.js";
 import { SkirmishScene } from "../scenes/SkirmishScene.js";
 import { UIScene } from "../scenes/UIScene.js";
 
@@ -11,7 +12,7 @@ export function createGame(): Phaser.Game {
     backgroundColor: "#102325",
     width: window.innerWidth,
     height: window.innerHeight,
-    scene: [BootScene, MainMenuScene, SkirmishScene, UIScene],
+    scene: [BootScene, MainMenuScene, MissionBriefingScene, SkirmishScene, UIScene],
     scale: {
       mode: Phaser.Scale.RESIZE,
       autoCenter: Phaser.Scale.CENTER_BOTH,

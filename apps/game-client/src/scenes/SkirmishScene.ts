@@ -42,10 +42,8 @@ import {
   type ResourceAmountSet,
   type ResourceDefinition,
   type ResourceNode,
-  type ScenarioBriefingDefinition,
   type ResearchDefinitionId,
   type ScenarioBriefingLineDefinition,
-  type ScenarioBriefingTitleFrameDefinition,
   type ScenarioDefinition,
   type ScenarioMissionDialogueDefinition,
   type ThemeDefinition,
@@ -131,12 +129,8 @@ import { createSessionTransport, type SessionTransport } from "../net/SessionTra
 import { getMissionLineDurationMs, normalizeMissionVoiceId } from "../missionVoiceTiming.js";
 import {
   beginPresentationPause,
-  createMissionBriefingReplayState,
-  getMissionBriefingClickAction,
   getMissionDialogueClickAction,
   getMissionDialoguePointerAdvance,
-  getMissionBriefingIntroFrameAlphas,
-  getMissionBriefingIntroStage,
   isPresentationExternallyPaused,
   shouldResumePresentationPlayback,
   type PresentationPauseOwnership,
@@ -165,13 +159,12 @@ import {
   type SerializedPlayerVisibilityState,
 } from "../session.js";
 import { createFormationTargets } from "../formation.js";
+import { launchGameWithPreGameBriefing } from "../preGameBriefingLaunch.js";
 import {
   BUILD_DONE_AUDIO_CUE_KEY,
   COMMAND_REJECTED_AUDIO_CUE_KEY,
   GAMEPLAY_AUDIO_CUES,
   GAMEPLAY_AUDIO_CUE_BY_KEY,
-  MISSION_BRIEFING_MUSIC_AUDIO_CUE_BY_SOURCE,
-  MISSION_BRIEFING_MUSIC_AUDIO_CUE_KEY,
   MISSION_DEFEAT_AUDIO_CUE_KEY,
   MISSION_VICTORY_AUDIO_CUE_KEY,
   TRAINING_DONE_AUDIO_CUE_KEY,
@@ -194,12 +187,6 @@ const FOG_UNEXPLORED_ALPHA = 0.9;
 const FOG_EXPLORED_ALPHA = 0.48;
 const TERRAIN_DEBUG_DETAILS_STORAGE_KEY = "isorts.debug.terrainDetails";
 const RESOURCE_DEFINITIONS = resourceDefinitions as Readonly<Record<string, ResourceDefinition>>;
-const MISSION_BRIEFING_DURATION_MS = 60_000;
-const MISSION_BRIEFING_LINE_DURATION_MS = 5_500;
-const MISSION_BRIEFING_BACKDROP_IMAGE_PREFIX = "image:mission-briefing-backdrop:";
-const MISSION_BRIEFING_BACKDROP_ASSET_ROOT_URL = "assets/themes/default/ui/briefing";
-const MISSION_BRIEFING_BACKDROP_SOURCE_WIDTH = 640;
-const MISSION_BRIEFING_BACKDROP_SOURCE_HEIGHT = 480;
 const MISSION_DIALOGUE_LINE_DURATION_MS = 5_500;
 const COMMAND_FEEDBACK_DURATION_MS = 2_200;
 const UNDER_ATTACK_ALERT_DURATION_MS = 2_800;
@@ -240,12 +227,6 @@ interface MissionVoiceAudioCueDefinition {
   volume: number;
 }
 
-interface MissionBriefingBackdropFrameDefinition {
-  key: string;
-  url: string;
-  durationMs: number;
-}
-
 interface MissionResultLogoFrameDefinition {
   key: string;
   url: string;
@@ -267,8 +248,6 @@ const MISSION_RESULT_BACKDROP_IMAGE_KEY = "image:mission-result-backdrop:titlere
 const MISSION_RESULT_BACKDROP_URL = "assets/themes/default/ui/result/titleresult/titleresult_0000.png";
 const MISSION_RESULT_BACKDROP_SOURCE_WIDTH = 640;
 const MISSION_RESULT_BACKDROP_SOURCE_HEIGHT = 480;
-
-const MISSION_BRIEFING_BACKDROP_PRELOAD_FRAMES = collectMissionBriefingBackdropFrames(imjinrokCampaignScenarios);
 
 const MISSION_VOICE_AUDIO_CUES = collectMissionVoiceAudioCues(imjinrokCampaignScenarios);
 const MISSION_VOICE_AUDIO_CUE_BY_ID: ReadonlyMap<string, MissionVoiceAudioCueDefinition> = new Map(
@@ -295,44 +274,6 @@ function createMissionResultLogoDefinition(stem: string, source: string): Missio
   };
 }
 
-function collectMissionBriefingBackdropFrames(
-  scenarios: readonly ScenarioDefinition[],
-): MissionBriefingBackdropFrameDefinition[] {
-  const frames = new Map<string, MissionBriefingBackdropFrameDefinition>();
-
-  for (const scenario of scenarios) {
-    for (const frame of collectMissionBriefingBackdropFramesForBriefing(scenario.briefing)) {
-      frames.set(frame.key, frame);
-    }
-  }
-
-  return [...frames.values()];
-}
-
-function collectMissionBriefingBackdropFramesForBriefing(
-  briefing: ScenarioBriefingDefinition | undefined,
-): MissionBriefingBackdropFrameDefinition[] {
-  return (briefing?.titleSequence ?? []).map(createMissionBriefingBackdropFrame);
-}
-
-function createMissionBriefingBackdropFrame(
-  frame: ScenarioBriefingTitleFrameDefinition,
-): MissionBriefingBackdropFrameDefinition {
-  const sourceAsset = normalizeMissionBriefingBackdropSourceAsset(frame.sourceAsset);
-  const sourceWithoutExtension = sourceAsset.replace(/\.[^/.]+$/, "");
-  const publicAssetPath = sourceWithoutExtension.replace(/^ybriefingfnt\//, "");
-  const key = publicAssetPath.replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-
-  return {
-    key: `${MISSION_BRIEFING_BACKDROP_IMAGE_PREFIX}${key}`,
-    url: `${MISSION_BRIEFING_BACKDROP_ASSET_ROOT_URL}/${publicAssetPath}_0000.png`,
-    durationMs: frame.durationMs,
-  };
-}
-
-function normalizeMissionBriefingBackdropSourceAsset(sourceAsset: string): string {
-  return sourceAsset.trim().replaceAll("\\", "/").replace(/^\/+/, "").toLowerCase();
-}
 
 function collectMissionVoiceAudioCues(
   scenarios: readonly ScenarioDefinition[],
@@ -545,20 +486,6 @@ export class SkirmishScene extends Phaser.Scene {
   private underAttackHideAt = 0;
   private lastUnderAttackAlertAt = Number.NEGATIVE_INFINITY;
   private underAttackFocusPoint: Phaser.Math.Vector2 | null = null;
-  private missionBriefingContainer: Phaser.GameObjects.Container | null = null;
-  private missionBriefingBackdropImage: Phaser.GameObjects.Image | null = null;
-  private missionBriefingIntroImage: Phaser.GameObjects.Image | null = null;
-  private missionBriefingBackdropStartedAt: number | null = null;
-  private missionBriefingHideAt: number | null = null;
-  private missionBriefingPausedAt: number | null = null;
-  private missionBriefingLineIndex = 0;
-  private missionBriefingLineRevealAt: number | null = null;
-  private missionBriefingNextLineAt: number | null = null;
-  private missionBriefingPauseOwnership: PresentationPauseOwnership | null = null;
-  private missionBriefingWasUiVisible: boolean | null = null;
-  private missionBriefingIntroCompleted = false;
-  private missionBriefingLineScheduled = false;
-  private missionBriefingMusicPlaying = false;
   private missionDialogueContainer: Phaser.GameObjects.Container | null = null;
   private missionResultContainer: Phaser.GameObjects.Container | null = null;
   private missionResultAudioStatus: "victory" | "defeat" | null = null;
@@ -657,12 +584,6 @@ export class SkirmishScene extends Phaser.Scene {
       }
     }
 
-    for (const frame of MISSION_BRIEFING_BACKDROP_PRELOAD_FRAMES) {
-      if (!this.textures.exists(frame.key)) {
-        this.load.image(frame.key, frame.url);
-      }
-    }
-
     for (const logo of Object.values(MISSION_RESULT_LOGO_BY_STATUS)) {
       for (const frame of logo.frames) {
         if (!this.textures.exists(frame.key)) {
@@ -682,18 +603,6 @@ export class SkirmishScene extends Phaser.Scene {
     this.activeMissionDialogue = null;
     this.missionResultAudioStatus = null;
     this.recordedCampaignVictoryScenarioId = null;
-    this.missionBriefingBackdropImage = null;
-    this.missionBriefingIntroImage = null;
-    this.missionBriefingBackdropStartedAt = null;
-    this.missionBriefingHideAt = null;
-    this.missionBriefingPausedAt = null;
-    this.missionBriefingLineIndex = 0;
-    this.missionBriefingLineRevealAt = null;
-    this.missionBriefingNextLineAt = null;
-    this.missionBriefingPauseOwnership = null;
-    this.missionBriefingWasUiVisible = null;
-    this.missionBriefingIntroCompleted = false;
-    this.missionBriefingLineScheduled = false;
     this.missionDialoguePauseOwnership = null;
     this.missionDialogueConsumedPointerId = null;
     this.introducedMissionPortraitKeys.clear();
@@ -702,7 +611,6 @@ export class SkirmishScene extends Phaser.Scene {
     this.trackedConstructionUnitIds.clear();
     this.trackedCompletedResearchKeys.clear();
     this.trackedUnitIds.clear();
-    this.missionBriefingMusicPlaying = false;
     this.knownResourceViews.clear();
     this.lastAudioCuePlayedAt.clear();
     this.controlGroups.clear();
@@ -752,7 +660,6 @@ export class SkirmishScene extends Phaser.Scene {
     this.setupScenarioStatusOverlay();
     this.setupCommandFeedbackOverlay();
     this.setupUnderAttackAlertOverlay();
-    this.setupMissionBriefingOverlay();
     if (data.resumeSnapshot) {
       this.restoreActiveMissionDialogue(data.resumeMissionDialogue);
     }
@@ -796,7 +703,6 @@ export class SkirmishScene extends Phaser.Scene {
     this.updatePerfOverlay(delta);
     this.updateCommandFeedbackOverlay(time);
     this.updateUnderAttackAlertOverlay(time);
-    this.updateMissionBriefingOverlay(time);
     this.updateBuildPlacementPreview();
     this.flushViewportIfDirty(time);
 
@@ -1005,7 +911,7 @@ export class SkirmishScene extends Phaser.Scene {
   }
 
   private isBlockingModalOpen(): boolean {
-    return Boolean(this.missionBriefingContainer || this.activeMissionDialogue || this.missionResultContainer || this.pauseMenuContainer);
+    return Boolean(this.activeMissionDialogue || this.missionResultContainer || this.pauseMenuContainer);
   }
 
   private setupPointerLockLifecycle(): void {
@@ -1142,7 +1048,6 @@ export class SkirmishScene extends Phaser.Scene {
     this.layoutScenarioStatusOverlay();
     this.layoutCommandFeedbackOverlay();
     this.layoutUnderAttackAlertOverlay();
-    this.redrawMissionBriefingOverlay();
     this.redrawMissionDialogueOverlay();
     this.redrawPauseMenuOverlay();
     this.redrawMissionResultOverlay();
@@ -1206,7 +1111,6 @@ export class SkirmishScene extends Phaser.Scene {
     this.underAttackText?.destroy();
     this.underAttackText = null;
     this.underAttackFocusPoint = null;
-    this.hideMissionBriefingOverlay();
     this.clearMissionDialogueOverlay();
     this.hideMissionResultOverlay();
     this.hidePauseMenu(false);
@@ -1888,424 +1792,6 @@ export class SkirmishScene extends Phaser.Scene {
     }
   }
 
-  private setupMissionBriefingOverlay(): void {
-    const briefing = this.launchContext?.scenario?.briefing;
-
-    if (!briefing || this.launchContext?.resumeSnapshot) {
-      return;
-    }
-
-    if (this.missionBriefingPauseOwnership === null) {
-      this.missionBriefingPauseOwnership = this.acquirePresentationPlaybackPause();
-    }
-
-    if (this.missionBriefingWasUiVisible === null) {
-      this.missionBriefingWasUiVisible = this.scene.isVisible("ui");
-      this.scene.setVisible(false, "ui");
-    }
-
-    const width = this.scale.width;
-    const height = this.scale.height;
-    const lineIndex = Phaser.Math.Clamp(
-      this.missionBriefingLineIndex,
-      0,
-      Math.max(0, briefing.lines.length - 1),
-    );
-
-    const lineRevealPending = this.missionBriefingLineRevealAt !== null && this.time.now < this.missionBriefingLineRevealAt;
-    const activeLine = !this.missionBriefingLineScheduled || lineRevealPending
-      ? undefined
-      : briefing.lines[lineIndex];
-    const container = this.addScreenOverlayContainer(SCREEN_OVERLAY_DEPTH + 24);
-    const graphics = this.add.graphics();
-
-    graphics
-      .fillStyle(0x000000, 1)
-      .fillRect(0, 0, width, height);
-    container.add(graphics);
-    this.addMissionBriefingBackdrop(container, width, height);
-
-    if (activeLine) {
-      this.addOriginalSpeechPresentation(
-        container,
-        briefing.lines,
-        activeLine,
-        lineIndex,
-        width,
-        height,
-      );
-    }
-
-    container.add(
-      this.add
-        .zone(0, 0, width, height)
-        .setOrigin(0, 0)
-        .setInteractive({ useHandCursor: true })
-        .on("pointerup", () => this.advanceMissionBriefingLine(this.time.now)),
-    );
-
-    const buttonWidth = 104;
-    const buttonGap = 12;
-    const buttonY = Math.max(8, height - 40);
-    const startX = width - 12 - buttonWidth;
-    const replayX = startX - buttonGap - buttonWidth;
-
-    this.addMissionBriefingButton(container, graphics, replayX, buttonY, buttonWidth, "다시보기", () => {
-      const replay = createMissionBriefingReplayState(this.time.now);
-
-      this.missionBriefingLineIndex = replay.lineIndex;
-      this.missionBriefingLineRevealAt = replay.lineRevealAt;
-      this.missionBriefingNextLineAt = replay.nextLineAt;
-      this.missionBriefingLineScheduled = replay.lineScheduled;
-      this.missionBriefingIntroCompleted = replay.introCompleted;
-      this.introducedMissionPortraitKeys.clear();
-      this.missionBriefingBackdropStartedAt = replay.introStartedAt;
-      this.redrawMissionBriefingOverlay();
-    });
-    this.addMissionBriefingButton(container, graphics, startX, buttonY, buttonWidth, "게임 시작", () => {
-      this.hideMissionBriefingOverlay();
-    });
-
-    this.missionBriefingContainer = container;
-    this.missionBriefingHideAt = briefing.noEnd
-      ? Number.POSITIVE_INFINITY
-      : this.time.now + MISSION_BRIEFING_DURATION_MS;
-    this.playMissionBriefingMusic();
-    if (activeLine) {
-      this.playMissionLineVoice(activeLine);
-    }
-    this.refreshScreenOverlayCameraOrder();
-  }
-
-  private addMissionBriefingBackdrop(
-    container: Phaser.GameObjects.Container,
-    width: number,
-    height: number,
-  ): void {
-    const frames = this.getMissionBriefingBackdropFrames();
-    const baseFrame = frames[0];
-    const completedFrame = frames[frames.length - 1];
-
-    if (!baseFrame || !this.textures.exists(baseFrame.key)) {
-      return;
-    }
-
-    if (this.missionBriefingBackdropStartedAt === null) {
-      this.missionBriefingBackdropStartedAt = this.time.now;
-    }
-
-    const scale = Math.min(
-      width / MISSION_BRIEFING_BACKDROP_SOURCE_WIDTH,
-      height / MISSION_BRIEFING_BACKDROP_SOURCE_HEIGHT,
-    );
-    const alphas = this.getMissionBriefingBackdropAlphas(this.time.now);
-    const image = this.add.image(width / 2, height / 2, baseFrame.key)
-      .setScale(scale)
-      .setAlpha(alphas.base);
-
-    this.missionBriefingBackdropImage = image;
-    container.add(image);
-    if (completedFrame && this.textures.exists(completedFrame.key)) {
-      this.missionBriefingIntroImage = this.add
-        .image(width / 2, height / 2, completedFrame.key)
-        .setScale(scale)
-        .setAlpha(alphas.completed);
-      container.add(this.missionBriefingIntroImage);
-    }
-    this.updateMissionBriefingBackdrop(this.time.now);
-  }
-
-  private getMissionBriefingBackdropFrames(): MissionBriefingBackdropFrameDefinition[] {
-    const briefing = this.launchContext?.scenario?.briefing;
-
-    return collectMissionBriefingBackdropFramesForBriefing(briefing);
-  }
-
-  private getMissionBriefingBackdropAlphas(time: number): { base: number; completed: number } {
-    const startedAt = this.missionBriefingBackdropStartedAt ?? time;
-
-    return getMissionBriefingIntroFrameAlphas(startedAt, time, this.missionBriefingIntroCompleted);
-  }
-
-  private updateMissionBriefingBackdrop(time: number): void {
-    if (!this.missionBriefingBackdropImage || this.missionBriefingBackdropStartedAt === null) {
-      return;
-    }
-
-    const frames = this.getMissionBriefingBackdropFrames();
-    const completedFrame = frames[frames.length - 1];
-
-    const alphas = this.getMissionBriefingBackdropAlphas(time);
-
-    this.missionBriefingBackdropImage.setAlpha(alphas.base);
-    if (!this.missionBriefingIntroImage || !completedFrame || !this.textures.exists(completedFrame.key)) {
-      return;
-    }
-
-    if (this.missionBriefingIntroImage.texture.key !== completedFrame.key) {
-      this.missionBriefingIntroImage.setTexture(completedFrame.key);
-    }
-    this.missionBriefingIntroImage.setAlpha(alphas.completed);
-  }
-
-  private addMissionBriefingButton(
-    container: Phaser.GameObjects.Container,
-    graphics: Phaser.GameObjects.Graphics,
-    x: number,
-    y: number,
-    width: number,
-    label: string,
-    onClick: () => void,
-  ): void {
-    const height = 32;
-
-    graphics
-      .fillStyle(0x102428, 0.94)
-      .fillRect(x, y, width, height)
-      .lineStyle(1, 0xd0b46a, 0.72)
-      .strokeRect(x, y, width, height);
-    container.add(
-      this.add.text(x + width / 2, y + 7, label, {
-        fontFamily: "Noto Sans KR, Malgun Gothic, Apple SD Gothic Neo, Trebuchet MS, sans-serif",
-        fontSize: "13px",
-        color: "#f1dfaa",
-      }).setOrigin(0.5, 0),
-    );
-    container.add(
-      this.add
-        .zone(x, y, width, height)
-        .setOrigin(0, 0)
-        .setInteractive({ useHandCursor: true })
-        .on(
-          "pointerdown",
-          (
-            _pointer: Phaser.Input.Pointer,
-            _localX: number,
-            _localY: number,
-            event: Phaser.Types.Input.EventData,
-          ) => event.stopPropagation(),
-        )
-        .on(
-          "pointerup",
-          (
-            _pointer: Phaser.Input.Pointer,
-            _localX: number,
-            _localY: number,
-            event: Phaser.Types.Input.EventData,
-          ) => {
-            event.stopPropagation();
-            onClick();
-          },
-        ),
-    );
-  }
-
-  private hideMissionBriefingOverlay(): void {
-    const shouldResumePlayback = shouldResumePresentationPlayback(this.missionBriefingPauseOwnership);
-    const shouldRestoreUi = this.missionBriefingWasUiVisible === true;
-
-    this.missionBriefingContainer?.destroy(true);
-    this.missionBriefingContainer = null;
-    this.missionBriefingBackdropImage = null;
-    this.missionBriefingIntroImage = null;
-    this.missionBriefingBackdropStartedAt = null;
-    this.missionBriefingHideAt = null;
-    this.missionBriefingPausedAt = null;
-    this.missionBriefingLineIndex = 0;
-    this.missionBriefingLineRevealAt = null;
-    this.missionBriefingNextLineAt = null;
-    this.missionBriefingPauseOwnership = null;
-    this.missionBriefingWasUiVisible = null;
-    this.missionBriefingIntroCompleted = false;
-    this.missionBriefingLineScheduled = false;
-    this.introducedMissionPortraitKeys.clear();
-    this.stopMissionBriefingMusic();
-    this.stopMissionVoiceAudio();
-
-    if (shouldResumePlayback && this.worldState.scenario.status === "running") {
-      this.setPlaybackPaused(false);
-    }
-
-    if (shouldRestoreUi) {
-      this.scene.setVisible(true, "ui");
-    }
-  }
-
-  private redrawMissionBriefingOverlay(): void {
-    if (!this.missionBriefingContainer) {
-      return;
-    }
-
-    const hideAt = this.missionBriefingHideAt;
-    const pausedAt = this.missionBriefingPausedAt;
-    const lineIndex = this.missionBriefingLineIndex;
-    const lineRevealAt = this.missionBriefingLineRevealAt;
-    const nextLineAt = this.missionBriefingNextLineAt;
-    const backdropStartedAt = this.missionBriefingBackdropStartedAt;
-
-    this.missionBriefingContainer.destroy(true);
-    this.missionBriefingContainer = null;
-    this.missionBriefingBackdropImage = null;
-    this.missionBriefingIntroImage = null;
-    this.missionBriefingBackdropStartedAt = backdropStartedAt;
-    this.missionBriefingLineIndex = lineIndex;
-    this.missionBriefingLineRevealAt = lineRevealAt;
-    this.setupMissionBriefingOverlay();
-    this.missionBriefingHideAt = hideAt;
-    this.missionBriefingPausedAt = pausedAt;
-    this.missionBriefingLineRevealAt = lineRevealAt;
-    this.missionBriefingNextLineAt = nextLineAt;
-    this.updateMissionBriefingBackdrop(this.time.now);
-  }
-
-  private updateMissionBriefingOverlay(time: number): void {
-    if (!this.missionBriefingContainer || this.missionBriefingHideAt === null) {
-      return;
-    }
-
-    if (this.isMissionPresentationPaused()) {
-      if (this.missionBriefingPausedAt === null) {
-        this.missionBriefingPausedAt = time;
-      }
-      return;
-    }
-
-    if (this.missionBriefingPausedAt !== null) {
-      const pausedDuration = Math.max(0, time - this.missionBriefingPausedAt);
-
-      this.missionBriefingHideAt += pausedDuration;
-      if (this.missionBriefingLineRevealAt !== null) {
-        this.missionBriefingLineRevealAt += pausedDuration;
-      }
-      if (this.missionBriefingNextLineAt !== null) {
-        this.missionBriefingNextLineAt += pausedDuration;
-      }
-      if (this.missionBriefingBackdropStartedAt !== null) {
-        this.missionBriefingBackdropStartedAt += pausedDuration;
-      }
-      this.missionBriefingPausedAt = null;
-    }
-
-    this.updateMissionBriefingBackdrop(time);
-
-    if (!this.missionBriefingLineScheduled && this.isMissionBriefingIntroReady(time)) {
-      this.missionBriefingLineScheduled = true;
-      this.scheduleMissionBriefingLine(
-        this.launchContext?.scenario?.briefing,
-        this.missionBriefingLineIndex,
-        time,
-      );
-      this.redrawMissionBriefingOverlay();
-      return;
-    }
-
-    if (this.missionBriefingLineRevealAt !== null && time >= this.missionBriefingLineRevealAt) {
-      this.revealMissionBriefingLine(time);
-      return;
-    }
-
-    if (this.missionBriefingNextLineAt !== null && time >= this.missionBriefingNextLineAt) {
-      this.advanceMissionBriefingLine(time);
-      return;
-    }
-
-    if (time >= this.missionBriefingHideAt) {
-      this.hideMissionBriefingOverlay();
-    }
-  }
-
-  private advanceMissionBriefingLine(time = this.time.now): void {
-    const briefing = this.launchContext?.scenario?.briefing;
-
-    if (!briefing || !this.missionBriefingContainer) {
-      return;
-    }
-
-    const clickAction = getMissionBriefingClickAction(
-      this.isMissionBriefingIntroReady(time),
-      this.missionBriefingLineRevealAt !== null && time < this.missionBriefingLineRevealAt,
-      this.missionBriefingLineIndex + 1 >= briefing.lines.length,
-    );
-
-    if (clickAction === "complete-intro") {
-      this.missionBriefingIntroCompleted = true;
-      this.missionBriefingLineScheduled = true;
-      this.scheduleMissionBriefingLine(briefing, this.missionBriefingLineIndex, time, false);
-      this.redrawMissionBriefingOverlay();
-      return;
-    }
-    if (clickAction === "reveal-line") {
-      this.revealMissionBriefingLine(time);
-      return;
-    }
-    if (clickAction === "hold-line") {
-      return;
-    }
-
-    this.missionBriefingLineIndex += 1;
-    this.scheduleMissionBriefingLine(briefing, this.missionBriefingLineIndex, time);
-    this.redrawMissionBriefingOverlay();
-  }
-
-  private isMissionBriefingIntroReady(time: number): boolean {
-    const startedAt = this.missionBriefingBackdropStartedAt;
-
-    return startedAt === null || getMissionBriefingIntroStage(startedAt, time, this.missionBriefingIntroCompleted) === "ready";
-  }
-
-  private revealMissionBriefingLine(time: number): void {
-    const briefing = this.launchContext?.scenario?.briefing;
-
-    if (!briefing || !this.missionBriefingContainer) {
-      return;
-    }
-
-    this.scheduleMissionBriefingLine(briefing, this.missionBriefingLineIndex, time, false);
-    this.redrawMissionBriefingOverlay();
-  }
-
-  private scheduleMissionBriefingLine(
-    briefing: ScenarioBriefingDefinition | undefined,
-    lineIndex: number,
-    time: number,
-    respectDelay = true,
-  ): void {
-    if (!briefing) {
-      this.missionBriefingLineRevealAt = null;
-      this.missionBriefingNextLineAt = null;
-      return;
-    }
-
-    const line = briefing.lines[lineIndex];
-
-    if (!line) {
-      this.missionBriefingLineRevealAt = null;
-      this.missionBriefingNextLineAt = null;
-      return;
-    }
-
-    const delayBeforeMs = respectDelay ? this.getMissionBriefingDelayBeforeMs(line) : 0;
-
-    if (delayBeforeMs > 0) {
-      this.missionBriefingLineRevealAt = time + delayBeforeMs;
-      this.missionBriefingNextLineAt = null;
-      return;
-    }
-
-    this.missionBriefingLineRevealAt = null;
-    this.missionBriefingNextLineAt = lineIndex + 1 < briefing.lines.length
-      ? time + this.getMissionBriefingLineDurationMs(line)
-      : null;
-  }
-
-  private getMissionBriefingLineDurationMs(line: ScenarioBriefingLineDefinition): number {
-    return getMissionLineDurationMs(line, MISSION_BRIEFING_LINE_DURATION_MS);
-  }
-
-  private getMissionBriefingDelayBeforeMs(line: ScenarioBriefingLineDefinition | undefined): number {
-    return Math.max(0, Math.floor(line?.delayBeforeMs ?? 0));
-  }
-
   private getMissionDialogueLineDurationMs(line: ScenarioBriefingLineDefinition): number {
     return getMissionLineDurationMs(line, MISSION_DIALOGUE_LINE_DURATION_MS);
   }
@@ -2335,7 +1821,6 @@ export class SkirmishScene extends Phaser.Scene {
       return;
     }
 
-    this.hideMissionBriefingOverlay();
     this.triggeredMissionDialogueIds.add(dialogue.id);
     this.activeMissionDialogue = {
       dialogue,
@@ -2349,10 +1834,7 @@ export class SkirmishScene extends Phaser.Scene {
 
   private isMissionPresentationPaused(): boolean {
     const playback = this.sessionTransport?.getPlaybackState();
-    const ownsPlaybackPause = Boolean(
-      this.missionBriefingPauseOwnership?.ownsPlaybackPause ||
-      this.missionDialoguePauseOwnership?.ownsPlaybackPause,
-    );
+    const ownsPlaybackPause = Boolean(this.missionDialoguePauseOwnership?.ownsPlaybackPause);
 
     return isPresentationExternallyPaused(
       Boolean(this.worldState.scenario.status === "running" && playback?.paused),
@@ -2850,7 +2332,6 @@ export class SkirmishScene extends Phaser.Scene {
       this.recordCampaignVictory();
     }
 
-    this.hideMissionBriefingOverlay();
     this.clearMissionDialogueOverlay();
     this.hidePauseMenu(false);
     this.playMissionResultAudio(status);
@@ -2999,10 +2480,7 @@ export class SkirmishScene extends Phaser.Scene {
   }
 
   private presentationOwnsPlaybackPause(): boolean {
-    return Boolean(
-      this.missionBriefingPauseOwnership?.ownsPlaybackPause ||
-      this.missionDialoguePauseOwnership?.ownsPlaybackPause,
-    );
+    return Boolean(this.missionDialoguePauseOwnership?.ownsPlaybackPause);
   }
 
   private quickSaveGame(): void {
@@ -3578,9 +3056,7 @@ export class SkirmishScene extends Phaser.Scene {
 
   private launchMissionContext(context: GameLaunchContext): void {
     this.stopGameplayAudio();
-    this.scene.stop("ui");
-    this.scene.start("skirmish", context);
-    this.scene.launch("ui", context);
+    launchGameWithPreGameBriefing(this.scene, context);
   }
 
   private createNextCampaignMissionContext(): GameLaunchContext | null {
@@ -4432,13 +3908,6 @@ export class SkirmishScene extends Phaser.Scene {
         return;
       }
 
-      if (this.missionBriefingContainer) {
-        this.hideMissionBriefingOverlay();
-        event.preventDefault();
-        event.stopPropagation();
-        return;
-      }
-
       if (this.pendingBuildPlacement || this.pendingTargetAction) {
         this.cancelBuildPlacement();
         this.cancelPendingTargetAction();
@@ -4525,18 +3994,7 @@ export class SkirmishScene extends Phaser.Scene {
       return true;
     }
 
-    if (!this.missionBriefingContainer) {
-      return false;
-    }
-
-    const briefing = this.launchContext?.scenario?.briefing;
-
-    if (!briefing) {
-      return false;
-    }
-
-    this.advanceMissionBriefingLine();
-    return true;
+    return false;
   }
 
   private handlePlaybackControl(control: GamePlaybackControlView): void {
@@ -4618,10 +4076,6 @@ export class SkirmishScene extends Phaser.Scene {
       }
     }
 
-    if (!muted && this.missionBriefingContainer) {
-      this.playMissionBriefingMusic();
-    }
-
     this.publishGamePlayback();
   }
 
@@ -4651,48 +4105,12 @@ export class SkirmishScene extends Phaser.Scene {
     }
 
     this.stopMissionVoiceAudio();
-    this.stopMissionBriefingMusic();
   }
 
   private stopMissionVoiceAudio(): void {
     for (const cue of MISSION_VOICE_AUDIO_CUES) {
       this.sound.stopByKey(cue.key);
     }
-  }
-
-  private stopMissionBriefingMusic(): void {
-    this.sound.stopByKey(MISSION_BRIEFING_MUSIC_AUDIO_CUE_KEY);
-    this.missionBriefingMusicPlaying = false;
-  }
-
-  private playMissionBriefingMusic(): void {
-    if (this.missionBriefingMusicPlaying || this.audioMuted || this.sound.mute) {
-      return;
-    }
-
-    const cue = GAMEPLAY_AUDIO_CUE_BY_KEY.get(this.getMissionBriefingMusicCueKey());
-
-    if (!cue || !this.cache.audio.exists(cue.key)) {
-      return;
-    }
-
-    try {
-      if (this.sound.play(cue.key, { volume: cue.volume, loop: cue.loop ?? false })) {
-        this.missionBriefingMusicPlaying = true;
-      }
-    } catch (error) {
-      console.warn("Failed to play mission briefing music", { error });
-    }
-  }
-
-  private getMissionBriefingMusicCueKey(): GameplayAudioCueKey {
-    const musicSource = this.launchContext?.scenario?.briefing?.musicSource?.trim().replaceAll("\\", "/").toLowerCase();
-
-    if (!musicSource) {
-      return MISSION_BRIEFING_MUSIC_AUDIO_CUE_KEY;
-    }
-
-    return MISSION_BRIEFING_MUSIC_AUDIO_CUE_BY_SOURCE.get(musicSource) ?? MISSION_BRIEFING_MUSIC_AUDIO_CUE_KEY;
   }
 
   private playMissionLineVoice(line: ScenarioBriefingLineDefinition): void {
