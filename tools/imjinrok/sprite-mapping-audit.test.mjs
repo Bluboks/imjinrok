@@ -44,20 +44,20 @@ test("sprite mapping audit is deterministic and current", (t) => {
 
 test("frame mappings stay quarantined outside statically proven scopes while identities are cataloged", () => {
   assert.deepEqual(report.summary, {
-    visualCount: 21,
-    unitVisualCount: 12,
+    visualCount: 23,
+    unitVisualCount: 14,
     buildingVisualCount: 9,
-    stateMappingCount: 80,
-    clipCount: 544,
-    frameReferenceCount: 4_056,
+    stateMappingCount: 90,
+    clipCount: 634,
+    frameReferenceCount: 4_812,
     missingFrameReferenceCount: 0,
     unverifiedVisualCount: 2,
-    mixedVisualCount: 17,
+    mixedVisualCount: 19,
     scopedStaticProvenVisualCount: 2,
-    staticIdentityVisualCount: 19,
+    staticIdentityVisualCount: 21,
     ambiguousIdentityVisualCount: 1,
     unboundIdentityVisualCount: 1,
-    projectBindingCount: 20,
+    projectBindingCount: 22,
     projectBindingConflictCount: 0,
     portraitCueCount: 17,
     unverifiedPortraitCueCount: 0,
@@ -100,6 +100,18 @@ test("frame mappings stay quarantined outside statically proven scopes while ide
   const japaneseSamurai = report.visuals.find(
     (visual) => visual.visualId === "japanese-samurai",
   );
+  for (const [visualId, internalClass, name, ranges] of [
+    ["korean-monk", 11, "조선 승병", { idle: [100, 139], move: [0, 39], walk: [0, 39], attack: [50, 99], death: [40, 47] }],
+    ["japanese-shrine-maiden", 16, "일본 무녀", { idle: [120, 159], move: [0, 39], walk: [0, 39], attack: [60, 109], death: [40, 47] }],
+  ]) {
+    const visual = report.visuals.find((candidate) => candidate.visualId === visualId);
+    assert.equal(visual?.evidenceStatus, "mixed");
+    assert.equal(visual?.staticEvidence.internalClass, internalClass);
+    assert.equal(visual?.staticEvidence.originalGameplayName, name);
+    assert.equal(visual?.staticEvidence.animationStateMapping, "static-proven-core-state-frames");
+    assert.deepEqual(visual?.staticEvidence.stateFrameRanges, ranges);
+    assert.equal(report.findings.some((finding) => finding.visualId === visualId && (finding.code === "direction-order-unverified" || finding.code === "mirrored-facing-unverified")), false);
+  }
   const japaneseGunner = report.visuals.find(
     (visual) => visual.visualId === "japanese-gunner",
   );

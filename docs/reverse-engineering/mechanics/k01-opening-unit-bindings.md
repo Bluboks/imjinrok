@@ -1,16 +1,16 @@
-# K01 시작 유닛 class 12·13 binding
+# K01 시작 유닛 class 11·12·13·16 binding
 
-질문: **원본 `k01.map`의 owner 1 class 12·13 시작 레코드 여섯 개를, 이미 이식된
-`japanese-gunner`·`japanese-samurai` 핵심 상태 프레임에만 정확히 연결할 수 있는가?**
+질문: **원본 `k01.map`의 class 11·12·13·16 시작 레코드를 해당 고유 project kind와
+정적으로 확정한 핵심 상태 프레임에만 정확히 연결할 수 있는가?**
 
 ## 상태와 범위
 
-- 분석 상태: `정적 확정` — 원본 K01 map entity 배열의 active owner 1 class 12·13 record,
-  타입 카탈로그의 class 정체·primary SPR, 그리고 각 기존 animation pilot의 범위에 한정한다.
-- 재현 상태: `재현 완료` — map record 수·좌표·class→project kind, canonical catalog hash와
-  변조된 binding/catalog 거부를 focused vector로 검사한다.
-- 구현 상태: `부분 이식` — 여섯 시작 record가 class 12→`japanese-gunner`, class 13→
-  `japanese-samurai`를 선택한다. 이 변경은 원본 gameplay·stats·owner 의미를 이식하지 않는다.
+- 분석 상태: `정적 확정` — canonical EXE/catalog/map/SPR와 class switch·initializer helper를
+  함께 재검증한 class 11·16의 상태 8/1/4/7, 그리고 기존 class 12·13 범위에 한정한다.
+- 재현 상태: `재현 완료` — class 11·16의 slot/frame/direction/mirror, map 좌표와 canonical
+  function·initializer·map·SPR 변조 거부 vector를 검사한다.
+- 구현 상태: `부분 이식` — class 11은 `korean-monk`, class 16은
+  `japanese-shrine-maiden` 고유 visual을 선택한다. gameplay·stats·owner 의미는 이식하지 않는다.
 
 ## 원본과 정체 근거
 
@@ -30,6 +30,8 @@ map header의 source entity 배열은 type/x/y/owner signed-WORD 배열이며 �
 | ---: | --- | --- | --- | --- |
 | 12 | 일본 조총병 | `char/gunj1.spr` | `japanese-gunner` | [normal reinforcement batch](k01-normal-reinforcement-animation-batch.md)의 상태 8/1/4/7 |
 | 13 | 일본 사무라이 | `char/horseswordj1.spr` | `japanese-samurai` | [samurai pilot](k01-samurai-animation-pilot.md)의 상태 8/1/4/7 |
+| 11 | 조선 승병 | `char/budak.spr` | `korean-monk` | `0x0042a520..0x0042a5d4`, 상태 8/1/4/7 |
+| 16 | 일본 무녀 | `char/advbudaj.spr` | `japanese-shrine-maiden` | `0x0042a5d5..0x0042a689`, 상태 8/1/4/7 |
 
 ## 재현 벡터와 구현 binding
 
@@ -55,10 +57,19 @@ owner 0 class-7 record `(7,6)`, `(8,6)`를 focused vector에서 함께 검사한
 일반 `StartingUnitDefinition[]`은 이 K01 전용 표에서 파생하므로 원본 전용 필드를 generic scenario
 타입에 추가하지 않는다.
 
+class 11의 `budak.spr` SHA-256은
+`310a88a083316f3f5172cec3d5df667c6eb76648830bf153ef625fa276da3e17` (65×50, 140 frames)이고,
+class 16의 `advbudaj.spr` SHA-256은
+`18399ae5b01edc38e58127c57d06f1463d0f5b86a1ded99970d8bb70b8c27754` (50×50, 300 frames)이다.
+공통 normal direction은 raw `[1,5,4,20,16,80,64,65]`에서 project facing
+`s,sw,w,nw,n,ne,e,se`, base index `0,1,2,3,2,1,0,4`, 북·북동·동 mirror로 복원했다.
+class 11은 idle/move/attack/death가 각각 `100/0/50/40` (stride `8/8/10/0`), class 16은
+`120/0/60/40` (stride `8/8/10/0`)이다. FPS와 pivot은 명시적인 프로젝트 적응이다.
+
 독립 검증은 다음을 수행한다.
 
 ```bash
-node --test tools/imjinrok/k01-opening-unit-bindings.test.mjs
+node --test tools/imjinrok/k01-opening-unit-bindings.test.mjs tools/imjinrok/k01-special-unit-animations.test.mjs
 ```
 
 - 정상: 여섯 record 수, 정확한 좌표와 class 12→gunner/class 13→samurai mapping
@@ -68,10 +79,9 @@ node --test tools/imjinrok/k01-opening-unit-bindings.test.mjs
 
 이 여섯 binding으로 K01 전체 unit mapping 또는 original simulation parity를 주장하지 않는다.
 
-1. class 31 일본 농부와 class 16 일본 무녀는 현재 `japanese-gunner` proxy다. 고유 kind·frame
+1. class 31 일본 농부는 현재 `japanese-gunner` proxy다. creation-default branch와 고유 kind·frame
    mapping을 만들지 않는다.
-2. local class 11 조선 승병과 genuinely mismatched K01 start building class 48/49/51, 58/60,
-   63은 proxy다. 자원·state·project kind를
+2. genuinely mismatched K01 start building class 48/49/51, 58/60, 63은 proxy다. 자원·state·project kind를
    시각적 유사성으로 교체하지 않는다.
 3. class 2는 일반 이동만 정적 확정·이식했고, idle·attack과 state 2 project policy는 별도다.
    class 3 일본 창병과 class 4 조선 궁수·class 7 조선 농부는 identity/source binding만
