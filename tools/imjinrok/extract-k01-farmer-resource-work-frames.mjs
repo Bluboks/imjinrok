@@ -78,8 +78,8 @@ const EVIDENCE_POINTS = [
   [0x00429bbc, "66 c7 86 84 04 00 00 28 00", "class 31 writes state-10 start 40"],
   [0x00429bd3, "66 c7 86 8a 04 00 00 50 00", "class 31 writes state-11 start 80"],
   [0x00429bea, "66 c7 86 90 04 00 00 78 00", "class 31 writes state-16 start 120"],
-  [0x00456329, "c6 04 c5 5b 52 63 00 0a", "selector 3 resource path writes visual state 10"],
-  [0x0045633c, "c6 04 d5 5b 52 63 00 0b", "other observed selector path writes visual state 11"],
+  [0x00456329, "c6 04 c5 5b 52 63 00 0a", "selector 1/2 branches write visual state 10"],
+  [0x0045633c, "c6 04 d5 5b 52 63 00 0b", "selector 3 branch writes visual state 11"],
   [0x00455937, "c6 04 c5 5b 52 63 00 10", "alternate resource routine path writes visual state 16"],
 ].map(([va, bytes, meaning]) => ({ va, bytes, meaning }));
 
