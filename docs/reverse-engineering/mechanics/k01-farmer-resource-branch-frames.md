@@ -4,7 +4,7 @@
 
 K01 internal class 7 `조선 농부`와 class 31 `일본 농부`에서 entity `WORD +0x47a != 0`일 때 상태 8
 idle과 상태 1 move가 선택하는 slot·frame·방향·mirror를 복원한다. 이 문서는 `+0x47a`를 이 흐름 안의
-carried/gathered resource quantity로 좁게 뒷받침하는 selector·increment·capacity·player-bank credit
+carried/gathered resource quantity로 좁게 뒷받침하는 selector·increment·capacity·coordinate-indexed tile WORD storage add
 경로도 함께 다룬다.
 
 ## 원본 파일과 해시
@@ -37,10 +37,11 @@ carried/gathered resource quantity로 좁게 뒷받침하는 selector·increment
 따라서 `0x0043ce75..0x0043ce9e`는 quantity `+0x47a`, selector `+0x478`, capacity `+0x47c`를 읽고
 quantity와 selector가 모두 0이 아니며 observed signed `JGE` 비교에서 quantity가 capacity보다 작을 때
 `0x0043ce9a`에서 `FUN_00424510`을 호출한다. 인수는 selector와 quantity다.
-`FUN_00424510`은 selector 1/2/3에 따라 player-bank WORD table에 quantity를 더하며 selector 3은 add 전
-quantity를 8 bit shift한다. 따라서 이 write/increment/gate/credit chain은 `+0x47a`가 이 흐름의
+`FUN_00424510`은 entity `+0x1bc/+0x1be` 좌표를 읽어 `x*45+y` index를 만들고 `0x00bb41cc`의
+coordinate-indexed tile WORD storage에 selector 1/2는 quantity raw WORD, selector 3은 quantity를 8 bit
+shift한 값을 더한다. 따라서 이 write/increment/gate/storage-add chain은 `+0x47a`가 이 흐름의
 carried/gathered resource quantity임을 `정적 확정`한다. selector의 사람용 자원 이름이나 다른 호출자의
-`+0x47a` 의미까지는 확정하지 않는다.
+`+0x47a` 의미, 그리고 이 tile storage add의 return/deposit 의미까지는 확정하지 않는다.
 
 `0x004564d4/0x004564db` increment 뒤 `0x0045650c`은 move helper `0x00428e10`, `0x00456524`는 idle
 helper `0x00428fb0`을 직접 호출한다. generated reference의 둘 다 containing function은
@@ -78,7 +79,7 @@ seed/SPR/EXE tamper rejection을 검사한다.
 ## 현재 구현과의 차이
 
 현행 port는 `carriedResource.amount > 0`일 때만 class 7·31의 `carry`/`carry-idle`로 이 정적 frame
-mapping을 선택한다. 이는 원본의 quantity mutation, selector, capacity, player-bank credit, gather 명령 또는
+mapping을 선택한다. 이는 원본의 quantity mutation, selector, capacity, coordinate-indexed tile storage add, gather 명령 또는
 full gather lifecycle을 구현했다는 뜻이 아니다. 기존 creation-default mapping의 `+0x47a==0` core 범위와
 이 문서의 `+0x47a!=0` 범위는 분리하며, FPS와 pivot은 프로젝트 적응으로 남는다.
 
