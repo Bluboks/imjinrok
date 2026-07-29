@@ -18,7 +18,10 @@ export function getOccupyingUnitIdsByTile(
   const occupants = new Map<string, string[]>();
 
   for (const unit of iterateUnitsOrdered(state)) {
-    if (unit.id === excludedUnitId || !unitDefinitions[unit.kind].footprint.blocksMovement) {
+    if (
+      unit.id === excludedUnitId ||
+      !unitDefinitions[unit.kind].footprint.blocksMovement
+    ) {
       continue;
     }
 
@@ -37,7 +40,12 @@ export function getEntityBlockingTiles(state: WorldState, excludedUnitId?: strin
   return new Set(getOccupyingUnitIdsByTile(state, excludedUnitId).keys());
 }
 
-export function canUnitOccupyPosition(state: WorldState, unit: UnitState, position: GridPoint): boolean {
+export function canUnitOccupyPosition(
+  state: WorldState,
+  unit: UnitState,
+  position: GridPoint,
+  reservation?: MovementReservation,
+): boolean {
   const footprint = unitDefinitions[unit.kind].footprint;
   const tiles = getFootprintTiles(position, footprint);
 
@@ -47,16 +55,23 @@ export function canUnitOccupyPosition(state: WorldState, unit: UnitState, positi
 
   const occupants = getOccupyingUnitIdsByTile(state, unit.id);
 
-  return tiles.every((tile) => isTileInMap(state, tile) && !occupants.has(toTileKey(tile)));
+  return tiles.every((tile) => {
+    const key = toTileKey(tile);
+    const occupantIds = occupants.get(key) ?? [];
+    const releasedIds = reservation?.releasedUnitIdsByTile.get(key);
+
+    return isTileInMap(state, tile) && occupantIds.every((occupantId) => releasedIds?.has(occupantId) === true);
+  });
 }
 
 /** Tick-local claims prevent two units from beginning travel toward the same empty footprint. */
 export interface MovementReservation {
   readonly claimedUnitIdsByTile: Map<string, string>;
+  readonly releasedUnitIdsByTile: Map<string, Set<string>>;
 }
 
 export function createMovementReservation(): MovementReservation {
-  return { claimedUnitIdsByTile: new Map() };
+  return { claimedUnitIdsByTile: new Map(), releasedUnitIdsByTile: new Map() };
 }
 
 export function reserveUnitPosition(
@@ -72,6 +87,13 @@ export function reserveUnitPosition(
 
   for (const tile of tiles) {
     reservation.claimedUnitIdsByTile.set(toTileKey(tile), unit.id);
+  }
+
+  for (const tile of getUnitOccupancyTiles(unit)) {
+    const key = toTileKey(tile);
+    const releasedIds = reservation.releasedUnitIdsByTile.get(key) ?? new Set<string>();
+    releasedIds.add(unit.id);
+    reservation.releasedUnitIdsByTile.set(key, releasedIds);
   }
 
   return true;

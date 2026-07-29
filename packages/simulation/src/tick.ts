@@ -317,7 +317,7 @@ function advanceUnitMovement(
     return;
   }
 
-  if (!canUnitOccupyPosition(state, unit, target) || !reserveUnitPosition(movementReservation, unit, target)) {
+  if (!canUnitOccupyPosition(state, unit, target, movementReservation) || !reserveUnitPosition(movementReservation, unit, target)) {
     repathBlockedMovementWaypoint(state, unit);
     return;
   }
@@ -329,6 +329,7 @@ function advanceUnitMovement(
   if (distance <= TARGET_EPSILON) {
     unit.position = { ...target };
     advanceMovementWaypoint(state, unit);
+    applyConditionalTravelFollowUp(state, unit);
     return;
   }
 
@@ -337,6 +338,7 @@ function advanceUnitMovement(
   if (step >= distance) {
     unit.position = { ...target };
     advanceMovementWaypoint(state, unit);
+    applyConditionalTravelFollowUp(state, unit);
     return;
   }
 
@@ -344,6 +346,7 @@ function advanceUnitMovement(
     x: unit.position.x + (deltaX / distance) * step,
     y: unit.position.y + (deltaY / distance) * step,
   };
+  applyConditionalTravelFollowUp(state, unit);
 }
 
 function clearBlockedMovementWaypoint(unit: UnitState): void {
