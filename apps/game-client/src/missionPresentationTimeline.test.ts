@@ -54,6 +54,7 @@ test("K01 delayed K1 line is revealed before a click can advance past it", () =>
   assert.equal(getMissionBriefingClickAction(false, true, false), "complete-intro");
   assert.equal(getMissionBriefingClickAction(true, true, false), "reveal-line");
   assert.equal(getMissionBriefingClickAction(true, false, false), "advance-line");
+  assert.equal(getMissionBriefingClickAction(true, false, true), "hold-line");
 });
 
 test("dialogue clicks advance each line and finish only after the final line", () => {

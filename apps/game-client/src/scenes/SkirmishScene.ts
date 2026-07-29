@@ -2212,8 +2212,7 @@ export class SkirmishScene extends Phaser.Scene {
       this.revealMissionBriefingLine(time);
       return;
     }
-    if (clickAction === "finish") {
-      this.hideMissionBriefingOverlay();
+    if (clickAction === "hold-line") {
       return;
     }
 

@@ -2,7 +2,7 @@ export const MISSION_BRIEFING_INTRO_HOLD_MS = 520;
 export const MISSION_BRIEFING_INTRO_FADE_MS = 420;
 
 export type MissionBriefingIntroStage = "holding" | "fading" | "ready";
-export type MissionBriefingClickAction = "complete-intro" | "reveal-line" | "advance-line" | "finish";
+export type MissionBriefingClickAction = "complete-intro" | "reveal-line" | "advance-line" | "hold-line";
 export type MissionDialogueClickAction = "advance-line" | "finish-dialogue";
 
 export interface PresentationPauseOwnership {
@@ -95,7 +95,7 @@ export function getMissionBriefingClickAction(
     return "reveal-line";
   }
 
-  return isLastLine ? "finish" : "advance-line";
+  return isLastLine ? "hold-line" : "advance-line";
 }
 
 export function getMissionDialogueClickAction(
