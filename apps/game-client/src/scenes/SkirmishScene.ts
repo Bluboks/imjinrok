@@ -145,7 +145,7 @@ import {
   resolveMapResourceVisualTextureKey,
   resolveResourceVisualPlacement,
 } from "../render/resourceVisualResolver.js";
-import { getAssetScale, getFrameOrigin, getFramePivot, REFERENCE_PX_PER_WU, RENDER_DEPTH_BIAS } from "../render/visualScale.js";
+import { getAssetScale, getFrameOrigin, getFramePivot, getGroundContactPlacement, REFERENCE_PX_PER_WU, RENDER_DEPTH_BIAS } from "../render/visualScale.js";
 import {
   createCampaignMissionLaunchContext,
   deserializePlayerVisibilityState,
@@ -218,6 +218,7 @@ const MAX_CAMERA_ZOOM = 1.8;
 const PLAYBACK_SPEEDS = [0.5, 1, 1.5, 2, 3] as const;
 const MAX_CLIENT_PRODUCTION_QUEUE_SIZE = 5;
 const CHEAT_INPUT_MAX_LENGTH = 32;
+const UNIT_SPRITE_GROUND_CONTACT = { x: 0, y: 0 } as const;
 
 type ClientCheatAction =
   | { type: "simulation"; code: CheatCodeId; label: string }
@@ -7922,6 +7923,19 @@ export class SkirmishScene extends Phaser.Scene {
       });
   }
 
+  private applyUnitSpriteGroundContactPlacement(
+    sprite: Phaser.GameObjects.Image,
+    visual: EntityVisual,
+    frame: FrameRef,
+  ): void {
+    const placement = getGroundContactPlacement(visual, frame, UNIT_SPRITE_GROUND_CONTACT);
+
+    sprite
+      .setOrigin(placement.origin.x, placement.origin.y)
+      .setScale(placement.scale)
+      .setPosition(placement.position.x, placement.position.y);
+  }
+
   private createUnitRenderable(unit: UnitState): UnitRenderable {
     const radius = unitDefinitions[unit.kind].renderRadius;
     const color = factionDefinitions[this.getPlayerFaction(unit.playerId)].unitColor;
@@ -7946,8 +7960,6 @@ export class SkirmishScene extends Phaser.Scene {
 
     if (visual && frame && this.textures.exists(frame.textureKey)) {
       const sprite = this.add.image(0, 0, frame.textureKey, frame.frameName);
-      const origin = getFrameOrigin(visual, frame);
-      const scale = getAssetScale(visual, REFERENCE_PX_PER_WU);
       const teamBadge = this.add.graphics();
       const spriteLayers: UnitRenderableSpriteLayer[] = [{
         id: "base",
@@ -7958,7 +7970,8 @@ export class SkirmishScene extends Phaser.Scene {
       }];
 
       this.textures.get(frame.textureKey).setFilter(Phaser.Textures.FilterMode.NEAREST);
-      sprite.setOrigin(origin.x, origin.y).setScale(scale).setFlipX(selection?.clip.mirrorX ?? false);
+      this.applyUnitSpriteGroundContactPlacement(sprite, visual, frame);
+      sprite.setFlipX(selection?.clip.mirrorX ?? false);
       for (const visualLayer of visual.layers ?? []) {
         const layerSelection = this.getEntityLayerAnimationSelection(unit, visual, visualLayer, initialFacing);
         const layerFrame = layerSelection?.clip.frames[0] ?? null;
@@ -7968,11 +7981,10 @@ export class SkirmishScene extends Phaser.Scene {
         }
 
         const layerSprite = this.add.image(0, 0, layerFrame.textureKey, layerFrame.frameName);
-        const layerOrigin = getFrameOrigin(visual, layerFrame);
-        const layerScale = getAssetScale(visual, REFERENCE_PX_PER_WU);
 
         this.textures.get(layerFrame.textureKey).setFilter(Phaser.Textures.FilterMode.NEAREST);
-        layerSprite.setOrigin(layerOrigin.x, layerOrigin.y).setScale(layerScale).setFlipX(layerSelection?.clip.mirrorX ?? false);
+        this.applyUnitSpriteGroundContactPlacement(layerSprite, visual, layerFrame);
+        layerSprite.setFlipX(layerSelection?.clip.mirrorX ?? false);
         spriteLayers.push({
           id: visualLayer.id,
           sprite: layerSprite,
@@ -8244,12 +8256,10 @@ export class SkirmishScene extends Phaser.Scene {
       return;
     }
 
-    const origin = getFrameOrigin(visual, frame);
-
     renderable.sprite
       .setTexture(frame.textureKey, frame.frameName)
-      .setOrigin(origin.x, origin.y)
       .setFlipX(selection?.clip.mirrorX ?? false);
+    this.applyUnitSpriteGroundContactPlacement(renderable.sprite, visual, frame);
     this.updateUnitRenderableSpriteLayers(renderable, unit, visual, facing, deltaMs);
   }
 
@@ -8286,8 +8296,8 @@ export class SkirmishScene extends Phaser.Scene {
         continue;
       }
 
-      const origin = getFrameOrigin(visual, frame);
-      renderLayer.sprite.setTexture(frame.textureKey, frame.frameName).setOrigin(origin.x, origin.y);
+      renderLayer.sprite.setTexture(frame.textureKey, frame.frameName);
+      this.applyUnitSpriteGroundContactPlacement(renderLayer.sprite, visual, frame);
     }
   }
 

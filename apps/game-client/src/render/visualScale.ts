@@ -37,10 +37,17 @@ export function getFrameOrigin(visual: VisualBase, frame: FrameRef): { x: number
   };
 }
 
+export interface GroundContactPlacement {
+  readonly origin: { x: number; y: number };
+  readonly position: { x: number; y: number };
+  readonly scale: number;
+}
+
 /**
  * Converts a simulation ground-contact point into render placement. The point is
  * deliberately independent from frame dimensions and source pivot values; those
  * affect only Phaser's origin. Lift is an explicit visual/elevation adjustment.
+ * This is a mod-friendly project rendering adapter, not an original pivot claim.
  */
 export function getGroundContactPlacement(
   visual: VisualBase,
@@ -48,12 +55,13 @@ export function getGroundContactPlacement(
   groundContact: { x: number; y: number },
   liftSteps = 1,
   pxPerWu = REFERENCE_PX_PER_WU,
-): { origin: { x: number; y: number }; position: { x: number; y: number } } {
+): GroundContactPlacement {
   const assetScale = getAssetScale(visual, pxPerWu);
   const pivot = getFramePivot(visual, frame);
 
   return {
     origin: getFrameOrigin(visual, frame),
+    scale: assetScale,
     position: {
       x: groundContact.x,
       y: groundContact.y - (pivot.liftPx ?? 0) * assetScale * liftSteps,
