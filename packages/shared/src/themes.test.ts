@@ -167,33 +167,38 @@ test("default theme unit frame blocks stay within their source exports", () => {
     swordsmanVisual.states.walk?.clips,
     swordsmanVisual.states.move?.clips,
   );
-  assert.equal(swordsmanVisual.states.attack?.clips.n?.frames[0]?.fileName, "swordk_0048.png");
-  assert.equal(swordsmanVisual.states.attack?.clips.s?.frames[0]?.fileName, "swordk_0080.png");
-  assert.equal(swordsmanVisual.states.attack?.clips.e?.frames[0]?.fileName, "swordk_0064.png");
+  assert.equal(swordsmanVisual.states.idle?.clips.n?.frames[0]?.fileName, "swordk_0148.png");
+  assert.equal(swordsmanVisual.states.idle?.clips.s?.frames[0]?.fileName, "swordk_0128.png");
+  assert.equal(swordsmanVisual.states.attack?.clips.n?.frames[0]?.fileName, "swordk_0064.png");
+  assert.equal(swordsmanVisual.states.attack?.clips.s?.frames[0]?.fileName, "swordk_0048.png");
+  assert.equal(swordsmanVisual.states.attack?.clips.e?.frames[0]?.fileName, "swordk_0048.png");
   assert.equal(swordsmanVisual.states.attack?.clips.w?.frames[0]?.fileName, "swordk_0064.png");
-  assert.equal(swordsmanVisual.states.attack?.clips.w?.mirrorX, true);
+  assert.equal(swordsmanVisual.states.attack?.clips.w?.mirrorX, undefined);
+  assert.equal(swordsmanVisual.states.death?.clips.ne?.frames[0]?.fileName, "swordk_0040.png");
 
   assert.equal(archerManifest.source, "original/imjinrok2/char/archerk.spr");
   assert.equal(archerManifest.frameCount, 176);
   assert.equal(archerManifest.exportedFrames.length, 176);
   assert.equal(archerVisual.states.move?.clips.s?.frames.length, 8);
-  assert.equal(archerVisual.states.idle?.clips.n?.frames[0]?.fileName, "archerk_0120.png");
-  assert.equal(archerVisual.states.idle?.clips.s?.frames[0]?.fileName, "archerk_0152.png");
-  assert.equal(archerVisual.states.move?.clips.s?.frames[0]?.fileName, "archerk_0112.png");
-  assert.equal(archerVisual.states.attack?.clips.s?.frames[0]?.fileName, "archerk_0032.png");
-  assert.equal(archerVisual.states.attack?.clips.e?.frames[0]?.fileName, "archerk_0016.png");
-  assert.equal(archerVisual.states.attack?.clips.w?.frames[0]?.fileName, "archerk_0016.png");
-  assert.equal(archerVisual.states.attack?.clips.w?.mirrorX, true);
+  assert.equal(archerVisual.states.idle?.clips.n?.frames[0]?.fileName, "archerk_0016.png");
+  assert.equal(archerVisual.states.idle?.clips.s?.frames[0]?.fileName, "archerk_0000.png");
+  assert.equal(archerVisual.states.move?.clips.s?.frames[0]?.fileName, "archerk_0080.png");
+  assert.equal(archerVisual.states.attack?.clips.s?.frames[0]?.fileName, "archerk_0120.png");
+  assert.equal(archerVisual.states.attack?.clips.e?.frames[0]?.fileName, "archerk_0120.png");
+  assert.equal(archerVisual.states.attack?.clips.w?.frames[0]?.fileName, "archerk_0136.png");
+  assert.equal(archerVisual.states.attack?.clips.w?.mirrorX, undefined);
+  assert.equal(archerVisual.states.death?.clips.ne?.frames[0]?.fileName, "archerk_0160.png");
 
   assert.equal(japaneseSwordsmanManifest.source, "original/imjinrok2/char/swordj.spr");
   assert.equal(japaneseSwordsmanManifest.frameCount, 192);
   assert.equal(japaneseSwordsmanManifest.exportedFrames.length, 192);
-  assert.equal(japaneseSwordsmanVisual.states.idle?.clips.n?.frames[0]?.fileName, "swordj_0000.png");
-  assert.equal(japaneseSwordsmanVisual.states.move?.clips.n?.frames[0]?.fileName, "swordj_0040.png");
-  assert.equal(japaneseSwordsmanVisual.states.move?.clips.s?.frames[0]?.fileName, "swordj_0072.png");
-  assert.equal(japaneseSwordsmanVisual.states.attack?.clips.s?.frames[0]?.fileName, "swordj_0160.png");
-  assert.equal(japaneseSwordsmanVisual.states.attack?.clips.w?.frames[0]?.fileName, "swordj_0144.png");
-  assert.equal(japaneseSwordsmanVisual.states.attack?.clips.w?.mirrorX, true);
+  assert.equal(japaneseSwordsmanVisual.states.idle?.clips.n?.frames[0]?.fileName, "swordj_0016.png");
+  assert.equal(japaneseSwordsmanVisual.states.move?.clips.n?.frames[0]?.fileName, "swordj_0056.png");
+  assert.equal(japaneseSwordsmanVisual.states.move?.clips.s?.frames[0]?.fileName, "swordj_0040.png");
+  assert.equal(japaneseSwordsmanVisual.states.attack?.clips.s?.frames[0]?.fileName, "swordj_0120.png");
+  assert.equal(japaneseSwordsmanVisual.states.attack?.clips.w?.frames[0]?.fileName, "swordj_0136.png");
+  assert.equal(japaneseSwordsmanVisual.states.attack?.clips.w?.mirrorX, undefined);
+  assert.equal(japaneseSwordsmanVisual.states.death?.clips.ne?.frames[0]?.fileName, "swordj_0176.png");
 
   assert.equal(japaneseGunnerManifest.source, "original/imjinrok2/char/gunj1.spr");
   assert.equal(japaneseGunnerManifest.frameCount, 80);
@@ -406,6 +411,38 @@ test("Japanese gunner uses the statically recovered class-12 core-state frame bl
   assert.equal(visual.states.walk?.clips.s?.loop, true);
   assert.equal(visual.states.attack?.clips.s?.loop, false);
   assert.equal(visual.states.death?.clips.s?.loop, false);
+});
+
+test("K01 classes 2, 3, and 4 use only the recovered normal core-state frame blocks", () => {
+  const expectations = [
+    ["swordsman", "swordk", { idle: [128, 10], move: [0, 8], attack: [48, 8], death: [40, 0] }],
+    ["japanese-swordsman", "swordj", { idle: [0, 8], move: [40, 8], attack: [120, 8], death: [176, 0] }],
+    ["archer", "archerk", { idle: [0, 8], move: [80, 8], attack: [120, 8], death: [160, 0] }],
+  ] as const;
+  const directionIndexes = { s: 0, sw: 1, w: 2, nw: 3, n: 2, ne: 1, e: 0, se: 4 } as const;
+
+  for (const [binding, stem, states] of expectations) {
+    const visual = defaultTheme.visuals[defaultTheme.entityBindings[binding]] as EntityVisual;
+    assert.deepEqual(Object.keys(visual.states).sort(), ["idle", "move", "walk", "attack", "death"].sort());
+    for (const [stateName, [start, stride]] of Object.entries(states)) {
+      const phaseCount = binding === "swordsman" && stateName === "idle" ? 10 : 8;
+      const state = visual.states[stateName as "idle" | "move" | "attack" | "death"];
+      assert.ok(state);
+      for (const [facing, directionIndex] of Object.entries(directionIndexes) as [Facing, number][]) {
+        const clip = state.clips[facing];
+        const first = `${stem}_${String(start + directionIndex * stride).padStart(4, "0")}.png`;
+        assert.equal(clip?.frames[0]?.fileName, first);
+        assert.equal(clip?.frames.length, phaseCount);
+        assert.equal(clip?.mirrorX === true, ["n", "ne", "e"].includes(facing));
+      }
+    }
+    assert.deepEqual(visual.states.walk, visual.states.move);
+    assert.equal(visual.states.idle?.clips.s?.loop, true);
+    assert.equal(visual.states.move?.clips.s?.loop, true);
+    assert.equal(visual.states.walk?.clips.s?.loop, true);
+    assert.equal(visual.states.attack?.clips.s?.loop, false);
+    assert.equal(visual.states.death?.clips.s?.loop, false);
+  }
 });
 
 test("Japanese samurai uses the statically recovered core-state frame blocks", () => {
