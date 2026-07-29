@@ -21,10 +21,11 @@
 - `pal/night1.pal`부터 `pal/night4.pal`, `tempeft/night1.YAV`.
 - `fnt/crop0.spr`, `crop1.spr`, `tree0.spr`, `resource.spr`, `helpresource.spr`.
 
-파일 존재는 source asset catalog의 사실일 뿐, map byte가 어떤 tile/file/frame을 선택하는지 또는
-`crop/tree/resource`가 현재 게임의 six-node kind와 정확히 대응하는지를 뜻하지 않는다. K01의
-`themeId=0 → normal`도 기존 [원시 맵 값 투영 계약](../reverse-engineering/mechanics/k01-map-terrain-contract.md)의
-`추정` 범위를 넘지 않는다.
+파일 존재는 source asset catalog의 사실일 뿐, map byte가 어떤 tile/file/frame을 선택하는지 증명하지
+않는다. `crop0` frame 0→`rice`/`potato`, `tree0` frame 0→`tree`/`bamboo`은 source file identity 위에
+올린 **source-backed project adaptation**이다. `resource.spr` frame 0은 UI sack source fact로 catalog에만
+남기며 `gold`/`stone` field node에는 자동 연결하지 않는다. K01의 `themeId=0 → normal`도 기존
+[원시 맵 값 투영 계약](../reverse-engineering/mechanics/k01-map-terrain-contract.md)의 `추정` 범위를 넘지 않는다.
 
 ## 프로젝트 계약
 
@@ -47,19 +48,25 @@ K01/K02 scaffold는 `imjinrok-normal` tileset identity만 선택한다. source n
 palette timing을 추측하지 않는 opt-in project adaptation이다. deterministic world tick에서 output
 `EnvironmentState.lightLevel01`을 관찰할 수 있다.
 
+기본 `river-crossing` skirmish map은 10 tick/s 기준 6,000 tick(10분) project-authored cycle을 opt-in하며,
+tick 0에서 dawn으로 시작해 600 tick 뒤 day가 된다. K01/K02와 다른 Imjinrok source map에는 원본 일정
+근거가 없으므로 이 cycle을 적용하지 않는다.
+
 ## renderer bridge contact
 
 후속 renderer는 registry를 resolve한 뒤 다음만 소비한다.
 
-1. terrain: `tileset.terrainAssets[tile.terrain]`, then optional
-   `tileset.elevationAssets[String(tile.elevation)]`.
-2. resource: `resourceVisualSet.resources[node.kind]?.states[getResourceNodeState(node)]`.
+1. terrain: exact original record→tile/frame rule은 미확정이다. catalog의 `grss1`/`hill0` frame 0을
+   전 tile에 반복 선택하는 terrain resolver를 만들지 않는다.
+2. resource: generic `resolveMapResourceVisual(registry, map, kind, state)`가 map-selected set의
+   `resourceVisualSet.resources[kind]?.states[state]`를 반환한다. visual set ID가 없는 legacy map과
+   매핑되지 않은 kind/state는 `null`이고 preload는 빈 배열이다. 명시했지만 등록되지 않은 set만 오류다.
 3. environment: opt-in state의 `lightLevel01`; `EnvironmentVisualProfile`은
    `evidenceStatus !== "unresolved"`인 asset만 자동 선택한다.
 
-Imjinrok resource candidate URL은 `evidenceStatus: "unresolved"`다. renderer가 이를 일반 gameplay visual로
-자동 승격하거나 state/frame 의미를 원본 사실로 표현해서는 안 된다. normal/snow/brown representative export도
-동일하게 원본 tile selection의 증거가 아니다.
+Imjinrok crop/tree adaptation은 active state frame 0만 가진다. depleted state와 `gold`/`stone`은 `null`
+fallback으로 기존 renderer behavior를 보존한다. normal/snow/brown representative export도 원본 tile
+selection의 증거가 아니다.
 
 ## 재현과 다음 분석
 

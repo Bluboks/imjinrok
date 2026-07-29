@@ -30,3 +30,22 @@ test("source catalog pack does not claim gameplay definition ownership", () => {
   assert.deepEqual(imjinrokSourceContentPack.resources, {});
   assert.deepEqual(imjinrokSourceContentPack.units, {});
 });
+
+test("resource visual catalog maps only crop and tree project adaptations", () => {
+  const resourceSet = imjinrokSourceContentPack.resourceVisualSets["imjinrok-source-resource-adaptation"];
+
+  assert.equal(resourceSet.evidenceStatus, "source-backed-adaptation");
+  assert.deepEqual(resourceSet.resources.rice, resourceSet.resources.potato);
+  assert.deepEqual(resourceSet.resources.tree, resourceSet.resources.bamboo);
+  assert.deepEqual(resourceSet.resources.rice?.states.active, {
+    url: "/assets/themes/default/resources/imjinrok/crop0_0000.png",
+    frame: 0,
+  });
+  assert.deepEqual(resourceSet.resources.tree?.states.active, {
+    url: "/assets/themes/default/resources/imjinrok/tree0_0000.png",
+    frame: 0,
+  });
+  assert.equal(resourceSet.resources.gold, undefined);
+  assert.equal(resourceSet.resources.stone, undefined);
+  assert.ok(resourceSet.sourceAssets?.some((asset) => asset.sourcePath === "fnt/resource.spr"));
+});
