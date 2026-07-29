@@ -1,6 +1,7 @@
 import type { ContentRegistry } from "./contentPack.js";
 import { validateDayNightCycle } from "./environment.js";
 import type { MapDefinition } from "./maps.js";
+import type { VisualAssetRef } from "./tilesets.js";
 
 export interface MapValidationIssue {
   path: string;
@@ -55,6 +56,7 @@ export function validateMapDefinition(map: MapDefinition, registry: ContentRegis
       if (tile.resource && !registry.resources[tile.resource.kind]) {
         issues.push(issue(`layers[${layerIndex}].tiles[${tileIndex}].resource.kind`, `Unknown resource '${tile.resource.kind}'.`));
       }
+      validateTileTilesetVisuals(map, registry, tile, `layers[${layerIndex}].tiles[${tileIndex}]`, issues);
     });
   });
 
@@ -78,6 +80,94 @@ function validateReference(
 ): void {
   if (reference !== undefined && !definitions[reference]) {
     issues.push(issue(path, `Unknown ${kind} '${reference}'.`));
+  }
+}
+
+function validateTileTilesetVisuals(
+  map: MapDefinition,
+  registry: ContentRegistry,
+  tile: MapDefinition["layers"][number]["tiles"][number],
+  tilePath: string,
+  issues: MapValidationIssue[],
+): void {
+  const selection = tile.tilesetVisuals;
+
+  if (!selection) {
+    return;
+  }
+
+  const tilesetId = map.tilesetId;
+  if (!tilesetId) {
+    if (selection.flatAssetKey !== undefined) {
+      issues.push(issue(`${tilePath}.tilesetVisuals.flatAssetKey`, "Explicit flat asset selection requires map.tilesetId."));
+    }
+    if (selection.elevationAssetKey !== undefined) {
+      issues.push(issue(`${tilePath}.tilesetVisuals.elevationAssetKey`, "Explicit elevation asset selection requires map.tilesetId."));
+    }
+    return;
+  }
+
+  const tileset = registry.tilesets[tilesetId];
+  if (!tileset) {
+    return;
+  }
+
+  validateSelectedTileAsset(
+    selection.flatAssetKey,
+    tileset.terrainAssets,
+    tileset.elevationAssets,
+    "flat",
+    `${tilePath}.tilesetVisuals.flatAssetKey`,
+    issues,
+  );
+  validateSelectedTileAsset(
+    selection.elevationAssetKey,
+    tileset.elevationAssets ?? {},
+    tileset.terrainAssets,
+    "elevation",
+    `${tilePath}.tilesetVisuals.elevationAssetKey`,
+    issues,
+  );
+}
+
+function validateSelectedTileAsset(
+  assetKey: string | undefined,
+  expectedAssets: Readonly<Record<string, VisualAssetRef>>,
+  otherAssets: Readonly<Record<string, VisualAssetRef>> | undefined,
+  collection: "flat" | "elevation",
+  path: string,
+  issues: MapValidationIssue[],
+): void {
+  if (assetKey === undefined) {
+    return;
+  }
+
+  const asset = expectedAssets[assetKey];
+  if (!asset) {
+    const otherCollection = collection === "flat" ? "elevationAssets" : "terrainAssets";
+    const message = otherAssets?.[assetKey]
+      ? `Asset '${assetKey}' belongs to ${otherCollection}, not the ${collection} collection.`
+      : `Unknown ${collection} asset '${assetKey}'.`;
+    issues.push(issue(path, message));
+    return;
+  }
+
+  const geometry = asset.imageGeometry;
+  if (!geometry) {
+    issues.push(issue(`${path}.imageGeometry`, "Explicit tile assets require image geometry."));
+    return;
+  }
+  if (!Number.isFinite(geometry.width) || geometry.width <= 0) {
+    issues.push(issue(`${path}.imageGeometry.width`, "Image width must be positive."));
+  }
+  if (!Number.isFinite(geometry.height) || geometry.height <= 0) {
+    issues.push(issue(`${path}.imageGeometry.height`, "Image height must be positive."));
+  }
+  if (!Number.isFinite(geometry.footprintAnchor.x) || geometry.footprintAnchor.x < 0 || geometry.footprintAnchor.x > geometry.width) {
+    issues.push(issue(`${path}.imageGeometry.footprintAnchor.x`, "Footprint anchor x must be inside the image."));
+  }
+  if (!Number.isFinite(geometry.footprintAnchor.y) || geometry.footprintAnchor.y < 0 || geometry.footprintAnchor.y > geometry.height) {
+    issues.push(issue(`${path}.imageGeometry.footprintAnchor.y`, "Footprint anchor y must be inside the image."));
   }
 }
 

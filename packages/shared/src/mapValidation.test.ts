@@ -33,6 +33,68 @@ test("legacy maps without visual references remain valid", () => {
   assert.equal(validateMapDefinition(map, createContentRegistry()).ok, true);
 });
 
+test("explicit tile visuals require a selected tileset and assets from the correct collection", () => {
+  const map = createBlankMap();
+  const tile = map.layers[0]?.tiles[0];
+  assert.ok(tile);
+  tile.tilesetVisuals = { flatAssetKey: "grass", elevationAssetKey: "1" };
+  delete map.tilesetId;
+
+  assert.deepEqual(
+    validateMapDefinition(map, createContentRegistry()).issues,
+    [
+      { path: "layers[0].tiles[0].tilesetVisuals.flatAssetKey", message: "Explicit flat asset selection requires map.tilesetId." },
+      { path: "layers[0].tiles[0].tilesetVisuals.elevationAssetKey", message: "Explicit elevation asset selection requires map.tilesetId." },
+    ],
+  );
+
+  map.tilesetId = "imjinrok-normal";
+  tile.tilesetVisuals = { flatAssetKey: "1", elevationAssetKey: "missing" };
+  assert.deepEqual(
+    validateMapDefinition(map, createContentRegistry()).issues,
+    [
+      {
+        path: "layers[0].tiles[0].tilesetVisuals.flatAssetKey",
+        message: "Asset '1' belongs to elevationAssets, not the flat collection.",
+      },
+      {
+        path: "layers[0].tiles[0].tilesetVisuals.elevationAssetKey",
+        message: "Unknown elevation asset 'missing'.",
+      },
+    ],
+  );
+});
+
+test("explicit tile visuals reject selected assets without valid geometry", () => {
+  const registry = createContentRegistry();
+  registry.tilesets["invalid-geometry"] = {
+    id: "invalid-geometry",
+    displayName: "Invalid Geometry",
+    terrainAssets: {
+      invalid: {
+        url: "/invalid.png",
+        frame: 0,
+        imageGeometry: { width: 0, height: 16, footprintAnchor: { x: 20, y: -1 } },
+      },
+    },
+    evidenceStatus: "source-backed-adaptation",
+  };
+  const map = createBlankMap();
+  const tile = map.layers[0]?.tiles[0];
+  assert.ok(tile);
+  map.tilesetId = "invalid-geometry";
+  tile.tilesetVisuals = { flatAssetKey: "invalid" };
+
+  assert.deepEqual(
+    validateMapDefinition(map, registry).issues,
+    [
+      { path: "layers[0].tiles[0].tilesetVisuals.flatAssetKey.imageGeometry.width", message: "Image width must be positive." },
+      { path: "layers[0].tiles[0].tilesetVisuals.flatAssetKey.imageGeometry.footprintAnchor.x", message: "Footprint anchor x must be inside the image." },
+      { path: "layers[0].tiles[0].tilesetVisuals.flatAssetKey.imageGeometry.footprintAnchor.y", message: "Footprint anchor y must be inside the image." },
+    ],
+  );
+});
+
 test("map validation rejects invalid elevation and unknown resource identities", () => {
   const map = createBlankMap({ width: 2, height: 2 });
   const firstTile = map.layers[0]?.tiles[0];
@@ -85,6 +147,7 @@ test("K01 retains only its normal tileset identity without an inferred night cyc
   assert.equal(map.tilesetId, "imjinrok-normal");
   assert.equal(map.environmentVisualProfileId, "core-default");
   assert.equal(map.environment, undefined);
+  assert.equal(map.layers.every((layer) => layer.tiles.every((tile) => tile.tilesetVisuals === undefined)), true);
   assert.equal(validateMapDefinition(map, createContentRegistry()).ok, true);
 });
 

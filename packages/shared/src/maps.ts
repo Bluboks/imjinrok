@@ -12,10 +12,20 @@ export interface ResourceNode {
   regrowTicks?: number;
 }
 
+/**
+ * Optional mod-authored selection of assets from the map's tileset. Leaving
+ * either key absent preserves the product theme renderer for that surface.
+ */
+export interface TileTilesetVisualSelection {
+  flatAssetKey?: string;
+  elevationAssetKey?: string;
+}
+
 export interface TileCell {
   terrain: TerrainType;
   elevation: number;
   resource?: ResourceNode;
+  tilesetVisuals?: TileTilesetVisualSelection;
 }
 
 export interface TileLayer {

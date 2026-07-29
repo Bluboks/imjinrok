@@ -57,7 +57,10 @@ tick 0에서 dawn으로 시작해 600 tick 뒤 day가 된다. K01/K02와 다른 
 후속 renderer는 registry를 resolve한 뒤 다음만 소비한다.
 
 1. terrain: exact original record→tile/frame rule은 미확정이다. catalog의 `grss1`/`hill0` frame 0을
-   전 tile에 반복 선택하는 terrain resolver를 만들지 않는다.
+   전 tile에 반복 선택하는 terrain resolver를 만들지 않는다. 모드 map은 `TileCell.tilesetVisuals`의
+   `flatAssetKey`/`elevationAssetKey`로 선택한 `tilesetId` collection key만 명시적으로 사용할 수 있다.
+   선택하지 않은 surface는 기존 theme fallback을 유지한다. tile asset의 image geometry와 footprint anchor는
+   모드 renderer 계약이며 original tile canvas/pivot/selection 규칙 주장이 아니다.
 2. resource: generic `resolveMapResourceVisual(registry, map, kind, state)`가 map-selected set의
    `resourceVisualSet.resources[kind]?.states[state]`를 반환한다. visual set ID가 없는 legacy map과
    매핑되지 않은 kind/state는 `null`이고 preload는 빈 배열이다. scene preload는 launch map 확정 전이므로
