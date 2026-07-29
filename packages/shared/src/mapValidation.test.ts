@@ -49,6 +49,35 @@ test("map validation rejects invalid elevation and unknown resource identities",
   ]);
 });
 
+test("map validation reports concrete invalid day/night curve paths", () => {
+  const map = createBlankMap();
+  map.environment = {
+    dayNight: {
+      cycleTicks: 0,
+      dayStartTick: -1,
+      nightStartTick: 1.5,
+      nightSightMultiplier: -1,
+      lightCurve: [
+        { tick: 0, phase: "night", lightLevel01: 2 },
+        { tick: 0, phase: "day", lightLevel01: Number.NaN },
+      ],
+    },
+  };
+
+  const result = validateMapDefinition(map, createContentRegistry());
+
+  assert.deepEqual(result.issues.map((entry) => entry.path), [
+    "environment.dayNight.cycleTicks",
+    "environment.dayNight.dayStartTick",
+    "environment.dayNight.nightStartTick",
+    "environment.dayNight.nightSightMultiplier",
+    "environment.dayNight.lightCurve[0].tick",
+    "environment.dayNight.lightCurve[0].lightLevel01",
+    "environment.dayNight.lightCurve[1].tick",
+    "environment.dayNight.lightCurve[1].lightLevel01",
+  ]);
+});
+
 test("K01 retains only its normal tileset identity without an inferred night cycle", () => {
   const map = createImjinrokMapScaffold("imjinrok-k01");
   assert.ok(map);

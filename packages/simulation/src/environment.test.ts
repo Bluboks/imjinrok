@@ -135,6 +135,23 @@ test("light curve interpolation changes sight deterministically without changing
   assert.equal(getEnvironmentLightLevel(state.environment), 0.5);
 });
 
+test("runtime rejects an invalid opt-in light curve instead of silently falling back", () => {
+  const map = createBlankMap();
+  map.environment = {
+    dayNight: {
+      cycleTicks: 8,
+      nightStartTick: 6,
+      dayStartTick: 2,
+      lightCurve: [
+        { tick: 0, phase: "night", lightLevel01: 0 },
+        { tick: 0, phase: "day", lightLevel01: 1 },
+      ],
+    },
+  };
+
+  assert.throws(() => createInitialWorldState(map, ["p1"]), /Invalid day\/night cycle: lightCurve\[1\]\.tick: Duplicate keyframe tick '0'/);
+});
+
 test("world snapshot includes environment state", () => {
   const state = createInitialWorldState(createBlankMap(), ["p1"]);
   const snapshot = toWorldSnapshot(state);

@@ -1,4 +1,4 @@
-import type { DayPhase, EnvironmentPreset, MapDefinition, WeatherKind } from "../../shared/src/index.js";
+import { assertValidDayNightCycle, type DayPhase, type EnvironmentPreset, type MapDefinition, type WeatherKind } from "../../shared/src/index.js";
 import type { WorldState } from "./types.js";
 
 export interface EnvironmentState {
@@ -57,13 +57,15 @@ function deriveEnvironmentState(map: MapDefinition, tick: number): EnvironmentSt
   const weather = preset?.weather ?? "clear";
 
   const dayNight = preset?.dayNight;
-  if (!dayNight || dayNight.cycleTicks <= 0) {
+  if (!dayNight) {
     return {
       weather,
       timeOfDay01: 0,
       dayPhase: "day",
     };
   }
+
+  assertValidDayNightCycle(dayNight);
 
   const cycleTick = tick % dayNight.cycleTicks;
   const lightCurveState = deriveLightCurveState(cycleTick, dayNight);
@@ -79,7 +81,7 @@ function deriveEnvironmentState(map: MapDefinition, tick: number): EnvironmentSt
 function deriveLightCurveState(cycleTick: number, dayNight: EnvironmentPreset["dayNight"]): Pick<EnvironmentState, "dayPhase" | "lightLevel01"> | null {
   const curve = dayNight?.lightCurve;
 
-  if (!curve || curve.length < 2 || !isValidLightCurve(curve, dayNight.cycleTicks)) {
+  if (!curve) {
     return null;
   }
 
@@ -108,26 +110,6 @@ function deriveLightCurveState(cycleTick: number, dayNight: EnvironmentPreset["d
     dayPhase: left.phase,
     lightLevel01: clamp01(left.lightLevel01 + ((right.lightLevel01 - left.lightLevel01) * progress)),
   };
-}
-
-function isValidLightCurve(curve: NonNullable<NonNullable<EnvironmentPreset["dayNight"]>["lightCurve"]>, cycleTicks: number): boolean {
-  if (!curve) {
-    return false;
-  }
-
-  const ticks = new Set<number>();
-  return curve.every((keyframe) => {
-    const valid = Number.isInteger(keyframe.tick)
-      && keyframe.tick >= 0
-      && keyframe.tick < cycleTicks
-      && Number.isFinite(keyframe.lightLevel01)
-      && keyframe.lightLevel01 >= 0
-      && keyframe.lightLevel01 <= 1
-      && !ticks.has(keyframe.tick);
-
-    ticks.add(keyframe.tick);
-    return valid;
-  });
 }
 
 function clamp01(value: number): number {

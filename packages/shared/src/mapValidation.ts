@@ -1,4 +1,5 @@
 import type { ContentRegistry } from "./contentPack.js";
+import { validateDayNightCycle } from "./environment.js";
 import type { MapDefinition } from "./maps.js";
 
 export interface MapValidationIssue {
@@ -33,6 +34,10 @@ export function validateMapDefinition(map: MapDefinition, registry: ContentRegis
   validateReference(map.tilesetId, registry.tilesets, "tilesetId", "tileset", issues);
   validateReference(map.environmentVisualProfileId, registry.environmentVisualProfiles, "environmentVisualProfileId", "environment visual profile", issues);
   validateReference(map.resourceVisualSetId, registry.resourceVisualSets, "resourceVisualSetId", "resource visual set", issues);
+
+  for (const environmentIssue of map.environment?.dayNight ? validateDayNightCycle(map.environment.dayNight) : []) {
+    issues.push(issue(`environment.dayNight.${environmentIssue.path}`, environmentIssue.message));
+  }
 
   const expectedTileCount = map.width * map.height;
   map.layers.forEach((layer, layerIndex) => {

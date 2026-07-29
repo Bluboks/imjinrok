@@ -216,6 +216,7 @@ export function validateContentRegistry(registry: ContentRegistry): ContentValid
   registry.packs.forEach((pack, index) => {
     issues.push(...validateContentPackMetadata(pack, `packs[${index}]`));
   });
+  validateDefinitionOwnership(registry.packs, issues);
 
   validateDefinitionIds(registry.terrains, "terrains", issues);
   validateDefinitionIds(registry.factions, "factions", issues);
@@ -255,6 +256,36 @@ function validateContentPackMetadata(pack: ContentPackDefinition, path: string):
   }
 
   return issues;
+}
+
+function validateDefinitionOwnership(packs: readonly ContentPackDefinition[], issues: ContentValidationIssue[]): void {
+  const namespaces: readonly [string, (pack: ContentPackDefinition) => Record<string, unknown> | undefined][] = [
+    ["terrains", (pack) => pack.terrains],
+    ["factions", (pack) => pack.factions],
+    ["resources", (pack) => pack.resources],
+    ["actions", (pack) => pack.actions],
+    ["units", (pack) => pack.units],
+    ["tilesets", (pack) => pack.tilesets],
+    ["environmentVisualProfiles", (pack) => pack.environmentVisualProfiles],
+    ["resourceVisualSets", (pack) => pack.resourceVisualSets],
+  ];
+
+  for (const [namespace, getDefinitions] of namespaces) {
+    const owners = new Map<string, { index: number; id: string }>();
+    packs.forEach((pack, index) => {
+      for (const definitionId of Object.keys(getDefinitions(pack) ?? {})) {
+        const firstOwner = owners.get(definitionId);
+        if (firstOwner) {
+          issues.push(createIssue(
+            `packs[${index}].${namespace}.${definitionId}`,
+            `Definition '${definitionId}' is already owned by pack '${firstOwner.id}' at packs[${firstOwner.index}].`,
+          ));
+          continue;
+        }
+        owners.set(definitionId, { index, id: pack.id });
+      }
+    });
+  }
 }
 
 function validateDefinitionIds(
