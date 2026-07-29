@@ -2,13 +2,13 @@
   "schemaVersion": 2,
   "policy": {
     "semanticStatus": "mixed",
-    "acceptedEvidence": "All 95 original type identities, uniquely matched current visual source identities, SPEECH portraits, Korean HQ and signal-beacon body states, K01 classes 2/3/4/7/11/12/13/16/31/82 normal core states in their documented limits, class-14 Japanese turtle-tank idle/move/attack grid states plus its non-theme 16-ring turn and creation-default transient destruction contracts, and the K01 heroes' idle, movement, attack, and death frame/direction mappings are statically proven in their documented scopes.",
+    "acceptedEvidence": "All 95 original type identities, uniquely matched current visual source identities, SPEECH portraits, Korean HQ and signal-beacon body states, K01 opening classes 48/49/51/58/60/63 catalog base frame 7 bindings, K01 classes 2/3/4/7/11/12/13/16/31/82 normal core states in their documented limits, class-14 Japanese turtle-tank idle/move/attack grid states plus its non-theme 16-ring turn and creation-default transient destruction contracts, and the K01 heroes' idle, movement, attack, and death frame/direction mappings are statically proven in their documented scopes.",
     "parityUse": "A unique source identity proves the original name and SPR binding only. Only explicitly listed frame scopes may be used for animation parity; all other direction, action, layer, and body mappings remain quarantined."
   },
   "sourceFiles": [
     {
       "path": "packages/shared/src/themes.ts",
-      "sha256": "9da2de51b79c4ec9cac4d3269e146fea9d963029920f9e0fcff4d496cd66c2c6"
+      "sha256": "ebee19d3eab537db47bff12d49b08c6eb0f1d4da2a4ee61703b9371a940fcc2f"
     },
     {
       "path": "packages/shared/src/visuals.ts",
@@ -16,11 +16,11 @@
     },
     {
       "path": "packages/shared/src/content.ts",
-      "sha256": "203aab21103a74e798af4d64af03b297a3a1247ae1872a85b2d2150135ea2cab"
+      "sha256": "abc2aea662d4c2adb4c1d4ae86fbc04e33c58555ebb20b2c4c3f16214a5ea857"
     },
     {
       "path": "packages/shared/src/scenarios.ts",
-      "sha256": "9ee67f2d274580f321be72eede70e5e1b052f74a50bbd482005d5fd5949634fd"
+      "sha256": "e56a3d54cd0f6c858e18d5e37147067c48f6a881546ce8111cf29760f5902c96"
     },
     {
       "path": "apps/game-client/src/scenes/SkirmishScene.ts",
@@ -92,7 +92,7 @@
     },
     {
       "path": "tools/imjinrok/audit-sprite-mappings.mjs",
-      "sha256": "6b48750d6fcbf3ad380fe6bc23356cb736e18f0365b0de9ca59d36f6b1114be6"
+      "sha256": "5d6ecabb70da936056189dfa469ccbc6d1009e9097b410e58d3b0426e04bfc76"
     },
     {
       "path": "apps/game-client/public/assets/themes/default/ui/mission-portraits/hero.manifest.json",
@@ -100,24 +100,24 @@
     }
   ],
   "summary": {
-    "visualCount": 24,
+    "visualCount": 26,
     "unitVisualCount": 15,
-    "buildingVisualCount": 9,
-    "stateMappingCount": 95,
-    "clipCount": 679,
-    "frameReferenceCount": 5235,
+    "buildingVisualCount": 11,
+    "stateMappingCount": 97,
+    "clipCount": 681,
+    "frameReferenceCount": 5237,
     "missingFrameReferenceCount": 0,
     "unverifiedVisualCount": 1,
-    "mixedVisualCount": 21,
+    "mixedVisualCount": 23,
     "scopedStaticProvenVisualCount": 2,
-    "staticIdentityVisualCount": 23,
+    "staticIdentityVisualCount": 25,
     "ambiguousIdentityVisualCount": 0,
     "unboundIdentityVisualCount": 1,
-    "projectBindingCount": 23,
+    "projectBindingCount": 25,
     "projectBindingConflictCount": 0,
     "portraitCueCount": 17,
     "unverifiedPortraitCueCount": 0,
-    "findingCount": 30
+    "findingCount": 32
   },
   "visuals": [
     {
@@ -3107,6 +3107,86 @@
                 61,
                 62,
                 63
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "visualId": "japanese-hq",
+      "category": "building",
+      "assetPath": "entities/japanese-hq",
+      "render": {
+        "srcPxPerWu": 32,
+        "filtering": "nearest"
+      },
+      "defaults": {
+        "size": {
+          "w": 120,
+          "h": 133
+        },
+        "pivot": {
+          "anchor": {
+            "x": 60,
+            "y": 104
+          }
+        }
+      },
+      "evidenceStatus": "mixed",
+      "staticEvidence": {
+        "status": "mixed",
+        "identity": "static-proven",
+        "originalGameplayName": "일본 본영",
+        "internalClass": 58,
+        "spriteSlot": 106,
+        "sourcePath": "char\\jhq.spr",
+        "baseFrame": 7,
+        "flags": "0x00510082",
+        "bodyStateMapping": "static-proven-base-frame",
+        "confirmedBodyScope": "project idle uses the catalog-proven source base frame 7 only",
+        "unresolvedScope": "construction, damaged/health body states, overlays, timing, pivot, stats, commands, behavior, and later runtime mutation remain unresolved; size is source dimensions and the foot anchor is a project rendering adaptation"
+      },
+      "source": {
+        "path": "original/imjinrok2/char/jhq.spr",
+        "sha256": "db1b4e9b9a587473b4f18c651fb7cac9791a5d21ad23f56285c0a3f5c22ffba2",
+        "frameCount": 24,
+        "width": 120,
+        "height": 133
+      },
+      "conversionManifest": {
+        "path": "apps/game-client/public/assets/themes/default/entities/japanese-hq/jhq.manifest.json",
+        "sha256": "4025b33101e55506e3d9d86089099a9bc7307bd96241e28d6c6effb303b9f7fa"
+      },
+      "sources": [
+        {
+          "path": "original/imjinrok2/char/jhq.spr",
+          "sha256": "db1b4e9b9a587473b4f18c651fb7cac9791a5d21ad23f56285c0a3f5c22ffba2",
+          "frameCount": 24,
+          "width": 120,
+          "height": 133,
+          "conversionManifest": {
+            "path": "apps/game-client/public/assets/themes/default/entities/japanese-hq/jhq.manifest.json",
+            "sha256": "4025b33101e55506e3d9d86089099a9bc7307bd96241e28d6c6effb303b9f7fa"
+          },
+          "primary": true
+        }
+      ],
+      "mappings": [
+        {
+          "scope": "base",
+          "state": "idle",
+          "declaredFacings": [],
+          "clips": [
+            {
+              "facing": "default",
+              "frameFiles": [
+                "jhq_0007.png"
+              ],
+              "frameIndexes": [
+                7
               ],
               "mirrorX": false,
               "missingFrames": []
@@ -13064,10 +13144,10 @@
             {
               "facing": "default",
               "frameFiles": [
-                "millk_0008.png"
+                "millk_0007.png"
               ],
               "frameIndexes": [
-                8
+                7
               ],
               "mirrorX": false,
               "missingFrames": []
@@ -17955,6 +18035,86 @@
       ]
     },
     {
+      "visualId": "korean-training-command",
+      "category": "building",
+      "assetPath": "entities/korean-training-command",
+      "render": {
+        "srcPxPerWu": 32,
+        "filtering": "nearest"
+      },
+      "defaults": {
+        "size": {
+          "w": 137,
+          "h": 118
+        },
+        "pivot": {
+          "anchor": {
+            "x": 69,
+            "y": 92
+          }
+        }
+      },
+      "evidenceStatus": "mixed",
+      "staticEvidence": {
+        "status": "mixed",
+        "identity": "static-proven",
+        "originalGameplayName": "조선 훈련도감",
+        "internalClass": 51,
+        "spriteSlot": 213,
+        "sourcePath": "char\\advbarrackk.spr",
+        "baseFrame": 7,
+        "flags": "0x00710002",
+        "bodyStateMapping": "static-proven-base-frame",
+        "confirmedBodyScope": "project idle uses the catalog-proven source base frame 7 only",
+        "unresolvedScope": "construction, damaged/health body states, overlays, timing, pivot, stats, commands, behavior, and later runtime mutation remain unresolved; size is source dimensions and the foot anchor is a project rendering adaptation"
+      },
+      "source": {
+        "path": "original/imjinrok2/char/advbarrackk.spr",
+        "sha256": "df40eb785b60824087329ec991e27b0dd88d5fe4ec918f742d8b06c363aa6bf5",
+        "frameCount": 14,
+        "width": 137,
+        "height": 118
+      },
+      "conversionManifest": {
+        "path": "apps/game-client/public/assets/themes/default/entities/korean-training-command/advbarrackk.manifest.json",
+        "sha256": "5edff45ad74e825c3c75f0f4e84379c7084d56ca43c18c150b8583faa18aa118"
+      },
+      "sources": [
+        {
+          "path": "original/imjinrok2/char/advbarrackk.spr",
+          "sha256": "df40eb785b60824087329ec991e27b0dd88d5fe4ec918f742d8b06c363aa6bf5",
+          "frameCount": 14,
+          "width": 137,
+          "height": 118,
+          "conversionManifest": {
+            "path": "apps/game-client/public/assets/themes/default/entities/korean-training-command/advbarrackk.manifest.json",
+            "sha256": "5edff45ad74e825c3c75f0f4e84379c7084d56ca43c18c150b8583faa18aa118"
+          },
+          "primary": true
+        }
+      ],
+      "mappings": [
+        {
+          "scope": "base",
+          "state": "idle",
+          "declaredFacings": [],
+          "clips": [
+            {
+              "facing": "default",
+              "frameFiles": [
+                "advbarrackk_0007.png"
+              ],
+              "frameIndexes": [
+                7
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            }
+          ]
+        }
+      ]
+    },
+    {
       "visualId": "villager-korean-farmer",
       "category": "unit",
       "assetPath": "entities/villager",
@@ -20450,6 +20610,39 @@
         "nameMatchesOriginal": true
       },
       {
+        "entityId": "japanese-hq",
+        "projectDisplayName": "일본 본영",
+        "projectGameplayAdapter": {
+          "category": "building",
+          "actionIds": [
+            "stop"
+          ],
+          "footprint": {
+            "width": 3,
+            "height": 3,
+            "blocksMovement": true
+          },
+          "baseAttributes": {
+            "health": 1200,
+            "mana": 0,
+            "movementSpeed": 0
+          },
+          "renderRadius": 10,
+          "selectionRadius": 10,
+          "hitRadius": 22,
+          "sightRadius": 6,
+          "minimapShape": "square",
+          "minimapRadius": 3.5,
+          "selectedMinimapRadius": 4.5
+        },
+        "visualId": "japanese-hq",
+        "visualSourcePath": "original/imjinrok2/char/jhq.spr",
+        "identityStatus": "static-proven",
+        "originalGameplayName": "일본 본영",
+        "internalClass": 58,
+        "nameMatchesOriginal": true
+      },
+      {
         "entityId": "japanese-konishi",
         "projectDisplayName": "일본 고니시",
         "projectGameplayAdapter": {
@@ -20711,6 +20904,39 @@
         "identityStatus": "static-proven",
         "originalGameplayName": "조선 승병",
         "internalClass": 11,
+        "nameMatchesOriginal": true
+      },
+      {
+        "entityId": "korean-training-command",
+        "projectDisplayName": "조선 훈련도감",
+        "projectGameplayAdapter": {
+          "category": "building",
+          "actionIds": [
+            "stop"
+          ],
+          "footprint": {
+            "width": 2,
+            "height": 2,
+            "blocksMovement": true
+          },
+          "baseAttributes": {
+            "health": 550,
+            "mana": 0,
+            "movementSpeed": 0
+          },
+          "renderRadius": 8,
+          "selectionRadius": 8,
+          "hitRadius": 18,
+          "sightRadius": 4,
+          "minimapShape": "square",
+          "minimapRadius": 3,
+          "selectedMinimapRadius": 4
+        },
+        "visualId": "korean-training-command",
+        "visualSourcePath": "original/imjinrok2/char/advbarrackk.spr",
+        "identityStatus": "static-proven",
+        "originalGameplayName": "조선 훈련도감",
+        "internalClass": 51,
         "nameMatchesOriginal": true
       },
       {
@@ -21565,6 +21791,16 @@
     {
       "severity": "blocking",
       "code": "building-health-frame-unverified",
+      "visualId": "japanese-hq",
+      "detail": "Idle/full-health and construction/damage semantics are inferred from frame positions.",
+      "idleFrameIndexes": [
+        7
+      ],
+      "constructionFrameIndexes": []
+    },
+    {
+      "severity": "blocking",
+      "code": "building-health-frame-unverified",
       "visualId": "korean-barracks",
       "detail": "Idle/full-health and construction/damage semantics are inferred from frame positions.",
       "idleFrameIndexes": [
@@ -21594,7 +21830,7 @@
       "visualId": "korean-mill-house-proxy",
       "detail": "Idle/full-health and construction/damage semantics are inferred from frame positions.",
       "idleFrameIndexes": [
-        8
+        7
       ],
       "constructionFrameIndexes": [
         0,
@@ -21607,6 +21843,16 @@
         7,
         8
       ]
+    },
+    {
+      "severity": "blocking",
+      "code": "building-health-frame-unverified",
+      "visualId": "korean-training-command",
+      "detail": "Idle/full-health and construction/damage semantics are inferred from frame positions.",
+      "idleFrameIndexes": [
+        7
+      ],
+      "constructionFrameIndexes": []
     },
     {
       "severity": "blocking",

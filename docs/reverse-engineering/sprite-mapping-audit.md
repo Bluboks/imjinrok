@@ -8,6 +8,8 @@
 class 7 조선 농부와 class 31 일본 농부는 각각 `+0x47a==0` 상태 8 idle·1 move/walk·7 death의
 프레임·방향·mirror 범위만 정적으로 확정했다. 조선 본영과 봉화대의 건설·정상·반파 본체는
 `scoped-static-proven`, 정체와 일부 또는 미확정 프레임이 함께 있는 비주얼은 `mixed`다.
+K01 시작 건물 class 48·49·51·58·60·63은 타입 카탈로그의 고유 정체·SPR·base frame 7만
+source binding에 반영했으며, class 49의 별도 본체 상태 범위를 제외한 건설·피해·오버레이는 미확정이다.
 `advtowerj.spr`는 95개 타입 정의에 사용되지 않아 `unverified`다. `mixed`인 조선 농부·일본 농부의
 상태 4, `+0x47a` nonzero, FPS·pivot·stats·behavior는 미확정으로 유지하며, 조선 창병 비주얼에서는 상태 1 일반 이동을, 일본 사무라이와
 권율·유성룡 비주얼에서는 각 문서가 확인한 상태 8 idle·1 일반 이동·4 공격·7 사망을,
@@ -27,9 +29,9 @@ pnpm imjinrok:audit-sprite-mappings
 | 대상 | 확인한 범위 | 판정 |
 | --- | --- | --- |
 | 원본 타입 95개 | 이름·슬롯·기본 프레임·raw flags·SPR 경로 | 타입 정체·출처 전수 `정적 확정` |
-| 엔티티 비주얼 24개 | 상태 95개, 클립 679개, 프레임 참조 5,235개 | 범위 확정 2개, `mixed` 21개, 미확인 1개 |
+| 엔티티 비주얼 26개 | 상태 97개, 클립 681개, 프레임 참조 5,237개 | 범위 확정 2개, `mixed` 23개, 미확인 1개 |
 | 유닛 비주얼 15개 | 정체·방향·행동·미러링 | 고유 정체 15개; class 7·11·12·13·16·31·82 scoped core states와 class 14 상태 8/1/4 grid 확정 |
-| 건물 비주얼 9개 | 정체·idle·construction·damaged·overlay | 본영·봉화대 본체 2개 `정적 확정`, 나머지 7개 본체 상태 `미확인` |
+| 건물 비주얼 11개 | 정체·idle·construction·damaged·overlay | 본영·봉화대 본체 2개 `정적 확정`; class 51·58은 base frame 7만 반영, 나머지 본체 상태 `미확인` |
 | 브리핑 초상화 17개 | `K1`~`K6`·`K10`, `J1`~`J5`, `C1`~`C5` | ID→`hero.spr` 프레임 `정적 확정` |
 | 원본 내부 클래스 2 | `조선 창병`, 슬롯 100, 상태 1·2, 8방향, phase 0~7 | 두 상태의 이동 의미·프레임 식 확정, 상태 1 일반 이동 이식 |
 | 원본 내부 클래스 11·16 | `조선 승병`·`일본 무녀`, 슬롯 112·124, 상태 8·1·4·7 | 각 core-state frame·8방향·mirror 확정·이식; FPS·pivot·stats·magic·state 2는 미확정 |
@@ -38,6 +40,8 @@ pnpm imjinrok:audit-sprite-mappings
 | 원본 내부 클래스 76·78 | `조선 권율`·`조선 유성룡`, 상태 8·1·4·7, 슬롯 153~155·158~159 | idle·일반 이동·공격·사망의 SPR·8방향·phase·mirror 확정·이식 |
 | 원본 내부 클래스 49 | `조선 본영`, 슬롯 141, 건설·정상·반파 | 본체 프레임 0~8 `정적 확정`·이식 |
 | 원본 내부 클래스 52 | `조선 봉화대`, 슬롯 113, 건설·정상·반파 | `firehousek.spr` 본체 프레임 0~8 `정적 확정`·이식 |
+| 원본 내부 클래스 48·51 | `조선 방앗간`·`조선 훈련도감`, 슬롯 146·213 | 각 고유 SPR의 catalog base frame 7만 K01 source binding에 반영; 상태 의미는 미확정 |
+| 원본 내부 클래스 58·60·63 | `일본 본영`·`일본 훈련소`·`일본 망루`, 슬롯 106·110·219 | 각 고유 SPR의 catalog base frame 7만 K01 source binding에 반영; 상태 의미는 미확정 |
 
 엔티티가 참조한 PNG가 변환 매니페스트에 없는 경우는 0개다. 이 수치는 유닛·건물 자원 변환과 경로가
 끊어지지 않았다는 뜻일 뿐, 올바른 방향·행동·체력 이미지가 선택됐다는 뜻은 아니다.
@@ -82,6 +86,12 @@ pnpm imjinrok:audit-sprite-mappings
 - 본체와 깃발·불꽃 같은 오버레이 구분도 프레임 위치로 추정했다.
 - 조선 본영과 봉화대를 제외하면 현재 체력·최대 체력·건설 진행도에서 프레임을 선택하는 확정 경로가
   없다.
+- K01 시작의 class 51 `advbarrackk.spr`와 class 58 `jhq.spr`는 전체 변환 자산을 보존하되,
+  `themes.ts`는 catalog base frame 7만 idle로 사용한다. 원본 SPR 치수는 렌더 size로 옮겼고 foot
+  anchor는 프로젝트 적응이다. construction·damaged·overlay를 원작 의미로 추가하지 않는다.
+- class 48 `millk.spr`의 idle은 catalog base frame 7로 바로잡았다. class 60 `barrackj.spr`와
+  class 63 `towerj.spr`도 K01 record를 기존 고유 visual로 다시 연결했다. 이 source binding은
+  gameplay stats·commands·behavior를 확정하지 않는다.
 
 조선 본영은 기존 idle frame 8이 원본의 반파 이미지임을 확인해 정상 frame 7로 수정했고, 진행도
 `0/10/20/30/40/50/70/100`과 엄격한 체력 50% 미만 분기를 이식했다.
