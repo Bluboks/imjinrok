@@ -4,6 +4,7 @@ import {
   defaultTheme,
   ELEVATION_NEIGHBOR_OFFSETS,
   actionDefinitions,
+  createContentRegistry,
   factionDefinitions,
   createImjinrokMapScaffold,
   createMapDefinitionFromId,
@@ -137,6 +138,13 @@ import {
 } from "../missionPresentationTimeline.js";
 import { placeStaticVisual } from "../render/placeStaticVisual.js";
 import { getEntityAnimationStateKey } from "../render/entityAnimationState.js";
+import {
+  getMapResourceVisualPreloadDescriptors,
+  getRegisteredResourceVisualPreloadDescriptors,
+  requireResourceVisualTexture,
+  resolveMapResourceVisualTextureKey,
+  resolveResourceVisualPlacement,
+} from "../render/resourceVisualResolver.js";
 import { getAssetScale, getFrameOrigin, getFramePivot, REFERENCE_PX_PER_WU, RENDER_DEPTH_BIAS } from "../render/visualScale.js";
 import {
   createCampaignMissionLaunchContext,
@@ -198,6 +206,7 @@ const FOG_UNEXPLORED_ALPHA = 0.9;
 const FOG_EXPLORED_ALPHA = 0.48;
 const TERRAIN_DEBUG_DETAILS_STORAGE_KEY = "isorts.debug.terrainDetails";
 const RESOURCE_DEFINITIONS = resourceDefinitions as Readonly<Record<string, ResourceDefinition>>;
+const CONTENT_REGISTRY = createContentRegistry();
 const MISSION_DIALOGUE_LINE_DURATION_MS = 5_500;
 const COMMAND_FEEDBACK_DURATION_MS = 2_200;
 const UNDER_ATTACK_ALERT_DURATION_MS = 2_800;
@@ -370,6 +379,7 @@ interface ResourceRenderable {
   shadow: Phaser.GameObjects.Graphics;
   marker: Phaser.GameObjects.Graphics;
   glyph: Phaser.GameObjects.Text;
+  sourceImage: Phaser.GameObjects.Image | null;
   stateKey: string;
 }
 
@@ -613,6 +623,12 @@ export class SkirmishScene extends Phaser.Scene {
         this.load.image(asset.textureKey, asset.assetPath);
       }
     }
+
+    for (const descriptor of getRegisteredResourceVisualPreloadDescriptors(CONTENT_REGISTRY)) {
+      if (!this.textures.exists(descriptor.textureKey)) {
+        this.load.image(descriptor.textureKey, descriptor.url);
+      }
+    }
   }
 
   create(data: GameLaunchContext): void {
@@ -652,6 +668,7 @@ export class SkirmishScene extends Phaser.Scene {
     this.sessionTransport = createSessionTransport(data, this.map, players);
     this.worldState = this.sessionTransport.getSnapshot();
     this.map = this.worldState.map;
+    this.ensureSelectedResourceVisualTextures();
     this.lastSyncedTick = this.worldState.tick;
     this.syncConstructionAudioState(false);
     this.syncProgressAudioState(false);
@@ -7563,10 +7580,16 @@ export class SkirmishScene extends Phaser.Scene {
       }
 
       const state = getResourceNodeState(resourceView.resource);
-      const stateKey = `${resourceView.resource.kind}:${state}`;
+      const textureKey = resolveMapResourceVisualTextureKey(
+        CONTENT_REGISTRY,
+        this.map,
+        resourceView.resource.kind,
+        state,
+      );
+      const stateKey = `${resourceView.resource.kind}:${state}:${textureKey ?? "placeholder"}`;
 
       if (renderable.stateKey !== stateKey) {
-        this.redrawResourceRenderable(renderable, definition, resourceView.resource);
+        this.redrawResourceRenderable(renderable, definition, resourceView.resource, textureKey);
         renderable.stateKey = stateKey;
       }
 
@@ -7699,6 +7722,12 @@ export class SkirmishScene extends Phaser.Scene {
     return `${point.x},${point.y}`;
   }
 
+  private ensureSelectedResourceVisualTextures(): void {
+    for (const descriptor of getMapResourceVisualPreloadDescriptors(CONTENT_REGISTRY, this.map)) {
+      requireResourceVisualTexture(descriptor.textureKey, (key) => this.textures.exists(key));
+    }
+  }
+
   private createResourceRenderable(): ResourceRenderable {
     const container = this.add.container(0, 0);
     const shadow = this.add.graphics();
@@ -7714,13 +7743,14 @@ export class SkirmishScene extends Phaser.Scene {
 
     container.add([shadow, marker, glyph]);
 
-    return { container, shadow, marker, glyph, stateKey: "" };
+    return { container, shadow, marker, glyph, sourceImage: null, stateKey: "" };
   }
 
   private redrawResourceRenderable(
     renderable: ResourceRenderable,
     definition: ResourceDefinition,
     resource: ResourceNode,
+    textureKey: string | null,
   ): void {
     const state = getResourceNodeState(resource);
     const depleted = state === "depleted";
@@ -7735,6 +7765,31 @@ export class SkirmishScene extends Phaser.Scene {
       .fillEllipse(0, 8, 34, 14);
 
     renderable.marker.clear();
+
+    if (textureKey) {
+      requireResourceVisualTexture(textureKey, (key) => this.textures.exists(key));
+      const placement = resolveResourceVisualPlacement(this.map.tileWidth, this.map.tileHeight);
+      const sourceImage = renderable.sourceImage ?? this.add.image(0, 0, textureKey);
+
+      sourceImage
+        .setTexture(textureKey)
+        .setOrigin(placement.originX, placement.originY)
+        .setPosition(placement.localX, placement.localY)
+        .setScale(placement.scale)
+        .setVisible(true);
+      if (!renderable.sourceImage) {
+        renderable.container.add(sourceImage);
+        renderable.sourceImage = sourceImage;
+      }
+
+      renderable.marker.setVisible(false);
+      renderable.glyph.setVisible(false);
+      return;
+    }
+
+    renderable.sourceImage?.setVisible(false);
+    renderable.marker.setVisible(true);
+    renderable.glyph.setVisible(true);
 
     if (definition.category === "wood") {
       this.drawWoodPlaceholder(renderable.marker, resource.kind, fillColor, outlineColor, alpha, depleted);

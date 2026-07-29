@@ -12,6 +12,14 @@ export interface ResourceVisualPreloadDescriptor extends VisualAssetRef {
   state: ResourceVisualState;
 }
 
+export interface ResourceVisualPlacement {
+  readonly originX: 0.5;
+  readonly originY: 1;
+  readonly scale: number;
+  readonly localX: 0;
+  readonly localY: number;
+}
+
 type ResourceVisualRegistry = Pick<ContentRegistry, "resourceVisualSets">;
 type ResourceVisualMap = Pick<MapDefinition, "id" | "resourceVisualSetId">;
 
@@ -58,6 +66,57 @@ export function getMapResourceVisualPreloadDescriptors(
   if (!visualSet) {
     return [];
   }
+
+  return getResourceVisualPreloadDescriptors(visualSet);
+}
+
+/**
+ * Preload every registered visual because the launch map is not known until after
+ * Phaser's preload phase. Ordering is stable across content-pack insertion order.
+ */
+export function getRegisteredResourceVisualPreloadDescriptors(
+  registry: ResourceVisualRegistry,
+): ResourceVisualPreloadDescriptor[] {
+  return Object.keys(registry.resourceVisualSets)
+    .sort()
+    .flatMap((visualSetId) => {
+      const visualSet = registry.resourceVisualSets[visualSetId];
+      return visualSet ? getResourceVisualPreloadDescriptors(visualSet) : [];
+    });
+}
+
+/**
+ * A source image uses its native aspect ratio and rests on the map diamond's
+ * ground contact. The 64px reference width and container correction are a
+ * project adaptation, not an original sprite pivot or scale claim.
+ */
+export function resolveResourceVisualPlacement(
+  mapTileWidth: number,
+  mapTileHeight: number,
+): ResourceVisualPlacement {
+  if (!Number.isFinite(mapTileWidth) || mapTileWidth <= 0 || !Number.isFinite(mapTileHeight) || mapTileHeight <= 0) {
+    throw new RangeError(`resource visual placement requires positive finite map tile dimensions; received ${mapTileWidth}x${mapTileHeight}`);
+  }
+
+  return {
+    originX: 0.5,
+    originY: 1,
+    scale: mapTileWidth / 64,
+    localX: 0,
+    localY: mapTileHeight / 3,
+  };
+}
+
+export function requireResourceVisualTexture(
+  textureKey: string,
+  exists: (textureKey: string) => boolean,
+): void {
+  if (!exists(textureKey)) {
+    throw new Error(`Required resource visual texture is not loaded: ${textureKey}`);
+  }
+}
+
+function getResourceVisualPreloadDescriptors(visualSet: ResourceVisualSetDefinition): ResourceVisualPreloadDescriptor[] {
   const descriptors: ResourceVisualPreloadDescriptor[] = [];
 
   for (const resourceKind of Object.keys(visualSet.resources).sort()) {
