@@ -15,7 +15,8 @@ K01 map loader가 생성한 내부 클래스 7 `조선 농부`에서 initializer
 
 - 분석 상태: `정적 확정`
 - 재현 상태: `재현 완료`
-- 구현 상태: core-state frame 범위는 `원본 기반`; 기존 carry/gather/build/repair는 `의도적 적응`이다.
+- 구현 상태: creation-default core state와 별도 nonzero-branch `carry`/`carry-idle` frame 범위는
+  `부분 이식`이다. `gather`/`build`/`repair`는 계속 `의도적 적응`이다.
 
 ## 데이터와 생성 경로
 
@@ -65,12 +66,14 @@ state 7/e/phase 7은 frame 247 mirror다.
 
 ## 현재 구현과의 차이
 
-`packages/shared/src/themes.ts`는 위 세 core state에만 recovered direction helper를 적용한다. FPS와
-pivot은 이 분석에서 확정하지 않았으므로 기존 프로젝트 설정이다. carry/gather/build/repair frame layout은
-원본 state 의미로 승격하지 않았으며, 프로젝트 source-layout adaptation으로 남긴다.
+`packages/shared/src/themes.ts`는 위 세 core state에 recovered direction helper를 적용한다. 별도
+[resource-quantity nonzero branch](k01-farmer-resource-branch-frames.md)는 `carriedResource.amount > 0`
+adapter로 `carry`/`carry-idle`의 frame·방향·mirror만 연결한다. 이는 원본 `+0x47a`의 의미를 다른
+entity나 시스템에 일반화하지 않으며, gather/build/repair는 프로젝트 source-layout adaptation으로 남는다.
+FPS와 pivot도 이 분석에서 확정하지 않은 프로젝트 설정이다.
 
 ## 미확인 항목과 다음 작업
 
-`+0x47a` nonzero resource/carry branches, `+0x478`의 사람용 의미, state 4 attack, 원본 tick→FPS,
-pivot, stats, behavior, later runtime mutation 및 death lifetime은 미확인이다. 이 항목은 별도 정적
-질문과 vector가 생기기 전에는 원작 일치 주장에 포함하지 않는다.
+`+0x478`의 사람용 의미, state 4 attack, 원본 tick→FPS, pivot, stats, behavior, later runtime mutation
+및 death lifetime은 미확인이다. gather/build/repair와 full gather lifecycle도 별도 정적 질문과 vector가
+생기기 전에는 원작 일치 주장에 포함하지 않는다.

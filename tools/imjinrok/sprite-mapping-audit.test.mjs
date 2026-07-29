@@ -47,9 +47,9 @@ test("frame mappings stay quarantined outside statically proven scopes while ide
     visualCount: 26,
     unitVisualCount: 15,
     buildingVisualCount: 11,
-    stateMappingCount: 95,
-    clipCount: 679,
-    frameReferenceCount: 5_212,
+    stateMappingCount: 98,
+    clipCount: 706,
+    frameReferenceCount: 5_365,
     missingFrameReferenceCount: 0,
     unverifiedVisualCount: 1,
     mixedVisualCount: 23,
@@ -61,7 +61,7 @@ test("frame mappings stay quarantined outside statically proven scopes while ide
     projectBindingConflictCount: 0,
     portraitCueCount: 17,
     unverifiedPortraitCueCount: 0,
-    findingCount: 32,
+    findingCount: 30,
   });
   assert.equal(
     report.visuals.filter((visual) => visual.evidenceStatus === "unverified").length,
@@ -124,7 +124,55 @@ test("frame mappings stay quarantined outside statically proven scopes while ide
   assert.deepEqual(japaneseFarmer?.staticEvidence.stateFrameRanges, {
     idle: [0, 39], move: [160, 199], walk: [160, 199], death: [240, 247],
   });
+  assert.deepEqual(japaneseFarmer?.staticEvidence.nonzeroResourceBranch, {
+    condition: "unsigned WORD entity +0x47a != 0",
+    analysisStatus: "static-confirmed",
+    reproductionStatus: "reproduction-complete",
+    confirmedAnimationScope:
+      "project carry maps original state 1 move and carry-idle maps original state 8 idle using the recovered direction/mirror profile",
+    stateSources: {
+      carry: "char\\farmerj.spr",
+      "carry-idle": "char\\farmerj.spr",
+    },
+    stateFrameRanges: { carry: [200, 239], "carry-idle": [200, 239] },
+    directionFrames: ["carry", "carry-idle"].reduce((evidence, state) => {
+      evidence[state] = [
+        ["s", 1, 200, [200, 207], false],
+        ["sw", 5, 208, [208, 215], false],
+        ["w", 4, 216, [216, 223], false],
+        ["nw", 20, 224, [224, 231], false],
+        ["n", 16, 216, [216, 223], true],
+        ["ne", 80, 208, [208, 215], true],
+        ["e", 64, 200, [200, 207], true],
+        ["se", 65, 232, [232, 239], false],
+      ].map(([facing, direction, frameBase, frameRange, mirrorX]) => ({ facing, direction, frameBase, frameRange, mirrorX }));
+      return evidence;
+    }, {}),
+    intentionalDuplicateStates: ["carry", "carry-idle"],
+    duplicateExplanation:
+      "The original class-31 +0x47a!=0 state 8 idle and state 1 move configurations both select the same 200..239 directional clip; this is static evidence, not an unverified project alias.",
+  });
   assert.equal(japaneseFarmer?.staticEvidence.stateSources.attack, undefined);
+  assert.equal(
+    report.findings.some(
+      (finding) =>
+        finding.visualId === "japanese-farmer" &&
+        finding.code === "distinct-state-frame-collision" &&
+        finding.states.includes("carry") &&
+        finding.states.includes("carry-idle"),
+    ),
+    false,
+  );
+  assert.equal(
+    report.findings.some(
+      (finding) =>
+        finding.visualId === "japanese-farmer" &&
+        ["carry", "carry-idle"].includes(finding.state) &&
+        (finding.code === "direction-order-unverified" ||
+          finding.code === "mirrored-facing-unverified"),
+    ),
+    false,
+  );
   assert.equal(japaneseGunner?.evidenceStatus, "mixed");
   assert.equal(
     japaneseGunner?.staticEvidence.animationStateMapping,
@@ -389,6 +437,45 @@ test("frame mappings stay quarantined outside statically proven scopes while ide
   assert.deepEqual(
     currentVillager?.staticEvidence.stateFrameRanges,
     { idle: [0, 39], move: [40, 79], walk: [40, 79], death: [240, 247] },
+  );
+  assert.deepEqual(currentVillager?.staticEvidence.nonzeroResourceBranch, {
+    condition: "unsigned WORD entity +0x47a != 0",
+    analysisStatus: "static-confirmed",
+    reproductionStatus: "reproduction-complete",
+    confirmedAnimationScope:
+      "project carry maps original state 1 move and carry-idle maps original state 8 idle using the recovered direction/mirror profile",
+    stateSources: {
+      carry: "char\\farmerk.spr",
+      "carry-idle": "char\\farmerk.spr",
+    },
+    stateFrameRanges: { carry: [80, 119] },
+    stateFrameIndexes: { "carry-idle": [82, 90, 98, 106, 98, 90, 82, 114] },
+    directionFrames: {
+      carry: [
+        ["s", 1, 80, [80, 87], false],
+        ["sw", 5, 88, [88, 95], false],
+        ["w", 4, 96, [96, 103], false],
+        ["nw", 20, 104, [104, 111], false],
+        ["n", 16, 96, [96, 103], true],
+        ["ne", 80, 88, [88, 95], true],
+        ["e", 64, 80, [80, 87], true],
+        ["se", 65, 112, [112, 119], false],
+      ].map(([facing, direction, frameBase, frameRange, mirrorX]) => ({ facing, direction, frameBase, frameRange, mirrorX })),
+      "carry-idle": [
+        ["s", 1, 82, false], ["sw", 5, 90, false], ["w", 4, 98, false], ["nw", 20, 106, false],
+        ["n", 16, 98, true], ["ne", 80, 90, true], ["e", 64, 82, true], ["se", 65, 114, false],
+      ].map(([facing, direction, frameBase, mirrorX]) => ({ facing, direction, frameBase, frameRange: [frameBase, frameBase], mirrorX })),
+    },
+  });
+  assert.equal(
+    report.findings.some(
+      (finding) =>
+        finding.visualId === "villager-korean-farmer" &&
+        ["carry", "carry-idle"].includes(finding.state) &&
+        (finding.code === "direction-order-unverified" ||
+          finding.code === "mirrored-facing-unverified"),
+    ),
+    false,
   );
   const unboundAdvancedTower = report.visuals.find(
     (visual) => visual.visualId === "japanese-camp-advanced-tower",

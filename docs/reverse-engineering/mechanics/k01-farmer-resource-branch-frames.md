@@ -17,7 +17,9 @@ carried/gathered resource quantity로 좁게 뒷받침하는 selector·increment
 
 - 분석 상태: `정적 확정`
 - 재현 상태: `재현 완료`
-- 구현 상태: `없음` — 이 문서는 기존 zero-branch core mapping을 넓히거나 renderer/theme을 변경하지 않는다.
+- 구현 상태: `부분 이식` — class 7 `villager`와 class 31 `japanese-farmer`의 `carry`/`carry-idle`은
+  이 nonzero branch의 frame·방향·mirror를 사용한다. 선택 조건은 port의 `carriedResource.amount > 0`
+  adapter이며, 원본 `+0x47a`의 의미를 다른 entity나 모든 시스템으로 일반화하지 않는다.
 
 ## 함수·데이터 주소와 field 흐름
 
@@ -75,8 +77,10 @@ seed/SPR/EXE tamper rejection을 검사한다.
 
 ## 현재 구현과의 차이
 
-현행 port에는 이 nonzero branch를 원본 기반으로 연결하지 않았다. 기존 class 7·31 creation-default
-mapping의 `+0x47a==0` 범위와 이 문서의 `+0x47a!=0` 범위는 분리한다.
+현행 port는 `carriedResource.amount > 0`일 때만 class 7·31의 `carry`/`carry-idle`로 이 정적 frame
+mapping을 선택한다. 이는 원본의 quantity mutation, selector, capacity, player-bank credit, gather 명령 또는
+full gather lifecycle을 구현했다는 뜻이 아니다. 기존 creation-default mapping의 `+0x47a==0` core 범위와
+이 문서의 `+0x47a!=0` 범위는 분리하며, FPS와 pivot은 프로젝트 적응으로 남는다.
 
 ## 미확인 항목과 다음 작업
 
