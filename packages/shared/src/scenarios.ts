@@ -376,10 +376,10 @@ export interface K01SourceUnitAdapterRecord {
 // `proxy` deliberately preserves current project fallbacks where identity or frame work is not
 // yet sufficient to claim a source binding. This adapter does not assert source gameplay behavior.
 export const k01SourceOpeningAdapter = [
-  { originalClass: 49, rawOwnerWord: 0, offset: { x: -1, y: -2 }, projectKind: "house", identityMapping: "proxy", idSuffix: "source-0x31-5-4" },
-  { originalClass: 48, rawOwnerWord: 0, offset: { x: 5, y: -1 }, projectKind: "house", identityMapping: "proxy", idSuffix: "source-0x30-11-5" },
+  { originalClass: 49, rawOwnerWord: 0, offset: { x: -1, y: -2 }, projectKind: "town-center", identityMapping: "exact-static-identity-source", idSuffix: "source-0x31-5-4" },
+  { originalClass: 48, rawOwnerWord: 0, offset: { x: 5, y: -1 }, projectKind: "house", identityMapping: "exact-static-identity-source", idSuffix: "source-0x30-11-5" },
   { originalClass: 50, rawOwnerWord: 0, offset: { x: 7, y: 4 }, projectKind: "barracks", identityMapping: "exact-static-identity-source", idSuffix: "source-0x32-13-10" },
-  { originalClass: 51, rawOwnerWord: 0, offset: { x: -1, y: 2 }, projectKind: "house", identityMapping: "proxy", idSuffix: "source-0x33-5-8" },
+  { originalClass: 51, rawOwnerWord: 0, offset: { x: -1, y: 2 }, projectKind: "korean-training-command", identityMapping: "exact-static-identity-source", idSuffix: "source-0x33-5-8" },
   { originalClass: 76, rawOwnerWord: 0, offset: { x: 3, y: 2 }, projectKind: "gwon-yul", identityMapping: "exact-static-identity-source", idSuffix: "source-0x4c-9-8" },
   { originalClass: 2, rawOwnerWord: 0, offset: { x: 5, y: 5 }, projectKind: "swordsman", identityMapping: "exact-static-identity-source", idSuffix: "source-0x02-11-11" },
   { originalClass: 11, rawOwnerWord: 0, offset: { x: 3, y: 5 }, projectKind: "korean-monk", identityMapping: "exact-static-identity-source", idSuffix: "source-0x0b-9-11" },
@@ -403,15 +403,15 @@ export const k01SourceOpeningAdapter = [
   { originalClass: 16, rawOwnerWord: 1, offset: { x: -41, y: 2 }, projectKind: "japanese-shrine-maiden", identityMapping: "exact-static-identity-source", idSuffix: "source-0x10-11-54" },
   { originalClass: 57, rawOwnerWord: 1, offset: { x: -40, y: 0 }, projectKind: "japanese-camp-house", identityMapping: "exact-static-identity-source", idSuffix: "source-0x39-12-52" },
   { originalClass: 57, rawOwnerWord: 1, offset: { x: -1, y: -47 }, projectKind: "japanese-camp-house", identityMapping: "exact-static-identity-source", idSuffix: "source-0x39-51-5" },
-  { originalClass: 58, rawOwnerWord: 1, offset: { x: -45, y: 5 }, projectKind: "japanese-camp-barracks", identityMapping: "proxy", idSuffix: "source-0x3a-7-57" },
-  { originalClass: 58, rawOwnerWord: 1, offset: { x: 4, y: -46 }, projectKind: "japanese-camp-barracks", identityMapping: "proxy", idSuffix: "source-0x3a-56-6" },
-  { originalClass: 60, rawOwnerWord: 1, offset: { x: -46, y: -2 }, projectKind: "japanese-camp-tower", identityMapping: "proxy", idSuffix: "source-0x3c-6-50" },
-  { originalClass: 60, rawOwnerWord: 1, offset: { x: 3, y: -41 }, projectKind: "japanese-camp-tower", identityMapping: "proxy", idSuffix: "source-0x3c-55-11" },
+  { originalClass: 58, rawOwnerWord: 1, offset: { x: -45, y: 5 }, projectKind: "japanese-hq", identityMapping: "exact-static-identity-source", idSuffix: "source-0x3a-7-57" },
+  { originalClass: 58, rawOwnerWord: 1, offset: { x: 4, y: -46 }, projectKind: "japanese-hq", identityMapping: "exact-static-identity-source", idSuffix: "source-0x3a-56-6" },
+  { originalClass: 60, rawOwnerWord: 1, offset: { x: -46, y: -2 }, projectKind: "japanese-camp-barracks", identityMapping: "exact-static-identity-source", idSuffix: "source-0x3c-6-50" },
+  { originalClass: 60, rawOwnerWord: 1, offset: { x: 3, y: -41 }, projectKind: "japanese-camp-barracks", identityMapping: "exact-static-identity-source", idSuffix: "source-0x3c-55-11" },
   { originalClass: 62, rawOwnerWord: 1, offset: { x: -40, y: 5 }, projectKind: "japanese-camp-firehouse", identityMapping: "exact-static-identity-source", idSuffix: "source-0x3e-12-57" },
-  { originalClass: 63, rawOwnerWord: 1, offset: { x: -34, y: -3 }, projectKind: "japanese-camp-advanced-tower", identityMapping: "proxy", idSuffix: "source-0x3f-18-49" },
-  { originalClass: 63, rawOwnerWord: 1, offset: { x: -8, y: -47 }, projectKind: "japanese-camp-advanced-tower", identityMapping: "proxy", idSuffix: "source-0x3f-44-5" },
-  { originalClass: 63, rawOwnerWord: 1, offset: { x: -20, y: -12 }, projectKind: "japanese-camp-advanced-tower", identityMapping: "proxy", idSuffix: "source-0x3f-32-40" },
-  { originalClass: 63, rawOwnerWord: 1, offset: { x: -17, y: -23 }, projectKind: "japanese-camp-advanced-tower", identityMapping: "proxy", idSuffix: "source-0x3f-35-29" },
+  { originalClass: 63, rawOwnerWord: 1, offset: { x: -34, y: -3 }, projectKind: "japanese-camp-tower", identityMapping: "exact-static-identity-source", idSuffix: "source-0x3f-18-49" },
+  { originalClass: 63, rawOwnerWord: 1, offset: { x: -8, y: -47 }, projectKind: "japanese-camp-tower", identityMapping: "exact-static-identity-source", idSuffix: "source-0x3f-44-5" },
+  { originalClass: 63, rawOwnerWord: 1, offset: { x: -20, y: -12 }, projectKind: "japanese-camp-tower", identityMapping: "exact-static-identity-source", idSuffix: "source-0x3f-32-40" },
+  { originalClass: 63, rawOwnerWord: 1, offset: { x: -17, y: -23 }, projectKind: "japanese-camp-tower", identityMapping: "exact-static-identity-source", idSuffix: "source-0x3f-35-29" },
 ] as const satisfies readonly K01SourceUnitAdapterRecord[];
 
 function deriveK01SourceOpeningStart(rawOwnerWord: 0 | 1): StartingUnitDefinition[] {
