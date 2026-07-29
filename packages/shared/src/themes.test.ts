@@ -167,8 +167,19 @@ test("default theme unit frame blocks stay within their source exports", () => {
   assert.equal(villagerVisual.states.carry?.clips.s?.loop, true);
   assert.equal(villagerVisual.states["carry-idle"]?.clips.s?.fps, 1);
   assert.equal(villagerVisual.states["carry-idle"]?.clips.s?.loop, true);
-  // Gather/build/repair remain project source-layout adaptations; they are not class-7 parity claims.
-  assert.equal(villagerVisual.states.gather?.clips.s?.frames[0]?.fileName, "farmerk_0152.png");
+  // Generic gather is a project adapter to the recovered class-7 state-10 shared source band.
+  assertDirectionalFrames(villagerVisual, "gather", {
+    stem: "farmerk",
+    phaseCount: 8,
+    frameStarts: { s: 120, sw: 120, w: 120, nw: 120, n: 120, ne: 120, e: 120, se: 120 },
+  });
+  assertDirectionalClipStarts(villagerVisual, "gather", "farmerk", {
+    s: [120, false], sw: [120, false], w: [120, false], nw: [120, false], n: [120, true], ne: [120, true], e: [120, true], se: [120, true],
+  });
+  assert.deepEqual(
+    [...new Set(Object.values(villagerVisual.states.gather?.clips ?? {}).flatMap((clip) => clip?.frames.map((frame) => frame.fileName) ?? []))].sort(),
+    frameNames("farmerk", 120, 127),
+  );
   assert.equal(villagerVisual.states.build?.clips.s?.frames[0]?.fileName, "farmerk_0192.png");
   assert.equal(villagerVisual.states.repair?.clips.s?.frames[0]?.fileName, "farmerk_0192.png");
 
@@ -445,14 +456,14 @@ test("Japanese gunner uses the statically recovered class-12 core-state frame bl
   assert.equal(visual.states.death?.clips.s?.loop, false);
 });
 
-test("Japanese farmer uses the recovered carrying frames and omits unresolved attack frames", () => {
+test("Japanese farmer uses the recovered resource-work and carrying frames and omits unresolved attack frames", () => {
   const manifest = readManifest("entities/japanese-farmer/Farmerj.manifest.json");
   const visual = defaultTheme.visuals[defaultTheme.entityBindings["japanese-farmer"]] as EntityVisual;
 
   assert.equal(manifest.source, "original/imjinrok2/char/Farmerj.spr");
   assert.equal(manifest.frameCount, 248);
   assert.equal(manifest.exportedFrames.length, 248);
-  assert.deepEqual(Object.keys(visual.states).sort(), ["carry", "carry-idle", "death", "idle", "move", "walk"]);
+  assert.deepEqual(Object.keys(visual.states).sort(), ["carry", "carry-idle", "death", "gather", "idle", "move", "walk"]);
   assertDirectionalFrames(visual, "idle", {
     stem: "Farmerj",
     phaseCount: 8,
@@ -462,6 +473,14 @@ test("Japanese farmer uses the recovered carrying frames and omits unresolved at
     stem: "Farmerj",
     phaseCount: 8,
     frameStarts: { s: 160, sw: 168, w: 176, nw: 184, n: 176, ne: 168, e: 160, se: 192 },
+  });
+  assertDirectionalFrames(visual, "gather", {
+    stem: "Farmerj",
+    phaseCount: 8,
+    frameStarts: { s: 40, sw: 40, w: 40, nw: 40, n: 40, ne: 40, e: 40, se: 40 },
+  });
+  assertDirectionalClipStarts(visual, "gather", "Farmerj", {
+    s: [40, false], sw: [40, false], w: [40, false], nw: [40, false], n: [40, true], ne: [40, true], e: [40, true], se: [40, true],
   });
   assertDirectionalFrames(visual, "carry", {
     stem: "Farmerj",

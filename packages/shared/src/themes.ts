@@ -88,6 +88,16 @@ const STATICALLY_RECOVERED_DIRECTION_SOURCES = {
   e: { frameBaseIndex: 0, mirrorX: true },
   se: { frameBaseIndex: 4, mirrorX: false },
 } as const satisfies Record<Facing, { frameBaseIndex: number; mirrorX: boolean }>;
+const STATICALLY_RECOVERED_RESOURCE_WORK_DIRECTION_SOURCES = {
+  s: { frameBaseIndex: 0, mirrorX: false },
+  sw: { frameBaseIndex: 0, mirrorX: false },
+  w: { frameBaseIndex: 0, mirrorX: false },
+  nw: { frameBaseIndex: 0, mirrorX: false },
+  n: { frameBaseIndex: 0, mirrorX: true },
+  ne: { frameBaseIndex: 0, mirrorX: true },
+  e: { frameBaseIndex: 0, mirrorX: true },
+  se: { frameBaseIndex: 0, mirrorX: true },
+} as const satisfies Record<Facing, { frameBaseIndex: number; mirrorX: boolean }>;
 const TURTLE_TANK_RECOVERED_DIRECTION_SOURCES = {
   s: { frameBaseIndex: 2, mirrorX: false },
   sw: { frameBaseIndex: 4, mirrorX: false },
@@ -202,6 +212,24 @@ function staticallyRecoveredNormalMovementClips(
     phaseCount: SOURCE_FRAMES_PER_FACING,
     fps,
     loop: true,
+  });
+}
+
+function staticallyRecoveredResourceWorkClips(
+  visualId: string,
+  stem: string,
+  startFrame: number,
+): Partial<Record<Facing | "default", AnimationClip>> {
+  // State 10 shares one eight-phase source band across all facings; direction only controls mirroring.
+  return staticallyRecoveredDirectionalClips({
+    visualId,
+    stem,
+    frameStart: startFrame,
+    frameStride: 0,
+    phaseCount: SOURCE_FRAMES_PER_FACING,
+    fps: PROVISIONAL_RECOVERED_ANIMATION_ACTIVE_FPS,
+    loop: true,
+    directionSources: STATICALLY_RECOVERED_RESOURCE_WORK_DIRECTION_SOURCES,
   });
 }
 
@@ -493,10 +521,10 @@ export const villagerEntityVisual = {
         loop: true,
       }),
     },
-    // Project source-layout adaptations. They remain intentionally separate from the class-7 original core-state proof.
+    // Project adapter: generic gather selects the recovered original state-10 source layout.
     gather: {
       facings: ENTITY_FACING_ORDER,
-      clips: sourceFiveFacingClips("villager", "farmerk", 120, 8),
+      clips: staticallyRecoveredResourceWorkClips("villager", "farmerk", 120),
     },
     build: {
       facings: ENTITY_FACING_ORDER,
@@ -854,6 +882,11 @@ export const japaneseFarmerEntityVisual = {
         fps: PROVISIONAL_RECOVERED_ANIMATION_ACTIVE_FPS,
         loop: true,
       }),
+    },
+    // Project adapter: generic gather selects the recovered original state-10 source layout.
+    gather: {
+      facings: ENTITY_FACING_ORDER,
+      clips: staticallyRecoveredResourceWorkClips("japanese_farmer", "Farmerj", 40),
     },
     carry: {
       facings: ENTITY_FACING_ORDER,
