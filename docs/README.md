@@ -72,6 +72,7 @@
 - [K01 봉화대 완성·K0120 native trigger](reverse-engineering/mechanics/k01-beacon-k0120-trigger.md)
 - [K01 native 증원 정체·요청 좌표 매핑](reverse-engineering/mechanics/k01-reinforcement-identity-map.md)
 - [K01 native 증원 슬롯·정확 배치 정책](reverse-engineering/mechanics/k01-reinforcement-placement-policy.md)
+- [K01 mobile occupancy update boundary](reverse-engineering/mechanics/k01-mobile-occupancy-boundary.md)
 - [K01 미션 결과 latch·timer·commit 수명주기](reverse-engineering/mechanics/k01-mission-result-lifecycle.md)
 - [K01 결과 presentation·post-result 전환](reverse-engineering/mechanics/k01-final-result-transition.md)
 - [K01 표준 미션 진입 timer reset](reverse-engineering/mechanics/k01-mission-timer-reset.md)

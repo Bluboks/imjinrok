@@ -1,0 +1,12 @@
+{
+  "analysisStatus": "unconfirmed",
+  "reproductionStatus": "not-reproduced",
+  "implementationStatus": "none",
+  "actionOneCallOrder": [
+    { "callSite": "0x0043cdac", "callee": "0x0043b2d0" },
+    { "callSite": "0x0043cdb3", "callee": "0x0043c300" },
+    { "callSite": "0x0043cdba", "callee": "0x0043ad30" }
+  ],
+  "firstUnresolvedFunction": "per-tick occupancy-grid clear and scheduler ordering",
+  "vectorIds": ["action-one-order", "occupied-destination-store", "unresolved-destination-coordinate"]
+}
