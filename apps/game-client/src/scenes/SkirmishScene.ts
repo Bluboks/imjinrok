@@ -162,10 +162,11 @@ import { createFormationTargets } from "../formation.js";
 import { launchGameWithPreGameBriefing } from "../preGameBriefingLaunch.js";
 import {
   CARDINAL_FOG_NEIGHBOR_OFFSETS,
-  K01_NORMAL_FOG_PROFILE_MAP_ID,
   NORMAL_FOG_ASSETS,
+  NORMAL_SOURCE_FOG_TILESET_ID,
   requireSourceTexture,
-  resolveK01NormalFogTransition,
+  resolveEnvironmentOverlayLightContract,
+  resolveNormalSourceFogTransition,
   resolveSourceFogTileScale,
   type FogVisibility,
   type SourceFogTile,
@@ -1296,10 +1297,9 @@ export class SkirmishScene extends Phaser.Scene {
     const environment = this.worldState.environment;
     const width = this.scale.width;
     const height = this.scale.height;
-    const lightLevel = getEnvironmentLightLevel(environment);
-    const nightAlpha = Phaser.Math.Clamp((1 - lightLevel) * 0.42, 0, 0.32);
+    const visualState = resolveEnvironmentOverlayLightContract(getEnvironmentLightLevel(environment));
     const rainFrame = environment.weather === "rain" ? this.worldState.tick % 48 : 0;
-    const signature = `${width}x${height}:${environment.weather}:${environment.dayPhase}:${rainFrame}`;
+    const signature = `${width}x${height}:${environment.weather}:${environment.dayPhase}:${visualState.lightSignature}:${rainFrame}`;
 
     if (!force && signature === this.environmentOverlaySignature) {
       return;
@@ -1308,8 +1308,8 @@ export class SkirmishScene extends Phaser.Scene {
     this.environmentOverlaySignature = signature;
     graphics.clear();
 
-    if (nightAlpha > 0) {
-      graphics.fillStyle(0x071426, nightAlpha).fillRect(0, 0, width, height);
+    if (visualState.nightAlpha > 0) {
+      graphics.fillStyle(0x071426, visualState.nightAlpha).fillRect(0, 0, width, height);
     }
 
     if (environment.weather === "rain") {
@@ -6737,7 +6737,7 @@ export class SkirmishScene extends Phaser.Scene {
       this.lastVisibilityDeltaMs = performance.now() - startedAt;
     }
 
-    return this.expandDirtyFogChunksForK01Transitions(update.dirtyChunkCount);
+    return this.expandDirtyFogChunksForNormalSourceFogTransitions(update.dirtyChunkCount);
   }
 
   private revealAllLocalVisibility(): number {
@@ -6804,7 +6804,7 @@ export class SkirmishScene extends Phaser.Scene {
 
     if (this.perfEnabled) console.time("fog full bake");
     this.ensureFogTextures();
-    this.ensureK01NormalFogTextures();
+    this.ensureNormalSourceFogTextures();
 
     let tileDrawCount = 0;
 
@@ -6834,7 +6834,7 @@ export class SkirmishScene extends Phaser.Scene {
 
     if (this.perfEnabled) console.time("fog dirty bake");
     this.ensureFogTextures();
-    this.ensureK01NormalFogTextures();
+    this.ensureNormalSourceFogTextures();
 
     let redrawnChunkCount = 0;
     let tileDrawCount = 0;
@@ -6894,7 +6894,7 @@ export class SkirmishScene extends Phaser.Scene {
           }
         }
 
-        this.drawK01NormalFogTransition(renderTexture, bounds, visibility, x, y, worldX, worldY);
+        this.drawNormalSourceFogTransition(renderTexture, bounds, visibility, x, y, worldX, worldY);
 
         hasFog = true;
         tileDrawCount += 1;
@@ -6940,7 +6940,7 @@ export class SkirmishScene extends Phaser.Scene {
     renderTexture.draw(textureKey, worldX - bounds.minX - halfWidth - 1, worldY - bounds.minY - halfHeight - 1);
   }
 
-  private drawK01NormalFogTransition(
+  private drawNormalSourceFogTransition(
     renderTexture: Phaser.GameObjects.RenderTexture,
     bounds: FogChunkBounds,
     visibility: TileVisibility,
@@ -6950,8 +6950,8 @@ export class SkirmishScene extends Phaser.Scene {
     worldY: number,
   ): void {
     if (getTileAt(this.map, x, y).elevation > 0) return;
-    const source = resolveK01NormalFogTransition(
-      this.map.id,
+    const source = resolveNormalSourceFogTransition(
+      this.map.tilesetId,
       this.toSourceFogVisibility(visibility),
       (direction) => {
         const offset = CARDINAL_FOG_NEIGHBOR_OFFSETS[direction];
@@ -7139,15 +7139,15 @@ export class SkirmishScene extends Phaser.Scene {
     }
   }
 
-  private ensureK01NormalFogTextures(): void {
-    if (this.map.id !== K01_NORMAL_FOG_PROFILE_MAP_ID) return;
+  private ensureNormalSourceFogTextures(): void {
+    if (this.map.tilesetId !== NORMAL_SOURCE_FOG_TILESET_ID) return;
     for (const asset of NORMAL_FOG_ASSETS) {
       requireSourceTexture(asset, (textureKey) => this.textures.exists(textureKey));
     }
   }
 
-  private expandDirtyFogChunksForK01Transitions(dirtyChunkCount: number): number {
-    if (dirtyChunkCount === 0 || this.map.id !== K01_NORMAL_FOG_PROFILE_MAP_ID) {
+  private expandDirtyFogChunksForNormalSourceFogTransitions(dirtyChunkCount: number): number {
+    if (dirtyChunkCount === 0 || this.map.tilesetId !== NORMAL_SOURCE_FOG_TILESET_ID) {
       return dirtyChunkCount;
     }
 

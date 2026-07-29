@@ -24,8 +24,14 @@ export interface OriginalCommandControlBinding {
   readonly sourceLabel: string | null;
 }
 
+export interface EnvironmentOverlayLightContract {
+  readonly lightLevel: number;
+  readonly lightSignature: string;
+  readonly nightAlpha: number;
+}
+
 const NORMAL_FOG_ASSET_PREFIX = "assets/themes/default/fog/normal";
-export const K01_NORMAL_FOG_PROFILE_MAP_ID = "imjinrok-k01";
+export const NORMAL_SOURCE_FOG_TILESET_ID = "imjinrok-normal";
 export const CARDINAL_FOG_NEIGHBOR_OFFSETS: Readonly<Record<CardinalDirection, Readonly<{ x: number; y: number }>>> = Object.freeze({
   west: { x: -1, y: 0 },
   north: { x: 0, y: -1 },
@@ -99,15 +105,15 @@ export function resolveSourceFogTile(
 }
 
 /**
- * Product-only K01 normal-fog transition policy. The bit order and fogN mapping are
+ * Product-only normal source-fog transition policy. The bit order and fogN mapping are
  * deliberately not an assertion about the original game's neighbor-mask rule.
  */
-export function resolveK01NormalFogTransition(
-  mapId: string,
+export function resolveNormalSourceFogTransition(
+  tilesetId: string | undefined,
   visibility: FogVisibility,
   neighborVisibility: (direction: CardinalDirection) => FogVisibility,
 ): SourceFogTile | null {
-  if (mapId !== K01_NORMAL_FOG_PROFILE_MAP_ID || visibility === "visible") {
+  if (tilesetId !== NORMAL_SOURCE_FOG_TILESET_ID || visibility === "visible") {
     return null;
   }
   const mask = resolveCardinalVisibleNeighborMask(neighborVisibility);
@@ -130,6 +136,17 @@ export function resolveSourceFogTileScale(mapTileWidth: number, mapTileHeight: n
     throw new RangeError(`source fog requires positive finite map tile dimensions; received ${mapTileWidth}x${mapTileHeight}`);
   }
   return { x: mapTileWidth / 32, y: mapTileHeight / 16 };
+}
+
+export function resolveEnvironmentOverlayLightContract(lightLevel: number): EnvironmentOverlayLightContract {
+  if (!Number.isFinite(lightLevel)) {
+    throw new RangeError(`environment light level must be finite; received ${String(lightLevel)}`);
+  }
+  return {
+    lightLevel,
+    lightSignature: lightLevel.toFixed(4),
+    nightAlpha: Math.max(0, Math.min(0.32, (1 - lightLevel) * 0.42)),
+  };
 }
 
 export function resolveSourceCommandIcon(actionId: ActionDefinitionId): SourceCommandIcon | undefined {
