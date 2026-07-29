@@ -416,16 +416,21 @@ export const villagerEntityVisual = {
   states: {
     idle: {
       facings: ENTITY_FACING_ORDER,
-      clips: sourceFiveFacingStillClips("villager", "farmerk", 0),
+      clips: staticallyRecoveredDirectionalClips({ visualId: "villager", stem: "farmerk", frameStart: 0, frameStride: 8, phaseCount: 8, fps: PROVISIONAL_RECOVERED_ANIMATION_IDLE_FPS, loop: true }),
     },
     move: {
       facings: ENTITY_FACING_ORDER,
-      clips: sourceFiveFacingClips("villager", "farmerk", 40, 8),
+      clips: staticallyRecoveredNormalMovementClips("villager", "farmerk", 40, PROVISIONAL_RECOVERED_ANIMATION_ACTIVE_FPS),
     },
     walk: {
       facings: ENTITY_FACING_ORDER,
-      clips: sourceFiveFacingClips("villager", "farmerk", 40, 8),
+      clips: staticallyRecoveredNormalMovementClips("villager", "farmerk", 40, PROVISIONAL_RECOVERED_ANIMATION_ACTIVE_FPS),
     },
+    death: {
+      facings: ENTITY_FACING_ORDER,
+      clips: staticallyRecoveredDirectionalClips({ visualId: "villager", stem: "farmerk", frameStart: 240, frameStride: 0, phaseCount: 8, fps: PROVISIONAL_RECOVERED_ANIMATION_ACTIVE_FPS, loop: false }),
+    },
+    // Project source-layout adaptations. They remain intentionally separate from the class-7 original core-state proof.
     carry: {
       facings: ENTITY_FACING_ORDER,
       clips: sourceFiveFacingClips("villager", "farmerk", 80, 8),

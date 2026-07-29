@@ -128,17 +128,20 @@ test("default theme unit frame blocks stay within their source exports", () => {
   assert.equal(farmerManifest.source, "original/imjinrok2/char/farmerk.spr");
   assert.equal(farmerManifest.frameCount, 248);
   assert.equal(farmerManifest.exportedFrames.length, 248);
-  assert.equal(villagerVisual.states.move?.clips.s?.frames.length, 8);
-  assert.equal(villagerVisual.states.idle?.clips.n?.frames[0]?.fileName, "farmerk_0000.png");
-  assert.equal(villagerVisual.states.move?.clips.n?.frames[0]?.fileName, "farmerk_0040.png");
-  assert.equal(villagerVisual.states.move?.clips.ne?.frames[0]?.fileName, "farmerk_0048.png");
-  assert.equal(villagerVisual.states.move?.clips.e?.frames[0]?.fileName, "farmerk_0056.png");
-  assert.equal(villagerVisual.states.move?.clips.se?.frames[0]?.fileName, "farmerk_0064.png");
-  assert.equal(villagerVisual.states.move?.clips.s?.frames[0]?.fileName, "farmerk_0072.png");
-  assert.equal(villagerVisual.states.move?.clips.w?.frames[0]?.fileName, "farmerk_0056.png");
-  assert.equal(villagerVisual.states.move?.clips.w?.mirrorX, true);
-  assert.equal(villagerVisual.states.move?.clips.sw?.frames[0]?.fileName, "farmerk_0064.png");
-  assert.equal(villagerVisual.states.move?.clips.sw?.mirrorX, true);
+  const farmerCoreFrameStarts = {
+    n: 16, ne: 8, e: 0, se: 32, s: 0, sw: 8, w: 16, nw: 24,
+  } as const satisfies Record<Facing, number>;
+  assertDirectionalFrames(villagerVisual, "idle", { stem: "farmerk", phaseCount: 8, frameStarts: farmerCoreFrameStarts });
+  assertDirectionalFrames(villagerVisual, "move", { stem: "farmerk", phaseCount: 8, frameStarts: Object.fromEntries(Object.entries(farmerCoreFrameStarts).map(([facing, frame]) => [facing, frame + 40])) as Record<Facing, number> });
+  assertDirectionalFrames(villagerVisual, "death", { stem: "farmerk", phaseCount: 8, frameStarts: Object.fromEntries(Object.keys(farmerCoreFrameStarts).map((facing) => [facing, 240])) as Record<Facing, number> });
+  assertDirectionalClipStarts(villagerVisual, "idle", "farmerk", { n: [16, true], ne: [8, true], e: [0, true], se: [32, false], s: [0, false], sw: [8, false], w: [16, false], nw: [24, false] });
+  assertDirectionalClipStarts(villagerVisual, "move", "farmerk", { n: [56, true], ne: [48, true], e: [40, true], se: [72, false], s: [40, false], sw: [48, false], w: [56, false], nw: [64, false] });
+  assertDirectionalClipStarts(villagerVisual, "death", "farmerk", { n: [240, true], ne: [240, true], e: [240, true], se: [240, false], s: [240, false], sw: [240, false], w: [240, false], nw: [240, false] });
+  assert.equal(villagerVisual.states.idle?.clips.s?.loop, true);
+  assert.equal(villagerVisual.states.move?.clips.s?.loop, true);
+  assert.deepEqual(villagerVisual.states.walk?.clips, villagerVisual.states.move?.clips);
+  assert.equal(villagerVisual.states.death?.clips.s?.loop, false);
+  // Carry/gather/build/repair retain project source-layout adaptations; they are not class-7 parity claims.
   assert.equal(villagerVisual.states.carry?.clips.s?.frames[0]?.fileName, "farmerk_0112.png");
   assert.equal(villagerVisual.states.gather?.clips.s?.frames[0]?.fileName, "farmerk_0152.png");
   assert.equal(villagerVisual.states.build?.clips.s?.frames[0]?.fileName, "farmerk_0192.png");
