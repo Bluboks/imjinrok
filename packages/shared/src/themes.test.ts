@@ -180,8 +180,25 @@ test("default theme unit frame blocks stay within their source exports", () => {
     [...new Set(Object.values(villagerVisual.states.gather?.clips ?? {}).flatMap((clip) => clip?.frames.map((frame) => frame.fileName) ?? []))].sort(),
     frameNames("farmerk", 120, 127),
   );
-  assert.equal(villagerVisual.states.build?.clips.s?.frames[0]?.fileName, "farmerk_0192.png");
-  assert.equal(villagerVisual.states.repair?.clips.s?.frames[0]?.fileName, "farmerk_0192.png");
+  // Generic build/repair intentionally adapt the recovered class-7 state-11 source layout;
+  // this does not assign state 11 an original gameplay meaning.
+  const state11SourceFrameStarts = {
+    s: 160, sw: 168, w: 176, nw: 184, n: 176, ne: 168, e: 160, se: 192,
+  } as const satisfies Record<Facing, number>;
+  const state11SourceClipStarts = {
+    s: [160, false], sw: [168, false], w: [176, false], nw: [184, false],
+    n: [176, true], ne: [168, true], e: [160, true], se: [192, false],
+  } as const satisfies Record<Facing, readonly [number, boolean]>;
+  for (const stateName of ["build", "repair"] as const) {
+    assertDirectionalFrames(villagerVisual, stateName, {
+      stem: "farmerk",
+      phaseCount: 8,
+      frameStarts: state11SourceFrameStarts,
+    });
+    assertDirectionalClipStarts(villagerVisual, stateName, "farmerk", state11SourceClipStarts);
+    assert.equal(villagerVisual.states[stateName]?.clips.s?.fps, 8);
+    assert.equal(villagerVisual.states[stateName]?.clips.s?.loop, true);
+  }
 
   assert.equal(swordsmanManifest.source, "original/imjinrok2/char/swordk.spr");
   assert.equal(swordsmanManifest.frameCount, 192);
