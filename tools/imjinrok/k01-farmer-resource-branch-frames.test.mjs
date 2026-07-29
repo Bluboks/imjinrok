@@ -28,6 +28,9 @@ test("recovers the narrowly evidenced quantity flow and class 7/31 nonzero idle/
   assert.deepEqual(report.fieldFlow.creditGate, {
     functionEntry: "0x0043c9c0", range: "0x0043ce75-0x0043ce9e", zeroRegisterProvenance: { setVa: "0x0043ca1e", instruction: "XOR EBP,EBP", comparatorRegister: "BP", verifiedRange: "0x0043ca1e-0x0043cea3" }, condition: "quantity != 0 && selector != 0 && quantity < capacity (the observed signed JGE comparison)", callVa: "0x0043ce9a", target: "0x00424510", arguments: ["selector from +0x478", "quantity from +0x47a"],
   });
+  assert.deepEqual(report.fieldFlow.coordinateIndexedTileStorageAdd, {
+    functionEntry: "0x00424510", coordinateFields: ["entity +0x1bc", "entity +0x1be"], indexFormula: "x*45+y", tableVa: "0x00bb41cc", selectorCases: [1, 2, 3], effect: "selectors 1/2 add the supplied quantity to a coordinate-indexed tile WORD; selector 3 shifts the supplied quantity by 8 before that add",
+  });
   assert.deepEqual(report.fieldFlow.quantityConfigRefresh, { functionEntry: "0x004562d0", moveCallVa: "0x0045650c", moveHelper: "0x00428e10", idleCallVa: "0x00456524", idleHelper: "0x00428fb0" });
   assert.deepEqual(report.callEdges.filter(({ from }) => from === "0x0045650c" || from === "0x00456524"), [
     { from: "0x0045650c", fromFunctionEntry: "0x004562d0", to: "0x00428e10" },
