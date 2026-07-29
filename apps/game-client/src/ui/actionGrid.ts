@@ -244,10 +244,11 @@ function toHudActionSlot(
   playerEconomy: PlayerEconomyView | null,
 ): HudActionSlot {
   const action = actionDefinitions[actionId];
+  const sourceIcon = resolveSourceCommandIcon(actionId);
 
   return {
     actionId,
-    sourceIcon: resolveSourceCommandIcon(actionId),
+    ...(sourceIcon ? { sourceIcon } : {}),
     icon: action.icon,
     hotkey: action.hotkey,
     label: action.label,
