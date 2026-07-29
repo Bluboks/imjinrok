@@ -1,6 +1,6 @@
 # 프로젝트 상태
 
-기준일: 2026-07-28
+기준일: 2026-07-29
 
 ## 요약
 
@@ -91,7 +91,7 @@ K02는 이 단기 MVP의 완료 조건이 아니다. 기존 K02 프로토타입�
 | 브리핑 초상화 | 17개 ID·`hero.spr` 프레임 이식 | 파서→조회→프레임 표→그리기 정적 확정 | 추출기·클라이언트 교차 테스트 | 원본 기반 |
 | `SPEECH` 대화 레이아웃 | 숫자 슬롯·초상화·대사 공통 배치 이식 | 640×480 슬롯 4개와 대사 좌표 정적 확정 | 추출기·배율 변환 테스트 | 확정 범위 원본 기반 |
 | K01 공통 임무 목표 모달 결합 | 검증된 raster·기하·K0110 텍스트·strict release와 유효 base wrap 폭 300을 독립 presenter에 연결; HUD button/event는 프로젝트 전용 | 진입·dispatcher에 더해 GDI `Arial` height 12/HANGEUL_CHARSET 요청, CP949 byte chunk·strict wrap·배치·실패 경로 정적 확정 | lifecycle 재현 완료; typography 제어 흐름은 공급한 synthetic GDI metrics 아래 부분 재현 | frame/content/dismiss·action·text·유효 폭은 원본 기반; 실제 font realization·glyph 폭·Korean wrap·빈 문자열 `SIZE.cy`, gameplay-panel 정체, mechanism source, dismiss visual·sound 미확정 |
-| UI·입력 | 반응형 목표 추적 HUD 존재 | 임무 목표 모달 확정; transient overlay 후보 반증; action 115 admission/removal, queue-count marker·type 76 state handoff와 player-scoped hero-priority·magic-auto-use gates, class 78 auto/manual pending-store·일반 공격 경계 정적 확정 | 기존 범위와 class 78 cadence·target admission·action 40/59 delivery·manual pending 충돌 부분 재현 | original raw queue/state/gate는 이식하지 않고 목표 추적 HUD·responsive selection UI를 포함한 나머지는 의도적 프로젝트 UI |
+| UI·입력 | 반응형 목표 추적 HUD와 K01 generic 4×3 12-slot action grid 존재 | 임무 목표 모달 확정; transient overlay 후보 반증; action 115 admission/removal, queue-count marker·type 76 state handoff와 player-scoped hero-priority·magic-auto-use gates, class 78 auto/manual pending-store·일반 공격 경계 정적 확정; original 3×3 command-grid는 정적 evidence로 보존 | 기존 범위와 class 78 cadence·target admission·action 40/59 delivery·manual pending 충돌 부분 재현 | original raw queue/state/gate와 3×3 command-grid는 product에 이식하지 않는다. K01 4×3 12-slot grid, 목표 추적 HUD·responsive selection UI를 포함한 나머지는 의도적 프로젝트 UI |
 | VM 동적 분석 | 과거 도구·기록 존재 | 다수 시행착오 기록 | 원시 증거가 저장소에 없음 | 보관, 기본 경로에서 제외 |
 
 ## 신뢰할 수 있는 출발점

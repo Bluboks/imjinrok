@@ -9,7 +9,7 @@
 | --- | --- | --- |
 | 분석 | 정적 확정 | `0x007c5ed8`의 9개 command slot, source-bound `34×34` `3×3` geometry, `pannel.spr` final blit, renderer/input 분기와 lock 실패 |
 | 재현 | 재현 완료 | source-bound exact rectangle, strict-edge, disabled, lock 실패, owner index와 loader/blit failure 범위 벡터 |
-| 구현 | 부분 이식 | `imjinrok-k01-opening`에서만 9-slot geometry·strict hit를 적용; action label·icon·의미와 HUD 구성은 의도적 적응 |
+| 구현 | 의도적 적응 | 원본 3×3 resolver와 evidence test는 research-only로 유지한다. K01 product runtime은 generic responsive 4×3 12-slot grid를 사용하며, 이는 원작 일치 주장이 아니다. |
 
 이는 [persistent selection/action boundary](persistent-selection-action-boundary.md)의 selected-action
 mirror와 no-selection seven-slot surface를 다시 이름 붙이는 문서가 아니다. 여기서는 그와 별개로
@@ -144,6 +144,7 @@ fixture와 report는 source-bound `34×34`를 기준으로 다음을 고정한�
 남은 불확실성은 post-initialization computed alias writer, selected-entity renderer
 `FUN_00421390`의 전체 visual contents, action identifier별 의미, concrete runtime
 DirectDraw/vtable semantic owner, 그리고 runtime sprite/resource pointer failure의 화면 결과다.
-제품은 `imjinrok-k01-opening`에서만 이 문서의 9-slot geometry와 strict interior admission을
-사용한다. 기존 action label·icon·action semantics, responsive HUD/minimap/selection contents 및 panel
-background placement는 프로젝트 적응이며 원작 일치라고 주장하지 않는다.
+원본 3×3 geometry와 strict interior admission의 resolver·test는 research evidence로만 유지한다.
+`imjinrok-k01-opening` product runtime은 generic responsive 4×3 12-slot command grid를 의도적으로
+사용한다. 이 product policy는 원작 일치 주장이 아니며, action label·icon·action semantics,
+responsive HUD/minimap/selection contents 및 panel background placement와 함께 프로젝트 적응이다.
