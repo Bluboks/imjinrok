@@ -741,6 +741,71 @@ export const japaneseGunnerEntityVisual = {
   },
 } as const satisfies EntityVisual;
 
+export const japaneseFarmerEntityVisual = {
+  id: "japanese-farmer",
+  kind: "entity",
+  assetPath: "entities/japanese-farmer",
+  render: {
+    srcPxPerWu: 32,
+    filtering: "nearest",
+  },
+  defaults: {
+    // Project display adaptation: original timing and pivot contracts are not recovered.
+    size: { w: 66, h: 56 },
+    pivot: { anchor: { x: 33, y: 50 } },
+  },
+  states: {
+    idle: {
+      facings: ENTITY_FACING_ORDER,
+      clips: staticallyRecoveredDirectionalClips({
+        visualId: "japanese_farmer",
+        stem: "Farmerj",
+        frameStart: 0,
+        frameStride: 8,
+        phaseCount: 8,
+        fps: PROVISIONAL_RECOVERED_ANIMATION_IDLE_FPS,
+        loop: true,
+      }),
+    },
+    move: {
+      facings: ENTITY_FACING_ORDER,
+      clips: staticallyRecoveredDirectionalClips({
+        visualId: "japanese_farmer",
+        stem: "Farmerj",
+        frameStart: 160,
+        frameStride: 8,
+        phaseCount: 8,
+        fps: PROVISIONAL_RECOVERED_ANIMATION_ACTIVE_FPS,
+        loop: true,
+      }),
+    },
+    walk: {
+      facings: ENTITY_FACING_ORDER,
+      clips: staticallyRecoveredDirectionalClips({
+        visualId: "japanese_farmer",
+        stem: "Farmerj",
+        frameStart: 160,
+        frameStride: 8,
+        phaseCount: 8,
+        fps: PROVISIONAL_RECOVERED_ANIMATION_ACTIVE_FPS,
+        loop: true,
+      }),
+    },
+    death: {
+      facings: ENTITY_FACING_ORDER,
+      clips: staticallyRecoveredDirectionalClips({
+        visualId: "japanese_farmer",
+        stem: "Farmerj",
+        frameStart: 240,
+        frameStride: 0,
+        phaseCount: 8,
+        fps: PROVISIONAL_RECOVERED_ANIMATION_ACTIVE_FPS,
+        loop: false,
+      }),
+    },
+  },
+} as const satisfies EntityVisual;
+
 export const japaneseShrineMaidenEntityVisual = {
   id: "japanese-shrine-maiden",
   kind: "entity",
@@ -1373,6 +1438,7 @@ export const defaultTheme = {
     "japanese-swordsman": japaneseSwordsmanEntityVisual,
     "korean-archer": archerEntityVisual,
     "japanese-gunner": japaneseGunnerEntityVisual,
+    "japanese-farmer": japaneseFarmerEntityVisual,
     "japanese-shrine-maiden": japaneseShrineMaidenEntityVisual,
     "japanese-samurai": japaneseSamuraiEntityVisual,
     "japanese-turtle-tank": japaneseTurtleTankEntityVisual,
@@ -1401,6 +1467,7 @@ export const defaultTheme = {
     archer: "korean-archer",
     "japanese-swordsman": "japanese-swordsman",
     "japanese-gunner": "japanese-gunner",
+    "japanese-farmer": "japanese-farmer",
     "japanese-shrine-maiden": "japanese-shrine-maiden",
     "japanese-samurai": "japanese-samurai",
     "japanese-turtle-tank": "japanese-turtle-tank",

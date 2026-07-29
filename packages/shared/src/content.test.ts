@@ -13,6 +13,7 @@ test("uses statically recovered names for uniquely bound original sprites", () =
         unitDefinitions["japanese-camp-barracks"].displayName,
       japaneseFirehouse:
         unitDefinitions["japanese-camp-firehouse"].displayName,
+      japaneseFarmer: unitDefinitions["japanese-farmer"].displayName,
       japaneseGunner: unitDefinitions["japanese-gunner"].displayName,
       japaneseKonishi: unitDefinitions["japanese-konishi"].displayName,
       japaneseShrineMaiden: unitDefinitions["japanese-shrine-maiden"].displayName,
@@ -38,6 +39,7 @@ test("uses statically recovered names for uniquely bound original sprites", () =
       house: "조선 방앗간",
       japaneseBarracks: "일본 훈련소",
       japaneseFirehouse: "일본 관측소",
+      japaneseFarmer: "일본 농부",
       japaneseGunner: "일본 조총병",
       japaneseKonishi: "일본 고니시",
       japaneseShrineMaiden: "일본 무녀",
@@ -93,6 +95,10 @@ test("new source identity kinds preserve their explicit project gameplay adapter
   );
   assert.deepEqual(
     omitIdentity(unitDefinitions["japanese-shrine-maiden"]),
+    omitIdentity(unitDefinitions["japanese-gunner"]),
+  );
+  assert.deepEqual(
+    omitIdentity(unitDefinitions["japanese-farmer"]),
     omitIdentity(unitDefinitions["japanese-gunner"]),
   );
 });

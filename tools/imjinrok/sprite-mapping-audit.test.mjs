@@ -44,20 +44,20 @@ test("sprite mapping audit is deterministic and current", (t) => {
 
 test("frame mappings stay quarantined outside statically proven scopes while identities are cataloged", () => {
   assert.deepEqual(report.summary, {
-    visualCount: 23,
-    unitVisualCount: 14,
+    visualCount: 24,
+    unitVisualCount: 15,
     buildingVisualCount: 9,
-    stateMappingCount: 90,
-    clipCount: 634,
-    frameReferenceCount: 4_812,
+    stateMappingCount: 94,
+    clipCount: 670,
+    frameReferenceCount: 5_100,
     missingFrameReferenceCount: 0,
     unverifiedVisualCount: 2,
-    mixedVisualCount: 19,
+    mixedVisualCount: 20,
     scopedStaticProvenVisualCount: 2,
-    staticIdentityVisualCount: 21,
+    staticIdentityVisualCount: 22,
     ambiguousIdentityVisualCount: 1,
     unboundIdentityVisualCount: 1,
-    projectBindingCount: 22,
+    projectBindingCount: 23,
     projectBindingConflictCount: 0,
     portraitCueCount: 17,
     unverifiedPortraitCueCount: 0,
@@ -115,6 +115,16 @@ test("frame mappings stay quarantined outside statically proven scopes while ide
   const japaneseGunner = report.visuals.find(
     (visual) => visual.visualId === "japanese-gunner",
   );
+  const japaneseFarmer = report.visuals.find(
+    (visual) => visual.visualId === "japanese-farmer",
+  );
+  assert.equal(japaneseFarmer?.evidenceStatus, "mixed");
+  assert.equal(japaneseFarmer?.staticEvidence.internalClass, 31);
+  assert.equal(japaneseFarmer?.staticEvidence.originalGameplayName, "일본 농부");
+  assert.deepEqual(japaneseFarmer?.staticEvidence.stateFrameRanges, {
+    idle: [0, 39], move: [160, 199], walk: [160, 199], death: [240, 247],
+  });
+  assert.equal(japaneseFarmer?.staticEvidence.stateSources.attack, undefined);
   assert.equal(japaneseGunner?.evidenceStatus, "mixed");
   assert.equal(
     japaneseGunner?.staticEvidence.animationStateMapping,

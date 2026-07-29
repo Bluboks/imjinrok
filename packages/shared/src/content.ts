@@ -499,6 +499,13 @@ export const unitDefinitions = {
     displayName: "일본 조총병",
     ...japaneseGunnerAdaptedGameplay,
   },
+  "japanese-farmer": {
+    id: "japanese-farmer",
+    displayName: "일본 농부",
+    // K01 class 31 has a source identity and core visual mapping only. Keep the existing
+    // Japanese-gunner project adapter unchanged; it is not evidence for farmer mechanics.
+    ...japaneseGunnerAdaptedGameplay,
+  },
   "japanese-shrine-maiden": {
     id: "japanese-shrine-maiden",
     displayName: "일본 무녀",

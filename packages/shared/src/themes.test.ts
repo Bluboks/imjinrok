@@ -18,6 +18,7 @@ test("default theme entity bindings point to loadable source-converted assets", 
   assert.equal(defaultTheme.entityBindings.archer, "korean-archer");
   assert.equal(defaultTheme.entityBindings["japanese-swordsman"], "japanese-swordsman");
   assert.equal(defaultTheme.entityBindings["japanese-gunner"], "japanese-gunner");
+  assert.equal(defaultTheme.entityBindings["japanese-farmer"], "japanese-farmer");
   assert.equal(defaultTheme.entityBindings["japanese-shrine-maiden"], "japanese-shrine-maiden");
   assert.equal(defaultTheme.entityBindings["japanese-samurai"], "japanese-samurai");
   assert.equal(defaultTheme.entityBindings["japanese-turtle-tank"], "japanese-turtle-tank");
@@ -51,6 +52,7 @@ test("original executable sprite pointer table backs K01/K02 theme source sprite
     { manifestPath: "entities/japanese-gunner/gunj1.manifest.json", sourcePath: "char/gunj1.spr", tableIndex: 14 },
     { manifestPath: "entities/japanese-gunner/gunj2.manifest.json", sourcePath: "char/gunj2.spr", tableIndex: 15 },
     { manifestPath: "entities/japanese-gunner/gunj3.manifest.json", sourcePath: "char/gunj3.spr", tableIndex: 16 },
+    { manifestPath: "entities/japanese-farmer/Farmerj.manifest.json", sourcePath: "char/farmerj.spr", tableIndex: 45 },
     { manifestPath: "entities/korean-monk/budak.manifest.json", sourcePath: "char/budak.spr", tableIndex: 12 },
     { manifestPath: "entities/japanese-shrine-maiden/advbudaj.manifest.json", sourcePath: "char/advbudaj.spr", tableIndex: 24 },
     { manifestPath: "entities/japanese-samurai/horseswordj1.manifest.json", sourcePath: "char/horseswordj1.spr", tableIndex: 17 },
@@ -414,6 +416,36 @@ test("Japanese gunner uses the statically recovered class-12 core-state frame bl
   assert.equal(visual.states.move?.clips.s?.loop, true);
   assert.equal(visual.states.walk?.clips.s?.loop, true);
   assert.equal(visual.states.attack?.clips.s?.loop, false);
+  assert.equal(visual.states.death?.clips.s?.loop, false);
+});
+
+test("Japanese farmer uses only its statically recovered core states and omits unresolved attack frames", () => {
+  const manifest = readManifest("entities/japanese-farmer/Farmerj.manifest.json");
+  const visual = defaultTheme.visuals[defaultTheme.entityBindings["japanese-farmer"]] as EntityVisual;
+
+  assert.equal(manifest.source, "original/imjinrok2/char/Farmerj.spr");
+  assert.equal(manifest.frameCount, 248);
+  assert.equal(manifest.exportedFrames.length, 248);
+  assert.deepEqual(Object.keys(visual.states).sort(), ["death", "idle", "move", "walk"]);
+  assertDirectionalFrames(visual, "idle", {
+    stem: "Farmerj",
+    phaseCount: 8,
+    frameStarts: { s: 0, sw: 8, w: 16, nw: 24, n: 16, ne: 8, e: 0, se: 32 },
+  });
+  assertDirectionalFrames(visual, "move", {
+    stem: "Farmerj",
+    phaseCount: 8,
+    frameStarts: { s: 160, sw: 168, w: 176, nw: 184, n: 176, ne: 168, e: 160, se: 192 },
+  });
+  assertDirectionalFrames(visual, "death", {
+    stem: "Farmerj",
+    phaseCount: 8,
+    frameStarts: { s: 240, sw: 240, w: 240, nw: 240, n: 240, ne: 240, e: 240, se: 240 },
+  });
+  assert.deepEqual(visual.states.walk, visual.states.move);
+  assert.equal(visual.states.attack, undefined);
+  assert.equal(visual.states.idle?.clips.s?.loop, true);
+  assert.equal(visual.states.move?.clips.s?.loop, true);
   assert.equal(visual.states.death?.clips.s?.loop, false);
 });
 
