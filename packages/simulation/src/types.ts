@@ -104,6 +104,7 @@ export interface UnitState {
   id: string;
   playerId: string;
   kind: UnitDefinitionId;
+  /** Ground-contact world position; rendering pivots and bounds never alter this SSOT. */
   position: GridPoint;
   movementSpeed: number;
   movementTarget?: GridPoint;
