@@ -1,0 +1,84 @@
+{
+  "classification": "still-unresolved",
+  "analysisStatus": "static-confirmed-renderer-and-refuted-one-shot-flag-hypothesis; overall-rule-unresolved",
+  "reproductionStatus": "reproduction-complete-for-flag-and-primary-gate-vectors",
+  "implementationStatus": "none",
+  "sources": {
+    "executable": { "size": 843833, "sha256": "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e" },
+    "functions": { "size": 1468333, "sha256": "7e071fdfe425d22447780c265fe1d3fd271a1bedd1773682bebcb8ddc6d2e16e", "sourceSha256": "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e" },
+    "references": { "size": 17206569, "sha256": "f64cfa6f04bc39573552f42a8b7bdd5b08fea1ba774d05865162d1d80daaf9a5", "sourceSha256": "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e" },
+    "seeds": { "size": 9112063, "sha256": "8e7c8821e9c84c5d0877bb977b119b3b878271502b36bf75e7426b570507bfb7", "sourceSha256": "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e" }
+  },
+  "analyzedFunctions": [
+    { "entry": "0x0048a5c0", "bodyRange": "0x0048a5c0-0x0048a878", "byteRange": "0x0048a5c0-0x0048a879 (end exclusive)", "blockCount": 32, "instructionCount": 181, "bodySha256": "0b78f8d459c6fa6d316d00bfa07148949a9156d182d3428726623749a0d9eed8" },
+    { "entry": "0x00460ba0", "bodyRange": "0x00460ba0-0x00460e20", "byteRange": "0x00460ba0-0x00460e21 (end exclusive)", "blockCount": 17, "instructionCount": 144, "bodySha256": "47f5f8e1743260ffdbc0f378f46510ec4126c2accc74cc41e2464dd77a5f3b32" },
+    { "entry": "0x004475a0", "bodyRange": "0x004475a0-0x00447bb8", "byteRange": "0x004475a0-0x00447bb9 (end exclusive)", "instructionCount": 418, "bodySha256": "81e6e28cf3a20e2ecd6d1f2e7ede44e646f044fbf86aa581620baa41f67f9f9c" },
+    { "entry": "0x0045f320", "bodyRange": "0x0045f320-0x0045f928", "byteRange": "0x0045f320-0x0045f929 (end exclusive)", "instructionCount": 479, "bodySha256": "0e1f7677a947bb9499881bb308a55adced0c1cbf516408a3fb1056428d60c469" }
+  ],
+  "searchTrail": {
+    "completedBeaconStateSearch": "Filtered the complete references artifact by direct target 0x008438dc; the only three results are 0x0048a731 READ, 0x0048a77a WRITE, and 0x0048a7f2 READ, all in FUN_0048a5c0.",
+    "originalTextResourceSearch": "ASCII strings from the hash-bound EXE and generated imjinrok2 JSON were searched for mini-map/minimap/small-map spellings; no original named string/resource candidate was found, so names were not used to identify the renderer.",
+    "functionGraphCandidate": "The source-bound function graph identifies FUN_004475a0 (caller 0x0045f9c0) as a HUD candidate because its callees include paired surface lock/unlock 0x0044abb0/0x0044ada0 and the uniquely root-called compact-map helpers 0x004abbc0 and 0x004abe50.",
+    "exactConfirmation": "Byte anchors at 0x004478d5, 0x00447903, and 0x0045f464 close the primary gate, request/mode consumption with surface draw, and interactive writer. They identify a concrete HUD compact-map entry, while its primary-gate producers remain the exact unresolved edge for the overall rule."
+  },
+  "flagLifecycle": {
+    "address": "0x008438dc",
+    "width": "WORD",
+    "writer": { "site": "0x0048a77a", "value": 1, "condition": "each qualifying iteration of the initial flag-zero scan" },
+    "initializerReset": { "site": "0x00460baf", "range": "[0x007c5ed8, 0x00843980)", "effect": "standard mission entry clears the containing DWORD" },
+    "clearerOnDestructionOrRemoval": "none in the complete proven flag CFG/direct-reference set",
+    "directReferenceSet": [
+      { "from": "0x0048a731", "type": "READ", "fromFunctionEntry": "0x0048a5c0" },
+      { "from": "0x0048a77a", "type": "WRITE", "fromFunctionEntry": "0x0048a5c0" },
+      { "from": "0x0048a7f2", "type": "READ", "fromFunctionEntry": "0x0048a5c0" }
+    ],
+    "directConsumer": { "site": "0x0048a7f2", "flow": "flag == 1 exactly -> 0x00482390(script context +8) -> if zero return AX=1; otherwise continue hero-loss checks", "notClaimed": "No minimap/UI-render call is reached from this direct consumer in the proven CFG." }
+  },
+  "beaconFlagHypothesis": {
+    "classification": "refuted",
+    "statement": "WORD[0x008438dc] is the live completed-beacon count gate for the HUD compact-map renderer",
+    "reason": "Its complete canonical direct-reference set is confined to FUN_0048a5c0, it is one-shot with no removal clearer in that set, and no direct operand occurs in the recovered renderer root/control anchors."
+  },
+  "compactMapDrawControl": {
+    "renderer": {
+      "root": "0x004475a0",
+      "primaryGate": "continue to cadence/render control when current-player record WORD[0x0082e9d0 + signed(WORD[0x00bccc44])*0x2c10] == 0 OR WORD[0x00bcbd84] == 0; otherwise skip",
+      "directConsumer": "after cadence/request control, lock via 0x0044abb0 -> call 0x004abbc0(mode WORD[0x007c6612]) -> call 0x004abe50 -> unlock via 0x0044ada0",
+      "beaconInputBoundary": "the complete direct-reference set for WORD[0x008438dc] contains only 0x0048a5c0 sites; no 0x008438dc direct operand occurs in this renderer root or its recovered draw-control anchors"
+    },
+    "mode": {
+      "address": "0x007c6612",
+      "writer": "0x0045f495 toggles it on the key-9 window path after mode WORD[0x004bdfc8] == 3 and prior latch WORD[0x00552784] != 0",
+      "initializerReset": "0x00460baf broad zero-fill covers this WORD during standard mission entry",
+      "clearerOnDestructionOrRemoval": "none in the canonical direct-reference set",
+      "directReferenceSet": [
+        { "from": "0x00447964", "type": "READ", "fromFunctionEntry": "0x004475a0" },
+        { "from": "0x0045f48b", "type": "READ", "fromFunctionEntry": "0x0045f320" },
+        { "from": "0x0045f495", "type": "WRITE", "fromFunctionEntry": "0x0045f320" }
+      ]
+    },
+    "redrawRequest": {
+      "address": "0x007c6610",
+      "writer": "0x0045f482 writes one on the same key-9 path",
+      "consumerClearer": "0x00447940 clears it after the renderer consumes a request",
+      "initializerReset": "0x00460baf broad zero-fill covers this WORD during standard mission entry",
+      "directReferenceSet": [
+        { "from": "0x00447930", "type": "READ", "fromFunctionEntry": "0x004475a0" },
+        { "from": "0x00447940", "type": "WRITE", "fromFunctionEntry": "0x004475a0" },
+        { "from": "0x0045f482", "type": "WRITE", "fromFunctionEntry": "0x0045f320" }
+      ]
+    },
+    "unresolvedPrimaryGateProducer": "The direct-reference set for WORD[0x00bcbd84] contains reads only; the per-player record operand is computed. This unit does not assign either raw gate a gameplay name or claim its alias writers are globally absent."
+  },
+  "vectors": [
+    { "id": "zero-completed-beacons", "input": { "initialFlagWord": 0, "records": [] }, "expected": { "finalFlagWord": 0, "events": [] } },
+    { "id": "first-completion-writes-one", "input": { "initialFlagWord": 0, "records": [{ "active": true, "ownerMatches": true, "classByte": 52, "progressByte": 100 }] }, "expected": { "finalFlagWord": 1, "events": [{ "kind": "flag-write-one", "index": 0 }] } },
+    { "id": "multiple-completions-repeat-within-one-scan", "input": { "initialFlagWord": 0, "records": [{ "active": true, "ownerMatches": true, "classByte": 52, "progressByte": 100 }, { "active": true, "ownerMatches": true, "classByte": 52, "progressByte": 100 }] }, "expected": { "finalFlagWord": 1, "events": [{ "kind": "flag-write-one", "index": 0 }, { "kind": "flag-write-one", "index": 1 }] } },
+    { "id": "last-removal-does-not-clear-existing-one", "input": { "initialFlagWord": 1, "records": [] }, "expected": { "finalFlagWord": 1, "events": [{ "kind": "initial-flag-nonzero-skip" }] } },
+    { "id": "inactive-or-incomplete-records-are-no-ops", "input": { "initialFlagWord": 0, "records": [{ "active": false, "ownerMatches": true, "classByte": 52, "progressByte": 100 }, { "active": true, "ownerMatches": true, "classByte": 52, "progressByte": 99 }] }, "expected": { "finalFlagWord": 0, "events": [{ "kind": "record-no-op", "index": 0 }, { "kind": "record-no-op", "index": 1 }] } },
+    { "id": "standard-entry-reset-clears-stale-word", "input": { "value": 65535 }, "expected": { "finalFlagWord": 0 } },
+    { "id": "compact-map-primary-gate-allows-zero-player-word", "input": { "playerRecordGateWord": 0, "globalGateWord": 1 }, "expected": { "allowsRenderControl": true } },
+    { "id": "compact-map-primary-gate-allows-zero-global-word", "input": { "playerRecordGateWord": 1, "globalGateWord": 0 }, "expected": { "allowsRenderControl": true } },
+    { "id": "compact-map-primary-gate-skips-only-two-nonzero-words", "input": { "playerRecordGateWord": 1, "globalGateWord": 1 }, "expected": { "allowsRenderControl": false } }
+  ]
+}
