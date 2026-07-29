@@ -43,6 +43,7 @@
 - [gameplay selection/command grid](reverse-engineering/mechanics/gameplay-selection-command-panel.md)
 - [command-grid cell-size common-loader 결합](reverse-engineering/mechanics/command-grid-cell-size-binding.md)
 - [K01 source fog 자산·command icon 추출 경계](reverse-engineering/mechanics/source-fog-command-icons.md)
+- [임진록 tileset 컨테이너 인벤토리](reverse-engineering/mechanics/imjinrok-tileset-container-inventory.md)
 - [`pannel.spr` HUD blit 결합](reverse-engineering/mechanics/pannel-spr-hud-blit.md)
 - [단일 선택 renderer dispatch의 lock·호출 순서](reverse-engineering/mechanics/single-selection-renderer-dispatch.md)
 - [선택 패널 slot dispatcher](reverse-engineering/mechanics/selection-panel-slot-dispatch.md)

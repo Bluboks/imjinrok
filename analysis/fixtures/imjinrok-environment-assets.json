@@ -6,1429 +6,4808 @@
       "category": "tileset:normal",
       "sourcePath": "tile/normal/castle0.ytl",
       "size": 19956,
-      "sha256": "a0aab61ab6dd6ef5ca721f4f91ec87ed543fc64cced55febd82ebffa4d3b45b3"
+      "sha256": "a0aab61ab6dd6ef5ca721f4f91ec87ed543fc64cced55febd82ebffa4d3b45b3",
+      "extension": ".ytl",
+      "familyStem": "castle",
+      "width": 64,
+      "height": 48,
+      "frameCount": 48,
+      "endOffset": 16896
     },
     {
       "category": "tileset:normal",
       "sourcePath": "tile/normal/castle1.ytl",
       "size": 56820,
-      "sha256": "2c3566ace002de151a0cf40b02ab13f73e4d8820383d43e478fe07cdc337773f"
+      "sha256": "2c3566ace002de151a0cf40b02ab13f73e4d8820383d43e478fe07cdc337773f",
+      "extension": ".ytl",
+      "familyStem": "castle",
+      "width": 64,
+      "height": 48,
+      "frameCount": 48,
+      "endOffset": 53760
     },
     {
       "category": "tileset:normal",
       "sourcePath": "tile/normal/castle2.ytl",
       "size": 48628,
-      "sha256": "705bf9f74938320c4c02903d0f5c95445dc21db4896727018e10f06e6bc69f93"
+      "sha256": "705bf9f74938320c4c02903d0f5c95445dc21db4896727018e10f06e6bc69f93",
+      "extension": ".ytl",
+      "familyStem": "castle",
+      "width": 64,
+      "height": 48,
+      "frameCount": 48,
+      "endOffset": 45568
     },
     {
       "category": "tileset:normal",
       "sourcePath": "tile/normal/diff1.ytl",
       "size": 27252,
-      "sha256": "d013d2ba1270e55f132f63f8d532c280f52746ef14e85f35c033d066e2919440"
+      "sha256": "d013d2ba1270e55f132f63f8d532c280f52746ef14e85f35c033d066e2919440",
+      "extension": ".ytl",
+      "familyStem": "diff",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 24192
     },
     {
       "category": "tileset:normal",
       "sourcePath": "tile/normal/diff10.ytl",
       "size": 20868,
-      "sha256": "dc48436c4b5f4e9829061d78db82fdb29d194801ae2bc9db31419ce1c91c2ef2"
+      "sha256": "dc48436c4b5f4e9829061d78db82fdb29d194801ae2bc9db31419ce1c91c2ef2",
+      "extension": ".ytl",
+      "familyStem": "diff",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 17808
     },
     {
       "category": "tileset:normal",
       "sourcePath": "tile/normal/diff11.ytl",
       "size": 13428,
-      "sha256": "1b559cda8ebf4c5337c058352c78b355dc0651a397ca64f29fcb2e56d05453e9"
+      "sha256": "1b559cda8ebf4c5337c058352c78b355dc0651a397ca64f29fcb2e56d05453e9",
+      "extension": ".ytl",
+      "familyStem": "diff",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 10368
     },
     {
       "category": "tileset:normal",
       "sourcePath": "tile/normal/diff12.ytl",
       "size": 20868,
-      "sha256": "98830c2abdb3d069ee0f4c8eb6e32920ec6b6fa84c816b9a1a3eb5025e8b0fdf"
+      "sha256": "98830c2abdb3d069ee0f4c8eb6e32920ec6b6fa84c816b9a1a3eb5025e8b0fdf",
+      "extension": ".ytl",
+      "familyStem": "diff",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 17808
     },
     {
       "category": "tileset:normal",
       "sourcePath": "tile/normal/diff13.ytl",
       "size": 29268,
-      "sha256": "675fc92a7a757dff186216f1eb36215318137a9e25c085b7e97f8fa85d795803"
+      "sha256": "675fc92a7a757dff186216f1eb36215318137a9e25c085b7e97f8fa85d795803",
+      "extension": ".ytl",
+      "familyStem": "diff",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 26208
     },
     {
       "category": "tileset:normal",
       "sourcePath": "tile/normal/diff13l.ytl",
       "size": 31188,
-      "sha256": "a0d8109e5af6e36616861f841441050e2c51caf87fd287df308ec31a11c86298"
+      "sha256": "a0d8109e5af6e36616861f841441050e2c51caf87fd287df308ec31a11c86298",
+      "extension": ".ytl",
+      "familyStem": "diff",
+      "width": 32,
+      "height": 16,
+      "frameCount": 144,
+      "endOffset": 28128
     },
     {
       "category": "tileset:normal",
       "sourcePath": "tile/normal/diff14.ytl",
       "size": 20628,
-      "sha256": "9c9728b6152897b35f6d6dfc87ac4a365af73db7a5967a432e152bf0b8e74cc6"
+      "sha256": "9c9728b6152897b35f6d6dfc87ac4a365af73db7a5967a432e152bf0b8e74cc6",
+      "extension": ".ytl",
+      "familyStem": "diff",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 17568
     },
     {
       "category": "tileset:normal",
       "sourcePath": "tile/normal/diff15.ytl",
       "size": 21603,
-      "sha256": "fe3e210019c8b88ad84af5aa6789476f21d54fe9c43d8c7b34c8becaa91a405b"
+      "sha256": "fe3e210019c8b88ad84af5aa6789476f21d54fe9c43d8c7b34c8becaa91a405b",
+      "extension": ".ytl",
+      "familyStem": "diff",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 18543
     },
     {
       "category": "tileset:normal",
       "sourcePath": "tile/normal/diff2.ytl",
       "size": 38004,
-      "sha256": "2c9cf058d9c254cb909b38e63bca8beeb7b0d7d6f4d2ad0ea68398fcde1caeee"
+      "sha256": "2c9cf058d9c254cb909b38e63bca8beeb7b0d7d6f4d2ad0ea68398fcde1caeee",
+      "extension": ".ytl",
+      "familyStem": "diff",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 34944
     },
     {
       "category": "tileset:normal",
       "sourcePath": "tile/normal/diff3.ytl",
       "size": 16500,
-      "sha256": "bc8e1412c0254895d9c44c641e154c6ba23e4e38933edc7903eda1fefb5c147a"
+      "sha256": "bc8e1412c0254895d9c44c641e154c6ba23e4e38933edc7903eda1fefb5c147a",
+      "extension": ".ytl",
+      "familyStem": "diff",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 13440
     },
     {
       "category": "tileset:normal",
       "sourcePath": "tile/normal/diff4.ytl",
       "size": 16500,
-      "sha256": "c92a4c316259ca5220bc6db4647e27dfe911f5dbc6d20852827e92dbb4c0061c"
+      "sha256": "c92a4c316259ca5220bc6db4647e27dfe911f5dbc6d20852827e92dbb4c0061c",
+      "extension": ".ytl",
+      "familyStem": "diff",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 13440
     },
     {
       "category": "tileset:normal",
       "sourcePath": "tile/normal/diff5.ytl",
       "size": 38004,
-      "sha256": "0c1b940a6058c97f134b8cd8529e0658814bb9da99e4c32efd2213dae28c7748"
+      "sha256": "0c1b940a6058c97f134b8cd8529e0658814bb9da99e4c32efd2213dae28c7748",
+      "extension": ".ytl",
+      "familyStem": "diff",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 34944
     },
     {
       "category": "tileset:normal",
       "sourcePath": "tile/normal/diff6.ytl",
       "size": 21348,
-      "sha256": "9345845894c9501954573d5bbf6fda05853504b1ab3e6d058e06b3419f8cb38f"
+      "sha256": "9345845894c9501954573d5bbf6fda05853504b1ab3e6d058e06b3419f8cb38f",
+      "extension": ".ytl",
+      "familyStem": "diff",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 18288
     },
     {
       "category": "tileset:normal",
       "sourcePath": "tile/normal/diff7.ytl",
       "size": 13428,
-      "sha256": "617c7220582f422d4cddd69914f5cade525262578786b567cb3664c62e07ab54"
+      "sha256": "617c7220582f422d4cddd69914f5cade525262578786b567cb3664c62e07ab54",
+      "extension": ".ytl",
+      "familyStem": "diff",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 10368
     },
     {
       "category": "tileset:normal",
       "sourcePath": "tile/normal/diff8.ytl",
       "size": 21348,
-      "sha256": "d033f61e3b3b62d45efc5432c02e29f36b0681a0b1213069b23b175dfa57f402"
+      "sha256": "d033f61e3b3b62d45efc5432c02e29f36b0681a0b1213069b23b175dfa57f402",
+      "extension": ".ytl",
+      "familyStem": "diff",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 18288
     },
     {
       "category": "tileset:normal",
       "sourcePath": "tile/normal/diff9.ytl",
       "size": 28308,
-      "sha256": "b80cf694261b4bcc520d4e2143b7b6320889a682f4d19a51513323778d9f31ae"
+      "sha256": "b80cf694261b4bcc520d4e2143b7b6320889a682f4d19a51513323778d9f31ae",
+      "extension": ".ytl",
+      "familyStem": "diff",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 25248
     },
     {
       "category": "tileset:normal",
       "sourcePath": "tile/normal/fog0.spr",
       "size": 17978,
-      "sha256": "98c4f138a47503e112b7fd78fd13c0cc6cb9593ef37c18209cbf88bc7f4e4759"
+      "sha256": "98c4f138a47503e112b7fd78fd13c0cc6cb9593ef37c18209cbf88bc7f4e4759",
+      "extension": ".spr",
+      "familyStem": "fog",
+      "width": 32,
+      "height": 16,
+      "frameCount": 96,
+      "endOffset": 14918
     },
     {
       "category": "tileset:normal",
       "sourcePath": "tile/normal/fog1.spr",
       "size": 24101,
-      "sha256": "0e64374263ceedb1253d7a55fc96681d3e2787e876021134747521bf88bf5701"
+      "sha256": "0e64374263ceedb1253d7a55fc96681d3e2787e876021134747521bf88bf5701",
+      "extension": ".spr",
+      "familyStem": "fog",
+      "width": 32,
+      "height": 16,
+      "frameCount": 96,
+      "endOffset": 21041
     },
     {
       "category": "tileset:normal",
       "sourcePath": "tile/normal/fog10.spr",
       "size": 11721,
-      "sha256": "bf6b260f412305fd29b0a6a8454fb6bb112e0344ac2f96b465f6f62923437c7c"
+      "sha256": "bf6b260f412305fd29b0a6a8454fb6bb112e0344ac2f96b465f6f62923437c7c",
+      "extension": ".spr",
+      "familyStem": "fog",
+      "width": 32,
+      "height": 16,
+      "frameCount": 96,
+      "endOffset": 8661
     },
     {
       "category": "tileset:normal",
       "sourcePath": "tile/normal/fog11.spr",
       "size": 17595,
-      "sha256": "3633f57e785791c0f5e9e6f632fed1575b23fbf7756177be2162dbd6ce602e47"
+      "sha256": "3633f57e785791c0f5e9e6f632fed1575b23fbf7756177be2162dbd6ce602e47",
+      "extension": ".spr",
+      "familyStem": "fog",
+      "width": 32,
+      "height": 16,
+      "frameCount": 96,
+      "endOffset": 14535
     },
     {
       "category": "tileset:normal",
       "sourcePath": "tile/normal/fog12.spr",
       "size": 23425,
-      "sha256": "3ed4ced064f3998f143a344f0f17cac528d91953fd41a97deb3add1b7330ba5d"
+      "sha256": "3ed4ced064f3998f143a344f0f17cac528d91953fd41a97deb3add1b7330ba5d",
+      "extension": ".spr",
+      "familyStem": "fog",
+      "width": 32,
+      "height": 16,
+      "frameCount": 96,
+      "endOffset": 20365
     },
     {
       "category": "tileset:normal",
       "sourcePath": "tile/normal/fog13.spr",
       "size": 17480,
-      "sha256": "b363feaf9cd89b964a7d306f0638f2f41cc57bf8b8efd0e1d8dd818c9aee5ee7"
+      "sha256": "b363feaf9cd89b964a7d306f0638f2f41cc57bf8b8efd0e1d8dd818c9aee5ee7",
+      "extension": ".spr",
+      "familyStem": "fog",
+      "width": 32,
+      "height": 16,
+      "frameCount": 96,
+      "endOffset": 14420
     },
     {
       "category": "tileset:normal",
       "sourcePath": "tile/normal/fog14.spr",
       "size": 17909,
-      "sha256": "efb2eb836d4552a9bea57a37f97370cb2de1e1a55d4f34271889ad0a083fc669"
+      "sha256": "efb2eb836d4552a9bea57a37f97370cb2de1e1a55d4f34271889ad0a083fc669",
+      "extension": ".spr",
+      "familyStem": "fog",
+      "width": 32,
+      "height": 16,
+      "frameCount": 96,
+      "endOffset": 14849
     },
     {
       "category": "tileset:normal",
       "sourcePath": "tile/normal/fog2.spr",
       "size": 11666,
-      "sha256": "114fa8aab39b45423a3fe6b3574a194fbc056877ee02f3c2b32b10c8d867b1a0"
+      "sha256": "114fa8aab39b45423a3fe6b3574a194fbc056877ee02f3c2b32b10c8d867b1a0",
+      "extension": ".spr",
+      "familyStem": "fog",
+      "width": 32,
+      "height": 16,
+      "frameCount": 96,
+      "endOffset": 8606
     },
     {
       "category": "tileset:normal",
       "sourcePath": "tile/normal/fog3.spr",
       "size": 11669,
-      "sha256": "c5db36d2e772d2309d086911e96eba91b2052d221e8d67b3e7d7ddaeb1009065"
+      "sha256": "c5db36d2e772d2309d086911e96eba91b2052d221e8d67b3e7d7ddaeb1009065",
+      "extension": ".spr",
+      "familyStem": "fog",
+      "width": 32,
+      "height": 16,
+      "frameCount": 96,
+      "endOffset": 8609
     },
     {
       "category": "tileset:normal",
       "sourcePath": "tile/normal/fog4.spr",
       "size": 24118,
-      "sha256": "c08dd146b67fe85d17900471273c7b6d3feaa06080d8fe83dda5b74b63892e79"
+      "sha256": "c08dd146b67fe85d17900471273c7b6d3feaa06080d8fe83dda5b74b63892e79",
+      "extension": ".spr",
+      "familyStem": "fog",
+      "width": 32,
+      "height": 16,
+      "frameCount": 96,
+      "endOffset": 21058
     },
     {
       "category": "tileset:normal",
       "sourcePath": "tile/normal/fog5.spr",
       "size": 17816,
-      "sha256": "26ea4a1ed4a0865ace99e22639df0d513a508da54f73b956c60e2dc9d3a646ca"
+      "sha256": "26ea4a1ed4a0865ace99e22639df0d513a508da54f73b956c60e2dc9d3a646ca",
+      "extension": ".spr",
+      "familyStem": "fog",
+      "width": 32,
+      "height": 16,
+      "frameCount": 96,
+      "endOffset": 14756
     },
     {
       "category": "tileset:normal",
       "sourcePath": "tile/normal/fog6.spr",
       "size": 11745,
-      "sha256": "5670c1940397a807e10ffe132d472613508800671f1aa3da3e1f54b46133c5a0"
+      "sha256": "5670c1940397a807e10ffe132d472613508800671f1aa3da3e1f54b46133c5a0",
+      "extension": ".spr",
+      "familyStem": "fog",
+      "width": 32,
+      "height": 16,
+      "frameCount": 96,
+      "endOffset": 8685
     },
     {
       "category": "tileset:normal",
       "sourcePath": "tile/normal/fog7.spr",
       "size": 17858,
-      "sha256": "798f6d69678c7b9c40decbc220199219c9e17cfc6ae76470daebd49d0af99b55"
+      "sha256": "798f6d69678c7b9c40decbc220199219c9e17cfc6ae76470daebd49d0af99b55",
+      "extension": ".spr",
+      "familyStem": "fog",
+      "width": 32,
+      "height": 16,
+      "frameCount": 96,
+      "endOffset": 14798
     },
     {
       "category": "tileset:normal",
       "sourcePath": "tile/normal/fog8.spr",
       "size": 22732,
-      "sha256": "4064773e38a13f43ede3f06975c61bb3405337eb6fcb90ccc3d7b4425eaf5f59"
+      "sha256": "4064773e38a13f43ede3f06975c61bb3405337eb6fcb90ccc3d7b4425eaf5f59",
+      "extension": ".spr",
+      "familyStem": "fog",
+      "width": 32,
+      "height": 16,
+      "frameCount": 96,
+      "endOffset": 19672
     },
     {
       "category": "tileset:normal",
       "sourcePath": "tile/normal/fog9.spr",
       "size": 17591,
-      "sha256": "22ba6fc52a03bbed16f063dcd16fdf47437bdab642ecbcb58af2c0aff03676be"
+      "sha256": "22ba6fc52a03bbed16f063dcd16fdf47437bdab642ecbcb58af2c0aff03676be",
+      "extension": ".spr",
+      "familyStem": "fog",
+      "width": 32,
+      "height": 16,
+      "frameCount": 96,
+      "endOffset": 14531
     },
     {
       "category": "tileset:normal",
       "sourcePath": "tile/normal/grss1.ytl",
       "size": 26228,
-      "sha256": "1e64a36addc74734bdbb24fa368ad70740c806a6bdc823419bab8f5286aea965"
+      "sha256": "1e64a36addc74734bdbb24fa368ad70740c806a6bdc823419bab8f5286aea965",
+      "extension": ".ytl",
+      "familyStem": "grss",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 23168
     },
     {
       "category": "tileset:normal",
       "sourcePath": "tile/normal/grss10.ytl",
       "size": 25908,
-      "sha256": "06b34e95a272095149e909b3286c462c31ed25925d7f02769aca19fc177ccfe8"
+      "sha256": "06b34e95a272095149e909b3286c462c31ed25925d7f02769aca19fc177ccfe8",
+      "extension": ".ytl",
+      "familyStem": "grss",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 22848
     },
     {
       "category": "tileset:normal",
       "sourcePath": "tile/normal/grss11.ytl",
       "size": 15988,
-      "sha256": "69aa201666bdd6002a04f4762f2616e694ec2e783f1ec22b0430cffaf7007eb3"
+      "sha256": "69aa201666bdd6002a04f4762f2616e694ec2e783f1ec22b0430cffaf7007eb3",
+      "extension": ".ytl",
+      "familyStem": "grss",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 12928
     },
     {
       "category": "tileset:normal",
       "sourcePath": "tile/normal/grss12.ytl",
       "size": 25908,
-      "sha256": "a252654f13d73f0fc0a05f51a05a207f4163617a3986c892c0919c16289929ae"
+      "sha256": "a252654f13d73f0fc0a05f51a05a207f4163617a3986c892c0919c16289929ae",
+      "extension": ".ytl",
+      "familyStem": "grss",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 22848
     },
     {
       "category": "tileset:normal",
       "sourcePath": "tile/normal/grss13.ytl",
       "size": 37108,
-      "sha256": "6ba960175d03c698701776de4fa0acead52267178829f79a7558e592ad73a6b0"
+      "sha256": "6ba960175d03c698701776de4fa0acead52267178829f79a7558e592ad73a6b0",
+      "extension": ".ytl",
+      "familyStem": "grss",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 34048
     },
     {
       "category": "tileset:normal",
       "sourcePath": "tile/normal/grss14.ytl",
       "size": 25588,
-      "sha256": "ae05349cc39271ed9a67410afbe8d0dca3436d060f3ae11a5deca2027101684b"
+      "sha256": "ae05349cc39271ed9a67410afbe8d0dca3436d060f3ae11a5deca2027101684b",
+      "extension": ".ytl",
+      "familyStem": "grss",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 22528
     },
     {
       "category": "tileset:normal",
       "sourcePath": "tile/normal/grss15.ytl",
       "size": 26484,
-      "sha256": "70b4d9f58adba8099290b660e11c63fe8e828b7ef354e3d7b1fbfb5de67c140f"
+      "sha256": "70b4d9f58adba8099290b660e11c63fe8e828b7ef354e3d7b1fbfb5de67c140f",
+      "extension": ".ytl",
+      "familyStem": "grss",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 23424
     },
     {
       "category": "tileset:normal",
       "sourcePath": "tile/normal/grss2.ytl",
       "size": 36468,
-      "sha256": "4664a32df5196364953c1762d8cc947c06a054d0cdb8bce86650fe81e03969df"
+      "sha256": "4664a32df5196364953c1762d8cc947c06a054d0cdb8bce86650fe81e03969df",
+      "extension": ".ytl",
+      "familyStem": "grss",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 33408
     },
     {
       "category": "tileset:normal",
       "sourcePath": "tile/normal/grss3.ytl",
       "size": 15988,
-      "sha256": "45a8e3a5c43e270cf1b69e61813d6116b4980afad7353bd90c1ff71cad6b2543"
+      "sha256": "45a8e3a5c43e270cf1b69e61813d6116b4980afad7353bd90c1ff71cad6b2543",
+      "extension": ".ytl",
+      "familyStem": "grss",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 12928
     },
     {
       "category": "tileset:normal",
       "sourcePath": "tile/normal/grss4.ytl",
       "size": 15988,
-      "sha256": "ad7a330f0135895e35bf6677a185fa54e3f08b7e436fae0e4eca8e158d6ae714"
+      "sha256": "ad7a330f0135895e35bf6677a185fa54e3f08b7e436fae0e4eca8e158d6ae714",
+      "extension": ".ytl",
+      "familyStem": "grss",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 12928
     },
     {
       "category": "tileset:normal",
       "sourcePath": "tile/normal/grss5.ytl",
       "size": 36468,
-      "sha256": "f80d4282cf22b38ad815ca4f3f1eb4bd785a3024d458336df2ee4baffc7374d8"
+      "sha256": "f80d4282cf22b38ad815ca4f3f1eb4bd785a3024d458336df2ee4baffc7374d8",
+      "extension": ".ytl",
+      "familyStem": "grss",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 33408
     },
     {
       "category": "tileset:normal",
       "sourcePath": "tile/normal/grss6.ytl",
       "size": 26548,
-      "sha256": "89e81362db22a331b121c256fed93adfd38588bf11cac93e417ef3d6e941395c"
+      "sha256": "89e81362db22a331b121c256fed93adfd38588bf11cac93e417ef3d6e941395c",
+      "extension": ".ytl",
+      "familyStem": "grss",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 23488
     },
     {
       "category": "tileset:normal",
       "sourcePath": "tile/normal/grss7.ytl",
       "size": 15988,
-      "sha256": "5d20e041ed59f4dbf8b82b075d634b696a4a0b2d0c9e0da0a9fbebd5f7e3aea0"
+      "sha256": "5d20e041ed59f4dbf8b82b075d634b696a4a0b2d0c9e0da0a9fbebd5f7e3aea0",
+      "extension": ".ytl",
+      "familyStem": "grss",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 12928
     },
     {
       "category": "tileset:normal",
       "sourcePath": "tile/normal/grss8.ytl",
       "size": 26548,
-      "sha256": "ff35fb0d5ba1d15497592552891139e3f5df71e2da549e2cf0a8b13de6ad6a68"
+      "sha256": "ff35fb0d5ba1d15497592552891139e3f5df71e2da549e2cf0a8b13de6ad6a68",
+      "extension": ".ytl",
+      "familyStem": "grss",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 23488
     },
     {
       "category": "tileset:normal",
       "sourcePath": "tile/normal/grss9.ytl",
       "size": 35828,
-      "sha256": "51f818a582607a01f3ec1fb07e03c9557da69d3206ad1245d2484244d014d456"
+      "sha256": "51f818a582607a01f3ec1fb07e03c9557da69d3206ad1245d2484244d014d456",
+      "extension": ".ytl",
+      "familyStem": "grss",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 32768
     },
     {
       "category": "tileset:normal",
       "sourcePath": "tile/normal/hill0.ypr",
       "size": 80560,
-      "sha256": "076e619cf4cc454e01fc375b420927e9267b6797d7015d978f3b0c0ddaadaafa"
+      "sha256": "076e619cf4cc454e01fc375b420927e9267b6797d7015d978f3b0c0ddaadaafa",
+      "extension": ".ypr",
+      "familyStem": "hill",
+      "width": 80,
+      "height": 60,
+      "frameCount": 44,
+      "endOffset": 77500
     },
     {
       "category": "tileset:normal",
       "sourcePath": "tile/normal/hill0.ytl",
       "size": 52340,
-      "sha256": "b8acdf64ba5a3c0fa9129e8546fe595fff7cdd83edbab05195a473ea650ff7b7"
+      "sha256": "b8acdf64ba5a3c0fa9129e8546fe595fff7cdd83edbab05195a473ea650ff7b7",
+      "extension": ".ytl",
+      "familyStem": "hill",
+      "width": 64,
+      "height": 48,
+      "frameCount": 44,
+      "endOffset": 49280
     },
     {
       "category": "tileset:normal",
       "sourcePath": "tile/normal/hill1.ytl",
       "size": 31348,
-      "sha256": "10f42ac03776f8eb4160eae34c2dc974ffe2ccc16b54a1abdd6ecd3ef05b069f"
+      "sha256": "10f42ac03776f8eb4160eae34c2dc974ffe2ccc16b54a1abdd6ecd3ef05b069f",
+      "extension": ".ytl",
+      "familyStem": "hill",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 28288
     },
     {
       "category": "tileset:normal",
       "sourcePath": "tile/normal/hill10.ytl",
       "size": 20868,
-      "sha256": "6c4d494de167f6e924f1e7c86a101fa0e86195cf98393023d0f5a4e12675e404"
+      "sha256": "6c4d494de167f6e924f1e7c86a101fa0e86195cf98393023d0f5a4e12675e404",
+      "extension": ".ytl",
+      "familyStem": "hill",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 17808
     },
     {
       "category": "tileset:normal",
       "sourcePath": "tile/normal/hill11.ytl",
       "size": 13428,
-      "sha256": "8db8d1e3938d073c5095965235d228cb0b7b18f0a7e3f101bce3dcdb8ef8e898"
+      "sha256": "8db8d1e3938d073c5095965235d228cb0b7b18f0a7e3f101bce3dcdb8ef8e898",
+      "extension": ".ytl",
+      "familyStem": "hill",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 10368
     },
     {
       "category": "tileset:normal",
       "sourcePath": "tile/normal/hill12.ytl",
       "size": 20868,
-      "sha256": "b71dc663ea001245400c400ec19d0d1c55618e14ee00dd9fe763ddc7719bdb0b"
+      "sha256": "b71dc663ea001245400c400ec19d0d1c55618e14ee00dd9fe763ddc7719bdb0b",
+      "extension": ".ytl",
+      "familyStem": "hill",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 17808
     },
     {
       "category": "tileset:normal",
       "sourcePath": "tile/normal/hill13.ytl",
       "size": 29268,
-      "sha256": "9182f3e9e3cfe7ca75ac5714f409c63412ad917b0b8f76618af519a2f1df9b11"
+      "sha256": "9182f3e9e3cfe7ca75ac5714f409c63412ad917b0b8f76618af519a2f1df9b11",
+      "extension": ".ytl",
+      "familyStem": "hill",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 26208
     },
     {
       "category": "tileset:normal",
       "sourcePath": "tile/normal/hill14.ytl",
       "size": 20628,
-      "sha256": "dd1fc96608b088b5666b79f2bd234383732b3dfb003b84b5238a391ce3b2f298"
+      "sha256": "dd1fc96608b088b5666b79f2bd234383732b3dfb003b84b5238a391ce3b2f298",
+      "extension": ".ytl",
+      "familyStem": "hill",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 17568
     },
     {
       "category": "tileset:normal",
       "sourcePath": "tile/normal/hill15.ytl",
       "size": 21588,
-      "sha256": "a160da5eb0285b5a4b632f4e95fa5b1588bbf0f9d4a6a21793b646c1f171849c"
+      "sha256": "a160da5eb0285b5a4b632f4e95fa5b1588bbf0f9d4a6a21793b646c1f171849c",
+      "extension": ".ytl",
+      "familyStem": "hill",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 18528
     },
     {
       "category": "tileset:normal",
       "sourcePath": "tile/normal/hill2.ytl",
       "size": 44148,
-      "sha256": "342cf2055660836f1cbdc2719524ce3354d0f1953c0a0b971a52131291bbb9f5"
+      "sha256": "342cf2055660836f1cbdc2719524ce3354d0f1953c0a0b971a52131291bbb9f5",
+      "extension": ".ytl",
+      "familyStem": "hill",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 41088
     },
     {
       "category": "tileset:normal",
       "sourcePath": "tile/normal/hill3.ytl",
       "size": 18548,
-      "sha256": "6dcafad032119310e2bd671260d9d9d24181964f084eddc864ed0dd4e0b62bab"
+      "sha256": "6dcafad032119310e2bd671260d9d9d24181964f084eddc864ed0dd4e0b62bab",
+      "extension": ".ytl",
+      "familyStem": "hill",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 15488
     },
     {
       "category": "tileset:normal",
       "sourcePath": "tile/normal/hill4.ytl",
       "size": 18548,
-      "sha256": "e2d9be5d0f1b1e5f2856fd4d4954e54c99cbb737487606f2d690f776f57b7981"
+      "sha256": "e2d9be5d0f1b1e5f2856fd4d4954e54c99cbb737487606f2d690f776f57b7981",
+      "extension": ".ytl",
+      "familyStem": "hill",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 15488
     },
     {
       "category": "tileset:normal",
       "sourcePath": "tile/normal/hill5.ytl",
       "size": 44148,
-      "sha256": "a0682d472995caf1fe0f11ea7b4d2622fdabcf3ecd98cdf7bea2d4f0f36ac3b1"
+      "sha256": "a0682d472995caf1fe0f11ea7b4d2622fdabcf3ecd98cdf7bea2d4f0f36ac3b1",
+      "extension": ".ytl",
+      "familyStem": "hill",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 41088
     },
     {
       "category": "tileset:normal",
       "sourcePath": "tile/normal/hill6.ytl",
       "size": 21348,
-      "sha256": "4474ed930861b88b23cf19cb94ad607ea2e9b38ad86ec99ed725ca4cbb86c15f"
+      "sha256": "4474ed930861b88b23cf19cb94ad607ea2e9b38ad86ec99ed725ca4cbb86c15f",
+      "extension": ".ytl",
+      "familyStem": "hill",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 18288
     },
     {
       "category": "tileset:normal",
       "sourcePath": "tile/normal/hill7.ytl",
       "size": 13428,
-      "sha256": "c4c1cf129a9dc41342c321652b9435e2b0119550233f6730220e9718f50bd24a"
+      "sha256": "c4c1cf129a9dc41342c321652b9435e2b0119550233f6730220e9718f50bd24a",
+      "extension": ".ytl",
+      "familyStem": "hill",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 10368
     },
     {
       "category": "tileset:normal",
       "sourcePath": "tile/normal/hill8.ytl",
       "size": 21348,
-      "sha256": "92d8e8427341d1de40d63582cea70aba27e4aba26fed579ea093d0334aefb557"
+      "sha256": "92d8e8427341d1de40d63582cea70aba27e4aba26fed579ea093d0334aefb557",
+      "extension": ".ytl",
+      "familyStem": "hill",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 18288
     },
     {
       "category": "tileset:normal",
       "sourcePath": "tile/normal/hill9.ytl",
       "size": 28308,
-      "sha256": "810c52c60ac24e8c15f4585b90eb69a67e65b7174f3c2895594ee020ee2f59cb"
+      "sha256": "810c52c60ac24e8c15f4585b90eb69a67e65b7174f3c2895594ee020ee2f59cb",
+      "extension": ".ytl",
+      "familyStem": "hill",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 25248
     },
     {
       "category": "tileset:normal",
       "sourcePath": "tile/normal/newblk0.ytl",
       "size": 15860,
-      "sha256": "51984e7fbbc60d358efb4f9d7a5d4cb666d4f7da64e8db9c5b64eacb99ce5a11"
+      "sha256": "51984e7fbbc60d358efb4f9d7a5d4cb666d4f7da64e8db9c5b64eacb99ce5a11",
+      "extension": ".ytl",
+      "familyStem": "newblk",
+      "width": 64,
+      "height": 48,
+      "frameCount": 48,
+      "endOffset": 12800
     },
     {
       "category": "tileset:normal",
       "sourcePath": "tile/normal/newblk1.ytl",
       "size": 56820,
-      "sha256": "e0cffb80acca3b671310b78eba6f77359058d7cdd4e4544c75e4b8c7eb185a69"
+      "sha256": "e0cffb80acca3b671310b78eba6f77359058d7cdd4e4544c75e4b8c7eb185a69",
+      "extension": ".ytl",
+      "familyStem": "newblk",
+      "width": 64,
+      "height": 48,
+      "frameCount": 48,
+      "endOffset": 53760
     },
     {
       "category": "tileset:normal",
       "sourcePath": "tile/normal/newblk2.ytl",
       "size": 56820,
-      "sha256": "1a65bcd7ceada8280fbdb8285c42bab3e297f4f2cd80185ea44ffc48ca2ba514"
+      "sha256": "1a65bcd7ceada8280fbdb8285c42bab3e297f4f2cd80185ea44ffc48ca2ba514",
+      "extension": ".ytl",
+      "familyStem": "newblk",
+      "width": 64,
+      "height": 48,
+      "frameCount": 48,
+      "endOffset": 53760
     },
     {
       "category": "tileset:normal",
       "sourcePath": "tile/normal/newblk3.ytl",
       "size": 24052,
-      "sha256": "e95728e4b033b235a3a150e6a5c1455587f49e4b9cf713f057d75429a2a63091"
+      "sha256": "e95728e4b033b235a3a150e6a5c1455587f49e4b9cf713f057d75429a2a63091",
+      "extension": ".ytl",
+      "familyStem": "newblk",
+      "width": 64,
+      "height": 48,
+      "frameCount": 48,
+      "endOffset": 20992
     },
     {
       "category": "tileset:normal",
       "sourcePath": "tile/normal/newblkgate.ytl",
       "size": 24052,
-      "sha256": "57052e1c3bed0366b6fcca7dfefe83539db7cda91764b0caf22771ceff2a62c8"
+      "sha256": "57052e1c3bed0366b6fcca7dfefe83539db7cda91764b0caf22771ceff2a62c8",
+      "extension": ".ytl",
+      "familyStem": "newblk",
+      "width": 64,
+      "height": 48,
+      "frameCount": 48,
+      "endOffset": 20992
     },
     {
       "category": "tileset:normal",
       "sourcePath": "tile/normal/sea0.ytl",
       "size": 40948,
-      "sha256": "5349dd452198bde4f67264faa8152c51a1e91afb93669f72d0d9b72db707229e"
+      "sha256": "5349dd452198bde4f67264faa8152c51a1e91afb93669f72d0d9b72db707229e",
+      "extension": ".ytl",
+      "familyStem": "sea",
+      "width": 64,
+      "height": 48,
+      "frameCount": 96,
+      "endOffset": 37888
     },
     {
       "category": "tileset:normal",
       "sourcePath": "tile/normal/sea1.ytl",
       "size": 56820,
-      "sha256": "523eec39dcd0404b167f8755b9b642cd006041477e4b35f3af73770d19fd105e"
+      "sha256": "523eec39dcd0404b167f8755b9b642cd006041477e4b35f3af73770d19fd105e",
+      "extension": ".ytl",
+      "familyStem": "sea",
+      "width": 64,
+      "height": 48,
+      "frameCount": 48,
+      "endOffset": 53760
     },
     {
       "category": "tileset:normal",
       "sourcePath": "tile/normal/sea2.ytl",
       "size": 56820,
-      "sha256": "9c4a51a9714df6cfecb2b296821aa9f86dd7535cfc13f59a5ae9a2d310f2087e"
+      "sha256": "9c4a51a9714df6cfecb2b296821aa9f86dd7535cfc13f59a5ae9a2d310f2087e",
+      "extension": ".ytl",
+      "familyStem": "sea",
+      "width": 64,
+      "height": 48,
+      "frameCount": 48,
+      "endOffset": 53760
     },
     {
       "category": "tileset:normal",
       "sourcePath": "tile/normal/sea3.ytl",
       "size": 40436,
-      "sha256": "491245bab0b22ab47098d59709e34d1127609012a1ecb8fe6024edd4810a85e6"
+      "sha256": "491245bab0b22ab47098d59709e34d1127609012a1ecb8fe6024edd4810a85e6",
+      "extension": ".ytl",
+      "familyStem": "sea",
+      "width": 64,
+      "height": 48,
+      "frameCount": 48,
+      "endOffset": 37376
     },
     {
       "category": "tileset:normal",
       "sourcePath": "tile/normal/shallow.spr",
       "size": 18557,
-      "sha256": "ae4e81bc096fc9ce2d7bb97be40c2e3f9360365aa566f842e3deeb1057219ed4"
+      "sha256": "ae4e81bc096fc9ce2d7bb97be40c2e3f9360365aa566f842e3deeb1057219ed4",
+      "extension": ".spr",
+      "familyStem": "shallow",
+      "width": 64,
+      "height": 32,
+      "frameCount": 16,
+      "endOffset": 15497
+    },
+    {
+      "category": "tileset:normal",
+      "sourcePath": "tile/normal/black.spr",
+      "size": 5108,
+      "sha256": "9ef53a565bfe804e8a272f73f9749c05681b6b9e3af4090f7e4eea61237292d0",
+      "extension": ".spr",
+      "familyStem": "black",
+      "width": 64,
+      "height": 32,
+      "frameCount": 1,
+      "endOffset": 2048
+    },
+    {
+      "category": "tileset:normal",
+      "sourcePath": "tile/normal/blacktile.ytl",
+      "size": 22644,
+      "sha256": "06438882138be46ff9dd267adda3d8f2ab278e1cde0cee7aaa243271b8835e09",
+      "extension": ".ytl",
+      "familyStem": "blacktile",
+      "width": 64,
+      "height": 48,
+      "frameCount": 44,
+      "endOffset": 19584
     },
     {
       "category": "tileset:snow",
       "sourcePath": "tile/snow/castle0.ytl",
       "size": 19956,
-      "sha256": "a0aab61ab6dd6ef5ca721f4f91ec87ed543fc64cced55febd82ebffa4d3b45b3"
+      "sha256": "a0aab61ab6dd6ef5ca721f4f91ec87ed543fc64cced55febd82ebffa4d3b45b3",
+      "extension": ".ytl",
+      "familyStem": "castle",
+      "width": 64,
+      "height": 48,
+      "frameCount": 48,
+      "endOffset": 16896
     },
     {
       "category": "tileset:snow",
       "sourcePath": "tile/snow/castle1.ytl",
       "size": 56820,
-      "sha256": "fb34fad4117e1ff625eb576c43f98c052d4a97dfb8e0e990e8ed7a9e76d0411d"
+      "sha256": "fb34fad4117e1ff625eb576c43f98c052d4a97dfb8e0e990e8ed7a9e76d0411d",
+      "extension": ".ytl",
+      "familyStem": "castle",
+      "width": 64,
+      "height": 48,
+      "frameCount": 48,
+      "endOffset": 53760
     },
     {
       "category": "tileset:snow",
       "sourcePath": "tile/snow/castle2.ytl",
       "size": 48628,
-      "sha256": "5eb4dbd10eb03cc4151c6bcfaa26483c0f84269e4bb71da0dcf602bacc2a9583"
+      "sha256": "5eb4dbd10eb03cc4151c6bcfaa26483c0f84269e4bb71da0dcf602bacc2a9583",
+      "extension": ".ytl",
+      "familyStem": "castle",
+      "width": 64,
+      "height": 48,
+      "frameCount": 48,
+      "endOffset": 45568
     },
     {
       "category": "tileset:snow",
       "sourcePath": "tile/snow/diff1.ytl",
       "size": 27252,
-      "sha256": "49157c2ec2712a66275ce907c507ca37121052b5741ebf49ce5eb9924f4cacef"
+      "sha256": "49157c2ec2712a66275ce907c507ca37121052b5741ebf49ce5eb9924f4cacef",
+      "extension": ".ytl",
+      "familyStem": "diff",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 24192
     },
     {
       "category": "tileset:snow",
       "sourcePath": "tile/snow/diff10.ytl",
       "size": 20868,
-      "sha256": "8a931a9f66559502fd68ceda6b5e376f51fd34683635c16622806fd0972a220d"
+      "sha256": "8a931a9f66559502fd68ceda6b5e376f51fd34683635c16622806fd0972a220d",
+      "extension": ".ytl",
+      "familyStem": "diff",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 17808
     },
     {
       "category": "tileset:snow",
       "sourcePath": "tile/snow/diff11.ytl",
       "size": 13428,
-      "sha256": "014474d25af67dfc2eefc3e6b4bea91db0a796e75472e1522462fb7b61f882cc"
+      "sha256": "014474d25af67dfc2eefc3e6b4bea91db0a796e75472e1522462fb7b61f882cc",
+      "extension": ".ytl",
+      "familyStem": "diff",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 10368
     },
     {
       "category": "tileset:snow",
       "sourcePath": "tile/snow/diff12.ytl",
       "size": 20868,
-      "sha256": "6152fcfee1f6b013c75ffebee9364064d250afc21e7c0d97cb1d8050f0534077"
+      "sha256": "6152fcfee1f6b013c75ffebee9364064d250afc21e7c0d97cb1d8050f0534077",
+      "extension": ".ytl",
+      "familyStem": "diff",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 17808
     },
     {
       "category": "tileset:snow",
       "sourcePath": "tile/snow/diff13.ytl",
       "size": 29268,
-      "sha256": "63be13478e0748ac4aefda50314ab32e79f38b512bbece420650e14e64ea7faf"
+      "sha256": "63be13478e0748ac4aefda50314ab32e79f38b512bbece420650e14e64ea7faf",
+      "extension": ".ytl",
+      "familyStem": "diff",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 26208
     },
     {
       "category": "tileset:snow",
       "sourcePath": "tile/snow/diff13l.ytl",
       "size": 31188,
-      "sha256": "a0d8109e5af6e36616861f841441050e2c51caf87fd287df308ec31a11c86298"
+      "sha256": "a0d8109e5af6e36616861f841441050e2c51caf87fd287df308ec31a11c86298",
+      "extension": ".ytl",
+      "familyStem": "diff",
+      "width": 32,
+      "height": 16,
+      "frameCount": 144,
+      "endOffset": 28128
     },
     {
       "category": "tileset:snow",
       "sourcePath": "tile/snow/diff14.ytl",
       "size": 20628,
-      "sha256": "516fe1d53d692c7551d78194dcf70774d38355910b519aed7152c0691af1289e"
+      "sha256": "516fe1d53d692c7551d78194dcf70774d38355910b519aed7152c0691af1289e",
+      "extension": ".ytl",
+      "familyStem": "diff",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 17568
     },
     {
       "category": "tileset:snow",
       "sourcePath": "tile/snow/diff15.ytl",
       "size": 21603,
-      "sha256": "0b11199b3dcbd51d851557cb2314fad99eb88a1b3ad8699520aa3e42bf4dc818"
+      "sha256": "0b11199b3dcbd51d851557cb2314fad99eb88a1b3ad8699520aa3e42bf4dc818",
+      "extension": ".ytl",
+      "familyStem": "diff",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 18543
     },
     {
       "category": "tileset:snow",
       "sourcePath": "tile/snow/diff2.ytl",
       "size": 38004,
-      "sha256": "d79f3773d814d6f782f2cc8055dcfc001a9f5850632cc2c1773027dcfdfb0eda"
+      "sha256": "d79f3773d814d6f782f2cc8055dcfc001a9f5850632cc2c1773027dcfdfb0eda",
+      "extension": ".ytl",
+      "familyStem": "diff",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 34944
     },
     {
       "category": "tileset:snow",
       "sourcePath": "tile/snow/diff3.ytl",
       "size": 16500,
-      "sha256": "4c3edf43fab40f82c33338e67b4fde270aebde7128c257f755cdf8a1811945a2"
+      "sha256": "4c3edf43fab40f82c33338e67b4fde270aebde7128c257f755cdf8a1811945a2",
+      "extension": ".ytl",
+      "familyStem": "diff",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 13440
     },
     {
       "category": "tileset:snow",
       "sourcePath": "tile/snow/diff4.ytl",
       "size": 16500,
-      "sha256": "fd1f6cec3e24372ef2f1aef59ebc8de5f2d046c590ca7a3c27011181b0f29a19"
+      "sha256": "fd1f6cec3e24372ef2f1aef59ebc8de5f2d046c590ca7a3c27011181b0f29a19",
+      "extension": ".ytl",
+      "familyStem": "diff",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 13440
     },
     {
       "category": "tileset:snow",
       "sourcePath": "tile/snow/diff5.ytl",
       "size": 38004,
-      "sha256": "3cf9903b9d88ed090329c2070e166d4f4b7965979b4061e26d452f4018c510ad"
+      "sha256": "3cf9903b9d88ed090329c2070e166d4f4b7965979b4061e26d452f4018c510ad",
+      "extension": ".ytl",
+      "familyStem": "diff",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 34944
     },
     {
       "category": "tileset:snow",
       "sourcePath": "tile/snow/diff6.ytl",
       "size": 21348,
-      "sha256": "d946cfed26a2d8c6ca9d12d5fe1721ce57fdcccea9c27497aceb97e203c95982"
+      "sha256": "d946cfed26a2d8c6ca9d12d5fe1721ce57fdcccea9c27497aceb97e203c95982",
+      "extension": ".ytl",
+      "familyStem": "diff",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 18288
     },
     {
       "category": "tileset:snow",
       "sourcePath": "tile/snow/diff7.ytl",
       "size": 13428,
-      "sha256": "bd12fb57aac43951c43757b5f8224c24f5f9dba7e549600259df1da82936be20"
+      "sha256": "bd12fb57aac43951c43757b5f8224c24f5f9dba7e549600259df1da82936be20",
+      "extension": ".ytl",
+      "familyStem": "diff",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 10368
     },
     {
       "category": "tileset:snow",
       "sourcePath": "tile/snow/diff8.ytl",
       "size": 21348,
-      "sha256": "21336bba9b27b0b5e0b58c7aba680831b2738590131301fce0eda226ab7c59ac"
+      "sha256": "21336bba9b27b0b5e0b58c7aba680831b2738590131301fce0eda226ab7c59ac",
+      "extension": ".ytl",
+      "familyStem": "diff",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 18288
     },
     {
       "category": "tileset:snow",
       "sourcePath": "tile/snow/diff9.ytl",
       "size": 28308,
-      "sha256": "298a90e283dd0dd05f4e1839d5f38144baf68b3bddd529925ecbc91e5fc74bd4"
+      "sha256": "298a90e283dd0dd05f4e1839d5f38144baf68b3bddd529925ecbc91e5fc74bd4",
+      "extension": ".ytl",
+      "familyStem": "diff",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 25248
     },
     {
       "category": "tileset:snow",
       "sourcePath": "tile/snow/fog0.spr",
       "size": 17978,
-      "sha256": "98c4f138a47503e112b7fd78fd13c0cc6cb9593ef37c18209cbf88bc7f4e4759"
+      "sha256": "98c4f138a47503e112b7fd78fd13c0cc6cb9593ef37c18209cbf88bc7f4e4759",
+      "extension": ".spr",
+      "familyStem": "fog",
+      "width": 32,
+      "height": 16,
+      "frameCount": 96,
+      "endOffset": 14918
     },
     {
       "category": "tileset:snow",
       "sourcePath": "tile/snow/fog1.spr",
       "size": 24101,
-      "sha256": "0e64374263ceedb1253d7a55fc96681d3e2787e876021134747521bf88bf5701"
+      "sha256": "0e64374263ceedb1253d7a55fc96681d3e2787e876021134747521bf88bf5701",
+      "extension": ".spr",
+      "familyStem": "fog",
+      "width": 32,
+      "height": 16,
+      "frameCount": 96,
+      "endOffset": 21041
     },
     {
       "category": "tileset:snow",
       "sourcePath": "tile/snow/fog10.spr",
       "size": 11721,
-      "sha256": "bf6b260f412305fd29b0a6a8454fb6bb112e0344ac2f96b465f6f62923437c7c"
+      "sha256": "bf6b260f412305fd29b0a6a8454fb6bb112e0344ac2f96b465f6f62923437c7c",
+      "extension": ".spr",
+      "familyStem": "fog",
+      "width": 32,
+      "height": 16,
+      "frameCount": 96,
+      "endOffset": 8661
     },
     {
       "category": "tileset:snow",
       "sourcePath": "tile/snow/fog11.spr",
       "size": 17595,
-      "sha256": "3633f57e785791c0f5e9e6f632fed1575b23fbf7756177be2162dbd6ce602e47"
+      "sha256": "3633f57e785791c0f5e9e6f632fed1575b23fbf7756177be2162dbd6ce602e47",
+      "extension": ".spr",
+      "familyStem": "fog",
+      "width": 32,
+      "height": 16,
+      "frameCount": 96,
+      "endOffset": 14535
     },
     {
       "category": "tileset:snow",
       "sourcePath": "tile/snow/fog12.spr",
       "size": 23425,
-      "sha256": "3ed4ced064f3998f143a344f0f17cac528d91953fd41a97deb3add1b7330ba5d"
+      "sha256": "3ed4ced064f3998f143a344f0f17cac528d91953fd41a97deb3add1b7330ba5d",
+      "extension": ".spr",
+      "familyStem": "fog",
+      "width": 32,
+      "height": 16,
+      "frameCount": 96,
+      "endOffset": 20365
     },
     {
       "category": "tileset:snow",
       "sourcePath": "tile/snow/fog13.spr",
       "size": 17480,
-      "sha256": "b363feaf9cd89b964a7d306f0638f2f41cc57bf8b8efd0e1d8dd818c9aee5ee7"
+      "sha256": "b363feaf9cd89b964a7d306f0638f2f41cc57bf8b8efd0e1d8dd818c9aee5ee7",
+      "extension": ".spr",
+      "familyStem": "fog",
+      "width": 32,
+      "height": 16,
+      "frameCount": 96,
+      "endOffset": 14420
     },
     {
       "category": "tileset:snow",
       "sourcePath": "tile/snow/fog14.spr",
       "size": 17909,
-      "sha256": "efb2eb836d4552a9bea57a37f97370cb2de1e1a55d4f34271889ad0a083fc669"
+      "sha256": "efb2eb836d4552a9bea57a37f97370cb2de1e1a55d4f34271889ad0a083fc669",
+      "extension": ".spr",
+      "familyStem": "fog",
+      "width": 32,
+      "height": 16,
+      "frameCount": 96,
+      "endOffset": 14849
     },
     {
       "category": "tileset:snow",
       "sourcePath": "tile/snow/fog2.spr",
       "size": 11666,
-      "sha256": "114fa8aab39b45423a3fe6b3574a194fbc056877ee02f3c2b32b10c8d867b1a0"
+      "sha256": "114fa8aab39b45423a3fe6b3574a194fbc056877ee02f3c2b32b10c8d867b1a0",
+      "extension": ".spr",
+      "familyStem": "fog",
+      "width": 32,
+      "height": 16,
+      "frameCount": 96,
+      "endOffset": 8606
     },
     {
       "category": "tileset:snow",
       "sourcePath": "tile/snow/fog3.spr",
       "size": 11669,
-      "sha256": "c5db36d2e772d2309d086911e96eba91b2052d221e8d67b3e7d7ddaeb1009065"
+      "sha256": "c5db36d2e772d2309d086911e96eba91b2052d221e8d67b3e7d7ddaeb1009065",
+      "extension": ".spr",
+      "familyStem": "fog",
+      "width": 32,
+      "height": 16,
+      "frameCount": 96,
+      "endOffset": 8609
     },
     {
       "category": "tileset:snow",
       "sourcePath": "tile/snow/fog4.spr",
       "size": 24118,
-      "sha256": "c08dd146b67fe85d17900471273c7b6d3feaa06080d8fe83dda5b74b63892e79"
+      "sha256": "c08dd146b67fe85d17900471273c7b6d3feaa06080d8fe83dda5b74b63892e79",
+      "extension": ".spr",
+      "familyStem": "fog",
+      "width": 32,
+      "height": 16,
+      "frameCount": 96,
+      "endOffset": 21058
     },
     {
       "category": "tileset:snow",
       "sourcePath": "tile/snow/fog5.spr",
       "size": 17816,
-      "sha256": "26ea4a1ed4a0865ace99e22639df0d513a508da54f73b956c60e2dc9d3a646ca"
+      "sha256": "26ea4a1ed4a0865ace99e22639df0d513a508da54f73b956c60e2dc9d3a646ca",
+      "extension": ".spr",
+      "familyStem": "fog",
+      "width": 32,
+      "height": 16,
+      "frameCount": 96,
+      "endOffset": 14756
     },
     {
       "category": "tileset:snow",
       "sourcePath": "tile/snow/fog6.spr",
       "size": 11745,
-      "sha256": "5670c1940397a807e10ffe132d472613508800671f1aa3da3e1f54b46133c5a0"
+      "sha256": "5670c1940397a807e10ffe132d472613508800671f1aa3da3e1f54b46133c5a0",
+      "extension": ".spr",
+      "familyStem": "fog",
+      "width": 32,
+      "height": 16,
+      "frameCount": 96,
+      "endOffset": 8685
     },
     {
       "category": "tileset:snow",
       "sourcePath": "tile/snow/fog7.spr",
       "size": 17858,
-      "sha256": "798f6d69678c7b9c40decbc220199219c9e17cfc6ae76470daebd49d0af99b55"
+      "sha256": "798f6d69678c7b9c40decbc220199219c9e17cfc6ae76470daebd49d0af99b55",
+      "extension": ".spr",
+      "familyStem": "fog",
+      "width": 32,
+      "height": 16,
+      "frameCount": 96,
+      "endOffset": 14798
     },
     {
       "category": "tileset:snow",
       "sourcePath": "tile/snow/fog8.spr",
       "size": 22732,
-      "sha256": "4064773e38a13f43ede3f06975c61bb3405337eb6fcb90ccc3d7b4425eaf5f59"
+      "sha256": "4064773e38a13f43ede3f06975c61bb3405337eb6fcb90ccc3d7b4425eaf5f59",
+      "extension": ".spr",
+      "familyStem": "fog",
+      "width": 32,
+      "height": 16,
+      "frameCount": 96,
+      "endOffset": 19672
     },
     {
       "category": "tileset:snow",
       "sourcePath": "tile/snow/fog9.spr",
       "size": 17591,
-      "sha256": "22ba6fc52a03bbed16f063dcd16fdf47437bdab642ecbcb58af2c0aff03676be"
+      "sha256": "22ba6fc52a03bbed16f063dcd16fdf47437bdab642ecbcb58af2c0aff03676be",
+      "extension": ".spr",
+      "familyStem": "fog",
+      "width": 32,
+      "height": 16,
+      "frameCount": 96,
+      "endOffset": 14531
     },
     {
       "category": "tileset:snow",
       "sourcePath": "tile/snow/grss1.ytl",
       "size": 26228,
-      "sha256": "68c100ee1a6ddffb646978207859abaa03e7e7df661bc64b843e036358669868"
+      "sha256": "68c100ee1a6ddffb646978207859abaa03e7e7df661bc64b843e036358669868",
+      "extension": ".ytl",
+      "familyStem": "grss",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 23168
     },
     {
       "category": "tileset:snow",
       "sourcePath": "tile/snow/grss10.ytl",
       "size": 25908,
-      "sha256": "78443557eee747942fab4c0c7833339f0535ee876c0e8296a035b1c8c9e7d0c8"
+      "sha256": "78443557eee747942fab4c0c7833339f0535ee876c0e8296a035b1c8c9e7d0c8",
+      "extension": ".ytl",
+      "familyStem": "grss",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 22848
     },
     {
       "category": "tileset:snow",
       "sourcePath": "tile/snow/grss11.ytl",
       "size": 15988,
-      "sha256": "94fd9311d32ba5f4aed35223b38fd88baddd78bad30c6ac8fc857ac4fcf4ae47"
+      "sha256": "94fd9311d32ba5f4aed35223b38fd88baddd78bad30c6ac8fc857ac4fcf4ae47",
+      "extension": ".ytl",
+      "familyStem": "grss",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 12928
     },
     {
       "category": "tileset:snow",
       "sourcePath": "tile/snow/grss12.ytl",
       "size": 25908,
-      "sha256": "4012aecd9287787bcac216f6768908f840ee5b3b542604f81e174a1dddce51d1"
+      "sha256": "4012aecd9287787bcac216f6768908f840ee5b3b542604f81e174a1dddce51d1",
+      "extension": ".ytl",
+      "familyStem": "grss",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 22848
     },
     {
       "category": "tileset:snow",
       "sourcePath": "tile/snow/grss13.ytl",
       "size": 37108,
-      "sha256": "e5abe603c47e8f5fc8210cdb55b38395a45897746e19789f0c92415b790d5715"
+      "sha256": "e5abe603c47e8f5fc8210cdb55b38395a45897746e19789f0c92415b790d5715",
+      "extension": ".ytl",
+      "familyStem": "grss",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 34048
     },
     {
       "category": "tileset:snow",
       "sourcePath": "tile/snow/grss14.ytl",
       "size": 25588,
-      "sha256": "449cd52911d0dc2d0ffa4004637e70e20b249b26a11520cb1d61075ba3778dbc"
+      "sha256": "449cd52911d0dc2d0ffa4004637e70e20b249b26a11520cb1d61075ba3778dbc",
+      "extension": ".ytl",
+      "familyStem": "grss",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 22528
     },
     {
       "category": "tileset:snow",
       "sourcePath": "tile/snow/grss15.ytl",
       "size": 26996,
-      "sha256": "a7236df8f9fb169a58dca3d347a8b06333e325cb827c2040d4a4d1f937634f05"
+      "sha256": "a7236df8f9fb169a58dca3d347a8b06333e325cb827c2040d4a4d1f937634f05",
+      "extension": ".ytl",
+      "familyStem": "grss",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 23936
     },
     {
       "category": "tileset:snow",
       "sourcePath": "tile/snow/grss2.ytl",
       "size": 36468,
-      "sha256": "7996ad0b5b3f48fa913bca067312ddb1dc77392acc0468b3f55433f8424f37e8"
+      "sha256": "7996ad0b5b3f48fa913bca067312ddb1dc77392acc0468b3f55433f8424f37e8",
+      "extension": ".ytl",
+      "familyStem": "grss",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 33408
     },
     {
       "category": "tileset:snow",
       "sourcePath": "tile/snow/grss3.ytl",
       "size": 15988,
-      "sha256": "22e2fafca6a03b75d3a3651be0d54ce07183d9ccdffa3ec96cfcc7018353a80a"
+      "sha256": "22e2fafca6a03b75d3a3651be0d54ce07183d9ccdffa3ec96cfcc7018353a80a",
+      "extension": ".ytl",
+      "familyStem": "grss",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 12928
     },
     {
       "category": "tileset:snow",
       "sourcePath": "tile/snow/grss4.ytl",
       "size": 15988,
-      "sha256": "06ac442ca3cc96cbac6a5fa94f86bbd07249e70605973c144b260ba2a54360cc"
+      "sha256": "06ac442ca3cc96cbac6a5fa94f86bbd07249e70605973c144b260ba2a54360cc",
+      "extension": ".ytl",
+      "familyStem": "grss",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 12928
     },
     {
       "category": "tileset:snow",
       "sourcePath": "tile/snow/grss5.ytl",
       "size": 36468,
-      "sha256": "ec38ffca9a4a77f27a71e3d1823f37de43511a93642af28668cf3824262785d3"
+      "sha256": "ec38ffca9a4a77f27a71e3d1823f37de43511a93642af28668cf3824262785d3",
+      "extension": ".ytl",
+      "familyStem": "grss",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 33408
     },
     {
       "category": "tileset:snow",
       "sourcePath": "tile/snow/grss6.ytl",
       "size": 26548,
-      "sha256": "496fd637d564d68bfc35e5489a158803a443d3b95bb653b85d8a58c933ba4d97"
+      "sha256": "496fd637d564d68bfc35e5489a158803a443d3b95bb653b85d8a58c933ba4d97",
+      "extension": ".ytl",
+      "familyStem": "grss",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 23488
     },
     {
       "category": "tileset:snow",
       "sourcePath": "tile/snow/grss7.ytl",
       "size": 15988,
-      "sha256": "1034b908fb8290558e95281c96a2f0df6518f47a06e0ea7daeba9344321a7cf9"
+      "sha256": "1034b908fb8290558e95281c96a2f0df6518f47a06e0ea7daeba9344321a7cf9",
+      "extension": ".ytl",
+      "familyStem": "grss",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 12928
     },
     {
       "category": "tileset:snow",
       "sourcePath": "tile/snow/grss8.ytl",
       "size": 26548,
-      "sha256": "92874bb098b98e6262ee4356d477206ba8eb32a1b72212fca8437d3bc8ef6888"
+      "sha256": "92874bb098b98e6262ee4356d477206ba8eb32a1b72212fca8437d3bc8ef6888",
+      "extension": ".ytl",
+      "familyStem": "grss",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 23488
     },
     {
       "category": "tileset:snow",
       "sourcePath": "tile/snow/grss9.ytl",
       "size": 35828,
-      "sha256": "647bc5963e91c013819669dea5273150cc75b563220f85986fa66aac0e109506"
+      "sha256": "647bc5963e91c013819669dea5273150cc75b563220f85986fa66aac0e109506",
+      "extension": ".ytl",
+      "familyStem": "grss",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 32768
     },
     {
       "category": "tileset:snow",
       "sourcePath": "tile/snow/hill0.ypr",
       "size": 80560,
-      "sha256": "076e619cf4cc454e01fc375b420927e9267b6797d7015d978f3b0c0ddaadaafa"
+      "sha256": "076e619cf4cc454e01fc375b420927e9267b6797d7015d978f3b0c0ddaadaafa",
+      "extension": ".ypr",
+      "familyStem": "hill",
+      "width": 80,
+      "height": 60,
+      "frameCount": 44,
+      "endOffset": 77500
     },
     {
       "category": "tileset:snow",
       "sourcePath": "tile/snow/hill0.ytl",
       "size": 52340,
-      "sha256": "08a8d6b25926225b524b841b313098a35f718d8751fda76ba052c0e58474f18a"
+      "sha256": "08a8d6b25926225b524b841b313098a35f718d8751fda76ba052c0e58474f18a",
+      "extension": ".ytl",
+      "familyStem": "hill",
+      "width": 64,
+      "height": 48,
+      "frameCount": 44,
+      "endOffset": 49280
     },
     {
       "category": "tileset:snow",
       "sourcePath": "tile/snow/hill1.ytl",
       "size": 31348,
-      "sha256": "bfa047441f1540cea7985f9714262311d0dcc72ba67895fdb4f9f88a85ae94a0"
+      "sha256": "bfa047441f1540cea7985f9714262311d0dcc72ba67895fdb4f9f88a85ae94a0",
+      "extension": ".ytl",
+      "familyStem": "hill",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 28288
     },
     {
       "category": "tileset:snow",
       "sourcePath": "tile/snow/hill10.ytl",
       "size": 20868,
-      "sha256": "557dd769c8da859cc53f0a4095c7e0b7040eff5f91c83351539e0a0287cc6465"
+      "sha256": "557dd769c8da859cc53f0a4095c7e0b7040eff5f91c83351539e0a0287cc6465",
+      "extension": ".ytl",
+      "familyStem": "hill",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 17808
     },
     {
       "category": "tileset:snow",
       "sourcePath": "tile/snow/hill11.ytl",
       "size": 13428,
-      "sha256": "fec937653cac483055f73b320c0ff18d12d185d868075c7e8c49696957656f37"
+      "sha256": "fec937653cac483055f73b320c0ff18d12d185d868075c7e8c49696957656f37",
+      "extension": ".ytl",
+      "familyStem": "hill",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 10368
     },
     {
       "category": "tileset:snow",
       "sourcePath": "tile/snow/hill12.ytl",
       "size": 20868,
-      "sha256": "3721302966e62ca5158ea12d77b5fdc85f058af54be235a7abc69979128c2c11"
+      "sha256": "3721302966e62ca5158ea12d77b5fdc85f058af54be235a7abc69979128c2c11",
+      "extension": ".ytl",
+      "familyStem": "hill",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 17808
     },
     {
       "category": "tileset:snow",
       "sourcePath": "tile/snow/hill13.ytl",
       "size": 29268,
-      "sha256": "e6268d5305ed05f2a0debf41eea3fde2d12da8560419d46c217d4f44a8ed0a13"
+      "sha256": "e6268d5305ed05f2a0debf41eea3fde2d12da8560419d46c217d4f44a8ed0a13",
+      "extension": ".ytl",
+      "familyStem": "hill",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 26208
     },
     {
       "category": "tileset:snow",
       "sourcePath": "tile/snow/hill14.ytl",
       "size": 20628,
-      "sha256": "64e84b76588b40e1ff124cb78854f44be5e2cd34c7fa5ecdf4c06bb9b0445f19"
+      "sha256": "64e84b76588b40e1ff124cb78854f44be5e2cd34c7fa5ecdf4c06bb9b0445f19",
+      "extension": ".ytl",
+      "familyStem": "hill",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 17568
     },
     {
       "category": "tileset:snow",
       "sourcePath": "tile/snow/hill15.ytl",
       "size": 21588,
-      "sha256": "f40b3ec61680d664d7cc24e3383f5a8927b7303f69b035924f7cc9117934384a"
+      "sha256": "f40b3ec61680d664d7cc24e3383f5a8927b7303f69b035924f7cc9117934384a",
+      "extension": ".ytl",
+      "familyStem": "hill",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 18528
     },
     {
       "category": "tileset:snow",
       "sourcePath": "tile/snow/hill2.ytl",
       "size": 44148,
-      "sha256": "f97f64ed3d13d0fa41c1457d5c93691a775cbd07c6a26b986b6b9c07c54e0c85"
+      "sha256": "f97f64ed3d13d0fa41c1457d5c93691a775cbd07c6a26b986b6b9c07c54e0c85",
+      "extension": ".ytl",
+      "familyStem": "hill",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 41088
     },
     {
       "category": "tileset:snow",
       "sourcePath": "tile/snow/hill3.ytl",
       "size": 18548,
-      "sha256": "b59e81590e0811d1d4c9f10ae0a0c08778d629a85861ca478850721a1bdcc584"
+      "sha256": "b59e81590e0811d1d4c9f10ae0a0c08778d629a85861ca478850721a1bdcc584",
+      "extension": ".ytl",
+      "familyStem": "hill",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 15488
     },
     {
       "category": "tileset:snow",
       "sourcePath": "tile/snow/hill4.ytl",
       "size": 18548,
-      "sha256": "7ee91ec958bccf8b79088d5566cd752cfe40239d783dc1b8f59296f3bdcf77fb"
+      "sha256": "7ee91ec958bccf8b79088d5566cd752cfe40239d783dc1b8f59296f3bdcf77fb",
+      "extension": ".ytl",
+      "familyStem": "hill",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 15488
     },
     {
       "category": "tileset:snow",
       "sourcePath": "tile/snow/hill5.ytl",
       "size": 44148,
-      "sha256": "ae1cfc72fe17c77d7ee66e4a4fe4ea0e12d71c37158fe33d8024f6930f725410"
+      "sha256": "ae1cfc72fe17c77d7ee66e4a4fe4ea0e12d71c37158fe33d8024f6930f725410",
+      "extension": ".ytl",
+      "familyStem": "hill",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 41088
     },
     {
       "category": "tileset:snow",
       "sourcePath": "tile/snow/hill6.ytl",
       "size": 21348,
-      "sha256": "c1741d1598a3e899e11a153856385899cf70482b4929587432c40179429b63a1"
+      "sha256": "c1741d1598a3e899e11a153856385899cf70482b4929587432c40179429b63a1",
+      "extension": ".ytl",
+      "familyStem": "hill",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 18288
     },
     {
       "category": "tileset:snow",
       "sourcePath": "tile/snow/hill7.ytl",
       "size": 13428,
-      "sha256": "b19e26425d351f4fd1f16b05f15d3c215c6ef793ae8799c223b9a490e7bce76a"
+      "sha256": "b19e26425d351f4fd1f16b05f15d3c215c6ef793ae8799c223b9a490e7bce76a",
+      "extension": ".ytl",
+      "familyStem": "hill",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 10368
     },
     {
       "category": "tileset:snow",
       "sourcePath": "tile/snow/hill8.ytl",
       "size": 21348,
-      "sha256": "a07ce179f4080a17fc6d20d4a394597f4265c0b6d3184a505b988a132d3caf51"
+      "sha256": "a07ce179f4080a17fc6d20d4a394597f4265c0b6d3184a505b988a132d3caf51",
+      "extension": ".ytl",
+      "familyStem": "hill",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 18288
     },
     {
       "category": "tileset:snow",
       "sourcePath": "tile/snow/hill9.ytl",
       "size": 28308,
-      "sha256": "6e29f24d5aef7663fd538501641e28f81da4ec66e02e0759fed6b418594a7cd9"
+      "sha256": "6e29f24d5aef7663fd538501641e28f81da4ec66e02e0759fed6b418594a7cd9",
+      "extension": ".ytl",
+      "familyStem": "hill",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 25248
     },
     {
       "category": "tileset:snow",
       "sourcePath": "tile/snow/newblk0.ytl",
       "size": 15860,
-      "sha256": "f31070feb6bab8c5525827391a409193b5e66d7eff5a47854d254bf419b4bfe1"
+      "sha256": "f31070feb6bab8c5525827391a409193b5e66d7eff5a47854d254bf419b4bfe1",
+      "extension": ".ytl",
+      "familyStem": "newblk",
+      "width": 64,
+      "height": 48,
+      "frameCount": 48,
+      "endOffset": 12800
     },
     {
       "category": "tileset:snow",
       "sourcePath": "tile/snow/newblk1.ytl",
       "size": 56820,
-      "sha256": "1ff5c8c9adf6eb8dbe606b3bcc173e5fa421bb3bec5c37cb87a8fea6f4db9fd2"
+      "sha256": "1ff5c8c9adf6eb8dbe606b3bcc173e5fa421bb3bec5c37cb87a8fea6f4db9fd2",
+      "extension": ".ytl",
+      "familyStem": "newblk",
+      "width": 64,
+      "height": 48,
+      "frameCount": 48,
+      "endOffset": 53760
     },
     {
       "category": "tileset:snow",
       "sourcePath": "tile/snow/newblk2.ytl",
       "size": 56820,
-      "sha256": "d1a69bc721ee844fcffd642299b7c14ddbe2e332577deb598882e1d67880ced4"
+      "sha256": "d1a69bc721ee844fcffd642299b7c14ddbe2e332577deb598882e1d67880ced4",
+      "extension": ".ytl",
+      "familyStem": "newblk",
+      "width": 64,
+      "height": 48,
+      "frameCount": 48,
+      "endOffset": 53760
     },
     {
       "category": "tileset:snow",
       "sourcePath": "tile/snow/newblk3.ytl",
       "size": 24052,
-      "sha256": "ee2c094198d6706bd87d3326d73a71a3d5880d18b4742c253411c1e555071692"
+      "sha256": "ee2c094198d6706bd87d3326d73a71a3d5880d18b4742c253411c1e555071692",
+      "extension": ".ytl",
+      "familyStem": "newblk",
+      "width": 64,
+      "height": 48,
+      "frameCount": 48,
+      "endOffset": 20992
     },
     {
       "category": "tileset:snow",
       "sourcePath": "tile/snow/newblkgate.ytl",
       "size": 24052,
-      "sha256": "5c48c4f32c8304bd17bd41f48f46ae54bfa08886954f3e53b48d28d31af45dbc"
+      "sha256": "5c48c4f32c8304bd17bd41f48f46ae54bfa08886954f3e53b48d28d31af45dbc",
+      "extension": ".ytl",
+      "familyStem": "newblk",
+      "width": 64,
+      "height": 48,
+      "frameCount": 48,
+      "endOffset": 20992
     },
     {
       "category": "tileset:snow",
       "sourcePath": "tile/snow/sea0.ytl",
       "size": 40948,
-      "sha256": "a0e6ce0acfc57a610512ccbb58dbd8cb55de81a7ae5ed602b8f24a9a715e1d3a"
+      "sha256": "a0e6ce0acfc57a610512ccbb58dbd8cb55de81a7ae5ed602b8f24a9a715e1d3a",
+      "extension": ".ytl",
+      "familyStem": "sea",
+      "width": 64,
+      "height": 48,
+      "frameCount": 96,
+      "endOffset": 37888
     },
     {
       "category": "tileset:snow",
       "sourcePath": "tile/snow/sea1.ytl",
       "size": 56820,
-      "sha256": "cf0967d2d0117ac7b0e4ad5f3beffc9a4f77ddd371101dd64d33a06bde43cbba"
+      "sha256": "cf0967d2d0117ac7b0e4ad5f3beffc9a4f77ddd371101dd64d33a06bde43cbba",
+      "extension": ".ytl",
+      "familyStem": "sea",
+      "width": 64,
+      "height": 48,
+      "frameCount": 48,
+      "endOffset": 53760
     },
     {
       "category": "tileset:snow",
       "sourcePath": "tile/snow/sea2.ytl",
       "size": 56820,
-      "sha256": "ead37c0766435f4989f0a096e8ca229c31838bf7b85c5f6f1dd6991c490e8e1a"
+      "sha256": "ead37c0766435f4989f0a096e8ca229c31838bf7b85c5f6f1dd6991c490e8e1a",
+      "extension": ".ytl",
+      "familyStem": "sea",
+      "width": 64,
+      "height": 48,
+      "frameCount": 48,
+      "endOffset": 53760
     },
     {
       "category": "tileset:snow",
       "sourcePath": "tile/snow/sea3.ytl",
       "size": 40436,
-      "sha256": "5bf8eda15555f0ba11fba9c3d1f3accb44c3560b466af1b4556e2a60442ba5b2"
+      "sha256": "5bf8eda15555f0ba11fba9c3d1f3accb44c3560b466af1b4556e2a60442ba5b2",
+      "extension": ".ytl",
+      "familyStem": "sea",
+      "width": 64,
+      "height": 48,
+      "frameCount": 48,
+      "endOffset": 37376
     },
     {
       "category": "tileset:snow",
       "sourcePath": "tile/snow/shallow.spr",
       "size": 18557,
-      "sha256": "ae4e81bc096fc9ce2d7bb97be40c2e3f9360365aa566f842e3deeb1057219ed4"
+      "sha256": "ae4e81bc096fc9ce2d7bb97be40c2e3f9360365aa566f842e3deeb1057219ed4",
+      "extension": ".spr",
+      "familyStem": "shallow",
+      "width": 64,
+      "height": 32,
+      "frameCount": 16,
+      "endOffset": 15497
+    },
+    {
+      "category": "tileset:snow",
+      "sourcePath": "tile/snow/black.spr",
+      "size": 5108,
+      "sha256": "9ef53a565bfe804e8a272f73f9749c05681b6b9e3af4090f7e4eea61237292d0",
+      "extension": ".spr",
+      "familyStem": "black",
+      "width": 64,
+      "height": 32,
+      "frameCount": 1,
+      "endOffset": 2048
+    },
+    {
+      "category": "tileset:snow",
+      "sourcePath": "tile/snow/blacktile.ytl",
+      "size": 22644,
+      "sha256": "06438882138be46ff9dd267adda3d8f2ab278e1cde0cee7aaa243271b8835e09",
+      "extension": ".ytl",
+      "familyStem": "blacktile",
+      "width": 64,
+      "height": 48,
+      "frameCount": 44,
+      "endOffset": 19584
     },
     {
       "category": "tileset:brown",
       "sourcePath": "tile/brown/castle0.ytl",
       "size": 19956,
-      "sha256": "a0aab61ab6dd6ef5ca721f4f91ec87ed543fc64cced55febd82ebffa4d3b45b3"
+      "sha256": "a0aab61ab6dd6ef5ca721f4f91ec87ed543fc64cced55febd82ebffa4d3b45b3",
+      "extension": ".ytl",
+      "familyStem": "castle",
+      "width": 64,
+      "height": 48,
+      "frameCount": 48,
+      "endOffset": 16896
     },
     {
       "category": "tileset:brown",
       "sourcePath": "tile/brown/castle1.ytl",
       "size": 56820,
-      "sha256": "c6b60a35c3e5d94aff1120af6434f3861c36f75e806055f13974d1afa3d3597d"
+      "sha256": "c6b60a35c3e5d94aff1120af6434f3861c36f75e806055f13974d1afa3d3597d",
+      "extension": ".ytl",
+      "familyStem": "castle",
+      "width": 64,
+      "height": 48,
+      "frameCount": 48,
+      "endOffset": 53760
     },
     {
       "category": "tileset:brown",
       "sourcePath": "tile/brown/castle2.ytl",
       "size": 48628,
-      "sha256": "710b7e0d786f2124d20bd3e1b21354e60024d09def02ae6d11cbc1e8e4ade8d9"
+      "sha256": "710b7e0d786f2124d20bd3e1b21354e60024d09def02ae6d11cbc1e8e4ade8d9",
+      "extension": ".ytl",
+      "familyStem": "castle",
+      "width": 64,
+      "height": 48,
+      "frameCount": 48,
+      "endOffset": 45568
     },
     {
       "category": "tileset:brown",
       "sourcePath": "tile/brown/diff1.ytl",
       "size": 27252,
-      "sha256": "1675e4f296d796f1cced3f27546ac4cf359fe329b20492965d71de061ff62984"
+      "sha256": "1675e4f296d796f1cced3f27546ac4cf359fe329b20492965d71de061ff62984",
+      "extension": ".ytl",
+      "familyStem": "diff",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 24192
     },
     {
       "category": "tileset:brown",
       "sourcePath": "tile/brown/diff10.ytl",
       "size": 20868,
-      "sha256": "156a4d70ba3fde6f99e5f20c856a67bfa35433754b290ff7d2c5d02385b9ea74"
+      "sha256": "156a4d70ba3fde6f99e5f20c856a67bfa35433754b290ff7d2c5d02385b9ea74",
+      "extension": ".ytl",
+      "familyStem": "diff",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 17808
     },
     {
       "category": "tileset:brown",
       "sourcePath": "tile/brown/diff11.ytl",
       "size": 13428,
-      "sha256": "ac6e6087c01e71ac9546a943c51a25449f238adf4739c197483a4219b7faaeae"
+      "sha256": "ac6e6087c01e71ac9546a943c51a25449f238adf4739c197483a4219b7faaeae",
+      "extension": ".ytl",
+      "familyStem": "diff",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 10368
     },
     {
       "category": "tileset:brown",
       "sourcePath": "tile/brown/diff12.ytl",
       "size": 20868,
-      "sha256": "1eea3070c8fd93cc3cc27d4c4ed8fcd21b8541e221a59e29dad6aa5db876cdb3"
+      "sha256": "1eea3070c8fd93cc3cc27d4c4ed8fcd21b8541e221a59e29dad6aa5db876cdb3",
+      "extension": ".ytl",
+      "familyStem": "diff",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 17808
     },
     {
       "category": "tileset:brown",
       "sourcePath": "tile/brown/diff13.ytl",
       "size": 29268,
-      "sha256": "502db62981cfb7fae475936f085925322f7be0e5b63204128b07aecdf0f9c9c2"
+      "sha256": "502db62981cfb7fae475936f085925322f7be0e5b63204128b07aecdf0f9c9c2",
+      "extension": ".ytl",
+      "familyStem": "diff",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 26208
     },
     {
       "category": "tileset:brown",
       "sourcePath": "tile/brown/diff13l.ytl",
       "size": 31188,
-      "sha256": "a0d8109e5af6e36616861f841441050e2c51caf87fd287df308ec31a11c86298"
+      "sha256": "a0d8109e5af6e36616861f841441050e2c51caf87fd287df308ec31a11c86298",
+      "extension": ".ytl",
+      "familyStem": "diff",
+      "width": 32,
+      "height": 16,
+      "frameCount": 144,
+      "endOffset": 28128
     },
     {
       "category": "tileset:brown",
       "sourcePath": "tile/brown/diff14.ytl",
       "size": 20628,
-      "sha256": "147e8df32d9a67e6c0fa8751f922d2a08f53247a18d377ed3bd5b7d8f1019ff7"
+      "sha256": "147e8df32d9a67e6c0fa8751f922d2a08f53247a18d377ed3bd5b7d8f1019ff7",
+      "extension": ".ytl",
+      "familyStem": "diff",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 17568
     },
     {
       "category": "tileset:brown",
       "sourcePath": "tile/brown/diff15.ytl",
       "size": 21603,
-      "sha256": "a934627071907e7247e7c566d8e9e7ab1adb3a02310885c3fdc7d7d8d7dc79ef"
+      "sha256": "a934627071907e7247e7c566d8e9e7ab1adb3a02310885c3fdc7d7d8d7dc79ef",
+      "extension": ".ytl",
+      "familyStem": "diff",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 18543
     },
     {
       "category": "tileset:brown",
       "sourcePath": "tile/brown/diff2.ytl",
       "size": 38004,
-      "sha256": "77daf094ac08fc08e788f92aa7eaa2e8222d35db29c6bc58d25c6d57f44c2a58"
+      "sha256": "77daf094ac08fc08e788f92aa7eaa2e8222d35db29c6bc58d25c6d57f44c2a58",
+      "extension": ".ytl",
+      "familyStem": "diff",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 34944
     },
     {
       "category": "tileset:brown",
       "sourcePath": "tile/brown/diff3.ytl",
       "size": 16500,
-      "sha256": "3ac9aed0930b5c89b143dd6d6baea6ef0fc89a0c3dbe6acc67f4b71fe2071515"
+      "sha256": "3ac9aed0930b5c89b143dd6d6baea6ef0fc89a0c3dbe6acc67f4b71fe2071515",
+      "extension": ".ytl",
+      "familyStem": "diff",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 13440
     },
     {
       "category": "tileset:brown",
       "sourcePath": "tile/brown/diff4.ytl",
       "size": 16500,
-      "sha256": "bd55442f2d3565f15a0d500c053bd02b9cbeb83af8186697ec29c1f155991a40"
+      "sha256": "bd55442f2d3565f15a0d500c053bd02b9cbeb83af8186697ec29c1f155991a40",
+      "extension": ".ytl",
+      "familyStem": "diff",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 13440
     },
     {
       "category": "tileset:brown",
       "sourcePath": "tile/brown/diff5.ytl",
       "size": 38004,
-      "sha256": "ee2c04dd71ffbabef1d51d1ad16ae3a8f99a97189c404a9faaf7d96a02329220"
+      "sha256": "ee2c04dd71ffbabef1d51d1ad16ae3a8f99a97189c404a9faaf7d96a02329220",
+      "extension": ".ytl",
+      "familyStem": "diff",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 34944
     },
     {
       "category": "tileset:brown",
       "sourcePath": "tile/brown/diff6.ytl",
       "size": 21348,
-      "sha256": "ddfbf065778a9de2dcd5c0c94766d25f13e9394e8e505a2953d5939d18a7fc62"
+      "sha256": "ddfbf065778a9de2dcd5c0c94766d25f13e9394e8e505a2953d5939d18a7fc62",
+      "extension": ".ytl",
+      "familyStem": "diff",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 18288
     },
     {
       "category": "tileset:brown",
       "sourcePath": "tile/brown/diff7.ytl",
       "size": 13428,
-      "sha256": "f6465e92cf8c444e41b641a7550539f0d211cb25ac1e49b88dc178997a043529"
+      "sha256": "f6465e92cf8c444e41b641a7550539f0d211cb25ac1e49b88dc178997a043529",
+      "extension": ".ytl",
+      "familyStem": "diff",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 10368
     },
     {
       "category": "tileset:brown",
       "sourcePath": "tile/brown/diff8.ytl",
       "size": 21348,
-      "sha256": "47078d8564e84a06daba867d1b4cb5f45fd8e5a5301062f39999041a5247e2ef"
+      "sha256": "47078d8564e84a06daba867d1b4cb5f45fd8e5a5301062f39999041a5247e2ef",
+      "extension": ".ytl",
+      "familyStem": "diff",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 18288
     },
     {
       "category": "tileset:brown",
       "sourcePath": "tile/brown/diff9.ytl",
       "size": 28308,
-      "sha256": "c802af8d12d8ded03248c5c5a3d76dea0796212fab4a71c1a1d505995be46af2"
+      "sha256": "c802af8d12d8ded03248c5c5a3d76dea0796212fab4a71c1a1d505995be46af2",
+      "extension": ".ytl",
+      "familyStem": "diff",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 25248
     },
     {
       "category": "tileset:brown",
       "sourcePath": "tile/brown/fog0.spr",
       "size": 17978,
-      "sha256": "98c4f138a47503e112b7fd78fd13c0cc6cb9593ef37c18209cbf88bc7f4e4759"
+      "sha256": "98c4f138a47503e112b7fd78fd13c0cc6cb9593ef37c18209cbf88bc7f4e4759",
+      "extension": ".spr",
+      "familyStem": "fog",
+      "width": 32,
+      "height": 16,
+      "frameCount": 96,
+      "endOffset": 14918
     },
     {
       "category": "tileset:brown",
       "sourcePath": "tile/brown/fog1.spr",
       "size": 24101,
-      "sha256": "0e64374263ceedb1253d7a55fc96681d3e2787e876021134747521bf88bf5701"
+      "sha256": "0e64374263ceedb1253d7a55fc96681d3e2787e876021134747521bf88bf5701",
+      "extension": ".spr",
+      "familyStem": "fog",
+      "width": 32,
+      "height": 16,
+      "frameCount": 96,
+      "endOffset": 21041
     },
     {
       "category": "tileset:brown",
       "sourcePath": "tile/brown/fog10.spr",
       "size": 11721,
-      "sha256": "bf6b260f412305fd29b0a6a8454fb6bb112e0344ac2f96b465f6f62923437c7c"
+      "sha256": "bf6b260f412305fd29b0a6a8454fb6bb112e0344ac2f96b465f6f62923437c7c",
+      "extension": ".spr",
+      "familyStem": "fog",
+      "width": 32,
+      "height": 16,
+      "frameCount": 96,
+      "endOffset": 8661
     },
     {
       "category": "tileset:brown",
       "sourcePath": "tile/brown/fog11.spr",
       "size": 17595,
-      "sha256": "3633f57e785791c0f5e9e6f632fed1575b23fbf7756177be2162dbd6ce602e47"
+      "sha256": "3633f57e785791c0f5e9e6f632fed1575b23fbf7756177be2162dbd6ce602e47",
+      "extension": ".spr",
+      "familyStem": "fog",
+      "width": 32,
+      "height": 16,
+      "frameCount": 96,
+      "endOffset": 14535
     },
     {
       "category": "tileset:brown",
       "sourcePath": "tile/brown/fog12.spr",
       "size": 23425,
-      "sha256": "3ed4ced064f3998f143a344f0f17cac528d91953fd41a97deb3add1b7330ba5d"
+      "sha256": "3ed4ced064f3998f143a344f0f17cac528d91953fd41a97deb3add1b7330ba5d",
+      "extension": ".spr",
+      "familyStem": "fog",
+      "width": 32,
+      "height": 16,
+      "frameCount": 96,
+      "endOffset": 20365
     },
     {
       "category": "tileset:brown",
       "sourcePath": "tile/brown/fog13.spr",
       "size": 17480,
-      "sha256": "b363feaf9cd89b964a7d306f0638f2f41cc57bf8b8efd0e1d8dd818c9aee5ee7"
+      "sha256": "b363feaf9cd89b964a7d306f0638f2f41cc57bf8b8efd0e1d8dd818c9aee5ee7",
+      "extension": ".spr",
+      "familyStem": "fog",
+      "width": 32,
+      "height": 16,
+      "frameCount": 96,
+      "endOffset": 14420
     },
     {
       "category": "tileset:brown",
       "sourcePath": "tile/brown/fog14.spr",
       "size": 17909,
-      "sha256": "efb2eb836d4552a9bea57a37f97370cb2de1e1a55d4f34271889ad0a083fc669"
+      "sha256": "efb2eb836d4552a9bea57a37f97370cb2de1e1a55d4f34271889ad0a083fc669",
+      "extension": ".spr",
+      "familyStem": "fog",
+      "width": 32,
+      "height": 16,
+      "frameCount": 96,
+      "endOffset": 14849
     },
     {
       "category": "tileset:brown",
       "sourcePath": "tile/brown/fog2.spr",
       "size": 11666,
-      "sha256": "114fa8aab39b45423a3fe6b3574a194fbc056877ee02f3c2b32b10c8d867b1a0"
+      "sha256": "114fa8aab39b45423a3fe6b3574a194fbc056877ee02f3c2b32b10c8d867b1a0",
+      "extension": ".spr",
+      "familyStem": "fog",
+      "width": 32,
+      "height": 16,
+      "frameCount": 96,
+      "endOffset": 8606
     },
     {
       "category": "tileset:brown",
       "sourcePath": "tile/brown/fog3.spr",
       "size": 11669,
-      "sha256": "c5db36d2e772d2309d086911e96eba91b2052d221e8d67b3e7d7ddaeb1009065"
+      "sha256": "c5db36d2e772d2309d086911e96eba91b2052d221e8d67b3e7d7ddaeb1009065",
+      "extension": ".spr",
+      "familyStem": "fog",
+      "width": 32,
+      "height": 16,
+      "frameCount": 96,
+      "endOffset": 8609
     },
     {
       "category": "tileset:brown",
       "sourcePath": "tile/brown/fog4.spr",
       "size": 24118,
-      "sha256": "c08dd146b67fe85d17900471273c7b6d3feaa06080d8fe83dda5b74b63892e79"
+      "sha256": "c08dd146b67fe85d17900471273c7b6d3feaa06080d8fe83dda5b74b63892e79",
+      "extension": ".spr",
+      "familyStem": "fog",
+      "width": 32,
+      "height": 16,
+      "frameCount": 96,
+      "endOffset": 21058
     },
     {
       "category": "tileset:brown",
       "sourcePath": "tile/brown/fog5.spr",
       "size": 17816,
-      "sha256": "26ea4a1ed4a0865ace99e22639df0d513a508da54f73b956c60e2dc9d3a646ca"
+      "sha256": "26ea4a1ed4a0865ace99e22639df0d513a508da54f73b956c60e2dc9d3a646ca",
+      "extension": ".spr",
+      "familyStem": "fog",
+      "width": 32,
+      "height": 16,
+      "frameCount": 96,
+      "endOffset": 14756
     },
     {
       "category": "tileset:brown",
       "sourcePath": "tile/brown/fog6.spr",
       "size": 11745,
-      "sha256": "5670c1940397a807e10ffe132d472613508800671f1aa3da3e1f54b46133c5a0"
+      "sha256": "5670c1940397a807e10ffe132d472613508800671f1aa3da3e1f54b46133c5a0",
+      "extension": ".spr",
+      "familyStem": "fog",
+      "width": 32,
+      "height": 16,
+      "frameCount": 96,
+      "endOffset": 8685
     },
     {
       "category": "tileset:brown",
       "sourcePath": "tile/brown/fog7.spr",
       "size": 17858,
-      "sha256": "798f6d69678c7b9c40decbc220199219c9e17cfc6ae76470daebd49d0af99b55"
+      "sha256": "798f6d69678c7b9c40decbc220199219c9e17cfc6ae76470daebd49d0af99b55",
+      "extension": ".spr",
+      "familyStem": "fog",
+      "width": 32,
+      "height": 16,
+      "frameCount": 96,
+      "endOffset": 14798
     },
     {
       "category": "tileset:brown",
       "sourcePath": "tile/brown/fog8.spr",
       "size": 22732,
-      "sha256": "4064773e38a13f43ede3f06975c61bb3405337eb6fcb90ccc3d7b4425eaf5f59"
+      "sha256": "4064773e38a13f43ede3f06975c61bb3405337eb6fcb90ccc3d7b4425eaf5f59",
+      "extension": ".spr",
+      "familyStem": "fog",
+      "width": 32,
+      "height": 16,
+      "frameCount": 96,
+      "endOffset": 19672
     },
     {
       "category": "tileset:brown",
       "sourcePath": "tile/brown/fog9.spr",
       "size": 17591,
-      "sha256": "22ba6fc52a03bbed16f063dcd16fdf47437bdab642ecbcb58af2c0aff03676be"
+      "sha256": "22ba6fc52a03bbed16f063dcd16fdf47437bdab642ecbcb58af2c0aff03676be",
+      "extension": ".spr",
+      "familyStem": "fog",
+      "width": 32,
+      "height": 16,
+      "frameCount": 96,
+      "endOffset": 14531
     },
     {
       "category": "tileset:brown",
       "sourcePath": "tile/brown/grss1.ytl",
       "size": 26228,
-      "sha256": "ad70db81325d9b297c06645d298ef77ed710ad17432be45b98a1560f137a5a3f"
+      "sha256": "ad70db81325d9b297c06645d298ef77ed710ad17432be45b98a1560f137a5a3f",
+      "extension": ".ytl",
+      "familyStem": "grss",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 23168
     },
     {
       "category": "tileset:brown",
       "sourcePath": "tile/brown/grss10.ytl",
       "size": 25908,
-      "sha256": "3c58602c134f743f2fbe6a44c4b402571b66b348054aa8eb3df1adbf0b37e2fd"
+      "sha256": "3c58602c134f743f2fbe6a44c4b402571b66b348054aa8eb3df1adbf0b37e2fd",
+      "extension": ".ytl",
+      "familyStem": "grss",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 22848
     },
     {
       "category": "tileset:brown",
       "sourcePath": "tile/brown/grss11.ytl",
       "size": 15988,
-      "sha256": "08d862fd2586055270fa8067e1f0449ccc8a2d250a163d60b8b1dacb2ec2d843"
+      "sha256": "08d862fd2586055270fa8067e1f0449ccc8a2d250a163d60b8b1dacb2ec2d843",
+      "extension": ".ytl",
+      "familyStem": "grss",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 12928
     },
     {
       "category": "tileset:brown",
       "sourcePath": "tile/brown/grss12.ytl",
       "size": 25908,
-      "sha256": "3e3bb5bb6f0c03a33495923746d9c13e588f2491e8ba81830ce6f8eeef604b16"
+      "sha256": "3e3bb5bb6f0c03a33495923746d9c13e588f2491e8ba81830ce6f8eeef604b16",
+      "extension": ".ytl",
+      "familyStem": "grss",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 22848
     },
     {
       "category": "tileset:brown",
       "sourcePath": "tile/brown/grss13.ytl",
       "size": 37108,
-      "sha256": "5d9f9963020bcef12e7d6dbd27ab91b9bc964cfb50f3793901566a862b621250"
+      "sha256": "5d9f9963020bcef12e7d6dbd27ab91b9bc964cfb50f3793901566a862b621250",
+      "extension": ".ytl",
+      "familyStem": "grss",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 34048
     },
     {
       "category": "tileset:brown",
       "sourcePath": "tile/brown/grss14.ytl",
       "size": 25588,
-      "sha256": "d60d7f822a48c9a320bb93466254d34410707af1087d1e6b3236d97fbfd7671a"
+      "sha256": "d60d7f822a48c9a320bb93466254d34410707af1087d1e6b3236d97fbfd7671a",
+      "extension": ".ytl",
+      "familyStem": "grss",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 22528
     },
     {
       "category": "tileset:brown",
       "sourcePath": "tile/brown/grss15.ytl",
       "size": 26829,
-      "sha256": "8bc9395d30e63cd78a5103cbb83f749cfc8af37fa4d6d4861dd35f09e7f838ea"
+      "sha256": "8bc9395d30e63cd78a5103cbb83f749cfc8af37fa4d6d4861dd35f09e7f838ea",
+      "extension": ".ytl",
+      "familyStem": "grss",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 23769
     },
     {
       "category": "tileset:brown",
       "sourcePath": "tile/brown/grss2.ytl",
       "size": 36468,
-      "sha256": "c1b5a1fa3822e0dbc5b96159e8473d7668aac921cd9d462d2f0ea18926764e3e"
+      "sha256": "c1b5a1fa3822e0dbc5b96159e8473d7668aac921cd9d462d2f0ea18926764e3e",
+      "extension": ".ytl",
+      "familyStem": "grss",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 33408
     },
     {
       "category": "tileset:brown",
       "sourcePath": "tile/brown/grss3.ytl",
       "size": 15988,
-      "sha256": "0a49396443c18ec7f18290cd11d78d4195db168389027ed535bc099b38b1187a"
+      "sha256": "0a49396443c18ec7f18290cd11d78d4195db168389027ed535bc099b38b1187a",
+      "extension": ".ytl",
+      "familyStem": "grss",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 12928
     },
     {
       "category": "tileset:brown",
       "sourcePath": "tile/brown/grss4.ytl",
       "size": 15988,
-      "sha256": "f007c937229ddcfae64121245655b45db25202c7d100dee817ac290743456029"
+      "sha256": "f007c937229ddcfae64121245655b45db25202c7d100dee817ac290743456029",
+      "extension": ".ytl",
+      "familyStem": "grss",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 12928
     },
     {
       "category": "tileset:brown",
       "sourcePath": "tile/brown/grss5.ytl",
       "size": 36468,
-      "sha256": "03938133e89be189bb26e09a07c5546ff0887ae633cc683af3abf58ebda3dcde"
+      "sha256": "03938133e89be189bb26e09a07c5546ff0887ae633cc683af3abf58ebda3dcde",
+      "extension": ".ytl",
+      "familyStem": "grss",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 33408
     },
     {
       "category": "tileset:brown",
       "sourcePath": "tile/brown/grss6.ytl",
       "size": 26548,
-      "sha256": "72bb99d8b9d4d79085c5830360f3324a25e289a3d4bc9a4ece2bbaeccb96452e"
+      "sha256": "72bb99d8b9d4d79085c5830360f3324a25e289a3d4bc9a4ece2bbaeccb96452e",
+      "extension": ".ytl",
+      "familyStem": "grss",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 23488
     },
     {
       "category": "tileset:brown",
       "sourcePath": "tile/brown/grss7.ytl",
       "size": 15988,
-      "sha256": "db213bd15d57c8ba6fc017551d951bf0567893a0e2b75d6bccd24a72f13ea085"
+      "sha256": "db213bd15d57c8ba6fc017551d951bf0567893a0e2b75d6bccd24a72f13ea085",
+      "extension": ".ytl",
+      "familyStem": "grss",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 12928
     },
     {
       "category": "tileset:brown",
       "sourcePath": "tile/brown/grss8.ytl",
       "size": 26548,
-      "sha256": "cb977e1bc29ea1d2d380077d48c5a1f80c907c026b4c11e66d29e800a38de088"
+      "sha256": "cb977e1bc29ea1d2d380077d48c5a1f80c907c026b4c11e66d29e800a38de088",
+      "extension": ".ytl",
+      "familyStem": "grss",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 23488
     },
     {
       "category": "tileset:brown",
       "sourcePath": "tile/brown/grss9.ytl",
       "size": 35828,
-      "sha256": "3144331c8180c3ab4ad6b16761bbe685dd79ffca286f66e13f7cd66cfa40f85b"
+      "sha256": "3144331c8180c3ab4ad6b16761bbe685dd79ffca286f66e13f7cd66cfa40f85b",
+      "extension": ".ytl",
+      "familyStem": "grss",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 32768
     },
     {
       "category": "tileset:brown",
       "sourcePath": "tile/brown/hill0.ypr",
       "size": 80560,
-      "sha256": "076e619cf4cc454e01fc375b420927e9267b6797d7015d978f3b0c0ddaadaafa"
+      "sha256": "076e619cf4cc454e01fc375b420927e9267b6797d7015d978f3b0c0ddaadaafa",
+      "extension": ".ypr",
+      "familyStem": "hill",
+      "width": 80,
+      "height": 60,
+      "frameCount": 44,
+      "endOffset": 77500
     },
     {
       "category": "tileset:brown",
       "sourcePath": "tile/brown/hill0.ytl",
       "size": 52340,
-      "sha256": "5e512bec4b95cfc18e7f0fd58da825eea31b2c057dd3cdab62c8d81862c92a68"
+      "sha256": "5e512bec4b95cfc18e7f0fd58da825eea31b2c057dd3cdab62c8d81862c92a68",
+      "extension": ".ytl",
+      "familyStem": "hill",
+      "width": 64,
+      "height": 48,
+      "frameCount": 44,
+      "endOffset": 49280
     },
     {
       "category": "tileset:brown",
       "sourcePath": "tile/brown/hill1.ytl",
       "size": 31348,
-      "sha256": "49f0c28c1ff69efbb768e80470f6c323e0a311e59833ae3e8f2356c90ff04c52"
+      "sha256": "49f0c28c1ff69efbb768e80470f6c323e0a311e59833ae3e8f2356c90ff04c52",
+      "extension": ".ytl",
+      "familyStem": "hill",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 28288
     },
     {
       "category": "tileset:brown",
       "sourcePath": "tile/brown/hill10.ytl",
       "size": 20868,
-      "sha256": "6e7464ccf30ae76838574cbd23ec70a09581e9af590bc1150f96a299203f0fdf"
+      "sha256": "6e7464ccf30ae76838574cbd23ec70a09581e9af590bc1150f96a299203f0fdf",
+      "extension": ".ytl",
+      "familyStem": "hill",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 17808
     },
     {
       "category": "tileset:brown",
       "sourcePath": "tile/brown/hill11.ytl",
       "size": 13428,
-      "sha256": "782346d48edf16df5567c3e87291a27d16ef8532fd68fc1a32fc10ce16f5eb26"
+      "sha256": "782346d48edf16df5567c3e87291a27d16ef8532fd68fc1a32fc10ce16f5eb26",
+      "extension": ".ytl",
+      "familyStem": "hill",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 10368
     },
     {
       "category": "tileset:brown",
       "sourcePath": "tile/brown/hill12.ytl",
       "size": 20868,
-      "sha256": "275ae80485e8fd82e28a4b1026a49b75edbd97cf7e065d7fa893f532b659606f"
+      "sha256": "275ae80485e8fd82e28a4b1026a49b75edbd97cf7e065d7fa893f532b659606f",
+      "extension": ".ytl",
+      "familyStem": "hill",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 17808
     },
     {
       "category": "tileset:brown",
       "sourcePath": "tile/brown/hill13.ytl",
       "size": 29268,
-      "sha256": "9828e3986b61b8be0a27db3d2e1f8d222b5007f2e8e145c95a8061a5e34221c8"
+      "sha256": "9828e3986b61b8be0a27db3d2e1f8d222b5007f2e8e145c95a8061a5e34221c8",
+      "extension": ".ytl",
+      "familyStem": "hill",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 26208
     },
     {
       "category": "tileset:brown",
       "sourcePath": "tile/brown/hill14.ytl",
       "size": 20628,
-      "sha256": "0bd38e9b2a70b8f0ba747eead36681d96dec7fecddb35c7fd4d245922edd24d8"
+      "sha256": "0bd38e9b2a70b8f0ba747eead36681d96dec7fecddb35c7fd4d245922edd24d8",
+      "extension": ".ytl",
+      "familyStem": "hill",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 17568
     },
     {
       "category": "tileset:brown",
       "sourcePath": "tile/brown/hill15.ytl",
       "size": 21588,
-      "sha256": "64406ac9a16d4d7c0679ec7c8029da92e6c2410a811c85083328e9e46da6dbe1"
+      "sha256": "64406ac9a16d4d7c0679ec7c8029da92e6c2410a811c85083328e9e46da6dbe1",
+      "extension": ".ytl",
+      "familyStem": "hill",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 18528
     },
     {
       "category": "tileset:brown",
       "sourcePath": "tile/brown/hill2.ytl",
       "size": 44148,
-      "sha256": "272985bc66523b79d80fdb6123d461aee6d19edfffac5719ee8d4af478592a32"
+      "sha256": "272985bc66523b79d80fdb6123d461aee6d19edfffac5719ee8d4af478592a32",
+      "extension": ".ytl",
+      "familyStem": "hill",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 41088
     },
     {
       "category": "tileset:brown",
       "sourcePath": "tile/brown/hill3.ytl",
       "size": 18548,
-      "sha256": "6289d857b27e4a0d315bde198b9a7074a9938d0038306a34b3d45e385a4691db"
+      "sha256": "6289d857b27e4a0d315bde198b9a7074a9938d0038306a34b3d45e385a4691db",
+      "extension": ".ytl",
+      "familyStem": "hill",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 15488
     },
     {
       "category": "tileset:brown",
       "sourcePath": "tile/brown/hill4.ytl",
       "size": 18548,
-      "sha256": "19a0d473282a86d323928ea2d4c4c6a43ea94548349feb98c3c5e54df36335ba"
+      "sha256": "19a0d473282a86d323928ea2d4c4c6a43ea94548349feb98c3c5e54df36335ba",
+      "extension": ".ytl",
+      "familyStem": "hill",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 15488
     },
     {
       "category": "tileset:brown",
       "sourcePath": "tile/brown/hill5.ytl",
       "size": 44148,
-      "sha256": "109de1dd96885eb9df45606a21b2840dca3cf5e26fb4329610630e45f1a617f1"
+      "sha256": "109de1dd96885eb9df45606a21b2840dca3cf5e26fb4329610630e45f1a617f1",
+      "extension": ".ytl",
+      "familyStem": "hill",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 41088
     },
     {
       "category": "tileset:brown",
       "sourcePath": "tile/brown/hill6.ytl",
       "size": 21348,
-      "sha256": "5465aed7cfd6cbe04d81c573db6091e0bfeb6b98cedebfb45148bb9a5b449743"
+      "sha256": "5465aed7cfd6cbe04d81c573db6091e0bfeb6b98cedebfb45148bb9a5b449743",
+      "extension": ".ytl",
+      "familyStem": "hill",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 18288
     },
     {
       "category": "tileset:brown",
       "sourcePath": "tile/brown/hill7.ytl",
       "size": 13428,
-      "sha256": "3efc42aa7415fe20b249e0401695189fc8cb16f799d33d116b1655530ebfecdf"
+      "sha256": "3efc42aa7415fe20b249e0401695189fc8cb16f799d33d116b1655530ebfecdf",
+      "extension": ".ytl",
+      "familyStem": "hill",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 10368
     },
     {
       "category": "tileset:brown",
       "sourcePath": "tile/brown/hill8.ytl",
       "size": 21348,
-      "sha256": "34a24d2b7780933ccfb329ab02097124f6b6a1da320da1dd56cd2284e918e343"
+      "sha256": "34a24d2b7780933ccfb329ab02097124f6b6a1da320da1dd56cd2284e918e343",
+      "extension": ".ytl",
+      "familyStem": "hill",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 18288
     },
     {
       "category": "tileset:brown",
       "sourcePath": "tile/brown/hill9.ytl",
       "size": 28308,
-      "sha256": "654063301048d87ef6674f6c3ce97d88a9df9206b6dad207cb9a8f68a38717a8"
+      "sha256": "654063301048d87ef6674f6c3ce97d88a9df9206b6dad207cb9a8f68a38717a8",
+      "extension": ".ytl",
+      "familyStem": "hill",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 25248
     },
     {
       "category": "tileset:brown",
       "sourcePath": "tile/brown/newblk0.ytl",
       "size": 15860,
-      "sha256": "9491107c3923b321595e5c31e30962f4c89309ff96035d999b2d653493d0c098"
+      "sha256": "9491107c3923b321595e5c31e30962f4c89309ff96035d999b2d653493d0c098",
+      "extension": ".ytl",
+      "familyStem": "newblk",
+      "width": 64,
+      "height": 48,
+      "frameCount": 48,
+      "endOffset": 12800
     },
     {
       "category": "tileset:brown",
       "sourcePath": "tile/brown/newblk1.ytl",
       "size": 56820,
-      "sha256": "f573dc03b0bf9b36a5df2e0b127278767b7710c7a49485b46165ae7f758f4760"
+      "sha256": "f573dc03b0bf9b36a5df2e0b127278767b7710c7a49485b46165ae7f758f4760",
+      "extension": ".ytl",
+      "familyStem": "newblk",
+      "width": 64,
+      "height": 48,
+      "frameCount": 48,
+      "endOffset": 53760
     },
     {
       "category": "tileset:brown",
       "sourcePath": "tile/brown/newblk2.ytl",
       "size": 56820,
-      "sha256": "2232899fb4d1416b84e5a428e4f82f26c127e977ca95f67ba3033305c9df1619"
+      "sha256": "2232899fb4d1416b84e5a428e4f82f26c127e977ca95f67ba3033305c9df1619",
+      "extension": ".ytl",
+      "familyStem": "newblk",
+      "width": 64,
+      "height": 48,
+      "frameCount": 48,
+      "endOffset": 53760
     },
     {
       "category": "tileset:brown",
       "sourcePath": "tile/brown/newblk3.ytl",
       "size": 24052,
-      "sha256": "13ba0c04768ff6b33778d8c8bfa6c61a50ac8af348a261f032d12af65f4d8188"
+      "sha256": "13ba0c04768ff6b33778d8c8bfa6c61a50ac8af348a261f032d12af65f4d8188",
+      "extension": ".ytl",
+      "familyStem": "newblk",
+      "width": 64,
+      "height": 48,
+      "frameCount": 48,
+      "endOffset": 20992
     },
     {
       "category": "tileset:brown",
       "sourcePath": "tile/brown/newblkgate.ytl",
       "size": 24052,
-      "sha256": "37e3a60010372ab1ed428db3d0fd98fbb25ea3c8afa63927d9a0d4be0a98c37d"
+      "sha256": "37e3a60010372ab1ed428db3d0fd98fbb25ea3c8afa63927d9a0d4be0a98c37d",
+      "extension": ".ytl",
+      "familyStem": "newblk",
+      "width": 64,
+      "height": 48,
+      "frameCount": 48,
+      "endOffset": 20992
     },
     {
       "category": "tileset:brown",
       "sourcePath": "tile/brown/sea0.ytl",
       "size": 40948,
-      "sha256": "5349dd452198bde4f67264faa8152c51a1e91afb93669f72d0d9b72db707229e"
+      "sha256": "5349dd452198bde4f67264faa8152c51a1e91afb93669f72d0d9b72db707229e",
+      "extension": ".ytl",
+      "familyStem": "sea",
+      "width": 64,
+      "height": 48,
+      "frameCount": 96,
+      "endOffset": 37888
     },
     {
       "category": "tileset:brown",
       "sourcePath": "tile/brown/sea1.ytl",
       "size": 56820,
-      "sha256": "48b3a11f7a8dc6b19be8b243cee5b7ec392e1518b7f43031508048dae6e91302"
+      "sha256": "48b3a11f7a8dc6b19be8b243cee5b7ec392e1518b7f43031508048dae6e91302",
+      "extension": ".ytl",
+      "familyStem": "sea",
+      "width": 64,
+      "height": 48,
+      "frameCount": 48,
+      "endOffset": 53760
     },
     {
       "category": "tileset:brown",
       "sourcePath": "tile/brown/sea2.ytl",
       "size": 56820,
-      "sha256": "701c04d472cb2661ab25f07abe34ff7d1303c350faeeab7903a8b9346c0fa2c0"
+      "sha256": "701c04d472cb2661ab25f07abe34ff7d1303c350faeeab7903a8b9346c0fa2c0",
+      "extension": ".ytl",
+      "familyStem": "sea",
+      "width": 64,
+      "height": 48,
+      "frameCount": 48,
+      "endOffset": 53760
     },
     {
       "category": "tileset:brown",
       "sourcePath": "tile/brown/sea3.ytl",
       "size": 40436,
-      "sha256": "10415d124145ae6ae3e422d21861929976c5c175dac3a65e852c7e0c91276e5e"
+      "sha256": "10415d124145ae6ae3e422d21861929976c5c175dac3a65e852c7e0c91276e5e",
+      "extension": ".ytl",
+      "familyStem": "sea",
+      "width": 64,
+      "height": 48,
+      "frameCount": 48,
+      "endOffset": 37376
     },
     {
       "category": "tileset:brown",
       "sourcePath": "tile/brown/shallow.spr",
       "size": 18557,
-      "sha256": "ae4e81bc096fc9ce2d7bb97be40c2e3f9360365aa566f842e3deeb1057219ed4"
+      "sha256": "ae4e81bc096fc9ce2d7bb97be40c2e3f9360365aa566f842e3deeb1057219ed4",
+      "extension": ".spr",
+      "familyStem": "shallow",
+      "width": 64,
+      "height": 32,
+      "frameCount": 16,
+      "endOffset": 15497
+    },
+    {
+      "category": "tileset:brown",
+      "sourcePath": "tile/brown/black.spr",
+      "size": 5108,
+      "sha256": "9ef53a565bfe804e8a272f73f9749c05681b6b9e3af4090f7e4eea61237292d0",
+      "extension": ".spr",
+      "familyStem": "black",
+      "width": 64,
+      "height": 32,
+      "frameCount": 1,
+      "endOffset": 2048
+    },
+    {
+      "category": "tileset:brown",
+      "sourcePath": "tile/brown/blacktile.ytl",
+      "size": 22644,
+      "sha256": "06438882138be46ff9dd267adda3d8f2ab278e1cde0cee7aaa243271b8835e09",
+      "extension": ".ytl",
+      "familyStem": "blacktile",
+      "width": 64,
+      "height": 48,
+      "frameCount": 44,
+      "endOffset": 19584
     },
     {
       "category": "environment",
       "sourcePath": "pal/night1.pal",
       "size": 768,
-      "sha256": "b085583412b8bb79bdf9b72d836881be37f6f36ad50d073db06bebd1c2670122"
+      "sha256": "b085583412b8bb79bdf9b72d836881be37f6f36ad50d073db06bebd1c2670122",
+      "extension": ".pal",
+      "familyStem": "night"
     },
     {
       "category": "environment",
       "sourcePath": "pal/night2.pal",
       "size": 768,
-      "sha256": "c45727bd8ffed04bf572da5ab38b14b7fcb819f540a15a2e5d13730357bda17d"
+      "sha256": "c45727bd8ffed04bf572da5ab38b14b7fcb819f540a15a2e5d13730357bda17d",
+      "extension": ".pal",
+      "familyStem": "night"
     },
     {
       "category": "environment",
       "sourcePath": "pal/night3.pal",
       "size": 768,
-      "sha256": "4fe0c28dc64480c6f00876c5ee484e1b3caa77b3b63b27387c6cf7702c3d2f97"
+      "sha256": "4fe0c28dc64480c6f00876c5ee484e1b3caa77b3b63b27387c6cf7702c3d2f97",
+      "extension": ".pal",
+      "familyStem": "night"
     },
     {
       "category": "environment",
       "sourcePath": "pal/night4.pal",
       "size": 768,
-      "sha256": "f8328d22007407df426dff9e489f43718e28772d03b3ddd5f663a5dd57156e95"
+      "sha256": "f8328d22007407df426dff9e489f43718e28772d03b3ddd5f663a5dd57156e95",
+      "extension": ".pal",
+      "familyStem": "night"
     },
     {
       "category": "environment",
       "sourcePath": "tempeft/night1.YAV",
       "size": 44826,
-      "sha256": "d31f2603ffc00e004911ab8b811c6603764798c1b5950a91e12288dab1f54f5f"
+      "sha256": "d31f2603ffc00e004911ab8b811c6603764798c1b5950a91e12288dab1f54f5f",
+      "extension": ".yav",
+      "familyStem": "night"
     },
     {
       "category": "resource-candidate",
       "sourcePath": "fnt/crop0.spr",
       "size": 23413,
-      "sha256": "ca91364c8b43f36974c591cac29f5a0610832bd9a9e5a6700d41d51225fbdc00"
+      "sha256": "ca91364c8b43f36974c591cac29f5a0610832bd9a9e5a6700d41d51225fbdc00",
+      "extension": ".spr",
+      "familyStem": "crop",
+      "width": 64,
+      "height": 32,
+      "frameCount": 100,
+      "endOffset": 20353
     },
     {
       "category": "resource-candidate",
       "sourcePath": "fnt/crop1.spr",
       "size": 38322,
-      "sha256": "35bf39a779195f201d6806cee40a0b265e3d64ea17eafd66dfa32ff8bbb912ad"
+      "sha256": "35bf39a779195f201d6806cee40a0b265e3d64ea17eafd66dfa32ff8bbb912ad",
+      "extension": ".spr",
+      "familyStem": "crop",
+      "width": 64,
+      "height": 48,
+      "frameCount": 40,
+      "endOffset": 35262
     },
     {
       "category": "resource-candidate",
       "sourcePath": "fnt/tree0.spr",
       "size": 36902,
-      "sha256": "871c0572134266838776bd3e90005287a14abfb3c56f5e9c2dab80f1aaa1c2fc"
+      "sha256": "871c0572134266838776bd3e90005287a14abfb3c56f5e9c2dab80f1aaa1c2fc",
+      "extension": ".spr",
+      "familyStem": "tree",
+      "width": 70,
+      "height": 90,
+      "frameCount": 70,
+      "endOffset": 33842
     },
     {
       "category": "resource-candidate",
       "sourcePath": "fnt/resource.spr",
       "size": 4533,
-      "sha256": "04a2c1608a64a91922193c82a67895d00391e59cb9faa31b5916238f9416ff40"
+      "sha256": "04a2c1608a64a91922193c82a67895d00391e59cb9faa31b5916238f9416ff40",
+      "extension": ".spr",
+      "familyStem": "resource",
+      "width": 20,
+      "height": 24,
+      "frameCount": 10,
+      "endOffset": 1473
     },
     {
       "category": "resource-candidate",
       "sourcePath": "fnt/helpresource.spr",
       "size": 3708,
-      "sha256": "658178919a9aba2b4f3c29ce82bc3ab3877c40927ea99691f9f6e6f254f74e8d"
+      "sha256": "658178919a9aba2b4f3c29ce82bc3ab3877c40927ea99691f9f6e6f254f74e8d",
+      "extension": ".spr",
+      "familyStem": "helpresource",
+      "width": 14,
+      "height": 14,
+      "frameCount": 4,
+      "endOffset": 648
     }
-  ]
+  ],
+  "tilesetSymmetry": {
+    "themes": {
+      "normal": {
+        "fileCount": 78,
+        "fileNames": [
+          "black.spr",
+          "blacktile.ytl",
+          "castle0.ytl",
+          "castle1.ytl",
+          "castle2.ytl",
+          "diff1.ytl",
+          "diff10.ytl",
+          "diff11.ytl",
+          "diff12.ytl",
+          "diff13.ytl",
+          "diff13l.ytl",
+          "diff14.ytl",
+          "diff15.ytl",
+          "diff2.ytl",
+          "diff3.ytl",
+          "diff4.ytl",
+          "diff5.ytl",
+          "diff6.ytl",
+          "diff7.ytl",
+          "diff8.ytl",
+          "diff9.ytl",
+          "fog0.spr",
+          "fog1.spr",
+          "fog10.spr",
+          "fog11.spr",
+          "fog12.spr",
+          "fog13.spr",
+          "fog14.spr",
+          "fog2.spr",
+          "fog3.spr",
+          "fog4.spr",
+          "fog5.spr",
+          "fog6.spr",
+          "fog7.spr",
+          "fog8.spr",
+          "fog9.spr",
+          "grss1.ytl",
+          "grss10.ytl",
+          "grss11.ytl",
+          "grss12.ytl",
+          "grss13.ytl",
+          "grss14.ytl",
+          "grss15.ytl",
+          "grss2.ytl",
+          "grss3.ytl",
+          "grss4.ytl",
+          "grss5.ytl",
+          "grss6.ytl",
+          "grss7.ytl",
+          "grss8.ytl",
+          "grss9.ytl",
+          "hill0.ypr",
+          "hill0.ytl",
+          "hill1.ytl",
+          "hill10.ytl",
+          "hill11.ytl",
+          "hill12.ytl",
+          "hill13.ytl",
+          "hill14.ytl",
+          "hill15.ytl",
+          "hill2.ytl",
+          "hill3.ytl",
+          "hill4.ytl",
+          "hill5.ytl",
+          "hill6.ytl",
+          "hill7.ytl",
+          "hill8.ytl",
+          "hill9.ytl",
+          "newblk0.ytl",
+          "newblk1.ytl",
+          "newblk2.ytl",
+          "newblk3.ytl",
+          "newblkgate.ytl",
+          "sea0.ytl",
+          "sea1.ytl",
+          "sea2.ytl",
+          "sea3.ytl",
+          "shallow.spr"
+        ],
+        "headerShapes": {
+          "black.spr": {
+            "extension": ".spr",
+            "familyStem": "black",
+            "width": 64,
+            "height": 32,
+            "frameCount": 1
+          },
+          "blacktile.ytl": {
+            "extension": ".ytl",
+            "familyStem": "blacktile",
+            "width": 64,
+            "height": 48,
+            "frameCount": 44
+          },
+          "castle0.ytl": {
+            "extension": ".ytl",
+            "familyStem": "castle",
+            "width": 64,
+            "height": 48,
+            "frameCount": 48
+          },
+          "castle1.ytl": {
+            "extension": ".ytl",
+            "familyStem": "castle",
+            "width": 64,
+            "height": 48,
+            "frameCount": 48
+          },
+          "castle2.ytl": {
+            "extension": ".ytl",
+            "familyStem": "castle",
+            "width": 64,
+            "height": 48,
+            "frameCount": 48
+          },
+          "diff1.ytl": {
+            "extension": ".ytl",
+            "familyStem": "diff",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "diff10.ytl": {
+            "extension": ".ytl",
+            "familyStem": "diff",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "diff11.ytl": {
+            "extension": ".ytl",
+            "familyStem": "diff",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "diff12.ytl": {
+            "extension": ".ytl",
+            "familyStem": "diff",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "diff13.ytl": {
+            "extension": ".ytl",
+            "familyStem": "diff",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "diff13l.ytl": {
+            "extension": ".ytl",
+            "familyStem": "diff",
+            "width": 32,
+            "height": 16,
+            "frameCount": 144
+          },
+          "diff14.ytl": {
+            "extension": ".ytl",
+            "familyStem": "diff",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "diff15.ytl": {
+            "extension": ".ytl",
+            "familyStem": "diff",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "diff2.ytl": {
+            "extension": ".ytl",
+            "familyStem": "diff",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "diff3.ytl": {
+            "extension": ".ytl",
+            "familyStem": "diff",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "diff4.ytl": {
+            "extension": ".ytl",
+            "familyStem": "diff",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "diff5.ytl": {
+            "extension": ".ytl",
+            "familyStem": "diff",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "diff6.ytl": {
+            "extension": ".ytl",
+            "familyStem": "diff",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "diff7.ytl": {
+            "extension": ".ytl",
+            "familyStem": "diff",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "diff8.ytl": {
+            "extension": ".ytl",
+            "familyStem": "diff",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "diff9.ytl": {
+            "extension": ".ytl",
+            "familyStem": "diff",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "fog0.spr": {
+            "extension": ".spr",
+            "familyStem": "fog",
+            "width": 32,
+            "height": 16,
+            "frameCount": 96
+          },
+          "fog1.spr": {
+            "extension": ".spr",
+            "familyStem": "fog",
+            "width": 32,
+            "height": 16,
+            "frameCount": 96
+          },
+          "fog10.spr": {
+            "extension": ".spr",
+            "familyStem": "fog",
+            "width": 32,
+            "height": 16,
+            "frameCount": 96
+          },
+          "fog11.spr": {
+            "extension": ".spr",
+            "familyStem": "fog",
+            "width": 32,
+            "height": 16,
+            "frameCount": 96
+          },
+          "fog12.spr": {
+            "extension": ".spr",
+            "familyStem": "fog",
+            "width": 32,
+            "height": 16,
+            "frameCount": 96
+          },
+          "fog13.spr": {
+            "extension": ".spr",
+            "familyStem": "fog",
+            "width": 32,
+            "height": 16,
+            "frameCount": 96
+          },
+          "fog14.spr": {
+            "extension": ".spr",
+            "familyStem": "fog",
+            "width": 32,
+            "height": 16,
+            "frameCount": 96
+          },
+          "fog2.spr": {
+            "extension": ".spr",
+            "familyStem": "fog",
+            "width": 32,
+            "height": 16,
+            "frameCount": 96
+          },
+          "fog3.spr": {
+            "extension": ".spr",
+            "familyStem": "fog",
+            "width": 32,
+            "height": 16,
+            "frameCount": 96
+          },
+          "fog4.spr": {
+            "extension": ".spr",
+            "familyStem": "fog",
+            "width": 32,
+            "height": 16,
+            "frameCount": 96
+          },
+          "fog5.spr": {
+            "extension": ".spr",
+            "familyStem": "fog",
+            "width": 32,
+            "height": 16,
+            "frameCount": 96
+          },
+          "fog6.spr": {
+            "extension": ".spr",
+            "familyStem": "fog",
+            "width": 32,
+            "height": 16,
+            "frameCount": 96
+          },
+          "fog7.spr": {
+            "extension": ".spr",
+            "familyStem": "fog",
+            "width": 32,
+            "height": 16,
+            "frameCount": 96
+          },
+          "fog8.spr": {
+            "extension": ".spr",
+            "familyStem": "fog",
+            "width": 32,
+            "height": 16,
+            "frameCount": 96
+          },
+          "fog9.spr": {
+            "extension": ".spr",
+            "familyStem": "fog",
+            "width": 32,
+            "height": 16,
+            "frameCount": 96
+          },
+          "grss1.ytl": {
+            "extension": ".ytl",
+            "familyStem": "grss",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "grss10.ytl": {
+            "extension": ".ytl",
+            "familyStem": "grss",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "grss11.ytl": {
+            "extension": ".ytl",
+            "familyStem": "grss",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "grss12.ytl": {
+            "extension": ".ytl",
+            "familyStem": "grss",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "grss13.ytl": {
+            "extension": ".ytl",
+            "familyStem": "grss",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "grss14.ytl": {
+            "extension": ".ytl",
+            "familyStem": "grss",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "grss15.ytl": {
+            "extension": ".ytl",
+            "familyStem": "grss",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "grss2.ytl": {
+            "extension": ".ytl",
+            "familyStem": "grss",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "grss3.ytl": {
+            "extension": ".ytl",
+            "familyStem": "grss",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "grss4.ytl": {
+            "extension": ".ytl",
+            "familyStem": "grss",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "grss5.ytl": {
+            "extension": ".ytl",
+            "familyStem": "grss",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "grss6.ytl": {
+            "extension": ".ytl",
+            "familyStem": "grss",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "grss7.ytl": {
+            "extension": ".ytl",
+            "familyStem": "grss",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "grss8.ytl": {
+            "extension": ".ytl",
+            "familyStem": "grss",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "grss9.ytl": {
+            "extension": ".ytl",
+            "familyStem": "grss",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "hill0.ypr": {
+            "extension": ".ypr",
+            "familyStem": "hill",
+            "width": 80,
+            "height": 60,
+            "frameCount": 44
+          },
+          "hill0.ytl": {
+            "extension": ".ytl",
+            "familyStem": "hill",
+            "width": 64,
+            "height": 48,
+            "frameCount": 44
+          },
+          "hill1.ytl": {
+            "extension": ".ytl",
+            "familyStem": "hill",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "hill10.ytl": {
+            "extension": ".ytl",
+            "familyStem": "hill",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "hill11.ytl": {
+            "extension": ".ytl",
+            "familyStem": "hill",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "hill12.ytl": {
+            "extension": ".ytl",
+            "familyStem": "hill",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "hill13.ytl": {
+            "extension": ".ytl",
+            "familyStem": "hill",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "hill14.ytl": {
+            "extension": ".ytl",
+            "familyStem": "hill",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "hill15.ytl": {
+            "extension": ".ytl",
+            "familyStem": "hill",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "hill2.ytl": {
+            "extension": ".ytl",
+            "familyStem": "hill",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "hill3.ytl": {
+            "extension": ".ytl",
+            "familyStem": "hill",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "hill4.ytl": {
+            "extension": ".ytl",
+            "familyStem": "hill",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "hill5.ytl": {
+            "extension": ".ytl",
+            "familyStem": "hill",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "hill6.ytl": {
+            "extension": ".ytl",
+            "familyStem": "hill",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "hill7.ytl": {
+            "extension": ".ytl",
+            "familyStem": "hill",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "hill8.ytl": {
+            "extension": ".ytl",
+            "familyStem": "hill",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "hill9.ytl": {
+            "extension": ".ytl",
+            "familyStem": "hill",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "newblk0.ytl": {
+            "extension": ".ytl",
+            "familyStem": "newblk",
+            "width": 64,
+            "height": 48,
+            "frameCount": 48
+          },
+          "newblk1.ytl": {
+            "extension": ".ytl",
+            "familyStem": "newblk",
+            "width": 64,
+            "height": 48,
+            "frameCount": 48
+          },
+          "newblk2.ytl": {
+            "extension": ".ytl",
+            "familyStem": "newblk",
+            "width": 64,
+            "height": 48,
+            "frameCount": 48
+          },
+          "newblk3.ytl": {
+            "extension": ".ytl",
+            "familyStem": "newblk",
+            "width": 64,
+            "height": 48,
+            "frameCount": 48
+          },
+          "newblkgate.ytl": {
+            "extension": ".ytl",
+            "familyStem": "newblk",
+            "width": 64,
+            "height": 48,
+            "frameCount": 48
+          },
+          "sea0.ytl": {
+            "extension": ".ytl",
+            "familyStem": "sea",
+            "width": 64,
+            "height": 48,
+            "frameCount": 96
+          },
+          "sea1.ytl": {
+            "extension": ".ytl",
+            "familyStem": "sea",
+            "width": 64,
+            "height": 48,
+            "frameCount": 48
+          },
+          "sea2.ytl": {
+            "extension": ".ytl",
+            "familyStem": "sea",
+            "width": 64,
+            "height": 48,
+            "frameCount": 48
+          },
+          "sea3.ytl": {
+            "extension": ".ytl",
+            "familyStem": "sea",
+            "width": 64,
+            "height": 48,
+            "frameCount": 48
+          },
+          "shallow.spr": {
+            "extension": ".spr",
+            "familyStem": "shallow",
+            "width": 64,
+            "height": 32,
+            "frameCount": 16
+          }
+        }
+      },
+      "snow": {
+        "fileCount": 78,
+        "fileNames": [
+          "black.spr",
+          "blacktile.ytl",
+          "castle0.ytl",
+          "castle1.ytl",
+          "castle2.ytl",
+          "diff1.ytl",
+          "diff10.ytl",
+          "diff11.ytl",
+          "diff12.ytl",
+          "diff13.ytl",
+          "diff13l.ytl",
+          "diff14.ytl",
+          "diff15.ytl",
+          "diff2.ytl",
+          "diff3.ytl",
+          "diff4.ytl",
+          "diff5.ytl",
+          "diff6.ytl",
+          "diff7.ytl",
+          "diff8.ytl",
+          "diff9.ytl",
+          "fog0.spr",
+          "fog1.spr",
+          "fog10.spr",
+          "fog11.spr",
+          "fog12.spr",
+          "fog13.spr",
+          "fog14.spr",
+          "fog2.spr",
+          "fog3.spr",
+          "fog4.spr",
+          "fog5.spr",
+          "fog6.spr",
+          "fog7.spr",
+          "fog8.spr",
+          "fog9.spr",
+          "grss1.ytl",
+          "grss10.ytl",
+          "grss11.ytl",
+          "grss12.ytl",
+          "grss13.ytl",
+          "grss14.ytl",
+          "grss15.ytl",
+          "grss2.ytl",
+          "grss3.ytl",
+          "grss4.ytl",
+          "grss5.ytl",
+          "grss6.ytl",
+          "grss7.ytl",
+          "grss8.ytl",
+          "grss9.ytl",
+          "hill0.ypr",
+          "hill0.ytl",
+          "hill1.ytl",
+          "hill10.ytl",
+          "hill11.ytl",
+          "hill12.ytl",
+          "hill13.ytl",
+          "hill14.ytl",
+          "hill15.ytl",
+          "hill2.ytl",
+          "hill3.ytl",
+          "hill4.ytl",
+          "hill5.ytl",
+          "hill6.ytl",
+          "hill7.ytl",
+          "hill8.ytl",
+          "hill9.ytl",
+          "newblk0.ytl",
+          "newblk1.ytl",
+          "newblk2.ytl",
+          "newblk3.ytl",
+          "newblkgate.ytl",
+          "sea0.ytl",
+          "sea1.ytl",
+          "sea2.ytl",
+          "sea3.ytl",
+          "shallow.spr"
+        ],
+        "headerShapes": {
+          "black.spr": {
+            "extension": ".spr",
+            "familyStem": "black",
+            "width": 64,
+            "height": 32,
+            "frameCount": 1
+          },
+          "blacktile.ytl": {
+            "extension": ".ytl",
+            "familyStem": "blacktile",
+            "width": 64,
+            "height": 48,
+            "frameCount": 44
+          },
+          "castle0.ytl": {
+            "extension": ".ytl",
+            "familyStem": "castle",
+            "width": 64,
+            "height": 48,
+            "frameCount": 48
+          },
+          "castle1.ytl": {
+            "extension": ".ytl",
+            "familyStem": "castle",
+            "width": 64,
+            "height": 48,
+            "frameCount": 48
+          },
+          "castle2.ytl": {
+            "extension": ".ytl",
+            "familyStem": "castle",
+            "width": 64,
+            "height": 48,
+            "frameCount": 48
+          },
+          "diff1.ytl": {
+            "extension": ".ytl",
+            "familyStem": "diff",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "diff10.ytl": {
+            "extension": ".ytl",
+            "familyStem": "diff",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "diff11.ytl": {
+            "extension": ".ytl",
+            "familyStem": "diff",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "diff12.ytl": {
+            "extension": ".ytl",
+            "familyStem": "diff",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "diff13.ytl": {
+            "extension": ".ytl",
+            "familyStem": "diff",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "diff13l.ytl": {
+            "extension": ".ytl",
+            "familyStem": "diff",
+            "width": 32,
+            "height": 16,
+            "frameCount": 144
+          },
+          "diff14.ytl": {
+            "extension": ".ytl",
+            "familyStem": "diff",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "diff15.ytl": {
+            "extension": ".ytl",
+            "familyStem": "diff",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "diff2.ytl": {
+            "extension": ".ytl",
+            "familyStem": "diff",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "diff3.ytl": {
+            "extension": ".ytl",
+            "familyStem": "diff",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "diff4.ytl": {
+            "extension": ".ytl",
+            "familyStem": "diff",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "diff5.ytl": {
+            "extension": ".ytl",
+            "familyStem": "diff",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "diff6.ytl": {
+            "extension": ".ytl",
+            "familyStem": "diff",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "diff7.ytl": {
+            "extension": ".ytl",
+            "familyStem": "diff",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "diff8.ytl": {
+            "extension": ".ytl",
+            "familyStem": "diff",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "diff9.ytl": {
+            "extension": ".ytl",
+            "familyStem": "diff",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "fog0.spr": {
+            "extension": ".spr",
+            "familyStem": "fog",
+            "width": 32,
+            "height": 16,
+            "frameCount": 96
+          },
+          "fog1.spr": {
+            "extension": ".spr",
+            "familyStem": "fog",
+            "width": 32,
+            "height": 16,
+            "frameCount": 96
+          },
+          "fog10.spr": {
+            "extension": ".spr",
+            "familyStem": "fog",
+            "width": 32,
+            "height": 16,
+            "frameCount": 96
+          },
+          "fog11.spr": {
+            "extension": ".spr",
+            "familyStem": "fog",
+            "width": 32,
+            "height": 16,
+            "frameCount": 96
+          },
+          "fog12.spr": {
+            "extension": ".spr",
+            "familyStem": "fog",
+            "width": 32,
+            "height": 16,
+            "frameCount": 96
+          },
+          "fog13.spr": {
+            "extension": ".spr",
+            "familyStem": "fog",
+            "width": 32,
+            "height": 16,
+            "frameCount": 96
+          },
+          "fog14.spr": {
+            "extension": ".spr",
+            "familyStem": "fog",
+            "width": 32,
+            "height": 16,
+            "frameCount": 96
+          },
+          "fog2.spr": {
+            "extension": ".spr",
+            "familyStem": "fog",
+            "width": 32,
+            "height": 16,
+            "frameCount": 96
+          },
+          "fog3.spr": {
+            "extension": ".spr",
+            "familyStem": "fog",
+            "width": 32,
+            "height": 16,
+            "frameCount": 96
+          },
+          "fog4.spr": {
+            "extension": ".spr",
+            "familyStem": "fog",
+            "width": 32,
+            "height": 16,
+            "frameCount": 96
+          },
+          "fog5.spr": {
+            "extension": ".spr",
+            "familyStem": "fog",
+            "width": 32,
+            "height": 16,
+            "frameCount": 96
+          },
+          "fog6.spr": {
+            "extension": ".spr",
+            "familyStem": "fog",
+            "width": 32,
+            "height": 16,
+            "frameCount": 96
+          },
+          "fog7.spr": {
+            "extension": ".spr",
+            "familyStem": "fog",
+            "width": 32,
+            "height": 16,
+            "frameCount": 96
+          },
+          "fog8.spr": {
+            "extension": ".spr",
+            "familyStem": "fog",
+            "width": 32,
+            "height": 16,
+            "frameCount": 96
+          },
+          "fog9.spr": {
+            "extension": ".spr",
+            "familyStem": "fog",
+            "width": 32,
+            "height": 16,
+            "frameCount": 96
+          },
+          "grss1.ytl": {
+            "extension": ".ytl",
+            "familyStem": "grss",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "grss10.ytl": {
+            "extension": ".ytl",
+            "familyStem": "grss",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "grss11.ytl": {
+            "extension": ".ytl",
+            "familyStem": "grss",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "grss12.ytl": {
+            "extension": ".ytl",
+            "familyStem": "grss",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "grss13.ytl": {
+            "extension": ".ytl",
+            "familyStem": "grss",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "grss14.ytl": {
+            "extension": ".ytl",
+            "familyStem": "grss",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "grss15.ytl": {
+            "extension": ".ytl",
+            "familyStem": "grss",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "grss2.ytl": {
+            "extension": ".ytl",
+            "familyStem": "grss",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "grss3.ytl": {
+            "extension": ".ytl",
+            "familyStem": "grss",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "grss4.ytl": {
+            "extension": ".ytl",
+            "familyStem": "grss",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "grss5.ytl": {
+            "extension": ".ytl",
+            "familyStem": "grss",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "grss6.ytl": {
+            "extension": ".ytl",
+            "familyStem": "grss",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "grss7.ytl": {
+            "extension": ".ytl",
+            "familyStem": "grss",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "grss8.ytl": {
+            "extension": ".ytl",
+            "familyStem": "grss",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "grss9.ytl": {
+            "extension": ".ytl",
+            "familyStem": "grss",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "hill0.ypr": {
+            "extension": ".ypr",
+            "familyStem": "hill",
+            "width": 80,
+            "height": 60,
+            "frameCount": 44
+          },
+          "hill0.ytl": {
+            "extension": ".ytl",
+            "familyStem": "hill",
+            "width": 64,
+            "height": 48,
+            "frameCount": 44
+          },
+          "hill1.ytl": {
+            "extension": ".ytl",
+            "familyStem": "hill",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "hill10.ytl": {
+            "extension": ".ytl",
+            "familyStem": "hill",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "hill11.ytl": {
+            "extension": ".ytl",
+            "familyStem": "hill",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "hill12.ytl": {
+            "extension": ".ytl",
+            "familyStem": "hill",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "hill13.ytl": {
+            "extension": ".ytl",
+            "familyStem": "hill",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "hill14.ytl": {
+            "extension": ".ytl",
+            "familyStem": "hill",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "hill15.ytl": {
+            "extension": ".ytl",
+            "familyStem": "hill",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "hill2.ytl": {
+            "extension": ".ytl",
+            "familyStem": "hill",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "hill3.ytl": {
+            "extension": ".ytl",
+            "familyStem": "hill",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "hill4.ytl": {
+            "extension": ".ytl",
+            "familyStem": "hill",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "hill5.ytl": {
+            "extension": ".ytl",
+            "familyStem": "hill",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "hill6.ytl": {
+            "extension": ".ytl",
+            "familyStem": "hill",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "hill7.ytl": {
+            "extension": ".ytl",
+            "familyStem": "hill",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "hill8.ytl": {
+            "extension": ".ytl",
+            "familyStem": "hill",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "hill9.ytl": {
+            "extension": ".ytl",
+            "familyStem": "hill",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "newblk0.ytl": {
+            "extension": ".ytl",
+            "familyStem": "newblk",
+            "width": 64,
+            "height": 48,
+            "frameCount": 48
+          },
+          "newblk1.ytl": {
+            "extension": ".ytl",
+            "familyStem": "newblk",
+            "width": 64,
+            "height": 48,
+            "frameCount": 48
+          },
+          "newblk2.ytl": {
+            "extension": ".ytl",
+            "familyStem": "newblk",
+            "width": 64,
+            "height": 48,
+            "frameCount": 48
+          },
+          "newblk3.ytl": {
+            "extension": ".ytl",
+            "familyStem": "newblk",
+            "width": 64,
+            "height": 48,
+            "frameCount": 48
+          },
+          "newblkgate.ytl": {
+            "extension": ".ytl",
+            "familyStem": "newblk",
+            "width": 64,
+            "height": 48,
+            "frameCount": 48
+          },
+          "sea0.ytl": {
+            "extension": ".ytl",
+            "familyStem": "sea",
+            "width": 64,
+            "height": 48,
+            "frameCount": 96
+          },
+          "sea1.ytl": {
+            "extension": ".ytl",
+            "familyStem": "sea",
+            "width": 64,
+            "height": 48,
+            "frameCount": 48
+          },
+          "sea2.ytl": {
+            "extension": ".ytl",
+            "familyStem": "sea",
+            "width": 64,
+            "height": 48,
+            "frameCount": 48
+          },
+          "sea3.ytl": {
+            "extension": ".ytl",
+            "familyStem": "sea",
+            "width": 64,
+            "height": 48,
+            "frameCount": 48
+          },
+          "shallow.spr": {
+            "extension": ".spr",
+            "familyStem": "shallow",
+            "width": 64,
+            "height": 32,
+            "frameCount": 16
+          }
+        }
+      },
+      "brown": {
+        "fileCount": 78,
+        "fileNames": [
+          "black.spr",
+          "blacktile.ytl",
+          "castle0.ytl",
+          "castle1.ytl",
+          "castle2.ytl",
+          "diff1.ytl",
+          "diff10.ytl",
+          "diff11.ytl",
+          "diff12.ytl",
+          "diff13.ytl",
+          "diff13l.ytl",
+          "diff14.ytl",
+          "diff15.ytl",
+          "diff2.ytl",
+          "diff3.ytl",
+          "diff4.ytl",
+          "diff5.ytl",
+          "diff6.ytl",
+          "diff7.ytl",
+          "diff8.ytl",
+          "diff9.ytl",
+          "fog0.spr",
+          "fog1.spr",
+          "fog10.spr",
+          "fog11.spr",
+          "fog12.spr",
+          "fog13.spr",
+          "fog14.spr",
+          "fog2.spr",
+          "fog3.spr",
+          "fog4.spr",
+          "fog5.spr",
+          "fog6.spr",
+          "fog7.spr",
+          "fog8.spr",
+          "fog9.spr",
+          "grss1.ytl",
+          "grss10.ytl",
+          "grss11.ytl",
+          "grss12.ytl",
+          "grss13.ytl",
+          "grss14.ytl",
+          "grss15.ytl",
+          "grss2.ytl",
+          "grss3.ytl",
+          "grss4.ytl",
+          "grss5.ytl",
+          "grss6.ytl",
+          "grss7.ytl",
+          "grss8.ytl",
+          "grss9.ytl",
+          "hill0.ypr",
+          "hill0.ytl",
+          "hill1.ytl",
+          "hill10.ytl",
+          "hill11.ytl",
+          "hill12.ytl",
+          "hill13.ytl",
+          "hill14.ytl",
+          "hill15.ytl",
+          "hill2.ytl",
+          "hill3.ytl",
+          "hill4.ytl",
+          "hill5.ytl",
+          "hill6.ytl",
+          "hill7.ytl",
+          "hill8.ytl",
+          "hill9.ytl",
+          "newblk0.ytl",
+          "newblk1.ytl",
+          "newblk2.ytl",
+          "newblk3.ytl",
+          "newblkgate.ytl",
+          "sea0.ytl",
+          "sea1.ytl",
+          "sea2.ytl",
+          "sea3.ytl",
+          "shallow.spr"
+        ],
+        "headerShapes": {
+          "black.spr": {
+            "extension": ".spr",
+            "familyStem": "black",
+            "width": 64,
+            "height": 32,
+            "frameCount": 1
+          },
+          "blacktile.ytl": {
+            "extension": ".ytl",
+            "familyStem": "blacktile",
+            "width": 64,
+            "height": 48,
+            "frameCount": 44
+          },
+          "castle0.ytl": {
+            "extension": ".ytl",
+            "familyStem": "castle",
+            "width": 64,
+            "height": 48,
+            "frameCount": 48
+          },
+          "castle1.ytl": {
+            "extension": ".ytl",
+            "familyStem": "castle",
+            "width": 64,
+            "height": 48,
+            "frameCount": 48
+          },
+          "castle2.ytl": {
+            "extension": ".ytl",
+            "familyStem": "castle",
+            "width": 64,
+            "height": 48,
+            "frameCount": 48
+          },
+          "diff1.ytl": {
+            "extension": ".ytl",
+            "familyStem": "diff",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "diff10.ytl": {
+            "extension": ".ytl",
+            "familyStem": "diff",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "diff11.ytl": {
+            "extension": ".ytl",
+            "familyStem": "diff",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "diff12.ytl": {
+            "extension": ".ytl",
+            "familyStem": "diff",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "diff13.ytl": {
+            "extension": ".ytl",
+            "familyStem": "diff",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "diff13l.ytl": {
+            "extension": ".ytl",
+            "familyStem": "diff",
+            "width": 32,
+            "height": 16,
+            "frameCount": 144
+          },
+          "diff14.ytl": {
+            "extension": ".ytl",
+            "familyStem": "diff",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "diff15.ytl": {
+            "extension": ".ytl",
+            "familyStem": "diff",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "diff2.ytl": {
+            "extension": ".ytl",
+            "familyStem": "diff",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "diff3.ytl": {
+            "extension": ".ytl",
+            "familyStem": "diff",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "diff4.ytl": {
+            "extension": ".ytl",
+            "familyStem": "diff",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "diff5.ytl": {
+            "extension": ".ytl",
+            "familyStem": "diff",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "diff6.ytl": {
+            "extension": ".ytl",
+            "familyStem": "diff",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "diff7.ytl": {
+            "extension": ".ytl",
+            "familyStem": "diff",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "diff8.ytl": {
+            "extension": ".ytl",
+            "familyStem": "diff",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "diff9.ytl": {
+            "extension": ".ytl",
+            "familyStem": "diff",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "fog0.spr": {
+            "extension": ".spr",
+            "familyStem": "fog",
+            "width": 32,
+            "height": 16,
+            "frameCount": 96
+          },
+          "fog1.spr": {
+            "extension": ".spr",
+            "familyStem": "fog",
+            "width": 32,
+            "height": 16,
+            "frameCount": 96
+          },
+          "fog10.spr": {
+            "extension": ".spr",
+            "familyStem": "fog",
+            "width": 32,
+            "height": 16,
+            "frameCount": 96
+          },
+          "fog11.spr": {
+            "extension": ".spr",
+            "familyStem": "fog",
+            "width": 32,
+            "height": 16,
+            "frameCount": 96
+          },
+          "fog12.spr": {
+            "extension": ".spr",
+            "familyStem": "fog",
+            "width": 32,
+            "height": 16,
+            "frameCount": 96
+          },
+          "fog13.spr": {
+            "extension": ".spr",
+            "familyStem": "fog",
+            "width": 32,
+            "height": 16,
+            "frameCount": 96
+          },
+          "fog14.spr": {
+            "extension": ".spr",
+            "familyStem": "fog",
+            "width": 32,
+            "height": 16,
+            "frameCount": 96
+          },
+          "fog2.spr": {
+            "extension": ".spr",
+            "familyStem": "fog",
+            "width": 32,
+            "height": 16,
+            "frameCount": 96
+          },
+          "fog3.spr": {
+            "extension": ".spr",
+            "familyStem": "fog",
+            "width": 32,
+            "height": 16,
+            "frameCount": 96
+          },
+          "fog4.spr": {
+            "extension": ".spr",
+            "familyStem": "fog",
+            "width": 32,
+            "height": 16,
+            "frameCount": 96
+          },
+          "fog5.spr": {
+            "extension": ".spr",
+            "familyStem": "fog",
+            "width": 32,
+            "height": 16,
+            "frameCount": 96
+          },
+          "fog6.spr": {
+            "extension": ".spr",
+            "familyStem": "fog",
+            "width": 32,
+            "height": 16,
+            "frameCount": 96
+          },
+          "fog7.spr": {
+            "extension": ".spr",
+            "familyStem": "fog",
+            "width": 32,
+            "height": 16,
+            "frameCount": 96
+          },
+          "fog8.spr": {
+            "extension": ".spr",
+            "familyStem": "fog",
+            "width": 32,
+            "height": 16,
+            "frameCount": 96
+          },
+          "fog9.spr": {
+            "extension": ".spr",
+            "familyStem": "fog",
+            "width": 32,
+            "height": 16,
+            "frameCount": 96
+          },
+          "grss1.ytl": {
+            "extension": ".ytl",
+            "familyStem": "grss",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "grss10.ytl": {
+            "extension": ".ytl",
+            "familyStem": "grss",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "grss11.ytl": {
+            "extension": ".ytl",
+            "familyStem": "grss",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "grss12.ytl": {
+            "extension": ".ytl",
+            "familyStem": "grss",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "grss13.ytl": {
+            "extension": ".ytl",
+            "familyStem": "grss",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "grss14.ytl": {
+            "extension": ".ytl",
+            "familyStem": "grss",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "grss15.ytl": {
+            "extension": ".ytl",
+            "familyStem": "grss",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "grss2.ytl": {
+            "extension": ".ytl",
+            "familyStem": "grss",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "grss3.ytl": {
+            "extension": ".ytl",
+            "familyStem": "grss",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "grss4.ytl": {
+            "extension": ".ytl",
+            "familyStem": "grss",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "grss5.ytl": {
+            "extension": ".ytl",
+            "familyStem": "grss",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "grss6.ytl": {
+            "extension": ".ytl",
+            "familyStem": "grss",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "grss7.ytl": {
+            "extension": ".ytl",
+            "familyStem": "grss",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "grss8.ytl": {
+            "extension": ".ytl",
+            "familyStem": "grss",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "grss9.ytl": {
+            "extension": ".ytl",
+            "familyStem": "grss",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "hill0.ypr": {
+            "extension": ".ypr",
+            "familyStem": "hill",
+            "width": 80,
+            "height": 60,
+            "frameCount": 44
+          },
+          "hill0.ytl": {
+            "extension": ".ytl",
+            "familyStem": "hill",
+            "width": 64,
+            "height": 48,
+            "frameCount": 44
+          },
+          "hill1.ytl": {
+            "extension": ".ytl",
+            "familyStem": "hill",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "hill10.ytl": {
+            "extension": ".ytl",
+            "familyStem": "hill",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "hill11.ytl": {
+            "extension": ".ytl",
+            "familyStem": "hill",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "hill12.ytl": {
+            "extension": ".ytl",
+            "familyStem": "hill",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "hill13.ytl": {
+            "extension": ".ytl",
+            "familyStem": "hill",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "hill14.ytl": {
+            "extension": ".ytl",
+            "familyStem": "hill",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "hill15.ytl": {
+            "extension": ".ytl",
+            "familyStem": "hill",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "hill2.ytl": {
+            "extension": ".ytl",
+            "familyStem": "hill",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "hill3.ytl": {
+            "extension": ".ytl",
+            "familyStem": "hill",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "hill4.ytl": {
+            "extension": ".ytl",
+            "familyStem": "hill",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "hill5.ytl": {
+            "extension": ".ytl",
+            "familyStem": "hill",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "hill6.ytl": {
+            "extension": ".ytl",
+            "familyStem": "hill",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "hill7.ytl": {
+            "extension": ".ytl",
+            "familyStem": "hill",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "hill8.ytl": {
+            "extension": ".ytl",
+            "familyStem": "hill",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "hill9.ytl": {
+            "extension": ".ytl",
+            "familyStem": "hill",
+            "width": 64,
+            "height": 48,
+            "frameCount": 28
+          },
+          "newblk0.ytl": {
+            "extension": ".ytl",
+            "familyStem": "newblk",
+            "width": 64,
+            "height": 48,
+            "frameCount": 48
+          },
+          "newblk1.ytl": {
+            "extension": ".ytl",
+            "familyStem": "newblk",
+            "width": 64,
+            "height": 48,
+            "frameCount": 48
+          },
+          "newblk2.ytl": {
+            "extension": ".ytl",
+            "familyStem": "newblk",
+            "width": 64,
+            "height": 48,
+            "frameCount": 48
+          },
+          "newblk3.ytl": {
+            "extension": ".ytl",
+            "familyStem": "newblk",
+            "width": 64,
+            "height": 48,
+            "frameCount": 48
+          },
+          "newblkgate.ytl": {
+            "extension": ".ytl",
+            "familyStem": "newblk",
+            "width": 64,
+            "height": 48,
+            "frameCount": 48
+          },
+          "sea0.ytl": {
+            "extension": ".ytl",
+            "familyStem": "sea",
+            "width": 64,
+            "height": 48,
+            "frameCount": 96
+          },
+          "sea1.ytl": {
+            "extension": ".ytl",
+            "familyStem": "sea",
+            "width": 64,
+            "height": 48,
+            "frameCount": 48
+          },
+          "sea2.ytl": {
+            "extension": ".ytl",
+            "familyStem": "sea",
+            "width": 64,
+            "height": 48,
+            "frameCount": 48
+          },
+          "sea3.ytl": {
+            "extension": ".ytl",
+            "familyStem": "sea",
+            "width": 64,
+            "height": 48,
+            "frameCount": 48
+          },
+          "shallow.spr": {
+            "extension": ".spr",
+            "familyStem": "shallow",
+            "width": 64,
+            "height": 32,
+            "frameCount": 16
+          }
+        }
+      }
+    },
+    "fileNameSetsSymmetric": true,
+    "headerShapesSymmetric": true
+  }
 }
