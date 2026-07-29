@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 1,
+  "sourceExecutableSha256": "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e",
+  "vectors": [
+    {
+      "id": "lock-failure-skips-success-only-inputs-but-calls-final-helper",
+      "input": { "selectedArgument": 7, "lockResult": 0 },
+      "expected": {
+        "selectedArgument": 7,
+        "lockResult": 0,
+        "operations": [
+          { "type": "call", "function": "FUN_0044abb0", "receiver": "DAT_00559418", "selectedArgument": 7 },
+          { "type": "call", "function": "FUN_00421550", "receiver": "owner", "selectedArgument": 7 }
+        ]
+      }
+    },
+    {
+      "id": "lock-success-with-zero-flags-keeps-optional-call-absent",
+      "input": { "selectedArgument": 9, "lockResult": 1, "layoutWord": 4660, "ownerFlags": 0 },
+      "expected": {
+        "selectedArgument": 9,
+        "lockResult": 1,
+        "operations": [
+          { "type": "call", "function": "FUN_0044abb0", "receiver": "DAT_00559418", "selectedArgument": 9 },
+          { "type": "call", "function": "FUN_00420c20", "receiver": "owner" },
+          { "type": "copy-word", "source": "WORD[0x0088bd94]", "destination": "owner+0x2a", "value": 4660 },
+          { "type": "call", "function": "FUN_00421810", "receiver": "owner" },
+          { "type": "call", "function": "FUN_004218b0", "receiver": "owner" },
+          { "type": "call", "function": "FUN_00421a40", "receiver": "owner" },
+          { "type": "call", "function": "FUN_00421960", "receiver": "owner" },
+          { "type": "call", "function": "FUN_0044ada0", "receiver": "DAT_00559418", "selectedArgument": 9 },
+          { "type": "call", "function": "FUN_00421550", "receiver": "owner", "selectedArgument": 9 }
+        ]
+      }
+    },
+    {
+      "id": "owner-flag-bit-0x200-admits-the-opaque-optional-subrenderer",
+      "input": { "selectedArgument": 11, "lockResult": 1, "layoutWord": 2, "ownerFlags": 512 },
+      "expected": {
+        "selectedArgument": 11,
+        "lockResult": 1,
+        "operations": [
+          { "type": "call", "function": "FUN_0044abb0", "receiver": "DAT_00559418", "selectedArgument": 11 },
+          { "type": "call", "function": "FUN_00420c20", "receiver": "owner" },
+          { "type": "copy-word", "source": "WORD[0x0088bd94]", "destination": "owner+0x2a", "value": 2 },
+          { "type": "call", "function": "FUN_00421810", "receiver": "owner" },
+          { "type": "call", "function": "FUN_004218b0", "receiver": "owner" },
+          { "type": "call", "function": "FUN_00421a40", "receiver": "owner" },
+          { "type": "call", "function": "FUN_00421960", "receiver": "owner" },
+          { "type": "call", "function": "FUN_00421b20", "receiver": "owner" },
+          { "type": "call", "function": "FUN_0044ada0", "receiver": "DAT_00559418", "selectedArgument": 11 },
+          { "type": "call", "function": "FUN_00421550", "receiver": "owner", "selectedArgument": 11 }
+        ]
+      }
+    },
+    {
+      "id": "owner-flag-bit-0x400-also-admits-the-opaque-optional-subrenderer",
+      "input": { "selectedArgument": 12, "lockResult": 1, "layoutWord": 3, "ownerFlags": 1024 },
+      "expected": {
+        "selectedArgument": 12,
+        "lockResult": 1,
+        "operations": [
+          { "type": "call", "function": "FUN_0044abb0", "receiver": "DAT_00559418", "selectedArgument": 12 },
+          { "type": "call", "function": "FUN_00420c20", "receiver": "owner" },
+          { "type": "copy-word", "source": "WORD[0x0088bd94]", "destination": "owner+0x2a", "value": 3 },
+          { "type": "call", "function": "FUN_00421810", "receiver": "owner" },
+          { "type": "call", "function": "FUN_004218b0", "receiver": "owner" },
+          { "type": "call", "function": "FUN_00421a40", "receiver": "owner" },
+          { "type": "call", "function": "FUN_00421960", "receiver": "owner" },
+          { "type": "call", "function": "FUN_00421b20", "receiver": "owner" },
+          { "type": "call", "function": "FUN_0044ada0", "receiver": "DAT_00559418", "selectedArgument": 12 },
+          { "type": "call", "function": "FUN_00421550", "receiver": "owner", "selectedArgument": 12 }
+        ]
+      }
+    }
+  ]
+}
