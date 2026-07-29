@@ -46,6 +46,7 @@
     "imjinrok:extract-k01-japanese-farmer-frames": "node tools/imjinrok/extract-k01-japanese-farmer-frames.mjs --json",
     "imjinrok:extract-k01-farmer-resource-branch-frames": "node tools/imjinrok/extract-k01-farmer-resource-branch-frames.mjs --json",
     "imjinrok:extract-k01-farmer-resource-work-frames": "node tools/imjinrok/extract-k01-farmer-resource-work-frames.mjs --json",
+    "imjinrok:extract-k01-farmer-state4-fallback-frames": "node tools/imjinrok/extract-k01-farmer-state4-fallback-frames.mjs --json",
     "imjinrok:extract-k01-normal-reinforcement-animation-batch": "node tools/imjinrok/extract-k01-normal-reinforcement-animation-batch.mjs --json",
     "imjinrok:extract-k01-opening-unit-bindings": "node tools/imjinrok/extract-k01-opening-unit-bindings.mjs",
     "imjinrok:extract-k01-opening-building-bindings": "node tools/imjinrok/extract-k01-opening-building-bindings.mjs",
