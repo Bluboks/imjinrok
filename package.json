@@ -44,6 +44,7 @@
     "imjinrok:extract-k01-turtle-tank-animation-pilot": "node tools/imjinrok/extract-k01-turtle-tank-animation-pilot.mjs --json",
     "imjinrok:extract-k01-konishi-animation-pilot": "node tools/imjinrok/extract-k01-konishi-animation-pilot.mjs --json",
     "imjinrok:extract-k01-normal-reinforcement-animation-batch": "node tools/imjinrok/extract-k01-normal-reinforcement-animation-batch.mjs --json",
+    "imjinrok:extract-k01-opening-unit-bindings": "node tools/imjinrok/extract-k01-opening-unit-bindings.mjs",
     "imjinrok:extract-k01-reinforcement-placement-policy": "node tools/imjinrok/extract-k01-reinforcement-placement-policy.mjs --json",
     "imjinrok:extract-building-state-pilot": "node tools/imjinrok/extract-building-state-pilot.mjs --json",
     "imjinrok:extract-beacon-state-pilot": "node tools/imjinrok/extract-beacon-state-pilot.mjs --json",
