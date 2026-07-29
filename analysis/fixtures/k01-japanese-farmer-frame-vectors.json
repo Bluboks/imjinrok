@@ -1,0 +1,7 @@
+{
+  "vectors": [
+    { "internalClass": 31, "state": 8, "stateName": "idle", "direction": 1, "facing": "s", "phase": 0, "spriteSlot": 145, "sourcePath": "char\\farmerj.spr", "frameIndex": 0, "mirrorX": false },
+    { "internalClass": 31, "state": 1, "stateName": "move", "direction": 16, "facing": "n", "phase": 7, "spriteSlot": 145, "sourcePath": "char\\farmerj.spr", "frameIndex": 183, "mirrorX": true },
+    { "internalClass": 31, "state": 7, "stateName": "death", "direction": 65, "facing": "se", "phase": 7, "spriteSlot": 145, "sourcePath": "char\\farmerj.spr", "frameIndex": 247, "mirrorX": false }
+  ]
+}
