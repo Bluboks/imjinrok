@@ -469,11 +469,31 @@ export const villagerEntityVisual = {
       facings: ENTITY_FACING_ORDER,
       clips: staticallyRecoveredDirectionalClips({ visualId: "villager", stem: "farmerk", frameStart: 240, frameStride: 0, phaseCount: 8, fps: PROVISIONAL_RECOVERED_ANIMATION_ACTIVE_FPS, loop: false }),
     },
-    // Project source-layout adaptations. They remain intentionally separate from the class-7 original core-state proof.
     carry: {
       facings: ENTITY_FACING_ORDER,
-      clips: sourceFiveFacingClips("villager", "farmerk", 80, 8),
+      clips: staticallyRecoveredDirectionalClips({
+        visualId: "villager",
+        stem: "farmerk",
+        frameStart: 80,
+        frameStride: 8,
+        phaseCount: 8,
+        fps: PROVISIONAL_RECOVERED_ANIMATION_ACTIVE_FPS,
+        loop: true,
+      }),
     },
+    "carry-idle": {
+      facings: ENTITY_FACING_ORDER,
+      clips: staticallyRecoveredDirectionalClips({
+        visualId: "villager",
+        stem: "farmerk",
+        frameStart: 82,
+        frameStride: 8,
+        phaseCount: 1,
+        fps: 1,
+        loop: true,
+      }),
+    },
+    // Project source-layout adaptations. They remain intentionally separate from the class-7 original core-state proof.
     gather: {
       facings: ENTITY_FACING_ORDER,
       clips: sourceFiveFacingClips("villager", "farmerk", 120, 8),
@@ -829,6 +849,30 @@ export const japaneseFarmerEntityVisual = {
         visualId: "japanese_farmer",
         stem: "Farmerj",
         frameStart: 160,
+        frameStride: 8,
+        phaseCount: 8,
+        fps: PROVISIONAL_RECOVERED_ANIMATION_ACTIVE_FPS,
+        loop: true,
+      }),
+    },
+    carry: {
+      facings: ENTITY_FACING_ORDER,
+      clips: staticallyRecoveredDirectionalClips({
+        visualId: "japanese_farmer",
+        stem: "Farmerj",
+        frameStart: 200,
+        frameStride: 8,
+        phaseCount: 8,
+        fps: PROVISIONAL_RECOVERED_ANIMATION_ACTIVE_FPS,
+        loop: true,
+      }),
+    },
+    "carry-idle": {
+      facings: ENTITY_FACING_ORDER,
+      clips: staticallyRecoveredDirectionalClips({
+        visualId: "japanese_farmer",
+        stem: "Farmerj",
+        frameStart: 200,
         frameStride: 8,
         phaseCount: 8,
         fps: PROVISIONAL_RECOVERED_ANIMATION_ACTIVE_FPS,

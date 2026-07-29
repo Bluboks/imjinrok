@@ -147,8 +147,27 @@ test("default theme unit frame blocks stay within their source exports", () => {
   assert.equal(villagerVisual.states.move?.clips.s?.loop, true);
   assert.deepEqual(villagerVisual.states.walk?.clips, villagerVisual.states.move?.clips);
   assert.equal(villagerVisual.states.death?.clips.s?.loop, false);
-  // Carry/gather/build/repair retain project source-layout adaptations; they are not class-7 parity claims.
-  assert.equal(villagerVisual.states.carry?.clips.s?.frames[0]?.fileName, "farmerk_0112.png");
+  assertDirectionalFrames(villagerVisual, "carry", {
+    stem: "farmerk",
+    phaseCount: 8,
+    frameStarts: { s: 80, sw: 88, w: 96, nw: 104, n: 96, ne: 88, e: 80, se: 112 },
+  });
+  assertDirectionalFrames(villagerVisual, "carry-idle", {
+    stem: "farmerk",
+    phaseCount: 1,
+    frameStarts: { s: 82, sw: 90, w: 98, nw: 106, n: 98, ne: 90, e: 82, se: 114 },
+  });
+  assertDirectionalClipStarts(villagerVisual, "carry", "farmerk", {
+    n: [96, true], ne: [88, true], e: [80, true], se: [112, false], s: [80, false], sw: [88, false], w: [96, false], nw: [104, false],
+  });
+  assertDirectionalClipStarts(villagerVisual, "carry-idle", "farmerk", {
+    n: [98, true], ne: [90, true], e: [82, true], se: [114, false], s: [82, false], sw: [90, false], w: [98, false], nw: [106, false],
+  });
+  assert.equal(villagerVisual.states.carry?.clips.s?.fps, 8);
+  assert.equal(villagerVisual.states.carry?.clips.s?.loop, true);
+  assert.equal(villagerVisual.states["carry-idle"]?.clips.s?.fps, 1);
+  assert.equal(villagerVisual.states["carry-idle"]?.clips.s?.loop, true);
+  // Gather/build/repair remain project source-layout adaptations; they are not class-7 parity claims.
   assert.equal(villagerVisual.states.gather?.clips.s?.frames[0]?.fileName, "farmerk_0152.png");
   assert.equal(villagerVisual.states.build?.clips.s?.frames[0]?.fileName, "farmerk_0192.png");
   assert.equal(villagerVisual.states.repair?.clips.s?.frames[0]?.fileName, "farmerk_0192.png");
@@ -426,14 +445,14 @@ test("Japanese gunner uses the statically recovered class-12 core-state frame bl
   assert.equal(visual.states.death?.clips.s?.loop, false);
 });
 
-test("Japanese farmer uses only its statically recovered core states and omits unresolved attack frames", () => {
+test("Japanese farmer uses the recovered carrying frames and omits unresolved attack frames", () => {
   const manifest = readManifest("entities/japanese-farmer/Farmerj.manifest.json");
   const visual = defaultTheme.visuals[defaultTheme.entityBindings["japanese-farmer"]] as EntityVisual;
 
   assert.equal(manifest.source, "original/imjinrok2/char/Farmerj.spr");
   assert.equal(manifest.frameCount, 248);
   assert.equal(manifest.exportedFrames.length, 248);
-  assert.deepEqual(Object.keys(visual.states).sort(), ["death", "idle", "move", "walk"]);
+  assert.deepEqual(Object.keys(visual.states).sort(), ["carry", "carry-idle", "death", "idle", "move", "walk"]);
   assertDirectionalFrames(visual, "idle", {
     stem: "Farmerj",
     phaseCount: 8,
@@ -444,6 +463,22 @@ test("Japanese farmer uses only its statically recovered core states and omits u
     phaseCount: 8,
     frameStarts: { s: 160, sw: 168, w: 176, nw: 184, n: 176, ne: 168, e: 160, se: 192 },
   });
+  assertDirectionalFrames(visual, "carry", {
+    stem: "Farmerj",
+    phaseCount: 8,
+    frameStarts: { s: 200, sw: 208, w: 216, nw: 224, n: 216, ne: 208, e: 200, se: 232 },
+  });
+  assertDirectionalFrames(visual, "carry-idle", {
+    stem: "Farmerj",
+    phaseCount: 8,
+    frameStarts: { s: 200, sw: 208, w: 216, nw: 224, n: 216, ne: 208, e: 200, se: 232 },
+  });
+  assertDirectionalClipStarts(visual, "carry", "Farmerj", {
+    n: [216, true], ne: [208, true], e: [200, true], se: [232, false], s: [200, false], sw: [208, false], w: [216, false], nw: [224, false],
+  });
+  assertDirectionalClipStarts(visual, "carry-idle", "Farmerj", {
+    n: [216, true], ne: [208, true], e: [200, true], se: [232, false], s: [200, false], sw: [208, false], w: [216, false], nw: [224, false],
+  });
   assertDirectionalFrames(visual, "death", {
     stem: "Farmerj",
     phaseCount: 8,
@@ -453,6 +488,9 @@ test("Japanese farmer uses only its statically recovered core states and omits u
   assert.equal(visual.states.attack, undefined);
   assert.equal(visual.states.idle?.clips.s?.loop, true);
   assert.equal(visual.states.move?.clips.s?.loop, true);
+  assert.equal(visual.states.carry?.clips.s?.loop, true);
+  assert.equal(visual.states.carry?.clips.s?.fps, 8);
+  assert.deepEqual(visual.states["carry-idle"], visual.states.carry);
   assert.equal(visual.states.death?.clips.s?.loop, false);
 });
 
@@ -630,7 +668,7 @@ test("Japanese turtle tank uses only the statically recovered grid core-state fr
 
 function assertDirectionalFrames(
   visual: EntityVisual,
-  stateName: "idle" | "move" | "walk" | "attack" | "death",
+  stateName: string,
   expected: {
     stem: string;
     phaseCount: number;
