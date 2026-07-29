@@ -57,6 +57,7 @@
 - [K01 일본 사무라이 핵심 애니메이션 파일럿](reverse-engineering/mechanics/k01-samurai-animation-pilot.md)
 - [K01 일본 농부 핵심 프레임](reverse-engineering/mechanics/k01-japanese-farmer-frames.md)
 - [K01 시작 유닛 class 12·13 binding](reverse-engineering/mechanics/k01-opening-unit-bindings.md)
+- [K01 조선 농부 class 7 creation-default core frames](reverse-engineering/mechanics/k01-korean-farmer-core-frames.md)
 - [K01 normal reinforcement animation batch](reverse-engineering/mechanics/k01-normal-reinforcement-animation-batch.md)
 - [K01 일본 귀갑차 핵심 애니메이션 파일럿](reverse-engineering/mechanics/k01-turtle-tank-animation-pilot.md)
 - [K01 일본 고니시 핵심 애니메이션 파일럿](reverse-engineering/mechanics/k01-konishi-animation-pilot.md)

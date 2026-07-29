@@ -80,6 +80,7 @@ Ghidra의 메모리 지도에는 PE 네 섹션 외에 헤더와 분석용 `tdb` 
 | 경로 | SHA-256 | 확정 범위 |
 | --- | --- | --- |
 | `char/swordk.spr` | `414d285b207ba12afdd856a0f16ddde615381cf491fe493d6ededf91681b55eb` | 조선 창병 정체와 상태 1 일반 이동·상태 2 별도 이동 프레임 식 |
+| `char/farmerk.spr` | `98e370f4dec6f147a2556340bf93d293d23c3ee3a5367bc22fd3984e7209e5ca` | K01 source-created class 7 조선 농부의 `+0x47a==0` 상태 8/1/7 core frame |
 | `char/generalk11.spr` | `658617ea4c762e85ff4e47167f6ed2f8cf1b37e8daea69338ed3e2c61c5bd829` | 조선 권율 상태 1 이동 0~39, 상태 7 사망 40~47 |
 | `char/generalk12.spr` | `9ae22b6fb4e4218b7625b6d73aaaf44a2696822d1ff4e518e396a1128c95a72b` | 조선 권율 상태 4 공격 방향 block, phase 8 |
 | `char/generalk13.spr` | `2576233295024781ab5c83da38116ac43ce24a2a2a7b0203876126b480bcdcf9` | 조선 권율 상태 8 대기 0~39 |

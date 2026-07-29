@@ -367,18 +367,12 @@ test("frame mappings stay quarantined outside statically proven scopes while ide
   const currentVillager = report.visuals.find(
     (visual) => visual.visualId === "villager-korean-farmer",
   );
-  assert.equal(currentVillager?.staticEvidence.identity, "ambiguous");
+  assert.equal(currentVillager?.staticEvidence.identity, "static-proven");
+  assert.equal(currentVillager?.staticEvidence.internalClass, 7);
+  assert.equal(currentVillager?.staticEvidence.animationStateMapping, "static-proven-core-state-frames");
   assert.deepEqual(
-    currentVillager?.staticEvidence.identityCandidates.map(
-      ({ internalClass, originalGameplayName }) => [
-        internalClass,
-        originalGameplayName,
-      ],
-    ),
-    [
-      [7, "조선 농부"],
-      [93, "솜씨 좋은 도공"],
-    ],
+    currentVillager?.staticEvidence.stateFrameRanges,
+    { idle: [0, 39], move: [40, 79], walk: [40, 79], death: [240, 247] },
   );
   const unboundAdvancedTower = report.visuals.find(
     (visual) => visual.visualId === "japanese-camp-advanced-tower",
