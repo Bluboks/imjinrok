@@ -22,7 +22,7 @@ const fixturePath = join(repositoryRoot, "analysis/fixtures/command-icon-frame-b
 const fixtureBytes = readFileSync(fixturePath, "utf8");
 const fixture = JSON.parse(fixtureBytes);
 
-test("source-binds four original command action records to exact button.spr pixel frames", () => {
+test("source-binds labelled and unlabelled original command records to exact button.spr pixel frames", () => {
   assert.deepEqual(fixture, createCommandIconFrameBindingFixture());
   assert.equal(fixtureBytes, `${JSON.stringify(createCommandIconFrameBindingFixture())}\n`);
   assert.equal(fixture.sourceExecutableSha256, EXPECTED_EXECUTABLE_SHA256);
@@ -30,24 +30,34 @@ test("source-binds four original command action records to exact button.spr pixe
   assert.equal(fixture.sourceReferencesSha256, EXPECTED_REFERENCES_SHA256);
   const report = extractCommandIconFrameBinding({ executablePath, buttonPath, referencesPath });
 
-  assert.equal(report.analysisStatus, "static-confirmed-for-action-61-through-64-to-button-frame-binding");
+  assert.equal(report.analysisStatus, "static-confirmed-for-bounded-command-action-label-and-button-frame-bindings");
   assert.equal(report.loaderContract.runtimeRecord, "0x00899828");
   assert.equal(report.loaderContract.runtimePayloadPointerField, "0x0089a41c");
   assert.equal(report.loaderContract.runtimeFrameOffsetTable, "0x00899ce8");
   assert.ok(report.rawCodeRanges.some(({ id }) => id === "common-spr-loader"));
   assert.deepEqual(
-    report.controlRecord.bindings.map(({ actionId, frameIndex, frame }) => ({ actionId, frameIndex, relativeOffset: frame.relativeOffset })),
+    report.controlRecord.bindings.map(({ actionId, frameIndex, frame, sourceLabel }) => ({ actionId, frameIndex, relativeOffset: frame.relativeOffset, label: sourceLabel?.value })),
     [
-      { actionId: 61, frameIndex: 27, relativeOffset: 14656 },
-      { actionId: 62, frameIndex: 26, relativeOffset: 13748 },
-      { actionId: 63, frameIndex: 28, relativeOffset: 15564 },
-      { actionId: 64, frameIndex: 29, relativeOffset: 16472 },
+      { actionId: 2, frameIndex: 43, relativeOffset: 29161, label: "정지" },
+      { actionId: 3, frameIndex: 6, relativeOffset: 3176, label: "이동" },
+      { actionId: 5, frameIndex: 4, relativeOffset: 2200, label: "공격" },
+      { actionId: 11, frameIndex: 16, relativeOffset: 8056, label: "건설" },
+      { actionId: 16, frameIndex: 12, relativeOffset: 6104, label: "수리" },
+      { actionId: 19, frameIndex: 45, relativeOffset: 30977, label: "취소" },
+      { actionId: 21, frameIndex: 11, relativeOffset: 5196, label: "집결지설정" },
+      { actionId: 35, frameIndex: 10, relativeOffset: 4288, label: "순찰" },
+      { actionId: 39, frameIndex: 39, relativeOffset: 25529, label: "사수" },
+      { actionId: 61, frameIndex: 27, relativeOffset: 14656, label: undefined },
+      { actionId: 62, frameIndex: 26, relativeOffset: 13748, label: undefined },
+      { actionId: 63, frameIndex: 28, relativeOffset: 15564, label: undefined },
+      { actionId: 64, frameIndex: 29, relativeOffset: 16472, label: undefined },
     ],
   );
+  assert.equal(report.controlRecord.commandLabelCopy.runtimeBase, "0x00aa4018");
   assert.deepEqual(report.renderer.submittedDimensions, { width: 34, height: 34 });
 });
 
-test("reproduces the four control frames and bounded no-draw failure vectors", () => {
+test("reproduces labelled and unlabelled control frames plus bounded no-draw failure vectors", () => {
   for (const vector of fixture.vectors) {
     assert.deepEqual(reproduceCommandIconFrameBinding(vector.input), vector.expected, vector.id);
   }
@@ -88,7 +98,7 @@ test("rejects tampered executable, button sprite, and references inputs", (t) =>
   copyFileSync(executablePath, alteredExecutablePath);
   copyFileSync(buttonPath, alteredButtonPath);
   copyFileSync(referencesPath, alteredReferencesPath);
-  flipByte(alteredExecutablePath, 0x4579f5 - 0x400000);
+  flipByte(alteredExecutablePath, 0x4c8524 - 0x400000);
   flipByte(alteredButtonPath, 4);
   flipByte(alteredReferencesPath, 0);
 

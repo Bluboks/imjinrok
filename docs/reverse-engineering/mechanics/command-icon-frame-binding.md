@@ -2,13 +2,14 @@
 
 ## 질문과 상태
 
-질문: 원본 selected command control의 action `61..64`가 어떤 정확한 `fnt\\button.spr`
-pixel frame을 선택하여 `34×34` draw 경로에 넘기는가?
+질문: 원본 command control action이 어떤 정확한 `fnt\\button.spr` pixel frame을 `34×34` draw
+경로에 넘기며, label이 있는 bounded control은 어느 CP949 source string을 runtime label pointer로
+복사하는가?
 
 | 구분 | 상태 | 범위 |
 | --- | --- | --- |
-| 분석 | 정적 확정 | action WORD→control record frame WORD→`button.spr` offset table/payload→`34×34` draw의 닫힌 경로 |
-| 재현 | 재현 완료 | 네 control binding, disabled slot·loader 실패·out-of-range no-draw 경계 |
+| 분석 | 정적 확정 | action 2/3/5/11/16/19/21/35/39의 CP949 source label→runtime pointer→frame, action 61..64의 frame, `button.spr` payload→`34×34` draw의 닫힌 경로 |
+| 재현 | 재현 완료 | 열세 action/frame vector, label copy metadata, disabled slot·loader 실패·out-of-range no-draw 경계 |
 | 구현 | 없음 | product action semantic mapping과 제품의 4×3 grid는 변경하지 않음 |
 
 기준 입력은 `original/imjinrok2/imjinrok2.exe` SHA-256
@@ -36,18 +37,36 @@ source frame offsets는 다음과 같다. `dataOffset`은 source file의 byte of
 | 27 | 14656 | 17716 | 908 |
 | 28 | 15564 | 18624 | 908 |
 | 29 | 16472 | 19532 | 908 |
+| 39 | 25529 | 28589 | 908 |
+| 43 | 29161 | 32221 | 908 |
+| 45 | 30977 | 34037 | 908 |
 
 ## action record에서 draw까지
 
 `FUN_004576c0`은 argument action WORD를 record `+0x00`에, frame/resource WORD를 `+0x02`에
-쓴다. 네 callsite의 raw push sequence는 다음 exact binding을 만든다.
+쓴다. `FUN_0045f190`은 `ECX=0x00aa4018`로 `FUN_0048ea90`을 먼저 호출하고 그 뒤
+`FUN_00457700`을 호출한다. `FUN_0048ea90`의 string-length/`REP MOVS` chain은 아래 CP949 source
+bytes를 `0x00aa4018+offset` runtime buffer에 복사하며, 각 constructor는 그 runtime address를
+후속 argument로 넘긴다.
 
-| action | constructor callsite | `button.spr` pixel frame |
-| ---: | --- | ---: |
-| 61 | `0x004579f5` | 27 |
-| 62 | `0x00457a13` | 26 |
-| 63 | `0x00457a27` | 28 |
-| 64 | `0x00457a45` | 29 |
+| action | CP949 label source → runtime pointer | constructor callsite | `button.spr` pixel frame |
+| ---: | --- | --- | ---: |
+| 2 | `정지`, `0x004c8524` → `0x00aa4ae8` | `0x00457700` | 43 |
+| 3 | `이동`, `0x004c851c` → `0x00aa4b08` | `0x0045771b` | 6 |
+| 5 | `공격`, `0x004c8514` → `0x00aa4b28` | `0x00457736` | 4 |
+| 11 | `건설`, `0x004c8504` → `0x00aa4b68` | `0x0045776c` | 16 |
+| 16 | `수리`, `0x004c84f4` → `0x00aa4ba8` | `0x004577a2` | 12 |
+| 19 | `취소`, `0x004c84dc` → `0x00aa4c08` | `0x004577f3` | 45 |
+| 21 | `집결지설정`, `0x004c84d0` → `0x00aa4c28` | `0x00457847` | 11 |
+| 35 | `순찰`, `0x004c84b0` → `0x00aa4ca8` | `0x004578b3` | 10 |
+| 39 | `사수`, `0x004c848c` → `0x00aa4d28` | `0x0045791f` | 39 |
+| 61 | — | `0x004579f5` | 27 |
+| 62 | — | `0x00457a13` | 26 |
+| 63 | — | `0x00457a27` | 28 |
+| 64 | — | `0x00457a45` | 29 |
+
+action 61..64는 이 slice에서 source label binding을 추가로 주장하지 않는다. 위 table의 label은
+원본 bounded command record의 CP949 text이며 현재 product action의 name 또는 semantic parity가 아니다.
 
 `FUN_0045ad90`의 selected command renderer는 slot owner가 present일 때 action을 `*0x10`으로
 scale해 `0x005e3f02+2`의 frame WORD를 읽는다. 이어 `DWORD[0x00899ce8 + frame*4]`의 relative
@@ -55,7 +74,9 @@ offset에 `DWORD[0x0089a41c]` payload base를 더하고, 결과 frame을 width/h
 helper에 제출한다. 따라서 위 네 값은 단순 resource index 추정이 아니라 `button.spr`의 정확한
 pixel frame index다.
 
-이 결론은 `FUN_004576c0` 전체 raw range `0x004576c0..0x004576f9`, 네 constructor call range
+이 결론은 `FUN_0048ea90` 전체 raw range `0x0048ea90..0x004924b2`, bounded label-copy chain
+`0x0048f201..0x0048f50f`, initializer caller `0x0045f190..0x0045f1b2`, `FUN_004576c0` 전체 raw range
+`0x004576c0..0x004576f9`, labelled constructor range `0x00457700..0x0045793a`, action 61..64 call range
 `0x004579f5..0x00457a63`, selected renderer `0x0045ad90..0x0045b39f`, 그리고 frame path
 `0x0045ae26..0x0045af59`를 hash와 byte anchor로 고정한 extractor로 재검증한다. renderer에서
 `0x005e3f02`, `0x00899ce8`, `0x0089a41c`, `0x0089982c`, `0x00899830`로 향하는 complete structured
@@ -66,9 +87,9 @@ direct-reference projection도 함께 고정한다.
 - disabled 또는 absent selected slot은 frame lookup과 draw를 하지 않는다.
 - button loader가 실패하면 valid payload pointer나 successful frame draw를 만들었다고 주장할 수 없다.
   이 분석은 loader 내부 성공 결과를 재현하거나 보충하지 않는다.
-- selected action이 이 네 binding 밖이거나 frame index가 supplied frame-count 범위를 벗어나면 이
+- selected action이 이 bounded binding 밖이거나 frame index가 supplied frame-count 범위를 벗어나면 이
   bounded reproducer는 successful draw를 만들지 않는다.
-- action `61..64`의 원본 control 의미와 현재 제품 `ActionDefinitionId`의 source-complete semantic
+- 이 열세 action의 원본 control label/record와 현재 제품 `ActionDefinitionId`의 source-complete semantic
   mapping은 별개다. 현재 대응은 없으며 제품 responsive 4 columns × 3 rows command grid는 그대로다.
 
 ## 재현 도구
