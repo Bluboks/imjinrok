@@ -9,7 +9,7 @@ const repositoryRoot = join(dirname(fileURLToPath(import.meta.url)), "../..");
 test("client UI layout audit separates original evidence from intentional product adaptations", () => {
   const report = extractClientUiLayoutAudit(repositoryRoot);
 
-  assert.equal(report.summary.probeCount, 6);
+  assert.equal(report.summary.probeCount, 7);
   assert.equal(report.summary.allPatternsPresent, true);
   assert.equal(report.summary.unprovenOriginalParityCount, 4);
   assert.deepEqual(
@@ -21,6 +21,7 @@ test("client UI layout audit separates original evidence from intentional produc
       "selection-panel-layout",
       "gameplay-selection-hitbox",
       "campaign-dialogue-layout",
+      "pre-game-briefing-layout",
     ],
   );
 });
@@ -80,15 +81,33 @@ test("client UI layout audit routes provisional surfaces to original binary trac
   ]);
   assert.equal(
     dialogueLayout.originalEvidenceStatus,
-    "static-proven-for-SPEECH-slots-and-text;project-adaptation-for-portrait-scale-in-and-base-to-completed-frame-fade",
+    "static-proven-for-SPEECH-slots-and-text;project-adaptation-for-portrait-scale-in",
   );
   assert.equal(
     dialogueLayout.currentBasis,
-    "static-proven-SPEECH-slots-and-text-with-project-portrait-scale-and-briefing-frame-fade-adaptations",
+    "static-proven-SPEECH-slots-and-text-with-project-portrait-scale-in-adaptation",
   );
-  assert.match(dialogueLayout.followUp, /SPEECH slot\/text mapping separate from project portrait scale-in/u);
+  assert.match(dialogueLayout.followUp, /in-game SPEECH slot\/text mapping separate from project portrait scale-in/u);
   assert.equal(
     dialogueLayout.patterns.every(
+      (pattern) => pattern.present && Number.isInteger(pattern.line),
+    ),
+    true,
+  );
+  const preGameBriefingLayout = probesById.get("pre-game-briefing-layout");
+  assert.ok(preGameBriefingLayout);
+  assert.deepEqual(preGameBriefingLayout.originalTraceTargets, [
+    "FUN_0048311e",
+    "FUN_004a7a50",
+    "FUN_004a8410",
+  ]);
+  assert.equal(
+    preGameBriefingLayout.originalEvidenceStatus,
+    "static-proven-for-SPEECH-slots-and-text;project-adaptation-for-base-to-completed-frame-fade-and-portrait-scale-in",
+  );
+  assert.match(preGameBriefingLayout.followUp, /base-to-completed fade and portrait scale-in as project presentation/u);
+  assert.equal(
+    preGameBriefingLayout.patterns.every(
       (pattern) => pattern.present && Number.isInteger(pattern.line),
     ),
     true,

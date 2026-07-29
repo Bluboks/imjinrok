@@ -50,6 +50,10 @@ const skirmishScenePath = join(
   repositoryRoot,
   "apps/game-client/src/scenes/SkirmishScene.ts",
 );
+const missionBriefingScenePath = join(
+  repositoryRoot,
+  "apps/game-client/src/scenes/MissionBriefingScene.ts",
+);
 const missionPortraitsPath = join(
   repositoryRoot,
   "apps/game-client/src/missionPortraits.ts",
@@ -243,6 +247,7 @@ const report = {
     sourceFileRecord(contentPath),
     sourceFileRecord(scenariosPath),
     sourceFileRecord(skirmishScenePath),
+    sourceFileRecord(missionBriefingScenePath),
     sourceFileRecord(missionPortraitsPath),
     sourceFileRecord(missionPortraitExtractorPath),
     sourceFileRecord(unitAnimationPilotPath),

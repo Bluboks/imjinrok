@@ -24,7 +24,11 @@
     },
     {
       "path": "apps/game-client/src/scenes/SkirmishScene.ts",
-      "sha256": "f1d14c49ec081bb9553ac06ace27f2057819ab344ab54c5cea7b18393585f5ad"
+      "sha256": "b7b3b59773b1741c0a12f86bdf64c0115469e7dcd440498d792639da83b6d14d"
+    },
+    {
+      "path": "apps/game-client/src/scenes/MissionBriefingScene.ts",
+      "sha256": "24f08c4254432df10012c0e7906a7611cdb291d566ec31c97763ba9931981664"
     },
     {
       "path": "apps/game-client/src/missionPortraits.ts",
@@ -104,7 +108,7 @@
     },
     {
       "path": "tools/imjinrok/audit-sprite-mappings.mjs",
-      "sha256": "219fa7c05268140b4bbeb56466997cafd0072ffbe4f805a9d3359122e921ec87"
+      "sha256": "b5d1f7ed7e0de6a9c42c539b42cc7e8f830533d4e2e9bc98c218c0f78fa5ee51"
     },
     {
       "path": "apps/game-client/public/assets/themes/default/ui/mission-portraits/hero.manifest.json",
