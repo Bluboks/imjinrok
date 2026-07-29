@@ -9,6 +9,7 @@ import { readPeImage, toHex } from "./pe-image.mjs";
 import {
   assertEqual,
   readJson,
+  readVaRange,
   verifyEvidencePoint,
   verifyRawCodeRange,
   sha256,
@@ -30,25 +31,61 @@ const BUTTON_PAYLOAD_FIELD = BUTTON_RECORD + DATA_BASE;
 const BUTTON_OFFSET_TABLE = BUTTON_RECORD + OFFSET_TABLE_START;
 const BUTTON_INDEX = 18;
 const CONTROL_FRAME_FIELD = 0x005e3f02;
+const COMMAND_LABEL_RUNTIME_BASE = 0x00aa4018;
 
 const CONTROL_BINDINGS = [
+  [2, 43, 0x00457700, 0x004c8524, "정지", "c1a4c1f600", 0x00aa4ae8],
+  [3, 6, 0x0045771b, 0x004c851c, "이동", "c0ccb5bf00", 0x00aa4b08],
+  [5, 4, 0x00457736, 0x004c8514, "공격", "b0f8b0dd00", 0x00aa4b28],
+  [11, 16, 0x0045776c, 0x004c8504, "건설", "b0c7bcb300", 0x00aa4b68],
+  [16, 12, 0x004577a2, 0x004c84f4, "수리", "bcf6b8ae00", 0x00aa4ba8],
+  [19, 45, 0x004577f3, 0x004c84dc, "취소", "c3ebbcd200", 0x00aa4c08],
+  [21, 11, 0x00457847, 0x004c84d0, "집결지설정", "c1fdb0e1c1f6bcb3c1a400", 0x00aa4c28],
+  [35, 10, 0x004578b3, 0x004c84b0, "순찰", "bcf8c2fb00", 0x00aa4ca8],
+  [39, 39, 0x0045791f, 0x004c848c, "사수", "bbe7bcf600", 0x00aa4d28],
   [61, 27, 0x004579f5],
   [62, 26, 0x00457a13],
   [63, 28, 0x00457a27],
   [64, 29, 0x00457a45],
-].map(([actionId, frameIndex, callSite]) => ({ actionId, frameIndex, callSite: toHex(callSite) }));
+].map(([actionId, frameIndex, callSite, sourceLabelAddress, sourceLabel, sourceLabelBytes, runtimeLabelAddress]) => ({
+  actionId,
+  frameIndex,
+  callSite: toHex(callSite),
+  ...(sourceLabel && {
+    sourceLabel: {
+      address: toHex(sourceLabelAddress),
+      value: sourceLabel,
+      cp949Bytes: sourceLabelBytes,
+      runtimeAddress: toHex(runtimeLabelAddress),
+      runtimeOffset: toHex(runtimeLabelAddress - COMMAND_LABEL_RUNTIME_BASE),
+    },
+  }),
+}));
 
 const EXPECTED_FRAMES = new Map([
+  [4, { relativeOffset: 2200, dataOffset: 5260, size: 908 }],
+  [6, { relativeOffset: 3176, dataOffset: 6236, size: 908 }],
+  [10, { relativeOffset: 4288, dataOffset: 7348, size: 908 }],
+  [11, { relativeOffset: 5196, dataOffset: 8256, size: 908 }],
+  [12, { relativeOffset: 6104, dataOffset: 9164, size: 908 }],
+  [16, { relativeOffset: 8056, dataOffset: 11116, size: 68 }],
   [26, { relativeOffset: 13748, dataOffset: 16808, size: 908 }],
   [27, { relativeOffset: 14656, dataOffset: 17716, size: 908 }],
   [28, { relativeOffset: 15564, dataOffset: 18624, size: 908 }],
   [29, { relativeOffset: 16472, dataOffset: 19532, size: 908 }],
+  [39, { relativeOffset: 25529, dataOffset: 28589, size: 908 }],
+  [43, { relativeOffset: 29161, dataOffset: 32221, size: 908 }],
+  [45, { relativeOffset: 30977, dataOffset: 34037, size: 908 }],
 ]);
 
 const RAW_CODE_RANGES = [
   ["common-spr-loader", 0x00443360, 0x0044343d, "80805e69437098006c8e2efce33121e9b98a1cf279f9baa19e7c4f9e2255694f"],
   ["common-spr-object-loader", 0x004434a0, 0x0044357f, "ab4c32302ba6ba9c56fad040df9689aad63a8e03eb33cdeab7b5972368170cf0"],
+  ["command-label-copy-function", 0x0048ea90, 0x004924b2, "a6c3bb4ff4927abf560e2de8674c7c62a6dc8af7101cb140339c5d7ae15a51c8"],
+  ["command-label-copy-chain", 0x0048f201, 0x0048f50f, "980bffb16472724900767d35ef56de67c853692bb696b5909fb1e8c9b1084d58"],
+  ["command-label-copy-caller", 0x0045f190, 0x0045f1b2, "24870318cc54a9ed4292e4ebf6b8f3df78d4383d63804a3799d8332c76de294a"],
   ["control-record-constructor", 0x004576c0, 0x004576f9, "ec5599a94d3add2e24c2ddaf431d9340f6e58028c478425c02e9a909a89b04ec"],
+  ["labelled-control-constructor-calls", 0x00457700, 0x0045793a, "b2c67c164c03bf263333012e9e5cf6ad29974ecae7ab3f296148aac216d8a66d"],
   ["four-control-constructor-calls", 0x004579f5, 0x00457a63, "ef3886ba0b2c9ffe4a5183aae4cfe8bec08375474e0bfcb19820c1b9950acee5"],
   ["selected-command-renderer", 0x0045ad90, 0x0045b39f, "f82b78ede2f143ebabd5ca357b5580d09bfdb5c33755bdc1e9c34c1ccc8974fc"],
   ["selected-command-frame-path", 0x0045ae26, 0x0045af59, "67a2e7b13ccbfd5bc62a7b444940de6295bb05c3c548d1295290557ede7a3b2f"],
@@ -62,7 +99,27 @@ const EVIDENCE = [
   [0x00443538, "89 87 f4 0b 00 00", "common object loader stores the payload pointer at record +0x0bf4"],
   [0x004bc0dc, "30 d8 4b 00", "common table entry 18 points to fnt\\button.spr"],
   [0x004bd830, "66 6e 74 5c 62 75 74 74 6f 6e 2e 73 70 72 00", "common table entry 18 string is fnt\\button.spr"],
+  [0x0045f19e, "b9 18 40 aa 00 e8 e8 f8 02 00 e8 53 85 ff ff", "initializer passes command-label runtime base 0x00aa4018 to FUN_0048ea90 before FUN_00457700 constructs controls"],
+  [0x0048f201, "8b fb 8d 9a d0 0a 00 00", "the label-copy chain advances to runtime base +0x0ad0 before copying source label 0x004c8524"],
+  [0x0048f217, "bf 24 85 4c 00", "the label-copy chain selects source CP949 label 0x004c8524"],
+  [0x0048f242, "bf 1c 85 4c 00", "the label-copy chain selects source CP949 label 0x004c851c"],
+  [0x0048f26a, "bf 14 85 4c 00", "the label-copy chain selects source CP949 label 0x004c8514"],
+  [0x0048f2b7, "bf 04 85 4c 00", "the label-copy chain selects source CP949 label 0x004c8504"],
+  [0x0048f30a, "bf f4 84 4c 00", "the label-copy chain selects source CP949 label 0x004c84f4"],
+  [0x0048f37f, "bf dc 84 4c 00", "the label-copy chain selects source CP949 label 0x004c84dc"],
+  [0x0048f3a7, "bf d0 84 4c 00", "the label-copy chain selects source CP949 label 0x004c84d0"],
+  [0x0048f447, "bf b0 84 4c 00", "the label-copy chain selects source CP949 label 0x004c84b0"],
+  [0x0048f4ea, "bf 8c 84 4c 00", "the label-copy chain selects source CP949 label 0x004c848c"],
   [0x004576c0, "66 8b 44 24 04 66 8b 54 24 08 66 89 01 66 8b 44 24 0c 66 89 51 02", "FUN_004576c0 stores action WORD at record +0 and resource/frame WORD at +2"],
+  [0x00457700, "6a 00 68 e8 4a aa 00 6a 73 6a 53 6a 01 6a 2b 6a 02 b9 10 3f 5e 00 e8 a5 ff ff ff", "action 2 uses runtime label 0x00aa4ae8 and button frame 43"],
+  [0x0045771b, "6a 00 68 08 4b aa 00 6a 6d 6a 4d 6a 01 6a 06 6a 03 b9 20 3f 5e 00 e8 8a ff ff ff", "action 3 uses runtime label 0x00aa4b08 and button frame 6"],
+  [0x00457736, "6a 00 68 28 4b aa 00 6a 61 6a 41 6a 01 6a 04 6a 05 b9 40 3f 5e 00 e8 6f ff ff ff", "action 5 uses runtime label 0x00aa4b28 and button frame 4"],
+  [0x0045776c, "6a 00 68 68 4b aa 00 6a 62 6a 42 6a 00 6a 10 6a 0b b9 80 3f 5e 00 e8 39 ff ff ff", "action 11 uses runtime label 0x00aa4b68 and button frame 16"],
+  [0x004577a2, "6a 00 68 a8 4b aa 00 6a 72 6a 52 6a 01 6a 0c 6a 10 b9 a0 3f 5e 00 e8 03 ff ff ff", "action 16 uses runtime label 0x00aa4ba8 and button frame 12"],
+  [0x004577f3, "6a 00 68 08 4c aa 00 6a 63 6a 43 6a 00 6a 2d 6a 13 b9 d0 3f 5e 00 e8 b2 fe ff ff", "action 19 uses runtime label 0x00aa4c08 and button frame 45"],
+  [0x00457847, "6a 00 68 28 4c aa 00 6a 74 6a 54 6a 00 6a 0b 6a 15 b9 10 40 5e 00 e8 5e fe ff ff", "action 21 uses runtime label 0x00aa4c28 and button frame 11"],
+  [0x004578b3, "6a 00 68 a8 4c aa 00 6a 70 6a 50 6a 01 6a 0a 6a 23 b9 40 40 5e 00 e8 f2 fd ff ff", "action 35 uses runtime label 0x00aa4ca8 and button frame 10"],
+  [0x0045791f, "6a 00 68 28 4d aa 00 6a 68 6a 48 6a 01 6a 27 6a 27 b9 60 40 5e 00 e8 86 fd ff ff", "action 39 uses runtime label 0x00aa4d28 and button frame 39"],
   [0x004579f5, "6a 00 6a 00 6a 00 6a 1b 6a 3d b9 10 41 5e 00 e8 b7 fc ff ff", "action 61 constructs a record with button frame 27"],
   [0x00457a13, "6a 00 6a 00 6a 00 6a 1a 6a 3e b9 20 41 5e 00 e8 99 fc ff ff", "action 62 constructs a record with button frame 26"],
   [0x00457a27, "68 68 77 aa 00 68 48 4e aa 00 6a 00 6a 00 6a 00 6a 1c 6a 3f b9 30 41 5e 00 e8 7b fc ff ff", "action 63 constructs a record with button frame 28"],
@@ -102,7 +159,11 @@ export function extractCommandIconFrameBinding({
   const references = readJson(referencesPath);
   assertEqual(references.sourceSha256, EXPECTED_EXECUTABLE_SHA256, `${referencesPath} source SHA-256`);
 
-  const bindings = CONTROL_BINDINGS.map((binding) => ({ ...binding, frame: verifyFrame(button, binding.frameIndex) }));
+  const bindings = CONTROL_BINDINGS.map((binding) => ({
+    ...binding,
+    frame: verifyFrame(button, binding.frameIndex),
+    ...(binding.sourceLabel && { sourceLabel: verifySourceLabel(buffer, image, binding.sourceLabel) }),
+  }));
   const rendererReferences = referenceRows(references, (entry) =>
     entry.fromFunctionEntry === "0x0045ad90" &&
     ["0x005e3f02", "0x0089982c", "0x00899830", "0x00899ce8", "0x0089a41c"].includes(entry.to),
@@ -112,8 +173,8 @@ export function extractCommandIconFrameBinding({
   assertEqual(rendererDigest, RENDERER_REFERENCE_SET.digest, `${RENDERER_REFERENCE_SET.label} digest`);
 
   return {
-    question: "Which exact button.spr pixel frame does each original selected command control action 61..64 submit to the 34x34 draw path?",
-    analysisStatus: "static-confirmed-for-action-61-through-64-to-button-frame-binding",
+    question: "Which exact button.spr pixel frame does each original command control action submit to the 34x34 draw path, and which source CP949 labels are copied into the constructor's runtime label pointers?",
+    analysisStatus: "static-confirmed-for-bounded-command-action-label-and-button-frame-bindings",
     reproductionStatus: "reproduction-complete-for-bounded-control-frame-selection-and-no-draw-failure-boundaries",
     implementationStatus: "analysis-only-no-product-semantic-mapping",
     sources: {
@@ -134,6 +195,12 @@ export function extractCommandIconFrameBinding({
       constructor: "FUN_004576c0",
       actionWord: "+0x00",
       frameWord: "+0x02",
+      commandLabelCopy: {
+        function: "FUN_0048ea90",
+        runtimeBase: toHex(COMMAND_LABEL_RUNTIME_BASE),
+        sourceEncoding: "CP949",
+        order: "FUN_0045f190 passes ECX=0x00aa4018 to FUN_0048ea90, then calls FUN_00457700; each bounded constructor passes its copied runtime label pointer as a later argument.",
+      },
       bindings,
     },
     renderer: {
@@ -146,7 +213,7 @@ export function extractCommandIconFrameBinding({
     rawCodeRanges: RAW_CODE_RANGES.map((range) => verifyRawCodeRange(buffer, image, range)),
     evidencePoints: EVIDENCE.map((point) => verifyEvidencePoint(buffer, image, point)),
     referenceSets: [{ ...RENDERER_REFERENCE_SET, references: rendererReferences }],
-    unresolvedBoundary: "This closes only the original action-ID-to-button pixel-frame path for actions 61..64. It does not assign product semantics or alter the project's independent 4x3 command grid.",
+    unresolvedBoundary: "This closes only the bounded original action-ID-to-button pixel-frame path, and CP949 source-label-to-runtime-pointer path, for actions 2/3/5/11/16/19/21/35/39/61/62/63/64. It does not assign product semantics or alter the project's independent 4x3 command grid.",
   };
 }
 
@@ -183,6 +250,14 @@ export function reproduceCommandIconFrameBinding(input) {
 
   const frame = EXPECTED_FRAMES.get(binding.frameIndex);
   output.frame = { index: binding.frameIndex, ...frame };
+  if (binding.sourceLabel) {
+    output.label = {
+      value: binding.sourceLabel.value,
+      sourceAddress: binding.sourceLabel.address,
+      runtimeAddress: binding.sourceLabel.runtimeAddress,
+      encoding: "CP949",
+    };
+  }
   output.operations.push({
     type: "resolve-button-frame-and-submit-34x34-draw",
     callSite: binding.callSite,
@@ -193,6 +268,15 @@ export function reproduceCommandIconFrameBinding(input) {
 
 export function createCommandIconFrameBindingFixture() {
   const vectors = [
+    ["action-2-stop-frame-43", { slotPresent: true, buttonLoadSucceeded: true, actionId: 2, frameCount: 289 }],
+    ["action-3-move-frame-6", { slotPresent: true, buttonLoadSucceeded: true, actionId: 3, frameCount: 289 }],
+    ["action-5-attack-frame-4", { slotPresent: true, buttonLoadSucceeded: true, actionId: 5, frameCount: 289 }],
+    ["action-11-build-frame-16", { slotPresent: true, buttonLoadSucceeded: true, actionId: 11, frameCount: 289 }],
+    ["action-16-repair-frame-12", { slotPresent: true, buttonLoadSucceeded: true, actionId: 16, frameCount: 289 }],
+    ["action-19-cancel-frame-45", { slotPresent: true, buttonLoadSucceeded: true, actionId: 19, frameCount: 289 }],
+    ["action-21-rally-frame-11", { slotPresent: true, buttonLoadSucceeded: true, actionId: 21, frameCount: 289 }],
+    ["action-35-patrol-frame-10", { slotPresent: true, buttonLoadSucceeded: true, actionId: 35, frameCount: 289 }],
+    ["action-39-hold-frame-39", { slotPresent: true, buttonLoadSucceeded: true, actionId: 39, frameCount: 289 }],
     ["action-61-frame-27", { slotPresent: true, buttonLoadSucceeded: true, actionId: 61, frameCount: 289 }],
     ["action-62-frame-26", { slotPresent: true, buttonLoadSucceeded: true, actionId: 62, frameCount: 289 }],
     ["action-63-frame-28", { slotPresent: true, buttonLoadSucceeded: true, actionId: 63, frameCount: 289 }],
@@ -217,6 +301,18 @@ function verifyFrame(button, frameIndex) {
     assertEqual(frame[key], value, `button.spr frame ${frameIndex} ${key}`);
   }
   return { index: frame.index, relativeOffset: frame.relativeOffset, dataOffset: frame.dataOffset, size: frame.size };
+}
+
+function verifySourceLabel(buffer, image, sourceLabel) {
+  const address = Number.parseInt(sourceLabel.address.slice(2), 16);
+  const expected = Buffer.from(sourceLabel.cp949Bytes, "hex");
+  const actual = readVaRange(buffer, image, address, address + expected.length);
+  assertEqual(Buffer.compare(actual, expected), 0, `${sourceLabel.address} CP949 source bytes`);
+  assertEqual(actual.at(-1), 0, `${sourceLabel.address} CP949 terminator`);
+  assertEqual(new TextDecoder("euc-kr").decode(actual.subarray(0, -1)), sourceLabel.value, `${sourceLabel.address} CP949 decoded label`);
+  const runtimeAddress = Number.parseInt(sourceLabel.runtimeAddress.slice(2), 16);
+  assertEqual(runtimeAddress - COMMAND_LABEL_RUNTIME_BASE, Number.parseInt(sourceLabel.runtimeOffset.slice(2), 16), `${sourceLabel.address} runtime copy offset`);
+  return sourceLabel;
 }
 
 function referenceRows(references, predicate) {
