@@ -5,6 +5,7 @@ import {
   MISSION_BRIEFING_INTRO_FADE_MS,
   MISSION_BRIEFING_INTRO_HOLD_MS,
   beginPresentationPause,
+  createMissionBriefingReplayState,
   getMissionBriefingClickAction,
   getMissionBriefingIntroFadeAlpha,
   getMissionBriefingIntroFrameAlphas,
@@ -32,6 +33,23 @@ test("briefing intro holds the blank frame, then fades the completed frame", () 
       completed: getMissionBriefingIntroFadeAlpha(1_000, 1_000 + MISSION_BRIEFING_INTRO_HOLD_MS + 100, false),
     },
   );
+});
+
+test("briefing replay restarts as a base-only intro with no scheduled line", () => {
+  const replay = createMissionBriefingReplayState(4_000);
+
+  assert.deepEqual(replay, {
+    introStartedAt: 4_000,
+    introCompleted: false,
+    lineIndex: 0,
+    lineRevealAt: null,
+    nextLineAt: null,
+    lineScheduled: false,
+  });
+  assert.deepEqual(getMissionBriefingIntroFrameAlphas(replay.introStartedAt, replay.introStartedAt, replay.introCompleted), {
+    base: 1,
+    completed: 0,
+  });
 });
 
 test("presentation pauses distinguish self-owned playback pause from external pause", () => {
