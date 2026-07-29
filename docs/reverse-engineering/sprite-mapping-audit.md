@@ -5,10 +5,11 @@
 ## 판정
 
 원본 내부 클래스 1~95의 명칭·슬롯·기본 프레임·자원 경로를 전수 정적 확정했다. 현행 23개
-비주얼 중 21개는 원본 타입 하나와 고유하게 연결된다. 조선 본영과 봉화대의 건설·정상·반파 본체는
-`scoped-static-proven`, 정체와 일부 또는 미확정 프레임이 함께 있는 19개는 `mixed`다.
-`farmerk.spr`는 두 타입이 공유하고 `advtowerj.spr`는 95개 타입 정의에 사용되지 않아 두 비주얼만
-`unverified`다. `mixed`인 조선 창병 비주얼에서는 상태 1 일반 이동을, 일본 사무라이와
+비주얼 중 K01 source-created class 7 근거로 분리한 조선 농부를 포함해 22개는 정적 원본 정체와
+연결된다. 조선 본영과 봉화대의 건설·정상·반파 본체는 `scoped-static-proven`, 정체와 일부 또는
+미확정 프레임이 함께 있는 20개는 `mixed`다. `advtowerj.spr`는 95개 타입 정의에 사용되지 않아
+하나만 `unverified`다. `mixed`인 조선 농부 비주얼에서는 K01 source-created `+0x47a==0` 상태
+8 idle·1 move/walk·7 death를, 조선 창병 비주얼에서는 상태 1 일반 이동을, 일본 사무라이와
 권율·유성룡 비주얼에서는 각 문서가 확인한 상태 8 idle·1 일반 이동·4 공격·7 사망을,
 일본 귀갑차에서는 상태 8/1/4의 grid 방향만 정적 확정 범위로 승격했다.
 브리핑 `SPEECH` 초상화 17개는 `static-proven`을 유지한다.
@@ -47,8 +48,10 @@ pnpm imjinrok:audit-sprite-mappings
   `gunj1.spr`는 클래스 12 `일본 조총병`으로 정체·출처가 확정됐다.
 - 과거 권율과 유성룡은 클래스 79 `조선 사명대사`의 `generalk4.spr`를 공유했다. 현재는 권율을
   클래스 76 `generalk11.spr`, 유성룡을 클래스 78 `generalk31.spr`로 분리했다.
-- `farmerk.spr`는 클래스 7 `조선 농부`와 클래스 93 `솜씨 좋은 도공`이 공유하므로 자원 경로만
-  보고 현재 `villager`의 정체를 하나로 확정하지 않는다.
+- `farmerk.spr`는 클래스 7 `조선 농부`와 클래스 93 `솜씨 좋은 도공`이 공유한다. 그러나 K01 map의
+  active owner 0 class-7 records와 map-loader→creator→initializer 경로를 추가로 교차해 현재
+  `villager`의 K01 source-created core-state 범위는 class 7로 분리했다. 이는 class 93의 행동,
+  generic villager 내용·수치 또는 `+0x47a` nonzero branch를 확정하지 않는다.
 - 공통 방향 순서를 `s, sw, w, nw, n, ne, e, se`로 고정했다.
 - 다수 유닛은 원본 다섯 방향을 `n, ne, e, se, s`로 가정하고 나머지 세 방향을 좌우 반전한다.
 - 이 방향 순서와 미러링 방식에 원본 바이너리·데이터 근거가 연결돼 있지 않다.

@@ -23,6 +23,7 @@ import { extractK01SamuraiAnimationPilot } from "./extract-k01-samurai-animation
 import { extractK01TurtleTankAnimationPilot } from "./extract-k01-turtle-tank-animation-pilot.mjs";
 import { extractK01KonishiAnimationPilot } from "./extract-k01-konishi-animation-pilot.mjs";
 import { extractK01CoreUnitAnimations } from "./extract-k01-core-unit-animations.mjs";
+import { extractK01KoreanFarmerCoreFrames } from "./extract-k01-korean-farmer-core-frames.mjs";
 import { extractK01SpecialUnitAnimations } from "./extract-k01-special-unit-animations.mjs";
 import { extractK01NormalReinforcementAnimationBatch } from "./extract-k01-normal-reinforcement-animation-batch.mjs";
 import { extractMissionPortraitMapping } from "./extract-mission-portrait-mapping.mjs";
@@ -77,6 +78,10 @@ const k01CoreUnitAnimationsPath = join(
   repositoryRoot,
   "tools/imjinrok/extract-k01-core-unit-animations.mjs",
 );
+const k01KoreanFarmerCoreFramesPath = join(
+  repositoryRoot,
+  "tools/imjinrok/extract-k01-korean-farmer-core-frames.mjs",
+);
 const k01SpecialUnitAnimationsPath = join(
   repositoryRoot,
   "tools/imjinrok/extract-k01-special-unit-animations.mjs",
@@ -116,6 +121,7 @@ const k01TurtleTankAnimationPilot =
   extractK01TurtleTankAnimationPilot();
 const k01KonishiAnimationPilot = extractK01KonishiAnimationPilot();
 const k01CoreUnitAnimations = extractK01CoreUnitAnimations();
+const k01KoreanFarmerCoreFrames = extractK01KoreanFarmerCoreFrames();
 const k01SpecialUnitAnimations = extractK01SpecialUnitAnimations();
 const k01NormalReinforcementAnimationBatch = extractK01NormalReinforcementAnimationBatch();
 const buildingStatePilot = extractBuildingStatePilot();
@@ -203,7 +209,7 @@ const report = {
   policy: {
     semanticStatus: "mixed",
     acceptedEvidence:
-      "All 95 original type identities, uniquely matched current visual source identities, SPEECH portraits, Korean HQ and signal-beacon body states, K01 classes 2/3/4/11/16 and class-12/13/82 normal core states, class-14 Japanese turtle-tank idle/move/attack grid states plus its non-theme 16-ring turn and creation-default transient destruction contracts, and the K01 heroes' idle, movement, attack, and death frame/direction mappings are statically proven in their documented scopes.",
+      "All 95 original type identities, uniquely matched current visual source identities, K01 source-created class-7 Korean farmer core states, SPEECH portraits, Korean HQ and signal-beacon body states, K01 classes 2/3/4/11/16 and class-12/13/82 normal core states, class-14 Japanese turtle-tank idle/move/attack grid states plus its non-theme 16-ring turn and creation-default transient destruction contracts, and the K01 heroes' idle, movement, attack, and death frame/direction mappings are statically proven in their documented scopes.",
     parityUse:
       "A unique source identity proves the original name and SPR binding only. Only explicitly listed frame scopes may be used for animation parity; all other direction, action, layer, and body mappings remain quarantined.",
   },
@@ -221,6 +227,7 @@ const report = {
     sourceFileRecord(k01TurtleTankAnimationPilotPath),
     sourceFileRecord(k01KonishiAnimationPilotPath),
     sourceFileRecord(k01CoreUnitAnimationsPath),
+    sourceFileRecord(k01KoreanFarmerCoreFramesPath),
     sourceFileRecord(k01SpecialUnitAnimationsPath),
     sourceFileRecord(k01NormalReinforcementAnimationBatchPath),
     sourceFileRecord(buildingStatePilotPath),
@@ -422,6 +429,36 @@ function appendVisualFindings(visual) {
 }
 
 function buildVisualStaticEvidence(visual, identityCandidates) {
+  if (visual.id === "villager-korean-farmer") {
+    const farmer = k01KoreanFarmerCoreFrames;
+    return {
+      status: "mixed",
+      identity: "static-proven",
+      originalGameplayName: farmer.identity.originalGameplayName,
+      internalClass: farmer.identity.internalClass,
+      spriteSlot: farmer.identity.spriteSlot,
+      sourcePath: farmer.identity.sourcePath,
+      baseFrame: 0,
+      flags: farmer.identity.typeFlags,
+      animationStateMapping: "static-proven-core-state-frames",
+      confirmedAnimationScope:
+        "K01 source-created class-7 records use the statically recovered +0x47a==0 state 8 idle, state 1 move/walk, and state 7 death frames, direction order, and mirroring",
+      stateFrameRanges: {
+        idle: farmer.states.idle.frameRange,
+        move: farmer.states.move.frameRange,
+        walk: farmer.states.move.frameRange,
+        death: farmer.states.death.frameRange,
+      },
+      stateSources: {
+        idle: farmer.states.idle.sourcePath,
+        move: farmer.states.move.sourcePath,
+        walk: farmer.states.move.sourcePath,
+        death: farmer.states.death.sourcePath,
+      },
+      unresolvedScope:
+        "+0x47a nonzero resource/carry branches, +0x478 meaning, state 4 attack, exact timing/FPS, pivot, stats, behavior, later runtime mutation, and death lifetime remain unresolved. Carry/gather/build/repair remain project source-layout adaptations.",
+    };
+  }
   if (identityCandidates.length === 0) {
     return {
       status: "unverified",
@@ -965,6 +1002,9 @@ function hasStaticDirectionEvidence(visualId, scope, stateName) {
   }
   if (visualId === "korean-swordsman") {
     return ["idle", "move", "walk", "attack", "death"].includes(stateName);
+  }
+  if (visualId === "villager-korean-farmer") {
+    return ["idle", "move", "walk", "death"].includes(stateName);
   }
   if (["japanese-swordsman", "korean-archer"].includes(visualId)) {
     return ["idle", "move", "walk", "attack", "death"].includes(stateName);

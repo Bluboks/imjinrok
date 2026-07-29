@@ -47,25 +47,25 @@ test("frame mappings stay quarantined outside statically proven scopes while ide
     visualCount: 23,
     unitVisualCount: 14,
     buildingVisualCount: 9,
-    stateMappingCount: 90,
-    clipCount: 634,
-    frameReferenceCount: 4_812,
+    stateMappingCount: 91,
+    clipCount: 643,
+    frameReferenceCount: 4_947,
     missingFrameReferenceCount: 0,
-    unverifiedVisualCount: 2,
-    mixedVisualCount: 19,
+    unverifiedVisualCount: 1,
+    mixedVisualCount: 20,
     scopedStaticProvenVisualCount: 2,
-    staticIdentityVisualCount: 21,
-    ambiguousIdentityVisualCount: 1,
+    staticIdentityVisualCount: 22,
+    ambiguousIdentityVisualCount: 0,
     unboundIdentityVisualCount: 1,
     projectBindingCount: 22,
-    projectBindingConflictCount: 0,
+    projectBindingConflictCount: 1,
     portraitCueCount: 17,
     unverifiedPortraitCueCount: 0,
-    findingCount: 37,
+    findingCount: 31,
   });
   assert.equal(
     report.visuals.filter((visual) => visual.evidenceStatus === "unverified").length,
-    2,
+    1,
   );
   assert.deepEqual(report.entityTypeCatalog.summary, {
     typeCount: 95,
@@ -357,18 +357,12 @@ test("frame mappings stay quarantined outside statically proven scopes while ide
   const currentVillager = report.visuals.find(
     (visual) => visual.visualId === "villager-korean-farmer",
   );
-  assert.equal(currentVillager?.staticEvidence.identity, "ambiguous");
+  assert.equal(currentVillager?.staticEvidence.identity, "static-proven");
+  assert.equal(currentVillager?.staticEvidence.internalClass, 7);
+  assert.equal(currentVillager?.staticEvidence.animationStateMapping, "static-proven-core-state-frames");
   assert.deepEqual(
-    currentVillager?.staticEvidence.identityCandidates.map(
-      ({ internalClass, originalGameplayName }) => [
-        internalClass,
-        originalGameplayName,
-      ],
-    ),
-    [
-      [7, "조선 농부"],
-      [93, "솜씨 좋은 도공"],
-    ],
+    currentVillager?.staticEvidence.stateFrameRanges,
+    { idle: [0, 39], move: [40, 79], walk: [40, 79], death: [240, 247] },
   );
   const unboundAdvancedTower = report.visuals.find(
     (visual) => visual.visualId === "japanese-camp-advanced-tower",
@@ -378,7 +372,7 @@ test("frame mappings stay quarantined outside statically proven scopes while ide
     report.entityTypeCatalog.projectBindings
       .filter((binding) => binding.nameMatchesOriginal === false)
       .map((binding) => binding.entityId),
-    [],
+    ["villager"],
   );
   assert.ok(
     report.portraits.cues.every(
