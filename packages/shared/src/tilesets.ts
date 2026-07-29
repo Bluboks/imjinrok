@@ -2,9 +2,18 @@
  * Renderer-facing terrain contracts. These references deliberately say nothing
  * about how an original map record selects a tile or frame.
  */
+export interface VisualAssetGeometry {
+  width: number;
+  height: number;
+  /** Source-pixel point placed on the map tile's ground-contact point. */
+  footprintAnchor: { x: number; y: number };
+}
+
 export interface VisualAssetRef {
   url: string;
   frame: number;
+  /** Required when a map explicitly renders this asset as a tile. */
+  imageGeometry?: VisualAssetGeometry;
 }
 
 export interface SourceAssetCatalogEntry {

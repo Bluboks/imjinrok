@@ -178,16 +178,21 @@ export function createContentRegistry(packs: readonly ContentPackDefinition[] = 
 
 function createImjinrokTileset(theme: "normal" | "snow" | "brown"): TilesetDefinition {
   const root = `/assets/themes/default/terrain/imjinrok-${theme}`;
+  const imageGeometry = {
+    width: 64,
+    height: 48,
+    footprintAnchor: { x: 32, y: 16 },
+  };
 
   return {
     id: `imjinrok-${theme}`,
     displayName: `Imjinrok ${theme} Source Asset Catalog`,
     terrainAssets: {
-      grass: { url: `${root}/grss1_0000.png`, frame: 0 },
-      water: { url: `${root}/sea0_0000.png`, frame: 0 },
+      grass: { url: `${root}/grss1_0000.png`, frame: 0, imageGeometry },
+      water: { url: `${root}/sea0_0000.png`, frame: 0, imageGeometry },
     },
     elevationAssets: {
-      "1": { url: `${root}/hill0_0000.png`, frame: 0 },
+      "1": { url: `${root}/hill0_0000.png`, frame: 0, imageGeometry },
     },
     evidenceStatus: "unresolved",
     sourceAssets: [

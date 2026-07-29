@@ -139,6 +139,14 @@ import {
 import { placeStaticVisual } from "../render/placeStaticVisual.js";
 import { getEntityAnimationStateKey } from "../render/entityAnimationState.js";
 import {
+  getMapExplicitTileVisualPreloadDescriptors,
+  getRegisteredExplicitTileVisualPreloadDescriptors,
+  requireExplicitTileVisualTexture,
+  resolveExplicitTileVisual,
+  resolveExplicitTileVisualPlacement,
+  type ExplicitTileVisualDescriptor,
+} from "../render/explicitTileVisualResolver.js";
+import {
   getMapResourceVisualPreloadDescriptors,
   getRegisteredResourceVisualPreloadDescriptors,
   requireResourceVisualTexture,
@@ -630,6 +638,12 @@ export class SkirmishScene extends Phaser.Scene {
         this.load.image(descriptor.textureKey, descriptor.url);
       }
     }
+
+    for (const descriptor of getRegisteredExplicitTileVisualPreloadDescriptors(CONTENT_REGISTRY)) {
+      if (!this.textures.exists(descriptor.textureKey)) {
+        this.load.image(descriptor.textureKey, descriptor.url);
+      }
+    }
   }
 
   create(data: GameLaunchContext): void {
@@ -670,6 +684,7 @@ export class SkirmishScene extends Phaser.Scene {
     this.worldState = this.sessionTransport.getSnapshot();
     this.map = this.worldState.map;
     this.ensureSelectedResourceVisualTextures();
+    this.ensureSelectedExplicitTileVisualTextures();
     this.lastSyncedTick = this.worldState.tick;
     this.syncConstructionAudioState(false);
     this.syncProgressAudioState(false);
@@ -5783,14 +5798,20 @@ export class SkirmishScene extends Phaser.Scene {
     const neighbors = this.getElevationNeighbors(point.x, point.y);
     const transitionSlot = resolveElevationTerrainSlot(tile.elevation, neighbors);
     const assets: TerrainDebugAssetInfo[] = [];
+    const explicitFlatVisual = resolveExplicitTileVisual(CONTENT_REGISTRY, this.map, tile, "flat");
     const flatVisual = this.getFlatTerrainVisualForTerrain(tile.terrain);
     const flatFrame = flatVisual ? this.pickTerrainFrame(flatVisual, "base", point.x, point.y) : null;
 
     if (tile.elevation <= 0) {
-      assets.push(this.createTerrainDebugAssetInfo("base", flatVisual, "base", flatFrame));
+      assets.push(explicitFlatVisual
+        ? this.createExplicitTerrainDebugAssetInfo("explicit flat", explicitFlatVisual)
+        : this.createTerrainDebugAssetInfo("base", flatVisual, "base", flatFrame));
     }
 
-    if (transitionSlot) {
+    const explicitElevationVisual = resolveExplicitTileVisual(CONTENT_REGISTRY, this.map, tile, "elevation");
+    if (explicitElevationVisual && tile.elevation > 0) {
+      assets.push(this.createExplicitTerrainDebugAssetInfo(`explicit elevation L${tile.elevation}`, explicitElevationVisual));
+    } else if (transitionSlot) {
       const visualTerrain = this.resolveElevationVisualTerrain(tile.terrain, tile.elevation, neighbors);
       const terrainVisual = this.getTerrainVisualForTerrain(visualTerrain);
       const frame = terrainVisual ? this.pickTerrainFrame(terrainVisual, transitionSlot, point.x, point.y) : null;
@@ -5826,6 +5847,20 @@ export class SkirmishScene extends Phaser.Scene {
       fileName: frame?.fileName ?? null,
       textureKey: frame?.textureKey ?? null,
       loaded: frame ? this.textures.exists(frame.textureKey) : false,
+    };
+  }
+
+  private createExplicitTerrainDebugAssetInfo(
+    label: string,
+    descriptor: ExplicitTileVisualDescriptor,
+  ): TerrainDebugAssetInfo {
+    return {
+      label,
+      visualId: `tileset:${descriptor.tilesetId}`,
+      slot: null,
+      fileName: descriptor.url,
+      textureKey: descriptor.textureKey,
+      loaded: this.textures.exists(descriptor.textureKey),
     };
   }
 
@@ -6934,6 +6969,13 @@ export class SkirmishScene extends Phaser.Scene {
     worldY: number,
   ): void {
     const tile = getTileAt(this.map, x, y);
+    const explicitVisual = resolveExplicitTileVisual(CONTENT_REGISTRY, this.map, tile, "flat");
+
+    if (explicitVisual) {
+      this.drawExplicitTileFog(renderTexture, bounds, explicitVisual, visibility, worldX, worldY, 0);
+      return;
+    }
+
     const flatVisual = this.getFlatTerrainVisualForTerrain(tile.terrain);
     const flatFrame = flatVisual ? this.pickTerrainFrame(flatVisual, "base", x, y) : null;
 
@@ -7021,6 +7063,13 @@ export class SkirmishScene extends Phaser.Scene {
     worldY: number,
   ): boolean {
     const tile = getTileAt(this.map, x, y);
+    const explicitVisual = resolveExplicitTileVisual(CONTENT_REGISTRY, this.map, tile, "elevation");
+
+    if (explicitVisual && tile.elevation > 0) {
+      this.drawExplicitTileFog(renderTexture, bounds, explicitVisual, visibility, worldX, worldY, tile.elevation);
+      return true;
+    }
+
     const neighbors = this.getElevationNeighbors(x, y);
     const slot = resolveElevationTerrainSlot(tile.elevation, neighbors);
 
@@ -7230,10 +7279,13 @@ export class SkirmishScene extends Phaser.Scene {
             const iso = cartToIso({ x, y }, this.map.tileWidth, this.map.tileHeight);
             const worldX = this.mapOrigin.x + iso.x;
             const worldY = this.mapOrigin.y + iso.y;
+            const explicitVisual = resolveExplicitTileVisual(CONTENT_REGISTRY, this.map, tile, "flat");
             const flatVisual = this.getFlatTerrainVisualForTerrain(tile.terrain);
             const flatFrame = flatVisual ? this.pickTerrainFrame(flatVisual, "base", x, y) : null;
 
-            if (flatVisual && flatFrame && this.textures.exists(flatFrame.textureKey)) {
+            if (explicitVisual) {
+              this.drawExplicitTileVisual(renderTexture, { minX, minY }, explicitVisual, worldX, worldY, 0);
+            } else if (flatVisual && flatFrame && this.textures.exists(flatFrame.textureKey)) {
               renderTexture.draw(this.getTerrainRenderStamp(flatVisual, flatFrame), worldX - minX, worldY - minY);
             } else {
               renderTexture.draw(this.terrainTextureKeys.get(tile.terrain)!, worldX - minX - halfWidth - 1, worldY - minY - halfHeight - 1);
@@ -7253,6 +7305,19 @@ export class SkirmishScene extends Phaser.Scene {
     for (let y = 0; y < this.map.height; y += 1) {
       for (let x = 0; x < this.map.width; x += 1) {
         const tile = getTileAt(this.map, x, y);
+        const explicitVisual = resolveExplicitTileVisual(CONTENT_REGISTRY, this.map, tile, "elevation");
+
+        if (explicitVisual) {
+          if (tile.elevation <= 0) {
+            continue;
+          }
+          const iso = cartToIso({ x, y }, this.map.tileWidth, this.map.tileHeight);
+          const worldX = this.mapOrigin.x + iso.x;
+          const worldY = this.mapOrigin.y + iso.y;
+          this.elevationOverlays.push(this.createExplicitElevationOverlay(explicitVisual, worldX, worldY, tile.elevation, x, y));
+          continue;
+        }
+
         const neighbors = this.getElevationNeighbors(x, y);
         const slot = resolveElevationTerrainSlot(tile.elevation, neighbors);
 
@@ -7360,6 +7425,117 @@ export class SkirmishScene extends Phaser.Scene {
     stamp.setOrigin(origin.x, origin.y).setScale(scale);
     this.terrainRenderStamps.set(stampKey, stamp);
 
+    return stamp;
+  }
+
+  private drawExplicitTileVisual(
+    renderTexture: Phaser.GameObjects.RenderTexture,
+    bounds: Pick<FogChunkBounds, "minX" | "minY">,
+    descriptor: ExplicitTileVisualDescriptor,
+    worldX: number,
+    worldY: number,
+    elevationSteps: number,
+  ): void {
+    requireExplicitTileVisualTexture(descriptor.textureKey, (key) => this.textures.exists(key));
+    const placement = resolveExplicitTileVisualPlacement(
+      descriptor,
+      { x: worldX, y: worldY },
+      this.map.tileWidth,
+      this.map.tileHeight,
+      elevationSteps,
+    );
+    renderTexture.draw(
+      this.getExplicitTileRenderStamp(descriptor),
+      placement.position.x - bounds.minX,
+      placement.position.y - bounds.minY,
+    );
+  }
+
+  private createExplicitElevationOverlay(
+    descriptor: ExplicitTileVisualDescriptor,
+    worldX: number,
+    worldY: number,
+    elevationSteps: number,
+    tileX: number,
+    tileY: number,
+  ): Phaser.GameObjects.Image {
+    requireExplicitTileVisualTexture(descriptor.textureKey, (key) => this.textures.exists(key));
+    const placement = resolveExplicitTileVisualPlacement(
+      descriptor,
+      { x: worldX, y: worldY },
+      this.map.tileWidth,
+      this.map.tileHeight,
+      elevationSteps,
+    );
+
+    return this.add
+      .image(placement.position.x, placement.position.y, descriptor.textureKey)
+      .setOrigin(placement.origin.x, placement.origin.y)
+      .setScale(placement.scale)
+      .setDepth(this.getTerrainChunkDepthForTile(tileX, tileY) + RENDER_DEPTH_BIAS.elevation);
+  }
+
+  private getExplicitTileRenderStamp(descriptor: ExplicitTileVisualDescriptor): Phaser.GameObjects.Image {
+    const stampKey = `explicit:${descriptor.textureKey}:${this.map.tileWidth}x${this.map.tileHeight}`;
+    const existing = this.terrainRenderStamps.get(stampKey);
+
+    if (existing) {
+      return existing;
+    }
+
+    requireExplicitTileVisualTexture(descriptor.textureKey, (key) => this.textures.exists(key));
+    const placement = resolveExplicitTileVisualPlacement(descriptor, { x: 0, y: 0 }, this.map.tileWidth, this.map.tileHeight);
+    const stamp = this.make.image({ x: 0, y: 0, key: descriptor.textureKey, add: false });
+    stamp.setOrigin(placement.origin.x, placement.origin.y).setScale(placement.scale);
+    this.terrainRenderStamps.set(stampKey, stamp);
+    return stamp;
+  }
+
+  private drawExplicitTileFog(
+    renderTexture: Phaser.GameObjects.RenderTexture,
+    bounds: FogChunkBounds,
+    descriptor: ExplicitTileVisualDescriptor,
+    visibility: TileVisibility,
+    worldX: number,
+    worldY: number,
+    elevationSteps: number,
+  ): void {
+    requireExplicitTileVisualTexture(descriptor.textureKey, (key) => this.textures.exists(key));
+    const placement = resolveExplicitTileVisualPlacement(
+      descriptor,
+      { x: worldX, y: worldY },
+      this.map.tileWidth,
+      this.map.tileHeight,
+      elevationSteps,
+    );
+    renderTexture.draw(
+      this.getExplicitTileFogStamp(descriptor, visibility),
+      placement.position.x - bounds.minX,
+      placement.position.y - bounds.minY,
+    );
+  }
+
+  private getExplicitTileFogStamp(
+    descriptor: ExplicitTileVisualDescriptor,
+    visibility: TileVisibility,
+  ): Phaser.GameObjects.Image {
+    const stampKey = `explicit:${visibility}:${descriptor.textureKey}:${this.map.tileWidth}x${this.map.tileHeight}`;
+    const existing = this.elevationFogStamps.get(stampKey);
+
+    if (existing) {
+      return existing;
+    }
+
+    requireExplicitTileVisualTexture(descriptor.textureKey, (key) => this.textures.exists(key));
+    const placement = resolveExplicitTileVisualPlacement(descriptor, { x: 0, y: 0 }, this.map.tileWidth, this.map.tileHeight);
+    const alpha = visibility === TileVisibility.Unexplored ? FOG_UNEXPLORED_ALPHA : FOG_EXPLORED_ALPHA;
+    const stamp = this.make.image({ x: 0, y: 0, key: descriptor.textureKey, add: false });
+    stamp
+      .setOrigin(placement.origin.x, placement.origin.y)
+      .setScale(placement.scale)
+      .setAlpha(alpha)
+      .setTint(0x020608);
+    this.elevationFogStamps.set(stampKey, stamp);
     return stamp;
   }
 
@@ -7726,6 +7902,12 @@ export class SkirmishScene extends Phaser.Scene {
   private ensureSelectedResourceVisualTextures(): void {
     for (const descriptor of getMapResourceVisualPreloadDescriptors(CONTENT_REGISTRY, this.map)) {
       requireResourceVisualTexture(descriptor.textureKey, (key) => this.textures.exists(key));
+    }
+  }
+
+  private ensureSelectedExplicitTileVisualTextures(): void {
+    for (const descriptor of getMapExplicitTileVisualPreloadDescriptors(CONTENT_REGISTRY, this.map)) {
+      requireExplicitTileVisualTexture(descriptor.textureKey, (key) => this.textures.exists(key));
     }
   }
 
