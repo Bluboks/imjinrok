@@ -62,6 +62,7 @@ import {
   type MinimapGeometry,
 } from "../ui/minimap.js";
 import { drawActionGrid, getEnabledActionForHotkey } from "../ui/actionGrid.js";
+import { ORIGINAL_COMMAND_ICON_ASSETS } from "../ui/sourceFogAndCommandAssets.js";
 import { resolveProductActionGridLayoutForScenario } from "../ui/actionGridLayoutPolicy.js";
 import { drawPanelFrame, HUD_TEXT_STYLE, type PanelBounds } from "../ui/hudPanel.js";
 import {
@@ -139,6 +140,11 @@ export class UIScene extends Phaser.Scene {
         OBJECTIVE_MODAL_FRAME_TEXTURE_KEY,
         ORIGINAL_OBJECTIVE_PANEL_FRAME_ASSET,
       );
+    }
+    for (const asset of ORIGINAL_COMMAND_ICON_ASSETS) {
+      if (!this.textures.exists(asset.textureKey)) {
+        this.load.image(asset.textureKey, asset.assetPath);
+      }
     }
   }
 

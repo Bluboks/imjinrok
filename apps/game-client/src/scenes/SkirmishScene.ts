@@ -161,6 +161,16 @@ import {
 import { createFormationTargets } from "../formation.js";
 import { launchGameWithPreGameBriefing } from "../preGameBriefingLaunch.js";
 import {
+  CARDINAL_FOG_NEIGHBOR_OFFSETS,
+  K01_NORMAL_FOG_PROFILE_MAP_ID,
+  NORMAL_FOG_ASSETS,
+  requireSourceTexture,
+  resolveK01NormalFogTransition,
+  resolveSourceFogTileScale,
+  type FogVisibility,
+  type SourceFogTile,
+} from "../ui/sourceFogAndCommandAssets.js";
+import {
   BUILD_DONE_AUDIO_CUE_KEY,
   COMMAND_REJECTED_AUDIO_CUE_KEY,
   GAMEPLAY_AUDIO_CUES,
@@ -457,6 +467,7 @@ export class SkirmishScene extends Phaser.Scene {
   private readonly terrainChunks: Phaser.GameObjects.RenderTexture[] = [];
   private readonly terrainRenderStamps = new Map<string, Phaser.GameObjects.Image>();
   private readonly elevationFogStamps = new Map<string, Phaser.GameObjects.Image>();
+  private readonly sourceFogStamps = new Map<string, Phaser.GameObjects.Image>();
   private readonly elevationOverlays: Phaser.GameObjects.Image[] = [];
   private readonly fogChunks: (Phaser.GameObjects.RenderTexture | null)[] = [];
   private readonly knownResourceViews = new Map<string, KnownResourceView>();
@@ -594,6 +605,12 @@ export class SkirmishScene extends Phaser.Scene {
 
     if (!this.textures.exists(MISSION_RESULT_BACKDROP_IMAGE_KEY)) {
       this.load.image(MISSION_RESULT_BACKDROP_IMAGE_KEY, MISSION_RESULT_BACKDROP_URL);
+    }
+
+    for (const asset of NORMAL_FOG_ASSETS) {
+      if (!this.textures.exists(asset.textureKey)) {
+        this.load.image(asset.textureKey, asset.assetPath);
+      }
     }
   }
 
@@ -1079,6 +1096,7 @@ export class SkirmishScene extends Phaser.Scene {
     this.terrainChunks.length = 0;
     this.disposeTerrainRenderStamps();
     this.disposeElevationFogStamps();
+    this.disposeSourceFogStamps();
     this.disposeElevationOverlay();
     this.disposeFogOverlay();
     this.disposeEnvironmentOverlay();
@@ -6719,7 +6737,7 @@ export class SkirmishScene extends Phaser.Scene {
       this.lastVisibilityDeltaMs = performance.now() - startedAt;
     }
 
-    return update.dirtyChunkCount;
+    return this.expandDirtyFogChunksForK01Transitions(update.dirtyChunkCount);
   }
 
   private revealAllLocalVisibility(): number {
@@ -6768,6 +6786,7 @@ export class SkirmishScene extends Phaser.Scene {
 
   private configureFogChunkGrid(): void {
     this.disposeFogOverlay();
+    this.disposeSourceFogStamps();
     this.fogChunksPerRow = Math.ceil(this.map.width / TERRAIN_CHUNK_SIZE);
     this.fogChunksPerColumn = Math.ceil(this.map.height / TERRAIN_CHUNK_SIZE);
     this.fogChunkDirtyMask = new Uint8Array(this.fogChunksPerRow * this.fogChunksPerColumn);
@@ -6785,6 +6804,7 @@ export class SkirmishScene extends Phaser.Scene {
 
     if (this.perfEnabled) console.time("fog full bake");
     this.ensureFogTextures();
+    this.ensureK01NormalFogTextures();
 
     let tileDrawCount = 0;
 
@@ -6814,6 +6834,7 @@ export class SkirmishScene extends Phaser.Scene {
 
     if (this.perfEnabled) console.time("fog dirty bake");
     this.ensureFogTextures();
+    this.ensureK01NormalFogTextures();
 
     let redrawnChunkCount = 0;
     let tileDrawCount = 0;
@@ -6873,6 +6894,8 @@ export class SkirmishScene extends Phaser.Scene {
           }
         }
 
+        this.drawK01NormalFogTransition(renderTexture, bounds, visibility, x, y, worldX, worldY);
+
         hasFog = true;
         tileDrawCount += 1;
       }
@@ -6915,6 +6938,59 @@ export class SkirmishScene extends Phaser.Scene {
     const halfHeight = this.map.tileHeight / 2;
 
     renderTexture.draw(textureKey, worldX - bounds.minX - halfWidth - 1, worldY - bounds.minY - halfHeight - 1);
+  }
+
+  private drawK01NormalFogTransition(
+    renderTexture: Phaser.GameObjects.RenderTexture,
+    bounds: FogChunkBounds,
+    visibility: TileVisibility,
+    x: number,
+    y: number,
+    worldX: number,
+    worldY: number,
+  ): void {
+    if (getTileAt(this.map, x, y).elevation > 0) return;
+    const source = resolveK01NormalFogTransition(
+      this.map.id,
+      this.toSourceFogVisibility(visibility),
+      (direction) => {
+        const offset = CARDINAL_FOG_NEIGHBOR_OFFSETS[direction];
+        const neighborX = x + offset.x;
+        const neighborY = y + offset.y;
+        return this.toSourceFogVisibility(this.getFogVisibilityAt(neighborX, neighborY));
+      },
+    );
+
+    if (!source) return;
+    requireSourceTexture(source, (textureKey) => this.textures.exists(textureKey));
+    renderTexture.draw(this.getSourceFogStamp(source), worldX - bounds.minX, worldY - bounds.minY);
+  }
+
+  private getFogVisibilityAt(x: number, y: number): TileVisibility {
+    if (x < 0 || x >= this.map.width || y < 0 || y >= this.map.height) {
+      return TileVisibility.Unexplored;
+    }
+    return (this.playerVisibility.tiles[y * this.playerVisibility.width + x] ?? TileVisibility.Unexplored) as TileVisibility;
+  }
+
+  private toSourceFogVisibility(visibility: TileVisibility): FogVisibility {
+    if (visibility === TileVisibility.Visible) return "visible";
+    return visibility === TileVisibility.Explored ? "explored" : "unseen";
+  }
+
+  private getSourceFogStamp(source: SourceFogTile): Phaser.GameObjects.Image {
+    const stampKey = `${source.textureKey}:${source.alpha}`;
+    const existing = this.sourceFogStamps.get(stampKey);
+    if (existing) return existing;
+
+    const stamp = this.make.image({ x: 0, y: 0, key: source.textureKey, add: false });
+    const scale = resolveSourceFogTileScale(this.map.tileWidth, this.map.tileHeight);
+    stamp
+      .setOrigin(0.5, 0.5)
+      .setScale(scale.x, scale.y)
+      .setAlpha(source.alpha);
+    this.sourceFogStamps.set(stampKey, stamp);
+    return stamp;
   }
 
   private drawElevationFogTile(
@@ -7061,6 +7137,41 @@ export class SkirmishScene extends Phaser.Scene {
       g.destroy();
       this.fogTextureKeys.set(style.visibility, key);
     }
+  }
+
+  private ensureK01NormalFogTextures(): void {
+    if (this.map.id !== K01_NORMAL_FOG_PROFILE_MAP_ID) return;
+    for (const asset of NORMAL_FOG_ASSETS) {
+      requireSourceTexture(asset, (textureKey) => this.textures.exists(textureKey));
+    }
+  }
+
+  private expandDirtyFogChunksForK01Transitions(dirtyChunkCount: number): number {
+    if (dirtyChunkCount === 0 || this.map.id !== K01_NORMAL_FOG_PROFILE_MAP_ID) {
+      return dirtyChunkCount;
+    }
+
+    const originallyDirty = Array.from(this.fogChunkDirtyMask.entries())
+      .filter(([, dirty]) => dirty === 1)
+      .map(([chunkIndex]) => chunkIndex);
+    for (const chunkIndex of originallyDirty) {
+      const chunkX = chunkIndex % this.fogChunksPerRow;
+      const chunkY = Math.floor(chunkIndex / this.fogChunksPerRow);
+      for (let offsetY = -1; offsetY <= 1; offsetY += 1) {
+        for (let offsetX = -1; offsetX <= 1; offsetX += 1) {
+          const neighborX = chunkX + offsetX;
+          const neighborY = chunkY + offsetY;
+          if (neighborX < 0 || neighborX >= this.fogChunksPerRow || neighborY < 0 || neighborY >= this.fogChunksPerColumn) continue;
+          this.fogChunkDirtyMask[neighborY * this.fogChunksPerRow + neighborX] = 1;
+        }
+      }
+    }
+
+    let expandedCount = 0;
+    for (const dirty of this.fogChunkDirtyMask) {
+      expandedCount += dirty;
+    }
+    return expandedCount;
   }
 
   private redrawTerrain(): void {
@@ -7269,6 +7380,11 @@ export class SkirmishScene extends Phaser.Scene {
   private disposeElevationFogStamps(): void {
     this.elevationFogStamps.forEach((stamp) => stamp.destroy());
     this.elevationFogStamps.clear();
+  }
+
+  private disposeSourceFogStamps(): void {
+    this.sourceFogStamps.forEach((stamp) => stamp.destroy());
+    this.sourceFogStamps.clear();
   }
 
   private applyVisualTextureFilter(visual: TerrainVisual, frame: FrameRef): void {

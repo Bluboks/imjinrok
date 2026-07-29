@@ -1,0 +1,13 @@
+{
+  "button": {
+    "path": "original/imjinrok2/fnt/button.spr",
+    "sha256": "cfe7bab02f2cb8a1f97a3161075e617ace22d6ecf5a976546263a7c67e4efbb4",
+    "header": { "width": 34, "height": 34, "frameCount": 289 },
+    "exportedFrames": [26, 27, 28, 29]
+  },
+  "normalFog": {
+    "sourceCount": 15,
+    "header": { "width": 32, "height": 16, "frameCount": 96 },
+    "exportedFrame": 0
+  }
+}
