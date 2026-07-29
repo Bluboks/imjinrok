@@ -31,6 +31,7 @@ import {
   type GameLaunchContext,
   type QuickSavePayload,
 } from "../session.js";
+import { launchGameWithPreGameBriefing } from "../preGameBriefingLaunch.js";
 
 const MENU_STYLE: Phaser.Types.GameObjects.Text.TextStyle = {
   fontFamily: "Noto Sans KR, Malgun Gothic, Apple SD Gothic Neo, Trebuchet MS, sans-serif",
@@ -393,12 +394,7 @@ export class MainMenuScene extends Phaser.Scene {
   }
 
   private launchGame(context: GameLaunchContext): void {
-    if (this.scene.isActive("ui")) {
-      this.scene.stop("ui");
-    }
-
-    this.scene.start("skirmish", context);
-    this.scene.launch("ui", context);
+    launchGameWithPreGameBriefing(this.scene, context);
   }
 
   private startCampaignMissionK01(): void {
