@@ -43,15 +43,7 @@ function assertFarmerResourceWorkEvidence(visual, sourcePath, frameStarts) {
   const resourceWork = visual?.staticEvidence.resourceWork;
   assert.equal(resourceWork?.analysisStatus, "static-confirmed");
   assert.equal(resourceWork?.reproductionStatus, "reproduction-complete");
-  assert.deepEqual(resourceWork?.projectAdapter, {
-    projectState: "gather",
-    originalAnimationState: 10,
-    implementationStatus: "partially-implemented",
-    confirmedAnimationScope:
-      "generic project gather intentionally adapts the recovered original state-10 source layout only",
-    boundary:
-      "This adapter does not map project resource names to selector identities and does not establish product mappings or human-readable meanings for original states 11/16.",
-  });
+  assert.equal(resourceWork?.implementationStatus, "partial-project-adapters");
   for (const [state, frameStart] of Object.entries(frameStarts)) {
     const sharedBand = state === "10";
     assert.deepEqual(resourceWork?.originalStates[state], {
@@ -60,6 +52,54 @@ function assertFarmerResourceWorkEvidence(visual, sourcePath, frameStarts) {
       directionFrames: expectedResourceWorkDirectionFrames(frameStart, sharedBand),
     });
   }
+  const expectedAdapters = [
+    {
+      projectStates: ["gather"],
+      originalAnimationState: 10,
+      implementationStatus: "intentional-source-layout-adapter",
+    },
+    ...(visual?.visualId === "villager-korean-farmer"
+      ? [{ projectStates: ["build", "repair"], originalAnimationState: 11, implementationStatus: "intentional-source-layout-adapter" }]
+      : []),
+  ];
+  assert.deepEqual(
+    resourceWork?.projectAdapters.map(({ projectStates, originalAnimationState, implementationStatus }) => ({ projectStates, originalAnimationState, implementationStatus })),
+    expectedAdapters,
+  );
+  for (const adapter of resourceWork?.projectAdapters ?? []) {
+    const sourceLayout = resourceWork.originalStates[adapter.originalAnimationState];
+    assert.deepEqual(adapter.sourceLayout, sourceLayout);
+    for (const projectState of adapter.projectStates) {
+      const mapping = visual?.mappings.find(({ scope, state }) => scope === "base" && state === projectState);
+      assert.ok(mapping, `${visual?.visualId} ${projectState} mapping`);
+      assert.deepEqual(
+        mapping.clips.filter(({ facing }) => facing !== "default").map(({ facing, frameIndexes, mirrorX }) => ({ facing, frameIndexes, mirrorX })).sort((left, right) => left.facing.localeCompare(right.facing)),
+        sourceLayout.directionFrames.map(({ facing, frameRange, mirrorX }) => ({
+          facing,
+          frameIndexes: Array.from({ length: frameRange[1] - frameRange[0] + 1 }, (_, index) => frameRange[0] + index),
+          mirrorX,
+        })).sort((left, right) => left.facing.localeCompare(right.facing)),
+        `${visual?.visualId} ${projectState} must match original state-${adapter.originalAnimationState} source layout`,
+      );
+    }
+  }
+}
+
+function assertFarmerState4FallbackEvidence(visual, sourcePath, frameStart) {
+  const fallback = visual?.staticEvidence.creationDefaultState4Fallback;
+  assert.equal(fallback?.analysisStatus, "static-confirmed");
+  assert.equal(fallback?.reproductionStatus, "reproduction-complete");
+  assert.deepEqual(fallback?.condition, {
+    sourceCreated: true,
+    typeFlagsHighBit: "clear",
+    creationWord144: 0,
+    initializerRange: visual?.staticEvidence.internalClass === 7 ? "0x0042981d-0x004298e7" : "0x00429b90-0x00429c59",
+  });
+  assert.equal(fallback?.originalVisualState, 4);
+  assert.equal(fallback?.fallbackOriginalVisualState, 8);
+  assert.equal(fallback?.sourcePath, sourcePath);
+  assert.deepEqual(fallback?.directionFrames, expectedResourceWorkDirectionFrames(frameStart));
+  assert.match(fallback?.productBoundary ?? "", /No product attack clip is inferred/);
 }
 
 test("sprite mapping audit is deterministic and current", (t) => {
@@ -106,7 +146,7 @@ test("frame mappings stay quarantined outside statically proven scopes while ide
     projectBindingConflictCount: 0,
     portraitCueCount: 17,
     unverifiedPortraitCueCount: 0,
-    findingCount: 28,
+    findingCount: 24,
   });
   assert.equal(
     report.visuals.filter((visual) => visual.evidenceStatus === "unverified").length,
@@ -179,6 +219,7 @@ test("frame mappings stay quarantined outside statically proven scopes while ide
     11: 80,
     16: 120,
   });
+  assertFarmerState4FallbackEvidence(japaneseFarmer, "char\\farmerj.spr", 0);
   assert.deepEqual(japaneseFarmer?.staticEvidence.nonzeroResourceBranch, {
     condition: "unsigned WORD entity +0x47a != 0",
     analysisStatus: "static-confirmed",
@@ -491,7 +532,7 @@ test("frame mappings stay quarantined outside statically proven scopes while ide
   assert.equal(currentVillager?.staticEvidence.animationStateMapping, "static-proven-core-state-frames");
   assert.deepEqual(
     currentVillager?.staticEvidence.stateFrameRanges,
-    { idle: [0, 39], move: [40, 79], walk: [40, 79], death: [240, 247], gather: [120, 127] },
+    { idle: [0, 39], move: [40, 79], walk: [40, 79], death: [240, 247], gather: [120, 127], build: [160, 199], repair: [160, 199] },
   );
   assert.deepEqual(currentVillager?.staticEvidence.stateSources.gather, "char\\farmerk.spr");
   assert.deepEqual(
@@ -503,6 +544,7 @@ test("frame mappings stay quarantined outside statically proven scopes while ide
     11: 160,
     16: 200,
   });
+  assertFarmerState4FallbackEvidence(currentVillager, "char\\farmerk.spr", 0);
   assert.deepEqual(currentVillager?.staticEvidence.nonzeroResourceBranch, {
     condition: "unsigned WORD entity +0x47a != 0",
     analysisStatus: "static-confirmed",
@@ -542,17 +584,15 @@ test("frame mappings stay quarantined outside statically proven scopes while ide
     ),
     false,
   );
-  for (const state of ["build", "repair"]) {
-    assert.equal(
-      report.findings.some(
-        (finding) =>
-          finding.visualId === "villager-korean-farmer" &&
-          finding.state === state &&
-          ["direction-order-unverified", "mirrored-facing-unverified"].includes(finding.code),
-      ),
-      true,
-    );
-  }
+  assert.equal(japaneseFarmer?.mappings.some(({ state }) => ["build", "repair"].includes(state)), false);
+  assert.equal(
+    report.findings.filter(
+      (finding) =>
+        ["villager-korean-farmer", "japanese-farmer"].includes(finding.visualId) &&
+        finding.severity === "blocking",
+    ).length,
+    0,
+  );
   const unboundAdvancedTower = report.visuals.find(
     (visual) => visual.visualId === "japanese-camp-advanced-tower",
   );

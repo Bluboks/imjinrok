@@ -13,8 +13,9 @@ source-created internal class 7 `조선 농부`와 class 31 `일본 농부`가 c
   `25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e`
 - 분석 상태: `정적 확정`
 - 재현 상태: `재현 완료`
-- 제품 구현 상태: `pending audit` — 기존 product visual이 이 제한된 source-created fallback과
-  정렬하는지는 아직 감사하지 않았다.
+- 제품 구현 상태: 감사 정렬 완료 — audit가 class 7·31의 source-created creation-default fallback을
+  구조화해 기록한다. 제품에 state-4 전용 clip이나 추정 `attack` clip은 추가하지 않으며, source-created
+  fallback 밖의 state-4 product mapping은 여전히 없다.
 
 ## 생성 기본값과 initializer 범위
 

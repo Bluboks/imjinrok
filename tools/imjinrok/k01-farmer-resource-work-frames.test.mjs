@@ -21,7 +21,7 @@ test("recovers K01 farmer resource-work states 10, 11, and 16 with 96 boundary v
   const report = extractK01FarmerResourceWorkFrames();
   assert.equal(report.analysisStatus, "static-confirmed");
   assert.equal(report.reproductionStatus, "reproduction-complete");
-  assert.equal(report.implementationStatus, "pending-project-adapter");
+  assert.equal(report.implementationStatus, "partial-project-adapters");
   assert.deepEqual(report.stateDispatch, { 10: "0x0041ecd0", 11: "0x0041edc0", 16: "0x0041d560" });
   assert.deepEqual(report.states[7][10], {
     originalAnimationState: 10, phaseCount: 8, spriteSlot: 105, frameStart: 120, frameStride: 0, directionProfile: "state-10",

@@ -139,7 +139,7 @@ export function extractK01FarmerResourceWorkFrames(options = {}) {
   return {
     schemaVersion: 1,
     question: "K01 class 7/31에서 original visual state 10/11/16이 어떤 resource-work slot/frame/direction/mirror를 선택하며 resource flow는 어떤 raw visual state를 쓰는가?",
-    analysisStatus: "static-confirmed", reproductionStatus: "reproduction-complete", implementationStatus: "pending-project-adapter",
+    analysisStatus: "static-confirmed", reproductionStatus: "reproduction-complete", implementationStatus: "partial-project-adapters",
     sources: { executable: { path: paths.executablePath, sha256: EXPECTED_EXECUTABLE_SHA256 }, functions: sourceRecord(paths.functionsPath, functions), jumpTables: sourceRecord(paths.jumpTablesPath, jumpTables), references: sourceRecord(paths.referencesPath, references), seeds: sourceRecord(paths.seedsPath, seeds), farmerResourceBranch: prior.sources },
     identities: prior.identities, stateDispatch: STATE_DISPATCH, states, directions: { state10: STATE_TEN_DIRECTIONS, state11And16: NORMAL_DIRECTIONS },
     resourceVisualStateWrites: { functionEntry: "0x004562d0", selectorCases: { 1: 10, 2: 10, 3: 11 }, alternateRoutine: { functionEntry: "0x004554c0", writeVa: "0x00455937", state: 16 }, uncertainty: "selector human-readable resource names, raw visual state 16 human meaning, and the full resource lifecycle remain unconfirmed." },
@@ -147,7 +147,7 @@ export function extractK01FarmerResourceWorkFrames(options = {}) {
     resourceWorkCadenceContract: resourceWorkCadenceContract(),
     functionEvidence, rawCodeRanges, evidencePoints, callEdges, seedsEvidence, testVectors,
     acceptedInputScope: "K01 classes 7/31; original visual states 10, 11, 16; recovered raw directions; frame phase 0..7; and raw action substate 8 state-16 cadence replay with the documented fixed-width numeric inputs.",
-    unresolvedScope: "Human-readable action names for states 10/11/16 (including build/repair), selector resource names, raw visual state 16 human meaning, timing/FPS, pivot, stats, behavior, complete resource lifecycle, and any product adapter remain unconfirmed or pending.",
+    unresolvedScope: "Human-readable action names for states 10/11/16 (including build/repair), selector resource names, raw visual state 16 human meaning, timing/FPS, pivot, stats, behavior, and the complete resource lifecycle remain unconfirmed. Current project adapters are intentionally limited to source layouts.",
   };
 }
 
