@@ -1,13 +1,11 @@
 import {
   getTileAt,
   terrainDefinitions,
-  unitDefinitions,
   type GridPoint,
   type MapDefinition,
 } from "../../shared/src/index.js";
-import { getFootprintTiles } from "./placement.js";
+import { getEntityBlockingTiles } from "./collision.js";
 import { isTilePassableForUnit } from "./terrain.js";
-import { iterateUnitsOrdered } from "./units.js";
 import type { UnitState, WorldState } from "./types.js";
 
 const NEIGHBORS: readonly GridPoint[] = [
@@ -37,7 +35,7 @@ export function findPathForUnit(
 ): GridPoint[] | null {
   const start = toTilePoint(unit.position);
   const requestedGoal = toTilePoint(target);
-  const blockedTiles = getStaticBlockingTiles(state);
+  const blockedTiles = getEntityBlockingTiles(state, unit.id, options.allowPartial !== true);
   const startKey = toTileKey(start);
 
   blockedTiles.delete(startKey);
@@ -146,26 +144,6 @@ export function isTerrainWalkable(map: MapDefinition, point: GridPoint): boolean
   const tile = getTileAt(map, point.x, point.y);
 
   return !terrainDefinitions[tile.terrain].blocksMovement;
-}
-
-function getStaticBlockingTiles(state: WorldState): Set<string> {
-  const blockedTiles = new Set<string>();
-
-  for (const unit of iterateUnitsOrdered(state)) {
-    const definition = unitDefinitions[unit.kind];
-
-    if (definition.category !== "building" || !definition.footprint.blocksMovement) {
-      continue;
-    }
-
-    const footprintTiles = getFootprintTiles(unit.position, definition.footprint);
-
-    for (const tile of footprintTiles) {
-      blockedTiles.add(toTileKey(tile));
-    }
-  }
-
-  return blockedTiles;
 }
 
 function resolveWalkableGoals(

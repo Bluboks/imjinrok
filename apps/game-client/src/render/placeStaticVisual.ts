@@ -1,6 +1,6 @@
 import Phaser from "phaser";
 import type { FrameRef, VisualBase } from "@shared";
-import { getAssetScale, getFrameOrigin, getFramePivot, REFERENCE_PX_PER_WU } from "./visualScale.js";
+import { getAssetScale, getGroundContactPlacement, REFERENCE_PX_PER_WU } from "./visualScale.js";
 
 export interface StaticVisualPosition {
   x: number;
@@ -26,16 +26,20 @@ export function placeStaticVisual(
     : scene.add.image(position.x, position.y, frame.textureKey);
   const pxPerWu = options.pxPerWu ?? REFERENCE_PX_PER_WU;
   const assetScale = getAssetScale(visual, pxPerWu);
-  const origin = getFrameOrigin(visual, frame);
-  const pivot = getFramePivot(visual, frame);
-  const liftPx = (pivot.liftPx ?? 0) * assetScale * (options.liftSteps ?? 1);
+  const placement = getGroundContactPlacement(
+    visual,
+    frame,
+    position,
+    options.liftSteps ?? 1,
+    pxPerWu,
+  );
 
   applyTextureFilter(scene, visual, frame);
 
   image
-    .setOrigin(origin.x, origin.y)
+    .setOrigin(placement.origin.x, placement.origin.y)
     .setScale(assetScale)
-    .setPosition(position.x, position.y - liftPx)
+    .setPosition(placement.position.x, placement.position.y)
     .setDepth(options.depth + (options.depthBias ?? 0));
 
   return image;

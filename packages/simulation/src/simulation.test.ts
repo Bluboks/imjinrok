@@ -238,6 +238,48 @@ test("move orders complete when the unit reaches its final waypoint", () => {
   assert.equal(unit.currentOrder, undefined);
 });
 
+test("terminal explicit move follow-up selects its requested target before nearby opportunistic enemies", () => {
+  const state = createInitialWorldState(createBlankMap({ width: 12, height: 12 }), ["p1", "p2"]);
+  state.units = {};
+  const mover = createUnitState("p1-mover", "p1", "villager", { x: 2, y: 2 });
+  const requestedTarget = createUnitState("p2-requested", "p2", "villager", { x: 8, y: 2 });
+  const nearbyEnemy = createUnitState("p2-nearby", "p2", "swordsman", { x: 3, y: 3 });
+  mover.movementSpeed = 100;
+  mover.movementTarget = { x: 3, y: 2 };
+  mover.movementPath = [{ x: 3, y: 2 }];
+  mover.currentOrder = {
+    type: "move",
+    target: { x: 3, y: 2 },
+    followUpAttackTarget: { playerId: "p2", targetKind: "villager" },
+  };
+  state.units[mover.id] = mover;
+  state.units[requestedTarget.id] = requestedTarget;
+  state.units[nearbyEnemy.id] = nearbyEnemy;
+
+  advanceWorldTick(state);
+
+  assert.deepEqual(mover.currentOrder, { type: "attack-unit", targetUnitId: requestedTarget.id });
+});
+
+test("terminal explicit move follow-up clears the move when its selector has no target", () => {
+  const state = createInitialWorldState(createBlankMap({ width: 12, height: 12 }), ["p1", "p2"]);
+  state.units = {};
+  const mover = createUnitState("p1-mover", "p1", "villager", { x: 2, y: 2 });
+  mover.movementSpeed = 100;
+  mover.movementTarget = { x: 3, y: 2 };
+  mover.movementPath = [{ x: 3, y: 2 }];
+  mover.currentOrder = {
+    type: "move",
+    target: { x: 3, y: 2 },
+    followUpAttackTarget: { playerId: "p2", targetKind: "archer" },
+  };
+  state.units[mover.id] = mover;
+
+  advanceWorldTick(state);
+
+  assert.equal(mover.currentOrder, undefined);
+});
+
 test("completed move orders restore idle aggro acquisition", () => {
   const state = createInitialWorldState(createBlankMap({ width: 30, height: 30 }), ["p1", "p2"], {
     ...defaultSkirmishScenario,

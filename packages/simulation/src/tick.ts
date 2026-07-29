@@ -7,6 +7,7 @@ import { arePlayersAllied, arePlayersEnemies } from "./diplomacy.js";
 import { createUnitState } from "./entities.js";
 import { getEnvironmentSightMultiplier, updateEnvironment } from "./environment.js";
 import { findPathForUnit } from "./navigation.js";
+import { canUnitOccupyPosition, createMovementReservation, reserveUnitPosition, type MovementReservation } from "./collision.js";
 import { getFootprintTiles } from "./placement.js";
 import { getPlayerPopulationState, getPopulationCost } from "./population.js";
 import { applyCompletedResearchToUnit, completeResearch } from "./research.js";
@@ -41,10 +42,12 @@ export function advanceWorldTick(state: WorldState): void {
   advanceProductionQueues(state);
   advanceResearchQueues(state);
 
+  const movementReservation = createMovementReservation();
+
   for (const unit of iterateUnitsOrdered(state)) {
     if (state.units[unit.id]) {
       advanceUnitScriptedBehavior(state, unit);
-      advanceUnitMovement(state, unit, SIM_TICK_SECONDS);
+      advanceUnitMovement(state, unit, SIM_TICK_SECONDS, movementReservation);
       advanceOpportunisticResourceDropoff(state, unit);
       advanceUnitPatrol(state, unit);
       advanceUnitGathering(state, unit);
@@ -290,7 +293,12 @@ function setNextMovementTarget(unit: UnitState, path: readonly GridPoint[]): voi
   delete unit.movementTarget;
 }
 
-function advanceUnitMovement(state: WorldState, unit: UnitState, deltaSeconds: number): void {
+function advanceUnitMovement(
+  state: WorldState,
+  unit: UnitState,
+  deltaSeconds: number,
+  movementReservation: MovementReservation,
+): void {
   const target = unit.movementTarget;
 
   if (applyConditionalTravelFollowUp(state, unit)) {
@@ -309,6 +317,11 @@ function advanceUnitMovement(state: WorldState, unit: UnitState, deltaSeconds: n
     return;
   }
 
+  if (!canUnitOccupyPosition(state, unit, target) || !reserveUnitPosition(movementReservation, unit, target)) {
+    repathBlockedMovementWaypoint(state, unit);
+    return;
+  }
+
   const deltaX = target.x - unit.position.x;
   const deltaY = target.y - unit.position.y;
   const distance = Math.hypot(deltaX, deltaY);
@@ -316,6 +329,7 @@ function advanceUnitMovement(state: WorldState, unit: UnitState, deltaSeconds: n
   if (distance <= TARGET_EPSILON) {
     unit.position = { ...target };
     advanceMovementWaypoint(state, unit);
+    applyConditionalTravelFollowUp(state, unit);
     return;
   }
 
@@ -324,6 +338,7 @@ function advanceUnitMovement(state: WorldState, unit: UnitState, deltaSeconds: n
   if (step >= distance) {
     unit.position = { ...target };
     advanceMovementWaypoint(state, unit);
+    applyConditionalTravelFollowUp(state, unit);
     return;
   }
 
@@ -331,6 +346,7 @@ function advanceUnitMovement(state: WorldState, unit: UnitState, deltaSeconds: n
     x: unit.position.x + (deltaX / distance) * step,
     y: unit.position.y + (deltaY / distance) * step,
   };
+  applyConditionalTravelFollowUp(state, unit);
 }
 
 function clearBlockedMovementWaypoint(unit: UnitState): void {
@@ -339,6 +355,46 @@ function clearBlockedMovementWaypoint(unit: UnitState): void {
 
   if (unit.currentOrder?.type === "move") {
     delete unit.currentOrder;
+  }
+}
+
+function repathBlockedMovementWaypoint(state: WorldState, unit: UnitState): void {
+  const destination = getMovementDestination(unit);
+
+  if (!destination) {
+    return;
+  }
+
+  const path = findPathForUnit(state, unit, destination, {
+    allowPartial: unit.scriptedBehavior?.allowPartialPath === true,
+  });
+
+  if (!path) {
+    return;
+  }
+
+  // The only reachable fallback can be the current footprint. Keep the blocked
+  // target so a later removal or move can admit the unit on a future tick.
+  if (path.length === 0) {
+    return;
+  }
+
+  unit.movementPath = path;
+  setNextMovementTarget(unit, path);
+}
+
+function getMovementDestination(unit: UnitState): GridPoint | undefined {
+  switch (unit.currentOrder?.type) {
+    case "move":
+    case "attack-move":
+      return unit.currentOrder.target;
+    case "patrol":
+      return unit.currentOrder.nextTarget;
+    case "build":
+    case "gather":
+      return unit.currentOrder.target;
+    default:
+      return unit.movementPath?.at(-1) ?? unit.movementTarget;
   }
 }
 
@@ -362,13 +418,14 @@ function advanceMovementWaypoint(state: WorldState, unit: UnitState): void {
 function completeTerminalTravelOrder(state: WorldState, unit: UnitState, pathExhausted: boolean): void {
   const order = unit.currentOrder;
 
-  if ((order?.type === "move" || order?.type === "attack-move") && isAtOrderTarget(unit, order.target)) {
-    delete unit.currentOrder;
+  if (pathExhausted && order?.type === "move" && order.followUpAttackTarget && !unit.movementTarget && !unit.movementPath) {
+    applyFollowUpAttackTarget(state, unit, order.followUpAttackTarget);
     return;
   }
 
-  if (pathExhausted && order?.type === "move" && order.followUpAttackTarget && !unit.movementTarget && !unit.movementPath) {
-    applyFollowUpAttackTarget(state, unit, order.followUpAttackTarget);
+  if ((order?.type === "move" || order?.type === "attack-move") && isAtOrderTarget(unit, order.target)) {
+    delete unit.currentOrder;
+    return;
   }
 }
 

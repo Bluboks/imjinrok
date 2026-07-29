@@ -18,7 +18,7 @@ export interface RenderProfile {
 }
 
 export interface PivotSpec {
-  /** Source-pixel anchor that is placed on the target world point. */
+  /** Source-pixel anchor placed on the entity's simulation ground-contact point. */
   anchor: VisualPoint;
   /** Optional source-pixel visual lift applied by generic placement helpers. */
   liftPx?: number;

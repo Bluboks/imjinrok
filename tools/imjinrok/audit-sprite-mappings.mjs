@@ -224,6 +224,7 @@ for (const visual of Object.values(defaultTheme.visuals)
   };
   visualRecords.push(visualRecord);
   appendVisualFindings(visualRecord);
+  appendPivotFindings(visual);
   appendIdentityFindings(visualRecord);
 }
 
@@ -459,6 +460,55 @@ function appendVisualFindings(visual) {
       });
     }
   }
+}
+
+function appendPivotFindings(visual) {
+  const defaultPivot = visual.defaults.pivot.anchor;
+  const defaultSize = visual.defaults.size;
+
+  if (!isPivotInsideFrame(defaultPivot, defaultSize)) {
+    findings.push({
+      severity: "blocking",
+      code: "pivot-anchor-out-of-bounds",
+      visualId: visual.id,
+      detail: "The configured source-pixel ground-contact anchor is not inside the declared source frame.",
+      anchor: defaultPivot,
+      size: defaultSize,
+    });
+  }
+
+  for (const layer of visual.layers ?? []) {
+    for (const stateName of Object.keys(layer.states)) {
+      if (visual.states[stateName] !== undefined) {
+        continue;
+      }
+      findings.push({
+        severity: "blocking",
+        code: "layer-state-without-base-state",
+        visualId: visual.id,
+        layerId: layer.id,
+        state: stateName,
+        detail: "A layer declares a state that the base entity visual does not declare.",
+      });
+    }
+  }
+
+  if (visual.kind === "entity") {
+    findings.push({
+      severity: "info",
+      code: "pivot-evidence-project-adaptation",
+      visualId: visual.id,
+      detail: "Current source-pixel pivot anchors are project ground-contact adapters unless narrower static pivot evidence is recorded.",
+    });
+  }
+}
+
+function isPivotInsideFrame(anchor, size) {
+  return Number.isFinite(anchor.x) && Number.isFinite(anchor.y) &&
+    Number.isFinite(size.w) && Number.isFinite(size.h) &&
+    size.w > 0 && size.h > 0 &&
+    anchor.x >= 0 && anchor.x <= size.w &&
+    anchor.y >= 0 && anchor.y <= size.h;
 }
 
 function buildVisualStaticEvidence(visual, identityCandidates) {
