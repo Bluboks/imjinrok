@@ -81,6 +81,12 @@ Ghidra의 메모리 지도에는 PE 네 섹션 외에 헤더와 분석용 `tdb` 
 | --- | --- | --- |
 | `char/swordk.spr` | `414d285b207ba12afdd856a0f16ddde615381cf491fe493d6ededf91681b55eb` | 조선 창병 정체와 상태 1 일반 이동·상태 2 별도 이동 프레임 식 |
 | `char/farmerk.spr` | `98e370f4dec6f147a2556340bf93d293d23c3ee3a5367bc22fd3984e7209e5ca` | K01 source-created class 7 조선 농부의 `+0x47a==0` 상태 8/1/7 core frame |
+| `char/millk.spr` | `bb393d9a34cf7ae752c124a077cb4333bc0151f1a171f76a1e74201bbc57ac29` | K01 class 48 조선 방앗간 source identity·base frame 7 |
+| `char/hqk.spr` | `17e5640a7b34f8aaf1063d210bd087b8ba59d769e194f5025e92941e422c2d4e` | K01 class 49 조선 본영 source identity·base frame 7; body-state 파일럿은 별도 |
+| `char/advbarrackk.spr` | `df40eb785b60824087329ec991e27b0dd88d5fe4ec918f742d8b06c363aa6bf5` | K01 class 51 조선 훈련도감 source identity·base frame 7 |
+| `char/jhq.spr` | `db1b4e9b9a587473b4f18c651fb7cac9791a5d21ad23f56285c0a3f5c22ffba2` | K01 class 58 일본 본영 source identity·base frame 7 |
+| `char/barrackj.spr` | `f71072d74f7fbe1e2646c9ae13ca2f2172f5c096749262a77f477ae8dcb4038d` | K01 class 60 일본 훈련소 source identity·base frame 7 |
+| `char/towerj.spr` | `bbaa6ec6390d1f1d4c48bccc9787e7d1dcabc729fc290dd92a76673426674693` | K01 class 63 일본 망루 source identity·base frame 7 |
 | `char/generalk11.spr` | `658617ea4c762e85ff4e47167f6ed2f8cf1b37e8daea69338ed3e2c61c5bd829` | 조선 권율 상태 1 이동 0~39, 상태 7 사망 40~47 |
 | `char/generalk12.spr` | `9ae22b6fb4e4218b7625b6d73aaaf44a2696822d1ff4e518e396a1128c95a72b` | 조선 권율 상태 4 공격 방향 block, phase 8 |
 | `char/generalk13.spr` | `2576233295024781ab5c83da38116ac43ce24a2a2a7b0203876126b480bcdcf9` | 조선 권율 상태 8 대기 0~39 |
