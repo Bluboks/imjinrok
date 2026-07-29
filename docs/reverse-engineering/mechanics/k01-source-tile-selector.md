@@ -8,7 +8,7 @@
 | --- | --- | --- |
 | 분석 | 정적 확정 | K01 `60×60`, theme 0 normal, object/frame byte address, loader record object index·frame bounds |
 | 재현 | 재현 완료 | 3,600 coordinate pair digest, object별 frame range, bounds/invalid object/invalid frame 및 source 변조 거부 |
-| 구현 | 없음 | 제품 renderer·asset export·passability/elevation을 변경하지 않음 |
+| 구현 | 부분 이식 | K01에만 exact object/frame→명시적 flat visual key/PNG를 연결; terrain/passability/elevation은 기존 product scaffold 유지 |
 
 ## 원본 입력과 byte 경로
 
@@ -43,9 +43,22 @@ object별 count/frame range로 재현하며, fixture에 중복된 3,600개 목�
 node tools/imjinrok/extract-k01-source-tile-selector.mjs \
   --output analysis/fixtures/k01-source-tile-selector.json
 node --test tools/imjinrok/k01-source-tile-selector.test.mjs
+node tools/imjinrok/export-k01-source-tile-visuals.mjs
+node --test tools/imjinrok/export-k01-source-tile-visuals.test.mjs
 ```
+
+`export-k01-source-tile-visuals.mjs`는 canonical hash-bound selector에서 다시 얻은 3,600개 stream을
+검사하고 K01에서 실제로 쓰는 243개 normal `YTL` frame만 PNG로 낸다. 생성된 browser-safe artifact는
+source file을 runtime에 읽지 않으며, x-major 원본 stream을 product `TileCell`의 row-major index로
+옮겨 `flatAssetKey`를 설정한다. `imjinrok-k01`에만 이 선택을 map terrain/spawn-lane/starter mutation 뒤에
+적용한다. K02와 다른 map은 명시적 K01 source tile selection을 받지 않는다.
+
+선택된 `hill`/`diff`/`grss` source filename은 모두 flat visual collection에만 등록한다. 이는 이 분석이
+확정한 object/frame identity를 보존하기 위한 계약이며 filename에서 elevation 또는 terrain meaning을
+추론하지 않는다. source canvas `64×48`, anchor `(32,16)`과 chunk overhang 계산은 product/mod renderer
+adapter다. 원본 pixel pivot·placement parity 주장이 아니다.
 
 ## 미확정 경계
 
 이 결과는 source object와 frame index 선택만 확정한다. terrain의 사람용 이름, passability, elevation, world meaning,
-pixel pivot/placement, 다른 map/theme, 그리고 현재 웹 renderer의 원작 일치는 포함하지 않는다.
+원본 pixel pivot/placement, 다른 map/theme, 그리고 현재 웹 renderer 전체의 원작 일치는 포함하지 않는다.

@@ -1,4 +1,5 @@
 import { resourceDefinitions, type BuiltInResourceDefinitionId, type FactionId, type TerrainType } from "./content.js";
+import { applyK01SourceTileVisuals } from "./k01SourceTileVisuals.js";
 import { createBlankMap, getTileIndex, type MapDefinition, type ResourceNode, type SpawnPoint, type TileCell } from "./maps.js";
 
 const FACTIONS: readonly FactionId[] = ["blue", "red", "green", "yellow"];
@@ -206,6 +207,11 @@ export function createImjinrokMapScaffold(mapId: string): MapDefinition | null {
     addCenterResourcePatch(map);
   }
   carveMissionRoute(map, metadata.missionRouteWaypoints);
+  if (metadata.id === "imjinrok-k01") {
+    const groundLayer = map.layers[0];
+    if (!groundLayer) throw new Error("K01 scaffold has no ground layer for source tile visual assignment.");
+    applyK01SourceTileVisuals(groundLayer.tiles, map.width, map.height);
+  }
 
   return map;
 }

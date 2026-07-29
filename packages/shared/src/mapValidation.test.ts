@@ -140,14 +140,14 @@ test("map validation reports concrete invalid day/night curve paths", () => {
   ]);
 });
 
-test("K01 retains only its normal tileset identity without an inferred night cycle", () => {
+test("K01 retains its normal tileset identity, exact explicit source tiles, and no inferred night cycle", () => {
   const map = createImjinrokMapScaffold("imjinrok-k01");
   assert.ok(map);
 
   assert.equal(map.tilesetId, "imjinrok-normal");
   assert.equal(map.environmentVisualProfileId, "core-default");
   assert.equal(map.environment, undefined);
-  assert.equal(map.layers.every((layer) => layer.tiles.every((tile) => tile.tilesetVisuals === undefined)), true);
+  assert.equal(map.layers.every((layer) => layer.tiles.every((tile) => tile.tilesetVisuals?.flatAssetKey?.startsWith("k01-source:") === true)), true);
   assert.equal(validateMapDefinition(map, createContentRegistry()).ok, true);
 });
 

@@ -11,6 +11,7 @@ import {
   type UnitDefinition,
 } from "./content.js";
 import type { EnvironmentVisualProfile, ResourceVisualSetDefinition, TilesetDefinition } from "./tilesets.js";
+import { getK01SourceTileVisualAssets, K01_SOURCE_TILE_IMAGE_GEOMETRY } from "./k01SourceTileVisuals.js";
 
 const KNOWN_DAMAGE_TYPES = new Set(["physical", "fire", "lightning", "drowning"]);
 
@@ -184,12 +185,21 @@ function createImjinrokTileset(theme: "normal" | "snow" | "brown"): TilesetDefin
     footprintAnchor: { x: 32, y: 16 },
   };
 
+  const k01SourceAssets = theme === "normal"
+    ? Object.fromEntries(getK01SourceTileVisualAssets().map((asset) => [asset.assetKey, {
+      url: `${root}/${asset.fileName}`,
+      frame: asset.frame,
+      imageGeometry: K01_SOURCE_TILE_IMAGE_GEOMETRY,
+    }]))
+    : {};
+
   return {
     id: `imjinrok-${theme}`,
     displayName: `Imjinrok ${theme} Source Asset Catalog`,
     terrainAssets: {
       grass: { url: `${root}/grss1_0000.png`, frame: 0, imageGeometry },
       water: { url: `${root}/sea0_0000.png`, frame: 0, imageGeometry },
+      ...k01SourceAssets,
     },
     elevationAssets: {
       "1": { url: `${root}/hill0_0000.png`, frame: 0, imageGeometry },

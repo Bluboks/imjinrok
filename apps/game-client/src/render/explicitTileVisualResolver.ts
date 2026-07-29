@@ -25,6 +25,13 @@ export interface ExplicitTileVisualPlacement {
   readonly scale: number;
 }
 
+export interface ExplicitTileVisualWorldBounds {
+  readonly left: number;
+  readonly top: number;
+  readonly right: number;
+  readonly bottom: number;
+}
+
 type TilesetRegistry = Pick<ContentRegistry, "tilesets">;
 type TilesetMap = Pick<MapDefinition, "id" | "tilesetId" | "layers">;
 
@@ -134,6 +141,24 @@ export function resolveExplicitTileVisualPlacement(
     },
     scale,
   };
+}
+
+/** Includes source canvas overhang so chunk textures cannot clip explicit art. */
+export function resolveExplicitTileVisualWorldBounds(
+  descriptor: Pick<ExplicitTileVisualDescriptor, "imageGeometry">,
+  groundContact: { x: number; y: number },
+  mapTileWidth: number,
+  mapTileHeight: number,
+  elevationSteps = 0,
+): ExplicitTileVisualWorldBounds {
+  const placement = resolveExplicitTileVisualPlacement(descriptor, groundContact, mapTileWidth, mapTileHeight, elevationSteps);
+  const geometry = descriptor.imageGeometry;
+  const width = geometry.width * placement.scale;
+  const height = geometry.height * placement.scale;
+  const left = placement.position.x - geometry.footprintAnchor.x * placement.scale;
+  const top = placement.position.y - geometry.footprintAnchor.y * placement.scale;
+
+  return { left, top, right: left + width, bottom: top + height };
 }
 
 export function requireExplicitTileVisualTexture(textureKey: string, exists: (textureKey: string) => boolean): void {

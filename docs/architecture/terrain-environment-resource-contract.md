@@ -12,6 +12,7 @@
 | map의 `tilesetId`·visual profile·resource visual set 선택 | `프로젝트 전용` | 명시적 registry 참조와 loud validation |
 | light curve와 dawn/day/dusk/night simulation output | `의도적 적응` | opt-in fixed-tick curve |
 | K01 원본 tile source object/frame selector | `원본 사실` | `FUN_00469330`의 K01 normal source object/frame 범위; pixel placement와 terrain 의미는 별도 |
+| K01 exact visual export·map assignment | `source-backed project adaptation` | 243 normal PNG와 K01-only explicit flat asset assignment; web anchor/chunk placement adapter |
 
 ## 원본 source fact
 
@@ -39,8 +40,11 @@ object/frame의 제한된 경로를 정적 확정했다. `crop0` frame 0→`rice
 가질 수 있다. `imjinrok-source-assets` pack은 gameplay terrain/resource/unit을 재선언하지 않는 source
 catalog pack이다. 이를 `isorts-core`와 조합해야 map reference가 resolve된다.
 
-K01/K02 scaffold는 `imjinrok-normal` tileset identity만 선택한다. source night catalog나 cycle은 K01 map에
-적용하지 않는다. K01에 자원 node를 새로 추가하지 않으며, existing K01 resource tile가 없는 상태도 그대로다.
+K01/K02 scaffold는 `imjinrok-normal` tileset identity만 선택한다. K01은 source selector가 확정한 3,600개
+object/frame stream을 243개 exported normal PNG의 explicit **flat** selection으로 적용한다. 이것은 terrain
+type/passability/elevation을 바꾸지 않으며 `hill`/`diff` filename도 world meaning으로 승격하지 않는다. K02에는
+이 K01-only selection을 적용하지 않는다. source night catalog나 cycle은 K01 map에 적용하지 않는다. K01에 자원
+node를 새로 추가하지 않으며, existing K01 resource tile가 없는 상태도 그대로다.
 
 ## light curve
 
@@ -57,12 +61,12 @@ tick 0에서 dawn으로 시작해 600 tick 뒤 day가 된다. K01/K02와 다른 
 
 후속 renderer는 registry를 resolve한 뒤 다음만 소비한다.
 
-1. terrain: K01의 exact original map byte→normal source object/frame rule은 확인됐지만 아직 제품 renderer에
-   연결하지 않는다. catalog의 `grss1`/`hill0` frame 0을 전 tile에 반복 선택하는 terrain resolver를 만들지
-   않는다. 모드 map은 `TileCell.tilesetVisuals`의 `flatAssetKey`/`elevationAssetKey`로 선택한 `tilesetId`
-   collection key만 명시적으로 사용할 수 있다. 선택하지 않은 surface는 기존 theme fallback을 유지한다. tile
-   asset의 image geometry와 footprint anchor는 모드 renderer 계약이며 original tile canvas/pivot/selection
-   규칙 주장이 아니다.
+1. terrain: K01은 exact original map byte→normal source object/frame rule로 고른 243개 frame을 `TileCell`
+   `flatAssetKey`에 명시적으로 연결한다. catalog의 `grss1`/`hill0` frame 0을 전 tile에 반복 선택하지 않는다.
+   K02와 모드 map은 `TileCell.tilesetVisuals`의 `flatAssetKey`/`elevationAssetKey`로 선택한 `tilesetId`
+   collection key만 명시적으로 사용할 수 있고, 선택하지 않은 surface는 기존 theme fallback을 유지한다. tile
+   image geometry `(64×48, anchor 32,16)`과 source-canvas overhang chunk bounds는 product/mod renderer 계약이며
+   original tile canvas/pivot/placement parity 주장이 아니다.
 2. resource: generic `resolveMapResourceVisual(registry, map, kind, state)`가 map-selected set의
    `resourceVisualSet.resources[kind]?.states[state]`를 반환한다. visual set ID가 없는 legacy map과
    매핑되지 않은 kind/state는 `null`이고 preload는 빈 배열이다. scene preload는 launch map 확정 전이므로
@@ -83,6 +87,8 @@ normal/snow/brown representative export도 원본 tile selection의 증거가 �
 node tools/imjinrok/extract-imjinrok-environment-assets.mjs --output analysis/fixtures/imjinrok-environment-assets.json
 node tools/imjinrok/export-imjinrok-environment-assets.mjs
 node --test tools/imjinrok/imjinrok-environment-assets.test.mjs
+node tools/imjinrok/export-k01-source-tile-visuals.mjs
+node --test tools/imjinrok/export-k01-source-tile-visuals.test.mjs
 ```
 
 다음 원본 분석은 K01 source frame의 pixel placement/pivot과 다른 map/theme selector, night palette/YAV
