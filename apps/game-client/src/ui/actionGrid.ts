@@ -6,9 +6,15 @@ import {
   ADAPTIVE_ACTION_GRID_LAYOUT,
   type ActionGridLayoutPolicy,
 } from "./actionGridLayoutPolicy.js";
+import {
+  requireSourceTexture,
+  resolveSourceCommandIcon,
+  type SourceCommandIcon,
+} from "./sourceFogAndCommandAssets.js";
 
 export interface HudActionSlot {
   actionId?: ActionDefinitionId;
+  sourceIcon?: SourceCommandIcon;
   icon: string;
   hotkey: string;
   label: string;
@@ -115,14 +121,24 @@ export function drawActionGrid(
       container.add(hitZone);
     }
 
-    container.add(scene.add
-      .text(slotX + renderedSlotWidth / 2, slotY + 10, action.icon, {
+    const iconVisual = resolveActionIconVisual(action);
+    if (iconVisual.kind === "source") {
+      requireSourceTexture(iconVisual.icon, (textureKey) => scene.textures.exists(textureKey));
+      container.add(scene.add
+        .image(slotX + renderedSlotWidth / 2, slotY + 20, iconVisual.icon.textureKey)
+        .setDisplaySize(30, 30)
+        .setOrigin(0.5, 0.5)
+        .setAlpha(action.enabled ? 1 : 0.48));
+    } else {
+      container.add(scene.add
+        .text(slotX + renderedSlotWidth / 2, slotY + 10, iconVisual.glyph, {
         fontFamily: "Georgia, Times New Roman, serif",
         fontSize: "20px",
         color: action.enabled ? "#f1dfaa" : "#6d817a",
         fontStyle: "bold",
       })
-      .setOrigin(0.5, 0));
+        .setOrigin(0.5, 0));
+    }
     container.add(scene.add
       .text(slotX + renderedSlotWidth / 2, slotY + renderedSlotHeight - 24, action.label, {
         ...HUD_TEXT_STYLE,
@@ -231,11 +247,18 @@ function toHudActionSlot(
 
   return {
     actionId,
+    sourceIcon: resolveSourceCommandIcon(actionId),
     icon: action.icon,
     hotkey: action.hotkey,
     label: action.label,
     ...getActionAvailability(actionId, selectedEntities, playerEconomy),
   };
+}
+
+export function resolveActionIconVisual(action: Pick<HudActionSlot, "icon" | "sourceIcon">):
+  | { kind: "source"; icon: SourceCommandIcon }
+  | { kind: "glyph"; glyph: string } {
+  return action.sourceIcon ? { kind: "source", icon: action.sourceIcon } : { kind: "glyph", glyph: action.icon };
 }
 
 function getActionAvailability(
