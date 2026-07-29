@@ -4,13 +4,15 @@ import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import test from "node:test";
 
-import { extractK01FarmerResourceWorkFrames, selectK01FarmerResourceWorkFrame } from "./extract-k01-farmer-resource-work-frames.mjs";
+import { extractK01FarmerResourceWorkFrames, replayK01FarmerResourceWorkCadence, selectK01FarmerResourceWorkFrame } from "./extract-k01-farmer-resource-work-frames.mjs";
 
 const root = resolve(import.meta.dirname, "../..");
 const fixturePath = join(root, "analysis/fixtures/k01-farmer-resource-work-frame-vectors.json");
+const cadenceFixturePath = join(root, "analysis/fixtures/k01-farmer-resource-work-cadence-vectors.json");
 const paths = {
   executablePath: join(root, "original/imjinrok2/imjinrok2.exe"),
   functionsPath: join(root, "analysis/generated/imjinrok2/functions.json"),
+  jumpTablesPath: join(root, "analysis/generated/imjinrok2/jump-tables.json"),
   referencesPath: join(root, "analysis/generated/imjinrok2/references.json"),
   seedsPath: join(root, "analysis/generated/imjinrok2/seeds.json"),
 };
@@ -30,9 +32,41 @@ test("recovers K01 farmer resource-work states 10, 11, and 16 with 96 boundary v
     functionEntry: "0x004562d0", selectorCases: { 1: 10, 2: 10, 3: 11 }, alternateRoutine: { functionEntry: "0x004554c0", writeVa: "0x00455937", state: 16 },
     uncertainty: "selector human-readable resource names and the internal condition that reaches the state-16 write remain unconfirmed.",
   });
+  assert.deepEqual(report.resourceWorkActionDispatch, {
+    functionEntry: "0x004554c0", switchAddress: "0x004554ec", rawActionSubstate: 8, jumpTableLabel: 7, destination: "0x00455882",
+  });
+  assert.equal(report.resourceWorkCadenceContract.fastStart.elapsed, "signed absolute DWORD difference abs(subrecord +0x0c - global DWORD 0x007c5f80) > 300");
+  assert.equal(report.resourceWorkCadenceContract.cadence.threshold, "signed BYTE entity +0x6f >= signed BYTE entity +0x6e + 2");
   const fixture = JSON.parse(readFileSync(fixturePath, "utf8"));
   const actual = report.testVectors.map(({ internalClass, state, direction, phase, frameIndex, mirrorX }) => [internalClass, state, direction, phase, frameIndex, mirrorX]);
   assert.deepEqual(actual, fixture.vectors);
+});
+
+test("replays the scoped raw state-16 fast-start and cadence boundaries", () => {
+  const fixture = JSON.parse(readFileSync(cadenceFixturePath, "utf8"));
+  assert.match(fixture.acceptedNumericScope, /unsigned DWORD/);
+  for (const vector of fixture.vectors) {
+    const replay = replayK01FarmerResourceWorkCadence(vector.input);
+    const actual = {
+      route: replay.route,
+      fastStart: replay.fastStart ?? null,
+      elapsedSignedMagnitude: replay.elapsedSignedMagnitude,
+      cadenceThresholdReached: replay.cadenceThresholdReached,
+      terminalReturn: replay.terminalReturn,
+      subrecord: {
+        lastTickDword: replay.subrecord.lastTickDword,
+        cadenceLatchWord: replay.subrecord.cadenceLatchWord,
+      },
+      entity: Object.fromEntries(Object.keys(vector.expected.entity).map((key) => [key, replay.entity[key]])),
+    };
+    assert.deepEqual(actual, vector.expected, vector.id);
+  }
+  assert.throws(() => replayK01FarmerResourceWorkCadence({
+    rawActionSubstate: 7,
+    subrecord: { selectorWord: 3, periodWord: 3, cadenceLatchWord: 0, lastTickDword: 0 },
+    entity: { phaseWord: 0, cadenceLimitByte: 0, cadenceCounterByte: 0, directionWord: 1 },
+    globals: { tickDword: 301, moduloDword: 0 },
+  }), /scoped dispatcher value 8/);
 });
 
 test("replays state-specific direction profiles and rejects unscoped input", () => {
@@ -60,6 +94,8 @@ test("rejects tampered canonical function, reference, seed, and raw EXE evidence
   assert.throws(() => extractK01FarmerResourceWorkFrames({ functionsPath }), /0x0041edc0 instruction count/);
   const referencesPath = mutateJson(paths.referencesPath, (value) => { value.references.find(({ from }) => from === "0x0041d25d").to = "0x0041d561"; });
   assert.throws(() => extractK01FarmerResourceWorkFrames({ referencesPath }), /0x0041d25d -> 0x0041d560/);
+  const jumpTablesPath = mutateJson(paths.jumpTablesPath, (value) => { Object.values(value.tables).find(({ switchAddress }) => switchAddress === "0x004554ec").cases.find(({ label }) => label === 7).destination = "0x00455883"; });
+  assert.throws(() => extractK01FarmerResourceWorkFrames({ jumpTablesPath }), /resource-work action case 7 destination/);
   const seedsPath = mutateJson(paths.seedsPath, (value) => { value.functions.find(({ entry }) => entry === "0x0041d210").instructions.find(({ address }) => address === "0x0041d244").text = "JMP 0x0041edc1"; });
   assert.throws(() => extractK01FarmerResourceWorkFrames({ seedsPath }), /seed instruction 0x0041d244/);
   const executablePath = join(temporaryDirectory, "imjinrok2.exe");
