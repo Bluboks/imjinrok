@@ -1,0 +1,569 @@
+{
+  "source": "original/imjinrok2/char/budak.spr",
+  "layout": "spr",
+  "width": 65,
+  "height": 50,
+  "frameCount": 140,
+  "exportedFrames": [
+    {
+      "index": 0,
+      "fileName": "budak_0000.png"
+    },
+    {
+      "index": 1,
+      "fileName": "budak_0001.png"
+    },
+    {
+      "index": 2,
+      "fileName": "budak_0002.png"
+    },
+    {
+      "index": 3,
+      "fileName": "budak_0003.png"
+    },
+    {
+      "index": 4,
+      "fileName": "budak_0004.png"
+    },
+    {
+      "index": 5,
+      "fileName": "budak_0005.png"
+    },
+    {
+      "index": 6,
+      "fileName": "budak_0006.png"
+    },
+    {
+      "index": 7,
+      "fileName": "budak_0007.png"
+    },
+    {
+      "index": 8,
+      "fileName": "budak_0008.png"
+    },
+    {
+      "index": 9,
+      "fileName": "budak_0009.png"
+    },
+    {
+      "index": 10,
+      "fileName": "budak_0010.png"
+    },
+    {
+      "index": 11,
+      "fileName": "budak_0011.png"
+    },
+    {
+      "index": 12,
+      "fileName": "budak_0012.png"
+    },
+    {
+      "index": 13,
+      "fileName": "budak_0013.png"
+    },
+    {
+      "index": 14,
+      "fileName": "budak_0014.png"
+    },
+    {
+      "index": 15,
+      "fileName": "budak_0015.png"
+    },
+    {
+      "index": 16,
+      "fileName": "budak_0016.png"
+    },
+    {
+      "index": 17,
+      "fileName": "budak_0017.png"
+    },
+    {
+      "index": 18,
+      "fileName": "budak_0018.png"
+    },
+    {
+      "index": 19,
+      "fileName": "budak_0019.png"
+    },
+    {
+      "index": 20,
+      "fileName": "budak_0020.png"
+    },
+    {
+      "index": 21,
+      "fileName": "budak_0021.png"
+    },
+    {
+      "index": 22,
+      "fileName": "budak_0022.png"
+    },
+    {
+      "index": 23,
+      "fileName": "budak_0023.png"
+    },
+    {
+      "index": 24,
+      "fileName": "budak_0024.png"
+    },
+    {
+      "index": 25,
+      "fileName": "budak_0025.png"
+    },
+    {
+      "index": 26,
+      "fileName": "budak_0026.png"
+    },
+    {
+      "index": 27,
+      "fileName": "budak_0027.png"
+    },
+    {
+      "index": 28,
+      "fileName": "budak_0028.png"
+    },
+    {
+      "index": 29,
+      "fileName": "budak_0029.png"
+    },
+    {
+      "index": 30,
+      "fileName": "budak_0030.png"
+    },
+    {
+      "index": 31,
+      "fileName": "budak_0031.png"
+    },
+    {
+      "index": 32,
+      "fileName": "budak_0032.png"
+    },
+    {
+      "index": 33,
+      "fileName": "budak_0033.png"
+    },
+    {
+      "index": 34,
+      "fileName": "budak_0034.png"
+    },
+    {
+      "index": 35,
+      "fileName": "budak_0035.png"
+    },
+    {
+      "index": 36,
+      "fileName": "budak_0036.png"
+    },
+    {
+      "index": 37,
+      "fileName": "budak_0037.png"
+    },
+    {
+      "index": 38,
+      "fileName": "budak_0038.png"
+    },
+    {
+      "index": 39,
+      "fileName": "budak_0039.png"
+    },
+    {
+      "index": 40,
+      "fileName": "budak_0040.png"
+    },
+    {
+      "index": 41,
+      "fileName": "budak_0041.png"
+    },
+    {
+      "index": 42,
+      "fileName": "budak_0042.png"
+    },
+    {
+      "index": 43,
+      "fileName": "budak_0043.png"
+    },
+    {
+      "index": 44,
+      "fileName": "budak_0044.png"
+    },
+    {
+      "index": 45,
+      "fileName": "budak_0045.png"
+    },
+    {
+      "index": 46,
+      "fileName": "budak_0046.png"
+    },
+    {
+      "index": 47,
+      "fileName": "budak_0047.png"
+    },
+    {
+      "index": 48,
+      "fileName": "budak_0048.png"
+    },
+    {
+      "index": 49,
+      "fileName": "budak_0049.png"
+    },
+    {
+      "index": 50,
+      "fileName": "budak_0050.png"
+    },
+    {
+      "index": 51,
+      "fileName": "budak_0051.png"
+    },
+    {
+      "index": 52,
+      "fileName": "budak_0052.png"
+    },
+    {
+      "index": 53,
+      "fileName": "budak_0053.png"
+    },
+    {
+      "index": 54,
+      "fileName": "budak_0054.png"
+    },
+    {
+      "index": 55,
+      "fileName": "budak_0055.png"
+    },
+    {
+      "index": 56,
+      "fileName": "budak_0056.png"
+    },
+    {
+      "index": 57,
+      "fileName": "budak_0057.png"
+    },
+    {
+      "index": 58,
+      "fileName": "budak_0058.png"
+    },
+    {
+      "index": 59,
+      "fileName": "budak_0059.png"
+    },
+    {
+      "index": 60,
+      "fileName": "budak_0060.png"
+    },
+    {
+      "index": 61,
+      "fileName": "budak_0061.png"
+    },
+    {
+      "index": 62,
+      "fileName": "budak_0062.png"
+    },
+    {
+      "index": 63,
+      "fileName": "budak_0063.png"
+    },
+    {
+      "index": 64,
+      "fileName": "budak_0064.png"
+    },
+    {
+      "index": 65,
+      "fileName": "budak_0065.png"
+    },
+    {
+      "index": 66,
+      "fileName": "budak_0066.png"
+    },
+    {
+      "index": 67,
+      "fileName": "budak_0067.png"
+    },
+    {
+      "index": 68,
+      "fileName": "budak_0068.png"
+    },
+    {
+      "index": 69,
+      "fileName": "budak_0069.png"
+    },
+    {
+      "index": 70,
+      "fileName": "budak_0070.png"
+    },
+    {
+      "index": 71,
+      "fileName": "budak_0071.png"
+    },
+    {
+      "index": 72,
+      "fileName": "budak_0072.png"
+    },
+    {
+      "index": 73,
+      "fileName": "budak_0073.png"
+    },
+    {
+      "index": 74,
+      "fileName": "budak_0074.png"
+    },
+    {
+      "index": 75,
+      "fileName": "budak_0075.png"
+    },
+    {
+      "index": 76,
+      "fileName": "budak_0076.png"
+    },
+    {
+      "index": 77,
+      "fileName": "budak_0077.png"
+    },
+    {
+      "index": 78,
+      "fileName": "budak_0078.png"
+    },
+    {
+      "index": 79,
+      "fileName": "budak_0079.png"
+    },
+    {
+      "index": 80,
+      "fileName": "budak_0080.png"
+    },
+    {
+      "index": 81,
+      "fileName": "budak_0081.png"
+    },
+    {
+      "index": 82,
+      "fileName": "budak_0082.png"
+    },
+    {
+      "index": 83,
+      "fileName": "budak_0083.png"
+    },
+    {
+      "index": 84,
+      "fileName": "budak_0084.png"
+    },
+    {
+      "index": 85,
+      "fileName": "budak_0085.png"
+    },
+    {
+      "index": 86,
+      "fileName": "budak_0086.png"
+    },
+    {
+      "index": 87,
+      "fileName": "budak_0087.png"
+    },
+    {
+      "index": 88,
+      "fileName": "budak_0088.png"
+    },
+    {
+      "index": 89,
+      "fileName": "budak_0089.png"
+    },
+    {
+      "index": 90,
+      "fileName": "budak_0090.png"
+    },
+    {
+      "index": 91,
+      "fileName": "budak_0091.png"
+    },
+    {
+      "index": 92,
+      "fileName": "budak_0092.png"
+    },
+    {
+      "index": 93,
+      "fileName": "budak_0093.png"
+    },
+    {
+      "index": 94,
+      "fileName": "budak_0094.png"
+    },
+    {
+      "index": 95,
+      "fileName": "budak_0095.png"
+    },
+    {
+      "index": 96,
+      "fileName": "budak_0096.png"
+    },
+    {
+      "index": 97,
+      "fileName": "budak_0097.png"
+    },
+    {
+      "index": 98,
+      "fileName": "budak_0098.png"
+    },
+    {
+      "index": 99,
+      "fileName": "budak_0099.png"
+    },
+    {
+      "index": 100,
+      "fileName": "budak_0100.png"
+    },
+    {
+      "index": 101,
+      "fileName": "budak_0101.png"
+    },
+    {
+      "index": 102,
+      "fileName": "budak_0102.png"
+    },
+    {
+      "index": 103,
+      "fileName": "budak_0103.png"
+    },
+    {
+      "index": 104,
+      "fileName": "budak_0104.png"
+    },
+    {
+      "index": 105,
+      "fileName": "budak_0105.png"
+    },
+    {
+      "index": 106,
+      "fileName": "budak_0106.png"
+    },
+    {
+      "index": 107,
+      "fileName": "budak_0107.png"
+    },
+    {
+      "index": 108,
+      "fileName": "budak_0108.png"
+    },
+    {
+      "index": 109,
+      "fileName": "budak_0109.png"
+    },
+    {
+      "index": 110,
+      "fileName": "budak_0110.png"
+    },
+    {
+      "index": 111,
+      "fileName": "budak_0111.png"
+    },
+    {
+      "index": 112,
+      "fileName": "budak_0112.png"
+    },
+    {
+      "index": 113,
+      "fileName": "budak_0113.png"
+    },
+    {
+      "index": 114,
+      "fileName": "budak_0114.png"
+    },
+    {
+      "index": 115,
+      "fileName": "budak_0115.png"
+    },
+    {
+      "index": 116,
+      "fileName": "budak_0116.png"
+    },
+    {
+      "index": 117,
+      "fileName": "budak_0117.png"
+    },
+    {
+      "index": 118,
+      "fileName": "budak_0118.png"
+    },
+    {
+      "index": 119,
+      "fileName": "budak_0119.png"
+    },
+    {
+      "index": 120,
+      "fileName": "budak_0120.png"
+    },
+    {
+      "index": 121,
+      "fileName": "budak_0121.png"
+    },
+    {
+      "index": 122,
+      "fileName": "budak_0122.png"
+    },
+    {
+      "index": 123,
+      "fileName": "budak_0123.png"
+    },
+    {
+      "index": 124,
+      "fileName": "budak_0124.png"
+    },
+    {
+      "index": 125,
+      "fileName": "budak_0125.png"
+    },
+    {
+      "index": 126,
+      "fileName": "budak_0126.png"
+    },
+    {
+      "index": 127,
+      "fileName": "budak_0127.png"
+    },
+    {
+      "index": 128,
+      "fileName": "budak_0128.png"
+    },
+    {
+      "index": 129,
+      "fileName": "budak_0129.png"
+    },
+    {
+      "index": 130,
+      "fileName": "budak_0130.png"
+    },
+    {
+      "index": 131,
+      "fileName": "budak_0131.png"
+    },
+    {
+      "index": 132,
+      "fileName": "budak_0132.png"
+    },
+    {
+      "index": 133,
+      "fileName": "budak_0133.png"
+    },
+    {
+      "index": 134,
+      "fileName": "budak_0134.png"
+    },
+    {
+      "index": 135,
+      "fileName": "budak_0135.png"
+    },
+    {
+      "index": 136,
+      "fileName": "budak_0136.png"
+    },
+    {
+      "index": 137,
+      "fileName": "budak_0137.png"
+    },
+    {
+      "index": 138,
+      "fileName": "budak_0138.png"
+    },
+    {
+      "index": 139,
+      "fileName": "budak_0139.png"
+    }
+  ]
+}

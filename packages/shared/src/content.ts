@@ -295,6 +295,27 @@ const japaneseGunnerAdaptedGameplay = {
   selectedMinimapRadius: 4.2,
 } as const satisfies Omit<UnitDefinition, "id" | "displayName">;
 
+// K01 class 11 has a separate source identity and sprite mapping. These values intentionally
+// reuse the project swordsman fallback; source stats, behavior, and UI are not recovered.
+const koreanMonkAdaptedGameplay = {
+  category: "infantry",
+  actionIds: infantryActionIds,
+  populationCost: 1,
+  footprint: { width: 1, height: 1, blocksMovement: true },
+  baseAttributes: { health: 55, mana: 0, movementSpeed: 4.0 },
+  portraitGlyph: "KM",
+  portraitColor: 0x9dada2,
+  groupBorderColor: 0xb7c4bb,
+  combat: { damage: 9, range: 1.5, cooldownTicks: 18, aggroRange: 7 },
+  renderRadius: 6,
+  selectionRadius: 6,
+  hitRadius: 16,
+  sightRadius: 7,
+  minimapShape: "circle",
+  minimapRadius: 2.9,
+  selectedMinimapRadius: 4.2,
+} as const satisfies Omit<UnitDefinition, "id" | "displayName">;
+
 export const unitDefinitions = {
   "town-center": {
     id: "town-center",
@@ -429,6 +450,11 @@ export const unitDefinitions = {
     minimapRadius: 2.9,
     selectedMinimapRadius: 4.2,
   },
+  "korean-monk": {
+    id: "korean-monk",
+    displayName: "조선 승병",
+    ...koreanMonkAdaptedGameplay,
+  },
   archer: {
     id: "archer",
     displayName: "조선 궁수",
@@ -469,6 +495,11 @@ export const unitDefinitions = {
   "japanese-gunner": {
     id: "japanese-gunner",
     displayName: "일본 조총병",
+    ...japaneseGunnerAdaptedGameplay,
+  },
+  "japanese-shrine-maiden": {
+    id: "japanese-shrine-maiden",
+    displayName: "일본 무녀",
     ...japaneseGunnerAdaptedGameplay,
   },
   "japanese-konishi": {

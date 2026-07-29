@@ -14,9 +14,11 @@ const originalExecutablePath = join(repositoryRoot, "original/imjinrok2/imjinrok
 test("default theme entity bindings point to loadable source-converted assets", () => {
   assert.equal(defaultTheme.entityBindings.villager, "villager-korean-farmer");
   assert.equal(defaultTheme.entityBindings.swordsman, "korean-swordsman");
+  assert.equal(defaultTheme.entityBindings["korean-monk"], "korean-monk");
   assert.equal(defaultTheme.entityBindings.archer, "korean-archer");
   assert.equal(defaultTheme.entityBindings["japanese-swordsman"], "japanese-swordsman");
   assert.equal(defaultTheme.entityBindings["japanese-gunner"], "japanese-gunner");
+  assert.equal(defaultTheme.entityBindings["japanese-shrine-maiden"], "japanese-shrine-maiden");
   assert.equal(defaultTheme.entityBindings["japanese-samurai"], "japanese-samurai");
   assert.equal(defaultTheme.entityBindings["japanese-turtle-tank"], "japanese-turtle-tank");
   assert.equal(defaultTheme.entityBindings["japanese-konishi"], "japanese-konishi");
@@ -49,6 +51,8 @@ test("original executable sprite pointer table backs K01/K02 theme source sprite
     { manifestPath: "entities/japanese-gunner/gunj1.manifest.json", sourcePath: "char/gunj1.spr", tableIndex: 14 },
     { manifestPath: "entities/japanese-gunner/gunj2.manifest.json", sourcePath: "char/gunj2.spr", tableIndex: 15 },
     { manifestPath: "entities/japanese-gunner/gunj3.manifest.json", sourcePath: "char/gunj3.spr", tableIndex: 16 },
+    { manifestPath: "entities/korean-monk/budak.manifest.json", sourcePath: "char/budak.spr", tableIndex: 12 },
+    { manifestPath: "entities/japanese-shrine-maiden/advbudaj.manifest.json", sourcePath: "char/advbudaj.spr", tableIndex: 24 },
     { manifestPath: "entities/japanese-samurai/horseswordj1.manifest.json", sourcePath: "char/horseswordj1.spr", tableIndex: 17 },
     { manifestPath: "entities/japanese-samurai/horseswordj2.manifest.json", sourcePath: "char/horseswordj2.spr", tableIndex: 18 },
     { manifestPath: "entities/japanese-turtle-tank/ghosttankj.manifest.json", sourcePath: "char/ghosttankj.spr", tableIndex: 4 },
@@ -440,6 +444,38 @@ test("K01 classes 2, 3, and 4 use only the recovered normal core-state frame blo
     assert.equal(visual.states.idle?.clips.s?.loop, true);
     assert.equal(visual.states.move?.clips.s?.loop, true);
     assert.equal(visual.states.walk?.clips.s?.loop, true);
+    assert.equal(visual.states.attack?.clips.s?.loop, false);
+    assert.equal(visual.states.death?.clips.s?.loop, false);
+  }
+});
+
+test("K01 class 11 monk and class 16 shrine maiden use only their recovered core frame blocks", () => {
+  const expectations = [
+    ["korean-monk", "budak", 140, { idle: [100, 8, 8], move: [0, 8, 8], attack: [50, 10, 10], death: [40, 0, 8] }],
+    ["japanese-shrine-maiden", "advbudaj", 300, { idle: [120, 8, 8], move: [0, 8, 8], attack: [60, 10, 10], death: [40, 0, 8] }],
+  ] as const;
+  const directionIndexes = { s: 0, sw: 1, w: 2, nw: 3, n: 2, ne: 1, e: 0, se: 4 } as const;
+
+  for (const [binding, stem, frameCount, states] of expectations) {
+    const manifest = readManifest(`entities/${binding}/${stem}.manifest.json`);
+    const visual = defaultTheme.visuals[defaultTheme.entityBindings[binding]] as EntityVisual;
+    assert.equal(manifest.source, `original/imjinrok2/char/${stem}.spr`);
+    assert.equal(manifest.frameCount, frameCount);
+    assert.equal(manifest.exportedFrames.length, binding === "japanese-shrine-maiden" ? 160 : frameCount);
+    assert.deepEqual(Object.keys(visual.states).sort(), ["idle", "move", "walk", "attack", "death"].sort());
+    for (const [stateName, [start, stride, phaseCount]] of Object.entries(states)) {
+      const state = visual.states[stateName as "idle" | "move" | "attack" | "death"];
+      assert.ok(state);
+      for (const [facing, directionIndex] of Object.entries(directionIndexes) as [Facing, number][]) {
+        const clip = state.clips[facing];
+        assert.equal(clip?.frames[0]?.fileName, `${stem}_${String(start + directionIndex * stride).padStart(4, "0")}.png`);
+        assert.equal(clip?.frames.length, phaseCount);
+        assert.equal(clip?.mirrorX === true, ["n", "ne", "e"].includes(facing));
+      }
+    }
+    assert.deepEqual(visual.states.walk, visual.states.move);
+    assert.equal(visual.states.idle?.clips.s?.loop, true);
+    assert.equal(visual.states.move?.clips.s?.loop, true);
     assert.equal(visual.states.attack?.clips.s?.loop, false);
     assert.equal(visual.states.death?.clips.s?.loop, false);
   }

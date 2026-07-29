@@ -15,6 +15,7 @@ test("uses statically recovered names for uniquely bound original sprites", () =
         unitDefinitions["japanese-camp-firehouse"].displayName,
       japaneseGunner: unitDefinitions["japanese-gunner"].displayName,
       japaneseKonishi: unitDefinitions["japanese-konishi"].displayName,
+      japaneseShrineMaiden: unitDefinitions["japanese-shrine-maiden"].displayName,
       japaneseHouse: unitDefinitions["japanese-camp-house"].displayName,
       japaneseSamurai: unitDefinitions["japanese-samurai"].displayName,
       japaneseSwordsman:
@@ -27,6 +28,7 @@ test("uses statically recovered names for uniquely bound original sprites", () =
       ryuSeongRyong:
         unitDefinitions["ryu-seong-ryong"].displayName,
       swordsman: unitDefinitions.swordsman.displayName,
+      koreanMonk: unitDefinitions["korean-monk"].displayName,
       townCenter: unitDefinitions["town-center"].displayName,
     },
     {
@@ -38,6 +40,7 @@ test("uses statically recovered names for uniquely bound original sprites", () =
       japaneseFirehouse: "일본 관측소",
       japaneseGunner: "일본 조총병",
       japaneseKonishi: "일본 고니시",
+      japaneseShrineMaiden: "일본 무녀",
       japaneseHouse: "일본 시장",
       japaneseSamurai: "일본 사무라이",
       japaneseSwordsman: "일본 창병",
@@ -47,6 +50,7 @@ test("uses statically recovered names for uniquely bound original sprites", () =
       royalCart: "조선 선조의 어가",
       ryuSeongRyong: "조선 유성룡",
       swordsman: "조선 창병",
+      koreanMonk: "조선 승병",
       townCenter: "조선 본영",
     },
   );
@@ -81,6 +85,10 @@ test("new Japanese identity kinds preserve their explicit project gameplay adapt
   );
   assert.deepEqual(
     omitIdentity(unitDefinitions["japanese-konishi"]),
+    omitIdentity(unitDefinitions["japanese-gunner"]),
+  );
+  assert.deepEqual(
+    omitIdentity(unitDefinitions["japanese-shrine-maiden"]),
     omitIdentity(unitDefinitions["japanese-gunner"]),
   );
 });
