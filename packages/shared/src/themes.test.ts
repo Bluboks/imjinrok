@@ -28,6 +28,8 @@ test("default theme entity bindings point to loadable source-converted assets", 
   assert.equal(defaultTheme.entityBindings["japanese-camp-tower"], "japanese-camp-tower");
   assert.equal(defaultTheme.entityBindings["japanese-camp-firehouse"], "japanese-camp-firehouse");
   assert.equal(defaultTheme.entityBindings["japanese-camp-advanced-tower"], "japanese-camp-advanced-tower");
+  assert.equal(defaultTheme.entityBindings["korean-training-command"], "korean-training-command");
+  assert.equal(defaultTheme.entityBindings["japanese-hq"], "japanese-hq");
   assert.equal(defaultTheme.entityBindings["ryu-seong-ryong"], "korean-ryu-seong-ryong");
   assert.equal(defaultTheme.entityBindings["gwon-yul"], "korean-gwon-yul");
   assert.equal(defaultTheme.entityBindings["town-center"], "korean-hq");
@@ -49,6 +51,7 @@ test("original executable sprite pointer table backs K01/K02 theme source sprite
     { manifestPath: "entities/villager/farmerk.manifest.json", sourcePath: "char/farmerk.spr", tableIndex: 5 },
     { manifestPath: "entities/barracks/barrackk.manifest.json", sourcePath: "char/barrackk.spr", tableIndex: 8 },
     { manifestPath: "entities/japanese-camp-barracks/barrackj.manifest.json", sourcePath: "char/barrackj.spr", tableIndex: 10 },
+    { manifestPath: "entities/japanese-hq/jhq.manifest.json", sourcePath: "char/jhq.spr", tableIndex: 6 },
     { manifestPath: "entities/japanese-gunner/gunj1.manifest.json", sourcePath: "char/gunj1.spr", tableIndex: 14 },
     { manifestPath: "entities/japanese-gunner/gunj2.manifest.json", sourcePath: "char/gunj2.spr", tableIndex: 15 },
     { manifestPath: "entities/japanese-gunner/gunj3.manifest.json", sourcePath: "char/gunj3.spr", tableIndex: 16 },
@@ -68,6 +71,7 @@ test("original executable sprite pointer table backs K01/K02 theme source sprite
     { manifestPath: "entities/town-center/hqk.manifest.json", sourcePath: "char/hqk.spr", tableIndex: 41 },
     { manifestPath: "entities/house/millk.manifest.json", sourcePath: "char/millk.spr", tableIndex: 46 },
     { manifestPath: "entities/general-k4/generalk4.manifest.json", sourcePath: "char/generalk4.spr", tableIndex: 60 },
+    { manifestPath: "entities/korean-training-command/advbarrackk.manifest.json", sourcePath: "char/advbarrackk.spr", tableIndex: 113 },
     { manifestPath: "entities/gwon-yul/generalk11.manifest.json", sourcePath: "char/generalk11.spr", tableIndex: 53 },
     { manifestPath: "entities/gwon-yul/generalk12.manifest.json", sourcePath: "char/generalk12.spr", tableIndex: 54 },
     { manifestPath: "entities/gwon-yul/generalk13.manifest.json", sourcePath: "char/generalk13.spr", tableIndex: 55 },
@@ -754,7 +758,8 @@ test("default theme maps source-exported building construction frames", () => {
       manifestPath: "entities/house/millk.manifest.json",
       source: "original/imjinrok2/char/millk.spr",
       frameCount: 16,
-      idleFrame: "millk_0008.png",
+      idleFrame: "millk_0007.png",
+      completeFrame: "millk_0008.png",
     },
     {
       binding: "barracks",
@@ -778,22 +783,6 @@ test("default theme maps source-exported building construction frames", () => {
       source: "original/imjinrok2/char/millj.spr",
       frameCount: 36,
       idleFrame: "millj_0008.png",
-    },
-    {
-      binding: "japanese-camp-barracks",
-      manifestPath: "entities/japanese-camp-barracks/barrackj.manifest.json",
-      source: "original/imjinrok2/char/barrackj.spr",
-      frameCount: 24,
-      idleFrame: "barrackj_0009.png",
-      completeFrame: "barrackj_0007.png",
-      constructionFrameCount: 8,
-    },
-    {
-      binding: "japanese-camp-tower",
-      manifestPath: "entities/japanese-camp-tower/towerj.manifest.json",
-      source: "original/imjinrok2/char/towerj.spr",
-      frameCount: 40,
-      idleFrame: "towerj_0008.png",
     },
     {
       binding: "japanese-camp-firehouse",
@@ -824,6 +813,51 @@ test("default theme maps source-exported building construction frames", () => {
     assert.equal(visual.states.construction?.clips.default?.frames.length, expectation.constructionFrameCount ?? 9);
     assert.equal(visual.states.construction?.clips.default?.frames[0]?.fileName.endsWith("_0000.png"), true);
     assert.equal(visual.states.construction?.clips.default?.frames.at(-1)?.fileName, expectation.completeFrame ?? expectation.idleFrame);
+  }
+});
+
+test("default theme binds newly identified opening buildings to only their proven base frames", () => {
+  const expectations = [
+    {
+      binding: "korean-training-command",
+      manifestPath: "entities/korean-training-command/advbarrackk.manifest.json",
+      source: "original/imjinrok2/char/advbarrackk.spr",
+      dimensions: { width: 137, height: 118 },
+      idleFrame: "advbarrackk_0007.png",
+    },
+    {
+      binding: "japanese-hq",
+      manifestPath: "entities/japanese-hq/jhq.manifest.json",
+      source: "original/imjinrok2/char/jhq.spr",
+      dimensions: { width: 120, height: 133 },
+      idleFrame: "jhq_0007.png",
+    },
+    {
+      binding: "japanese-camp-barracks",
+      manifestPath: "entities/japanese-camp-barracks/barrackj.manifest.json",
+      source: "original/imjinrok2/char/barrackj.spr",
+      dimensions: { width: 125, height: 110 },
+      idleFrame: "barrackj_0007.png",
+    },
+    {
+      binding: "japanese-camp-tower",
+      manifestPath: "entities/japanese-camp-tower/towerj.manifest.json",
+      source: "original/imjinrok2/char/towerj.spr",
+      dimensions: { width: 71, height: 98 },
+      idleFrame: "towerj_0007.png",
+    },
+  ] as const;
+
+  for (const expectation of expectations) {
+    const visual = defaultTheme.visuals[defaultTheme.entityBindings[expectation.binding]] as EntityVisual;
+    const manifest = readManifest(expectation.manifestPath);
+
+    assert.equal(manifest.source, expectation.source);
+    assert.deepEqual({ width: manifest.width, height: manifest.height }, expectation.dimensions);
+    assert.equal(visual.states.idle?.clips.default?.frames[0]?.fileName, expectation.idleFrame);
+    assert.equal(visual.states.construction, undefined);
+    assert.equal(visual.states.damaged, undefined);
+    assert.equal(visual.layers, undefined);
   }
 });
 
@@ -863,17 +897,12 @@ test("default theme applies the statically recovered Korean beacon identity and 
 
 test("default theme animates Japanese camp building idle frames from source sprites", () => {
   const houseVisual = defaultTheme.visuals[defaultTheme.entityBindings["japanese-camp-house"]] as EntityVisual;
-  const barracksVisual = defaultTheme.visuals[defaultTheme.entityBindings["japanese-camp-barracks"]] as EntityVisual;
   const firehouseVisual = defaultTheme.visuals[defaultTheme.entityBindings["japanese-camp-firehouse"]] as EntityVisual;
   const houseOverlay = houseVisual.layers?.find((layer) => layer.id === "idle-overlay");
 
   assert.deepEqual(
     houseOverlay?.states.idle?.clips.default?.frames.map((frame) => frame.fileName),
     frameNames("millj", 9, 18),
-  );
-  assert.deepEqual(
-    barracksVisual.states.idle?.clips.default?.frames.map((frame) => frame.fileName),
-    frameNames("barrackj", 9, 17),
   );
   assert.deepEqual(
     firehouseVisual.states.idle?.clips.default?.frames.map((frame) => frame.fileName),
@@ -902,11 +931,15 @@ test("default theme models Korean barracks flag as an idle overlay layer", () =>
 
 function readManifest(relativePath: string): {
   source: string;
+  width: number;
+  height: number;
   frameCount: number;
   exportedFrames: readonly unknown[];
 } {
   return JSON.parse(readFileSync(join(defaultThemeAssetRoot, relativePath), "utf8")) as {
     source: string;
+    width: number;
+    height: number;
     frameCount: number;
     exportedFrames: readonly unknown[];
   };

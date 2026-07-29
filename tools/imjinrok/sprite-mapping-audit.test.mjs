@@ -44,24 +44,24 @@ test("sprite mapping audit is deterministic and current", (t) => {
 
 test("frame mappings stay quarantined outside statically proven scopes while identities are cataloged", () => {
   assert.deepEqual(report.summary, {
-    visualCount: 24,
+    visualCount: 26,
     unitVisualCount: 15,
-    buildingVisualCount: 9,
+    buildingVisualCount: 11,
     stateMappingCount: 95,
     clipCount: 679,
-    frameReferenceCount: 5_235,
+    frameReferenceCount: 5_212,
     missingFrameReferenceCount: 0,
     unverifiedVisualCount: 1,
-    mixedVisualCount: 21,
+    mixedVisualCount: 23,
     scopedStaticProvenVisualCount: 2,
-    staticIdentityVisualCount: 23,
+    staticIdentityVisualCount: 25,
     ambiguousIdentityVisualCount: 0,
     unboundIdentityVisualCount: 1,
-    projectBindingCount: 23,
+    projectBindingCount: 25,
     projectBindingConflictCount: 0,
     portraitCueCount: 17,
     unverifiedPortraitCueCount: 0,
-    findingCount: 30,
+    findingCount: 32,
   });
   assert.equal(
     report.visuals.filter((visual) => visual.evidenceStatus === "unverified").length,
@@ -276,6 +276,22 @@ test("frame mappings stay quarantined outside statically proven scopes while ide
   assert.deepEqual(koreanHeadquarters?.staticEvidence.constructionFrames, [0, 1, 2, 3, 4, 5, 6, 7]);
   assert.equal(koreanHeadquarters?.staticEvidence.healthyFrame, 7);
   assert.equal(koreanHeadquarters?.staticEvidence.damagedFrame, 8);
+  for (const [visualId, internalClass, name, sourcePath] of [
+    ["korean-training-command", 51, "조선 훈련도감", "char\\advbarrackk.spr"],
+    ["japanese-hq", 58, "일본 본영", "char\\jhq.spr"],
+    ["japanese-camp-barracks", 60, "일본 훈련소", "char\\barrackj.spr"],
+    ["japanese-camp-tower", 63, "일본 망루", "char\\towerj.spr"],
+  ]) {
+    const visual = report.visuals.find((candidate) => candidate.visualId === visualId);
+
+    assert.equal(visual?.evidenceStatus, "mixed");
+    assert.equal(visual?.staticEvidence.internalClass, internalClass);
+    assert.equal(visual?.staticEvidence.originalGameplayName, name);
+    assert.equal(visual?.staticEvidence.sourcePath, sourcePath);
+    assert.equal(visual?.staticEvidence.baseFrame, 7);
+    assert.equal(visual?.staticEvidence.bodyStateMapping, "static-proven-base-frame");
+    assert.deepEqual(visual?.mappings.map((mapping) => mapping.state), ["idle"]);
+  }
   const currentBeacon = report.visuals.find(
     (visual) => visual.visualId === "korean-signal-beacon",
   );
@@ -460,7 +476,7 @@ test("frame mappings stay quarantined outside statically proven scopes while ide
     report.findings.filter(
       (finding) => finding.code === "building-health-frame-unverified",
     ).length,
-    7,
+    9,
   );
   assert.deepEqual(report.portraits.currentScenarioPortraitIds, [
     "J1",

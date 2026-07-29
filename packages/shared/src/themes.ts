@@ -368,6 +368,45 @@ const sourceBuildingEntityVisual = ({
     : {}),
 });
 
+interface SourceBaseBuildingVisualOptions {
+  id: string;
+  assetPath: string;
+  visualId: string;
+  stem: string;
+  size: { w: number; h: number };
+  pivot: { x: number; y: number };
+}
+
+// This deliberately exposes only the catalog-proven base frame. Size comes directly from the
+// source SPR dimensions; the foot anchor is a project rendering adaptation, not source evidence.
+const sourceBaseBuildingEntityVisual = ({
+  id,
+  assetPath,
+  visualId,
+  stem,
+  size,
+  pivot,
+}: SourceBaseBuildingVisualOptions): EntityVisual => ({
+  id,
+  kind: "entity",
+  assetPath,
+  render: {
+    srcPxPerWu: 32,
+    filtering: "nearest",
+  },
+  defaults: {
+    size,
+    pivot: { anchor: pivot },
+  },
+  states: {
+    idle: {
+      clips: {
+        default: { frames: [entityFrame(visualId, stem, 7)], fps: 1, loop: true },
+      },
+    },
+  },
+});
+
 /**
  * Provisional hill0 slot map from the source asset naming notes.
  * Direction names are screen-space around the raised tile.
@@ -1265,7 +1304,7 @@ export const houseEntityVisual = {
   states: {
     idle: {
       clips: {
-        default: { frames: [entityFrame("house", "millk", 8)], fps: 1, loop: true },
+        default: { frames: [entityFrame("house", "millk", 7)], fps: 1, loop: true },
       },
     },
     construction: {
@@ -1356,20 +1395,16 @@ export const japaneseCampHouseEntityVisual = sourceBuildingEntityVisual({
   idleOverlayFrameCount: 10,
 });
 
-export const japaneseCampBarracksEntityVisual = sourceBuildingEntityVisual({
+export const japaneseCampBarracksEntityVisual = sourceBaseBuildingEntityVisual({
   id: "japanese-camp-barracks",
   assetPath: "entities/japanese-camp-barracks",
   visualId: "japanese_camp_barracks",
   stem: "barrackj",
   size: { w: 125, h: 110 },
   pivot: { x: 63, y: 86 },
-  completeFrameIndex: 7,
-  idleFrameStart: 9,
-  idleFrameCount: 9,
-  idleFps: 8,
 });
 
-export const japaneseCampTowerEntityVisual = sourceBuildingEntityVisual({
+export const japaneseCampTowerEntityVisual = sourceBaseBuildingEntityVisual({
   id: "japanese-camp-tower",
   assetPath: "entities/japanese-camp-tower",
   visualId: "japanese_camp_tower",
@@ -1397,6 +1432,24 @@ export const japaneseCampAdvancedTowerEntityVisual = sourceBuildingEntityVisual(
   stem: "advtowerj",
   size: { w: 75, h: 98 },
   pivot: { x: 38, y: 74 },
+});
+
+export const koreanTrainingCommandEntityVisual = sourceBaseBuildingEntityVisual({
+  id: "korean-training-command",
+  assetPath: "entities/korean-training-command",
+  visualId: "korean_training_command",
+  stem: "advbarrackk",
+  size: { w: 137, h: 118 },
+  pivot: { x: 69, y: 92 },
+});
+
+export const japaneseHqEntityVisual = sourceBaseBuildingEntityVisual({
+  id: "japanese-hq",
+  assetPath: "entities/japanese-hq",
+  visualId: "japanese_hq",
+  stem: "jhq",
+  size: { w: 120, h: 133 },
+  pivot: { x: 60, y: 104 },
 });
 
 export const royalCartEntityVisual = {
@@ -1460,6 +1513,8 @@ export const defaultTheme = {
     "japanese-camp-tower": japaneseCampTowerEntityVisual,
     "japanese-camp-firehouse": japaneseCampFirehouseEntityVisual,
     "japanese-camp-advanced-tower": japaneseCampAdvancedTowerEntityVisual,
+    "korean-training-command": koreanTrainingCommandEntityVisual,
+    "japanese-hq": japaneseHqEntityVisual,
     "korean-royal-cart": royalCartEntityVisual,
   },
   terrainBindings: {
@@ -1488,6 +1543,8 @@ export const defaultTheme = {
     "japanese-camp-tower": "japanese-camp-tower",
     "japanese-camp-firehouse": "japanese-camp-firehouse",
     "japanese-camp-advanced-tower": "japanese-camp-advanced-tower",
+    "korean-training-command": "korean-training-command",
+    "japanese-hq": "japanese-hq",
     "royal-cart": "korean-royal-cart",
   },
 } as const satisfies ThemeDefinition;

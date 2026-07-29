@@ -157,7 +157,7 @@ for (const visual of Object.values(defaultTheme.visuals)
       resource.manifest.exportedFrames.map((frame) => frame.fileName),
     ),
   );
-  const category = visual.states.construction === undefined ? "unit" : "building";
+  const category = isProjectBuildingVisual(visual.id) ? "building" : "unit";
   const mappings = [];
 
   appendStateMappings({
@@ -215,7 +215,7 @@ const report = {
   policy: {
     semanticStatus: "mixed",
     acceptedEvidence:
-      "All 95 original type identities, uniquely matched current visual source identities, SPEECH portraits, Korean HQ and signal-beacon body states, K01 classes 2/3/4/7/11/12/13/16/31/82 normal core states in their documented limits, class-14 Japanese turtle-tank idle/move/attack grid states plus its non-theme 16-ring turn and creation-default transient destruction contracts, and the K01 heroes' idle, movement, attack, and death frame/direction mappings are statically proven in their documented scopes.",
+      "All 95 original type identities, uniquely matched current visual source identities, SPEECH portraits, Korean HQ and signal-beacon body states, K01 opening classes 48/49/51/58/60/63 catalog base frame 7 bindings, K01 classes 2/3/4/7/11/12/13/16/31/82 normal core states in their documented limits, class-14 Japanese turtle-tank idle/move/attack grid states plus its non-theme 16-ring turn and creation-default transient destruction contracts, and the K01 heroes' idle, movement, attack, and death frame/direction mappings are statically proven in their documented scopes.",
     parityUse:
       "A unique source identity proves the original name and SPR binding only. Only explicitly listed frame scopes may be used for animation parity; all other direction, action, layer, and body mappings remain quarantined.",
   },
@@ -743,6 +743,23 @@ function buildVisualStaticEvidence(visual, identityCandidates) {
     };
   }
 
+  if ([
+    "korean-training-command",
+    "japanese-hq",
+    "japanese-camp-barracks",
+    "japanese-camp-tower",
+  ].includes(visual.id)) {
+    return {
+      status: "mixed",
+      ...identityEvidence,
+      bodyStateMapping: "static-proven-base-frame",
+      confirmedBodyScope:
+        "project idle uses the catalog-proven source base frame 7 only",
+      unresolvedScope:
+        "construction, damaged/health body states, overlays, timing, pivot, stats, commands, behavior, and later runtime mutation remain unresolved; size is source dimensions and the foot anchor is a project rendering adaptation",
+    };
+  }
+
   return {
     status: "mixed",
     ...identityEvidence,
@@ -751,6 +768,13 @@ function buildVisualStaticEvidence(visual, identityCandidates) {
     animationStateMapping:
       visual.states.construction === undefined ? "unverified" : undefined,
   };
+}
+
+function isProjectBuildingVisual(visualId) {
+  return Object.entries(defaultTheme.entityBindings).some(
+    ([entityId, boundVisualId]) =>
+      boundVisualId === visualId && unitDefinitions[entityId]?.category === "building",
+  );
 }
 
 function appendIdentityFindings(visual) {

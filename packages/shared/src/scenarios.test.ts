@@ -388,19 +388,21 @@ test("imjinrok K01 starts with a source-derived established Joseon base", () => 
     archer: 1,
     barracks: 1,
     "gwon-yul": 1,
-    house: 3,
+    house: 1,
+    "korean-training-command": 1,
     "korean-monk": 2,
     "ryu-seong-ryong": 1,
     swordsman: 1,
+    "town-center": 1,
     villager: 2,
   });
   assert.deepEqual(
-    localStart.filter((unit) => unit.kind === "town-center" || unit.kind === "barracks" || unit.kind === "house"),
+    localStart.filter((unit) => ["town-center", "barracks", "house", "korean-training-command"].includes(unit.kind)),
     [
-      { kind: "house", idSuffix: "source-0x31-5-4", offset: { x: -1, y: -2 } },
+      { kind: "town-center", idSuffix: "source-0x31-5-4", offset: { x: -1, y: -2 } },
       { kind: "house", idSuffix: "source-0x30-11-5", offset: { x: 5, y: -1 } },
       { kind: "barracks", idSuffix: "source-0x32-13-10", offset: { x: 7, y: 4 } },
-      { kind: "house", idSuffix: "source-0x33-5-8", offset: { x: -1, y: 2 } },
+      { kind: "korean-training-command", idSuffix: "source-0x33-5-8", offset: { x: -1, y: 2 } },
     ],
   );
 });
@@ -451,13 +453,13 @@ test("imjinrok K01 and K02 avoid skirmish economy starts for scripted Japanese p
     stone: 0,
   });
   assert.deepEqual(countUnitsByKind(k01CpuStart?.startingUnits ?? []), {
-    "japanese-camp-advanced-tower": 4,
     "japanese-camp-barracks": 2,
     "japanese-camp-firehouse": 1,
     "japanese-camp-house": 2,
-    "japanese-camp-tower": 2,
+    "japanese-camp-tower": 4,
     "japanese-farmer": 3,
     "japanese-gunner": 3,
+    "japanese-hq": 2,
     "japanese-samurai": 3,
     "japanese-shrine-maiden": 1,
     "japanese-swordsman": 3,
@@ -478,7 +480,7 @@ test("imjinrok K01 and K02 avoid skirmish economy starts for scripted Japanese p
   assert.equal(k02AllyStart?.startingUnits?.some((unit) => economyKinds.has(unit.kind)), false);
 });
 
-test("K01 opening adapter exposes source provenance and upgrades only class 31 identity/source", () => {
+test("K01 opening adapter preserves all statically identified opening-building records", () => {
   assert.equal(k01SourceOpeningAdapter.length, 36);
   assert.deepEqual(
     k01SourceOpeningAdapter
@@ -489,7 +491,10 @@ test("K01 opening adapter exposes source provenance and upgrades only class 31 i
       .map(({ originalClass, rawOwnerWord, offset, projectKind, identityMapping }) => ({
         originalClass,
         rawOwnerWord,
-        sourcePosition: { x: 52 + offset.x, y: 52 + offset.y },
+        sourcePosition: {
+          x: (rawOwnerWord === 0 ? 6 : 52) + offset.x,
+          y: (rawOwnerWord === 0 ? 6 : 52) + offset.y,
+        },
         projectKind,
         identityMapping,
       })),
@@ -497,21 +502,38 @@ test("K01 opening adapter exposes source provenance and upgrades only class 31 i
   );
   assert.deepEqual(
     k01SourceOpeningAdapter
-      .filter(({ identityMapping }) => identityMapping === "proxy")
-      .map(({ originalClass, rawOwnerWord }) => ({ originalClass, rawOwnerWord })),
+      .filter(({ originalClass }) => [48, 49, 51, 58, 60, 63].includes(originalClass))
+      .map(({ originalClass, rawOwnerWord, offset, projectKind, identityMapping, idSuffix }) => ({
+        originalClass,
+        rawOwnerWord,
+        sourcePosition: {
+          x: (rawOwnerWord === 0 ? 6 : 52) + offset.x,
+          y: (rawOwnerWord === 0 ? 6 : 52) + offset.y,
+        },
+        projectKind,
+        identityMapping,
+        idSuffix,
+      })),
     [
-      { originalClass: 49, rawOwnerWord: 0 },
-      { originalClass: 48, rawOwnerWord: 0 },
-      { originalClass: 51, rawOwnerWord: 0 },
-      { originalClass: 58, rawOwnerWord: 1 },
-      { originalClass: 58, rawOwnerWord: 1 },
-      { originalClass: 60, rawOwnerWord: 1 },
-      { originalClass: 60, rawOwnerWord: 1 },
-      { originalClass: 63, rawOwnerWord: 1 },
-      { originalClass: 63, rawOwnerWord: 1 },
-      { originalClass: 63, rawOwnerWord: 1 },
-      { originalClass: 63, rawOwnerWord: 1 },
+      { originalClass: 49, rawOwnerWord: 0, sourcePosition: { x: 5, y: 4 }, projectKind: "town-center", identityMapping: "exact-static-identity-source", idSuffix: "source-0x31-5-4" },
+      { originalClass: 48, rawOwnerWord: 0, sourcePosition: { x: 11, y: 5 }, projectKind: "house", identityMapping: "exact-static-identity-source", idSuffix: "source-0x30-11-5" },
+      { originalClass: 51, rawOwnerWord: 0, sourcePosition: { x: 5, y: 8 }, projectKind: "korean-training-command", identityMapping: "exact-static-identity-source", idSuffix: "source-0x33-5-8" },
+      { originalClass: 58, rawOwnerWord: 1, sourcePosition: { x: 7, y: 57 }, projectKind: "japanese-hq", identityMapping: "exact-static-identity-source", idSuffix: "source-0x3a-7-57" },
+      { originalClass: 58, rawOwnerWord: 1, sourcePosition: { x: 56, y: 6 }, projectKind: "japanese-hq", identityMapping: "exact-static-identity-source", idSuffix: "source-0x3a-56-6" },
+      { originalClass: 60, rawOwnerWord: 1, sourcePosition: { x: 6, y: 50 }, projectKind: "japanese-camp-barracks", identityMapping: "exact-static-identity-source", idSuffix: "source-0x3c-6-50" },
+      { originalClass: 60, rawOwnerWord: 1, sourcePosition: { x: 55, y: 11 }, projectKind: "japanese-camp-barracks", identityMapping: "exact-static-identity-source", idSuffix: "source-0x3c-55-11" },
+      { originalClass: 63, rawOwnerWord: 1, sourcePosition: { x: 18, y: 49 }, projectKind: "japanese-camp-tower", identityMapping: "exact-static-identity-source", idSuffix: "source-0x3f-18-49" },
+      { originalClass: 63, rawOwnerWord: 1, sourcePosition: { x: 44, y: 5 }, projectKind: "japanese-camp-tower", identityMapping: "exact-static-identity-source", idSuffix: "source-0x3f-44-5" },
+      { originalClass: 63, rawOwnerWord: 1, sourcePosition: { x: 32, y: 40 }, projectKind: "japanese-camp-tower", identityMapping: "exact-static-identity-source", idSuffix: "source-0x3f-32-40" },
+      { originalClass: 63, rawOwnerWord: 1, sourcePosition: { x: 35, y: 29 }, projectKind: "japanese-camp-tower", identityMapping: "exact-static-identity-source", idSuffix: "source-0x3f-35-29" },
     ],
+  );
+  assert.equal(
+    k01SourceOpeningAdapter.some(
+      ({ originalClass, projectKind }) =>
+        originalClass === 63 && projectKind === "japanese-camp-advanced-tower",
+    ),
+    false,
   );
   assert.deepEqual(
     k01SourceOpeningAdapter
@@ -955,15 +977,17 @@ const k01JapaneseSourceKindByTypeHex = {
   "0x14": "japanese-swordsman",
   "0x1f": "japanese-farmer",
   "0x39": "japanese-camp-house",
-  "0x3a": "japanese-camp-barracks",
-  "0x3c": "japanese-camp-tower",
+  "0x3a": "japanese-hq",
+  "0x3c": "japanese-camp-barracks",
   "0x3e": "japanese-camp-firehouse",
-  "0x3f": "japanese-camp-advanced-tower",
+  "0x3f": "japanese-camp-tower",
 } as const;
 
 const k01JoseonSourceKindByTypeHex = {
   ...joseonSourceKindByTypeHex,
   "0x0b": "korean-monk",
+  "0x31": "town-center",
+  "0x33": "korean-training-command",
 } as const;
 
 const k02JapaneseSourceKindByTypeHex = {
