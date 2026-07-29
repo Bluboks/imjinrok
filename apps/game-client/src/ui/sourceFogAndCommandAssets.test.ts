@@ -4,6 +4,9 @@ import {
   ORIGINAL_COMMAND_CONTROL_BINDINGS,
   ORIGINAL_COMMAND_ICON_ASSETS,
   requireSourceTexture,
+  resolveCardinalVisibleNeighborMask,
+  resolveK01NormalFogTransition,
+  resolveSourceFogTileScale,
   resolveSourceCommandIcon,
   resolveSourceFogTile,
 } from "./sourceFogAndCommandAssets";
@@ -20,6 +23,31 @@ test("fog resolver keeps source identity separate from the explicit project mask
   assert.equal(resolveSourceFogTile("explored", 15)?.sourceSpriteIndex, 14);
   assert.equal(resolveSourceFogTile("explored", 15)?.alpha, 0.58);
   assert.throws(() => resolveSourceFogTile("unseen", 16), /0\.\.15/);
+});
+
+test("source fog scales its 32×16 source image to the active map diamond", () => {
+  assert.deepEqual(resolveSourceFogTileScale(64, 32), { x: 2, y: 2 });
+  assert.deepEqual(resolveSourceFogTileScale(96, 48), { x: 3, y: 3 });
+  assert.throws(() => resolveSourceFogTileScale(0, 32), /positive finite/);
+});
+
+test("K01 normal fog uses a deterministic cardinal project policy only at the K01 map profile", () => {
+  assert.equal(
+    resolveCardinalVisibleNeighborMask((direction) => direction === "west" || direction === "south" ? "visible" : "unseen"),
+    0x9,
+  );
+  assert.equal(resolveK01NormalFogTransition("custom-map", "unseen", () => "visible"), null);
+  assert.equal(resolveK01NormalFogTransition("imjinrok-k01", "visible", () => "unseen"), null);
+  assert.deepEqual(
+    resolveK01NormalFogTransition("imjinrok-k01", "explored", (direction) => direction === "east" ? "visible" : "unseen"),
+    {
+      textureKey: "original-normal-fog-4-frame-0000",
+      assetPath: "assets/themes/default/fog/normal/fog4_0000.png",
+      sourceSpriteIndex: 4,
+      sourceFrameIndex: 0,
+      alpha: 0.58,
+    },
+  );
 });
 
 test("keeps original control bindings separate from exported image identity and product fallback", () => {

@@ -2,6 +2,7 @@ import type { ActionDefinitionId } from "@shared";
 
 export type FogVisibility = "visible" | "explored" | "unseen";
 export type FogNeighborMask = number;
+export type CardinalDirection = "north" | "east" | "south" | "west";
 
 export interface SourceFogTile {
   readonly textureKey: string;
@@ -24,6 +25,13 @@ export interface OriginalCommandControlBinding {
 }
 
 const NORMAL_FOG_ASSET_PREFIX = "assets/themes/default/fog/normal";
+export const K01_NORMAL_FOG_PROFILE_MAP_ID = "imjinrok-k01";
+export const CARDINAL_FOG_NEIGHBOR_OFFSETS: Readonly<Record<CardinalDirection, Readonly<{ x: number; y: number }>>> = Object.freeze({
+  west: { x: -1, y: 0 },
+  north: { x: 0, y: -1 },
+  east: { x: 1, y: 0 },
+  south: { x: 0, y: 1 },
+});
 
 export const NORMAL_FOG_ASSETS: readonly SourceFogTile[] = Object.freeze(
   Array.from({ length: 15 }, (_, sourceSpriteIndex) => ({
@@ -88,6 +96,40 @@ export function resolveSourceFogTile(
   const asset = NORMAL_FOG_ASSETS[sourceSpriteIndex];
   if (!asset) throw new Error(`Missing normal fog source asset ${sourceSpriteIndex}`);
   return visibility === "explored" ? { ...asset, alpha: 0.58 } : asset;
+}
+
+/**
+ * Product-only K01 normal-fog transition policy. The bit order and fogN mapping are
+ * deliberately not an assertion about the original game's neighbor-mask rule.
+ */
+export function resolveK01NormalFogTransition(
+  mapId: string,
+  visibility: FogVisibility,
+  neighborVisibility: (direction: CardinalDirection) => FogVisibility,
+): SourceFogTile | null {
+  if (mapId !== K01_NORMAL_FOG_PROFILE_MAP_ID || visibility === "visible") {
+    return null;
+  }
+  const mask = resolveCardinalVisibleNeighborMask(neighborVisibility);
+  return mask === 0 ? null : resolveSourceFogTile(visibility, mask);
+}
+
+export function resolveCardinalVisibleNeighborMask(
+  neighborVisibility: (direction: CardinalDirection) => FogVisibility,
+): FogNeighborMask {
+  let mask = 0;
+  if (neighborVisibility("west") === "visible") mask |= 0x1;
+  if (neighborVisibility("north") === "visible") mask |= 0x2;
+  if (neighborVisibility("east") === "visible") mask |= 0x4;
+  if (neighborVisibility("south") === "visible") mask |= 0x8;
+  return mask;
+}
+
+export function resolveSourceFogTileScale(mapTileWidth: number, mapTileHeight: number): Readonly<{ x: number; y: number }> {
+  if (!Number.isFinite(mapTileWidth) || mapTileWidth <= 0 || !Number.isFinite(mapTileHeight) || mapTileHeight <= 0) {
+    throw new RangeError(`source fog requires positive finite map tile dimensions; received ${mapTileWidth}x${mapTileHeight}`);
+  }
+  return { x: mapTileWidth / 32, y: mapTileHeight / 16 };
 }
 
 export function resolveSourceCommandIcon(actionId: ActionDefinitionId): SourceCommandIcon | undefined {

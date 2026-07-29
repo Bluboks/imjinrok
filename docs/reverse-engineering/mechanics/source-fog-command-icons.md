@@ -31,7 +31,9 @@ extractor는 기존 `codec.mjs` decoder/PNG encoder를 재사용한다. 원본 S
 
 `resolveSourceFogTile(visibility, neighborMask)`은 `visible`에서 `null`, `explored`/`unseen`에서 source normal fog asset record를 반환한다. `neighborMask`는 0..15만 받으며 잘못된 값은 오류다. 이 16→15 table(15→14 fallback), explored alpha `0.58`, 그리고 visibility 의미는 **프로젝트 적응**이다. 원본의 neighbor-mask→fogN/frame 규칙으로 주장하지 않는다. catalog의 source path, source sprite index와 frame 0 identity만 source-backed다.
 
-SkirmishScene는 이 문서 범위에서 변경하지 않았다. 후속 battlefield bridge는 resolver 결과와 `NORMAL_FOG_ASSETS`의 texture key/path를 preload·draw contract로 사용해야 하며, missing texture를 `requireSourceTexture`로 명시적으로 실패시켜야 한다.
+SkirmishScene battlefield bridge는 resolver 결과와 `NORMAL_FOG_ASSETS`의 texture key/path를 preload·draw contract로 사용하며, missing texture는 `requireSourceTexture`로 명시적으로 실패한다.
+
+후속 bridge는 `imjinrok-k01` map profile에서만 original normal PNG를 transition layer로 사용한다. non-visible tile의 기존 complete fog/elevation bake를 먼저 유지하고, cardinal visible-neighbor 4-bit project mask가 nonzero인 flat tile에만 source PNG를 map diamond `tileWidth/32 × tileHeight/16`으로 draw한다. `64×32` K01 map tile에서는 정확히 `2×2`다. visible tile과 elevated tile에는 source transition을 draw하지 않으며, chunk boundary의 visible-neighbor 변화는 인접 dirty chunk도 한 번 더 bake한다. 이 bit order, mask table, alpha와 draw eligibility는 모두 프로젝트 적응이다.
 
 ## 재현 벡터와 남은 작업
 
