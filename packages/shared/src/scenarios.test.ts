@@ -5,6 +5,7 @@ import { dirname, resolve } from "node:path";
 import { TextDecoder } from "node:util";
 import { fileURLToPath } from "node:url";
 import { extractExecutableReferences } from "../../../tools/imjinrok/extract-executable-refs.mjs";
+import { K01_PROVEN_OPENING_UNIT_BINDINGS } from "../../../tools/imjinrok/extract-k01-opening-unit-bindings.mjs";
 import { extractK01ReinforcementIdentityMap } from "../../../tools/imjinrok/extract-k01-reinforcement-identity-map.mjs";
 import { extractMapEntities, parseMapHeader } from "../../../tools/imjinrok/map-codec.mjs";
 import {
@@ -15,6 +16,7 @@ import {
   imjinrokK01Scenario,
   imjinrokK02Scenario,
   imjinrokOriginalMissionResultDelayTicks,
+  k01SourceOpeningAdapter,
   k01ReinforcementAdapter,
   k01ReinforcementOwnerAdapter,
 } from "./index.js";
@@ -453,8 +455,9 @@ test("imjinrok K01 and K02 avoid skirmish economy starts for scripted Japanese p
     "japanese-camp-firehouse": 1,
     "japanese-camp-house": 2,
     "japanese-camp-tower": 2,
-    "japanese-gunner": 4,
-    "japanese-swordsman": 9,
+    "japanese-gunner": 7,
+    "japanese-samurai": 3,
+    "japanese-swordsman": 3,
   });
   assert.equal(k01CpuStart?.startingUnits?.length, 24);
   assert.equal(k01CpuStart?.startingUnits?.some((unit) => economyKinds.has(unit.kind)), false);
@@ -472,6 +475,53 @@ test("imjinrok K01 and K02 avoid skirmish economy starts for scripted Japanese p
   assert.equal(k02AllyStart?.startingUnits?.some((unit) => economyKinds.has(unit.kind)), false);
 });
 
+test("K01 opening adapter exposes source provenance without upgrading unresolved proxies", () => {
+  assert.equal(k01SourceOpeningAdapter.length, 36);
+  assert.deepEqual(
+    k01SourceOpeningAdapter
+      .filter(
+        ({ rawOwnerWord, originalClass }) =>
+          rawOwnerWord === 1 && (originalClass === 12 || originalClass === 13),
+      )
+      .map(({ originalClass, rawOwnerWord, offset, projectKind, identityMapping }) => ({
+        originalClass,
+        rawOwnerWord,
+        sourcePosition: { x: 52 + offset.x, y: 52 + offset.y },
+        projectKind,
+        identityMapping,
+      })),
+    K01_PROVEN_OPENING_UNIT_BINDINGS,
+  );
+  assert.deepEqual(
+    k01SourceOpeningAdapter
+      .filter(({ identityMapping }) => identityMapping === "proxy")
+      .map(({ originalClass, rawOwnerWord }) => ({ originalClass, rawOwnerWord })),
+    [
+      { originalClass: 49, rawOwnerWord: 0 },
+      { originalClass: 48, rawOwnerWord: 0 },
+      { originalClass: 51, rawOwnerWord: 0 },
+      { originalClass: 2, rawOwnerWord: 0 },
+      { originalClass: 11, rawOwnerWord: 0 },
+      { originalClass: 4, rawOwnerWord: 0 },
+      { originalClass: 7, rawOwnerWord: 0 },
+      { originalClass: 7, rawOwnerWord: 0 },
+      { originalClass: 11, rawOwnerWord: 0 },
+      { originalClass: 31, rawOwnerWord: 1 },
+      { originalClass: 31, rawOwnerWord: 1 },
+      { originalClass: 31, rawOwnerWord: 1 },
+      { originalClass: 16, rawOwnerWord: 1 },
+      { originalClass: 58, rawOwnerWord: 1 },
+      { originalClass: 58, rawOwnerWord: 1 },
+      { originalClass: 60, rawOwnerWord: 1 },
+      { originalClass: 60, rawOwnerWord: 1 },
+      { originalClass: 63, rawOwnerWord: 1 },
+      { originalClass: 63, rawOwnerWord: 1 },
+      { originalClass: 63, rawOwnerWord: 1 },
+      { originalClass: 63, rawOwnerWord: 1 },
+    ],
+  );
+});
+
 test("imjinrok K01 and K02 player starts cover every active source map entity", () => {
   assert.deepEqual(
     collectScenarioStartSourcePlacements(imjinrokK01Scenario, {
@@ -483,7 +533,7 @@ test("imjinrok K01 and K02 player starts cover every active source map entity", 
     }),
     collectSourceMapEntityPlacements("k01.map", {
       0: { playerId: "local-player", kindByTypeHex: joseonSourceKindByTypeHex },
-      1: { playerId: "cpu-1", kindByTypeHex: japaneseSourceKindByTypeHex },
+      1: { playerId: "cpu-1", kindByTypeHex: k01JapaneseSourceKindByTypeHex },
     }),
   );
   assert.deepEqual(
@@ -497,7 +547,7 @@ test("imjinrok K01 and K02 player starts cover every active source map entity", 
     }),
     collectSourceMapEntityPlacements("k02.map", {
       0: { playerId: "local-player", kindByTypeHex: joseonSourceKindByTypeHex },
-      1: { playerId: "cpu-1", kindByTypeHex: japaneseSourceKindByTypeHex },
+      1: { playerId: "cpu-1", kindByTypeHex: k02JapaneseSourceKindByTypeHex },
       6: { playerId: "ally-1", kindByTypeHex: joseonSourceKindByTypeHex },
     }),
   );
@@ -868,10 +918,10 @@ const joseonSourceKindByTypeHex = {
   "0x4e": "ryu-seong-ryong",
 } as const;
 
-const japaneseSourceKindByTypeHex = {
+const k01JapaneseSourceKindByTypeHex = {
   "0x03": "japanese-swordsman",
-  "0x0c": "japanese-swordsman",
-  "0x0d": "japanese-swordsman",
+  "0x0c": "japanese-gunner",
+  "0x0d": "japanese-samurai",
   "0x10": "japanese-gunner",
   "0x14": "japanese-swordsman",
   "0x1f": "japanese-gunner",
@@ -880,6 +930,12 @@ const japaneseSourceKindByTypeHex = {
   "0x3c": "japanese-camp-tower",
   "0x3e": "japanese-camp-firehouse",
   "0x3f": "japanese-camp-advanced-tower",
+} as const;
+
+const k02JapaneseSourceKindByTypeHex = {
+  ...k01JapaneseSourceKindByTypeHex,
+  "0x0c": "japanese-swordsman",
+  "0x0d": "japanese-swordsman",
 } as const;
 
 interface SourceOwnerMapping {

@@ -244,24 +244,6 @@ const localCombatStart: StartingUnitDefinition[] = [
   { kind: "archer", idSuffix: "archer-1", offset: { x: 6, y: 5 } },
 ];
 
-// Source map entity arrays are decoded from the original map header slots loaded by the executable
-// at 0xac00a4/0xac06e4/0xac0d24/0xac1364. Unsupported source types are left out until their
-// mechanics/assets exist locally.
-const k01SourceOpeningBaseStart: StartingUnitDefinition[] = [
-  { kind: "house", idSuffix: "source-0x31-5-4", offset: { x: -1, y: -2 } },
-  { kind: "house", idSuffix: "source-0x30-11-5", offset: { x: 5, y: -1 } },
-  { kind: "barracks", idSuffix: "source-0x32-13-10", offset: { x: 7, y: 4 } },
-  { kind: "house", idSuffix: "source-0x33-5-8", offset: { x: -1, y: 2 } },
-  { kind: "gwon-yul", idSuffix: "source-0x4c-9-8", offset: { x: 3, y: 2 } },
-  { kind: "swordsman", idSuffix: "source-0x02-11-11", offset: { x: 5, y: 5 } },
-  { kind: "swordsman", idSuffix: "source-0x0b-9-11", offset: { x: 3, y: 5 } },
-  { kind: "archer", idSuffix: "source-0x04-14-8", offset: { x: 8, y: 2 } },
-  { kind: "villager", idSuffix: "source-0x07-7-6", offset: { x: 1, y: 0 } },
-  { kind: "villager", idSuffix: "source-0x07-8-6", offset: { x: 2, y: 0 } },
-  { kind: "ryu-seong-ryong", idSuffix: "source-0x4e-7-8", offset: { x: 1, y: 2 } },
-  { kind: "swordsman", idSuffix: "source-0x0b-7-10", offset: { x: 1, y: 4 } },
-];
-
 const originalCampaignStartingResources: ResourceAmountSet = {
   food: 5000,
   wood: 5000,
@@ -377,33 +359,69 @@ const k01ReinforcementWave: StartingUnitDefinition[] = k01ReinforcementAdapter.m
 
 const k02OccupationScan = { origin: { x: 0, y: 65 }, width: 7, height: 13, yStep: 2 } as const;
 
-// K0115 starts with source map enemy troops and production-less camp structures from the owner1 source records.
-const k01ForwardJapaneseStart: StartingUnitDefinition[] = [
-  { kind: "japanese-swordsman", idSuffix: "source-0x03-19-29", offset: { x: -33, y: -23 } },
-  { kind: "japanese-swordsman", idSuffix: "source-0x0d-20-29", offset: { x: -32, y: -23 } },
-  { kind: "japanese-swordsman", idSuffix: "source-0x03-37-7", offset: { x: -15, y: -45 } },
-  { kind: "japanese-swordsman", idSuffix: "source-0x03-14-51", offset: { x: -38, y: -1 } },
-  { kind: "japanese-swordsman", idSuffix: "source-0x0d-36-26", offset: { x: -16, y: -26 } },
-  { kind: "japanese-swordsman", idSuffix: "source-0x0c-38-6", offset: { x: -14, y: -46 } },
-  { kind: "japanese-swordsman", idSuffix: "source-0x0c-50-8", offset: { x: -2, y: -44 } },
-  { kind: "japanese-gunner", idSuffix: "source-0x1f-7-48", offset: { x: -45, y: -4 } },
-  { kind: "japanese-gunner", idSuffix: "source-0x1f-7-47", offset: { x: -45, y: -5 } },
-  { kind: "japanese-gunner", idSuffix: "source-0x1f-48-1", offset: { x: -4, y: -51 } },
-  { kind: "japanese-swordsman", idSuffix: "source-0x0d-31-44", offset: { x: -21, y: -8 } },
-  { kind: "japanese-swordsman", idSuffix: "source-0x0c-38-27", offset: { x: -14, y: -25 } },
-  { kind: "japanese-gunner", idSuffix: "source-0x10-11-54", offset: { x: -41, y: 2 } },
-  { kind: "japanese-camp-house", idSuffix: "source-0x39-12-52", offset: { x: -40, y: 0 } },
-  { kind: "japanese-camp-house", idSuffix: "source-0x39-51-5", offset: { x: -1, y: -47 } },
-  { kind: "japanese-camp-barracks", idSuffix: "source-0x3a-7-57", offset: { x: -45, y: 5 } },
-  { kind: "japanese-camp-barracks", idSuffix: "source-0x3a-56-6", offset: { x: 4, y: -46 } },
-  { kind: "japanese-camp-tower", idSuffix: "source-0x3c-6-50", offset: { x: -46, y: -2 } },
-  { kind: "japanese-camp-tower", idSuffix: "source-0x3c-55-11", offset: { x: 3, y: -41 } },
-  { kind: "japanese-camp-firehouse", idSuffix: "source-0x3e-12-57", offset: { x: -40, y: 5 } },
-  { kind: "japanese-camp-advanced-tower", idSuffix: "source-0x3f-18-49", offset: { x: -34, y: -3 } },
-  { kind: "japanese-camp-advanced-tower", idSuffix: "source-0x3f-44-5", offset: { x: -8, y: -47 } },
-  { kind: "japanese-camp-advanced-tower", idSuffix: "source-0x3f-32-40", offset: { x: -20, y: -12 } },
-  { kind: "japanese-camp-advanced-tower", idSuffix: "source-0x3f-35-29", offset: { x: -17, y: -23 } },
-];
+export type K01SourceIdentityMapping =
+  | "exact-static-identity-source"
+  | "proxy";
+
+export interface K01SourceUnitAdapterRecord {
+  originalClass: number;
+  rawOwnerWord: 0 | 1;
+  offset: GridPoint;
+  projectKind: UnitDefinitionId;
+  identityMapping: K01SourceIdentityMapping;
+  idSuffix: string;
+}
+
+// The K01 map header stores source entity arrays at 0xac00a4/0xac06e4/0xac0d24/0xac1364.
+// `proxy` deliberately preserves current project fallbacks where identity or frame work is not
+// yet sufficient to claim a source binding. This adapter does not assert source gameplay behavior.
+export const k01SourceOpeningAdapter = [
+  { originalClass: 49, rawOwnerWord: 0, offset: { x: -1, y: -2 }, projectKind: "house", identityMapping: "proxy", idSuffix: "source-0x31-5-4" },
+  { originalClass: 48, rawOwnerWord: 0, offset: { x: 5, y: -1 }, projectKind: "house", identityMapping: "proxy", idSuffix: "source-0x30-11-5" },
+  { originalClass: 50, rawOwnerWord: 0, offset: { x: 7, y: 4 }, projectKind: "barracks", identityMapping: "exact-static-identity-source", idSuffix: "source-0x32-13-10" },
+  { originalClass: 51, rawOwnerWord: 0, offset: { x: -1, y: 2 }, projectKind: "house", identityMapping: "proxy", idSuffix: "source-0x33-5-8" },
+  { originalClass: 76, rawOwnerWord: 0, offset: { x: 3, y: 2 }, projectKind: "gwon-yul", identityMapping: "exact-static-identity-source", idSuffix: "source-0x4c-9-8" },
+  { originalClass: 2, rawOwnerWord: 0, offset: { x: 5, y: 5 }, projectKind: "swordsman", identityMapping: "proxy", idSuffix: "source-0x02-11-11" },
+  { originalClass: 11, rawOwnerWord: 0, offset: { x: 3, y: 5 }, projectKind: "swordsman", identityMapping: "proxy", idSuffix: "source-0x0b-9-11" },
+  { originalClass: 4, rawOwnerWord: 0, offset: { x: 8, y: 2 }, projectKind: "archer", identityMapping: "proxy", idSuffix: "source-0x04-14-8" },
+  { originalClass: 7, rawOwnerWord: 0, offset: { x: 1, y: 0 }, projectKind: "villager", identityMapping: "proxy", idSuffix: "source-0x07-7-6" },
+  { originalClass: 7, rawOwnerWord: 0, offset: { x: 2, y: 0 }, projectKind: "villager", identityMapping: "proxy", idSuffix: "source-0x07-8-6" },
+  { originalClass: 78, rawOwnerWord: 0, offset: { x: 1, y: 2 }, projectKind: "ryu-seong-ryong", identityMapping: "exact-static-identity-source", idSuffix: "source-0x4e-7-8" },
+  { originalClass: 11, rawOwnerWord: 0, offset: { x: 1, y: 4 }, projectKind: "swordsman", identityMapping: "proxy", idSuffix: "source-0x0b-7-10" },
+  { originalClass: 3, rawOwnerWord: 1, offset: { x: -33, y: -23 }, projectKind: "japanese-swordsman", identityMapping: "exact-static-identity-source", idSuffix: "source-0x03-19-29" },
+  { originalClass: 13, rawOwnerWord: 1, offset: { x: -32, y: -23 }, projectKind: "japanese-samurai", identityMapping: "exact-static-identity-source", idSuffix: "source-0x0d-20-29" },
+  { originalClass: 3, rawOwnerWord: 1, offset: { x: -15, y: -45 }, projectKind: "japanese-swordsman", identityMapping: "exact-static-identity-source", idSuffix: "source-0x03-37-7" },
+  { originalClass: 3, rawOwnerWord: 1, offset: { x: -38, y: -1 }, projectKind: "japanese-swordsman", identityMapping: "exact-static-identity-source", idSuffix: "source-0x03-14-51" },
+  { originalClass: 13, rawOwnerWord: 1, offset: { x: -16, y: -26 }, projectKind: "japanese-samurai", identityMapping: "exact-static-identity-source", idSuffix: "source-0x0d-36-26" },
+  { originalClass: 12, rawOwnerWord: 1, offset: { x: -14, y: -46 }, projectKind: "japanese-gunner", identityMapping: "exact-static-identity-source", idSuffix: "source-0x0c-38-6" },
+  { originalClass: 12, rawOwnerWord: 1, offset: { x: -2, y: -44 }, projectKind: "japanese-gunner", identityMapping: "exact-static-identity-source", idSuffix: "source-0x0c-50-8" },
+  { originalClass: 31, rawOwnerWord: 1, offset: { x: -45, y: -4 }, projectKind: "japanese-gunner", identityMapping: "proxy", idSuffix: "source-0x1f-7-48" },
+  { originalClass: 31, rawOwnerWord: 1, offset: { x: -45, y: -5 }, projectKind: "japanese-gunner", identityMapping: "proxy", idSuffix: "source-0x1f-7-47" },
+  { originalClass: 31, rawOwnerWord: 1, offset: { x: -4, y: -51 }, projectKind: "japanese-gunner", identityMapping: "proxy", idSuffix: "source-0x1f-48-1" },
+  { originalClass: 13, rawOwnerWord: 1, offset: { x: -21, y: -8 }, projectKind: "japanese-samurai", identityMapping: "exact-static-identity-source", idSuffix: "source-0x0d-31-44" },
+  { originalClass: 12, rawOwnerWord: 1, offset: { x: -14, y: -25 }, projectKind: "japanese-gunner", identityMapping: "exact-static-identity-source", idSuffix: "source-0x0c-38-27" },
+  { originalClass: 16, rawOwnerWord: 1, offset: { x: -41, y: 2 }, projectKind: "japanese-gunner", identityMapping: "proxy", idSuffix: "source-0x10-11-54" },
+  { originalClass: 57, rawOwnerWord: 1, offset: { x: -40, y: 0 }, projectKind: "japanese-camp-house", identityMapping: "exact-static-identity-source", idSuffix: "source-0x39-12-52" },
+  { originalClass: 57, rawOwnerWord: 1, offset: { x: -1, y: -47 }, projectKind: "japanese-camp-house", identityMapping: "exact-static-identity-source", idSuffix: "source-0x39-51-5" },
+  { originalClass: 58, rawOwnerWord: 1, offset: { x: -45, y: 5 }, projectKind: "japanese-camp-barracks", identityMapping: "proxy", idSuffix: "source-0x3a-7-57" },
+  { originalClass: 58, rawOwnerWord: 1, offset: { x: 4, y: -46 }, projectKind: "japanese-camp-barracks", identityMapping: "proxy", idSuffix: "source-0x3a-56-6" },
+  { originalClass: 60, rawOwnerWord: 1, offset: { x: -46, y: -2 }, projectKind: "japanese-camp-tower", identityMapping: "proxy", idSuffix: "source-0x3c-6-50" },
+  { originalClass: 60, rawOwnerWord: 1, offset: { x: 3, y: -41 }, projectKind: "japanese-camp-tower", identityMapping: "proxy", idSuffix: "source-0x3c-55-11" },
+  { originalClass: 62, rawOwnerWord: 1, offset: { x: -40, y: 5 }, projectKind: "japanese-camp-firehouse", identityMapping: "exact-static-identity-source", idSuffix: "source-0x3e-12-57" },
+  { originalClass: 63, rawOwnerWord: 1, offset: { x: -34, y: -3 }, projectKind: "japanese-camp-advanced-tower", identityMapping: "proxy", idSuffix: "source-0x3f-18-49" },
+  { originalClass: 63, rawOwnerWord: 1, offset: { x: -8, y: -47 }, projectKind: "japanese-camp-advanced-tower", identityMapping: "proxy", idSuffix: "source-0x3f-44-5" },
+  { originalClass: 63, rawOwnerWord: 1, offset: { x: -20, y: -12 }, projectKind: "japanese-camp-advanced-tower", identityMapping: "proxy", idSuffix: "source-0x3f-32-40" },
+  { originalClass: 63, rawOwnerWord: 1, offset: { x: -17, y: -23 }, projectKind: "japanese-camp-advanced-tower", identityMapping: "proxy", idSuffix: "source-0x3f-35-29" },
+] as const satisfies readonly K01SourceUnitAdapterRecord[];
+
+function deriveK01SourceOpeningStart(rawOwnerWord: 0 | 1): StartingUnitDefinition[] {
+  return k01SourceOpeningAdapter
+    .filter((record) => record.rawOwnerWord === rawOwnerWord)
+    .map(({ projectKind: kind, idSuffix, offset }) => ({ kind, idSuffix, offset }));
+}
+
+const k01SourceOpeningBaseStart = deriveK01SourceOpeningStart(0);
+const k01ForwardJapaneseStart = deriveK01SourceOpeningStart(1);
 
 const k02SourceJapaneseStart: StartingUnitDefinition[] = [
   { kind: "japanese-swordsman", idSuffix: "source-0x03-54-17-a", offset: { x: -18, y: 9 } },
