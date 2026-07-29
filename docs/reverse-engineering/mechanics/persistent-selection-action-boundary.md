@@ -156,9 +156,10 @@ owner는 `0x007c5ed8`이며 slot WORD는 `owner+0x82a+slot*2`,
    `y=WORD[0x0088bd82]-2`, width `WORD[0x0088bd64]`,
    height `WORD[0x0088bd66]`을 사용한다.
 7. draw resource 인자는 `0x00899ce8`, `0x0089a41c`, `0x0089982c`,
-   `0x00899830`과 resolved frame index를 통해 계산된다. 이 slice는 그 runtime table이
-   가리키는 원본 파일명이나 gameplay label을 완결하지 않았으므로 resource identity를 추정하지
-   않는다.
+   `0x00899830`과 resolved frame index를 통해 계산된다. action 61..64의 별도 selected-control
+   경로는 [command control의 pixel-frame 결합](command-icon-frame-binding.md)에서
+   `button.spr` frames 27/26/28/29까지 정적 확정했다. 이 일곱-slot producer의 type→gameplay
+   label 또는 다른 action의 resource identity는 이 slice에서 여전히 확정하지 않는다.
 8. slot index는 signed WORD `0..6` 경계다. 저장 값 자체는 raw WORD이며 setter는 low WORD를
    쓴다. 이 producer가 전달하는 값은 zero 또는 완전 복원된 entity internal-class 범위
    `1..95`다. renderer가 nonzero 값을 signed-extend하므로 임의 high-bit raw WORD를 “지원되는
