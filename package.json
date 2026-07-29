@@ -25,6 +25,7 @@
     "imjinrok:extract-terrain-mask": "node tools/imjinrok/extract-map-terrain-mask.mjs",
     "imjinrok:extract-environment-assets": "node tools/imjinrok/extract-imjinrok-environment-assets.mjs --output analysis/fixtures/imjinrok-environment-assets.json",
     "imjinrok:export-environment-assets": "node tools/imjinrok/export-imjinrok-environment-assets.mjs",
+    "imjinrok:export-k01-source-tile-visuals": "node tools/imjinrok/export-k01-source-tile-visuals.mjs",
     "imjinrok:extract-k01-global-mask-boundary": "node tools/imjinrok/extract-k01-global-mask-boundary.mjs",
     "imjinrok:extract-mission-portraits": "node tools/imjinrok/extract-mission-portrait-mapping.mjs --json",
     "imjinrok:extract-speech-layout": "node tools/imjinrok/extract-speech-layout-evidence.mjs --json",

@@ -6,6 +6,7 @@ export * from "./damage.js";
 export * from "./elevationAutotile.js";
 export * from "./environment.js";
 export * from "./imjinrokMaps.js";
+export * from "./k01SourceTileVisuals.js";
 export * from "./maps.js";
 export * from "./mapValidation.js";
 export * from "./network.js";

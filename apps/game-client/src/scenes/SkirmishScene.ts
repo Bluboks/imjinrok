@@ -144,6 +144,7 @@ import {
   requireExplicitTileVisualTexture,
   resolveExplicitTileVisual,
   resolveExplicitTileVisualPlacement,
+  resolveExplicitTileVisualWorldBounds,
   type ExplicitTileVisualDescriptor,
 } from "../render/explicitTileVisualResolver.js";
 import {
@@ -7152,17 +7153,12 @@ export class SkirmishScene extends Phaser.Scene {
     const chunkY = chunkRow * TERRAIN_CHUNK_SIZE;
     const maxX = Math.min(this.map.width - 1, chunkX + TERRAIN_CHUNK_SIZE - 1);
     const maxY = Math.min(this.map.height - 1, chunkY + TERRAIN_CHUNK_SIZE - 1);
-    const corners = [
-      this.getTileWorldDiamondBounds(chunkX, chunkY),
-      this.getTileWorldDiamondBounds(maxX, chunkY),
-      this.getTileWorldDiamondBounds(maxX, maxY),
-      this.getTileWorldDiamondBounds(chunkX, maxY),
-    ];
-    const minX = Math.min(...corners.map((corner) => corner.left)) - 2;
-    const flatMinY = Math.min(...corners.map((corner) => corner.top)) - 2;
+    const visualBounds = this.getTerrainChunkWorldBounds(chunkX, chunkY, maxX, maxY);
+    const minX = visualBounds.left - 2;
+    const flatMinY = visualBounds.top - 2;
     const minY = flatMinY - this.terrainFogLiftPaddingPx;
-    const maxRight = Math.max(...corners.map((corner) => corner.right)) + 2;
-    const maxBottom = Math.max(...corners.map((corner) => corner.bottom)) + 2;
+    const maxRight = visualBounds.right + 2;
+    const maxBottom = visualBounds.bottom + 2;
 
     return {
       chunkX,
@@ -7254,16 +7250,11 @@ export class SkirmishScene extends Phaser.Scene {
       for (let chunkX = 0; chunkX < this.map.width; chunkX += TERRAIN_CHUNK_SIZE) {
         const maxX = Math.min(this.map.width - 1, chunkX + TERRAIN_CHUNK_SIZE - 1);
         const maxY = Math.min(this.map.height - 1, chunkY + TERRAIN_CHUNK_SIZE - 1);
-        const corners = [
-          this.getTileWorldDiamondBounds(chunkX, chunkY),
-          this.getTileWorldDiamondBounds(maxX, chunkY),
-          this.getTileWorldDiamondBounds(maxX, maxY),
-          this.getTileWorldDiamondBounds(chunkX, maxY),
-        ];
-        const minX = Math.min(...corners.map((corner) => corner.left)) - 2;
-        const minY = Math.min(...corners.map((corner) => corner.top)) - 2;
-        const maxRight = Math.max(...corners.map((corner) => corner.right)) + 2;
-        const maxBottom = Math.max(...corners.map((corner) => corner.bottom)) + 2;
+        const bounds = this.getTerrainChunkWorldBounds(chunkX, chunkY, maxX, maxY);
+        const minX = bounds.left - 2;
+        const minY = bounds.top - 2;
+        const maxRight = bounds.right + 2;
+        const maxBottom = bounds.bottom + 2;
         const renderTexture = this.add
           .renderTexture(minX, minY, Math.ceil(maxRight - minX), Math.ceil(maxBottom - minY))
           .setOrigin(0, 0)
@@ -7734,6 +7725,41 @@ export class SkirmishScene extends Phaser.Scene {
       this.map.tileWidth,
       this.map.tileHeight,
     );
+  }
+
+  private getTerrainChunkWorldBounds(chunkX: number, chunkY: number, maxX: number, maxY: number): Phaser.Geom.Rectangle {
+    const corners = [
+      this.getTileWorldDiamondBounds(chunkX, chunkY),
+      this.getTileWorldDiamondBounds(maxX, chunkY),
+      this.getTileWorldDiamondBounds(maxX, maxY),
+      this.getTileWorldDiamondBounds(chunkX, maxY),
+    ];
+    let left = Math.min(...corners.map((corner) => corner.left));
+    let top = Math.min(...corners.map((corner) => corner.top));
+    let right = Math.max(...corners.map((corner) => corner.right));
+    let bottom = Math.max(...corners.map((corner) => corner.bottom));
+
+    for (let y = chunkY; y <= maxY; y += 1) {
+      for (let x = chunkX; x <= maxX; x += 1) {
+        const tile = getTileAt(this.map, x, y);
+        const descriptor = resolveExplicitTileVisual(CONTENT_REGISTRY, this.map, tile, "flat")
+          ?? (tile.elevation > 0 ? resolveExplicitTileVisual(CONTENT_REGISTRY, this.map, tile, "elevation") : null);
+        if (!descriptor) continue;
+        const iso = cartToIso({ x, y }, this.map.tileWidth, this.map.tileHeight);
+        const visualBounds = resolveExplicitTileVisualWorldBounds(
+          descriptor,
+          { x: this.mapOrigin.x + iso.x, y: this.mapOrigin.y + iso.y },
+          this.map.tileWidth,
+          this.map.tileHeight,
+          descriptor.collection === "elevation" ? tile.elevation : 0,
+        );
+        left = Math.min(left, visualBounds.left);
+        top = Math.min(top, visualBounds.top);
+        right = Math.max(right, visualBounds.right);
+        bottom = Math.max(bottom, visualBounds.bottom);
+      }
+    }
+    return new Phaser.Geom.Rectangle(left, top, right - left, bottom - top);
   }
 
   private syncResourceRenderables(): void {

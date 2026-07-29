@@ -7,6 +7,7 @@ import {
   requireExplicitTileVisualTexture,
   resolveExplicitTileVisual,
   resolveExplicitTileVisualPlacement,
+  resolveExplicitTileVisualWorldBounds,
 } from "./explicitTileVisualResolver";
 
 test("resolves flat and elevation assets from each explicitly selected Imjinrok tileset", () => {
@@ -48,7 +49,7 @@ test("preload descriptors are deterministic, namespaced, and deduplicated for ma
   const keys = registered.map((descriptor) => descriptor.textureKey);
 
   assert.equal(new Set(keys).size, keys.length);
-  assert.deepEqual(keys, [...keys].sort());
+  assert.deepEqual(keys, [...keys].sort((left, right) => left.localeCompare(right)));
 
   const map = createBlankMap();
   const first = map.layers[0]?.tiles[0];
@@ -84,6 +85,11 @@ test("places source geometry by its footprint anchor and map elevation step", ()
       position: { x: 120, y: 32 },
       scale: 1.5,
     },
+  );
+
+  assert.deepEqual(
+    resolveExplicitTileVisualWorldBounds(descriptor, { x: 120, y: 80 }, 96, 48, 2),
+    { left: 72, top: 8, right: 168, bottom: 80 },
   );
 });
 
