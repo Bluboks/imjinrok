@@ -1,6 +1,6 @@
 # 분석 도구 인벤토리
 
-기준일: 2026-07-28
+기준일: 2026-07-29
 
 이 문서는 `tools/imjinrok/`의 도구를 현재 정적 분석 계획에 맞게 분류한다. 분류는 도구의 존재나
 테스트 통과 여부가 아니라, 원본 동작의 근거로 사용할 수 있는 범위를 뜻한다.
@@ -54,6 +54,7 @@
 | `extract-k01-hero-death-lifecycle.mjs`, `k01-hero-death-lifecycle.test.mjs` | 유지 | K01 두 영웅의 signed-health 행동 6 진입, incoming cadence/runtime flags별 phase·행동 7/`0x16`·조건부 release, health→slot→generation 무효화와 확인한 경로의 direct eager-clear 부재를 정적 추출·재현; runtime flag 도달·alias write·24 Hz mapping은 미확정 |
 | `extract-k01-beacon-k0120-trigger.mjs`, `k01-beacon-k0120-trigger.test.mjs` | 유지 | K01 raw-relation blocker, 1,200-slot 봉화대 세 active gate·match, flag·script busy·loader 0/1·void start, 같은 scan 반복, signed-WORD 증원 descriptor, selector 5 raw grid, 조건부 post-state 반환을 정적 추출·재현; 승리 결과와 runtime mapping은 포함하지 않음 |
 | `extract-k01-reinforcement-identity-map.mjs`, `k01-reinforcement-identity-map.test.mjs` | 유지 | native descriptor, 타입 카탈로그·K01 map·class 12/13/14 primary와 class 82의 세 SPR, 여섯 conversion manifest와 current sprite audit/K01 adapter provenance를 교차 검증해 요청 좌표·exact static identity/source 9/9를 확정; class 13·14·82 animation은 별도 파일럿을 링크하며 최종 배치·행동·stats는 포함하지 않음 |
+| `extract-k01-opening-unit-bindings.mjs`, `k01-opening-unit-bindings.test.mjs` | 유지 | K01 map owner 1의 active class 12·13 여섯 시작 record를 canonical type catalog hash·원본 이름·primary SPR와 교차해 class 12→`japanese-gunner`, class 13→`japanese-samurai`로 제한적으로 검증한다. binding/catalog 변조는 거부하며, 나머지 K01 opening proxy·stats·owner·movement는 범위 밖이다. |
 | `extract-k01-reinforcement-placement-policy.mjs`, `k01-reinforcement-placement-policy.test.mjs` | 유지 | `pnpm imjinrok:extract-k01-reinforcement-placement-policy`; K01 descriptor의 signed reuse-age slot 1..1199 선택·WORD wrap, allocate-before-bounds, slot failure/OOB/terminator, exact x/y·1×1 mode-1 occupancy overwrite를 추출·재현; 원본 pool/grid 저장 모델과 이후 이동은 포함하지 않음 |
 | `extract-k01-mission-result-lifecycle.mjs`, `k01-mission-result-lifecycle.test.mjs` | 유지 | K01 general/영웅 loss latch, beacon bypass, strict wrapped timer, dispatcher pre-gate/stage와 distinct raw-tick final commit 추출·재현; raw clock·result transition·identity mapping은 포함하지 않음 |
 | `extract-k01-mode-direct-writers.mjs`, `k01-mode-direct-writers.test.mjs` | 유지 | scheduler mode `WORD 0x00c06e20`의 complete canonical direct WRITE set, BP/DI zero dataflow, `FUN_00485890` arg 1/2 output과 source-bound `FUN_004a5070` arg-2 no-write closure를 EXE·generated evidence에 결합해 재현 |
