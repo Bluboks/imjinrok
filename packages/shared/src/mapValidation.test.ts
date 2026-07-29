@@ -97,7 +97,7 @@ test("source visual contracts retain catalogued source hashes without semantic p
   const resourceSet = imjinrokSourceContentPack.resourceVisualSets["imjinrok-source-resource-adaptation"];
 
   assert.equal(normalTileset.evidenceStatus, "unresolved");
-  assert.equal(resourceSet.evidenceStatus, "unresolved");
+  assert.equal(resourceSet.evidenceStatus, "source-backed-adaptation");
   for (const asset of [...(normalTileset.sourceAssets ?? []), ...(resourceSet.sourceAssets ?? [])]) {
     assert.equal(hashes.get(asset.sourcePath), asset.sha256, asset.sourcePath);
   }

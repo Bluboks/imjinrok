@@ -143,16 +143,14 @@ export const imjinrokSourceContentPack = {
   resourceVisualSets: {
     "imjinrok-source-resource-adaptation": {
       id: "imjinrok-source-resource-adaptation",
-      displayName: "Imjinrok Resource Source-Asset Candidates",
+      displayName: "Imjinrok Resource Visual Adaptation",
       resources: {
         rice: sourceResourceVisual("crop0"),
         potato: sourceResourceVisual("crop0"),
         tree: sourceResourceVisual("tree0"),
         bamboo: sourceResourceVisual("tree0"),
-        gold: sourceResourceVisual("resource"),
-        stone: sourceResourceVisual("resource"),
       },
-      evidenceStatus: "unresolved",
+      evidenceStatus: "source-backed-adaptation",
       sourceAssets: [
         sourceAsset("fnt/crop0.spr", "ca91364c8b43f36974c591cac29f5a0610832bd9a9e5a6700d41d51225fbdc00"),
         sourceAsset("fnt/tree0.spr", "871c0572134266838776bd3e90005287a14abfb3c56f5e9c2dab80f1aaa1c2fc"),
@@ -204,10 +202,10 @@ function sourceAsset(sourcePath: string, sha256: string) {
   return { sourcePath, sha256 };
 }
 
-function sourceResourceVisual(stem: "crop0" | "tree0" | "resource"): ResourceVisualSetDefinition["resources"][string] {
+function sourceResourceVisual(stem: "crop0" | "tree0"): ResourceVisualSetDefinition["resources"][string] {
   const asset = { url: `/assets/themes/default/resources/imjinrok/${stem}_0000.png`, frame: 0 };
 
-  return { states: { active: asset, depleted: asset }, evidenceStatus: "unresolved" };
+  return { states: { active: asset }, evidenceStatus: "source-backed-adaptation" };
 }
 
 export function validateContentRegistry(registry: ContentRegistry): ContentValidationResult {

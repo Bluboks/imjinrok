@@ -21,10 +21,11 @@
 - `pal/night1.pal`부터 `pal/night4.pal`, `tempeft/night1.YAV`.
 - `fnt/crop0.spr`, `crop1.spr`, `tree0.spr`, `resource.spr`, `helpresource.spr`.
 
-파일 존재는 source asset catalog의 사실일 뿐, map byte가 어떤 tile/file/frame을 선택하는지 또는
-`crop/tree/resource`가 현재 게임의 six-node kind와 정확히 대응하는지를 뜻하지 않는다. K01의
-`themeId=0 → normal`도 기존 [원시 맵 값 투영 계약](../reverse-engineering/mechanics/k01-map-terrain-contract.md)의
-`추정` 범위를 넘지 않는다.
+파일 존재는 source asset catalog의 사실일 뿐, map byte가 어떤 tile/file/frame을 선택하는지 증명하지
+않는다. `crop0` frame 0→`rice`/`potato`, `tree0` frame 0→`tree`/`bamboo`은 source file identity 위에
+올린 **source-backed project adaptation**이다. `resource.spr` frame 0은 UI sack source fact로 catalog에만
+남기며 `gold`/`stone` field node에는 자동 연결하지 않는다. K01의 `themeId=0 → normal`도 기존
+[원시 맵 값 투영 계약](../reverse-engineering/mechanics/k01-map-terrain-contract.md)의 `추정` 범위를 넘지 않는다.
 
 ## 프로젝트 계약
 
@@ -54,15 +55,17 @@ K01/K02와 다른 Imjinrok source map에는 원본 일정 근거가 없으므로
 
 후속 renderer는 registry를 resolve한 뒤 다음만 소비한다.
 
-1. terrain: `tileset.terrainAssets[tile.terrain]`, then optional
-   `tileset.elevationAssets[String(tile.elevation)]`.
-2. resource: `resourceVisualSet.resources[node.kind]?.states[getResourceNodeState(node)]`.
+1. terrain: exact original record→tile/frame rule은 미확정이다. catalog의 `grss1`/`hill0` frame 0을
+   전 tile에 반복 선택하는 terrain resolver를 만들지 않는다.
+2. resource: generic `resolveMapResourceVisual(registry, map, kind, state)`가 map-selected set의
+   `resourceVisualSet.resources[kind]?.states[state]`를 반환한다. 등록되지 않은 set은 오류,
+   매핑되지 않은 kind/state는 `null`이다. preload에는 matching descriptor만 사용한다.
 3. environment: opt-in state의 `lightLevel01`; `EnvironmentVisualProfile`은
    `evidenceStatus !== "unresolved"`인 asset만 자동 선택한다.
 
-Imjinrok resource candidate URL은 `evidenceStatus: "unresolved"`다. renderer가 이를 일반 gameplay visual로
-자동 승격하거나 state/frame 의미를 원본 사실로 표현해서는 안 된다. normal/snow/brown representative export도
-동일하게 원본 tile selection의 증거가 아니다.
+Imjinrok crop/tree adaptation은 active state frame 0만 가진다. depleted state와 `gold`/`stone`은 `null`
+fallback으로 기존 renderer behavior를 보존한다. normal/snow/brown representative export도 원본 tile
+selection의 증거가 아니다.
 
 ## 재현과 다음 분석
 
