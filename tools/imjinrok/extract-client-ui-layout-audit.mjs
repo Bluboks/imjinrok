@@ -89,18 +89,32 @@ export const CLIENT_UI_LAYOUT_AUDIT_PROBES = [
     patterns: [
       "this.addOriginalSpeechPresentation(",
       "const layout = resolveOriginalSpeechLayout(",
+      "const targetScale = portrait.width / 130;",
+      ".setScale(animateIntroduction ? 0 : targetScale);",
+      "scaleX: targetScale,",
+    ],
+    currentBasis: "static-proven-SPEECH-slots-and-text-with-project-portrait-scale-in-adaptation",
+    originalEvidenceStatus: "static-proven-for-SPEECH-slots-and-text;project-adaptation-for-portrait-scale-in",
+    originalTraceTargets: ["FUN_0048311e", "FUN_004a7a50", "FUN_004a8410"],
+    followUp:
+      "Keep in-game SPEECH slot/text mapping separate from project portrait scale-in; recover title, objective, button, font, and hit-test layout separately.",
+  },
+  {
+    id: "pre-game-briefing-layout",
+    sourcePath: "apps/game-client/src/scenes/MissionBriefingScene.ts",
+    patterns: [
       "const baseFrame = frames[0];",
-      "const completedFrame = frames[frames.length - 1];",
+      "const completedFrame = frames.at(-1);",
       "getMissionBriefingIntroFrameAlphas(",
       "const targetScale = portrait.width / 130;",
       ".setScale(animateIntroduction ? 0 : targetScale);",
       "scaleX: targetScale,",
     ],
-    currentBasis: "static-proven-SPEECH-slots-and-text-with-project-portrait-scale-and-briefing-frame-fade-adaptations",
-    originalEvidenceStatus: "static-proven-for-SPEECH-slots-and-text;project-adaptation-for-portrait-scale-in-and-base-to-completed-frame-fade",
+    currentBasis: "project-pre-game-briefing-presentation-with-static-proven-SPEECH-slots-and-text",
+    originalEvidenceStatus: "static-proven-for-SPEECH-slots-and-text;project-adaptation-for-base-to-completed-frame-fade-and-portrait-scale-in",
     originalTraceTargets: ["FUN_0048311e", "FUN_004a7a50", "FUN_004a8410"],
     followUp:
-      "Keep SPEECH slot/text mapping separate from project portrait scale-in and base-to-completed-frame fade; recover title, objective, button, font, and hit-test layout separately.",
+      "Keep the pre-game briefing base-to-completed fade and portrait scale-in as project presentation; recover original title, objective, button, font, and hit-test layout separately.",
   },
 ];
 
