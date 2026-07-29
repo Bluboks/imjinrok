@@ -1,0 +1,48 @@
+/**
+ * Renderer-facing terrain contracts. These references deliberately say nothing
+ * about how an original map record selects a tile or frame.
+ */
+export interface VisualAssetRef {
+  url: string;
+  frame: number;
+}
+
+export interface SourceAssetCatalogEntry {
+  sourcePath: string;
+  sha256: string;
+}
+
+export type SourceEvidenceStatus = "source-fact" | "source-backed-adaptation" | "unresolved";
+
+export interface TilesetDefinition {
+  id: string;
+  displayName: string;
+  terrainAssets: Readonly<Record<string, VisualAssetRef>>;
+  elevationAssets?: Readonly<Record<string, VisualAssetRef>>;
+  evidenceStatus: SourceEvidenceStatus;
+  sourceAssets?: readonly SourceAssetCatalogEntry[];
+}
+
+export interface EnvironmentVisualProfile {
+  id: string;
+  displayName: string;
+  paletteAssets?: readonly VisualAssetRef[];
+  effectAssets?: readonly VisualAssetRef[];
+  evidenceStatus: SourceEvidenceStatus;
+  sourceAssets?: readonly SourceAssetCatalogEntry[];
+}
+
+export type ResourceVisualState = "active" | "depleted";
+
+export interface ResourceVisualIdentity {
+  states: Readonly<Partial<Record<ResourceVisualState, VisualAssetRef>>>;
+  evidenceStatus: SourceEvidenceStatus;
+}
+
+export interface ResourceVisualSetDefinition {
+  id: string;
+  displayName: string;
+  resources: Readonly<Record<string, ResourceVisualIdentity>>;
+  evidenceStatus: SourceEvidenceStatus;
+  sourceAssets?: readonly SourceAssetCatalogEntry[];
+}

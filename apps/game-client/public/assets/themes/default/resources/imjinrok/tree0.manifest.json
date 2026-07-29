@@ -1,0 +1,13 @@
+{
+  "source": "/home/agent/coding/imjinrok/map-terrain-system/original/imjinrok2/fnt/tree0.spr",
+  "layout": "spr",
+  "width": 70,
+  "height": 90,
+  "frameCount": 70,
+  "exportedFrames": [
+    {
+      "index": 0,
+      "fileName": "tree0_0000.png"
+    }
+  ]
+}

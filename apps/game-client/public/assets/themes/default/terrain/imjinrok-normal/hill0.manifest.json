@@ -1,0 +1,13 @@
+{
+  "source": "/home/agent/coding/imjinrok/map-terrain-system/original/imjinrok2/tile/normal/hill0.ytl",
+  "layout": "ytl",
+  "width": 64,
+  "height": 48,
+  "frameCount": 44,
+  "exportedFrames": [
+    {
+      "index": 0,
+      "fileName": "hill0_0000.png"
+    }
+  ]
+}

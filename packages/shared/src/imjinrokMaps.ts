@@ -195,6 +195,8 @@ export function createImjinrokMapScaffold(mapId: string): MapDefinition | null {
   });
 
   map.sourceInitialView = { ...metadata.view };
+  map.tilesetId = `imjinrok-${metadata.tileTheme}`;
+  map.resourceVisualSetId = "imjinrok-source-resource-adaptation";
   applyOriginalTerrainMask(map, metadata.terrainMaskRle);
   map.spawnPoints = createSpawnPoints(metadata.spawns, metadata.width, metadata.height);
   carveSpawnLanes(map);

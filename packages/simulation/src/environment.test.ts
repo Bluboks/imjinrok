@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { createBlankMap } from "../../shared/src/index.js";
-import { advanceWorldTick, createInitialWorldState, createPlayerVisibility, getTileVisibility, TileVisibility, toWorldSnapshot, updatePlayerVisibility } from "./index.js";
+import { advanceWorldTick, createInitialWorldState, createPlayerVisibility, getEnvironmentLightLevel, getTileVisibility, TileVisibility, toWorldSnapshot, updatePlayerVisibility } from "./index.js";
 
 test("initial world defaults to clear day environment", () => {
   const state = createInitialWorldState(createBlankMap(), ["p1"]);
@@ -82,6 +82,76 @@ test("identical worlds advanced equally produce identical environment state", ()
   assert.deepEqual(a.environment, b.environment);
 });
 
+test("opt-in light curves expose deterministic dawn, day, dusk, and night output", () => {
+  const map = createBlankMap();
+  map.environment = {
+    dayNight: {
+      cycleTicks: 16,
+      nightStartTick: 12,
+      dayStartTick: 4,
+      nightSightMultiplier: 0.5,
+      lightCurve: [
+        { tick: 0, phase: "night", lightLevel01: 0.25 },
+        { tick: 4, phase: "dawn", lightLevel01: 0.5 },
+        { tick: 6, phase: "day", lightLevel01: 1 },
+        { tick: 10, phase: "dusk", lightLevel01: 0.5 },
+        { tick: 12, phase: "night", lightLevel01: 0.25 },
+      ],
+    },
+  };
+  const state = createInitialWorldState(map, ["p1"]);
+
+  assert.deepEqual(pickLight(state), { phase: "night", light: 0.25 });
+  advanceTicks(state, 4);
+  assert.deepEqual(pickLight(state), { phase: "dawn", light: 0.5 });
+  advanceTicks(state, 2);
+  assert.deepEqual(pickLight(state), { phase: "day", light: 1 });
+  advanceTicks(state, 4);
+  assert.deepEqual(pickLight(state), { phase: "dusk", light: 0.5 });
+  advanceTicks(state, 2);
+  assert.deepEqual(pickLight(state), { phase: "night", light: 0.25 });
+});
+
+test("light curve interpolation changes sight deterministically without changing legacy presets", () => {
+  const map = createBlankMap();
+  map.environment = {
+    dayNight: {
+      cycleTicks: 8,
+      nightStartTick: 6,
+      dayStartTick: 2,
+      nightSightMultiplier: 0.5,
+      lightCurve: [
+        { tick: 0, phase: "night", lightLevel01: 0 },
+        { tick: 4, phase: "day", lightLevel01: 1 },
+      ],
+    },
+  };
+  const state = createInitialWorldState(map, ["p1"]);
+
+  assert.equal(state.environment.lightLevel01, 0);
+  assert.equal(getEnvironmentLightLevel(state.environment), 0);
+  advanceTicks(state, 2);
+  assert.equal(state.environment.lightLevel01, 0.5);
+  assert.equal(getEnvironmentLightLevel(state.environment), 0.5);
+});
+
+test("runtime rejects an invalid opt-in light curve instead of silently falling back", () => {
+  const map = createBlankMap();
+  map.environment = {
+    dayNight: {
+      cycleTicks: 8,
+      nightStartTick: 6,
+      dayStartTick: 2,
+      lightCurve: [
+        { tick: 0, phase: "night", lightLevel01: 0 },
+        { tick: 0, phase: "day", lightLevel01: 1 },
+      ],
+    },
+  };
+
+  assert.throws(() => createInitialWorldState(map, ["p1"]), /Invalid day\/night cycle: lightCurve\[1\]\.tick: Duplicate keyframe tick '0'/);
+});
+
 test("world snapshot includes environment state", () => {
   const state = createInitialWorldState(createBlankMap(), ["p1"]);
   const snapshot = toWorldSnapshot(state);
@@ -147,4 +217,14 @@ function keepOnlyUnit(state: ReturnType<typeof createInitialWorldState>, keptUni
       delete state.units[unitId];
     }
   }
+}
+
+function advanceTicks(state: ReturnType<typeof createInitialWorldState>, count: number): void {
+  for (let index = 0; index < count; index += 1) {
+    advanceWorldTick(state);
+  }
+}
+
+function pickLight(state: ReturnType<typeof createInitialWorldState>): { phase: string; light: number | undefined } {
+  return { phase: state.environment.dayPhase, light: state.environment.lightLevel01 };
 }

@@ -1,0 +1,13 @@
+{
+  "source": "/home/agent/coding/imjinrok/map-terrain-system/original/imjinrok2/fnt/resource.spr",
+  "layout": "spr",
+  "width": 20,
+  "height": 24,
+  "frameCount": 10,
+  "exportedFrames": [
+    {
+      "index": 0,
+      "fileName": "resource_0000.png"
+    }
+  ]
+}

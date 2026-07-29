@@ -1,0 +1,13 @@
+{
+  "source": "/home/agent/coding/imjinrok/map-terrain-system/original/imjinrok2/tile/brown/sea0.ytl",
+  "layout": "ytl",
+  "width": 64,
+  "height": 48,
+  "frameCount": 96,
+  "exportedFrames": [
+    {
+      "index": 0,
+      "fileName": "sea0_0000.png"
+    }
+  ]
+}

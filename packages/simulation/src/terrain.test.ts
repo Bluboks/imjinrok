@@ -92,6 +92,24 @@ test("static deep water remains blocked in clear and rain", () => {
   assert.equal(isTilePassableForUnit(rainState, rainUnit, { x: 4, y: 4 }), false);
 });
 
+test("elevation remains a map visual/topology contract and does not silently change terrain passability", () => {
+  const map = createBlankMap({ width: 10, height: 10 });
+  const elevated = map.layers[0]?.tiles[getTileIndex(map.width, 4, 4)];
+  assert.ok(elevated);
+  elevated.elevation = 3;
+  const state = createInitialWorldState(map, ["p1"]);
+  const unit = state.units["p1-villager-1"]!;
+
+  assert.equal(isTerrainWalkable(map, { x: 4, y: 4 }), true);
+  assert.equal(isTilePassableForUnit(state, unit, { x: 4, y: 4 }), true);
+
+  setTerrain(map, 4, 4, "cliff");
+  const cliff = map.layers[0]?.tiles[getTileIndex(map.width, 4, 4)];
+  assert.ok(cliff);
+  cliff.elevation = 3;
+  assert.equal(isTerrainWalkable(map, { x: 4, y: 4 }), false);
+});
+
 function createBarrierMap(terrain: TerrainType): MapDefinition {
   const map = createBlankMap({ width: 10, height: 10 });
 

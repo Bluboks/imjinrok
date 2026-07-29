@@ -42,6 +42,10 @@ export interface MapDefinition {
   tags: string[];
   sourceInitialView?: GridPoint;
   environment?: EnvironmentPreset;
+  /** Optional so saved/custom maps created before visual packs remain valid. */
+  tilesetId?: string;
+  environmentVisualProfileId?: string;
+  resourceVisualSetId?: string;
 }
 
 export function getTileIndex(width: number, x: number, y: number): number {
@@ -89,6 +93,9 @@ export function createBlankMap(options?: Partial<Pick<MapDefinition, "id" | "nam
     layers: [createBlankLayer(width, height)],
     spawnPoints: createDefaultSpawnPoints(width, height),
     tags: options?.tags ?? ["skirmish", "editor-ready"],
+    tilesetId: "core-default",
+    environmentVisualProfileId: "core-default",
+    resourceVisualSetId: "core-default",
   };
 }
 

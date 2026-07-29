@@ -1,0 +1,13 @@
+{
+  "source": "/home/agent/coding/imjinrok/map-terrain-system/original/imjinrok2/fnt/crop0.spr",
+  "layout": "spr",
+  "width": 64,
+  "height": 32,
+  "frameCount": 100,
+  "exportedFrames": [
+    {
+      "index": 0,
+      "fileName": "crop0_0000.png"
+    }
+  ]
+}
