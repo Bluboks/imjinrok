@@ -18,6 +18,7 @@
 - [프로젝트 상태](project-status.md): 구현과 원작 검증 상태의 요약
 - [로드맵](roadmap.md): 정적 분석부터 이식까지의 단계와 통과 조건
 - [원본과 포팅 구현의 경계](architecture/original-vs-port.md): 무엇이 원본 사실이고 무엇이 프로젝트 설계인지 구분
+- [지형·환경·자원 시각 계약](architecture/terrain-environment-resource-contract.md): 모딩 registry와 원본 source catalog의 경계
 
 ### 역공학
 

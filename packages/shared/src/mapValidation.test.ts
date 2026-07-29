@@ -1,7 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { createBlankMap } from "./maps.js";
-import { createContentRegistry } from "./contentPack.js";
+import { createContentRegistry, imjinrokSourceContentPack } from "./contentPack.js";
 import { assertValidMapDefinition, validateMapDefinition } from "./mapValidation.js";
 import { createImjinrokMapScaffold } from "./imjinrokMaps.js";
 
@@ -55,4 +57,19 @@ test("K01 retains only its normal tileset identity without an inferred night cyc
   assert.equal(map.environmentVisualProfileId, "core-default");
   assert.equal(map.environment, undefined);
   assert.equal(validateMapDefinition(map, createContentRegistry()).ok, true);
+});
+
+test("source visual contracts retain catalogued source hashes without semantic promotion", () => {
+  const fixture = JSON.parse(readFileSync(resolve("analysis/fixtures/imjinrok-environment-assets.json"), "utf8")) as {
+    sourceFiles: { sourcePath: string; sha256: string }[];
+  };
+  const hashes = new Map(fixture.sourceFiles.map((entry) => [entry.sourcePath, entry.sha256]));
+  const normalTileset = imjinrokSourceContentPack.tilesets["imjinrok-normal"];
+  const resourceSet = imjinrokSourceContentPack.resourceVisualSets["imjinrok-source-resource-adaptation"];
+
+  assert.equal(normalTileset.evidenceStatus, "unresolved");
+  assert.equal(resourceSet.evidenceStatus, "unresolved");
+  for (const asset of [...(normalTileset.sourceAssets ?? []), ...(resourceSet.sourceAssets ?? [])]) {
+    assert.equal(hashes.get(asset.sourcePath), asset.sha256, asset.sourcePath);
+  }
 });
