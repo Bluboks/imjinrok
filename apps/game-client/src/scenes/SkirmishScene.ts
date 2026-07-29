@@ -132,6 +132,16 @@ import {
 } from "../hud.js";
 import { createSessionTransport, type SessionTransport } from "../net/SessionTransport.js";
 import { getMissionLineDurationMs, normalizeMissionVoiceId } from "../missionVoiceTiming.js";
+import {
+  beginPresentationPause,
+  getMissionBriefingClickAction,
+  getMissionDialogueClickAction,
+  getMissionBriefingIntroFrameAlphas,
+  getMissionBriefingIntroStage,
+  isPresentationExternallyPaused,
+  shouldResumePresentationPlayback,
+  type PresentationPauseOwnership,
+} from "../missionPresentationTimeline.js";
 import { placeStaticVisual } from "../render/placeStaticVisual.js";
 import { getAssetScale, getFrameOrigin, getFramePivot, REFERENCE_PX_PER_WU, RENDER_DEPTH_BIAS } from "../render/visualScale.js";
 import {
@@ -537,14 +547,17 @@ export class SkirmishScene extends Phaser.Scene {
   private underAttackFocusPoint: Phaser.Math.Vector2 | null = null;
   private missionBriefingContainer: Phaser.GameObjects.Container | null = null;
   private missionBriefingBackdropImage: Phaser.GameObjects.Image | null = null;
+  private missionBriefingIntroImage: Phaser.GameObjects.Image | null = null;
   private missionBriefingBackdropStartedAt: number | null = null;
   private missionBriefingHideAt: number | null = null;
   private missionBriefingPausedAt: number | null = null;
   private missionBriefingLineIndex = 0;
   private missionBriefingLineRevealAt: number | null = null;
   private missionBriefingNextLineAt: number | null = null;
-  private missionBriefingWasPlaybackPaused: boolean | null = null;
+  private missionBriefingPauseOwnership: PresentationPauseOwnership | null = null;
   private missionBriefingWasUiVisible: boolean | null = null;
+  private missionBriefingIntroCompleted = false;
+  private missionBriefingLineScheduled = false;
   private missionBriefingMusicPlaying = false;
   private missionDialogueContainer: Phaser.GameObjects.Container | null = null;
   private missionResultContainer: Phaser.GameObjects.Container | null = null;
@@ -579,6 +592,9 @@ export class SkirmishScene extends Phaser.Scene {
   private launchContext: GameLaunchContext | null = null;
   private activeMissionDialogue: ActiveMissionDialogue | null = null;
   private missionDialoguePausedAt: number | null = null;
+  private missionDialoguePauseOwnership: PresentationPauseOwnership | null = null;
+  private missionDialoguePointerUpTime: number | null = null;
+  private readonly introducedMissionPortraitKeys = new Set<string>();
   private readonly triggeredMissionDialogueIds = new Set<string>();
   private isPointerLocked = false;
   private readonly virtualCursorScreen = new Phaser.Math.Vector2(0, 0);
@@ -667,14 +683,20 @@ export class SkirmishScene extends Phaser.Scene {
     this.missionResultAudioStatus = null;
     this.recordedCampaignVictoryScenarioId = null;
     this.missionBriefingBackdropImage = null;
+    this.missionBriefingIntroImage = null;
     this.missionBriefingBackdropStartedAt = null;
     this.missionBriefingHideAt = null;
     this.missionBriefingPausedAt = null;
     this.missionBriefingLineIndex = 0;
     this.missionBriefingLineRevealAt = null;
     this.missionBriefingNextLineAt = null;
-    this.missionBriefingWasPlaybackPaused = null;
+    this.missionBriefingPauseOwnership = null;
     this.missionBriefingWasUiVisible = null;
+    this.missionBriefingIntroCompleted = false;
+    this.missionBriefingLineScheduled = false;
+    this.missionDialoguePauseOwnership = null;
+    this.missionDialoguePointerUpTime = null;
+    this.introducedMissionPortraitKeys.clear();
     this.triggeredMissionDialogueIds.clear();
     this.processedCombatEventIds.clear();
     this.trackedConstructionUnitIds.clear();
@@ -903,6 +925,11 @@ export class SkirmishScene extends Phaser.Scene {
     });
 
     this.input.on("pointerup", (pointer: Phaser.Input.Pointer) => {
+      if (this.missionDialoguePointerUpTime === pointer.upTime) {
+        this.missionDialoguePointerUpTime = null;
+        return;
+      }
+
       if (this.isBlockingModalOpen()) {
         return;
       }
@@ -974,7 +1001,7 @@ export class SkirmishScene extends Phaser.Scene {
   }
 
   private isBlockingModalOpen(): boolean {
-    return Boolean(this.missionBriefingContainer || this.missionResultContainer || this.pauseMenuContainer);
+    return Boolean(this.missionBriefingContainer || this.activeMissionDialogue || this.missionResultContainer || this.pauseMenuContainer);
   }
 
   private setupPointerLockLifecycle(): void {
@@ -1864,11 +1891,8 @@ export class SkirmishScene extends Phaser.Scene {
       return;
     }
 
-    if (this.missionBriefingWasPlaybackPaused === null) {
-      const playback = this.sessionTransport?.getPlaybackState();
-
-      this.missionBriefingWasPlaybackPaused = Boolean(playback?.paused);
-      this.setPlaybackPaused(true);
+    if (this.missionBriefingPauseOwnership === null) {
+      this.missionBriefingPauseOwnership = this.acquirePresentationPlaybackPause();
     }
 
     if (this.missionBriefingWasUiVisible === null) {
@@ -1884,22 +1908,18 @@ export class SkirmishScene extends Phaser.Scene {
       Math.max(0, briefing.lines.length - 1),
     );
 
-    if (this.missionBriefingLineRevealAt === null && this.missionBriefingNextLineAt === null) {
-      this.scheduleMissionBriefingLine(briefing, lineIndex, this.time.now);
-    }
-
-    const lineRevealPending =
-      this.missionBriefingLineRevealAt !== null &&
-      this.time.now < this.missionBriefingLineRevealAt;
-    const activeLine = lineRevealPending ? undefined : briefing.lines[lineIndex];
+    const lineRevealPending = this.missionBriefingLineRevealAt !== null && this.time.now < this.missionBriefingLineRevealAt;
+    const activeLine = !this.missionBriefingLineScheduled || lineRevealPending
+      ? undefined
+      : briefing.lines[lineIndex];
     const container = this.addScreenOverlayContainer(SCREEN_OVERLAY_DEPTH + 24);
-    const hasBackdrop = this.addMissionBriefingBackdrop(container, width, height);
     const graphics = this.add.graphics();
 
     graphics
-      .fillStyle(0x000000, hasBackdrop ? 0.34 : 1)
+      .fillStyle(0x000000, 1)
       .fillRect(0, 0, width, height);
     container.add(graphics);
+    this.addMissionBriefingBackdrop(container, width, height);
 
     if (activeLine) {
       this.addOriginalSpeechPresentation(
@@ -1928,7 +1948,11 @@ export class SkirmishScene extends Phaser.Scene {
 
     this.addMissionBriefingButton(container, graphics, replayX, buttonY, buttonWidth, "다시보기", () => {
       this.missionBriefingLineIndex = 0;
-      this.scheduleMissionBriefingLine(briefing, 0, this.time.now);
+      this.missionBriefingLineRevealAt = null;
+      this.missionBriefingNextLineAt = null;
+      this.missionBriefingLineScheduled = false;
+      this.missionBriefingIntroCompleted = false;
+      this.introducedMissionPortraitKeys.clear();
       this.missionBriefingBackdropStartedAt = this.time.now;
       this.redrawMissionBriefingOverlay();
     });
@@ -1951,35 +1975,38 @@ export class SkirmishScene extends Phaser.Scene {
     container: Phaser.GameObjects.Container,
     width: number,
     height: number,
-  ): boolean {
+  ): void {
     const frames = this.getMissionBriefingBackdropFrames();
-    const fallbackFrame = frames.find((frame) => this.textures.exists(frame.key));
+    const baseFrame = frames[0];
+    const completedFrame = frames[frames.length - 1];
 
-    if (!fallbackFrame) {
-      return false;
+    if (!baseFrame || !this.textures.exists(baseFrame.key)) {
+      return;
     }
 
     if (this.missionBriefingBackdropStartedAt === null) {
       this.missionBriefingBackdropStartedAt = this.time.now;
     }
 
-    const activeFrame = this.getMissionBriefingBackdropFrame(this.time.now, frames);
-    if (!activeFrame) {
-      return false;
-    }
-    const frame = this.textures.exists(activeFrame.key) ? activeFrame : fallbackFrame;
     const scale = Math.min(
       width / MISSION_BRIEFING_BACKDROP_SOURCE_WIDTH,
       height / MISSION_BRIEFING_BACKDROP_SOURCE_HEIGHT,
     );
-    const image = this.add.image(width / 2, height / 2, frame.key)
+    const alphas = this.getMissionBriefingBackdropAlphas(this.time.now);
+    const image = this.add.image(width / 2, height / 2, baseFrame.key)
       .setScale(scale)
-      .setAlpha(0.92);
+      .setAlpha(alphas.base);
 
     this.missionBriefingBackdropImage = image;
     container.add(image);
+    if (completedFrame && this.textures.exists(completedFrame.key)) {
+      this.missionBriefingIntroImage = this.add
+        .image(width / 2, height / 2, completedFrame.key)
+        .setScale(scale)
+        .setAlpha(alphas.completed);
+      container.add(this.missionBriefingIntroImage);
+    }
     this.updateMissionBriefingBackdrop(this.time.now);
-    return true;
   }
 
   private getMissionBriefingBackdropFrames(): MissionBriefingBackdropFrameDefinition[] {
@@ -1988,25 +2015,10 @@ export class SkirmishScene extends Phaser.Scene {
     return collectMissionBriefingBackdropFramesForBriefing(briefing);
   }
 
-  private getMissionBriefingBackdropFrame(
-    time: number,
-    frames: readonly MissionBriefingBackdropFrameDefinition[],
-  ): MissionBriefingBackdropFrameDefinition | null {
-    if (frames.length === 0) {
-      return null;
-    }
-
+  private getMissionBriefingBackdropAlphas(time: number): { base: number; completed: number } {
     const startedAt = this.missionBriefingBackdropStartedAt ?? time;
-    let elapsedMs = Math.max(0, time - startedAt);
 
-    for (const frame of frames) {
-      if (elapsedMs < frame.durationMs) {
-        return frame;
-      }
-      elapsedMs -= frame.durationMs;
-    }
-
-    return frames[frames.length - 1]!;
+    return getMissionBriefingIntroFrameAlphas(startedAt, time, this.missionBriefingIntroCompleted);
   }
 
   private updateMissionBriefingBackdrop(time: number): void {
@@ -2015,13 +2027,19 @@ export class SkirmishScene extends Phaser.Scene {
     }
 
     const frames = this.getMissionBriefingBackdropFrames();
-    const frame = this.getMissionBriefingBackdropFrame(time, frames);
+    const completedFrame = frames[frames.length - 1];
 
-    if (!frame || !this.textures.exists(frame.key) || this.missionBriefingBackdropImage.texture.key === frame.key) {
+    const alphas = this.getMissionBriefingBackdropAlphas(time);
+
+    this.missionBriefingBackdropImage.setAlpha(alphas.base);
+    if (!this.missionBriefingIntroImage || !completedFrame || !this.textures.exists(completedFrame.key)) {
       return;
     }
 
-    this.missionBriefingBackdropImage.setTexture(frame.key);
+    if (this.missionBriefingIntroImage.texture.key !== completedFrame.key) {
+      this.missionBriefingIntroImage.setTexture(completedFrame.key);
+    }
+    this.missionBriefingIntroImage.setAlpha(alphas.completed);
   }
 
   private addMissionBriefingButton(
@@ -2057,20 +2075,24 @@ export class SkirmishScene extends Phaser.Scene {
   }
 
   private hideMissionBriefingOverlay(): void {
-    const shouldResumePlayback = this.missionBriefingWasPlaybackPaused === false;
+    const shouldResumePlayback = shouldResumePresentationPlayback(this.missionBriefingPauseOwnership);
     const shouldRestoreUi = this.missionBriefingWasUiVisible === true;
 
     this.missionBriefingContainer?.destroy(true);
     this.missionBriefingContainer = null;
     this.missionBriefingBackdropImage = null;
+    this.missionBriefingIntroImage = null;
     this.missionBriefingBackdropStartedAt = null;
     this.missionBriefingHideAt = null;
     this.missionBriefingPausedAt = null;
     this.missionBriefingLineIndex = 0;
     this.missionBriefingLineRevealAt = null;
     this.missionBriefingNextLineAt = null;
-    this.missionBriefingWasPlaybackPaused = null;
+    this.missionBriefingPauseOwnership = null;
     this.missionBriefingWasUiVisible = null;
+    this.missionBriefingIntroCompleted = false;
+    this.missionBriefingLineScheduled = false;
+    this.introducedMissionPortraitKeys.clear();
     this.stopMissionBriefingMusic();
     this.stopMissionVoiceAudio();
 
@@ -2098,6 +2120,7 @@ export class SkirmishScene extends Phaser.Scene {
     this.missionBriefingContainer.destroy(true);
     this.missionBriefingContainer = null;
     this.missionBriefingBackdropImage = null;
+    this.missionBriefingIntroImage = null;
     this.missionBriefingBackdropStartedAt = backdropStartedAt;
     this.missionBriefingLineIndex = lineIndex;
     this.missionBriefingLineRevealAt = lineRevealAt;
@@ -2139,6 +2162,17 @@ export class SkirmishScene extends Phaser.Scene {
 
     this.updateMissionBriefingBackdrop(time);
 
+    if (!this.missionBriefingLineScheduled && this.isMissionBriefingIntroReady(time)) {
+      this.missionBriefingLineScheduled = true;
+      this.scheduleMissionBriefingLine(
+        this.launchContext?.scenario?.briefing,
+        this.missionBriefingLineIndex,
+        time,
+      );
+      this.redrawMissionBriefingOverlay();
+      return;
+    }
+
     if (this.missionBriefingLineRevealAt !== null && time >= this.missionBriefingLineRevealAt) {
       this.revealMissionBriefingLine(time);
       return;
@@ -2161,20 +2195,36 @@ export class SkirmishScene extends Phaser.Scene {
       return;
     }
 
-    if (this.missionBriefingLineRevealAt !== null && time < this.missionBriefingLineRevealAt) {
+    const clickAction = getMissionBriefingClickAction(
+      this.isMissionBriefingIntroReady(time),
+      this.missionBriefingLineRevealAt !== null && time < this.missionBriefingLineRevealAt,
+      this.missionBriefingLineIndex + 1 >= briefing.lines.length,
+    );
+
+    if (clickAction === "complete-intro") {
+      this.missionBriefingIntroCompleted = true;
+      this.missionBriefingLineScheduled = true;
+      this.scheduleMissionBriefingLine(briefing, this.missionBriefingLineIndex, time, false);
+      this.redrawMissionBriefingOverlay();
+      return;
+    }
+    if (clickAction === "reveal-line") {
       this.revealMissionBriefingLine(time);
       return;
     }
-
-    if (this.missionBriefingLineIndex + 1 >= briefing.lines.length) {
-      this.missionBriefingNextLineAt = null;
-      this.redrawMissionBriefingOverlay();
+    if (clickAction === "hold-line") {
       return;
     }
 
     this.missionBriefingLineIndex += 1;
     this.scheduleMissionBriefingLine(briefing, this.missionBriefingLineIndex, time);
     this.redrawMissionBriefingOverlay();
+  }
+
+  private isMissionBriefingIntroReady(time: number): boolean {
+    const startedAt = this.missionBriefingBackdropStartedAt;
+
+    return startedAt === null || getMissionBriefingIntroStage(startedAt, time, this.missionBriefingIntroCompleted) === "ready";
   }
 
   private revealMissionBriefingLine(time: number): void {
@@ -2189,11 +2239,17 @@ export class SkirmishScene extends Phaser.Scene {
   }
 
   private scheduleMissionBriefingLine(
-    briefing: ScenarioBriefingDefinition,
+    briefing: ScenarioBriefingDefinition | undefined,
     lineIndex: number,
     time: number,
     respectDelay = true,
   ): void {
+    if (!briefing) {
+      this.missionBriefingLineRevealAt = null;
+      this.missionBriefingNextLineAt = null;
+      return;
+    }
+
     const line = briefing.lines[lineIndex];
 
     if (!line) {
@@ -2260,14 +2316,23 @@ export class SkirmishScene extends Phaser.Scene {
       lineIndex: 0,
       nextLineAt: time + this.getMissionDialogueLineDurationMs(firstLine),
     };
+    this.beginMissionDialoguePlaybackPause();
     this.focusMissionDialogueCamera(dialogue);
     this.showMissionDialogueLine(dialogue, firstLine, 0);
   }
 
   private isMissionPresentationPaused(): boolean {
     const playback = this.sessionTransport?.getPlaybackState();
+    const ownsPlaybackPause = Boolean(
+      this.missionBriefingPauseOwnership?.ownsPlaybackPause ||
+      this.missionDialoguePauseOwnership?.ownsPlaybackPause,
+    );
 
-    return Boolean(this.pauseMenuContainer || (this.worldState.scenario.status === "running" && playback?.paused));
+    return isPresentationExternallyPaused(
+      Boolean(this.worldState.scenario.status === "running" && playback?.paused),
+      ownsPlaybackPause,
+      Boolean(this.pauseMenuContainer),
+    );
   }
 
   private pauseMissionDialogueTimer(time: number): void {
@@ -2324,16 +2389,20 @@ export class SkirmishScene extends Phaser.Scene {
       return;
     }
 
-    active.lineIndex += 1;
-
-    const nextLine = active.dialogue.lines[active.lineIndex];
-
-    if (!nextLine) {
+    if (getMissionDialogueClickAction(active.lineIndex, active.dialogue.lines.length) === "finish-dialogue") {
       const completedDialogue = active.dialogue;
 
       this.clearMissionDialogueOverlay();
       this.completeScenarioAfterMissionDialogue(completedDialogue);
       return;
+    }
+
+    active.lineIndex += 1;
+
+    const nextLine = active.dialogue.lines[active.lineIndex];
+
+    if (!nextLine) {
+      throw new Error("Mission dialogue timeline advanced beyond its declared line count.");
     }
 
     active.nextLineAt = time + this.getMissionDialogueLineDurationMs(nextLine);
@@ -2413,6 +2482,7 @@ export class SkirmishScene extends Phaser.Scene {
       lineIndex,
       nextLineAt: this.time.now + this.getMissionDialogueLineDurationMs(line),
     };
+    this.beginMissionDialoguePlaybackPause();
     this.focusMissionDialogueCamera(dialogue);
     this.showMissionDialogueLine(dialogue, line, lineIndex);
   }
@@ -2487,23 +2557,12 @@ export class SkirmishScene extends Phaser.Scene {
       width,
       height,
     );
-    const activeLayout = resolveOriginalSpeechLayout(
-      width,
-      height,
-      getOriginalSpeechSlot(line),
-    );
-    const advanceZoneHeight = 120 * activeLayout.scale;
     container.add(
       this.add
-        .zone(
-          activeLayout.text.x,
-          activeLayout.text.centerY - advanceZoneHeight / 2,
-          activeLayout.text.maxWidth,
-          advanceZoneHeight,
-        )
+        .zone(0, 0, width, height)
         .setOrigin(0, 0)
         .setInteractive({ useHandCursor: true })
-        .on("pointerup", () => this.advanceMissionDialogueLine()),
+        .on("pointerup", (pointer: Phaser.Input.Pointer) => this.advanceMissionDialogueLineFromPointer(pointer)),
     );
 
     container.setAlpha(0);
@@ -2531,12 +2590,17 @@ export class SkirmishScene extends Phaser.Scene {
     const participants = this.getOriginalSpeechParticipants(lines, lineIndex);
 
     for (const participant of participants) {
+      const portraitKey = `${participant.speechSlot}:${normalizeMissionPortraitId(participant.portraitId)}`;
+      const isNewPortrait = !this.introducedMissionPortraitKeys.has(portraitKey);
+
+      this.introducedMissionPortraitKeys.add(portraitKey);
       this.addOriginalSpeechPortrait(
         container,
         participant,
         participant.speechSlot === activeSlot,
         viewportWidth,
         viewportHeight,
+        isNewPortrait,
       );
     }
 
@@ -2569,6 +2633,7 @@ export class SkirmishScene extends Phaser.Scene {
     active: boolean,
     viewportWidth: number,
     viewportHeight: number,
+    animateIntroduction: boolean,
   ): void {
     const cue = this.getMissionPortraitImageCue(participant.portraitId);
 
@@ -2576,24 +2641,37 @@ export class SkirmishScene extends Phaser.Scene {
       return;
     }
 
+    this.textures.get(cue.key).setFilter(Phaser.Textures.FilterMode.NEAREST);
+
     const { portrait } = resolveOriginalSpeechLayout(
       viewportWidth,
       viewportHeight,
       participant.speechSlot,
     );
+    const targetScale = portrait.width / 130;
     const image = this.add
       .image(
         portrait.x + portrait.width / 2,
         portrait.y + portrait.height / 2,
         cue.key,
       )
-      .setDisplaySize(portrait.width, portrait.height);
+      .setScale(animateIntroduction ? 0 : targetScale);
 
     if (!active) {
       image.setTint(0x534668);
     }
 
     container.add(image);
+
+    if (animateIntroduction) {
+      this.tweens.add({
+        targets: image,
+        scaleX: targetScale,
+        scaleY: targetScale,
+        duration: 240,
+        ease: "Cubic.easeOut",
+      });
+    }
   }
 
   private getMissionPortraitImageCue(portraitId: string): MissionPortraitImageDefinition | null {
@@ -2649,10 +2727,38 @@ export class SkirmishScene extends Phaser.Scene {
     this.stopMissionVoiceAudio();
   }
 
+  private advanceMissionDialogueLineFromPointer(pointer: Phaser.Input.Pointer): void {
+    this.missionDialoguePointerUpTime = pointer.upTime;
+    this.advanceMissionDialogueLine();
+  }
+
   private clearMissionDialogueOverlay(): void {
+    const shouldResumePlayback = shouldResumePresentationPlayback(this.missionDialoguePauseOwnership);
+
     this.activeMissionDialogue = null;
     this.missionDialoguePausedAt = null;
+    this.missionDialoguePauseOwnership = null;
+    this.introducedMissionPortraitKeys.clear();
     this.hideMissionDialogueOverlay();
+
+    if (shouldResumePlayback && this.worldState.scenario.status === "running") {
+      this.setPlaybackPaused(false);
+    }
+  }
+
+  private beginMissionDialoguePlaybackPause(): void {
+    if (this.missionDialoguePauseOwnership) {
+      return;
+    }
+
+    this.missionDialoguePauseOwnership = this.acquirePresentationPlaybackPause();
+  }
+
+  private acquirePresentationPlaybackPause(): PresentationPauseOwnership {
+    const playbackWasPaused = Boolean(this.sessionTransport?.getPlaybackState()?.paused);
+    const pausedByPresentation = !playbackWasPaused && this.setPlaybackPaused(true);
+
+    return beginPresentationPause(playbackWasPaused || !pausedByPresentation);
   }
 
   private completeScenarioAfterMissionDialogue(dialogue: ScenarioMissionDialogueDefinition): void {
@@ -2832,9 +2938,16 @@ export class SkirmishScene extends Phaser.Scene {
     this.pauseMenuContainer = null;
     this.pauseMenuMessageText = null;
 
-    if (resumePlayback && this.worldState.scenario.status === "running") {
+    if (resumePlayback && this.worldState.scenario.status === "running" && !this.presentationOwnsPlaybackPause()) {
       this.setPlaybackPaused(false);
     }
+  }
+
+  private presentationOwnsPlaybackPause(): boolean {
+    return Boolean(
+      this.missionBriefingPauseOwnership?.ownsPlaybackPause ||
+      this.missionDialoguePauseOwnership?.ownsPlaybackPause,
+    );
   }
 
   private quickSaveGame(): void {
@@ -4363,9 +4476,8 @@ export class SkirmishScene extends Phaser.Scene {
 
     const briefing = this.launchContext?.scenario?.briefing;
 
-    if (!briefing || this.missionBriefingLineIndex + 1 >= briefing.lines.length) {
-      this.hideMissionBriefingOverlay();
-      return true;
+    if (!briefing) {
+      return false;
     }
 
     this.advanceMissionBriefingLine();
@@ -4390,6 +4502,10 @@ export class SkirmishScene extends Phaser.Scene {
   }
 
   private togglePlaybackPause(): void {
+    if (this.presentationOwnsPlaybackPause()) {
+      return;
+    }
+
     const playback = this.sessionTransport?.getPlaybackState();
 
     if (!playback?.controllable) {
