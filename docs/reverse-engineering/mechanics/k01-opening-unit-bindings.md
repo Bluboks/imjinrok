@@ -87,8 +87,10 @@ node --test tools/imjinrok/k01-opening-unit-bindings.test.mjs tools/imjinrok/k01
    계속 미확인이다.
 2. class 2/3/4 state 2의 project policy를 결정한다. alternate movement frame은 정적 확정했지만
    제품에 매핑하지 않았다.
-3. genuinely mismatched K01 start building class 48/49/51, 58/60, 63은 proxy다. 자원·state·project kind를
-   시각적 유사성으로 교체하지 않는다.
+3. K01 시작 building class 48/49/51/58/60/63의 exact identity/source/slot/catalog base-frame-only
+   범위는 [opening building binding](k01-opening-building-bindings.md)에서 정적 확정·이식했다.
+   class 49의 별도 body-state 범위를 제외한 construction/damaged/overlay/timing/pivot/stats/commands/
+   behavior와 raw owner 의미는 이 unit binding 문서 밖의 미확정 범위다.
 
 class 12 state 2 policy, class 11·12·13·16의 tick→FPS·pivot, 모든 unit stats·combat behavior, raw owner의
 사람용 의미와 이후 movement/placement는 계속 별도 근거가 필요하다.
