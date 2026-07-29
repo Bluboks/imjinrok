@@ -9,8 +9,10 @@ test("uses statically recovered names for uniquely bound original sprites", () =
       barracks: unitDefinitions.barracks.displayName,
       beacon: unitDefinitions.beacon.displayName,
       house: unitDefinitions.house.displayName,
+      koreanTrainingCommand: unitDefinitions["korean-training-command"].displayName,
       japaneseBarracks:
         unitDefinitions["japanese-camp-barracks"].displayName,
+      japaneseHq: unitDefinitions["japanese-hq"].displayName,
       japaneseFirehouse:
         unitDefinitions["japanese-camp-firehouse"].displayName,
       japaneseFarmer: unitDefinitions["japanese-farmer"].displayName,
@@ -38,7 +40,9 @@ test("uses statically recovered names for uniquely bound original sprites", () =
       barracks: "조선 훈련소",
       beacon: "조선 봉화대",
       house: "조선 방앗간",
+      koreanTrainingCommand: "조선 훈련도감",
       japaneseBarracks: "일본 훈련소",
+      japaneseHq: "일본 본영",
       japaneseFirehouse: "일본 관측소",
       japaneseFarmer: "일본 농부",
       japaneseGunner: "일본 조총병",
@@ -102,6 +106,14 @@ test("new source identity kinds preserve their explicit project gameplay adapter
   assert.deepEqual(
     omitIdentity(unitDefinitions["japanese-farmer"]),
     omitIdentity(unitDefinitions["japanese-gunner"]),
+  );
+  assert.deepEqual(
+    omitIdentity(unitDefinitions["korean-training-command"]),
+    omitIdentity(unitDefinitions.house),
+  );
+  assert.deepEqual(
+    omitIdentity(unitDefinitions["japanese-hq"]),
+    omitIdentity(unitDefinitions["japanese-camp-barracks"]),
   );
 });
 

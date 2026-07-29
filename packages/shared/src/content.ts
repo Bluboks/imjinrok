@@ -318,6 +318,49 @@ const koreanMonkAdaptedGameplay = {
   selectedMinimapRadius: 4.2,
 } as const satisfies Omit<UnitDefinition, "id" | "displayName">;
 
+// K01 class 51 has a separate source identity and base-frame binding. Its stats, commands,
+// construction, and behavior are not recovered, so it deliberately retains the house adapter.
+const houseAdaptedGameplay = {
+  category: "building",
+  actionIds: passiveBuildingActionIds,
+  buildTimeTicks: 180,
+  populationProvided: 5,
+  footprint: { width: 2, height: 2, blocksMovement: true },
+  placement: grassPlacement,
+  cost: { wood: 30 },
+  baseAttributes: { health: 550, mana: 0, movementSpeed: 0 },
+  portraitGlyph: "H",
+  portraitColor: 0xb99a6a,
+  groupBorderColor: 0xb99a6a,
+  renderRadius: 8,
+  selectionRadius: 8,
+  hitRadius: 18,
+  sightRadius: 4,
+  minimapShape: "square",
+  minimapRadius: 3,
+  selectedMinimapRadius: 4,
+} as const satisfies Omit<UnitDefinition, "id" | "displayName">;
+
+// K01 class 58 has a separate source identity and base-frame binding. Its gameplay continues
+// to use the Japanese camp barracks adapter rather than infer original HQ mechanics.
+const japaneseCampBarracksAdaptedGameplay = {
+  category: "building",
+  actionIds: passiveBuildingActionIds,
+  footprint: { width: 3, height: 3, blocksMovement: true },
+  placement: grassPlacement,
+  baseAttributes: { health: 1200, mana: 0, movementSpeed: 0 },
+  portraitGlyph: "JB",
+  portraitColor: 0xa3604d,
+  groupBorderColor: 0xd08a72,
+  renderRadius: 10,
+  selectionRadius: 10,
+  hitRadius: 22,
+  sightRadius: 6,
+  minimapShape: "square",
+  minimapRadius: 3.5,
+  selectedMinimapRadius: 4.5,
+} as const satisfies Omit<UnitDefinition, "id" | "displayName">;
+
 export const unitDefinitions = {
   "town-center": {
     id: "town-center",
@@ -345,24 +388,12 @@ export const unitDefinitions = {
   house: {
     id: "house",
     displayName: "조선 방앗간",
-    category: "building",
-    actionIds: passiveBuildingActionIds,
-    buildTimeTicks: 180,
-    populationProvided: 5,
-    footprint: { width: 2, height: 2, blocksMovement: true },
-    placement: grassPlacement,
-    cost: { wood: 30 },
-    baseAttributes: { health: 550, mana: 0, movementSpeed: 0 },
-    portraitGlyph: "H",
-    portraitColor: 0xb99a6a,
-    groupBorderColor: 0xb99a6a,
-    renderRadius: 8,
-    selectionRadius: 8,
-    hitRadius: 18,
-    sightRadius: 4,
-    minimapShape: "square",
-    minimapRadius: 3,
-    selectedMinimapRadius: 4,
+    ...houseAdaptedGameplay,
+  },
+  "korean-training-command": {
+    id: "korean-training-command",
+    displayName: "조선 훈련도감",
+    ...houseAdaptedGameplay,
   },
   barracks: {
     id: "barracks",
@@ -538,21 +569,12 @@ export const unitDefinitions = {
   "japanese-camp-barracks": {
     id: "japanese-camp-barracks",
     displayName: "일본 훈련소",
-    category: "building",
-    actionIds: passiveBuildingActionIds,
-    footprint: { width: 3, height: 3, blocksMovement: true },
-    placement: grassPlacement,
-    baseAttributes: { health: 1200, mana: 0, movementSpeed: 0 },
-    portraitGlyph: "JB",
-    portraitColor: 0xa3604d,
-    groupBorderColor: 0xd08a72,
-    renderRadius: 10,
-    selectionRadius: 10,
-    hitRadius: 22,
-    sightRadius: 6,
-    minimapShape: "square",
-    minimapRadius: 3.5,
-    selectedMinimapRadius: 4.5,
+    ...japaneseCampBarracksAdaptedGameplay,
+  },
+  "japanese-hq": {
+    id: "japanese-hq",
+    displayName: "일본 본영",
+    ...japaneseCampBarracksAdaptedGameplay,
   },
   "japanese-camp-tower": {
     id: "japanese-camp-tower",
