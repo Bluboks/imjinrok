@@ -11,6 +11,7 @@ import {
   getMissionBriefingIntroFrameAlphas,
   getMissionBriefingIntroStage,
   getMissionDialogueClickAction,
+  getMissionDialoguePointerAdvance,
   isPresentationExternallyPaused,
   shouldResumePresentationPlayback,
 } from "./missionPresentationTimeline.js";
@@ -83,4 +84,15 @@ test("dialogue clicks advance each line and finish only after the final line", (
   assert.equal(getMissionDialogueClickAction(0, 3), "advance-line");
   assert.equal(getMissionDialogueClickAction(1, 3), "advance-line");
   assert.equal(getMissionDialogueClickAction(2, 3), "finish-dialogue");
+});
+
+test("dialogue pointer advances consume world input for both intermediate and final lines", () => {
+  assert.deepEqual(getMissionDialoguePointerAdvance(0, 3), {
+    action: "advance-line",
+    consumesWorldInput: true,
+  });
+  assert.deepEqual(getMissionDialoguePointerAdvance(2, 3), {
+    action: "finish-dialogue",
+    consumesWorldInput: true,
+  });
 });

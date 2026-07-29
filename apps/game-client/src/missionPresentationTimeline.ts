@@ -5,6 +5,11 @@ export type MissionBriefingIntroStage = "holding" | "fading" | "ready";
 export type MissionBriefingClickAction = "complete-intro" | "reveal-line" | "advance-line" | "hold-line";
 export type MissionDialogueClickAction = "advance-line" | "finish-dialogue";
 
+export interface MissionDialoguePointerAdvance {
+  action: MissionDialogueClickAction;
+  consumesWorldInput: true;
+}
+
 export interface PresentationPauseOwnership {
   ownsPlaybackPause: boolean;
 }
@@ -123,4 +128,14 @@ export function getMissionDialogueClickAction(
   lineCount: number,
 ): MissionDialogueClickAction {
   return lineIndex + 1 >= lineCount ? "finish-dialogue" : "advance-line";
+}
+
+export function getMissionDialoguePointerAdvance(
+  lineIndex: number,
+  lineCount: number,
+): MissionDialoguePointerAdvance {
+  return {
+    action: getMissionDialogueClickAction(lineIndex, lineCount),
+    consumesWorldInput: true,
+  };
 }
