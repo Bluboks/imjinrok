@@ -21,6 +21,12 @@ test("recovers the source-created state-4 creation-default visual fallback for b
   assert.deepEqual(report.state4.classGate, {
     functionEntry: "0x0041e370", switchAddress: "0x0041e385", classes: [7, 31], destination: "0x0041e3a0", highBit: "clear", zeroWord144Destination: "0x0041e3b3 -> 0x0041d870",
   });
+  assert.deepEqual(report.initializer.classes.map(({ internalClass, directCalls }) => ({ internalClass, targetCounts: directCalls.targetCounts, state4ConfigHelper: directCalls.state4ConfigHelper })), [
+    { internalClass: 7, targetCounts: { "0x004550c0": 1, "0x00428fb0": 1, "0x00428e10": 1, "0x004390b0": 5 }, state4ConfigHelper: { target: "0x004390e0", directCallCount: 0 } },
+    { internalClass: 31, targetCounts: { "0x004550c0": 1, "0x00428fb0": 1, "0x00428e10": 1, "0x004390b0": 4 }, state4ConfigHelper: { target: "0x004390e0", directCallCount: 0 } },
+  ]);
+  assert.equal(report.sources.crossCheckedExtractors.koreanFarmerCore.roles.deathConfiguration, "0x004390b0");
+  assert.equal(report.sources.crossCheckedExtractors.coreUnitAnimations.state4ConfigHelper, "0x004390e0");
   const fixture = JSON.parse(readFileSync(fixturePath, "utf8"));
   const expected = fixture.endpoints.map(([internalClass, direction, phase, spriteSlot, frameIndex, mirrorX]) => ({
     internalClass, visualState: 4, visualStateName: "state4-creation-default-visual-fallback", fallbackState: 8, fallbackStateName: "idle", direction,
@@ -75,6 +81,14 @@ test("rejects tampered switches, zero fill, initializer field writes, and releva
     value.references.find(({ from }) => from === "0x0041e3b3").to = "0x0041e200";
   });
   assert.throws(() => extractK01FarmerState4FallbackFrames({ referencesPath }), /missing required call edge 0x0041e3b3/);
+  const initializerCalleeReferencesPath = mutateJson(join(root, "analysis/generated/imjinrok2/references.json"), (value) => {
+    value.references.find(({ from }) => from === "0x00429880").to = "0x004390e0";
+  });
+  assert.throws(() => extractK01FarmerState4FallbackFrames({ referencesPath: initializerCalleeReferencesPath }), /class 7 exact initializer direct calls/);
+  const helperFunctionsPath = mutateJson(join(root, "analysis/generated/imjinrok2/functions.json"), (value) => {
+    value.functions.find(({ entry }) => entry === "0x004550c0").instructionCount = 25;
+  });
+  assert.throws(() => extractK01FarmerState4FallbackFrames({ functionsPath: helperFunctionsPath }), /0x004550c0 instruction count/);
   const executablePath = join(temp, "imjinrok2.exe");
   copyFileSync(join(root, "original/imjinrok2/imjinrok2.exe"), executablePath);
   const executable = readFileSync(executablePath);

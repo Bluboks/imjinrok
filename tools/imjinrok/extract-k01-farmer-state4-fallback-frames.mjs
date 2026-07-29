@@ -6,9 +6,9 @@ import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { EXPECTED_EXECUTABLE_SHA256 } from "./extract-entity-type-catalog.mjs";
-import { NORMAL_DIRECTION_PROFILES } from "./extract-k01-core-unit-animations.mjs";
-import { selectK01JapaneseFarmerFrame } from "./extract-k01-japanese-farmer-frames.mjs";
-import { selectK01KoreanFarmerCoreFrame } from "./extract-k01-korean-farmer-core-frames.mjs";
+import { extractK01CoreUnitAnimations, NORMAL_DIRECTION_PROFILES } from "./extract-k01-core-unit-animations.mjs";
+import { extractK01JapaneseFarmerFrames, selectK01JapaneseFarmerFrame } from "./extract-k01-japanese-farmer-frames.mjs";
+import { extractK01KoreanFarmerCoreFrames, selectK01KoreanFarmerCoreFrame } from "./extract-k01-korean-farmer-core-frames.mjs";
 import { readPeImage, toHex } from "./pe-image.mjs";
 import { verifyEvidencePoint, verifyRawCodeRange } from "./static-evidence.mjs";
 
@@ -32,6 +32,11 @@ const INITIALIZER_RANGES = [
 const FUNCTION_CONTRACTS = [
   ["0x00437650", ["0x00437650-0x00438025"], 539, "4605056775f6f43c9b2065ea5a4ddff5570137eb87587f4a09d2018618e13c28"],
   ["0x004291d0", ["0x004291d0-0x0042c547"], 4156, "1c05959938219ae4fa918ba3061b1856dcfb575f007a1a48281dd316709a7e96"],
+  ["0x004550c0", ["0x004550c0-0x00455116"], 26, "190248d3e18a3c0c2a79bddf83622ea017b06297b38e09c10c9b7faf9bfb9c44"],
+  ["0x00428fb0", ["0x00428fb0-0x00429193"], 148, "e5f8707e93a2c0b61922f9e44d828c88e6175c01176aef565f61c6d6b2cef31a"],
+  ["0x00428e10", ["0x00428e10-0x00428f64"], 86, "665ce3064ad839771a84f6ab029b63f44cdfcb52e1c0706a26ec7a27037fae5b"],
+  ["0x004390b0", ["0x004390b0-0x004390d0"], 6, "8c576d98214fa38d4d64c0dc710a6e1452a92ceb33e39a9a563567976dd191df"],
+  ["0x004390e0", ["0x004390e0-0x0043910e"], 24, "02510627f1038fb23f0100a2c3a540507c282404bf087e399f55cbc06dba7b3e"],
   ["0x0041d210", ["0x0041d210-0x0041d277", "0x0041d2c0-0x0041d41a", "0x0041e200-0x0041e2f5"], 177, "dbc2f289ae0aacdc6d7ef785d7d8290d1153742003a389889f5ac881563ca278"],
   ["0x0041e370", ["0x0041e370-0x0041e3bd", "0x0041e3f0-0x0041e5db"], 115, "aa96086d04f698f4965205fa74803f0cc7d7db9a05ee610834a0ccffac293a61"],
   ["0x0041d870", ["0x0041d870-0x0041d976", "0x0041d9f0-0x0041dbdc"], 149, "725ef4a43130d35f9001bbd0b96ab9868b54ee4c000a49de36b96eccce7cdfc2"],
@@ -59,6 +64,17 @@ const REQUIRED_CALL_EDGES = [
   ["0x0041d230", "0x0041d210", "0x0041e370"],
   ["0x0041e3b3", "0x0041e370", "0x0041d870"],
 ];
+const INITIALIZER_DIRECT_CALLS = {
+  7: [
+    ["0x0042982a", "0x004550c0"], ["0x00429880", "0x00428fb0"], ["0x00429887", "0x00428e10"],
+    ["0x0042989e", "0x004390b0"], ["0x004298ae", "0x004390b0"], ["0x004298be", "0x004390b0"], ["0x004298ce", "0x004390b0"], ["0x004298de", "0x004390b0"],
+  ],
+  31: [
+    ["0x00429b9d", "0x004550c0"], ["0x00429bfc", "0x00428fb0"], ["0x00429c03", "0x00428e10"],
+    ["0x00429c1a", "0x004390b0"], ["0x00429c2a", "0x004390b0"], ["0x00429c3a", "0x004390b0"], ["0x00429c4a", "0x004390b0"],
+  ],
+};
+const INITIALIZER_ALLOWED_CALLEES = ["0x004550c0", "0x00428fb0", "0x00428e10", "0x004390b0"];
 
 export function extractK01FarmerState4FallbackFrames(options = {}) {
   const paths = { ...DEFAULTS, ...options };
@@ -73,8 +89,9 @@ export function extractK01FarmerState4FallbackFrames(options = {}) {
   const rawCodeRanges = RAW_CODE_RANGES.map((range) => verifyRawCodeRange(buffer, image, range));
   const evidencePoints = EVIDENCE_POINTS.map((point) => verifyEvidencePoint(buffer, image, point));
   const callEdges = REQUIRED_CALL_EDGES.map(([from, fromFunctionEntry, to]) => verifyCallEdge(references, { from, fromFunctionEntry, to }));
-  const initializer = verifyInitializerDefault(seeds, jumpTables);
+  const initializer = verifyInitializerDefault(seeds, jumpTables, references);
   const state4 = verifyState4Fallback(jumpTables);
+  const crossCheckedExtractors = crossCheckExistingExtractors();
   const testVectors = FARMERS.flatMap(({ internalClass }) => DIRECTIONS.flatMap((direction) =>
     [0, 7].map((phase) => selectK01FarmerState4FallbackFrame({ internalClass, direction, phase })),
   ));
@@ -90,6 +107,7 @@ export function extractK01FarmerState4FallbackFrames(options = {}) {
       jumpTables: { path: paths.jumpTablesPath, sourceSha256: jumpTables.sourceSha256 },
       references: { path: paths.referencesPath, sourceSha256: references.sourceSha256 },
       seeds: { path: paths.seedsPath, sourceSha256: seeds.sourceSha256 },
+      crossCheckedExtractors,
     },
     functionEvidence,
     rawCodeRanges,
@@ -129,7 +147,7 @@ export function selectK01FarmerState4FallbackFrame({ internalClass, direction, p
   };
 }
 
-function verifyInitializerDefault(seeds, jumpTables) {
+function verifyInitializerDefault(seeds, jumpTables, references) {
   const initializer = requireSeed(seeds, "0x004291d0");
   const creator = requireSeed(seeds, "0x00437650");
   const creatorInstructions = new Map(creator.instructions.map(({ address, text }) => [address, text]));
@@ -147,17 +165,59 @@ function verifyInitializerDefault(seeds, jumpTables) {
     equal(requireCase(classSwitch, range.internalClass).destination, toHex(range.start), `class ${range.internalClass} initializer destination`);
     const writes = scopedInstructions.filter(({ text }) => writesField(text, 0x144));
     equal(writes.length, 0, `class ${range.internalClass} initializer writes to WORD +0x144`);
+    const directCalls = verifyInitializerDirectCalls(references, range);
     return {
       internalClass: range.internalClass,
       initializerRange: `${toHex(range.start)}-${toHex(range.endExclusive - 1)}`,
       seedInstructionCount: scopedInstructions.length,
       noWord144Write: { field: "+0x144", scope: "exact class initializer range", result: true },
+      directCalls,
     };
   });
   return {
     creator: { functionEntry: "0x00437650", zeroFill: { dwordCount: 0x156, byteCount: 0x558, repStosdVa: "0x00437666" }, initializerCallVa: "0x00437f29" },
     classes,
-    result: { field: "+0x144", value: 0, status: "creation-default-static-confirmed" },
+    result: { field: "+0x144", value: 0, status: "creation-default-static-confirmed", basis: "creator zero-fill + exact initializer direct writes + exact direct callee set + canonical helper bodies" },
+  };
+}
+
+function verifyInitializerDirectCalls(references, range) {
+  const actual = references.references
+    ?.filter((reference) => reference.type === "UNCONDITIONAL_CALL" && reference.fromFunctionEntry === "0x004291d0" && Number.parseInt(reference.from, 16) >= range.start && Number.parseInt(reference.from, 16) < range.endExclusive)
+    .map(({ from, to }) => [from, to])
+    .sort(([left], [right]) => left.localeCompare(right));
+  const expected = INITIALIZER_DIRECT_CALLS[range.internalClass];
+  deepEqual(actual, expected, `class ${range.internalClass} exact initializer direct calls`);
+  const targetCounts = Object.fromEntries(INITIALIZER_ALLOWED_CALLEES.map((target) => [target, actual.filter(([, candidate]) => candidate === target).length]));
+  equal(actual.some(([, target]) => !INITIALIZER_ALLOWED_CALLEES.includes(target)), false, `class ${range.internalClass} initializer allowed direct callees`);
+  equal(actual.some(([, target]) => target === "0x004390e0"), false, `class ${range.internalClass} initializer has no state-4 config helper`);
+  return {
+    allowedTargets: INITIALIZER_ALLOWED_CALLEES,
+    calls: actual.map(([from, to]) => ({ from, to })),
+    targetCounts,
+    state4ConfigHelper: { target: "0x004390e0", directCallCount: 0 },
+  };
+}
+
+function crossCheckExistingExtractors() {
+  const korean = extractK01KoreanFarmerCoreFrames();
+  const japanese = extractK01JapaneseFarmerFrames();
+  const coreUnits = extractK01CoreUnitAnimations();
+  const koreanHelperEvidence = korean.functionEvidence.filter(({ entry }) => ["0x004550c0", "0x00428fb0", "0x00428e10", "0x004390b0"].includes(entry));
+  const coreHelperEvidence = coreUnits.functionEvidence.filter(({ entry }) => ["0x004390b0", "0x004390e0"].includes(entry));
+  equal(koreanHelperEvidence.length, 4, "Korean farmer core helper evidence coverage");
+  equal(coreHelperEvidence.length, 2, "core unit state-4/death helper evidence coverage");
+  equal(korean.initializer.helperCalls.idle, "0x00429880 -> 0x00428fb0", "Korean farmer idle helper role");
+  equal(korean.initializer.helperCalls.move, "0x00429887 -> 0x00428e10", "Korean farmer move helper role");
+  equal(korean.initializer.death.helper, "0x004390b0", "Korean farmer death helper role");
+  equal(japanese.initializerCalls.idle.helper, "0x00438e50", "Japanese farmer idle configuration consumer");
+  equal(japanese.initializerCalls.move.helper, "0x00438ef0", "Japanese farmer move configuration consumer");
+  equal(japanese.initializerCalls.death.helper, "0x004390b0", "Japanese farmer death helper role");
+  for (const unit of coreUnits.classes) equal(unit.initializers.attack.helper, "0x004390e0", `core unit class ${unit.identity.internalClass} state-4 config helper`);
+  return {
+    koreanFarmerCore: { sources: korean.sources, helperEvidence: koreanHelperEvidence, roles: { subrecordInitializer: "0x004550c0", idleConfiguration: "0x00428fb0", moveConfiguration: "0x00428e10", deathConfiguration: "0x004390b0" } },
+    japaneseFarmerCore: { sources: japanese.sources, initializerCalls: japanese.initializerCalls },
+    coreUnitAnimations: { sources: coreUnits.sources, helperEvidence: coreHelperEvidence, state4ConfigHelper: "0x004390e0" },
   };
 }
 

@@ -24,9 +24,25 @@ creator `FUN_00437650`은 `0x00437656`에서 `ECX=0x156`, `EAX=0`, `EDI=record`�
 
 `0x004292b3` class switch의 case 7 범위는 `0x0042981d..0x004298e7`, case 31 범위는
 `0x00429b90..0x00429c59`다. extractor는 이 두 **정확한 seed instruction 범위**만 대상으로
-`WORD +0x144`를 쓰는 instruction이 없음을 검사한다. 이는 이후의 모든 함수·alias·runtime write가
-없다는 주장이 아니다. zero-fill과 이 제한된 initializer 범위의 결합으로 source-created entry에서
-`+0x144`는 0이다.
+`WORD +0x144`를 쓰는 instruction이 없음을 검사한다. 또한 generated references에서 그 범위의 모든
+direct `CALL` edge를 주소와 count까지 고정한다.
+
+| class | exact direct calls | 허용 callee count |
+| ---: | --- | --- |
+| 7 | `0x0042982a, 0x00429880, 0x00429887, 0x0042989e, 0x004298ae, 0x004298be, 0x004298ce, 0x004298de` | `0x004550c0` 1, `0x00428fb0` 1, `0x00428e10` 1, `0x004390b0` 5 |
+| 31 | `0x00429b9d, 0x00429bfc, 0x00429c03, 0x00429c1a, 0x00429c2a, 0x00429c3a, 0x00429c4a` | `0x004550c0` 1, `0x00428fb0` 1, `0x00428e10` 1, `0x004390b0` 4 |
+
+이 exact direct-call set의 target은 resource subrecord initializer `FUN_004550c0`, idle configuration
+`FUN_00428fb0`, move configuration `FUN_00428e10`, death configuration `FUN_004390b0`뿐이다. 각 helper의
+canonical function body/count/hash를 함께 고정한다. state-4 configuration helper `FUN_004390e0`는
+두 range에서 direct call count 0이다. class 31의 fifth death setup은 range 마지막의 direct call이
+아닌 shared tail jump이므로 위 표의 direct-call count에는 포함하지 않는다.
+
+기존 Korean farmer core, Japanese farmer core 및 core-unit animation extractor도 직접 실행한다.
+전자는 네 allowed helper의 canonical evidence와 idle/move/death 역할을, 후자는 state-4 configuration
+helper가 `FUN_004390e0`임을 교차 확인한다. 따라서 이 source-created conclusion은 creator zero-fill,
+exact initializer direct writes, exact direct callee set 및 canonical helper bodies의 결합 범위에서만
+`+0x144 == 0`이다. 이후의 모든 함수·alias·runtime write가 없다는 주장은 아니다.
 
 type flags는 class 7 `0x000a0801`, class 31 `0x00081001`이고 둘 다 high bit가 clear다.
 
@@ -54,13 +70,14 @@ normal direction은 `1,5,4,20,16,80,64,65` = `s,sw,w,nw,n,ne,e,se`다. base inde
 
 [`extract-k01-farmer-state4-fallback-frames.mjs`](../../../tools/imjinrok/extract-k01-farmer-state4-fallback-frames.mjs)는
 canonical EXE, functions, jump-tables, references, seeds, function/raw-range hash, evidence point와
-call edge를 함께 고정한다. two existing farmer core selectors를 이용해 state-8 idle endpoint와
+call edge를 함께 고정한다. 기존 두 farmer extractor와 core-unit animation extractor를 직접 실행해
+helper canonical evidence를 교차하며, two existing farmer core selectors로 state-8 idle endpoint와
 동일한 결과를 만든다.
 
 fixture [`k01-farmer-state4-fallback-frame-vectors.json`](../../../analysis/fixtures/k01-farmer-state4-fallback-frame-vectors.json)은
 class 7/31 × 8 directions × phase 0/7의 32 endpoint에서 slot/frame/mirror를 고정한다. focused test는
 state-4 class switch, creator zero-fill, exact initializer range에 주입한 `+0x144` write, references 및
-EXE 변조를 거부한다.
+EXE 변조를 거부한다. initializer direct callee 및 helper function artifact 변조도 거부한다.
 
 ## 미확인 경계
 
