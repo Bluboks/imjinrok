@@ -91,6 +91,7 @@
 | `0x0043c300` | `FUN_0043c300`, `0x0043c300-0x0043c9b1` | ? / 524 | action-1 create-return direct helper | `+0x1bc/+0x1be`를 읽고 rewrite하지 않는 K01 immediate scope 정적 확정 |
 | `0x0043c9c0` | `FUN_0043c9c0`, `0x0043c9c0-0x0043d35f` | 143 / 684 | `+0x1b0` 상위 행동 dispatcher와 outer keep/release 반환 | K01 action 1 call edge `0x0043b2d0→0x0043c300→0x0043ad30`, 상태 5 공격·클래스 76·78 health-zero 행동 6/7/`0x16` 정적 확정 |
 | `0x00443360` | `FUN_00443360` | 자원 순회 | 경로 포인터 표→런타임 스프라이트 레코드 로드 | 타입 1~95 및 effect table index 5/6 `exp1/exp2` 경로 정적 확정 |
+| `0x00443160`, `0x00443320` | `FUN_00443160`, `FUN_00443320` | ? / 148; ? / 17 | main tileset prefix selector·76-entry filename table→`0x00bcdff8` stride `0x0bf8` loader, 그리고 76-record cleanup | signed-WORD `0/1/2`→normal/snow/brown/default normal, table sentinel `0x004cab44`, cleanup `0x4c` 범위 정적 확정; renderer/frame/map-cell selector는 미확정 |
 | `0x00446420` | `FUN_00446420`, `0x00446420-0x004464be` | 9 / 33 | shared session teardown raw write/call chain | result state write 뒤 순서와 exact-one 분기 정적 확정; opaque callee 의미 미확정, unrelated caller 존재 |
 | `0x00447360` | `FUN_00447360`, `0x00447360-0x00447599` | 35 / 156 | active entity list 뒤 투사체 slot 0~99 순회 | entity dispatcher 반환 0→`0x00483aa0`, subtype `0x0c` pool 범위 정적 확정 |
 | `0x00447bc0` | `FUN_00447bc0`, `0x00447bc0-0x00447cfa` | 21 / 75 | 원본 simulation-step scheduler | 13개 resolved direct call의 raw 조건·순서, 모든 gate 승인 뒤 pool 1회와 조건부 post-pool call 정적 확정; callee 의미 미확정 |

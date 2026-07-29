@@ -11,6 +11,7 @@
 | PE 구조와 주소 변환 | 정적 확정 | 재현 완료 | 도구 존재 | 새 원본 변형을 받을 때 동일 검증 적용 |
 | 원본 자원 인벤토리 | 추정 | 부분 재현 | 변환 도구 존재 | 전체 파일 해시 매니페스트와 파서 fixture |
 | 임진록 tileset 컨테이너 인벤토리 | source file/header 범위 정적 확정 | 재현 완료 | 없음 | map cell render field에서 filename·frame을 고르는 selector와 range/default branch 정적 분석 |
+| 임진록 main tileset loader 경계 | signed-WORD 0/1/2→normal/snow/brown prefix·default normal, 76-entry filename table/sentinel, `0x00bcdff8`/`0x0bf8` record loop와 `0x4c` cleanup 정적 확정 | 재현 완료 | 없음 | map cell render field→loader record·frame selector의 complete branch/range/default 분석 |
 | 공통 함수 지도 | 추정 | 부분 재현 | 구조화 산출물 존재 | 일반 참조·점프 테이블에서 주요 경계와 동적 인덱스 수동 검토 |
 | 엔티티 타입 정체 | 클래스 1~95 이름·슬롯·기본 프레임·flags·SPR 경로 정적 확정 | 전수 추출·결정론 검증 완료 | 고유 연결 표시 이름과 봉화대 자원 반영 | flags 비트·행동·수치 의미는 메커니즘별 복원 |
 | 엔티티 자료구조 | 추정 | 미재현 | 별도 프로젝트 모델 존재 | 생성·읽기·쓰기 경로 교차 확인 |
