@@ -30,13 +30,20 @@ carried/gathered resource quantity로 좁게 뒷받침하는 selector·increment
 1/2/3과 비교한 뒤 `+0x1e`에 selector 3이면 12 (`0x004564d4`), 그 밖의 관찰된 경로면 9
 (`0x004564db`)를 더한다.
 
-`FUN_0043c9c0`의 `0x0043ce75..0x0043ce9e`는 quantity `+0x47a`, selector `+0x478`, capacity `+0x47c`를
-읽는다. quantity와 selector가 모두 0이 아니고, observed signed `JGE` 비교에서 quantity가 capacity보다
-작을 때 `0x0043ce9a`에서 `FUN_00424510`을 호출한다. 인수는 selector와 quantity다.
+`FUN_0043c9c0`의 `0x0043ca1e`는 `XOR EBP,EBP`로 `BP=0`을 만들며, raw range
+`0x0043ca1e..0x0043cea3`에서 `0x0043ce7c CMP AX,BP`까지 그 comparator register를 다시 쓰지 않는다.
+따라서 `0x0043ce75..0x0043ce9e`는 quantity `+0x47a`, selector `+0x478`, capacity `+0x47c`를 읽고
+quantity와 selector가 모두 0이 아니며 observed signed `JGE` 비교에서 quantity가 capacity보다 작을 때
+`0x0043ce9a`에서 `FUN_00424510`을 호출한다. 인수는 selector와 quantity다.
 `FUN_00424510`은 selector 1/2/3에 따라 player-bank WORD table에 quantity를 더하며 selector 3은 add 전
 quantity를 8 bit shift한다. 따라서 이 write/increment/gate/credit chain은 `+0x47a`가 이 흐름의
 carried/gathered resource quantity임을 `정적 확정`한다. selector의 사람용 자원 이름이나 다른 호출자의
 `+0x47a` 의미까지는 확정하지 않는다.
+
+`0x004564d4/0x004564db` increment 뒤 `0x0045650c`은 move helper `0x00428e10`, `0x00456524`는 idle
+helper `0x00428fb0`을 직접 호출한다. generated reference의 둘 다 containing function은
+`0x004562d0`이다. 따라서 quantity mutation이 같은 invocation에서 class 7/31의 `+0x47a!=0` move/idle
+configuration refresh로 직접 이어짐을 정적 확정한다.
 
 ## class dispatch와 비영 branch
 

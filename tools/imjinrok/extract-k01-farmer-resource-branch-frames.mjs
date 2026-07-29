@@ -69,6 +69,7 @@ const RAW_CODE_RANGES = [
   ["resource-subrecord-reset", 0x004550c0, 0x00455116, "cd167f9a693efdec58e00bc28679598ba2c3a89856542a79853510880c99f04d"],
   ["resource-selector-writer", 0x00455798, 0x004557f7, "04c6b1d17fee4e8ea3ee15b6faf53b9cc015b0283166d24a6cfd43fc0a615f1d"],
   ["resource-quantity-increment", 0x004564bc, 0x00456529, "b1a2e611095a04e6375cf39d22cd47ecabe5e343cae1cfd0e64f215f74e0e9a8"],
+  ["resource-credit-zero-register-to-gate", 0x0043ca1e, 0x0043cea3, "9d037fe6bc1238f0ee87a97ebc9b40afd3541f5b707d296ab59ea9161fdc09ea"],
   ["resource-credit-gate", 0x0043ce6e, 0x0043cea3, "775e9302733f3b725c490786094db63a17df4e2b2722ed9e9e80c48185494546"],
   ["player-bank-credit", 0x00424510, 0x0042456d, "f46afa27f64240cc7afa781e59659007195c7b7a16de6e79b40e400abc213dd6"],
   ["class-7-idle-nonzero", 0x00428fdd, 0x0042902f, "4eda7a3d473d76d790589063cc3a9ac6835d026dbef099fc07a2141f1c540c20"],
@@ -84,6 +85,9 @@ const EVIDENCE_POINTS = [
   [0x004557a3, "66 89 46 1c", "resource selector writer stores its nonzero input at subrecord +0x1c"],
   [0x004564d4, "66 83 46 1e 0c", "selector 3 adds 12 to subrecord +0x1e"],
   [0x004564db, "66 83 46 1e 09", "other selector paths add 9 to subrecord +0x1e"],
+  [0x0045650c, "e8 ff 28 fd ff", "quantity increment path refreshes move configuration"],
+  [0x00456524, "e8 87 2a fd ff", "quantity increment path refreshes idle configuration"],
+  [0x0043ca1e, "33 ed", "credit-gate path clears EBP, whose BP view is used by CMP AX,BP"],
   [0x0043ce75, "66 8b 86 7a 04 00 00", "credit gate reads entity +0x47a quantity"],
   [0x0043ce81, "66 8b 8e 78 04 00 00", "credit gate reads entity +0x478 selector"],
   [0x0043ce8d, "66 3b 86 7c 04 00 00", "credit gate compares quantity with entity +0x47c capacity"],
@@ -104,6 +108,8 @@ const REQUIRED_CALL_EDGES = [
   ["0x00429bfc", "0x004291d0", "0x00428fb0"],
   ["0x00429c03", "0x004291d0", "0x00428e10"],
   ["0x0043ce9a", "0x0043c9c0", "0x00424510"],
+  ["0x0045650c", "0x004562d0", "0x00428e10"],
+  ["0x00456524", "0x004562d0", "0x00428fb0"],
   ["0x00428fee", "0x00428fb0", "0x00438e80"],
   ["0x00428ffd", "0x00428fb0", "0x00438e80"],
   ["0x0042900c", "0x00428fb0", "0x00438e80"],
@@ -192,7 +198,8 @@ function buildStates(farmer) {
 function recoverFieldFlow() {
   return {
     subrecord: { entityOffset: "+0x45c", selector: { subrecordOffset: "+0x1c", entityOffset: "+0x478", resetVa: "0x004550ea", writerVa: "0x004557a3" }, quantity: { subrecordOffset: "+0x1e", entityOffset: "+0x47a", resetVa: "0x004550ee", increments: [{ va: "0x004564d4", selectorCase: 3, add: 12 }, { va: "0x004564db", selectorCase: "other observed cases", add: 9 }] }, capacity: { subrecordOffset: "+0x20", entityOffset: "+0x47c", initialValue: 10, resetVa: "0x004550f2" } },
-    creditGate: { functionEntry: "0x0043c9c0", range: "0x0043ce75-0x0043ce9e", condition: "quantity != 0 && selector != 0 && quantity < capacity (the observed signed JGE comparison)", callVa: "0x0043ce9a", target: "0x00424510", arguments: ["selector from +0x478", "quantity from +0x47a"] },
+    creditGate: { functionEntry: "0x0043c9c0", range: "0x0043ce75-0x0043ce9e", zeroRegisterProvenance: { setVa: "0x0043ca1e", instruction: "XOR EBP,EBP", comparatorRegister: "BP", verifiedRange: "0x0043ca1e-0x0043cea3" }, condition: "quantity != 0 && selector != 0 && quantity < capacity (the observed signed JGE comparison)", callVa: "0x0043ce9a", target: "0x00424510", arguments: ["selector from +0x478", "quantity from +0x47a"] },
+    quantityConfigRefresh: { functionEntry: "0x004562d0", moveCallVa: "0x0045650c", moveHelper: "0x00428e10", idleCallVa: "0x00456524", idleHelper: "0x00428fb0" },
     playerBankCredit: { functionEntry: "0x00424510", selectorCases: [1, 2, 3], effect: "adds the supplied quantity to a selector-indexed player-bank WORD; selector 3 shifts its supplied quantity by 8 before the add" },
     interpretation: "The selector writer, quantity increments, capacity gate, and player-bank credit narrowly support +0x47a as a carried/gathered resource quantity for this flow. They do not establish a universal semantic for the field or human names for selector values.",
   };
