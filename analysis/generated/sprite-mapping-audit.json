@@ -12,7 +12,7 @@
     },
     {
       "path": "packages/shared/src/visuals.ts",
-      "sha256": "8592aaad11fc924aefd98bb0d5d967ba04390aca70c11244f86ed76675ea7f20"
+      "sha256": "1ef31510078495985a9ccf0c92f20e85e76ba65a3c8ef4daf9305d5169bfd8b1"
     },
     {
       "path": "packages/shared/src/content.ts",
@@ -108,7 +108,7 @@
     },
     {
       "path": "tools/imjinrok/audit-sprite-mappings.mjs",
-      "sha256": "b5d1f7ed7e0de6a9c42c539b42cc7e8f830533d4e2e9bc98c218c0f78fa5ee51"
+      "sha256": "a07b24781b11c57e2d2a2841808079333e2f170dc132f709a1df9cc3cc4130fd"
     },
     {
       "path": "apps/game-client/public/assets/themes/default/ui/mission-portraits/hero.manifest.json",
@@ -133,7 +133,7 @@
     "projectBindingConflictCount": 0,
     "portraitCueCount": 17,
     "unverifiedPortraitCueCount": 0,
-    "findingCount": 24
+    "findingCount": 50
   },
   "visuals": [
     {
@@ -24556,6 +24556,162 @@
       "scope": "base",
       "state": "walk",
       "detail": "Three facings reuse mirrored source frames without binary/data proof."
+    },
+    {
+      "severity": "info",
+      "code": "pivot-evidence-project-adaptation",
+      "visualId": "japanese-camp-advanced-tower",
+      "detail": "Current source-pixel pivot anchors are project ground-contact adapters unless narrower static pivot evidence is recorded."
+    },
+    {
+      "severity": "info",
+      "code": "pivot-evidence-project-adaptation",
+      "visualId": "japanese-camp-barracks",
+      "detail": "Current source-pixel pivot anchors are project ground-contact adapters unless narrower static pivot evidence is recorded."
+    },
+    {
+      "severity": "info",
+      "code": "pivot-evidence-project-adaptation",
+      "visualId": "japanese-camp-firehouse",
+      "detail": "Current source-pixel pivot anchors are project ground-contact adapters unless narrower static pivot evidence is recorded."
+    },
+    {
+      "severity": "info",
+      "code": "pivot-evidence-project-adaptation",
+      "visualId": "japanese-camp-house",
+      "detail": "Current source-pixel pivot anchors are project ground-contact adapters unless narrower static pivot evidence is recorded."
+    },
+    {
+      "severity": "info",
+      "code": "pivot-evidence-project-adaptation",
+      "visualId": "japanese-camp-tower",
+      "detail": "Current source-pixel pivot anchors are project ground-contact adapters unless narrower static pivot evidence is recorded."
+    },
+    {
+      "severity": "info",
+      "code": "pivot-evidence-project-adaptation",
+      "visualId": "japanese-farmer",
+      "detail": "Current source-pixel pivot anchors are project ground-contact adapters unless narrower static pivot evidence is recorded."
+    },
+    {
+      "severity": "info",
+      "code": "pivot-evidence-project-adaptation",
+      "visualId": "japanese-gunner",
+      "detail": "Current source-pixel pivot anchors are project ground-contact adapters unless narrower static pivot evidence is recorded."
+    },
+    {
+      "severity": "info",
+      "code": "pivot-evidence-project-adaptation",
+      "visualId": "japanese-hq",
+      "detail": "Current source-pixel pivot anchors are project ground-contact adapters unless narrower static pivot evidence is recorded."
+    },
+    {
+      "severity": "info",
+      "code": "pivot-evidence-project-adaptation",
+      "visualId": "japanese-konishi",
+      "detail": "Current source-pixel pivot anchors are project ground-contact adapters unless narrower static pivot evidence is recorded."
+    },
+    {
+      "severity": "info",
+      "code": "pivot-evidence-project-adaptation",
+      "visualId": "japanese-samurai",
+      "detail": "Current source-pixel pivot anchors are project ground-contact adapters unless narrower static pivot evidence is recorded."
+    },
+    {
+      "severity": "info",
+      "code": "pivot-evidence-project-adaptation",
+      "visualId": "japanese-shrine-maiden",
+      "detail": "Current source-pixel pivot anchors are project ground-contact adapters unless narrower static pivot evidence is recorded."
+    },
+    {
+      "severity": "info",
+      "code": "pivot-evidence-project-adaptation",
+      "visualId": "japanese-swordsman",
+      "detail": "Current source-pixel pivot anchors are project ground-contact adapters unless narrower static pivot evidence is recorded."
+    },
+    {
+      "severity": "info",
+      "code": "pivot-evidence-project-adaptation",
+      "visualId": "japanese-turtle-tank",
+      "detail": "Current source-pixel pivot anchors are project ground-contact adapters unless narrower static pivot evidence is recorded."
+    },
+    {
+      "severity": "info",
+      "code": "pivot-evidence-project-adaptation",
+      "visualId": "korean-archer",
+      "detail": "Current source-pixel pivot anchors are project ground-contact adapters unless narrower static pivot evidence is recorded."
+    },
+    {
+      "severity": "info",
+      "code": "pivot-evidence-project-adaptation",
+      "visualId": "korean-barracks",
+      "detail": "Current source-pixel pivot anchors are project ground-contact adapters unless narrower static pivot evidence is recorded."
+    },
+    {
+      "severity": "info",
+      "code": "pivot-evidence-project-adaptation",
+      "visualId": "korean-general-k4",
+      "detail": "Current source-pixel pivot anchors are project ground-contact adapters unless narrower static pivot evidence is recorded."
+    },
+    {
+      "severity": "info",
+      "code": "pivot-evidence-project-adaptation",
+      "visualId": "korean-gwon-yul",
+      "detail": "Current source-pixel pivot anchors are project ground-contact adapters unless narrower static pivot evidence is recorded."
+    },
+    {
+      "severity": "info",
+      "code": "pivot-evidence-project-adaptation",
+      "visualId": "korean-hq",
+      "detail": "Current source-pixel pivot anchors are project ground-contact adapters unless narrower static pivot evidence is recorded."
+    },
+    {
+      "severity": "info",
+      "code": "pivot-evidence-project-adaptation",
+      "visualId": "korean-mill-house-proxy",
+      "detail": "Current source-pixel pivot anchors are project ground-contact adapters unless narrower static pivot evidence is recorded."
+    },
+    {
+      "severity": "info",
+      "code": "pivot-evidence-project-adaptation",
+      "visualId": "korean-monk",
+      "detail": "Current source-pixel pivot anchors are project ground-contact adapters unless narrower static pivot evidence is recorded."
+    },
+    {
+      "severity": "info",
+      "code": "pivot-evidence-project-adaptation",
+      "visualId": "korean-royal-cart",
+      "detail": "Current source-pixel pivot anchors are project ground-contact adapters unless narrower static pivot evidence is recorded."
+    },
+    {
+      "severity": "info",
+      "code": "pivot-evidence-project-adaptation",
+      "visualId": "korean-ryu-seong-ryong",
+      "detail": "Current source-pixel pivot anchors are project ground-contact adapters unless narrower static pivot evidence is recorded."
+    },
+    {
+      "severity": "info",
+      "code": "pivot-evidence-project-adaptation",
+      "visualId": "korean-signal-beacon",
+      "detail": "Current source-pixel pivot anchors are project ground-contact adapters unless narrower static pivot evidence is recorded."
+    },
+    {
+      "severity": "info",
+      "code": "pivot-evidence-project-adaptation",
+      "visualId": "korean-swordsman",
+      "detail": "Current source-pixel pivot anchors are project ground-contact adapters unless narrower static pivot evidence is recorded."
+    },
+    {
+      "severity": "info",
+      "code": "pivot-evidence-project-adaptation",
+      "visualId": "korean-training-command",
+      "detail": "Current source-pixel pivot anchors are project ground-contact adapters unless narrower static pivot evidence is recorded."
+    },
+    {
+      "severity": "info",
+      "code": "pivot-evidence-project-adaptation",
+      "visualId": "villager-korean-farmer",
+      "detail": "Current source-pixel pivot anchors are project ground-contact adapters unless narrower static pivot evidence is recorded."
     },
     {
       "severity": "blocking",

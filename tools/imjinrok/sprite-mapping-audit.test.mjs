@@ -146,7 +146,7 @@ test("frame mappings stay quarantined outside statically proven scopes while ide
     projectBindingConflictCount: 0,
     portraitCueCount: 17,
     unverifiedPortraitCueCount: 0,
-    findingCount: 24,
+    findingCount: 50,
   });
   assert.equal(
     report.visuals.filter((visual) => visual.evidenceStatus === "unverified").length,
@@ -720,6 +720,23 @@ test("audit provenance hashes resolve to the current source files", () => {
     ),
     report.portraits.source.conversionManifest.sha256,
     report.portraits.source.conversionManifest.path,
+  );
+});
+
+test("pivot audit keeps source anchors in bounds and labels them as project adaptations", () => {
+  const entityVisuals = report.visuals.filter((visual) => visual.category === "unit" || visual.category === "building");
+
+  assert.equal(
+    report.findings.some((finding) => finding.code === "pivot-anchor-out-of-bounds"),
+    false,
+  );
+  assert.equal(
+    report.findings.some((finding) => finding.code === "layer-state-without-base-state"),
+    false,
+  );
+  assert.equal(
+    report.findings.filter((finding) => finding.code === "pivot-evidence-project-adaptation").length,
+    entityVisuals.length,
   );
 });
 
