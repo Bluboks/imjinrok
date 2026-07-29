@@ -317,7 +317,14 @@ function advanceUnitMovement(
     return;
   }
 
-  if (!canUnitOccupyPosition(state, unit, target) || !reserveUnitPosition(movementReservation, unit, target)) {
+  // A presently occupied footprint is a queue, not a new route request. The
+  // blocker may leave on a later tick; keeping this waypoint prevents repeated
+  // whole-map searches while preserving the occupied source footprint.
+  if (!canUnitOccupyPosition(state, unit, target)) {
+    return;
+  }
+
+  if (!reserveUnitPosition(movementReservation, unit, target)) {
     repathBlockedMovementWaypoint(state, unit);
     return;
   }
@@ -1007,7 +1014,7 @@ function advanceUnitCombat(state: WorldState): void {
     const distance = getUnitDistance(unit, target);
     if (shouldMoveTowardCombatTarget(unit, combat, distance)) {
       if (!moveUnitTowardCombatTarget(state, unit, target)) {
-        if (unit.currentOrder?.type === "attack-unit") {
+        if (unit.currentOrder?.type === "attack-unit" && !canReachAttackTargetPastMobileBlockers(state, unit, target)) {
           clearUnitOrder(unit);
         } else if (isAggressiveTravelOrder(unit)) {
           resumeAggressiveTravelDestination(state, unit);
@@ -1075,7 +1082,7 @@ function getCombatTarget(
       return null;
     }
 
-    return canEngageCombatTarget(state, unit, target, combat) ? target : null;
+    return target;
   }
 
   if (unit.currentOrder?.type === "move") {
@@ -1085,6 +1092,10 @@ function getCombatTarget(
   const engagementRange = getEngagementRange(unit, combat);
 
   return findNearestEnemyInRange(state, unit, engagementRange, combat);
+}
+
+function canReachAttackTargetPastMobileBlockers(state: WorldState, unit: UnitState, target: UnitState): boolean {
+  return findPathForUnit(state, unit, target.position, { ignoreMobileBlockers: true }) !== null;
 }
 
 function getEngagementRange(unit: UnitState, combat: NonNullable<UnitDefinition["combat"]>): number {

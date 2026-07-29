@@ -18,6 +18,17 @@ test("pathfinding treats every blocking entity footprint as an obstacle", () => 
   assert.equal(path.some((point) => point.x === 3 && point.y === 3), false);
 });
 
+test("partial paths still route around mobile footprints", () => {
+  const state = createCollisionState();
+  const mover = addUnit(state, "mover", { x: 2, y: 3 });
+  addUnit(state, "blocker", { x: 3, y: 3 });
+
+  const path = findPathForUnit(state, mover, { x: 5, y: 3 }, { allowPartial: true });
+
+  assert.ok(path);
+  assert.equal(path.some((point) => point.x === 3 && point.y === 3), false);
+});
+
 test("stable unit order reserves a shared empty waypoint before fractional travel can overlap", () => {
   const state = createCollisionState();
   const first = addUnit(state, "a-first", { x: 1, y: 3 });
