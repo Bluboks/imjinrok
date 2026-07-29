@@ -60,7 +60,7 @@
     },
     {
       "path": "tools/imjinrok/extract-k01-japanese-farmer-frames.mjs",
-      "sha256": "8430c1c0e7912566308aa483efca90fb02335aa994b5e7f47b85defefaefb567"
+      "sha256": "8d1b39783657fce73b5317ef71b854c5c2c66c8d4229542eee9d22e473cc7ad4"
     },
     {
       "path": "tools/imjinrok/extract-k01-special-unit-animations.mjs",

@@ -60,8 +60,12 @@ const RAW_EVIDENCE = [
   [0x00429bfc, "e8aff3ffff", "class 31 initializer calls the idle helper"],
   [0x00429c03, "e808f2ffff", "class 31 initializer calls the move helper"],
   [0x00429c1a, "e891f40000", "class 31 initializer starts five death helper calls"],
-  [0x00429108, "6683be7a04000000c6869200000008", "idle helper class 31 branch tests WORD +0x47a and sets state 8"],
-  [0x00428f1a, "6683b97a04000000c681a600000008", "move helper class 31 branch tests WORD +0x47a and sets state 1"],
+  [0x00429108, "6683be7a04000000c68692000000086a087469", "idle helper class 31 tests WORD +0x47a, writes state 8, and carries phase 8 to its zero branch"],
+  [0x00429184, "6a0068910000008bcee8befc00005ec3", "idle zero branch pushes start 0 and slot 145 then calls 0x00438e50"],
+  [0x00428f1a, "6683b97a04000000c681a6000000086a087410", "move helper class 31 tests WORD +0x47a, writes state 1, and carries phase 8 to its zero branch"],
+  [0x00428f3d, "68a00000006891000000e8a4ff0000c3", "move zero branch pushes start 160 and slot 145 then calls 0x00438ef0"],
+  [0x0043792b, "8d8e5c040000", "creator addresses subrecord +0x45c before its reset call"],
+  [0x00437962, "e859d70100", "creator calls the +0x45c subrecord reset before class initialization"],
 ];
 
 export function extractK01JapaneseFarmerFrames(options = {}) {
@@ -93,7 +97,6 @@ export function extractK01JapaneseFarmerFrames(options = {}) {
   const initializer = seeds.functions?.find(({ entry }) => entry === "0x004291d0");
   const creator = seeds.functions?.find(({ entry }) => entry === "0x00437650");
   if (!initializer?.instructions || !creator?.instructions) throw new Error("seeds artifact is missing class 31 initializer or creator instructions");
-  const initializerCalls = recoverInitializerCalls(initializer.instructions);
   const creation = recoverCreationOrder(creator.instructions);
   const records = extractMapEntities(mapBuffer, mapHeader).entities
     .filter((entity) => entity.active && entity.ownerId === 1 && entity.typeId === 31)
@@ -101,6 +104,8 @@ export function extractK01JapaneseFarmerFrames(options = {}) {
   deepEqual(records, MAP_RECORDS, "K01 active owner-1 class 31 map records");
   const rawEvidence = RAW_EVIDENCE.map(([va, bytes, meaning]) => inspectBytes(buffer, image, va, bytes, meaning));
   if (rawEvidence.some(({ matched }) => !matched)) throw new Error("Japanese farmer raw byte evidence mismatch");
+  const helperBranches = recoverHelperZeroBranches(rawEvidence);
+  const initializerCalls = recoverInitializerCalls(initializer.instructions, helperBranches);
   const states = Object.fromEntries(Object.entries(FARMER.states).map(([name, state]) => [name, describeState(name, state)]));
   const testVectors = Object.values(FARMER.states).flatMap(({ originalAnimationState, phaseCount }) =>
     NORMAL_DIRECTION_PROFILES.flatMap(({ direction }) => [0, phaseCount - 1].map((phase) =>
@@ -158,20 +163,51 @@ function recoverCreationOrder(instructions) {
   equal(byAddress.get("0x00437666"), "STOSD.REP ES:EDI", "creator zero-fill instruction");
   equal(byAddress.get("0x00437b86"), "MOV byte ptr [ESI + 0x37],CL", "creator class write");
   equal(byAddress.get("0x00437f29"), "CALL 0x004291d0", "creator initializer call");
+  equal(byAddress.get("0x0043792b"), "LEA ECX,[ESI + 0x45c]", "creator +0x45c subrecord context");
+  equal(byAddress.get("0x00437962"), "CALL 0x004550c0", "creator +0x45c subrecord reset call");
   const fieldWrites = instructions.filter(({ address, text }) => Number.parseInt(address, 16) >= 0x00437666 && Number.parseInt(address, 16) < 0x00437f29 && /\[ESI \+ 0x47a\]/.test(text));
   equal(fieldWrites.length, 0, "creator direct writes to WORD +0x47a before initializer");
-  return { mapLoader: "0x0048dbe0", wrapper: "0x00483c50", creator: "0x00437650", zeroFill: { dwordCount: 0x156, byteCount: 0x558, instruction: "0x00437666" }, classWrite: "0x00437b86", initializerCall: "0x00437f29", initializerWordAtEntry: 0 };
+  return { mapLoader: "0x0048dbe0", wrapper: "0x00483c50", creator: "0x00437650", zeroFill: { dwordCount: 0x156, byteCount: 0x558, instruction: "0x00437666" }, subrecordReset: { context: "0x0043792b", call: "0x00437962", offset: "0x45c" }, classWrite: "0x00437b86", initializerCall: "0x00437f29", initializerWordAtEntry: 0 };
 }
-function recoverInitializerCalls(instructions) {
+function recoverHelperZeroBranches(rawEvidence) {
+  const requirePoint = (va) => {
+    const point = rawEvidence.find((candidate) => candidate.va === va);
+    if (!point?.matched) throw new Error(`missing raw helper evidence at ${va}`);
+  };
+  requirePoint("0x00429108");
+  requirePoint("0x00429184");
+  requirePoint("0x00428f1a");
+  requirePoint("0x00428f3d");
+  return {
+    idle: { helper: "0x00438e50", state: 8, slot: 145, frameStart: 0, phaseCount: 8, branch: "0x00429108" },
+    move: { helper: "0x00438ef0", state: 1, slot: 145, frameStart: 160, phaseCount: 8, branch: "0x00428f1a" },
+  };
+}
+function recoverInitializerCalls(instructions, helperBranches) {
+  const byAddress = new Map(instructions.map((instruction) => [instruction.address, instruction.text]));
   const selected = instructions.filter(({ address }) => Number.parseInt(address, 16) >= 0x00429b90 && Number.parseInt(address, 16) <= 0x00429c59);
   const texts = selected.map(({ text }) => text);
+  equal(byAddress.get("0x00429ba2"), "MOV EBX,0x8", "class 31 initializer phase register");
+  equal(byAddress.get("0x00429ba7"), "MOV EDI,0x91", "class 31 initializer sprite slot register");
   const expected = ["CALL 0x00428fb0", "CALL 0x00428e10"];
   for (const value of expected) equal(texts.filter((text) => text === value).length, 1, `class 31 ${value}`);
   equal(texts.filter((text) => text === "CALL 0x004390b0").length, 4, "class 31 direct death helper call count");
   equal(texts.filter((text) => text === "JMP 0x00429997").length, 1, "class 31 fifth death helper shared tail jump");
+  for (const [facing, pushAddress, callAddress] of [[0, "0x00429c08", "0x00429c1a"], [1, "0x00429c1f", "0x00429c2a"], [2, "0x00429c2f", "0x00429c3a"], [3, "0x00429c3f", "0x00429c4a"]]) {
+    equal(byAddress.get(pushAddress), "PUSH EBX", `class 31 death facing ${facing} phase count`);
+    const pushOffset = Number.parseInt(pushAddress, 16);
+    equal(byAddress.get(toHex(pushOffset + 1)), "PUSH 0xf0", `class 31 death facing ${facing} start`);
+    equal(byAddress.get(toHex(pushOffset + 6)), "PUSH EDI", `class 31 death facing ${facing} slot`);
+    equal(byAddress.get(toHex(pushOffset + 7)), `PUSH 0x${facing.toString(16)}`, `class 31 death facing index ${facing}`);
+    equal(byAddress.get(callAddress), "CALL 0x004390b0", `class 31 death facing ${facing} helper`);
+  }
+  equal(byAddress.get("0x00429c4f"), "PUSH EBX", "class 31 death shared tail phase count");
+  equal(byAddress.get("0x00429c50"), "PUSH 0xf0", "class 31 death shared tail start");
+  equal(byAddress.get("0x00429997"), "PUSH EDI", "class 31 death shared tail slot");
+  equal(byAddress.get("0x00429998"), "PUSH 0x4", "class 31 death shared tail facing index");
   const sharedTail = instructions.find(({ address }) => address === "0x0042999c");
   equal(sharedTail?.text, "CALL 0x004390b0", "class 31 fifth death helper shared tail call");
-  return { initializerRange: "0x00429b90-0x00429c59", idle: { helper: "0x00428fb0", state: 8, slot: 145, frameStart: 0, phaseCount: 8, branch: "0x00429108" }, move: { helper: "0x00428e10", state: 1, slot: 145, frameStart: 160, phaseCount: 8, branch: "0x00428f1a" }, death: { helper: "0x004390b0", state: 7, slot: 145, frameStart: 240, frameStride: 0, phaseCount: 8, facingCallCount: 5 } };
+  return { initializerRange: "0x00429b90-0x00429c59", idle: helperBranches.idle, move: helperBranches.move, death: { helper: "0x004390b0", state: 7, slot: 145, frameStart: 240, frameStride: 0, phaseCount: 8, facingCallCount: 5 } };
 }
 function inspectSprite(table, path) {
   const entry = table.entries[FARMER.sprite.tableIndex];

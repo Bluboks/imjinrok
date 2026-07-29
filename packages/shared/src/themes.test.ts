@@ -419,7 +419,7 @@ test("Japanese gunner uses the statically recovered class-12 core-state frame bl
   assert.equal(visual.states.death?.clips.s?.loop, false);
 });
 
-test("Japanese farmer uses only its statically recovered core states and lets the existing runtime attack fallback select idle", () => {
+test("Japanese farmer uses only its statically recovered core states and omits unresolved attack frames", () => {
   const manifest = readManifest("entities/japanese-farmer/Farmerj.manifest.json");
   const visual = defaultTheme.visuals[defaultTheme.entityBindings["japanese-farmer"]] as EntityVisual;
 

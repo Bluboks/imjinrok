@@ -1,7 +1,7 @@
 {
   "vectors": [
-    { "internalClass": 31, "state": 8, "stateName": "idle", "direction": 1, "facing": "s", "phase": 0, "spriteSlot": 145, "sourcePath": "char\\farmerj.spr", "frameIndex": 0, "mirrorX": false },
-    { "internalClass": 31, "state": 1, "stateName": "move", "direction": 16, "facing": "n", "phase": 7, "spriteSlot": 145, "sourcePath": "char\\farmerj.spr", "frameIndex": 183, "mirrorX": true },
-    { "internalClass": 31, "state": 7, "stateName": "death", "direction": 65, "facing": "se", "phase": 7, "spriteSlot": 145, "sourcePath": "char\\farmerj.spr", "frameIndex": 247, "mirrorX": false }
+    [8, 1, 0], [8, 1, 7], [8, 5, 0], [8, 5, 7], [8, 4, 0], [8, 4, 7], [8, 20, 0], [8, 20, 7], [8, 16, 0], [8, 16, 7], [8, 80, 0], [8, 80, 7], [8, 64, 0], [8, 64, 7], [8, 65, 0], [8, 65, 7],
+    [1, 1, 0], [1, 1, 7], [1, 5, 0], [1, 5, 7], [1, 4, 0], [1, 4, 7], [1, 20, 0], [1, 20, 7], [1, 16, 0], [1, 16, 7], [1, 80, 0], [1, 80, 7], [1, 64, 0], [1, 64, 7], [1, 65, 0], [1, 65, 7],
+    [7, 1, 0], [7, 1, 7], [7, 5, 0], [7, 5, 7], [7, 4, 0], [7, 4, 7], [7, 20, 0], [7, 20, 7], [7, 16, 0], [7, 16, 7], [7, 80, 0], [7, 80, 7], [7, 64, 0], [7, 64, 7], [7, 65, 0], [7, 65, 7]
   ]
 }
