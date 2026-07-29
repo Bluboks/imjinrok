@@ -80,7 +80,8 @@ Ghidra의 메모리 지도에는 PE 네 섹션 외에 헤더와 분석용 `tdb` 
 | 경로 | SHA-256 | 확정 범위 |
 | --- | --- | --- |
 | `char/swordk.spr` | `414d285b207ba12afdd856a0f16ddde615381cf491fe493d6ededf91681b55eb` | 조선 창병 정체와 상태 1 일반 이동·상태 2 별도 이동 프레임 식 |
-| `char/farmerk.spr` | `98e370f4dec6f147a2556340bf93d293d23c3ee3a5367bc22fd3984e7209e5ca` | K01 source-created class 7 조선 농부의 `+0x47a==0` 상태 8/1/7 core frame |
+| `char/farmerk.spr` | `98e370f4dec6f147a2556340bf93d293d23c3ee3a5367bc22fd3984e7209e5ca` | K01 class 7 조선 농부의 `+0x47a==0` core 및 `+0x47a!=0` idle/move frame |
+| `char/Farmerj.spr` | `e6cc67849a872f391c977079fc04118bf06d57b99ad8b5137b02398e26d9cdc5` | K01 class 31 일본 농부의 `+0x47a==0` core 및 `+0x47a!=0` idle/move frame |
 | `char/millk.spr` | `bb393d9a34cf7ae752c124a077cb4333bc0151f1a171f76a1e74201bbc57ac29` | K01 class 48 조선 방앗간 source identity·base frame 7 |
 | `char/hqk.spr` | `17e5640a7b34f8aaf1063d210bd087b8ba59d769e194f5025e92941e422c2d4e` | K01 class 49 조선 본영 source identity·base frame 7; body-state 파일럿은 별도 |
 | `char/advbarrackk.spr` | `df40eb785b60824087329ec991e27b0dd88d5fe4ec918f742d8b06c363aa6bf5` | K01 class 51 조선 훈련도감 source identity·base frame 7 |
