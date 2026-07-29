@@ -7,7 +7,8 @@
 
 - 분석: `정적 확정`
 - 재현: `재현 완료`
-- 구현: `부분 이식` — 고유 `japanese-farmer` visual의 idle/move/walk/death에만 반영했다.
+- 구현: `부분 이식` — 고유 `japanese-farmer` visual의 idle/move/walk/death와, 별도 nonzero branch의
+  carry/carry-idle frame·방향·mirror에 반영했다.
 
 ## 입력과 증거
 
@@ -45,10 +46,12 @@ normal direction profile은 raw `1,5,4,20,16,80,64,65` →
 | 1 | move / walk | 145 | 160 | 8 | 8 | 160..199 |
 | 7 | death | 145 | 240 | 0 | 8 | 240..247 |
 
-state 4 attack과 `+0x47a != 0` branch는 이 범위에서 `미확인`이다. visual에는 attack
-clip을 추정해 추가하지 않았으며, 현재 renderer의 state candidate fallback이 idle을 고른다.
-FPS, pivot, stats, commands, behavior, raw owner의 사람용 의미와 death lifetime은 프로젝트
-적응 또는 미확인이다.
+state 4 attack은 이 범위에서 `미확인`이다. visual에는 attack clip을 추정해 추가하지 않았으며,
+현재 renderer의 state candidate fallback이 idle을 고른다. `+0x47a != 0`의 state 8/1 branch는
+[별도 resource-quantity 분석](k01-farmer-resource-branch-frames.md)에서 정적 확정·재현했고,
+port는 `carriedResource.amount > 0` adapter로 carry/carry-idle에만 반영한다. 이 adapter는 원본 field
+의미를 다른 entity나 시스템에 일반화하지 않는다. FPS, pivot, stats, commands, behavior, raw owner의
+사람용 의미와 death lifetime은 프로젝트 적응 또는 미확인이다.
 
 ## 재현
 
