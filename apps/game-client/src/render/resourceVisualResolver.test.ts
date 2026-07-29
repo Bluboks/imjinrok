@@ -5,9 +5,12 @@ import { resolve } from "node:path";
 import test from "node:test";
 import { createContentRegistry, createImjinrokMapScaffold } from "@shared";
 import {
+  getRegisteredResourceVisualPreloadDescriptors,
   getMapResourceVisualPreloadDescriptors,
+  requireResourceVisualTexture,
   resolveMapResourceVisual,
   resolveMapResourceVisualTextureKey,
+  resolveResourceVisualPlacement,
 } from "./resourceVisualResolver";
 
 const assetRoot = resolve("apps/game-client/public/assets/themes/default/resources/imjinrok");
@@ -99,6 +102,61 @@ test("provides deterministic preload descriptors for mapped active frame-zero as
       frame: 0,
     },
   ]);
+});
+
+test("preloads every registered resource visual deterministically before a launch map is known", () => {
+  const registry = createContentRegistry();
+  registry.resourceVisualSets["custom-visuals"] = {
+    id: "custom-visuals",
+    displayName: "Custom Visuals",
+    resources: {
+      berries: {
+        states: {
+          active: { url: "/assets/custom/berries-active.png", frame: 0 },
+          depleted: { url: "/assets/custom/berries-depleted.png", frame: 1 },
+        },
+        evidenceStatus: "source-backed-adaptation",
+      },
+    },
+    evidenceStatus: "source-backed-adaptation",
+  };
+
+  assert.deepEqual(
+    getRegisteredResourceVisualPreloadDescriptors(registry).map((descriptor) => descriptor.textureKey),
+    [
+      "resource-visual:custom-visuals:berries:active",
+      "resource-visual:custom-visuals:berries:depleted",
+      "resource-visual:imjinrok-source-resource-adaptation:bamboo:active",
+      "resource-visual:imjinrok-source-resource-adaptation:potato:active",
+      "resource-visual:imjinrok-source-resource-adaptation:rice:active",
+      "resource-visual:imjinrok-source-resource-adaptation:tree:active",
+    ],
+  );
+});
+
+test("uses a source-preserving project placement at the resource container ground contact", () => {
+  assert.deepEqual(resolveResourceVisualPlacement(64, 32), {
+    originX: 0.5,
+    originY: 1,
+    scale: 1,
+    localX: 0,
+    localY: 32 / 3,
+  });
+  assert.deepEqual(resolveResourceVisualPlacement(96, 48), {
+    originX: 0.5,
+    originY: 1,
+    scale: 1.5,
+    localX: 0,
+    localY: 16,
+  });
+  assert.throws(() => resolveResourceVisualPlacement(0, 32), /positive finite/);
+});
+
+test("fails loudly when a selected resource visual texture was not preloaded", () => {
+  assert.throws(
+    () => requireResourceVisualTexture("resource-visual:custom-visuals:berries:active", () => false),
+    /Required resource visual texture is not loaded/,
+  );
 });
 
 test("frame-zero exports retain their manifest identity and deterministic PNG hashes", () => {

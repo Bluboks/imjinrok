@@ -60,13 +60,17 @@ tick 0에서 dawn으로 시작해 600 tick 뒤 day가 된다. K01/K02와 다른 
    전 tile에 반복 선택하는 terrain resolver를 만들지 않는다.
 2. resource: generic `resolveMapResourceVisual(registry, map, kind, state)`가 map-selected set의
    `resourceVisualSet.resources[kind]?.states[state]`를 반환한다. visual set ID가 없는 legacy map과
-   매핑되지 않은 kind/state는 `null`이고 preload는 빈 배열이다. 명시했지만 등록되지 않은 set만 오류다.
+   매핑되지 않은 kind/state는 `null`이고 preload는 빈 배열이다. scene preload는 launch map 확정 전이므로
+   registry의 모든 등록 descriptor를 결정론적으로 읽는다. 명시했지만 등록되지 않은 set 또는 선택된
+   descriptor의 preload 누락은 오류다.
 3. environment: opt-in state의 `lightLevel01`; `EnvironmentVisualProfile`은
    `evidenceStatus !== "unresolved"`인 asset만 자동 선택한다.
 
 Imjinrok crop/tree adaptation은 active state frame 0만 가진다. depleted state와 `gold`/`stone`은 `null`
-fallback으로 기존 renderer behavior를 보존한다. normal/snow/brown representative export도 원본 tile
-selection의 증거가 아니다.
+fallback으로 기존 renderer behavior를 보존한다. active crop/tree는 native pixel aspect ratio를 유지하고
+map diamond ground contact에 놓는 project scale/pivot policy를 사용한다. 이는 frame 0 source identity만
+소비하는 source-backed project adaptation이며 원본 pivot·scale 또는 K01 resource placement 주장이 아니다.
+normal/snow/brown representative export도 원본 tile selection의 증거가 아니다.
 
 ## 재현과 다음 분석
 
