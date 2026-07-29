@@ -1,4 +1,4 @@
-# K01 시작 유닛 class 11·12·13·16 binding
+# K01 시작 유닛 class 11·12·13·16·31 binding
 
 질문: **원본 `k01.map`의 class 11·12·13·16 시작 레코드를 해당 고유 project kind와
 정적으로 확정한 핵심 상태 프레임에만 정확히 연결할 수 있는가?**
@@ -81,8 +81,9 @@ node --test tools/imjinrok/k01-opening-unit-bindings.test.mjs tools/imjinrok/k01
 
 이 시작 binding으로 K01 전체 unit mapping 또는 original simulation parity를 주장하지 않는다.
 
-1. class 31 일본 농부의 creation-default branch와 source-backed core-state evidence를 먼저
-   확보한다. 그 전에는 `japanese-gunner` proxy를 유지한다.
+1. class 31 일본 농부의 source identity와 state 8/1/7 core frame은
+   [별도 파일럿](k01-japanese-farmer-frames.md)에서 확정했다. state 4와 `+0x47a != 0` branch는
+   계속 미확인이다.
 2. class 7 조선 농부의 core states를 별도 정적 분석한다. 현재는 identity/source만 확정했다.
 3. class 2/3/4 state 2의 project policy를 결정한다. alternate movement frame은 정적 확정했지만
    제품에 매핑하지 않았다.

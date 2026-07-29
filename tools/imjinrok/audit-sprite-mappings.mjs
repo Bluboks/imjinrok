@@ -23,6 +23,7 @@ import { extractK01SamuraiAnimationPilot } from "./extract-k01-samurai-animation
 import { extractK01TurtleTankAnimationPilot } from "./extract-k01-turtle-tank-animation-pilot.mjs";
 import { extractK01KonishiAnimationPilot } from "./extract-k01-konishi-animation-pilot.mjs";
 import { extractK01CoreUnitAnimations } from "./extract-k01-core-unit-animations.mjs";
+import { extractK01JapaneseFarmerFrames } from "./extract-k01-japanese-farmer-frames.mjs";
 import { extractK01SpecialUnitAnimations } from "./extract-k01-special-unit-animations.mjs";
 import { extractK01NormalReinforcementAnimationBatch } from "./extract-k01-normal-reinforcement-animation-batch.mjs";
 import { extractMissionPortraitMapping } from "./extract-mission-portrait-mapping.mjs";
@@ -77,6 +78,10 @@ const k01CoreUnitAnimationsPath = join(
   repositoryRoot,
   "tools/imjinrok/extract-k01-core-unit-animations.mjs",
 );
+const k01JapaneseFarmerFramesPath = join(
+  repositoryRoot,
+  "tools/imjinrok/extract-k01-japanese-farmer-frames.mjs",
+);
 const k01SpecialUnitAnimationsPath = join(
   repositoryRoot,
   "tools/imjinrok/extract-k01-special-unit-animations.mjs",
@@ -116,6 +121,7 @@ const k01TurtleTankAnimationPilot =
   extractK01TurtleTankAnimationPilot();
 const k01KonishiAnimationPilot = extractK01KonishiAnimationPilot();
 const k01CoreUnitAnimations = extractK01CoreUnitAnimations();
+const k01JapaneseFarmerFrames = extractK01JapaneseFarmerFrames();
 const k01SpecialUnitAnimations = extractK01SpecialUnitAnimations();
 const k01NormalReinforcementAnimationBatch = extractK01NormalReinforcementAnimationBatch();
 const buildingStatePilot = extractBuildingStatePilot();
@@ -203,7 +209,7 @@ const report = {
   policy: {
     semanticStatus: "mixed",
     acceptedEvidence:
-      "All 95 original type identities, uniquely matched current visual source identities, SPEECH portraits, Korean HQ and signal-beacon body states, K01 classes 2/3/4/11/16 and class-12/13/82 normal core states, class-14 Japanese turtle-tank idle/move/attack grid states plus its non-theme 16-ring turn and creation-default transient destruction contracts, and the K01 heroes' idle, movement, attack, and death frame/direction mappings are statically proven in their documented scopes.",
+      "All 95 original type identities, uniquely matched current visual source identities, SPEECH portraits, Korean HQ and signal-beacon body states, K01 classes 2/3/4/11/12/13/16/31/82 normal core states in their documented limits, class-14 Japanese turtle-tank idle/move/attack grid states plus its non-theme 16-ring turn and creation-default transient destruction contracts, and the K01 heroes' idle, movement, attack, and death frame/direction mappings are statically proven in their documented scopes.",
     parityUse:
       "A unique source identity proves the original name and SPR binding only. Only explicitly listed frame scopes may be used for animation parity; all other direction, action, layer, and body mappings remain quarantined.",
   },
@@ -221,6 +227,7 @@ const report = {
     sourceFileRecord(k01TurtleTankAnimationPilotPath),
     sourceFileRecord(k01KonishiAnimationPilotPath),
     sourceFileRecord(k01CoreUnitAnimationsPath),
+    sourceFileRecord(k01JapaneseFarmerFramesPath),
     sourceFileRecord(k01SpecialUnitAnimationsPath),
     sourceFileRecord(k01NormalReinforcementAnimationBatchPath),
     sourceFileRecord(buildingStatePilotPath),
@@ -535,6 +542,31 @@ function buildVisualStaticEvidence(visual, identityCandidates) {
       },
       unresolvedScope:
         "state 2 is a statically proven movement variant but its environment label and project policy are unresolved; exact timing, pivot, later flags, hit reaction, and death lifetime remain unresolved",
+    };
+  }
+
+  if (visual.id === "japanese-farmer") {
+    const states = k01JapaneseFarmerFrames.states;
+    return {
+      status: "mixed",
+      ...identityEvidence,
+      animationStateMapping: "static-proven-core-state-frames",
+      confirmedAnimationScope:
+        "project idle and move/walk and death use the statically recovered class-31 state 8, 1, and 7 frames, direction order, and mirroring; state 4 attack is deliberately absent and the existing runtime fallback selects idle",
+      stateFrameRanges: {
+        idle: stateFrameRange(states.idle),
+        move: stateFrameRange(states.move),
+        walk: stateFrameRange(states.move),
+        death: stateFrameRange(states.death),
+      },
+      stateSources: {
+        idle: states.idle.sourcePath,
+        move: states.move.sourcePath,
+        walk: states.move.sourcePath,
+        death: states.death.sourcePath,
+      },
+      unresolvedScope:
+        "state 4 attack, WORD +0x47a nonzero branches, exact timing, pivot, stats, commands, behavior, later runtime mutation, and death lifetime remain unresolved",
     };
   }
 
@@ -975,6 +1007,9 @@ function hasStaticDirectionEvidence(visualId, scope, stateName) {
   if (visualId === "japanese-gunner") {
     return ["idle", "move", "walk", "attack", "death"].includes(stateName);
   }
+  if (visualId === "japanese-farmer") {
+    return ["idle", "move", "walk", "death"].includes(stateName);
+  }
   if (visualId === "japanese-samurai") {
     return ["idle", "move", "walk", "attack", "death"].includes(stateName);
   }
@@ -999,6 +1034,13 @@ function coreStateFrameRanges(unit) {
     attack: unit.states.attack.frameRange,
     death: unit.states.death.frameRange,
   };
+}
+
+function stateFrameRange({ frameStart, frameStride, phaseCount }) {
+  const bases = [0, 1, 2, 3, 2, 1, 0, 4].map(
+    (index) => frameStart + index * frameStride,
+  );
+  return [Math.min(...bases), Math.max(...bases) + phaseCount - 1];
 }
 
 function coreStateSources(unit) {
