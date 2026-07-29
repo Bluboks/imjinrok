@@ -1,0 +1,148 @@
+{
+  "schemaVersion": 1,
+  "bindings": [
+    {
+      "internalClass": 48,
+      "rawOwnerWord": 0,
+      "sourcePosition": {
+        "x": 11,
+        "y": 5
+      },
+      "originalGameplayName": "조선 방앗간",
+      "spriteSlot": 146,
+      "baseFrame": 7,
+      "sourcePath": "char\\millk.spr",
+      "identityMapping": "exact-static-identity-source"
+    },
+    {
+      "internalClass": 49,
+      "rawOwnerWord": 0,
+      "sourcePosition": {
+        "x": 5,
+        "y": 4
+      },
+      "originalGameplayName": "조선 본영",
+      "spriteSlot": 141,
+      "baseFrame": 7,
+      "sourcePath": "char\\hqk.spr",
+      "identityMapping": "exact-static-identity-source"
+    },
+    {
+      "internalClass": 51,
+      "rawOwnerWord": 0,
+      "sourcePosition": {
+        "x": 5,
+        "y": 8
+      },
+      "originalGameplayName": "조선 훈련도감",
+      "spriteSlot": 213,
+      "baseFrame": 7,
+      "sourcePath": "char\\advbarrackk.spr",
+      "identityMapping": "exact-static-identity-source"
+    },
+    {
+      "internalClass": 58,
+      "rawOwnerWord": 1,
+      "sourcePosition": {
+        "x": 7,
+        "y": 57
+      },
+      "originalGameplayName": "일본 본영",
+      "spriteSlot": 106,
+      "baseFrame": 7,
+      "sourcePath": "char\\jhq.spr",
+      "identityMapping": "exact-static-identity-source"
+    },
+    {
+      "internalClass": 58,
+      "rawOwnerWord": 1,
+      "sourcePosition": {
+        "x": 56,
+        "y": 6
+      },
+      "originalGameplayName": "일본 본영",
+      "spriteSlot": 106,
+      "baseFrame": 7,
+      "sourcePath": "char\\jhq.spr",
+      "identityMapping": "exact-static-identity-source"
+    },
+    {
+      "internalClass": 60,
+      "rawOwnerWord": 1,
+      "sourcePosition": {
+        "x": 6,
+        "y": 50
+      },
+      "originalGameplayName": "일본 훈련소",
+      "spriteSlot": 110,
+      "baseFrame": 7,
+      "sourcePath": "char\\barrackj.spr",
+      "identityMapping": "exact-static-identity-source"
+    },
+    {
+      "internalClass": 60,
+      "rawOwnerWord": 1,
+      "sourcePosition": {
+        "x": 55,
+        "y": 11
+      },
+      "originalGameplayName": "일본 훈련소",
+      "spriteSlot": 110,
+      "baseFrame": 7,
+      "sourcePath": "char\\barrackj.spr",
+      "identityMapping": "exact-static-identity-source"
+    },
+    {
+      "internalClass": 63,
+      "rawOwnerWord": 1,
+      "sourcePosition": {
+        "x": 18,
+        "y": 49
+      },
+      "originalGameplayName": "일본 망루",
+      "spriteSlot": 219,
+      "baseFrame": 7,
+      "sourcePath": "char\\towerj.spr",
+      "identityMapping": "exact-static-identity-source"
+    },
+    {
+      "internalClass": 63,
+      "rawOwnerWord": 1,
+      "sourcePosition": {
+        "x": 32,
+        "y": 40
+      },
+      "originalGameplayName": "일본 망루",
+      "spriteSlot": 219,
+      "baseFrame": 7,
+      "sourcePath": "char\\towerj.spr",
+      "identityMapping": "exact-static-identity-source"
+    },
+    {
+      "internalClass": 63,
+      "rawOwnerWord": 1,
+      "sourcePosition": {
+        "x": 35,
+        "y": 29
+      },
+      "originalGameplayName": "일본 망루",
+      "spriteSlot": 219,
+      "baseFrame": 7,
+      "sourcePath": "char\\towerj.spr",
+      "identityMapping": "exact-static-identity-source"
+    },
+    {
+      "internalClass": 63,
+      "rawOwnerWord": 1,
+      "sourcePosition": {
+        "x": 44,
+        "y": 5
+      },
+      "originalGameplayName": "일본 망루",
+      "spriteSlot": 219,
+      "baseFrame": 7,
+      "sourcePath": "char\\towerj.spr",
+      "identityMapping": "exact-static-identity-source"
+    }
+  ]
+}
