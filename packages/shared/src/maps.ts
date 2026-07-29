@@ -191,6 +191,23 @@ export const defaultMap: MapDefinition = (() => {
     height: demoMapSize,
     tags: ["skirmish", "1v1", "custom-lobby", "automatch"],
   });
+  // Project-authored opt-in cycle for the default skirmish map. It is not an
+  // assertion about any original mission's palette or timing.
+  map.environment = {
+    dayNight: {
+      cycleTicks: 6_000,
+      dayStartTick: 1_800,
+      nightStartTick: 4_800,
+      nightSightMultiplier: 0.6,
+      lightCurve: [
+        { tick: 0, phase: "night", lightLevel01: 0.3 },
+        { tick: 1_200, phase: "dawn", lightLevel01: 0.65 },
+        { tick: 1_800, phase: "day", lightLevel01: 1 },
+        { tick: 4_200, phase: "dusk", lightLevel01: 0.65 },
+        { tick: 4_800, phase: "night", lightLevel01: 0.3 },
+      ],
+    },
+  };
 
   const fillRect = (fromX: number, fromY: number, toX: number, toY: number, terrain: TerrainType): void => {
     for (let y = fromY; y <= toY; y += 1) {

@@ -47,6 +47,9 @@ K01/K02 scaffold는 `imjinrok-normal` tileset identity만 선택한다. source n
 palette timing을 추측하지 않는 opt-in project adaptation이다. deterministic world tick에서 output
 `EnvironmentState.lightLevel01`을 관찰할 수 있다.
 
+기본 `river-crossing` skirmish map은 10 tick/s 기준 6,000 tick(10분) project-authored cycle을 opt-in한다.
+K01/K02와 다른 Imjinrok source map에는 원본 일정 근거가 없으므로 이 cycle을 적용하지 않는다.
+
 ## renderer bridge contact
 
 후속 renderer는 registry를 resolve한 뒤 다음만 소비한다.
