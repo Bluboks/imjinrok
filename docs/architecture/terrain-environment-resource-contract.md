@@ -48,8 +48,9 @@ K01/K02 scaffold는 `imjinrok-normal` tileset identity만 선택한다. source n
 palette timing을 추측하지 않는 opt-in project adaptation이다. deterministic world tick에서 output
 `EnvironmentState.lightLevel01`을 관찰할 수 있다.
 
-기본 `river-crossing` skirmish map은 10 tick/s 기준 6,000 tick(10분) project-authored cycle을 opt-in한다.
-K01/K02와 다른 Imjinrok source map에는 원본 일정 근거가 없으므로 이 cycle을 적용하지 않는다.
+기본 `river-crossing` skirmish map은 10 tick/s 기준 6,000 tick(10분) project-authored cycle을 opt-in하며,
+tick 0에서 dawn으로 시작해 600 tick 뒤 day가 된다. K01/K02와 다른 Imjinrok source map에는 원본 일정
+근거가 없으므로 이 cycle을 적용하지 않는다.
 
 ## renderer bridge contact
 
@@ -58,8 +59,8 @@ K01/K02와 다른 Imjinrok source map에는 원본 일정 근거가 없으므로
 1. terrain: exact original record→tile/frame rule은 미확정이다. catalog의 `grss1`/`hill0` frame 0을
    전 tile에 반복 선택하는 terrain resolver를 만들지 않는다.
 2. resource: generic `resolveMapResourceVisual(registry, map, kind, state)`가 map-selected set의
-   `resourceVisualSet.resources[kind]?.states[state]`를 반환한다. 등록되지 않은 set은 오류,
-   매핑되지 않은 kind/state는 `null`이다. preload에는 matching descriptor만 사용한다.
+   `resourceVisualSet.resources[kind]?.states[state]`를 반환한다. visual set ID가 없는 legacy map과
+   매핑되지 않은 kind/state는 `null`이고 preload는 빈 배열이다. 명시했지만 등록되지 않은 set만 오류다.
 3. environment: opt-in state의 `lightLevel01`; `EnvironmentVisualProfile`은
    `evidenceStatus !== "unresolved"`인 asset만 자동 선택한다.
 

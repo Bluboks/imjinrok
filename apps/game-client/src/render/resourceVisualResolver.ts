@@ -26,7 +26,10 @@ export function resolveMapResourceVisual(
   resourceKind: string,
   state: ResourceVisualState,
 ): VisualAssetRef | null {
-  const visualSet = requireResourceVisualSet(registry, map);
+  const visualSet = resolveResourceVisualSet(registry, map);
+  if (!visualSet) {
+    return null;
+  }
   const asset = visualSet.resources[resourceKind]?.states[state];
 
   return asset ? { ...asset } : null;
@@ -38,7 +41,10 @@ export function resolveMapResourceVisualTextureKey(
   resourceKind: string,
   state: ResourceVisualState,
 ): string | null {
-  const visualSet = requireResourceVisualSet(registry, map);
+  const visualSet = resolveResourceVisualSet(registry, map);
+  if (!visualSet) {
+    return null;
+  }
   const asset = visualSet.resources[resourceKind]?.states[state];
 
   return asset ? createTextureKey(visualSet.id, resourceKind, state) : null;
@@ -48,7 +54,10 @@ export function getMapResourceVisualPreloadDescriptors(
   registry: ResourceVisualRegistry,
   map: ResourceVisualMap,
 ): ResourceVisualPreloadDescriptor[] {
-  const visualSet = requireResourceVisualSet(registry, map);
+  const visualSet = resolveResourceVisualSet(registry, map);
+  if (!visualSet) {
+    return [];
+  }
   const descriptors: ResourceVisualPreloadDescriptor[] = [];
 
   for (const resourceKind of Object.keys(visualSet.resources).sort()) {
@@ -75,10 +84,10 @@ export function getMapResourceVisualPreloadDescriptors(
   return descriptors;
 }
 
-function requireResourceVisualSet(registry: ResourceVisualRegistry, map: ResourceVisualMap): ResourceVisualSetDefinition {
+function resolveResourceVisualSet(registry: ResourceVisualRegistry, map: ResourceVisualMap): ResourceVisualSetDefinition | null {
   const visualSetId = map.resourceVisualSetId;
   if (!visualSetId) {
-    throw new Error(`Map '${map.id}' does not select a resource visual set.`);
+    return null;
   }
 
   const visualSet = registry.resourceVisualSets[visualSetId];

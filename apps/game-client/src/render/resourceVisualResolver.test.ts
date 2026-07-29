@@ -53,6 +53,17 @@ test("fails loudly when a map does not select a registered resource visual set",
   );
 });
 
+test("legacy maps without a resource visual set keep placeholder fallback behavior", () => {
+  const registry = createContentRegistry();
+  const map = createImjinrokMapScaffold("imjinrok-k01");
+  assert.ok(map);
+  delete map.resourceVisualSetId;
+
+  assert.equal(resolveMapResourceVisual(registry, map, "rice", "active"), null);
+  assert.equal(resolveMapResourceVisualTextureKey(registry, map, "rice", "active"), null);
+  assert.deepEqual(getMapResourceVisualPreloadDescriptors(registry, map), []);
+});
+
 test("provides deterministic preload descriptors for mapped active frame-zero assets", () => {
   const map = createImjinrokMapScaffold("imjinrok-k01");
   assert.ok(map);
