@@ -25,6 +25,11 @@ const MAX_GOAL_CANDIDATES = 64;
 
 export interface FindPathOptions {
   allowPartial?: boolean;
+  /**
+   * Use only for reachability checks. Movement paths keep mobile footprints
+   * blocked so their waypoints remain immediately occupiable.
+   */
+  ignoreMobileBlockers?: boolean;
 }
 
 export function findPathForUnit(
@@ -35,7 +40,7 @@ export function findPathForUnit(
 ): GridPoint[] | null {
   const start = toTilePoint(unit.position);
   const requestedGoal = toTilePoint(target);
-  const blockedTiles = getEntityBlockingTiles(state, unit.id, options.allowPartial !== true);
+  const blockedTiles = getEntityBlockingTiles(state, unit.id, options.ignoreMobileBlockers !== true);
   const startKey = toTileKey(start);
 
   blockedTiles.delete(startKey);
