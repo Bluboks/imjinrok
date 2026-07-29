@@ -11,7 +11,7 @@
 | representative PNG/palette manifest export | `source-backed project adaptation` | hash가 고정된 frame 0 export; 원본 선택 규칙 아님 |
 | map의 `tilesetId`·visual profile·resource visual set 선택 | `프로젝트 전용` | 명시적 registry 참조와 loud validation |
 | light curve와 dawn/day/dusk/night simulation output | `의도적 적응` | opt-in fixed-tick curve |
-| K01 원본 tile layout·palette selection/timing·resource placement | `미확인` | source-backed adaptation으로도 승격하지 않고 구현에 강제하지 않음 |
+| K01 원본 tile source object/frame selector | `원본 사실` | `FUN_00469330`의 K01 normal source object/frame 범위; pixel placement와 terrain 의미는 별도 |
 
 ## 원본 source fact
 
@@ -21,11 +21,12 @@
 - `pal/night1.pal`부터 `pal/night4.pal`, `tempeft/night1.YAV`.
 - `fnt/crop0.spr`, `crop1.spr`, `tree0.spr`, `resource.spr`, `helpresource.spr`.
 
-파일 존재는 source asset catalog의 사실일 뿐, map byte가 어떤 tile/file/frame을 선택하는지 증명하지
-않는다. `crop0` frame 0→`rice`/`potato`, `tree0` frame 0→`tree`/`bamboo`은 source file identity 위에
+파일 존재만으로 일반 map byte가 어떤 tile/file/frame을 선택한다고 주장하지 않는다. 단, K01은
+[source tile selector](../reverse-engineering/mechanics/k01-source-tile-selector.md)가 map byte→normal loader
+object/frame의 제한된 경로를 정적 확정했다. `crop0` frame 0→`rice`/`potato`, `tree0` frame 0→`tree`/`bamboo`은 source file identity 위에
 올린 **source-backed project adaptation**이다. `resource.spr` frame 0은 UI sack source fact로 catalog에만
-남기며 `gold`/`stone` field node에는 자동 연결하지 않는다. K01의 `themeId=0 → normal`도 기존
-[원시 맵 값 투영 계약](../reverse-engineering/mechanics/k01-map-terrain-contract.md)의 `추정` 범위를 넘지 않는다.
+남기며 `gold`/`stone` field node에는 자동 연결하지 않는다. K01 `themeId=0 → normal`은 위 selector의
+제한된 source selection 범위에서만 원본 사실이며, terrain 의미나 product resource policy는 아니다.
 
 ## 프로젝트 계약
 
@@ -56,11 +57,12 @@ tick 0에서 dawn으로 시작해 600 tick 뒤 day가 된다. K01/K02와 다른 
 
 후속 renderer는 registry를 resolve한 뒤 다음만 소비한다.
 
-1. terrain: exact original record→tile/frame rule은 미확정이다. catalog의 `grss1`/`hill0` frame 0을
-   전 tile에 반복 선택하는 terrain resolver를 만들지 않는다. 모드 map은 `TileCell.tilesetVisuals`의
-   `flatAssetKey`/`elevationAssetKey`로 선택한 `tilesetId` collection key만 명시적으로 사용할 수 있다.
-   선택하지 않은 surface는 기존 theme fallback을 유지한다. tile asset의 image geometry와 footprint anchor는
-   모드 renderer 계약이며 original tile canvas/pivot/selection 규칙 주장이 아니다.
+1. terrain: K01의 exact original map byte→normal source object/frame rule은 확인됐지만 아직 제품 renderer에
+   연결하지 않는다. catalog의 `grss1`/`hill0` frame 0을 전 tile에 반복 선택하는 terrain resolver를 만들지
+   않는다. 모드 map은 `TileCell.tilesetVisuals`의 `flatAssetKey`/`elevationAssetKey`로 선택한 `tilesetId`
+   collection key만 명시적으로 사용할 수 있다. 선택하지 않은 surface는 기존 theme fallback을 유지한다. tile
+   asset의 image geometry와 footprint anchor는 모드 renderer 계약이며 original tile canvas/pivot/selection
+   규칙 주장이 아니다.
 2. resource: generic `resolveMapResourceVisual(registry, map, kind, state)`가 map-selected set의
    `resourceVisualSet.resources[kind]?.states[state]`를 반환한다. visual set ID가 없는 legacy map과
    매핑되지 않은 kind/state는 `null`이고 preload는 빈 배열이다. scene preload는 launch map 확정 전이므로
@@ -83,5 +85,5 @@ node tools/imjinrok/export-imjinrok-environment-assets.mjs
 node --test tools/imjinrok/imjinrok-environment-assets.test.mjs
 ```
 
-다음 원본 분석은 renderer의 raw field → tile resource/frame CFG, night palette/YAV selection/update path,
-그리고 map/source record에서 직접 확인 가능한 resource placement/identity를 각각 좁은 질문으로 닫아야 한다.
+다음 원본 분석은 K01 source frame의 pixel placement/pivot과 다른 map/theme selector, night palette/YAV
+selection/update path, 그리고 map/source record에서 직접 확인 가능한 resource placement/identity를 각각 좁은 질문으로 닫아야 한다.

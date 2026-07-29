@@ -1,0 +1,817 @@
+{
+  "question": "Which hash-bound K01 map bytes select a main-loader tile object and sprite frame in FUN_00469330?",
+  "analysisStatus": "static-confirmed-for-K01-source-tile-object-and-frame-selector",
+  "reproductionStatus": "reproduction-complete-for-all-K01-coordinate-pairs-and-source-frame-bounds",
+  "implementationStatus": "analysis-only-no-product-renderer-change",
+  "sources": {
+    "executable": {
+      "path": "original/imjinrok2/imjinrok2.exe",
+      "sha256": "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e"
+    },
+    "map": {
+      "path": "original/imjinrok2/stagemap/k01.map",
+      "size": 1097100,
+      "sha256": "43ec3a173032f74c12d3cce1db1078b076b651ed79070a0914673a5b65da99cb"
+    },
+    "loaderFixture": "analysis/fixtures/imjinrok-tileset-loader-boundary.json",
+    "environmentFixture": "analysis/fixtures/imjinrok-environment-assets.json"
+  },
+  "map": {
+    "themeId": 0,
+    "theme": "normal",
+    "width": 60,
+    "height": 60,
+    "bounds": {
+      "widthFieldOffset": "0x2da0",
+      "heightFieldOffset": "0x2da4"
+    },
+    "storage": {
+      "objectByte": "map + 0x3a3a4 + x * 180 + y",
+      "frameByte": "map + 0x42234 + x * 180 + y",
+      "coordinateOrder": "x-major storage traversal: ordinal = x * height + y; this is not the product's older row-major RLE serialization order."
+    }
+  },
+  "renderer": {
+    "primary": "FUN_00469330",
+    "sibling": "FUN_00469510",
+    "loaderRecord": {
+      "base": "0x00bcdff8",
+      "stride": "0x0bf8",
+      "frameOffsetTable": "record +0x4c0",
+      "payload": "record +0x0bf4"
+    },
+    "lowNibbleBoundary": "map +0x32514 is used by a separate lift/branch path and is not this object/frame selector identity."
+  },
+  "objects": [
+    {
+      "objectIndex": 0,
+      "fileName": "hill0.ytl",
+      "sourcePath": "tile/normal/hill0.ytl",
+      "sha256": "b8acdf64ba5a3c0fa9129e8546fe595fff7cdd83edbab05195a473ea650ff7b7",
+      "width": 64,
+      "height": 48,
+      "frameCount": 44,
+      "endOffset": 49280,
+      "cellCount": 2613,
+      "frameRange": {
+        "min": 0,
+        "max": 43
+      },
+      "uniqueFrameCount": 43
+    },
+    {
+      "objectIndex": 1,
+      "fileName": "hill1.ytl",
+      "sourcePath": "tile/normal/hill1.ytl",
+      "sha256": "10f42ac03776f8eb4160eae34c2dc974ffe2ccc16b54a1abdd6ecd3ef05b069f",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 28288,
+      "cellCount": 113,
+      "frameRange": {
+        "min": 0,
+        "max": 20
+      },
+      "uniqueFrameCount": 19
+    },
+    {
+      "objectIndex": 2,
+      "fileName": "hill2.ytl",
+      "sourcePath": "tile/normal/hill2.ytl",
+      "sha256": "342cf2055660836f1cbdc2719524ce3354d0f1953c0a0b971a52131291bbb9f5",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 41088,
+      "cellCount": 5,
+      "frameRange": {
+        "min": 1,
+        "max": 14
+      },
+      "uniqueFrameCount": 4
+    },
+    {
+      "objectIndex": 3,
+      "fileName": "hill3.ytl",
+      "sourcePath": "tile/normal/hill3.ytl",
+      "sha256": "6dcafad032119310e2bd671260d9d9d24181964f084eddc864ed0dd4e0b62bab",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 15488,
+      "cellCount": 7,
+      "frameRange": {
+        "min": 0,
+        "max": 18
+      },
+      "uniqueFrameCount": 7
+    },
+    {
+      "objectIndex": 4,
+      "fileName": "hill4.ytl",
+      "sourcePath": "tile/normal/hill4.ytl",
+      "sha256": "e2d9be5d0f1b1e5f2856fd4d4954e54c99cbb737487606f2d690f776f57b7981",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 15488,
+      "cellCount": 17,
+      "frameRange": {
+        "min": 0,
+        "max": 19
+      },
+      "uniqueFrameCount": 7
+    },
+    {
+      "objectIndex": 5,
+      "fileName": "hill5.ytl",
+      "sourcePath": "tile/normal/hill5.ytl",
+      "sha256": "a0682d472995caf1fe0f11ea7b4d2622fdabcf3ecd98cdf7bea2d4f0f36ac3b1",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 41088,
+      "cellCount": 11,
+      "frameRange": {
+        "min": 0,
+        "max": 18
+      },
+      "uniqueFrameCount": 8
+    },
+    {
+      "objectIndex": 6,
+      "fileName": "hill6.ytl",
+      "sourcePath": "tile/normal/hill6.ytl",
+      "sha256": "4474ed930861b88b23cf19cb94ad607ea2e9b38ad86ec99ed725ca4cbb86c15f",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 18288,
+      "cellCount": 6,
+      "frameRange": {
+        "min": 2,
+        "max": 14
+      },
+      "uniqueFrameCount": 5
+    },
+    {
+      "objectIndex": 7,
+      "fileName": "hill7.ytl",
+      "sourcePath": "tile/normal/hill7.ytl",
+      "sha256": "c4c1cf129a9dc41342c321652b9435e2b0119550233f6730220e9718f50bd24a",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 10368,
+      "cellCount": 3,
+      "frameRange": {
+        "min": 1,
+        "max": 14
+      },
+      "uniqueFrameCount": 3
+    },
+    {
+      "objectIndex": 8,
+      "fileName": "hill8.ytl",
+      "sourcePath": "tile/normal/hill8.ytl",
+      "sha256": "92d8e8427341d1de40d63582cea70aba27e4aba26fed579ea093d0334aefb557",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 18288,
+      "cellCount": 8,
+      "frameRange": {
+        "min": 0,
+        "max": 14
+      },
+      "uniqueFrameCount": 5
+    },
+    {
+      "objectIndex": 9,
+      "fileName": "hill9.ytl",
+      "sourcePath": "tile/normal/hill9.ytl",
+      "sha256": "810c52c60ac24e8c15f4585b90eb69a67e65b7174f3c2895594ee020ee2f59cb",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 25248,
+      "cellCount": 2,
+      "frameRange": {
+        "min": 2,
+        "max": 14
+      },
+      "uniqueFrameCount": 2
+    },
+    {
+      "objectIndex": 10,
+      "fileName": "hill10.ytl",
+      "sourcePath": "tile/normal/hill10.ytl",
+      "sha256": "6c4d494de167f6e924f1e7c86a101fa0e86195cf98393023d0f5a4e12675e404",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 17808,
+      "cellCount": 10,
+      "frameRange": {
+        "min": 0,
+        "max": 14
+      },
+      "uniqueFrameCount": 5
+    },
+    {
+      "objectIndex": 11,
+      "fileName": "hill11.ytl",
+      "sourcePath": "tile/normal/hill11.ytl",
+      "sha256": "8db8d1e3938d073c5095965235d228cb0b7b18f0a7e3f101bce3dcdb8ef8e898",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 10368,
+      "cellCount": 2,
+      "frameRange": {
+        "min": 2,
+        "max": 11
+      },
+      "uniqueFrameCount": 2
+    },
+    {
+      "objectIndex": 12,
+      "fileName": "hill12.ytl",
+      "sourcePath": "tile/normal/hill12.ytl",
+      "sha256": "b71dc663ea001245400c400ec19d0d1c55618e14ee00dd9fe763ddc7719bdb0b",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 17808,
+      "cellCount": 5,
+      "frameRange": {
+        "min": 0,
+        "max": 14
+      },
+      "uniqueFrameCount": 3
+    },
+    {
+      "objectIndex": 13,
+      "fileName": "hill13.ytl",
+      "sourcePath": "tile/normal/hill13.ytl",
+      "sha256": "9182f3e9e3cfe7ca75ac5714f409c63412ad917b0b8f76618af519a2f1df9b11",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 26208,
+      "cellCount": 3,
+      "frameRange": {
+        "min": 2,
+        "max": 14
+      },
+      "uniqueFrameCount": 2
+    },
+    {
+      "objectIndex": 16,
+      "fileName": "diff1.ytl",
+      "sourcePath": "tile/normal/diff1.ytl",
+      "sha256": "d013d2ba1270e55f132f63f8d532c280f52746ef14e85f35c033d066e2919440",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 24192,
+      "cellCount": 169,
+      "frameRange": {
+        "min": 0,
+        "max": 14
+      },
+      "uniqueFrameCount": 10
+    },
+    {
+      "objectIndex": 17,
+      "fileName": "diff2.ytl",
+      "sourcePath": "tile/normal/diff2.ytl",
+      "sha256": "2c9cf058d9c254cb909b38e63bca8beeb7b0d7d6f4d2ad0ea68398fcde1caeee",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 34944,
+      "cellCount": 14,
+      "frameRange": {
+        "min": 1,
+        "max": 16
+      },
+      "uniqueFrameCount": 5
+    },
+    {
+      "objectIndex": 18,
+      "fileName": "diff3.ytl",
+      "sourcePath": "tile/normal/diff3.ytl",
+      "sha256": "bc8e1412c0254895d9c44c641e154c6ba23e4e38933edc7903eda1fefb5c147a",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 13440,
+      "cellCount": 17,
+      "frameRange": {
+        "min": 1,
+        "max": 14
+      },
+      "uniqueFrameCount": 5
+    },
+    {
+      "objectIndex": 19,
+      "fileName": "diff4.ytl",
+      "sourcePath": "tile/normal/diff4.ytl",
+      "sha256": "c92a4c316259ca5220bc6db4647e27dfe911f5dbc6d20852827e92dbb4c0061c",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 13440,
+      "cellCount": 13,
+      "frameRange": {
+        "min": 0,
+        "max": 14
+      },
+      "uniqueFrameCount": 3
+    },
+    {
+      "objectIndex": 20,
+      "fileName": "diff5.ytl",
+      "sourcePath": "tile/normal/diff5.ytl",
+      "sha256": "0c1b940a6058c97f134b8cd8529e0658814bb9da99e4c32efd2213dae28c7748",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 34944,
+      "cellCount": 17,
+      "frameRange": {
+        "min": 2,
+        "max": 17
+      },
+      "uniqueFrameCount": 3
+    },
+    {
+      "objectIndex": 21,
+      "fileName": "diff6.ytl",
+      "sourcePath": "tile/normal/diff6.ytl",
+      "sha256": "9345845894c9501954573d5bbf6fda05853504b1ab3e6d058e06b3419f8cb38f",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 18288,
+      "cellCount": 5,
+      "frameRange": {
+        "min": 2,
+        "max": 14
+      },
+      "uniqueFrameCount": 3
+    },
+    {
+      "objectIndex": 22,
+      "fileName": "diff7.ytl",
+      "sourcePath": "tile/normal/diff7.ytl",
+      "sha256": "617c7220582f422d4cddd69914f5cade525262578786b567cb3664c62e07ab54",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 10368,
+      "cellCount": 5,
+      "frameRange": {
+        "min": 0,
+        "max": 14
+      },
+      "uniqueFrameCount": 3
+    },
+    {
+      "objectIndex": 23,
+      "fileName": "diff8.ytl",
+      "sourcePath": "tile/normal/diff8.ytl",
+      "sha256": "d033f61e3b3b62d45efc5432c02e29f36b0681a0b1213069b23b175dfa57f402",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 18288,
+      "cellCount": 10,
+      "frameRange": {
+        "min": 0,
+        "max": 14
+      },
+      "uniqueFrameCount": 2
+    },
+    {
+      "objectIndex": 24,
+      "fileName": "diff9.ytl",
+      "sourcePath": "tile/normal/diff9.ytl",
+      "sha256": "b80cf694261b4bcc520d4e2143b7b6320889a682f4d19a51513323778d9f31ae",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 25248,
+      "cellCount": 12,
+      "frameRange": {
+        "min": 1,
+        "max": 14
+      },
+      "uniqueFrameCount": 3
+    },
+    {
+      "objectIndex": 25,
+      "fileName": "diff10.ytl",
+      "sourcePath": "tile/normal/diff10.ytl",
+      "sha256": "dc48436c4b5f4e9829061d78db82fdb29d194801ae2bc9db31419ce1c91c2ef2",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 17808,
+      "cellCount": 13,
+      "frameRange": {
+        "min": 2,
+        "max": 14
+      },
+      "uniqueFrameCount": 4
+    },
+    {
+      "objectIndex": 26,
+      "fileName": "diff11.ytl",
+      "sourcePath": "tile/normal/diff11.ytl",
+      "sha256": "1b559cda8ebf4c5337c058352c78b355dc0651a397ca64f29fcb2e56d05453e9",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 10368,
+      "cellCount": 6,
+      "frameRange": {
+        "min": 0,
+        "max": 14
+      },
+      "uniqueFrameCount": 3
+    },
+    {
+      "objectIndex": 27,
+      "fileName": "diff12.ytl",
+      "sourcePath": "tile/normal/diff12.ytl",
+      "sha256": "98830c2abdb3d069ee0f4c8eb6e32920ec6b6fa84c816b9a1a3eb5025e8b0fdf",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 17808,
+      "cellCount": 4,
+      "frameRange": {
+        "min": 1,
+        "max": 14
+      },
+      "uniqueFrameCount": 2
+    },
+    {
+      "objectIndex": 28,
+      "fileName": "diff13.ytl",
+      "sourcePath": "tile/normal/diff13.ytl",
+      "sha256": "675fc92a7a757dff186216f1eb36215318137a9e25c085b7e97f8fa85d795803",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 26208,
+      "cellCount": 13,
+      "frameRange": {
+        "min": 1,
+        "max": 14
+      },
+      "uniqueFrameCount": 3
+    },
+    {
+      "objectIndex": 31,
+      "fileName": "grss1.ytl",
+      "sourcePath": "tile/normal/grss1.ytl",
+      "sha256": "1e64a36addc74734bdbb24fa368ad70740c806a6bdc823419bab8f5286aea965",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 23168,
+      "cellCount": 380,
+      "frameRange": {
+        "min": 0,
+        "max": 19
+      },
+      "uniqueFrameCount": 18
+    },
+    {
+      "objectIndex": 32,
+      "fileName": "grss2.ytl",
+      "sourcePath": "tile/normal/grss2.ytl",
+      "sha256": "4664a32df5196364953c1762d8cc947c06a054d0cdb8bce86650fe81e03969df",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 33408,
+      "cellCount": 31,
+      "frameRange": {
+        "min": 0,
+        "max": 19
+      },
+      "uniqueFrameCount": 12
+    },
+    {
+      "objectIndex": 33,
+      "fileName": "grss3.ytl",
+      "sourcePath": "tile/normal/grss3.ytl",
+      "sha256": "45a8e3a5c43e270cf1b69e61813d6116b4980afad7353bd90c1ff71cad6b2543",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 12928,
+      "cellCount": 1,
+      "frameRange": {
+        "min": 9,
+        "max": 9
+      },
+      "uniqueFrameCount": 1
+    },
+    {
+      "objectIndex": 34,
+      "fileName": "grss4.ytl",
+      "sourcePath": "tile/normal/grss4.ytl",
+      "sha256": "ad7a330f0135895e35bf6677a185fa54e3f08b7e436fae0e4eca8e158d6ae714",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 12928,
+      "cellCount": 33,
+      "frameRange": {
+        "min": 0,
+        "max": 19
+      },
+      "uniqueFrameCount": 11
+    },
+    {
+      "objectIndex": 35,
+      "fileName": "grss5.ytl",
+      "sourcePath": "tile/normal/grss5.ytl",
+      "sha256": "f80d4282cf22b38ad815ca4f3f1eb4bd785a3024d458336df2ee4baffc7374d8",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 33408,
+      "cellCount": 3,
+      "frameRange": {
+        "min": 3,
+        "max": 19
+      },
+      "uniqueFrameCount": 3
+    },
+    {
+      "objectIndex": 36,
+      "fileName": "grss6.ytl",
+      "sourcePath": "tile/normal/grss6.ytl",
+      "sha256": "89e81362db22a331b121c256fed93adfd38588bf11cac93e417ef3d6e941395c",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 23488,
+      "cellCount": 1,
+      "frameRange": {
+        "min": 14,
+        "max": 14
+      },
+      "uniqueFrameCount": 1
+    },
+    {
+      "objectIndex": 37,
+      "fileName": "grss7.ytl",
+      "sourcePath": "tile/normal/grss7.ytl",
+      "sha256": "5d20e041ed59f4dbf8b82b075d634b696a4a0b2d0c9e0da0a9fbebd5f7e3aea0",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 12928,
+      "cellCount": 1,
+      "frameRange": {
+        "min": 3,
+        "max": 3
+      },
+      "uniqueFrameCount": 1
+    },
+    {
+      "objectIndex": 38,
+      "fileName": "grss8.ytl",
+      "sourcePath": "tile/normal/grss8.ytl",
+      "sha256": "ff35fb0d5ba1d15497592552891139e3f5df71e2da549e2cf0a8b13de6ad6a68",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 23488,
+      "cellCount": 10,
+      "frameRange": {
+        "min": 4,
+        "max": 19
+      },
+      "uniqueFrameCount": 5
+    },
+    {
+      "objectIndex": 39,
+      "fileName": "grss9.ytl",
+      "sourcePath": "tile/normal/grss9.ytl",
+      "sha256": "51f818a582607a01f3ec1fb07e03c9557da69d3206ad1245d2484244d014d456",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 32768,
+      "cellCount": 10,
+      "frameRange": {
+        "min": 0,
+        "max": 18
+      },
+      "uniqueFrameCount": 8
+    },
+    {
+      "objectIndex": 40,
+      "fileName": "grss10.ytl",
+      "sourcePath": "tile/normal/grss10.ytl",
+      "sha256": "06b34e95a272095149e909b3286c462c31ed25925d7f02769aca19fc177ccfe8",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 22848,
+      "cellCount": 13,
+      "frameRange": {
+        "min": 0,
+        "max": 19
+      },
+      "uniqueFrameCount": 9
+    },
+    {
+      "objectIndex": 41,
+      "fileName": "grss11.ytl",
+      "sourcePath": "tile/normal/grss11.ytl",
+      "sha256": "69aa201666bdd6002a04f4762f2616e694ec2e783f1ec22b0430cffaf7007eb3",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 12928,
+      "cellCount": 1,
+      "frameRange": {
+        "min": 0,
+        "max": 0
+      },
+      "uniqueFrameCount": 1
+    },
+    {
+      "objectIndex": 42,
+      "fileName": "grss12.ytl",
+      "sourcePath": "tile/normal/grss12.ytl",
+      "sha256": "a252654f13d73f0fc0a05f51a05a207f4163617a3986c892c0919c16289929ae",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 22848,
+      "cellCount": 4,
+      "frameRange": {
+        "min": 1,
+        "max": 16
+      },
+      "uniqueFrameCount": 4
+    },
+    {
+      "objectIndex": 43,
+      "fileName": "grss13.ytl",
+      "sourcePath": "tile/normal/grss13.ytl",
+      "sha256": "6ba960175d03c698701776de4fa0acead52267178829f79a7558e592ad73a6b0",
+      "width": 64,
+      "height": 48,
+      "frameCount": 28,
+      "endOffset": 34048,
+      "cellCount": 9,
+      "frameRange": {
+        "min": 2,
+        "max": 16
+      },
+      "uniqueFrameCount": 5
+    }
+  ],
+  "pairStream": {
+    "coordinateOrder": "x-major storage traversal: ordinal = x * height + y",
+    "count": 3600,
+    "byteCount": 7200,
+    "sha256": "23abe630e1ceadd2c0fb323350a6df2b1c4bf28c9989fa14ef21a94ed2b3fd22",
+    "uniquePairCount": 243,
+    "dimensions": {
+      "width": 60,
+      "height": 60
+    }
+  },
+  "representativePoints": [
+    {
+      "x": 0,
+      "y": 0,
+      "storageOffset": 0,
+      "objectIndex": 0,
+      "frameIndex": 39,
+      "sourcePath": "tile/normal/hill0.ytl",
+      "fileName": "hill0.ytl",
+      "frameCount": 44
+    },
+    {
+      "x": 0,
+      "y": 59,
+      "storageOffset": 59,
+      "objectIndex": 0,
+      "frameIndex": 40,
+      "sourcePath": "tile/normal/hill0.ytl",
+      "fileName": "hill0.ytl",
+      "frameCount": 44
+    },
+    {
+      "x": 13,
+      "y": 0,
+      "storageOffset": 2340,
+      "objectIndex": 0,
+      "frameIndex": 1,
+      "sourcePath": "tile/normal/hill0.ytl",
+      "fileName": "hill0.ytl",
+      "frameCount": 44
+    },
+    {
+      "x": 16,
+      "y": 0,
+      "storageOffset": 2880,
+      "objectIndex": 20,
+      "frameIndex": 14,
+      "sourcePath": "tile/normal/diff5.ytl",
+      "fileName": "diff5.ytl",
+      "frameCount": 28
+    },
+    {
+      "x": 31,
+      "y": 0,
+      "storageOffset": 5580,
+      "objectIndex": 0,
+      "frameIndex": 5,
+      "sourcePath": "tile/normal/hill0.ytl",
+      "fileName": "hill0.ytl",
+      "frameCount": 44
+    },
+    {
+      "x": 59,
+      "y": 59,
+      "storageOffset": 10679,
+      "objectIndex": 31,
+      "frameIndex": 18,
+      "sourcePath": "tile/normal/grss1.ytl",
+      "fileName": "grss1.ytl",
+      "frameCount": 28
+    }
+  ],
+  "rawCodeRanges": [
+    {
+      "id": "FUN_00469330 selector core",
+      "byteRange": "0x004693c8-0x004694f8 (end exclusive)",
+      "bodySha256": "ae72865db1f2d596ba79009cf6343c0263c9036947674fbdd759ef757c19279e"
+    },
+    {
+      "id": "FUN_00469510 sibling selector core",
+      "byteRange": "0x004695a4-0x00469624 (end exclusive)",
+      "bodySha256": "06b7173166d619c146e02b020bc9214dea2401aa21e22b8279967221dc0e9967"
+    }
+  ],
+  "evidencePoints": [
+    {
+      "va": "0x00469351",
+      "rawOffset": "0x00069351",
+      "bytes": "8b 8e a0 2d 00 00 0f bf c7 3b c1 7d 47 66 85 ed 7c 42 8b 96 a4 2d 00 00 0f bf cd 3b ca 7d 35",
+      "meaning": "FUN_00469330 bounds signed x/y against map +0x2da0/+0x2da4"
+    },
+    {
+      "va": "0x004693ce",
+      "rawOffset": "0x000693ce",
+      "bytes": "8d 94 80 e1 19 00 00 8d 84 80 65 1d 00 00 0f bf 6c 24 24 8d 14 d2 8d 04 c0 0f bf db 8d 14 91 8d 0c 81 66 0f b6 14 32 66 0f b6 04 31",
+      "meaning": "x*180+y reads map +0x3a3a4 object byte then map +0x42234 frame byte"
+    },
+    {
+      "va": "0x00469406",
+      "rawOffset": "0x00069406",
+      "bytes": "8d 34 7f 8d 54 24 14 c1 e6 07 2b f7 51 c1 e6 03",
+      "meaning": "object byte is scaled to loader record stride 0x0bf8"
+    },
+    {
+      "va": "0x0046941c",
+      "rawOffset": "0x0006941c",
+      "bytes": "8b 86 00 e0 bc 00 8d 4c 24 28 51 8b 8e fc df bc 00",
+      "meaning": "selected loader record supplies copied sprite header fields before draw"
+    },
+    {
+      "va": "0x004694c6",
+      "rawOffset": "0x000694c6",
+      "bytes": "50 0f bf 44 24 30 c1 e2 07 8b 9e ec eb bc 00 2b d7",
+      "meaning": "selected record payload pointer is read from record +0x0bf4"
+    },
+    {
+      "va": "0x004695bf",
+      "rawOffset": "0x000695bf",
+      "bytes": "66 0f b6 14 30 8d 84 9b 65 1d 00 00 0f bf fa",
+      "meaning": "FUN_00469510 repeats the object-byte read"
+    },
+    {
+      "va": "0x004695e2",
+      "rawOffset": "0x000695e2",
+      "bytes": "66 0f b6 04 31 8d 34 7f",
+      "meaning": "FUN_00469510 repeats the frame-byte read and record scale"
+    }
+  ],
+  "unresolvedBoundary": "This confirms source object/frame selection only. It does not assign passability, elevation, terrain/world meaning, pixel placement, or product renderer parity."
+}
