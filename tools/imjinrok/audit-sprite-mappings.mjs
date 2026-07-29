@@ -27,6 +27,7 @@ import { extractK01JapaneseFarmerFrames } from "./extract-k01-japanese-farmer-fr
 import { extractK01KoreanFarmerCoreFrames } from "./extract-k01-korean-farmer-core-frames.mjs";
 import { extractK01FarmerResourceBranchFrames } from "./extract-k01-farmer-resource-branch-frames.mjs";
 import { extractK01FarmerResourceWorkFrames } from "./extract-k01-farmer-resource-work-frames.mjs";
+import { extractK01FarmerState4FallbackFrames } from "./extract-k01-farmer-state4-fallback-frames.mjs";
 import { extractK01SpecialUnitAnimations } from "./extract-k01-special-unit-animations.mjs";
 import { extractK01NormalReinforcementAnimationBatch } from "./extract-k01-normal-reinforcement-animation-batch.mjs";
 import { extractMissionPortraitMapping } from "./extract-mission-portrait-mapping.mjs";
@@ -97,6 +98,10 @@ const k01FarmerResourceWorkFramesPath = join(
   repositoryRoot,
   "tools/imjinrok/extract-k01-farmer-resource-work-frames.mjs",
 );
+const k01FarmerState4FallbackFramesPath = join(
+  repositoryRoot,
+  "tools/imjinrok/extract-k01-farmer-state4-fallback-frames.mjs",
+);
 const k01SpecialUnitAnimationsPath = join(
   repositoryRoot,
   "tools/imjinrok/extract-k01-special-unit-animations.mjs",
@@ -140,6 +145,7 @@ const k01JapaneseFarmerFrames = extractK01JapaneseFarmerFrames();
 const k01KoreanFarmerCoreFrames = extractK01KoreanFarmerCoreFrames();
 const k01FarmerResourceBranchFrames = extractK01FarmerResourceBranchFrames();
 const k01FarmerResourceWorkFrames = extractK01FarmerResourceWorkFrames();
+const k01FarmerState4FallbackFrames = extractK01FarmerState4FallbackFrames();
 const k01SpecialUnitAnimations = extractK01SpecialUnitAnimations();
 const k01NormalReinforcementAnimationBatch = extractK01NormalReinforcementAnimationBatch();
 const buildingStatePilot = extractBuildingStatePilot();
@@ -223,11 +229,11 @@ const portraitAudit = buildPortraitAudit();
 findings.push(...portraitAudit.findings);
 
 const report = {
-  schemaVersion: 2,
+  schemaVersion: 3,
   policy: {
     semanticStatus: "mixed",
     acceptedEvidence:
-      "All 95 original type identities, uniquely matched current visual source identities, SPEECH portraits, Korean HQ and signal-beacon body states, K01 opening classes 48/49/51/58/60/63 catalog base frame 7 bindings, K01 classes 2/3/4/7/11/12/13/16/31/82 normal core states in their documented limits, class-7/31 +0x47a!=0 carry/carry-idle states, and class-7/31 resource-work states 10/11/16 are statically proven in their documented scopes. Generic project gather intentionally adapts only original state 10; it neither maps project resource names to selector identities nor establishes product mappings or human meanings for states 11/16. Class-14 Japanese turtle-tank idle/move/attack grid states plus its non-theme 16-ring turn and creation-default transient destruction contracts, and the K01 heroes' idle, movement, attack, and death frame/direction mappings are statically proven in their documented scopes.",
+      "All 95 original type identities, uniquely matched current visual source identities, SPEECH portraits, Korean HQ and signal-beacon body states, K01 opening classes 48/49/51/58/60/63 catalog base frame 7 bindings, K01 classes 2/3/4/7/11/12/13/16/31/82 normal core states in their documented limits, class-7/31 creation-default state-4 fallback to state-8 idle, +0x47a!=0 carry/carry-idle states, and resource-work states 10/11/16 plus scoped raw state-16 cadence numeric boundaries are statically proven in their documented scopes. Generic project gather intentionally adapts original state 10, while class-7 project build/repair intentionally adapt original state 11 source layouts; these adapters neither map project resource names to selector identities nor establish original human meanings. Class-14 Japanese turtle-tank idle/move/attack grid states plus its non-theme 16-ring turn and creation-default transient destruction contracts, and the K01 heroes' idle, movement, attack, and death frame/direction mappings are statically proven in their documented scopes.",
     parityUse:
       "A unique source identity proves the original name and SPR binding only. Only explicitly listed frame scopes may be used for animation parity; all other direction, action, layer, and body mappings remain quarantined.",
   },
@@ -249,6 +255,7 @@ const report = {
     sourceFileRecord(k01KoreanFarmerCoreFramesPath),
     sourceFileRecord(k01FarmerResourceBranchFramesPath),
     sourceFileRecord(k01FarmerResourceWorkFramesPath),
+    sourceFileRecord(k01FarmerState4FallbackFramesPath),
     sourceFileRecord(k01SpecialUnitAnimationsPath),
     sourceFileRecord(k01NormalReinforcementAnimationBatchPath),
     sourceFileRecord(buildingStatePilotPath),
@@ -454,6 +461,7 @@ function buildVisualStaticEvidence(visual, identityCandidates) {
     const farmer = k01KoreanFarmerCoreFrames;
     const carriedStates = k01FarmerResourceBranchFrames.states[7];
     const resourceWork = farmerResourceWorkAuditEvidence(7);
+    const creationDefaultState4Fallback = farmerState4FallbackAuditEvidence(7);
     return {
       status: "mixed",
       identity: "static-proven",
@@ -465,13 +473,15 @@ function buildVisualStaticEvidence(visual, identityCandidates) {
       flags: farmer.identity.typeFlags,
       animationStateMapping: "static-proven-core-state-frames",
       confirmedAnimationScope:
-        "project idle, move/walk, and death use the statically recovered K01 source-created class-7 +0x47a==0 state 8, 1, and 7 frames, direction order, and mirroring; generic project gather intentionally adapts original state 10 only",
+        "project idle, move/walk, and death use the statically recovered K01 source-created class-7 +0x47a==0 state 8, 1, and 7 frames, direction order, and mirroring; creation-default state 4 falls through to the state-8 idle slot/frame/mirror; generic project gather intentionally adapts original state 10 and project build/repair intentionally adapt original state 11 source layouts",
       stateFrameRanges: {
         idle: farmer.states.idle.frameRange,
         move: farmer.states.move.frameRange,
         walk: farmer.states.move.frameRange,
         death: farmer.states.death.frameRange,
         gather: resourceWork.originalStates[10].frameRange,
+        build: resourceWork.originalStates[11].frameRange,
+        repair: resourceWork.originalStates[11].frameRange,
       },
       stateSources: {
         idle: farmer.states.idle.sourcePath,
@@ -479,14 +489,19 @@ function buildVisualStaticEvidence(visual, identityCandidates) {
         walk: farmer.states.move.sourcePath,
         death: farmer.states.death.sourcePath,
         gather: resourceWork.originalStates[10].sourcePath,
+        build: resourceWork.originalStates[11].sourcePath,
+        repair: resourceWork.originalStates[11].sourcePath,
       },
       directionFrames: {
         gather: resourceWork.originalStates[10].directionFrames,
+        build: resourceWork.originalStates[11].directionFrames,
+        repair: resourceWork.originalStates[11].directionFrames,
       },
       nonzeroResourceBranch: farmerResourceBranchAuditEvidence(carriedStates),
+      creationDefaultState4Fallback,
       resourceWork,
       unresolvedScope:
-        "state 4 attack, original states 11/16 product mappings and human-readable meanings, selector resource identities, exact timing/FPS, pivot, stats, commands, behavior, later runtime mutation, and death lifetime remain unresolved; build/repair remain project source-layout adaptations",
+        "later state-4 mutation, reachability, and combat meaning; original state 16 product mapping and human-readable meanings for states 10/11/16; selector resource identities; exact timing/FPS, pivot, stats, commands, behavior, and death lifetime remain unresolved. Build/repair remain project source-layout adaptations, not original state-11 semantic mappings.",
     };
   }
 
@@ -610,12 +625,13 @@ function buildVisualStaticEvidence(visual, identityCandidates) {
     const states = k01JapaneseFarmerFrames.states;
     const carriedStates = k01FarmerResourceBranchFrames.states[31];
     const resourceWork = farmerResourceWorkAuditEvidence(31);
+    const creationDefaultState4Fallback = farmerState4FallbackAuditEvidence(31);
     return {
       status: "mixed",
       ...identityEvidence,
       animationStateMapping: "static-proven-core-state-frames",
       confirmedAnimationScope:
-        "project idle and move/walk and death use the statically recovered class-31 state 8, 1, and 7 frames, direction order, and mirroring; generic project gather intentionally adapts original state 10 only; state 4 attack is deliberately absent and the existing runtime fallback selects idle",
+        "project idle and move/walk and death use the statically recovered class-31 state 8, 1, and 7 frames, direction order, and mirroring; creation-default state 4 falls through to the state-8 idle slot/frame/mirror; generic project gather intentionally adapts original state 10 only, and no build/repair product state is added",
       stateFrameRanges: {
         idle: stateFrameRange(states.idle),
         move: stateFrameRange(states.move),
@@ -638,9 +654,10 @@ function buildVisualStaticEvidence(visual, identityCandidates) {
         duplicateExplanation:
           "The original class-31 +0x47a!=0 state 8 idle and state 1 move configurations both select the same 200..239 directional clip; this is static evidence, not an unverified project alias.",
       }),
+      creationDefaultState4Fallback,
       resourceWork,
       unresolvedScope:
-        "state 4 attack, original states 11/16 product mappings and human-readable meanings, selector resource identities, exact timing, pivot, stats, commands, behavior, later runtime mutation, and death lifetime remain unresolved",
+        "later state-4 mutation, reachability, and combat meaning; original states 11/16 product mappings and human-readable meanings for states 10/11/16; selector resource identities; exact timing, pivot, stats, commands, behavior, and death lifetime remain unresolved",
     };
   }
 
@@ -1109,7 +1126,7 @@ function hasStaticDirectionEvidence(visualId, scope, stateName) {
     return ["idle", "move", "walk", "gather", "carry", "carry-idle", "death"].includes(stateName);
   }
   if (visualId === "villager-korean-farmer") {
-    return ["idle", "move", "walk", "gather", "carry", "carry-idle", "death"].includes(stateName);
+    return ["idle", "move", "walk", "gather", "build", "repair", "carry", "carry-idle", "death"].includes(stateName);
   }
   if (visualId === "japanese-samurai") {
     return ["idle", "move", "walk", "attack", "death"].includes(stateName);
@@ -1182,30 +1199,84 @@ function farmerResourceWorkAuditEvidence(internalClass) {
   if (!states) {
     throw new Error(`farmer resource-work extractor is missing class ${internalClass}`);
   }
+  const originalStates = Object.fromEntries(
+    Object.entries(states).map(([state, evidence]) => [
+      state,
+      {
+        sourcePath: k01FarmerResourceWorkFrames.identities[internalClass].sourcePath,
+        frameRange: stateFrameRange(evidence),
+        directionFrames: resourceWorkDirectionalFrameEvidence(evidence),
+      },
+    ]),
+  );
+  const projectAdapters = [
+    resourceWorkProjectAdapter(["gather"], 10, originalStates),
+    ...(internalClass === 7
+      ? [resourceWorkProjectAdapter(["build", "repair"], 11, originalStates)]
+      : []),
+  ];
   return {
     analysisStatus: k01FarmerResourceWorkFrames.analysisStatus,
     reproductionStatus: k01FarmerResourceWorkFrames.reproductionStatus,
-    originalStates: Object.fromEntries(
-      Object.entries(states).map(([state, evidence]) => [
-        state,
-        {
-          sourcePath: k01FarmerResourceWorkFrames.identities[internalClass].sourcePath,
-          frameRange: stateFrameRange(evidence),
-          directionFrames: resourceWorkDirectionalFrameEvidence(evidence),
-        },
-      ]),
-    ),
-    projectAdapter: {
-      projectState: "gather",
-      originalAnimationState: 10,
-      implementationStatus: "partially-implemented",
-      confirmedAnimationScope:
-        "generic project gather intentionally adapts the recovered original state-10 source layout only",
-      boundary:
-        "This adapter does not map project resource names to selector identities and does not establish product mappings or human-readable meanings for original states 11/16.",
-    },
+    implementationStatus: k01FarmerResourceWorkFrames.implementationStatus,
+    originalStates,
+    projectAdapters,
     unresolvedScope:
-      "Original states 11/16 have no product mapping; human-readable meanings for states 10/11/16, selector resource identities, the state-16 condition, timing/FPS, pivot, stats, behavior, and the complete resource lifecycle remain unresolved.",
+      "The raw state-16 fast-start/cadence numeric boundary is confirmed only for raw action substate 8. Human-readable meanings for states 10/11/16, selector resource identities, raw state-16 human meaning, timing/FPS, pivot, stats, behavior, and the complete resource lifecycle remain unresolved.",
+  };
+}
+
+function resourceWorkProjectAdapter(projectStates, originalAnimationState, originalStates) {
+  const sourceLayout = originalStates[originalAnimationState];
+  if (!sourceLayout) {
+    throw new Error(`farmer resource-work state ${originalAnimationState} is missing source layout evidence`);
+  }
+  return {
+    projectStates,
+    originalAnimationState,
+    implementationStatus: "intentional-source-layout-adapter",
+    sourceLayout,
+    confirmedAnimationScope:
+      `project ${projectStates.join("/")} intentionally adapt${projectStates.length === 1 ? "s" : ""} the recovered original state-${originalAnimationState} source layout only`,
+    boundary:
+      "This adapter does not map project resource names to selector identities and does not establish an original human-readable meaning for the mapped state.",
+  };
+}
+
+function farmerState4FallbackAuditEvidence(internalClass) {
+  const initializer = k01FarmerState4FallbackFrames.initializer.classes.find(
+    (candidate) => candidate.internalClass === internalClass,
+  );
+  if (!initializer) {
+    throw new Error(`farmer state-4 fallback extractor is missing class ${internalClass}`);
+  }
+  const directionFrames = k01FarmerState4FallbackFrames.testVectors
+    .filter((vector) => vector.internalClass === internalClass && vector.phase === 0)
+    .map(({ facing, direction, frameIndex, mirrorX }) => ({
+      facing,
+      direction,
+      frameBase: frameIndex,
+      frameRange: [frameIndex, frameIndex + 7],
+      mirrorX,
+    }));
+  return {
+    analysisStatus: k01FarmerState4FallbackFrames.analysisStatus,
+    reproductionStatus: k01FarmerState4FallbackFrames.reproductionStatus,
+    condition: {
+      sourceCreated: true,
+      typeFlagsHighBit: k01FarmerState4FallbackFrames.state4.classGate.highBit,
+      creationWord144: k01FarmerState4FallbackFrames.initializer.result.value,
+      initializerRange: initializer.initializerRange,
+    },
+    originalVisualState: 4,
+    fallbackOriginalVisualState: 8,
+    dispatch: k01FarmerState4FallbackFrames.state4,
+    sourcePath: k01FarmerState4FallbackFrames.testVectors.find(
+      (vector) => vector.internalClass === internalClass,
+    )?.sourcePath,
+    directionFrames,
+    productBoundary:
+      "No product attack clip is inferred. This evidence covers only the source-created creation-default fallback; later mutation, reachability, and combat meaning remain unresolved.",
   };
 }
 
