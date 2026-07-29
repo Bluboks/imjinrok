@@ -35,7 +35,7 @@ export function findPathForUnit(
 ): GridPoint[] | null {
   const start = toTilePoint(unit.position);
   const requestedGoal = toTilePoint(target);
-  const blockedTiles = getEntityBlockingTiles(state, unit.id);
+  const blockedTiles = getEntityBlockingTiles(state, unit.id, options.allowPartial !== true);
   const startKey = toTileKey(start);
 
   blockedTiles.delete(startKey);

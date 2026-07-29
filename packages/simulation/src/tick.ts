@@ -317,7 +317,7 @@ function advanceUnitMovement(
     return;
   }
 
-  if (!canUnitOccupyPosition(state, unit, target, movementReservation) || !reserveUnitPosition(movementReservation, unit, target)) {
+  if (!canUnitOccupyPosition(state, unit, target) || !reserveUnitPosition(movementReservation, unit, target)) {
     repathBlockedMovementWaypoint(state, unit);
     return;
   }
@@ -365,7 +365,9 @@ function repathBlockedMovementWaypoint(state: WorldState, unit: UnitState): void
     return;
   }
 
-  const path = findPathForUnit(state, unit, destination);
+  const path = findPathForUnit(state, unit, destination, {
+    allowPartial: unit.scriptedBehavior?.allowPartialPath === true,
+  });
 
   if (!path) {
     return;
@@ -416,13 +418,14 @@ function advanceMovementWaypoint(state: WorldState, unit: UnitState): void {
 function completeTerminalTravelOrder(state: WorldState, unit: UnitState, pathExhausted: boolean): void {
   const order = unit.currentOrder;
 
-  if ((order?.type === "move" || order?.type === "attack-move") && isAtOrderTarget(unit, order.target)) {
-    delete unit.currentOrder;
+  if (pathExhausted && order?.type === "move" && order.followUpAttackTarget && !unit.movementTarget && !unit.movementPath) {
+    applyFollowUpAttackTarget(state, unit, order.followUpAttackTarget);
     return;
   }
 
-  if (pathExhausted && order?.type === "move" && order.followUpAttackTarget && !unit.movementTarget && !unit.movementPath) {
-    applyFollowUpAttackTarget(state, unit, order.followUpAttackTarget);
+  if ((order?.type === "move" || order?.type === "attack-move") && isAtOrderTarget(unit, order.target)) {
+    delete unit.currentOrder;
+    return;
   }
 }
 

@@ -47,6 +47,20 @@ test("head-on swaps are denied while both source footprints remain occupied", ()
   assertUniqueGroundContactTiles(state);
 });
 
+test("a fast follower cannot enter a slow leader's rounded footprint before it actually leaves", () => {
+  const state = createCollisionState();
+  const leader = addUnit(state, "a-leader", { x: 1, y: 3 });
+  const follower = addUnit(state, "b-follower", { x: 0, y: 3 });
+  orderMove(leader, { x: 2, y: 3 }, 1);
+  orderMove(follower, { x: 1, y: 3 }, 100);
+
+  for (let tick = 0; tick < 12; tick += 1) {
+    advanceWorldTick(state);
+    assertUniqueGroundContactTiles(state);
+    assert.equal(Math.round(follower.position.x) === 1 && Math.round(leader.position.x) === 1, false);
+  }
+});
+
 test("a blocked waypoint remains pending and re-enters after its blocker is removed", () => {
   const state = createCollisionState();
   const mover = addUnit(state, "mover", { x: 1, y: 3 });
