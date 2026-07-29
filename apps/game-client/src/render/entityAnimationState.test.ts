@@ -26,6 +26,8 @@ const unit = (
 const carryingFood = { kind: "food", amount: 1 } as const;
 const moveOrder = { type: "move", target: { x: 2, y: 3 } } as const;
 const gatherOrder = { type: "gather", resourceId: "rice", target: { x: 2, y: 3 } } as const;
+const repairOrder = { type: "repair", targetUnitId: "damaged-building" } as const;
+const buildOrder = { type: "build", building: "house", target: { x: 2, y: 3 } } as const;
 
 test("carried resources select carried movement and idle states independently of order type", () => {
   const visual = visualWithStates("carry", "carry-idle", "move", "walk", "gather", "idle");
@@ -58,6 +60,26 @@ test("carried-resource state selection falls back to existing movement and idle 
     "move",
   );
   assert.equal(getEntityAnimationStateKey(unit({ carriedResource: carryingFood }), visual), "idle");
+});
+
+test("stationary repair and build states take priority over carried-resource idle states", () => {
+  const visual = visualWithStates("repair", "build", "carry", "carry-idle", "move", "walk", "idle");
+
+  assert.equal(
+    getEntityAnimationStateKey(unit({ carriedResource: carryingFood, currentOrder: repairOrder }), visual),
+    "repair",
+  );
+  assert.equal(
+    getEntityAnimationStateKey(unit({ carriedResource: carryingFood, currentOrder: buildOrder }), visual),
+    "build",
+  );
+  assert.equal(
+    getEntityAnimationStateKey(
+      unit({ carriedResource: carryingFood, currentOrder: buildOrder, movementTarget: { x: 2, y: 3 } }),
+      visual,
+    ),
+    "carry",
+  );
 });
 
 test("empty carried-resource records retain movement and gather selection", () => {

@@ -34,6 +34,14 @@ export function getEntityAnimationStateKey(
   const isMoving = unit.movementTarget !== undefined || (unit.movementPath?.length ?? 0) > 0;
   const isCarryingResource = (unit.carriedResource?.amount ?? 0) > 0;
 
+  if (!isMoving && unit.currentOrder?.type === "repair") {
+    candidates.push("repair", "build");
+  }
+
+  if (!isMoving && unit.currentOrder?.type === "build") {
+    candidates.push("build");
+  }
+
   if (isCarryingResource) {
     if (isMoving) {
       candidates.push("carry", "move", "walk");
@@ -50,11 +58,11 @@ export function getEntityAnimationStateKey(
     }
   }
 
-  if (unit.currentOrder?.type === "repair") {
+  if (isMoving && unit.currentOrder?.type === "repair") {
     candidates.push("repair", "build");
   }
 
-  if (unit.currentOrder?.type === "build") {
+  if (isMoving && unit.currentOrder?.type === "build") {
     candidates.push("build");
   }
 
