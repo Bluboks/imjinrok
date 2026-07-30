@@ -12,7 +12,7 @@ const tileWidth = 64;
 const tileHeight = 32;
 const sourceHeight = 48;
 
-test("K01 emitted source PNG alpha requires a footprint underlay and rejects the raw delta as a web y axis", (t) => {
+test("K01 selected-frame mosaic has measured gaps while its corrected source-art coverage pass fills the terrain domain", (t) => {
   const artifact = readArtifact();
   const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
   const assetByPair = new Map(manifest.assets.map((asset) => [`${asset.stem}:${asset.frame}`, asset]));
@@ -22,29 +22,22 @@ test("K01 emitted source PNG alpha requires a footprint underlay and rejects the
   for (const asset of manifest.assets) {
     alphaByPair.set(`${asset.stem}:${asset.frame}`, readPngAlpha(resolve(assetDirectory, asset.fileName)));
   }
-  const underlayAssetKey = manifest.productRenderingAdapter?.webPlacement?.underlayAssetKey;
-  assert.equal(underlayAssetKey, "k01-source:grss1:0000", "K01 underlay must be an explicit source-art asset contract");
-  const underlayAsset = assetByKey.get(underlayAssetKey);
-  assert.ok(underlayAsset, "K01 source-art underlay must be part of the emitted K01 catalog");
+  const underlayAsset = assetByKey.get("k01-source:grss1:0000");
+  assert.ok(underlayAsset);
   const underlayAlpha = alphaByPair.get(`${underlayAsset.stem}:${underlayAsset.frame}`);
-  assert.ok(underlayAlpha, "K01 source-art underlay must have an emitted PNG alpha mask");
+  assert.ok(underlayAlpha);
+  const sourceRaster = measureCoverage(artifact, assetByPair, alphaByPair, null, (x, y) => rawDeltaY(artifact, x, y));
+  const adaptedRaster = measureCoverage(artifact, assetByPair, alphaByPair, underlayAlpha, (x, y) => rawDeltaY(artifact, x, y));
 
-  const legacy = measureCoverage(artifact, assetByPair, alphaByPair, underlayAlpha, (x, y) => rawDeltaY(artifact, x, y));
-  const product = measureCoverage(artifact, assetByPair, alphaByPair, underlayAlpha, () => 0);
-
-  // The exact raw stream has 735 delta-bearing cells. Treating those cells as
-  // web-y translations introduces a discontinuity at every mixed low-nibble
-  // neighbor boundary, while the ground-contact adapter has none.
-  assert.equal(legacy.rawDeltaCellCount, 735);
-  assert.equal(legacy.mixedRawDeltaNeighborCount, 798);
-  assert.equal(product.mixedRawDeltaNeighborCount, 0);
-  assert.equal(legacy.uncoveredFootprintPixels, 153600, "source PNG alpha alone must expose logical terrain holes");
-  assert.equal(product.uncoveredFootprintPixels, 161043, "a neutral web placement does not make alpha-bearing source frames opaque");
-  assert.equal(product.uncoveredFootprintPixelsWithUnderlay, 0, "terrain footprint underlay must cover every logical K01 diamond pixel");
+  assert.equal(manifest.productRenderingAdapter?.imageGeometry?.footprintAnchor?.y, 0);
+  assert.equal(sourceRaster.rawDeltaCellCount, 735);
+  assert.equal(sourceRaster.mixedRawDeltaNeighborCount, 798);
+  assert.equal(sourceRaster.uncoveredFootprintPixels, 74771, "selected source frames retain measured alpha gaps in the corrected logical diamond coverage probe");
+  assert.equal(adaptedRaster.uncoveredFootprintPixels, 0, "the explicit source-art coverage pass must cover every corrected K01 terrain-domain pixel");
 
   t.diagnostic(JSON.stringify({
-    legacy: summarizeCoverage(legacy),
-    product: summarizeCoverage(product),
+    sourceRaster: summarizeCoverage(sourceRaster),
+    adaptedRaster: summarizeCoverage(adaptedRaster),
   }));
 });
 
@@ -60,8 +53,8 @@ function measureCoverage(artifact, assetByPair, alphaByPair, underlayAlpha, offs
   const pairBytes = Buffer.from(artifact.pairBytesBase64, "base64");
   const canvas = createCanvas(width, height);
   const sourceAlpha = new Uint8Array(canvas.width * canvas.height);
+  const coverageAlpha = new Uint8Array(canvas.width * canvas.height);
   const footprint = new Uint8Array(canvas.width * canvas.height);
-  const terrainUnderlay = new Uint8Array(canvas.width * canvas.height);
   let rawDeltaCellCount = 0;
   let mixedRawDeltaNeighborCount = 0;
 
@@ -76,9 +69,9 @@ function measureCoverage(artifact, assetByPair, alphaByPair, underlayAlpha, offs
       assert.ok(alpha, `K01 map cell ${x},${y} must have an emitted PNG alpha mask`);
       const offsetY = offsetYForCell(x, y);
       if (offsetY !== 0) rawDeltaCellCount += 1;
-      compositeAlpha(sourceAlpha, canvas, alpha, cellCenter(canvas, x, y).x - 32, cellCenter(canvas, x, y).y - 16 + offsetY);
-      fillDiamond(footprint, canvas, cellCenter(canvas, x, y));
-      compositeAlpha(terrainUnderlay, canvas, underlayAlpha, cellCenter(canvas, x, y).x - 32, cellCenter(canvas, x, y).y - 16);
+      compositeAlpha(sourceAlpha, canvas, alpha, cellCenter(canvas, x, y).x - 32, cellCenter(canvas, x, y).y + offsetY);
+      if (underlayAlpha) compositeAlpha(coverageAlpha, canvas, underlayAlpha, cellCenter(canvas, x, y).x - 32, cellCenter(canvas, x, y).y + offsetY);
+      fillDiamond(footprint, canvas, cellCenter(canvas, x, y), offsetY);
 
       for (const neighbor of [{ x: x + 1, y }, { x, y: y + 1 }]) {
         if (neighbor.x < width && neighbor.y < height && offsetY !== offsetYForCell(neighbor.x, neighbor.y)) {
@@ -90,12 +83,10 @@ function measureCoverage(artifact, assetByPair, alphaByPair, underlayAlpha, offs
 
   let footprintPixels = 0;
   let uncoveredFootprintPixels = 0;
-  let uncoveredFootprintPixelsWithUnderlay = 0;
   for (let index = 0; index < footprint.length; index += 1) {
     if (footprint[index] !== 1) continue;
     footprintPixels += 1;
-    if (sourceAlpha[index] === 0) uncoveredFootprintPixels += 1;
-    if (terrainUnderlay[index] === 0) uncoveredFootprintPixelsWithUnderlay += 1;
+    if (sourceAlpha[index] === 0 && coverageAlpha[index] === 0) uncoveredFootprintPixels += 1;
   }
 
   return {
@@ -103,7 +94,6 @@ function measureCoverage(artifact, assetByPair, alphaByPair, underlayAlpha, offs
     mixedRawDeltaNeighborCount,
     footprintPixels,
     uncoveredFootprintPixels,
-    uncoveredFootprintPixelsWithUnderlay,
   };
 }
 
@@ -138,9 +128,9 @@ function compositeAlpha(target, canvas, alpha, left, top) {
   }
 }
 
-function fillDiamond(target, canvas, center) {
+function fillDiamond(target, canvas, center, offsetY) {
   const left = center.x - tileWidth / 2;
-  const top = center.y - tileHeight / 2;
+  const top = center.y + offsetY;
   for (let y = 0; y < tileHeight; y += 1) {
     for (let x = 0; x < tileWidth; x += 1) {
       if (Math.abs(x + 0.5 - tileWidth / 2) / (tileWidth / 2) + Math.abs(y + 0.5 - tileHeight / 2) / (tileHeight / 2) > 1) continue;

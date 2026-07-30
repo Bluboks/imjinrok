@@ -238,6 +238,7 @@ export function createImjinrokMapScaffold(mapId: string): MapDefinition | null {
     const groundLayer = map.layers[0];
     if (!groundLayer) throw new Error("K01 scaffold has no ground layer for source tile visual assignment.");
     applyK01SourceTileVisuals(groundLayer.tiles, map.width, map.height);
+    map.terrainCompositionProfile = "source-raster-underlay";
     map.fogVisualProfileId = "imjinrok-source-fog-composite";
     applyK01SourceFogVisuals(groundLayer.tiles, map.width, map.height);
   }

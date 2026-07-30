@@ -32,6 +32,7 @@ const PLACEMENT_LOOKUP_OFFSET = 0x147d5;
 const PLACEMENT_SELECTOR_STRIDE = 0x1fa4;
 
 const RAW_CODE_RANGES = [
+  ["FUN_00466f20 source full-map raster loop", 0x00466f20, 0x004676e0, "bafebb7ea1dd47236aaac78fdb969ea463fbf667224fa49e4fdb88dad27c8dfc"],
   ["FUN_00464cc0 complete body", 0x00464cc0, 0x00464dde, "40b41b7ce95c3e7516c0bf2f6d01f1e86bf2848ed0ec5256f63d7858f55a1d10"],
   ["FUN_00469330 complete body", 0x00469330, 0x0046950c, "f1a131328d7fe0c85e26b90d4c7d28371f6f9ae41bd56f03dab68c9ab8510ec7"],
   ["FUN_00469510 complete body", 0x00469510, 0x00469917, "1d05579e1c2179989bd1441cb54510de8df4ecb24157dac496fda7f3c6c8f9ce"],
@@ -39,6 +40,9 @@ const RAW_CODE_RANGES = [
 ].map(([id, start, endExclusive, digest]) => ({ id, start, endExclusive, sha256: digest }));
 
 const EVIDENCE_POINTS = [
+  [0x00466f20, "83 ec 30 53 55 56 8b f1 57 8b 9e a4 2d 00 00 8b ae a0 2d 00 00 c1 e3 05 81 c3 c8 00 00 00 c1 e5", "FUN_00466f20 derives width*32+200 source-raster dimensions from map width/height."],
+  [0x0046703f, "8b c5 99 2b c2 8b d0 d1 fa 89 54 24 1c 33 c0 eb 04 8b 54 24 1c 0f bf 4c 24 10 8b f8 2b f9 8d 2c 08 c1 e7 05 c1 e5 04 03 fa 81 c5 c8 00 00 00", "FUN_00466f20 inner body forms x/y isometric screen coordinates and the +200 vertical origin before its draw dispatch."],
+  [0x00467160, "e8 ab 23 00 00", "FUN_00466f20 calls FUN_00469510 after pushing its bounded screen and cell arguments."],
   [0x00464cc6, "8b 4c 24 14 66 85 c9 7c 23 8b 87 a0 2d 00 00 0f bf f1 3b f0 7d 16 8b 44 24 18 66 85 c0 7c 0d", "FUN_00464cc0 reads signed-word x/y stack arguments and rejects negative or map-boundary coordinates."],
   [0x00464d00, "e8 4b 89 00 00 8d 84 b6 e9 20 00 00 8b 6c 24 24 33 d2 8d 04 c0 8d 0c 83 8b c6 2b c3 8a 14 39", "FUN_00464cc0 calls FUN_0046d650 and reads map +0x4a0c4+x*180+y as the runtime WORD-table index."],
   [0x00464d27, "8d 14 33 c1 e0 05 c1 e2 04 89 01 89 55 00", "FUN_00464cc0 writes (x-y)<<5 and (x+y)<<4 before the relative component."],
@@ -63,6 +67,7 @@ const EVIDENCE_POINTS = [
 ].map(([va, bytes, meaning]) => ({ va, bytes, meaning }));
 
 const FUNCTION_SPECS = [
+  { entry: "0x00466f20", bodyRange: "0x00466f20-0x004676df", bodySize: 1984, instructionCount: 574, instructionSha256: "b37afc8a5141d906b4b83b08c76ecdc87bdfe43a8f1b9a9a17c4fe095d434e75", callees: ["0x00413fb0", "0x0041d420", "0x0041fdb0", "0x00438aa0", "0x0044aaf0", "0x0044ae80", "0x0044aef0", "0x00469000", "0x00469180", "0x00469510", "0x00469920", "0x00469a50", "0x00469df0", "0x0046a190", "0x004ad7e0", "0x004adcb6"] },
   { entry: "0x00464cc0", bodyRange: "0x00464cc0-0x00464ddd", bodySize: 286, instructionCount: 103, instructionSha256: "0df728460a1833f756c0164f3968eda5de7312a64e87c52edc98aa5a33566781", callees: ["0x0046d650"] },
   { entry: "0x00469330", bodyRange: "0x00469330-0x0046950b", bodySize: 476, instructionCount: 150, instructionSha256: "f94f79c8a00da772f524665f0df56ba09b9bea8a861bd67d99fec4c7b30ec099", callees: ["0x0044af50", "0x0044afa0", "0x00454390", "0x0046d650"] },
   { entry: "0x00469510", bodyRange: "0x00469510-0x00469916", bodySize: 1031, instructionCount: 341, instructionSha256: "28849833f557b0f4863c88318828d72b8039639450bd42b5623927dd8ef036e3", callees: ["0x0044af50", "0x0044afa0", "0x00454250", "0x004542e0", "0x004547c0", "0x00454960", "0x0046d650"] },
@@ -71,7 +76,8 @@ const FUNCTION_SPECS = [
 
 const REQUIRED_CALL_EDGES = [
   ["0x00464d00", "0x00464cc0"], ["0x00464d6e", "0x00464cc0"], ["0x00464dab", "0x00464cc0"],
-  ["0x00469391", "0x00469330"], ["0x004693a9", "0x00469330"], ["0x00469575", "0x00469510"], ["0x0046958b", "0x00469510"],
+  ["0x00469391", "0x00469330", "0x0046d650"], ["0x004693a9", "0x00469330", "0x0046d650"], ["0x00469575", "0x00469510", "0x0046d650"], ["0x0046958b", "0x00469510", "0x0046d650"],
+  ["0x00467160", "0x00466f20", "0x00469510"],
 ];
 
 export function extractK01TilePlacementElevationEvidence({
@@ -154,6 +160,15 @@ export function extractK01TilePlacementElevationEvidence({
         { selector: 4, lookup: 0, result: 0 },
         { selector: 4, lookup: null, result: -1, boundary: "out-of-bounds helper return" },
       ],
+    },
+    sourceRaster: {
+      function: "FUN_00466f20",
+      dimensions: "surfaceWidth = map.width * 64; surfaceHeight = map.height * 32 + 200",
+      drawOrder: "y outer, x inner",
+      baseScreenPoint: "screenX = (x - y) * 32 + map.width * 32; screenY = (x + y) * 16 + 200",
+      dispatch: "FUN_00469510(argument1=screenX, argument2=screenY, argument3=x, argument4=y)",
+      drawRectangle: "drawLeft = argument1 - 32; drawTop = argument2 - verticalShift, where K01 verticalShift is 0 for lowNibble == 2 and 16 otherwise",
+      boundary: "This bounded full-map raster establishes draw order and rectangle arithmetic, not broader pivot, clip/mode, palette, or renderer parity semantics.",
     },
     cellProjection: {
       function: "FUN_00464cc0",
@@ -326,12 +341,12 @@ function verifyStaticAnalysis({ executable, image, functionsPath, referencesPath
     const endExclusive = start + specification.bodySize;
     return { entry: specification.entry, bodyRange: specification.bodyRange, instructionCount: specification.instructionCount, instructionSha256: specification.instructionSha256, rawBodySha256: sha256(readVaRange(executable, image, start, endExclusive)), callees: record.callees };
   });
-  const requiredCallEdges = REQUIRED_CALL_EDGES.map(([from, fromFunctionEntry]) => {
-    const matches = references.filter((reference) => reference.from === from && reference.fromFunctionEntry === fromFunctionEntry && reference.to === "0x0046d650" && reference.type === "UNCONDITIONAL_CALL");
-    if (matches.length !== 1) throw new Error(`Expected exactly one helper call edge ${fromFunctionEntry}:${from}->0x0046d650, got ${matches.length}`);
+  const requiredCallEdges = REQUIRED_CALL_EDGES.map(([from, fromFunctionEntry, to = "0x0046d650"]) => {
+    const matches = references.filter((reference) => reference.from === from && reference.fromFunctionEntry === fromFunctionEntry && reference.to === to && reference.type === "UNCONDITIONAL_CALL");
+    if (matches.length !== 1) throw new Error(`Expected exactly one required call edge ${fromFunctionEntry}:${from}->${to}, got ${matches.length}`);
     const reference = matches[0];
     if (reference.source !== "DEFAULT" || reference.operandIndex !== 0 || reference.primary !== true || reference.fromBlock !== ".text" || reference.toBlock !== ".text") throw new Error(`Static call provenance mismatch at ${from}`);
-    return { from, fromFunctionEntry, to: "0x0046d650", type: "UNCONDITIONAL_CALL" };
+    return { from, fromFunctionEntry, to, type: "UNCONDITIONAL_CALL" };
   });
   return {
     functions: { ...sourceDescriptor(functionsPath, functionsSource.buffer), sourceSha256: functionsSource.parsed.sourceSha256, functionProvenance },

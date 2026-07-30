@@ -7,13 +7,9 @@ export const K01_SOURCE_TILE_VISUAL_PLACEMENT_OFFSET_DIGEST = K01_SOURCE_TILE_VI
 export const K01_SOURCE_TILE_IMAGE_GEOMETRY = {
   width: 64,
   height: 48,
-  footprintAnchor: { x: 32, y: 16 },
+  footprintAnchor: { x: 32, y: 0 },
 } as const;
-/**
- * K01-only source-art underlay adaptation. This exported normal-source frame
- * has an opaque logical diamond alpha mask; it is not an original renderer
- * composition claim.
- */
+/** Product-only alpha-coverage fallback; not an original draw-layer claim. */
 export const K01_SOURCE_TILE_UNDERLAY_ASSET_KEY = "k01-source:grss1:0000";
 
 export interface K01SourceTileVisualAsset {
@@ -76,21 +72,18 @@ export function getK01SourceTileRawPlacementArgumentDelta(x: number, y: number):
 }
 
 /**
- * Source-backed product adaptation: emitted tiles share the map ground
- * contact. The original raw argument axis/pivot is unresolved, and the
- * real-map alpha coverage fixture rejects interpreting its 16-pixel delta as
- * a per-cell web y translation.
+ * The recovered full-map raster draws selected 64x48 frames from a top-edge
+ * anchor. Its bounded raw second-argument adjustment is retained as the
+ * source-image y offset; broader original pivot/clip behavior is unresolved.
  */
-export function getK01SourceTilePlacementOffset(x: number, y: number): { readonly x: 0; readonly y: 0 } {
-  getK01SourceTileRawPlacementArgumentDelta(x, y);
-  return { x: 0, y: 0 };
+export function getK01SourceTilePlacementOffset(x: number, y: number): { readonly x: 0; readonly y: 0 | -16 } {
+  return { x: 0, y: getK01SourceTileRawPlacementArgumentDelta(x, y) === 16 ? -16 : 0 };
 }
 
 export function getK01SourceTileVisualAssets(): readonly K01SourceTileVisualAsset[] {
   return assets;
 }
 
-/** Validates the K01 grid while returning the shared source-art underlay. */
 export function getK01SourceTileUnderlayAssetKey(x: number, y: number): string {
   getK01SourceTileFlatAssetKey(x, y);
   return K01_SOURCE_TILE_UNDERLAY_ASSET_KEY;

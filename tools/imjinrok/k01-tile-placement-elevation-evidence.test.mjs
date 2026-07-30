@@ -36,6 +36,16 @@ test("hash-bound extractor reproduces all K01 placement/object/frame vectors", (
   assert.equal(report.cellProjection.K01Distribution.sourceBackedRawRelativeComponent.sha256, "76cc670258325ebc671d19b6f864768bf376328a7573ca7b29887c780e50b864");
   assert.equal(report.sources.sourceTileSelector.allK01ObjectFramesWithinValidatedSourceHeaders, true);
   assert.equal(report.sources.sourceTileSelector.pairStream.count, 3600);
+  assert.deepEqual(report.sourceRaster, {
+    function: "FUN_00466f20",
+    dimensions: "surfaceWidth = map.width * 64; surfaceHeight = map.height * 32 + 200",
+    drawOrder: "y outer, x inner",
+    baseScreenPoint: "screenX = (x - y) * 32 + map.width * 32; screenY = (x + y) * 16 + 200",
+    dispatch: "FUN_00469510(argument1=screenX, argument2=screenY, argument3=x, argument4=y)",
+    drawRectangle: "drawLeft = argument1 - 32; drawTop = argument2 - verticalShift, where K01 verticalShift is 0 for lowNibble == 2 and 16 otherwise",
+    boundary: "This bounded full-map raster establishes draw order and rectangle arithmetic, not broader pivot, clip/mode, palette, or renderer parity semantics.",
+  });
+  assert.equal(report.sources.staticAnalysis.references.requiredCallEdges.some((edge) => edge.from === "0x00467160" && edge.to === "0x00469510"), true);
 });
 
 test("FUN_00464cc0 reproducer fixes bounded base projection and separates the unresolved table input", () => {

@@ -19,7 +19,7 @@ const defaultManifestPath = resolve(defaultAssetDirectory, "k01-source-tiles.man
 /**
  * Exports only the source frames selected by K01's static object/frame stream.
  * The emitted TypeScript is browser-safe data: it never reads original files at
- * runtime. This product export uses a declared 64x48/32,16 placement adapter;
+ * runtime. This product export uses a declared 64x48/32,0 placement adapter;
  * it does not assert original pixel pivot parity.
  */
 export function exportK01SourceTileVisuals(options = {}) {
@@ -100,18 +100,18 @@ export function exportK01SourceTileVisuals(options = {}) {
       uniqueAssetCount: selector.pairStream.uniquePairCount,
     },
     productRenderingAdapter: {
-      imageGeometry: { width: 64, height: 48, footprintAnchor: { x: 32, y: 16 } },
+      imageGeometry: { width: 64, height: 48, footprintAnchor: { x: 32, y: 0 } },
       rawPlacementArgumentDelta: {
         source: "FUN_00469330/FUN_00469510 K01 second raw placement argument adjustment. Its screen/world axis and pixel pivot are unresolved.",
         values: { zero: 2865, positive16: 735 },
       },
       webPlacement: {
         underlayAssetKey: createAssetKey("grss1", 0),
-        choice: "all cells use the shared ground-contact anchor; the raw delta is retained as evidence but is not interpreted as web y. K01 composes exported grss1 frame 0 as a source-art footprint underlay before the selected frame.",
-        basis: "tools/imjinrok/k01-terrain-composition-coverage.test.mjs measures emitted PNG alpha masks, finds 798 mixed-delta map neighbors, and verifies the actual grss1_0000 alpha mask covers every logical K01 diamond pixel.",
+        choice: "all cells use the recovered top-edge source-image anchor (32,0); raw delta 0/16 becomes sourcePixelOffset.y 0/-16. Selected source frames compose in one global y-then-x raster order. A separate all-cell source-art coverage pass precedes selected frames only under the explicit source-raster-underlay product profile.",
+        basis: "tools/imjinrok/k01-terrain-composition-coverage.test.mjs measures the complete emitted PNG mosaic with the recovered top-edge anchor, offset stream, and global raster order; it retains the coverage pass because selected-frame alpha has measured internal gaps.",
         evidenceStatus: "source-backed-adaptation",
       },
-      note: "Map ground-contact placement, footprint underlay, and y-axis choice are product/mod renderer contracts, not proven original pixel pivot or screen-axis parity.",
+      note: "The coverage pass is an explicit product adaptation, not an original draw-layer claim. The bounded draw rectangle establishes this top-edge placement adapter only. Original pixel pivot, clipping/mode behavior outside the bounded main raster, and full renderer parity remain unconfirmed.",
     },
     assets: emittedAssets,
   };

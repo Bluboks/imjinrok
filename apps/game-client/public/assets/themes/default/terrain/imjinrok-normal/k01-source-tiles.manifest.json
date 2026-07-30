@@ -19,7 +19,7 @@
       "height": 48,
       "footprintAnchor": {
         "x": 32,
-        "y": 16
+        "y": 0
       }
     },
     "rawPlacementArgumentDelta": {
@@ -31,11 +31,11 @@
     },
     "webPlacement": {
       "underlayAssetKey": "k01-source:grss1:0000",
-      "choice": "all cells use the shared ground-contact anchor; the raw delta is retained as evidence but is not interpreted as web y. K01 composes exported grss1 frame 0 as a source-art footprint underlay before the selected frame.",
-      "basis": "tools/imjinrok/k01-terrain-composition-coverage.test.mjs measures emitted PNG alpha masks, finds 798 mixed-delta map neighbors, and verifies the actual grss1_0000 alpha mask covers every logical K01 diamond pixel.",
+      "choice": "all cells use the recovered top-edge source-image anchor (32,0); raw delta 0/16 becomes sourcePixelOffset.y 0/-16. Selected source frames compose in one global y-then-x raster order. A separate all-cell source-art coverage pass precedes selected frames only under the explicit source-raster-underlay product profile.",
+      "basis": "tools/imjinrok/k01-terrain-composition-coverage.test.mjs measures the complete emitted PNG mosaic with the recovered top-edge anchor, offset stream, and global raster order; it retains the coverage pass because selected-frame alpha has measured internal gaps.",
       "evidenceStatus": "source-backed-adaptation"
     },
-    "note": "Map ground-contact placement, footprint underlay, and y-axis choice are product/mod renderer contracts, not proven original pixel pivot or screen-axis parity."
+    "note": "The coverage pass is an explicit product adaptation, not an original draw-layer claim. The bounded draw rectangle establishes this top-edge placement adapter only. Original pixel pivot, clipping/mode behavior outside the bounded main raster, and full renderer parity remain unconfirmed."
   },
   "assets": [
     {

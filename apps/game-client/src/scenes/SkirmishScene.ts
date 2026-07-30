@@ -147,6 +147,14 @@ import {
   TERRAIN_RENDER_CHUNK_SIZE,
 } from "../render/chunkPolicy.js";
 import { runRenderTextureBatch } from "../render/renderTextureBatch.js";
+import {
+  alignSourceTerrainCoverageUnderlay,
+  createSourceTerrainRasterPlan,
+  usesSourceTerrainRasterComposition,
+  usesSourceTerrainRasterUnderlay,
+  type SourceTerrainRasterPlan,
+  type SourceTerrainRasterRegion,
+} from "../render/k01TerrainRasterPlan.js";
 import { getEntityAnimationStateKey } from "../render/entityAnimationState.js";
 import { resolveEntityAnimationSelection } from "../render/sourceOrientationAnimation.js";
 import {
@@ -7187,7 +7195,10 @@ export class SkirmishScene extends Phaser.Scene {
 
     if (explicitVisual) {
       if (explicitUnderlay) {
-        this.drawExplicitTileFog(renderTexture, bounds, explicitUnderlay, visibility, worldX, worldY, 0);
+        const coverageUnderlay = usesSourceTerrainRasterUnderlay(this.map)
+          ? alignSourceTerrainCoverageUnderlay(explicitUnderlay, explicitVisual)
+          : explicitUnderlay;
+        this.drawExplicitTileFog(renderTexture, bounds, coverageUnderlay, visibility, worldX, worldY, 0);
       } else {
         this.drawFallbackFogTile(renderTexture, bounds, fallbackTextureKey, worldX, worldY);
       }
@@ -7476,6 +7487,19 @@ export class SkirmishScene extends Phaser.Scene {
 
     const halfWidth = this.map.tileWidth / 2;
     const halfHeight = this.map.tileHeight / 2;
+    if (usesSourceTerrainRasterComposition(this.map)) {
+      const sourceRasterBounds = this.getTerrainChunkWorldBounds(0, 0, this.map.width - 1, this.map.height - 1);
+      const sourceRasterPlan = createSourceTerrainRasterPlan(
+        this.map,
+        sourceRasterBounds,
+        this.getSourceTerrainRasterMaxTextureSize(),
+      );
+      if (sourceRasterPlan) {
+        this.redrawSourceTerrainRaster(sourceRasterPlan, usesSourceTerrainRasterUnderlay(this.map));
+        if (this.perfEnabled) console.timeEnd("terrain chunk bake");
+        return;
+      }
+    }
 
     for (let chunkY = 0; chunkY < this.map.height; chunkY += TERRAIN_RENDER_CHUNK_SIZE) {
       for (let chunkX = 0; chunkX < this.map.width; chunkX += TERRAIN_RENDER_CHUNK_SIZE) {
@@ -7524,6 +7548,78 @@ export class SkirmishScene extends Phaser.Scene {
       }
     }
     if (this.perfEnabled) console.timeEnd("terrain chunk bake");
+  }
+
+  /** Replays alpha-overlapping source frames in each output region's global order. */
+  private redrawSourceTerrainRaster(plan: SourceTerrainRasterPlan, useCoverageUnderlay: boolean): void {
+    for (const region of plan.regions) {
+      const renderTexture = this.add
+        .renderTexture(region.left, region.top, region.width, region.height)
+        .setOrigin(0, 0)
+        .setDepth(region.top);
+
+      runRenderTextureBatch(renderTexture, () => {
+        if (useCoverageUnderlay) {
+          for (const point of plan.cells) {
+            const tile = getTileAt(this.map, point.x, point.y);
+            const underlay = resolveExplicitTileUnderlayVisual(CONTENT_REGISTRY, this.map, tile);
+            const selected = resolveExplicitTileVisual(CONTENT_REGISTRY, this.map, tile, "flat");
+            if (!underlay || !selected) {
+              throw new Error(`Source terrain coverage fallback requires an explicit underlay at ${point.x},${point.y}.`);
+            }
+            const descriptor = alignSourceTerrainCoverageUnderlay(underlay, selected);
+            const iso = cartToIso(point, this.map.tileWidth, this.map.tileHeight);
+            const worldX = this.mapOrigin.x + iso.x;
+            const worldY = this.mapOrigin.y + iso.y;
+            const visualBounds = resolveExplicitTileVisualWorldBounds(
+              descriptor,
+              { x: worldX, y: worldY },
+              this.map.tileWidth,
+              this.map.tileHeight,
+            );
+            if (!this.sourceTerrainRegionIntersectsVisual(region, visualBounds)) continue;
+            this.drawExplicitTileVisual(renderTexture, { minX: region.left, minY: region.top }, descriptor, worldX, worldY, 0);
+          }
+        }
+        for (const point of plan.cells) {
+          const tile = getTileAt(this.map, point.x, point.y);
+          const descriptor = resolveExplicitTileVisual(CONTENT_REGISTRY, this.map, tile, "flat");
+          if (!descriptor) {
+            throw new Error(`Source terrain raster requires an explicit flat visual at ${point.x},${point.y}.`);
+          }
+          const iso = cartToIso(point, this.map.tileWidth, this.map.tileHeight);
+          const worldX = this.mapOrigin.x + iso.x;
+          const worldY = this.mapOrigin.y + iso.y;
+          const visualBounds = resolveExplicitTileVisualWorldBounds(
+            descriptor,
+            { x: worldX, y: worldY },
+            this.map.tileWidth,
+            this.map.tileHeight,
+          );
+          if (!this.sourceTerrainRegionIntersectsVisual(region, visualBounds)) continue;
+          this.drawExplicitTileVisual(renderTexture, { minX: region.left, minY: region.top }, descriptor, worldX, worldY, 0);
+        }
+      });
+      this.terrainChunks.push(renderTexture);
+    }
+  }
+
+  private sourceTerrainRegionIntersectsVisual(
+    region: SourceTerrainRasterRegion,
+    visualBounds: ReturnType<typeof resolveExplicitTileVisualWorldBounds>,
+  ): boolean {
+    return visualBounds.right > region.left
+      && visualBounds.left < region.right
+      && visualBounds.bottom > region.top
+      && visualBounds.top < region.bottom;
+  }
+
+  private getSourceTerrainRasterMaxTextureSize(): number {
+    if (this.renderer instanceof Phaser.Renderer.WebGL.WebGLRenderer) {
+      const maxTextureSize = this.renderer.gl.getParameter(this.renderer.gl.MAX_TEXTURE_SIZE) as number;
+      if (Number.isInteger(maxTextureSize) && maxTextureSize > 0) return maxTextureSize;
+    }
+    return 4096;
   }
 
   private redrawElevationOverlay(): void {
