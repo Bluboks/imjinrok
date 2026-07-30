@@ -23,6 +23,11 @@ import { advanceUnitOrientationForProjectTarget, getSourceOrientationProfileForU
 import { getIdleCombatPolicy } from "./idleCombatPolicy.js";
 import { tryExecutePlayerAutoAbility } from "./autoAbilityPolicy.js";
 import { advanceProjectileSystem, PRODUCT_PROJECTILE_REGISTRY, type ProjectileRegistry } from "./projectiles.js";
+import {
+  resolveCombatProjectileImpacts,
+  resolveProjectileDeliveryProfileId,
+  spawnCombatProjectile,
+} from "./projectileCombat.js";
 import { unitCanPerformAction, unitDefinitions, type BankResourceKind, type BuildingDefinitionId, type GridPoint, type ScenarioAreaDefinition, type UnitDefinition } from "../../shared/src/index.js";
 import type { UnitState, UnitTargetSelectorState, WorldState } from "./types.js";
 
@@ -72,8 +77,10 @@ export function advanceWorldTick(state: WorldState, options: AdvanceWorldTickOpt
     }
   }
 
-  advanceProjectileLifecycle(state, options.projectileRegistry ?? PRODUCT_PROJECTILE_REGISTRY);
-  advanceUnitCombat(state);
+  const projectileRegistry = options.projectileRegistry ?? PRODUCT_PROJECTILE_REGISTRY;
+  const projectileImpacts = advanceProjectileLifecycle(state, projectileRegistry);
+  resolveCombatProjectileImpacts(state, projectileImpacts);
+  advanceUnitCombat(state, projectileRegistry);
   advanceSourceOrientationAdapters(state);
 
   resolveFloodDrowning(state);
@@ -85,12 +92,13 @@ export function advanceWorldTick(state: WorldState, options: AdvanceWorldTickOpt
  * Isolated before combat so projectiles created by a later combat phase cannot
  * accidentally consume an advance in their spawn tick.
  */
-function advanceProjectileLifecycle(state: WorldState, registry: ProjectileRegistry): void {
+function advanceProjectileLifecycle(state: WorldState, registry: ProjectileRegistry) {
   const result = advanceProjectileSystem(state.projectileSystem, registry);
   state.projectileSystem = result.state;
   for (const impact of result.impacts) {
     state.projectileImpactEvents.push({ ...impact, tick: state.tick });
   }
+  return result.impacts;
 }
 
 /**
@@ -1023,7 +1031,7 @@ function advanceUnitPatrol(state: WorldState, unit: UnitState): void {
   setNextMovementTarget(unit, path);
 }
 
-function advanceUnitCombat(state: WorldState): void {
+function advanceUnitCombat(state: WorldState, projectileRegistry: ProjectileRegistry): void {
   for (const unit of iterateUnitsOrdered(state)) {
     if (!state.units[unit.id]) {
       continue;
@@ -1088,6 +1096,18 @@ function advanceUnitCombat(state: WorldState): void {
     delete unit.movementPath;
 
     if ((unit.attackCooldownTicks ?? 0) > 0) {
+      continue;
+    }
+
+    const projectileProfileId = resolveProjectileDeliveryProfileId(unit, combat);
+    if (projectileProfileId !== undefined) {
+      spawnCombatProjectile(state, projectileRegistry, {
+        profileId: projectileProfileId,
+        source: unit,
+        target,
+        combat,
+      });
+      unit.attackCooldownTicks = combat.cooldownTicks;
       continue;
     }
 

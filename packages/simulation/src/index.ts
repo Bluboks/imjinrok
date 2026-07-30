@@ -34,6 +34,13 @@ export {
   type ProjectileTargetReference,
   type SpawnProjectileRequest,
 } from "./projectiles.js";
+export {
+  COMBAT_PROJECTILE_PAYLOAD_SCHEMA,
+  COMBAT_PROJECTILE_PAYLOAD_VERSION,
+  resolveCombatProjectileImpacts,
+  resolveProjectileDeliveryProfileId,
+  spawnCombatProjectile,
+} from "./projectileCombat.js";
 export * from "./world.js";
 export { SkirmishAiController, SKIRMISH_AI_TUNING, type SkirmishAiControllerOptions, type SkirmishAiDifficulty, type SkirmishAiTuning } from "./skirmishAi.js";
 export {
