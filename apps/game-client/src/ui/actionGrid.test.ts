@@ -60,6 +60,29 @@ test("the Imjinrok profile supplies its source-backed bindings without changing 
   );
 });
 
+test("the source profile makes actions without a recovered source frame explicit disabled placeholders", () => {
+  const slots = getActionSlots(
+    [{ id: "unit", kind: "villager", construction: false }],
+    null,
+    IMJINROK_SOURCE_COMMAND_ICON_PROFILE,
+  );
+  const gather = slots.find(({ actionId }) => actionId === "gather");
+
+  assert.deepEqual(gather, {
+    actionId: "gather",
+    sourceIconPlaceholder: "unconfirmed-source-frame",
+    icon: "?",
+    hotkey: "G",
+    label: "채집",
+    enabled: false,
+    disabledReason: "미확인",
+  });
+  assert.deepEqual(resolveActionIconVisual(gather!), {
+    kind: "placeholder",
+    glyph: "?",
+  });
+});
+
 test("no-selection K01 grid exposes the source-bound magic auto-use toggle in slot zero", () => {
   const disabled = getActionSlots([], null, IMJINROK_SOURCE_COMMAND_ICON_PROFILE, { playerId: "p1", enabled: false });
   const enabled = getActionSlots([], null, IMJINROK_SOURCE_COMMAND_ICON_PROFILE, { playerId: "p1", enabled: true });

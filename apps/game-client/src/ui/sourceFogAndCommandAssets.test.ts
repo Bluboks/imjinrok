@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 import {
   ORIGINAL_COMMAND_CONTROL_BINDINGS,
   ORIGINAL_COMMAND_ICON_ASSETS,
+  DEFAULT_SOURCE_COMMAND_ICON_PROFILE_REGISTRY,
   IMJINROK_SOURCE_COMMAND_ICON_PROFILE,
   IMJINROK_SOURCE_FOG_PROFILE_ID,
   SOURCE_FOG_COMPOSITE_IMAGE_GEOMETRY,
@@ -24,6 +25,7 @@ import {
   resolveSourceCommandIcon,
   resolveMagicAutoUseSourceCommandIcon,
   resolveSourceCommandIconProfileForScenario,
+  SourceCommandIconProfileRegistry,
   resolveSourceFogComposite,
   resolveSourceFogLayerPlan,
 } from "./sourceFogAndCommandAssets";
@@ -142,6 +144,7 @@ test("keeps original control bindings separate from exported image identity and 
 });
 
 test("the opt-in Imjinrok profile binds exact controls and labels source-backed adaptations", () => {
+  assert.equal(IMJINROK_SOURCE_COMMAND_ICON_PROFILE.unboundActionPolicy, "disabled-placeholder");
   assert.deepEqual(
     Object.entries(IMJINROK_SOURCE_COMMAND_ICON_PROFILE.actionBindings).map(([actionId, binding]) => [
       actionId,
@@ -177,6 +180,40 @@ test("the opt-in Imjinrok profile binds exact controls and labels source-backed 
   assert.equal(resolveMagicAutoUseSourceCommandIcon(false), undefined);
   assert.equal(resolveSourceCommandIconProfileForScenario("core-default"), undefined);
   assert.equal(resolveSourceCommandIconProfileForScenario("imjinrok-k01-opening"), IMJINROK_SOURCE_COMMAND_ICON_PROFILE);
+});
+
+test("a command icon registry lets a mod replace the K01 pack without changing the adaptive layout", () => {
+  const customProfile = {
+    ...IMJINROK_SOURCE_COMMAND_ICON_PROFILE,
+    actionBindings: {
+      move: {
+        ...ORIGINAL_COMMAND_ICON_ASSETS.find((asset) => asset.sourceFrameIndex === 45)!,
+        sourceActionWord: 999,
+        sourceLabel: "custom-move",
+        evidenceStatus: "source-backed-adaptation" as const,
+      },
+    },
+    unboundActionPolicy: "glyph-fallback" as const,
+  };
+  const registry = new SourceCommandIconProfileRegistry([
+    IMJINROK_SOURCE_COMMAND_ICON_PROFILE,
+  ]);
+
+  registry.replace(customProfile);
+
+  assert.equal(registry.resolve(customProfile.id), customProfile);
+  assert.equal(
+    resolveSourceCommandIconProfileForScenario("imjinrok-k01-opening", registry),
+    customProfile,
+  );
+  assert.throws(
+    () => registry.register(IMJINROK_SOURCE_COMMAND_ICON_PROFILE),
+    /already registered/,
+  );
+  assert.equal(
+    DEFAULT_SOURCE_COMMAND_ICON_PROFILE_REGISTRY.resolve(IMJINROK_SOURCE_COMMAND_ICON_PROFILE.id),
+    IMJINROK_SOURCE_COMMAND_ICON_PROFILE,
+  );
 });
 
 test("missing source textures fail loudly", () => {

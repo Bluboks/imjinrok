@@ -22,6 +22,7 @@ export interface SourceCommandIcon {
 }
 
 export type SourceCommandIconEvidenceStatus = "exact-source-control-binding" | "source-backed-adaptation";
+export type UnboundSourceCommandIconPolicy = "glyph-fallback" | "disabled-placeholder";
 
 export interface SourceCommandIconBinding extends SourceCommandIcon {
   readonly sourceActionWord: number;
@@ -36,6 +37,11 @@ export interface SourceCommandIconBinding extends SourceCommandIcon {
 export interface SourceCommandIconProfile {
   readonly id: string;
   readonly actionBindings: Readonly<Partial<Record<ActionDefinitionId, SourceCommandIconBinding>>>;
+  /**
+   * Product policy for actions without a source control/frame binding. This
+   * deliberately does not infer a neighboring button.spr frame.
+   */
+  readonly unboundActionPolicy?: UnboundSourceCommandIconPolicy;
   /** Player-global controls are separate from ActionDefinitionId/unit capabilities. */
   readonly magicAutoUseBindings?: Readonly<{
     enable: SourceCommandIconBinding;
@@ -47,6 +53,38 @@ export interface OriginalCommandControlBinding {
   readonly sourceActionWord: number;
   readonly frameOrResourceIndex: number;
   readonly sourceLabel: string | null;
+}
+
+/**
+ * Named command-icon packs keep a mod's presentation choice independent from
+ * the responsive command-grid layout. A caller may replace a registered pack
+ * for its own scenario without mutating source-backed K01 metadata.
+ */
+export class SourceCommandIconProfileRegistry {
+  private readonly profiles = new Map<string, SourceCommandIconProfile>();
+
+  constructor(profiles: readonly SourceCommandIconProfile[] = []) {
+    for (const profile of profiles) {
+      this.register(profile);
+    }
+  }
+
+  register(profile: SourceCommandIconProfile): void {
+    assertCommandIconProfile(profile);
+    if (this.profiles.has(profile.id)) {
+      throw new Error(`Source command icon profile '${profile.id}' is already registered.`);
+    }
+    this.profiles.set(profile.id, profile);
+  }
+
+  replace(profile: SourceCommandIconProfile): void {
+    assertCommandIconProfile(profile);
+    this.profiles.set(profile.id, profile);
+  }
+
+  resolve(profileId: string): SourceCommandIconProfile | undefined {
+    return this.profiles.get(profileId);
+  }
 }
 
 export interface EnvironmentOverlayLightContract {
@@ -201,6 +239,7 @@ function bindSourceControlIcon(
 
 export const IMJINROK_SOURCE_COMMAND_ICON_PROFILE: SourceCommandIconProfile = Object.freeze({
   id: "imjinrok-source-command-icons",
+  unboundActionPolicy: "disabled-placeholder",
   actionBindings: Object.freeze({
     move: bindSourceCommandIcon("move", 3, "이동", 6, "exact-source-control-binding"),
     stop: bindSourceCommandIcon("stop", 2, "정지", 43, "exact-source-control-binding"),
@@ -219,10 +258,17 @@ export const IMJINROK_SOURCE_COMMAND_ICON_PROFILE: SourceCommandIconProfile = Ob
   }),
 });
 
+export const DEFAULT_SOURCE_COMMAND_ICON_PROFILE_REGISTRY = new SourceCommandIconProfileRegistry([
+  IMJINROK_SOURCE_COMMAND_ICON_PROFILE,
+]);
+
 export function resolveSourceCommandIconProfileForScenario(
   scenarioId: string | undefined,
+  registry: SourceCommandIconProfileRegistry = DEFAULT_SOURCE_COMMAND_ICON_PROFILE_REGISTRY,
 ): SourceCommandIconProfile | undefined {
-  return scenarioId === "imjinrok-k01-opening" ? IMJINROK_SOURCE_COMMAND_ICON_PROFILE : undefined;
+  return scenarioId === "imjinrok-k01-opening"
+    ? registry.resolve(IMJINROK_SOURCE_COMMAND_ICON_PROFILE.id)
+    : undefined;
 }
 
 /**
@@ -394,6 +440,13 @@ export function resolveSourceCommandIcon(
   return profile?.actionBindings[actionId];
 }
 
+export function shouldUseUnboundSourceCommandPlaceholder(
+  actionId: ActionDefinitionId,
+  profile?: SourceCommandIconProfile,
+): boolean {
+  return profile?.unboundActionPolicy === "disabled-placeholder" && profile.actionBindings[actionId] === undefined;
+}
+
 export function resolveMagicAutoUseSourceCommandIcon(
   enabled: boolean,
   profile?: SourceCommandIconProfile,
@@ -413,5 +466,11 @@ export function requireSourceTexture(
 function assertFamilyIndex(value: number | undefined): asserts value is number {
   if (typeof value !== "number" || !Number.isInteger(value) || value < 0 || value > 14) {
     throw new RangeError(`source fog family index must be an integer in 0..14; received ${String(value)}`);
+  }
+}
+
+function assertCommandIconProfile(profile: SourceCommandIconProfile): void {
+  if (!profile.id.trim()) {
+    throw new Error("Source command icon profile id must not be empty.");
   }
 }

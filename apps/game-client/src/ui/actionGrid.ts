@@ -10,6 +10,7 @@ import {
   requireSourceTexture,
   resolveMagicAutoUseSourceCommandIcon,
   resolveSourceCommandIcon,
+  shouldUseUnboundSourceCommandPlaceholder,
   type SourceCommandIcon,
   type SourceCommandIconBinding,
   type SourceCommandIconProfile,
@@ -19,6 +20,8 @@ export interface HudActionSlot {
   actionId?: ActionDefinitionId;
   globalAction?: { type: "toggle-magic-auto-use"; enabled: boolean };
   sourceIcon?: SourceCommandIconBinding;
+  /** Source-profile opt-in with no recovered original control/frame. */
+  sourceIconPlaceholder?: "unconfirmed-source-frame";
   icon: string;
   hotkey: string;
   label: string;
@@ -146,13 +149,17 @@ export function drawActionGrid(
         .setOrigin(0.5, 0.5)
         .setAlpha(action.enabled ? 1 : 0.48));
     } else {
+      let iconColor = action.enabled ? "#f1dfaa" : "#6d817a";
+      if (iconVisual.kind === "placeholder") {
+        iconColor = "#8aa69b";
+      }
       container.add(scene.add
         .text(slotX + renderedSlotWidth / 2, slotY + 10, iconVisual.glyph, {
-        fontFamily: "Georgia, Times New Roman, serif",
-        fontSize: "20px",
-        color: action.enabled ? "#f1dfaa" : "#6d817a",
-        fontStyle: "bold",
-      })
+          fontFamily: "Georgia, Times New Roman, serif",
+          fontSize: "20px",
+          color: iconColor,
+          fontStyle: "bold",
+        })
         .setOrigin(0.5, 0));
     }
     container.add(scene.add
@@ -285,6 +292,19 @@ function toHudActionSlot(
 ): HudActionSlot {
   const action = actionDefinitions[actionId];
   const sourceIcon = resolveSourceCommandIcon(actionId, sourceIconProfile);
+  const availability = getActionAvailability(actionId, selectedEntities, playerEconomy);
+
+  if (shouldUseUnboundSourceCommandPlaceholder(actionId, sourceIconProfile)) {
+    return {
+      actionId,
+      sourceIconPlaceholder: "unconfirmed-source-frame",
+      icon: "?",
+      hotkey: action.hotkey,
+      label: action.label,
+      enabled: false,
+      disabledReason: "미확인",
+    };
+  }
 
   return {
     actionId,
@@ -292,14 +312,20 @@ function toHudActionSlot(
     icon: action.icon,
     hotkey: action.hotkey,
     label: action.label,
-    ...getActionAvailability(actionId, selectedEntities, playerEconomy),
+    ...availability,
   };
 }
 
-export function resolveActionIconVisual(action: Pick<HudActionSlot, "icon" | "sourceIcon">):
+export function resolveActionIconVisual(action: Pick<HudActionSlot, "icon" | "sourceIcon" | "sourceIconPlaceholder">):
   | { kind: "source"; icon: SourceCommandIcon }
-  | { kind: "glyph"; glyph: string } {
-  return action.sourceIcon ? { kind: "source", icon: action.sourceIcon } : { kind: "glyph", glyph: action.icon };
+  | { kind: "glyph"; glyph: string }
+  | { kind: "placeholder"; glyph: string } {
+  if (action.sourceIcon) {
+    return { kind: "source", icon: action.sourceIcon };
+  }
+  return action.sourceIconPlaceholder
+    ? { kind: "placeholder", glyph: action.icon }
+    : { kind: "glyph", glyph: action.icon };
 }
 
 function getActionAvailability(
