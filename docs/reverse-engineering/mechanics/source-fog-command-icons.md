@@ -6,7 +6,7 @@
 
 | 구분 | 상태 | 범위 |
 | --- | --- | --- |
-| 분석 | 자원 identity와 원본 action 61..64→button pixel frame 결합은 정적 확정; fog frame 선택·mask 의미와 product action 대응은 미확인 | SHA-256, SPR header, button frames 26..29, original control path |
+| 분석 | 자원 identity와 원본 action 61..64→button pixel frame 결합은 정적 확정; fog의 resource family·16-byte lookup·state별 six-subframe renderer 경계는 [별도 static evidence](source-fog-rendering.md)에서 정적 확정, fog frame-index algebra·mask/visibility 의미와 product action 대응은 미확인 | SHA-256, SPR header, button frames 26..29, original control path |
 | 재현 | 추출 범위 재현 완료 | hash/header 검증, 결정론 PNG·manifest export |
 | 구현 | 의도적 적응 | source asset catalog, fog project mapping policy, 4×3/12 product command grid fallback |
 
@@ -39,4 +39,4 @@ bridge는 map id가 아니라 `tilesetId: "imjinrok-normal"`을 선택한 지도
 
 focused tests는 original SHA/header mismatch가 extraction을 중단하는지와 두 output manifest/PNG hash가 일치하는지, visible/explored/unseen catalog result·invalid mask·missing source texture 오류, source/glyph actionGrid branch, 기존 4×3/12 slot geometry를 확인한다.
 
-남은 작업은 fog 96-frame scheduler와 original neighbor-mask/index rule의 static analysis, 그리고 original control과 product action ID의 source-complete mapping이다.
+남은 작업은 fog 96-frame scheduler와 exact six-frame index algebra, mask/visibility 의미, 그리고 original control과 product action ID의 source-complete mapping이다.

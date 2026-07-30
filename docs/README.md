@@ -44,6 +44,7 @@
 - [command-grid cell-size common-loader 결합](reverse-engineering/mechanics/command-grid-cell-size-binding.md)
 - [원본 command control의 `button.spr` pixel-frame 결합](reverse-engineering/mechanics/command-icon-frame-binding.md)
 - [K01 source fog 자산·command icon 추출 경계](reverse-engineering/mechanics/source-fog-command-icons.md)
+- [원본 fog resource·mask·six-subframe renderer 경계](reverse-engineering/mechanics/source-fog-rendering.md)
 - [임진록 tileset 컨테이너 인벤토리](reverse-engineering/mechanics/imjinrok-tileset-container-inventory.md)
 - [임진록 main tileset loader 경계](reverse-engineering/mechanics/imjinrok-tileset-loader-boundary.md)
 - [K01 source tile object·frame selector](reverse-engineering/mechanics/k01-source-tile-selector.md)
