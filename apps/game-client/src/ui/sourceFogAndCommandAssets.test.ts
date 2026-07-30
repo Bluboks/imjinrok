@@ -8,6 +8,8 @@ import {
   ORIGINAL_COMMAND_ICON_ASSETS,
   IMJINROK_SOURCE_COMMAND_ICON_PROFILE,
   IMJINROK_SOURCE_FOG_PROFILE_ID,
+  SOURCE_FOG_COMPOSITE_IMAGE_GEOMETRY,
+  SOURCE_FOG_OVERLAY_TINT,
   SOURCE_FOG_COMPOSITE_ASSETS,
   requireSourceTexture,
   assertSourceFogFamilyIndex,
@@ -22,6 +24,7 @@ import {
   resolveSourceCommandIcon,
   resolveSourceCommandIconProfileForScenario,
   resolveSourceFogComposite,
+  resolveSourceFogLayerPlan,
 } from "./sourceFogAndCommandAssets";
 
 test("source fog uses the exact corner bits, lookup, and six-frame algebra behind an explicit profile", () => {
@@ -53,8 +56,29 @@ test("source fog uses the exact corner bits, lookup, and six-frame algebra behin
     },
   );
   assert.equal(resolveSourceFogComposite(IMJINROK_SOURCE_FOG_PROFILE_ID, 0, "explored", () => "explored"), null);
+  assert.deepEqual(resolveSourceFogLayerPlan(IMJINROK_SOURCE_FOG_PROFILE_ID, 0, "unseen", () => "unseen"), {
+    drawBaseFog: true,
+    composite: null,
+  });
+  assert.deepEqual(resolveSourceFogLayerPlan(IMJINROK_SOURCE_FOG_PROFILE_ID, 0, "explored", () => "explored"), {
+    drawBaseFog: true,
+    composite: null,
+  });
+  assert.deepEqual(resolveSourceFogLayerPlan(IMJINROK_SOURCE_FOG_PROFILE_ID, 0, "visible", () => "visible"), {
+    drawBaseFog: false,
+    composite: null,
+  });
   assert.deepEqual(reproduceSourceFogFrameIndices(13), [26, 27, 58, 59, 90, 91]);
   assert.throws(() => reproduceSourceFogFrameIndices(14), /0\.\.13/);
+});
+
+test("source fog composites keep source frame identity but use the shared 64x48 placement geometry and dark product tint", () => {
+  assert.deepEqual(SOURCE_FOG_COMPOSITE_IMAGE_GEOMETRY, {
+    width: 64,
+    height: 48,
+    footprintAnchor: { x: 32, y: 16 },
+  });
+  assert.equal(SOURCE_FOG_OVERLAY_TINT, 0x020608);
 });
 
 test("source fog keeps the generic fallback and malformed opt-ins fail loudly", () => {

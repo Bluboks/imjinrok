@@ -52,6 +52,14 @@ export interface EnvironmentOverlayLightContract {
 
 const SOURCE_FOG_ASSET_PREFIX = "assets/themes/default/fog/normal/composites";
 export const IMJINROK_SOURCE_FOG_PROFILE_ID = "imjinrok-source-fog-composite";
+/** Product image geometry for source composites; original pixel pivot remains unresolved. */
+export const SOURCE_FOG_COMPOSITE_IMAGE_GEOMETRY = Object.freeze({
+  width: 64,
+  height: 48,
+  footprintAnchor: { x: 32, y: 16 },
+});
+/** Product fog overlay tint. Source frame identity is retained; palette color is not. */
+export const SOURCE_FOG_OVERLAY_TINT = 0x020608;
 export const SOURCE_FOG_NEIGHBOR_OFFSETS: Readonly<Record<SourceFogNeighbor, Readonly<{ x: number; y: number }>>> = Object.freeze({
   top: { x: 0, y: -1 },
   bottom: { x: 0, y: 1 },
@@ -221,6 +229,25 @@ export function resolveSourceFogComposite(
   };
 }
 
+/**
+ * Keeps source mask omission separate from fog coverage: mask 0/15 means no
+ * source edge composite, never that the caller should omit the base fog tile.
+ */
+export function resolveSourceFogLayerPlan(
+  profileId: string | undefined,
+  familyIndex: number | undefined,
+  visibility: FogVisibility,
+  neighborVisibility: (neighbor: SourceFogNeighbor) => FogVisibility,
+): { readonly drawBaseFog: boolean; readonly composite: SourceFogComposite | null } {
+  if (visibility === "visible") {
+    return { drawBaseFog: false, composite: null };
+  }
+  return {
+    drawBaseFog: true,
+    composite: resolveSourceFogComposite(profileId, familyIndex, visibility, neighborVisibility),
+  };
+}
+
 export function assertSourceFogVisualProfile(profileId: string): void {
   if (profileId !== IMJINROK_SOURCE_FOG_PROFILE_ID) {
     throw new Error(`Unknown source fog visual profile '${profileId}'.`);
@@ -260,7 +287,7 @@ export function resolveSourceFogCompositeScale(mapTileWidth: number): number {
   if (!Number.isFinite(mapTileWidth) || mapTileWidth <= 0) {
     throw new RangeError(`source fog composite requires a positive finite map tile width; received ${String(mapTileWidth)}`);
   }
-  return mapTileWidth / 64;
+  return mapTileWidth / SOURCE_FOG_COMPOSITE_IMAGE_GEOMETRY.width;
 }
 
 /** Marks the one-chunk halo required by the source renderer's eight-neighbor mask. */

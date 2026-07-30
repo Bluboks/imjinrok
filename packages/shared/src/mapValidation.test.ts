@@ -123,6 +123,19 @@ test("explicit tile visuals reject selected assets without valid geometry", () =
   );
 });
 
+test("explicit tile placement offsets require a selected asset and finite source pixels", () => {
+  const map = createBlankMap();
+  const tile = map.layers[0]?.tiles[0];
+  assert.ok(tile);
+  tile.tilesetVisuals = { sourcePixelOffset: { x: Number.NaN, y: Number.POSITIVE_INFINITY } };
+
+  assert.deepEqual(validateMapDefinition(map, createContentRegistry()).issues, [
+    { path: "layers[0].tiles[0].tilesetVisuals.sourcePixelOffset", message: "Explicit tile placement offset requires a selected tile asset." },
+    { path: "layers[0].tiles[0].tilesetVisuals.sourcePixelOffset.x", message: "Tile placement offset x must be finite." },
+    { path: "layers[0].tiles[0].tilesetVisuals.sourcePixelOffset.y", message: "Tile placement offset y must be finite." },
+  ]);
+});
+
 test("map validation rejects invalid elevation and unknown resource identities", () => {
   const map = createBlankMap({ width: 2, height: 2 });
   const firstTile = map.layers[0]?.tiles[0];

@@ -17,6 +17,8 @@ export interface ExplicitTileVisualPreloadDescriptor extends VisualAssetRef {
 
 export interface ExplicitTileVisualDescriptor extends ExplicitTileVisualPreloadDescriptor {
   readonly imageGeometry: VisualAssetGeometry;
+  /** Asset-native pixel translation selected by the map for this cell. */
+  readonly sourcePixelOffset: { readonly x: number; readonly y: number };
 }
 
 export interface ExplicitTileVisualPlacement {
@@ -30,6 +32,11 @@ export interface ExplicitTileVisualWorldBounds {
   readonly top: number;
   readonly right: number;
   readonly bottom: number;
+}
+
+export interface TileImagePlacementInput {
+  readonly imageGeometry: VisualAssetGeometry;
+  readonly sourcePixelOffset?: { readonly x: number; readonly y: number };
 }
 
 type TilesetRegistry = Pick<ContentRegistry, "tilesets">;
@@ -73,6 +80,7 @@ export function resolveExplicitTileVisual(
     collection,
     textureKey: createTextureKey(tileset.id, collection, assetKey, asset.frame),
     imageGeometry: asset.imageGeometry,
+    sourcePixelOffset: tile.tilesetVisuals?.sourcePixelOffset ?? { x: 0, y: 0 },
   };
 }
 
@@ -113,7 +121,22 @@ export function getMapExplicitTileVisualPreloadDescriptors(
 }
 
 export function resolveExplicitTileVisualPlacement(
-  descriptor: Pick<ExplicitTileVisualDescriptor, "imageGeometry">,
+  descriptor: Pick<ExplicitTileVisualDescriptor, "imageGeometry" | "sourcePixelOffset">,
+  groundContact: { x: number; y: number },
+  mapTileWidth: number,
+  mapTileHeight: number,
+  elevationSteps = 0,
+): ExplicitTileVisualPlacement {
+  return resolveTileImagePlacement(descriptor, groundContact, mapTileWidth, mapTileHeight, elevationSteps);
+}
+
+/**
+ * Shared product placement adapter for explicit terrain, its fog base, and
+ * source fog composites. Offsets remain in source-image pixels and therefore
+ * scale with the selected asset.
+ */
+export function resolveTileImagePlacement(
+  descriptor: TileImagePlacementInput,
   groundContact: { x: number; y: number },
   mapTileWidth: number,
   mapTileHeight: number,
@@ -129,6 +152,8 @@ export function resolveExplicitTileVisualPlacement(
   const geometry = descriptor.imageGeometry;
   assertImageGeometry(geometry, "explicit", "asset");
   const scale = mapTileWidth / geometry.width;
+  const sourcePixelOffset = descriptor.sourcePixelOffset ?? { x: 0, y: 0 };
+  assertSourcePixelOffset(sourcePixelOffset);
 
   return {
     origin: {
@@ -136,8 +161,8 @@ export function resolveExplicitTileVisualPlacement(
       y: geometry.footprintAnchor.y / geometry.height,
     },
     position: {
-      x: groundContact.x,
-      y: groundContact.y - mapTileHeight / 2 * elevationSteps,
+      x: groundContact.x + sourcePixelOffset.x * scale,
+      y: groundContact.y - mapTileHeight / 2 * elevationSteps + sourcePixelOffset.y * scale,
     },
     scale,
   };
@@ -145,7 +170,7 @@ export function resolveExplicitTileVisualPlacement(
 
 /** Includes source canvas overhang so chunk textures cannot clip explicit art. */
 export function resolveExplicitTileVisualWorldBounds(
-  descriptor: Pick<ExplicitTileVisualDescriptor, "imageGeometry">,
+  descriptor: Pick<ExplicitTileVisualDescriptor, "imageGeometry" | "sourcePixelOffset">,
   groundContact: { x: number; y: number },
   mapTileWidth: number,
   mapTileHeight: number,
@@ -211,6 +236,12 @@ function assertImageGeometry(
   const { x, y } = geometry.footprintAnchor;
   if (!Number.isFinite(x) || x < 0 || x > geometry.width || !Number.isFinite(y) || y < 0 || y > geometry.height) {
     throw new Error(`Tileset '${tilesetId}' asset '${assetKey}' has an imageGeometry footprint anchor outside its image.`);
+  }
+}
+
+function assertSourcePixelOffset(offset: { readonly x: number; readonly y: number }): void {
+  if (!Number.isFinite(offset.x) || !Number.isFinite(offset.y)) {
+    throw new Error("Explicit tile visual sourcePixelOffset must contain finite x and y values.");
   }
 }
 

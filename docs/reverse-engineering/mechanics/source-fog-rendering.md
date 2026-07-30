@@ -108,8 +108,12 @@ table-domain 밖의 mask와 caller-reachable `0..13` 밖의 selector는 helper�
   네 diagonal `0x1`/`0x2`/`0x4`/`0x8`)과 lookup table만 쓴다. product grid의 top/bottom/left/right 이름은
   source bit의 사람용 방향 의미 주장이 아니다.
 - `unseen→literal state 4`, `explored→literal state 8`, explored alpha `0.58`, `64×48` image의
-  ground-contact placement와 visibility update scheduler는 **source-backed adaptation**이다. 원본이 두
-  literal state에 부여한 visibility 의미, pixel pivot/alpha와 wall-clock cadence는 여전히 미확인이다.
+  ground-contact placement와 visibility update scheduler는 **source-backed adaptation**이다. K01에서 tile
+  placement evidence가 내보낸 cell별 asset-native y offset은 terrain·explicit base fog·source composite에
+  같은 helper로 적용하지만, raw source axis/pivot의 원작 일치는 주장하지 않는다. 원본이 두 literal state에
+  부여한 visibility 의미, pixel pivot/alpha와 wall-clock cadence는 여전히 미확인이다.
+- source composite의 family/selector/six-frame identity는 보존한다. 현재 web adapter의 dark tint는 밝은
+  source palette가 fog gap처럼 보이는 것을 막기 위한 제품 overlay policy이며 original palette/blend parity가 아니다.
 
 ## 미확인과 이식 경계
 

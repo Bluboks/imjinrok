@@ -3,6 +3,7 @@ import { createHash } from "node:crypto";
 import test from "node:test";
 import {
   K01_SOURCE_TILE_VISUAL_DIMENSIONS,
+  K01_SOURCE_TILE_VISUAL_PLACEMENT_OFFSET_DIGEST,
   K01_SOURCE_TILE_VISUAL_PAIR_DIGEST,
   K01_SOURCE_FOG_DIMENSIONS,
   K01_SOURCE_FOG_FAMILY_DIGEST,
@@ -14,6 +15,7 @@ import {
   createContentRegistry,
   createImjinrokMapScaffold,
   getK01SourceTileFlatAssetKey,
+  getK01SourceTilePlacementOffset,
   getK01SourceTileVisualAssets,
   getK01SourceFogFamilyIndex,
   getTileAt,
@@ -46,8 +48,16 @@ test("K01 source tile artifact preserves every hash-bound x-major source pair", 
   assert.equal(new Set(getK01SourceTileVisualAssets().map((asset) => asset.assetKey)).size, 243);
   const bytes = Buffer.from(K01_SOURCE_TILE_VISUAL_ARTIFACT.pairBytesBase64, "base64");
   assert.equal(createHash("sha256").update(bytes).digest("hex"), K01_SOURCE_TILE_VISUAL_PAIR_DIGEST);
+  const placementOffsetBytes = Buffer.from(K01_SOURCE_TILE_VISUAL_ARTIFACT.placementOffsetYBytesBase64, "base64");
+  assert.equal(createHash("sha256").update(placementOffsetBytes).digest("hex"), K01_SOURCE_TILE_VISUAL_PLACEMENT_OFFSET_DIGEST);
+  assert.deepEqual(K01_SOURCE_TILE_VISUAL_ARTIFACT.placementOffsetYDistribution, { zero: 2865, negative16: 735 });
+  assert.equal(placementOffsetBytes.filter((value) => value === 0).length, 2865);
+  assert.equal(placementOffsetBytes.filter((value) => value === 0xf0).length, 735);
   assert.equal(getK01SourceTileFlatAssetKey(0, 0), "k01-source:hill0:0039");
   assert.equal(getK01SourceTileFlatAssetKey(59, 59), "k01-source:grss1:0018");
+  assert.deepEqual(getK01SourceTilePlacementOffset(0, 0), { x: 0, y: -16 });
+  assert.deepEqual(getK01SourceTilePlacementOffset(0, 1), { x: 0, y: 0 });
+  assert.deepEqual(getK01SourceTilePlacementOffset(59, 59), { x: 0, y: 0 });
   assert.throws(() => getK01SourceTileFlatAssetKey(60, 0), /outside/u);
   const registry = createContentRegistry();
   const key = getK01SourceTileFlatAssetKey(45, 40);
@@ -68,6 +78,8 @@ test("only K01 applies source tile visuals after gameplay terrain mutations", ()
 
   assert.equal(sourceKeys?.length, 3600);
   assert.equal(new Set(sourceKeys).size, 243);
+  assert.deepEqual(getTileAt(k01, 0, 0).tilesetVisuals?.sourcePixelOffset, { x: 0, y: -16 });
+  assert.deepEqual(getTileAt(k01, 0, 1).tilesetVisuals?.sourcePixelOffset, { x: 0, y: 0 });
   assert.equal(getTileAt(k01, 45, 40).terrain, "shallowWater");
   assert.equal(getTileAt(k01, 45, 40).elevation, 0);
   assert.equal(getTileAt(k01, 6, 6).terrain, "grass");
