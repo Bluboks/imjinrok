@@ -27,6 +27,24 @@ interface SourceBackedUnitAudioMapping {
 
 const japaneseSourceBackedMappings = [
   {
+    kind: "japanese-farmer",
+    action: "select",
+    cueKey: "audio:voice:select-farmer-j1",
+    sourceFileName: "select_farmerj1.YAV",
+  },
+  {
+    kind: "japanese-farmer",
+    action: "move",
+    cueKey: "audio:voice:move-farmer-j1",
+    sourceFileName: "move_farmerj1.YAV",
+  },
+  {
+    kind: "japanese-farmer",
+    action: "attack",
+    cueKey: "audio:voice:attack-farmer-j1",
+    sourceFileName: "attack_farmerj1.YAV",
+  },
+  {
     kind: "japanese-swordsman",
     action: "select",
     cueKey: "audio:voice:select-sword-j1",
@@ -154,8 +172,18 @@ test("Japanese K01/K02 enemy units and camp structures use source-backed audio c
     assert.equal(wavFormat.sampleRate, sourceFormat.sampleRate, cue.url);
     assert.equal(wavFormat.bitsPerSample, sourceFormat.bitsPerSample, cue.url);
     assert.ok(wavFormat.dataSize > 0, cue.url);
+    assertConvertedYavPcmPayload(sourcePath, resolve(publicDirectory, cue.url));
   }
 });
+
+function assertConvertedYavPcmPayload(sourcePath: string, wavPath: string): void {
+  const yav = readFileSync(sourcePath);
+  const wav = readFileSync(wavPath);
+  const declaredDataSize = yav.readUInt32LE(22);
+  const yavSampleData = yav.subarray(26, 26 + Math.min(declaredDataSize, yav.length - 26));
+
+  assert.deepEqual(wav.subarray(44), yavSampleData, `${wavPath} should preserve ${sourcePath} PCM data`);
+}
 
 function readWavFormat(path: string): { channels: number; sampleRate: number; bitsPerSample: number; dataSize: number } {
   const wav = readFileSync(path);
