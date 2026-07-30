@@ -1,5 +1,5 @@
 import { resourceDefinitions, type CommandEnvelope, type MapDefinition, type ResourceDefinition, type ScenarioDefinition } from "@shared";
-import { advanceWorldTick, completeScenarioRuntime, createInitialWorldState, createPlayerResearchState, createProjectileSystemState, issueCommand as issueWorldCommand, parseSerializedProjectileImpactLog, parseSerializedProjectileSystemState, SIM_TICK_SECONDS, SkirmishAiController, type IssueCommandResult, type ScenarioStatus, type SkirmishAiControllerOptions, type WorldSnapshot, type WorldState } from "@simulation";
+import { advanceWorldTick, completeScenarioRuntime, createInitialWorldState, createPlayerResearchState, createProjectileSystemState, issueCommand as issueWorldCommand, parseSerializedProjectileImpactLog, parseSerializedProjectileSystemState, PRODUCT_PROJECTILE_REGISTRY, SIM_TICK_SECONDS, SkirmishAiController, type IssueCommandResult, type ProjectileRegistry, type ScenarioStatus, type SkirmishAiControllerOptions, type WorldSnapshot, type WorldState } from "@simulation";
 import type { GameLaunchContext } from "../session.js";
 import { NetworkClient } from "./NetworkClient.js";
 
@@ -12,6 +12,14 @@ export interface SessionPlaybackState {
   paused: boolean;
   speed: number;
   controllable: boolean;
+}
+
+/**
+ * Product-superset host boundary for local authoritative simulation only.
+ * Executable policies remain caller-owned and are never part of a snapshot.
+ */
+export interface SessionTransportSimulationOptions {
+  projectileRegistry?: ProjectileRegistry;
 }
 
 export interface SessionTransport {
@@ -40,6 +48,7 @@ export class LocalSessionTransport implements SessionTransport {
     aiPlayerIds: readonly string[] = [],
     aiOptions: SkirmishAiControllerOptions = {},
     private readonly mapMetadataSource: MapDefinition = worldState.map,
+    private readonly projectileRegistry: ProjectileRegistry = PRODUCT_PROJECTILE_REGISTRY,
   ) {
     this.aiController = aiPlayerIds.length > 0 ? new SkirmishAiController(aiPlayerIds, aiOptions) : null;
     this.stopForTerminalScenario();
@@ -110,7 +119,7 @@ export class LocalSessionTransport implements SessionTransport {
     }
 
     while (this.tickAccumulatorMs >= SIM_TICK_MILLISECONDS) {
-      advanceWorldTick(this.worldState);
+      advanceWorldTick(this.worldState, { projectileRegistry: this.projectileRegistry });
 
       if (this.stopForTerminalScenario()) {
         break;
@@ -420,6 +429,7 @@ export function createSessionTransport(
   map: MapDefinition,
   players: string[],
   networkClient = new NetworkClient(),
+  simulationOptions: SessionTransportSimulationOptions = {},
 ): SessionTransport {
   const initialSnapshot = context.resumeSnapshot
     ? normalizeWorldSnapshot(context.resumeSnapshot, context.scenario, map)
@@ -431,6 +441,7 @@ export function createSessionTransport(
       getLocalAiPlayerIds(context),
       context.aiDifficulty ? { difficulty: context.aiDifficulty } : {},
       map,
+      simulationOptions.projectileRegistry ?? PRODUCT_PROJECTILE_REGISTRY,
     );
   }
 
