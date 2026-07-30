@@ -98,6 +98,8 @@ import {
   MAGIC_AUTO_USE_REGISTRY_KEY,
   MAGIC_AUTO_USE_REQUESTED_EVENT,
   MINIMAP_ALERT_EVENT,
+  MINIMAP_AVAILABILITY_CHANGED_EVENT,
+  MINIMAP_AVAILABILITY_REGISTRY_KEY,
   MINIMAP_NAVIGATE_EVENT,
   MINIMAP_ENTITIES_CHANGED_EVENT,
   MINIMAP_ENTITIES_REGISTRY_KEY,
@@ -122,14 +124,20 @@ import {
   type DragSelectionView,
   type GamePlaybackControlView,
   type MinimapAlertView,
+  type MinimapAvailabilityView,
   type MinimapPoint,
   type MinimapResourcesView,
   type MagicAutoUseRequestedView,
   type MagicAutoUseView,
   createMagicAutoUseView,
+  createMinimapAvailabilityView,
   type PlayerEconomyView,
   toSelectedEntityView,
 } from "../hud.js";
+import {
+  evaluateMinimapAvailability,
+  requireMinimapAvailabilityPolicyForMap,
+} from "../ui/minimapAvailability.js";
 import { createSessionTransport, type SessionTransport } from "../net/SessionTransport.js";
 import { getMissionLineDurationMs, normalizeMissionVoiceId } from "../missionVoiceTiming.js";
 import {
@@ -563,6 +571,7 @@ export class SkirmishScene extends Phaser.Scene {
   private readonly fogTextureKeys = new Map<TileVisibility, string>();
   private playerEconomySignature: string | null = null;
   private magicAutoUseSignature: string | null = null;
+  private minimapAvailabilitySignature: string | null = null;
   private selectionSignature: string | null = null;
   private screenOverlayCamera: Phaser.Cameras.Scene2D.Camera | null = null;
   private readonly screenOverlayRoots = new Set<ScreenOverlayGameObject>();
@@ -763,10 +772,12 @@ export class SkirmishScene extends Phaser.Scene {
     this.localPlayerId = players[0] ?? "local-player";
     this.perfEnabled = new URLSearchParams(globalThis.location?.search ?? "").get("perf") === "1";
     this.map = this.resolveLaunchMap(data);
+    requireMinimapAvailabilityPolicyForMap(this.map);
     this.sessionTransport = createSessionTransport(data, this.map, players);
     this.applyInitialGameplayPlaybackSpeed();
     this.worldState = this.sessionTransport.getSnapshot();
     this.map = this.worldState.map;
+    requireMinimapAvailabilityPolicyForMap(this.map);
     this.ensureSelectedResourceVisualTextures();
     this.ensureSelectedExplicitTileVisualTextures();
     this.ensureSelectedEnvironmentPaletteData();
@@ -821,6 +832,7 @@ export class SkirmishScene extends Phaser.Scene {
     this.publishGamePlayback();
     this.selectInitialUnit(this.localPlayerId);
     this.publishMinimapMap();
+    this.publishMinimapAvailability();
     this.publishMinimapVisibility();
     this.publishMinimapEntities();
     this.publishMinimapViewport(true);
@@ -859,6 +871,7 @@ export class SkirmishScene extends Phaser.Scene {
 
     this.worldState = nextSnapshot;
     this.map = nextSnapshot.map;
+    requireMinimapAvailabilityPolicyForMap(this.map);
     this.lastSyncedTick = nextSnapshot.tick;
     this.updateEnvironmentOverlay();
     const dirtyFogChunkCount = this.refreshLocalVisibility();
@@ -878,6 +891,7 @@ export class SkirmishScene extends Phaser.Scene {
       this.publishMinimapVisibility();
     }
     this.publishMinimapEntities();
+    this.publishMinimapAvailability();
     this.updateScenarioStatusOverlay();
     this.redrawObjectiveAreaOverlay();
     this.updateObjectiveTrackerOverlay();
@@ -1093,7 +1107,7 @@ export class SkirmishScene extends Phaser.Scene {
   }
 
   private handleMinimapNavigate(target: MinimapPoint): void {
-    if (this.isBlockingModalOpen()) {
+    if (this.isBlockingModalOpen() || !this.isMinimapAvailable()) {
       return;
     }
 
@@ -1245,6 +1259,7 @@ export class SkirmishScene extends Phaser.Scene {
     this.updateObjectiveTrackerOverlay();
     this.publishVirtualCursor();
     this.publishMinimapMap();
+    this.publishMinimapAvailability();
     this.publishMinimapVisibility();
     this.publishMinimapEntities();
     this.publishMinimapViewport(true);
@@ -1325,6 +1340,7 @@ export class SkirmishScene extends Phaser.Scene {
       MINIMAP_ENTITIES_REGISTRY_KEY,
       MINIMAP_RESOURCES_REGISTRY_KEY,
       MINIMAP_VISIBILITY_REGISTRY_KEY,
+      MINIMAP_AVAILABILITY_REGISTRY_KEY,
       PLAYER_ECONOMY_REGISTRY_KEY,
       BATTLEFIELD_SUMMARY_REGISTRY_KEY,
       GAME_PLAYBACK_REGISTRY_KEY,
@@ -1335,6 +1351,7 @@ export class SkirmishScene extends Phaser.Scene {
   private resetHudPublicationSignatures(): void {
     this.playerEconomySignature = null;
     this.magicAutoUseSignature = null;
+    this.minimapAvailabilitySignature = null;
     this.selectionSignature = null;
   }
 
@@ -1826,12 +1843,14 @@ export class SkirmishScene extends Phaser.Scene {
     this.underAttackText.setText(message).setAlpha(1).setVisible(true);
     this.underAttackHideAt = now + UNDER_ATTACK_ALERT_DURATION_MS;
     this.layoutUnderAttackAlertOverlay();
-    this.game.events.emit(MINIMAP_ALERT_EVENT, {
-      id: event.id,
-      kind: "under-attack",
-      severity: event.killed ? "critical" : "normal",
-      position: { ...event.targetPosition },
-    } satisfies MinimapAlertView);
+    if (this.isMinimapAvailable()) {
+      this.game.events.emit(MINIMAP_ALERT_EVENT, {
+        id: event.id,
+        kind: "under-attack",
+        severity: event.killed ? "critical" : "normal",
+        position: { ...event.targetPosition },
+      } satisfies MinimapAlertView);
+    }
     this.showUnderAttackMarker(event.targetPosition);
   }
 
@@ -2790,6 +2809,7 @@ export class SkirmishScene extends Phaser.Scene {
     this.worldState = snapshot;
     this.lastSyncedTick = snapshot.tick;
     this.map = snapshot.map;
+    requireMinimapAvailabilityPolicyForMap(this.map);
     this.revealMapCheatActive = false;
     this.syncConstructionAudioState(false);
     this.syncProgressAudioState(false);
@@ -5757,6 +5777,26 @@ export class SkirmishScene extends Phaser.Scene {
     this.game.events.emit(MINIMAP_MAP_CHANGED_EVENT, view);
   }
 
+  private isMinimapAvailable(): boolean {
+    return evaluateMinimapAvailability(this.map, {
+      localPlayerId: this.localPlayerId,
+      units: this.worldState.units,
+    });
+  }
+
+  private publishMinimapAvailability(): void {
+    const view: MinimapAvailabilityView = createMinimapAvailabilityView(this.isMinimapAvailable());
+    const publication = shouldPublishSerializableView(this.minimapAvailabilitySignature, view);
+
+    if (!publication.shouldPublish) {
+      return;
+    }
+
+    this.minimapAvailabilitySignature = publication.signature;
+    this.registry.set(MINIMAP_AVAILABILITY_REGISTRY_KEY, view);
+    this.game.events.emit(MINIMAP_AVAILABILITY_CHANGED_EVENT, view);
+  }
+
   private publishPlayerEconomy(): void {
     const resources = this.worldState.playerResources[this.localPlayerId] ?? { food: 0, wood: 0, gold: 0, stone: 0 };
     const view: PlayerEconomyView = {
@@ -6637,6 +6677,7 @@ export class SkirmishScene extends Phaser.Scene {
 
     this.worldState = snapshot;
     this.map = snapshot.map;
+    requireMinimapAvailabilityPolicyForMap(this.map);
     this.lastSyncedTick = snapshot.tick;
     const dirtyFogChunkCount = this.refreshLocalVisibility();
     this.redrawDirtyFogOverlay(dirtyFogChunkCount);
@@ -6654,6 +6695,7 @@ export class SkirmishScene extends Phaser.Scene {
       this.publishMinimapVisibility();
     }
     this.publishMinimapEntities();
+    this.publishMinimapAvailability();
     this.updateScenarioStatusOverlay();
     this.redrawObjectiveAreaOverlay();
     this.updateObjectiveTrackerOverlay();

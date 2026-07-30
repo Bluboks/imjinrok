@@ -23,7 +23,26 @@ mode/redraw state를 쓴다. 그러나 그 두 primary gate operand의 producer�
 | `WORD[0x008438dc]` one-shot lifecycle | `정적 확정` | writer, standard-entry reset, complete canonical direct-reference set, post-state consumer CFG를 확인했다. |
 | raw primary-gate field의 게임플레이 이름·alias writer | `미확인` | `0x00bcbd84`에는 direct read만 있고 player field operand는 computed다. |
 | 재현 | `재현 완료` | normal/zero/first/multiple/last-removal/stale-inactive/reset, primary-gate 및 malformed/source-tamper vector를 전용 test가 검사한다. |
-| 구현 | `없음` | 제품, map renderer, fog-of-war 코드를 수정하지 않았다. |
+| 구현 | `프로젝트 전용` | 원본 규칙 이식은 없다. K01 map metadata가 선택하는 교체 가능한 product policy가 local-player의 live completed `beacon`으로 HUD compact map의 표시·입력만 제어한다. |
+
+## 프로젝트 전용 minimap availability 정책
+
+이 절은 원본 동작 판정이 아니라 제품 규칙이다. `imjinrok-k01`은 map data의
+`minimapAvailabilityPolicyId="imjinrok:k01-local-completed-beacon"`을 선택한다. 정책 registry는
+generic map의 `core:always-enabled`와 K01 product policy를 분리하며, mod는 stable ID를 등록하거나
+교체할 수 있다. 알 수 없는 configured ID는 scene setup에서 error로 중단한다.
+
+K01 product policy는 local player의 `UnitState` 가운데 `kind === "beacon"`, positive current health,
+그리고 `isUnitUnderConstruction(unit) === false`인 record가 하나 이상일 때만 enabled이다. 따라서
+unfinished→complete, one-of-many removal, final removal, foreign-owner, dead record와 removed record를
+독립 test vector로 고정했다. enabled가 아니면 HUD는 playable minimap diamond interior를 opaque black으로
+덮고 terrain/fog/resources/objectives/entities/viewport를 보이지 않게 하며 minimap navigation 및 alerts를
+받지 않는다. source fog composition 자체는 바꾸지 않는다.
+
+이 제품 정책은 `WORD[0x008438dc]`가 live completed-beacon count gate라는 가설의 **반증됨** 결론이나,
+actual compact-map primary gate producer/alias writer와 completion/destruction reachability가 **미확인**이라는
+원본 분석 상태를 바꾸지 않는다. 그러므로 이 UI behavior를 원본 일치 또는 원본 수명주기 구현으로 부르지
+않는다.
 
 ## 고정 원본과 재현 도구
 

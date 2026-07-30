@@ -13,6 +13,8 @@ import {
   MAGIC_AUTO_USE_REGISTRY_KEY,
   MAGIC_AUTO_USE_REQUESTED_EVENT,
   MINIMAP_ALERT_EVENT,
+  MINIMAP_AVAILABILITY_CHANGED_EVENT,
+  MINIMAP_AVAILABILITY_REGISTRY_KEY,
   MINIMAP_NAVIGATE_EVENT,
   MINIMAP_ENTITIES_CHANGED_EVENT,
   MINIMAP_ENTITIES_REGISTRY_KEY,
@@ -37,6 +39,7 @@ import {
   type GamePlaybackControlView,
   type GamePlaybackView,
   type MinimapAlertView,
+  type MinimapAvailabilityView,
   type MagicAutoUseView,
   type MinimapMapView,
   type MinimapResourcesView,
@@ -112,6 +115,7 @@ export class UIScene extends Phaser.Scene {
   private minimapEntities: MinimapEntitiesView = { entities: [] };
   private minimapResources: MinimapResourcesView = { resources: [] };
   private minimapVisibility: MinimapVisibilityView | null = null;
+  private minimapAvailability: MinimapAvailabilityView = { enabled: true };
   private minimapGeometry: MinimapGeometry | null = null;
   private minimapTerrainGraphics: Phaser.GameObjects.RenderTexture | null = null;
   private minimapFog: MinimapFogTexture | null = null;
@@ -121,6 +125,7 @@ export class UIScene extends Phaser.Scene {
   private minimapAlertGraphics: Phaser.GameObjects.Graphics | null = null;
   private minimapViewportGraphics: Phaser.GameObjects.Graphics | null = null;
   private minimapBorderGraphics: Phaser.GameObjects.Graphics | null = null;
+  private minimapUnavailableGraphics: Phaser.GameObjects.Graphics | null = null;
   private minimapZoomText: Phaser.GameObjects.Text | null = null;
   private economyText: Phaser.GameObjects.Text | null = null;
   private battlefieldSummaryText: Phaser.GameObjects.Text | null = null;
@@ -171,6 +176,8 @@ export class UIScene extends Phaser.Scene {
       (this.registry.get(MINIMAP_RESOURCES_REGISTRY_KEY) as MinimapResourcesView | null | undefined) ?? this.minimapResources;
     this.minimapVisibility =
       (this.registry.get(MINIMAP_VISIBILITY_REGISTRY_KEY) as MinimapVisibilityView | null | undefined) ?? null;
+    this.minimapAvailability =
+      (this.registry.get(MINIMAP_AVAILABILITY_REGISTRY_KEY) as MinimapAvailabilityView | null | undefined) ?? this.minimapAvailability;
     this.playerEconomy = (this.registry.get(PLAYER_ECONOMY_REGISTRY_KEY) as PlayerEconomyView | null | undefined) ?? null;
     this.battlefieldSummary =
       (this.registry.get(BATTLEFIELD_SUMMARY_REGISTRY_KEY) as BattlefieldSummaryView | null | undefined) ?? null;
@@ -203,6 +210,7 @@ export class UIScene extends Phaser.Scene {
     this.game.events.on(MINIMAP_ENTITIES_CHANGED_EVENT, this.handleMinimapEntitiesChanged, this);
     this.game.events.on(MINIMAP_RESOURCES_CHANGED_EVENT, this.handleMinimapResourcesChanged, this);
     this.game.events.on(MINIMAP_VISIBILITY_CHANGED_EVENT, this.handleMinimapVisibilityChanged, this);
+    this.game.events.on(MINIMAP_AVAILABILITY_CHANGED_EVENT, this.handleMinimapAvailabilityChanged, this);
     this.game.events.on(MINIMAP_ALERT_EVENT, this.handleMinimapAlert, this);
     this.game.events.on(PLAYER_ECONOMY_CHANGED_EVENT, this.handlePlayerEconomyChanged, this);
     this.game.events.on(BATTLEFIELD_SUMMARY_CHANGED_EVENT, this.handleBattlefieldSummaryChanged, this);
@@ -295,7 +303,21 @@ export class UIScene extends Phaser.Scene {
     this.updateMinimapFogOverlay();
   }
 
+  private handleMinimapAvailabilityChanged(view: MinimapAvailabilityView): void {
+    this.minimapAvailability = view;
+    this.isMinimapNavigating = false;
+
+    if (!view.enabled) {
+      this.minimapAlerts.length = 0;
+    }
+
+    this.applyMinimapAvailabilityPresentation();
+  }
+
   private handleMinimapAlert(view: MinimapAlertView): void {
+    if (!this.minimapAvailability.enabled) {
+      return;
+    }
     const now = this.time.now;
     const existingIndex = this.minimapAlerts.findIndex((alert) => alert.id === view.id);
     const alert: ActiveMinimapAlert = {
@@ -408,7 +430,7 @@ export class UIScene extends Phaser.Scene {
   }
 
   private emitMinimapNavigationAt(point: Phaser.Math.Vector2, clampToMinimap = false): boolean {
-    if (this.isObjectiveModalActive()) {
+    if (this.isObjectiveModalActive() || !this.minimapAvailability.enabled) {
       return false;
     }
     const bounds = this.minimapViewport?.worldBounds ?? this.minimapMap?.worldBounds;
@@ -440,6 +462,7 @@ export class UIScene extends Phaser.Scene {
     this.game.events.off(MINIMAP_ENTITIES_CHANGED_EVENT, this.handleMinimapEntitiesChanged, this);
     this.game.events.off(MINIMAP_RESOURCES_CHANGED_EVENT, this.handleMinimapResourcesChanged, this);
     this.game.events.off(MINIMAP_VISIBILITY_CHANGED_EVENT, this.handleMinimapVisibilityChanged, this);
+    this.game.events.off(MINIMAP_AVAILABILITY_CHANGED_EVENT, this.handleMinimapAvailabilityChanged, this);
     this.game.events.off(MINIMAP_ALERT_EVENT, this.handleMinimapAlert, this);
     this.game.events.off(PLAYER_ECONOMY_CHANGED_EVENT, this.handlePlayerEconomyChanged, this);
     this.game.events.off(BATTLEFIELD_SUMMARY_CHANGED_EVENT, this.handleBattlefieldSummaryChanged, this);
@@ -458,6 +481,8 @@ export class UIScene extends Phaser.Scene {
     this.minimapObjectiveGraphics = null;
     this.minimapAlertGraphics?.destroy();
     this.minimapAlertGraphics = null;
+    this.minimapUnavailableGraphics?.destroy();
+    this.minimapUnavailableGraphics = null;
     this.minimapAlerts.length = 0;
     this.hudContainer?.destroy(true);
     this.hudContainer = null;
@@ -536,6 +561,7 @@ export class UIScene extends Phaser.Scene {
     this.minimapAlertGraphics = null;
     this.minimapViewportGraphics = null;
     this.minimapBorderGraphics = null;
+    this.minimapUnavailableGraphics = null;
     this.minimapZoomText = null;
     this.economyText = null;
     this.battlefieldSummaryText = null;
@@ -665,6 +691,7 @@ export class UIScene extends Phaser.Scene {
     this.minimapAlertGraphics?.destroy();
     this.minimapViewportGraphics?.destroy();
     this.minimapBorderGraphics?.destroy();
+    this.minimapUnavailableGraphics?.destroy();
     this.minimapZoomText?.destroy();
     const mapDefinition = this.minimapMap?.map ?? defaultMap;
     const geometry = createMinimapGeometry(x, y, width, height);
@@ -680,7 +707,8 @@ export class UIScene extends Phaser.Scene {
     this.minimapEntityGraphics = this.add.graphics().setScrollFactor(0).setDepth(1005);
     this.minimapAlertGraphics = this.add.graphics().setScrollFactor(0).setDepth(1006);
     this.minimapViewportGraphics = this.add.graphics().setScrollFactor(0).setDepth(1007);
-    this.minimapBorderGraphics = this.add.graphics().setScrollFactor(0).setDepth(1008);
+    this.minimapBorderGraphics = this.add.graphics().setScrollFactor(0).setDepth(1010);
+    this.minimapUnavailableGraphics = this.add.graphics().setScrollFactor(0).setDepth(1009);
     container.add([
       this.minimapTerrainGraphics,
       this.minimapResourceGraphics,
@@ -689,6 +717,7 @@ export class UIScene extends Phaser.Scene {
       this.minimapEntityGraphics,
       this.minimapAlertGraphics,
       this.minimapViewportGraphics,
+      this.minimapUnavailableGraphics,
       this.minimapBorderGraphics,
     ]);
     this.minimapZoomText = this.add.text(x + 18, y + height - 24, "", { ...HUD_TEXT_STYLE, fontSize: "11px", color: "#7f9b91" });
@@ -708,10 +737,50 @@ export class UIScene extends Phaser.Scene {
     this.drawMinimapViewportOverlay();
     this.minimapBorderGraphics.lineStyle(2, 0xd0b46a, 0.85);
     this.minimapBorderGraphics.strokePoints(getMinimapDiamondPoints(geometry), true);
+    this.applyMinimapAvailabilityPresentation();
+  }
 
+  private applyMinimapAvailabilityPresentation(): void {
+    const enabled = this.minimapAvailability.enabled;
+
+    this.minimapTerrainGraphics?.setVisible(enabled);
+    this.minimapFog?.image.setVisible(enabled);
+    this.minimapResourceGraphics?.setVisible(enabled);
+    this.minimapObjectiveGraphics?.setVisible(enabled);
+    this.minimapEntityGraphics?.setVisible(enabled);
+    this.minimapAlertGraphics?.setVisible(enabled);
+    this.minimapViewportGraphics?.setVisible(enabled);
+    this.minimapZoomText?.setVisible(enabled);
+
+    const unavailableGraphics = this.minimapUnavailableGraphics;
+    const geometry = this.minimapGeometry;
+
+    if (!unavailableGraphics || !geometry) {
+      return;
+    }
+
+    unavailableGraphics.clear();
+    unavailableGraphics.setVisible(!enabled);
+
+    if (!enabled) {
+      unavailableGraphics.fillStyle(0x000000, 1);
+      unavailableGraphics.fillPoints(getMinimapDiamondPoints(geometry), true);
+      return;
+    }
+
+    this.updateMinimapFogOverlay();
+    this.drawMinimapResourcesOverlay();
+    this.drawMinimapObjectiveOverlay();
+    this.drawMinimapEntitiesOverlay();
+    this.drawMinimapAlertOverlay(this.time.now);
+    this.drawMinimapViewportOverlay();
   }
 
   private updateMinimapFogOverlay(): void {
+    if (!this.minimapAvailability.enabled) {
+      return;
+    }
+
     this.minimapFog?.update(this.minimapVisibility);
   }
 
@@ -722,6 +791,8 @@ export class UIScene extends Phaser.Scene {
     if (!graphics || !geometry) return;
 
     graphics.clear();
+
+    if (!this.minimapAvailability.enabled) return;
 
     const mapDefinition = this.minimapMap?.map ?? defaultMap;
 
@@ -797,6 +868,7 @@ export class UIScene extends Phaser.Scene {
 
     const graphics = this.minimapViewportGraphics;
     graphics.clear();
+    if (!this.minimapAvailability.enabled) return;
     const points = viewport.viewportWorldCorners.map((corner) => worldToMinimap(corner, geometry, viewport.worldBounds));
     graphics.fillStyle(0xf4df8e, 0.13);
     graphics.fillPoints(points, true);
@@ -813,6 +885,7 @@ export class UIScene extends Phaser.Scene {
     const graphics = this.minimapResourceGraphics;
     const mapDefinition = this.minimapMap?.map ?? defaultMap;
     graphics.clear();
+    if (!this.minimapAvailability.enabled) return;
     this.minimapResources.resources.forEach((resource) => {
       const marker = gridToMinimap(resource.position, geometry, mapDefinition);
       drawMinimapResourceMarker(graphics, resource, marker);
@@ -827,6 +900,7 @@ export class UIScene extends Phaser.Scene {
     const graphics = this.minimapEntityGraphics;
     const mapDefinition = this.minimapMap?.map ?? defaultMap;
     graphics.clear();
+    if (!this.minimapAvailability.enabled) return;
     this.minimapEntities.entities.forEach((entity) => {
       const marker = gridToMinimap(entity.position, geometry, mapDefinition);
       drawMinimapEntityMarker(graphics, entity, marker);
@@ -834,6 +908,10 @@ export class UIScene extends Phaser.Scene {
   }
 
   private updateMinimapAlertOverlay(time: number): void {
+    if (!this.minimapAvailability.enabled) {
+      return;
+    }
+
     if (this.minimapAlerts.length === 0) {
       return;
     }
@@ -856,6 +934,10 @@ export class UIScene extends Phaser.Scene {
     if (!graphics || !geometry) return;
 
     graphics.clear();
+
+    if (!this.minimapAvailability.enabled) {
+      return;
+    }
 
     if (this.minimapAlerts.length === 0) {
       return;
