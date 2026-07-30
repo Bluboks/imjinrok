@@ -245,11 +245,10 @@ registered auto-ability profile로 추가했다. 이는 `부분 이식`이며 �
 `currentHp < trunc(maxHp * 2 / 3)`, mana 70 및 project tick `% 3 === 0`에서만 소유권을 이전한다.
 이 cadence는 source global LCG를 복원한 것이 아닌 명시적 project clock adaptation이며, 70/70 mana도
 한 cast를 위한 제품 값일 뿐 original stat parity가 아니다. source raw flags/registry/team prerequisite는
-제품 analogue가 없어 추가로 꾸며내지 않았다. 성공 update는 normal attack을 생략하고 converted target의
-이동/명령 상태를 비운다.
+제품 analogue가 없어 추가로 꾸며내지 않았다. 성공 update는 normal attack을 생략하고 converted target과
+caster의 이동/명령 상태를 비운다. caster cleanup은 새 ally를 계속 공격하지 않기 위한 제품 adapter
+상태 정리이며, 원본 pending-record write와의 parity 주장이 아니다.
 
-원본 command record, fixed slots, timing, player/team/entity raw layout은 증거를 설명하는 내부 사실이지
-public architecture mandate가 아니다.
 원본 command record, fixed slots, timing, player/team/entity raw layout은 증거를 설명하는 내부 사실이지
 public architecture mandate가 아니다. 현재 프로젝트의 responsive/multi-selection/mana/health,
 Noto/Canvas adaptation은 의도적 superset으로 유지한다.

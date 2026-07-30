@@ -48,6 +48,9 @@ const k01RyuAutoAbilityPolicy: AutoAbilityPolicy = {
 
     caster.mana.current = Math.max(0, caster.mana.current - K01_RYU_ACTION_40_MANA_COST);
     target.playerId = caster.playerId;
+    // Product adapter cleanup: source pending records do not map one-to-one to
+    // project orders, so do not leave the caster attacking its new ally.
+    clearUnitOrder(caster);
     clearUnitOrder(target);
     return true;
   },

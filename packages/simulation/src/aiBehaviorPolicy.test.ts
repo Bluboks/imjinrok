@@ -147,6 +147,9 @@ test("K01 Ryu action-40 adapter observes off/on cadence mana threshold target an
   advanceWorldTick(state);
   assert.equal(target.playerId, "p1");
   assert.equal(ryu.mana.current, 0);
+  assert.equal(ryu.currentOrder, undefined);
+  assert.equal(ryu.movementTarget, undefined);
+  assert.equal(ryu.movementPath, undefined);
   assert.equal(target.currentOrder, undefined);
   assert.equal(target.movementTarget, undefined);
   assert.equal(target.movementPath, undefined);
