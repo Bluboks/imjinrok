@@ -1,4 +1,5 @@
 import type { GameLaunchContext } from "./session.js";
+import { GAMEPLAY_LAUNCH_SCENE_KEY } from "./gameplaySceneRegistration.js";
 
 export const MISSION_BRIEFING_SCENE_KEY = "mission-briefing";
 
@@ -18,8 +19,7 @@ export function launchGameplayScenes(scene: SceneLaunchPort, context: GameLaunch
     scene.stop("ui");
   }
 
-  scene.start("skirmish", context);
-  scene.launch("ui", context);
+  scene.start(GAMEPLAY_LAUNCH_SCENE_KEY, context);
 }
 
 export function launchGameWithPreGameBriefing(scene: SceneLaunchPort, context: GameLaunchContext): void {

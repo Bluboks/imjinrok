@@ -46,19 +46,18 @@ test("a fresh campaign enters only the pre-game briefing before gameplay is conf
   assert.deepEqual(scene.calls, [{ type: "start", key: MISSION_BRIEFING_SCENE_KEY, data: campaignContext }]);
 });
 
-test("the pre-game start action activates gameplay and HUD once with a duplicate no-op boundary", () => {
+test("the pre-game start action enters the lazy gameplay boundary once with a duplicate no-op boundary", () => {
   const scene = new RecordingSceneLaunchPort();
   const controller = new PreGameBriefingLaunchController();
 
   assert.equal(controller.startGameplay(scene, campaignContext), true);
   assert.equal(controller.startGameplay(scene, campaignContext), false);
   assert.deepEqual(scene.calls, [
-    { type: "start", key: "skirmish", data: campaignContext },
-    { type: "launch", key: "ui", data: campaignContext },
+    { type: "start", key: "gameplay-launch", data: campaignContext },
   ]);
 });
 
-test("each new briefing lifecycle gets one independent gameplay activation", () => {
+test("each new briefing lifecycle gets one independent lazy gameplay activation", () => {
   const firstScene = new RecordingSceneLaunchPort();
   const firstLifecycle = new PreGameBriefingLaunchController();
   const secondScene = new RecordingSceneLaunchPort();
@@ -69,16 +68,14 @@ test("each new briefing lifecycle gets one independent gameplay activation", () 
   assert.equal(secondLifecycle.startGameplay(secondScene, campaignContext), true);
   assert.equal(secondLifecycle.startGameplay(secondScene, campaignContext), false);
   assert.deepEqual(firstScene.calls, [
-    { type: "start", key: "skirmish", data: campaignContext },
-    { type: "launch", key: "ui", data: campaignContext },
+    { type: "start", key: "gameplay-launch", data: campaignContext },
   ]);
   assert.deepEqual(secondScene.calls, [
-    { type: "start", key: "skirmish", data: campaignContext },
-    { type: "launch", key: "ui", data: campaignContext },
+    { type: "start", key: "gameplay-launch", data: campaignContext },
   ]);
 });
 
-test("a resumed snapshot bypasses the briefing and launches gameplay with its HUD", () => {
+test("a resumed snapshot bypasses the briefing and enters the lazy gameplay boundary", () => {
   const scene = new RecordingSceneLaunchPort();
 
   launchGameWithPreGameBriefing(scene, {
@@ -89,7 +86,6 @@ test("a resumed snapshot bypasses the briefing and launches gameplay with its HU
   });
 
   assert.equal(scene.calls[0]?.type, "start");
-  assert.equal(scene.calls[0]?.key, "skirmish");
-  assert.equal(scene.calls[1]?.type, "launch");
-  assert.equal(scene.calls[1]?.key, "ui");
+  assert.equal(scene.calls[0]?.key, "gameplay-launch");
+  assert.equal(scene.calls[1], undefined);
 });
