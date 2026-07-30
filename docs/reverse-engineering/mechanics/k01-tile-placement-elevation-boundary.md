@@ -2,13 +2,13 @@
 
 ## 질문과 상태
 
-질문: **해시를 고정한 K01 map cell에서 `FUN_00469330`·`FUN_00469510`은 어떤 byte와 `FUN_0046d650` 반환으로 두 번째 raw placement argument를 보정하고, 어떤 object/frame byte를 loader payload 경계까지 전달하는가?**
+질문: **해시를 고정한 K01 map cell에서 `FUN_00464cc0`은 어떤 isometric base 좌표와 relative component를 만들고, `FUN_00469330`·`FUN_00469510`은 어떤 byte와 `FUN_0046d650` 반환으로 두 번째 raw placement argument를 보정하며 object/frame byte를 loader payload 경계까지 전달하는가?**
 
 | 구분 | 상태 | 범위 |
 | --- | --- | --- |
-| 분석 | `정적 확정` | 두 caller의 signed-word x/y guard, `lowNibble == 2`/other 수식, direct helper의 전체 return 분기, K01 `60×60` cell의 selector/lookup·object/frame fields |
-| 재현 | `재현 완료` | 3,600-cell x-major stream/digest·분포, low-nibble two/other, 네 map corner, helper의 synthetic positive/negative branch와 malformed/tampered input 거부 |
-| 구현 | `부분 이식·source-backed-adaptation` | hash-bound K01의 raw second-argument delta stream은 보존한다. emitted PNG alpha coverage와 low-nibble boundary vector를 근거로 모든 web tile은 shared ground contact에 두고, exported `grss1_0000` source-art footprint underlay 위에 source artwork를 합성한다. raw argument 축·pivot은 여전히 미확정이다. |
+| 분석 | `정적 확정` | `FUN_00464cc0` signed-word x/y guard와 `(x-y)<<5`/`(x+y)<<4`, raw relative branch, 두 caller의 low-nibble branch, direct helper의 전체 return 분기, K01 `60×60` cell의 selector/lookup·object/frame fields |
+| 재현 | `재현 완료` | 3,600-cell x-major stream/digest·분포, base projection, low-nibble two/other, 네 map corner, helper의 synthetic positive/negative branch와 malformed/tampered input 거부 |
+| 구현 | `source-backed-adaptation` | hash-bound K01의 raw second-argument `0/16` delta stream을 보존해 `TileCell.elevation`의 base/one-raised discrete product level로 적응한다. source flat artwork는 `flatArtworkEmbedsRelief`를 명시하고 shared ground contact·`grss1_0000` underlay 위에 합성한다. raw argument 축·pivot과 원본 height 의미는 미확정이다. |
 
 이것은 기존 [K01 source tile object·frame selector](k01-source-tile-selector.md)의 **다음 placement 경계**다.
 기존 문서의 object/frame source identity와 3,600 pair frame-bound proof를 그대로 hash-bound로 재검증하지만,
@@ -24,10 +24,11 @@
 | `analysis/generated/imjinrok2/references.json` | 17,206,569 / `f64cfa6f04bc39573552f42a8b7bdd5b08fea1ba774d05865162d1d80daaf9a5` |
 
 생성기는 generated JSON의 전체 hash와 `sourceSha256`, 다음 함수의 Ghidra body/instruction digest, raw body digest,
-그리고 helper call edge `0x00469391`, `0x004693a9`, `0x00469575`, `0x0046958b`를 검사한다.
+그리고 helper call edge `0x00464d00`, `0x00464d6e`, `0x00464dab`, `0x00469391`, `0x004693a9`, `0x00469575`, `0x0046958b`를 검사한다.
 
 | 함수 | raw byte range (끝 제외) | 역할을 확정한 범위 |
 | --- | --- | --- |
+| `FUN_00464cc0` | `0x00464cc0-0x00464dde` | signed x/y admission, `(x-y)<<5`/`(x+y)<<4` base output, `+0x4a0c4` byte-indexed runtime WORD-table addition과 low-nibble/helper relative branch |
 | `FUN_00469330` | `0x00469330-0x0046950c` | `argument1 - 0x1f`, low-nibble branch, argument 2 vertical adjustment, object/frame loader path |
 | `FUN_00469510` | `0x00469510-0x00469917` | `argument1 - 0x20`, 같은 low-nibble/helper adjustment, object/frame loader path와 local mode/clip gate |
 | `FUN_0046d650` | `0x0046d650-0x0046d6d8` | signed-word bounds, selector/lookup와 모든 return branch |
@@ -35,6 +36,24 @@
 `FUN_00469510` entry stack에서 x/y는 `argument3`/`argument4`의 low signed word다. `argument1`의 fixed
 subtract와 `argument2`의 helper-derived subtract는 별도이다. 이 evidence는 raw argument가 screen/world의 어느 축인지
 정하지 않는다.
+
+`FUN_00464cc0`도 같은 signed bounds 뒤 output pair에 먼저 다음 값을 쓴다.
+
+```text
+outputX = (int32(x) - int32(y)) << 5
+outputY = (int32(x) + int32(y)) << 4
+fogFamily = uint8(map + 0x4a0c4 + x*180 + y)
+tableWord = int16(DAT_00c06e86 + fogFamily*8)
+
+if lowNibble == 2:
+  outputY += tableWord + 16 - (helperReturn << 4)
+else:
+  outputY += tableWord - (abs(helperReturn) << 4)
+```
+
+`map+0x4a0c4`는 별도 `FUN_0046a530` 범위에서 fog-family byte로 정적 확정됐지만, 여기서 참조하는
+`DAT_00c06e86` WORD table의 값·writer·lifetime·사람용 의미는 미확정이다. 따라서 이 식만으로 original terrain
+height 또는 web pixel pivot을 주장하지 않는다.
 
 ## field layout과 정확한 수식
 
@@ -90,13 +109,19 @@ x-major stream SHA-256 `78d0d96e0157e60cf9d2e2e4325941510f8911dbc9a57422ad002208
 cell에는 나타나지 않는다**. K01 결과를 elevation, height, terrain 또는 world coordinate라고 부를 근거는 없으며,
 이 문서는 중립어 **placement-level selector**를 사용한다.
 
+제품 K01 adapter가 소비하는 별도 raw relative stream은 `FUN_00469510`의 `vertical subtract` 그대로다. SHA-256
+`76cc670258325ebc671d19b6f864768bf376328a7573ca7b29887c780e50b864`에서 `0:2865`, `16:735`이며, 이는 full
+original elevation parity가 아니라 map-authorable discrete surface level로의 **source-backed adaptation**이다.
+
 fixture의 map-corner vector도 source value를 고정한다. `(0,0)`은 low nibble 1/object 0/frame 39/shift 16,
 `(0,1)`은 low nibble 2/object 0/frame 4/shift 0, `(59,59)`은 low nibble 2/object 31/frame 18/shift 0이다.
 
 ## 제품 adapter 경계
 
 `export-k01-source-tile-visuals.mjs`는 canonical placement-evidence fixture를 다시 검증한 뒤 raw second-argument
-delta를 `0` 또는 `16`의 stream으로 보존한다. `0`은 2,865, `16`은 735개다. 그러나
+delta를 `0` 또는 `16`의 stream으로 보존한다. `0`은 2,865, `16`은 735개다. K01 adapter는 `16→TileCell.elevation=1`,
+`0→0`으로 명시적으로 적응하고 selected flat artwork에 `flatArtworkEmbedsRelief=true`를 남겨 generic overlay가 source
+relief를 이중 합성하지 않게 한다. 그러나
 `k01-terrain-composition-coverage.test.mjs`는 실제 emitted 64×48 PNG alpha mask와 3,600-cell map placement를
 합성해, 이전처럼 `16`을 web `y=-16`으로 해석하면 low-nibble가 다른 이웃 경계가 798개 생김을 재현한다.
 source PNG만으로는 logical diamond 내부를 완전히 덮지 못한다(legacy mapping 153,600 pixel, shared-anchor mapping
@@ -125,14 +150,16 @@ node --test tools/imjinrok/k01-tile-placement-elevation-evidence.test.mjs
 node --test tools/imjinrok/k01-terrain-composition-coverage.test.mjs
 ```
 
-pure reference reproducer는 signed 16-bit x/y와 signed 32-bit raw argument만 받는다. out-of-bounds direct-helper
-query에는 `-1`을 반환하지만, `FUN_00469510`의 뒤쪽 object/frame memory access를 map bounds 밖에서 재현하려 하기
-전 fail closed 한다. test는 malformed buffer, fraction/out-of-range argument와 EXE/map/functions JSON/references JSON의
+pure reference reproducer는 signed 16-bit x/y와 signed 32-bit raw argument를 받으며, `FUN_00464cc0` projection은
+미확정 runtime table을 explicit signed WORD input으로 받는다. out-of-bounds direct-helper query에는 `-1`을 반환하지만,
+`FUN_00469510`의 뒤쪽 object/frame memory access를 map bounds 밖에서 재현하려 하기 전 fail closed 한다. test는
+fog-family offset까지 닿지 못하는 malformed buffer, fraction/out-of-range argument와 EXE/map/functions JSON/references JSON의
 한 byte 변조를 report 발행 전에 거부한다.
 
 ## 미확정 경계
 
 - `FUN_0046d650` result의 사람용 height/elevation/terrain 의미와 writer/lifecycle은 미확정이다.
+- `DAT_00c06e86` table의 실제 values, writer/lifetime와 human semantics은 미확정이다.
 - raw argument 1/2의 screen/world axis, exact pixel anchor/pivot, clipping/mode callee semantics은 미확정이다.
 - 다른 map/theme의 table contents와 original renderer 전체, product renderer parity는 이 범위 밖이다.
 - `field_0x00032514`의 direct writer set과 alias/computed writer boundary는
