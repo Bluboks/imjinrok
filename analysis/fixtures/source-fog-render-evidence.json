@@ -1,14 +1,19 @@
 {
   "question": "What source-backed fog resource, neighbor-lookup, caller-state, and six-subframe composition contract do FUN_00467de0 and FUN_0046a530 establish?",
-  "analysisStatus": "정적 확정 (resource family, lookup, caller state branches, and composition shape only)",
-  "reproductionStatus": "재현 완료 (hash-bound extraction, resource records, lookup vectors, and loop bounds only)",
+  "analysisStatus": "정적 확정 (resource family, lookup, caller state branches, six-subframe composition, and frame algebra only)",
+  "reproductionStatus": "재현 완료 (hash-bound extraction, resource records, lookup/frame vectors, and loop bounds only)",
   "implementationStatus": "없음",
   "sources": {
     "executable": {
       "path": "original/imjinrok2/imjinrok2.exe",
       "sha256": "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e"
     },
-    "normalTileDirectory": "original/imjinrok2/tile/normal"
+    "normalTileDirectory": "original/imjinrok2/tile/normal",
+    "k01Map": {
+      "path": "original/imjinrok2/stagemap/k01.map",
+      "size": 1097100,
+      "sha256": "43ec3a173032f74c12d3cce1db1078b076b651ed79070a0914673a5b65da99cb"
+    }
   },
   "functions": {
     "caller": {
@@ -23,8 +28,93 @@
   "resources": {
     "loaderRecordBase": "0x00bcdff8",
     "loaderRecordStride": "0x0bf8",
-    "familyByteAddress": "this + 0x12831 + mapX * 45 + mapY",
+    "familyByteAddress": "map + 0x4a0c4 + mapX * 180 + mapY",
     "familyToResourceIndex": "resourceIndex = familyByte + 0x3c",
+    "k01FamilyBytes": {
+      "scope": "K01 hash-bound map bytes only; this neither identifies the runtime producer nor generalizes to other maps.",
+      "mapOffset": "0x4a0c4",
+      "coordinateStorage": "map + 0x4a0c4 + x * 180 + y",
+      "dimensions": {
+        "width": 60,
+        "height": 60
+      },
+      "cellCount": 3600,
+      "valueStreamSha256": "7a9fcc150cf0128af19d57f742a6c160c6b5b8b003a81c069fb3167427208f88",
+      "domain": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        14
+      ],
+      "distribution": [
+        {
+          "value": 0,
+          "count": 2865
+        },
+        {
+          "value": 1,
+          "count": 95
+        },
+        {
+          "value": 2,
+          "count": 95
+        },
+        {
+          "value": 3,
+          "count": 101
+        },
+        {
+          "value": 4,
+          "count": 79
+        },
+        {
+          "value": 5,
+          "count": 38
+        },
+        {
+          "value": 6,
+          "count": 36
+        },
+        {
+          "value": 7,
+          "count": 54
+        },
+        {
+          "value": 8,
+          "count": 61
+        },
+        {
+          "value": 9,
+          "count": 52
+        },
+        {
+          "value": 10,
+          "count": 33
+        },
+        {
+          "value": 11,
+          "count": 35
+        },
+        {
+          "value": 12,
+          "count": 55
+        },
+        {
+          "value": 14,
+          "count": 1
+        }
+      ]
+    },
     "fog": [
       {
         "resourceIndex": 60,
@@ -35,8 +125,11 @@
         "header": {
           "width": 32,
           "height": 16,
-          "frameCount": 96
-        }
+          "frameCount": 96,
+          "atlasWidth": 1024,
+          "atlasHeight": 48
+        },
+        "headerFieldSha256": "0429cc48e98dd4c6a44ab9542b8c37f2b86bc965bb1d8338b4f72191a616d0c5"
       },
       {
         "resourceIndex": 61,
@@ -47,8 +140,11 @@
         "header": {
           "width": 32,
           "height": 16,
-          "frameCount": 96
-        }
+          "frameCount": 96,
+          "atlasWidth": 1024,
+          "atlasHeight": 48
+        },
+        "headerFieldSha256": "0429cc48e98dd4c6a44ab9542b8c37f2b86bc965bb1d8338b4f72191a616d0c5"
       },
       {
         "resourceIndex": 62,
@@ -59,8 +155,11 @@
         "header": {
           "width": 32,
           "height": 16,
-          "frameCount": 96
-        }
+          "frameCount": 96,
+          "atlasWidth": 1024,
+          "atlasHeight": 48
+        },
+        "headerFieldSha256": "0429cc48e98dd4c6a44ab9542b8c37f2b86bc965bb1d8338b4f72191a616d0c5"
       },
       {
         "resourceIndex": 63,
@@ -71,8 +170,11 @@
         "header": {
           "width": 32,
           "height": 16,
-          "frameCount": 96
-        }
+          "frameCount": 96,
+          "atlasWidth": 1024,
+          "atlasHeight": 48
+        },
+        "headerFieldSha256": "0429cc48e98dd4c6a44ab9542b8c37f2b86bc965bb1d8338b4f72191a616d0c5"
       },
       {
         "resourceIndex": 64,
@@ -83,8 +185,11 @@
         "header": {
           "width": 32,
           "height": 16,
-          "frameCount": 96
-        }
+          "frameCount": 96,
+          "atlasWidth": 1024,
+          "atlasHeight": 48
+        },
+        "headerFieldSha256": "0429cc48e98dd4c6a44ab9542b8c37f2b86bc965bb1d8338b4f72191a616d0c5"
       },
       {
         "resourceIndex": 65,
@@ -95,8 +200,11 @@
         "header": {
           "width": 32,
           "height": 16,
-          "frameCount": 96
-        }
+          "frameCount": 96,
+          "atlasWidth": 1024,
+          "atlasHeight": 48
+        },
+        "headerFieldSha256": "0429cc48e98dd4c6a44ab9542b8c37f2b86bc965bb1d8338b4f72191a616d0c5"
       },
       {
         "resourceIndex": 66,
@@ -107,8 +215,11 @@
         "header": {
           "width": 32,
           "height": 16,
-          "frameCount": 96
-        }
+          "frameCount": 96,
+          "atlasWidth": 1024,
+          "atlasHeight": 48
+        },
+        "headerFieldSha256": "0429cc48e98dd4c6a44ab9542b8c37f2b86bc965bb1d8338b4f72191a616d0c5"
       },
       {
         "resourceIndex": 67,
@@ -119,8 +230,11 @@
         "header": {
           "width": 32,
           "height": 16,
-          "frameCount": 96
-        }
+          "frameCount": 96,
+          "atlasWidth": 1024,
+          "atlasHeight": 48
+        },
+        "headerFieldSha256": "0429cc48e98dd4c6a44ab9542b8c37f2b86bc965bb1d8338b4f72191a616d0c5"
       },
       {
         "resourceIndex": 68,
@@ -131,8 +245,11 @@
         "header": {
           "width": 32,
           "height": 16,
-          "frameCount": 96
-        }
+          "frameCount": 96,
+          "atlasWidth": 1024,
+          "atlasHeight": 48
+        },
+        "headerFieldSha256": "0429cc48e98dd4c6a44ab9542b8c37f2b86bc965bb1d8338b4f72191a616d0c5"
       },
       {
         "resourceIndex": 69,
@@ -143,8 +260,11 @@
         "header": {
           "width": 32,
           "height": 16,
-          "frameCount": 96
-        }
+          "frameCount": 96,
+          "atlasWidth": 1024,
+          "atlasHeight": 48
+        },
+        "headerFieldSha256": "0429cc48e98dd4c6a44ab9542b8c37f2b86bc965bb1d8338b4f72191a616d0c5"
       },
       {
         "resourceIndex": 70,
@@ -155,8 +275,11 @@
         "header": {
           "width": 32,
           "height": 16,
-          "frameCount": 96
-        }
+          "frameCount": 96,
+          "atlasWidth": 1024,
+          "atlasHeight": 48
+        },
+        "headerFieldSha256": "0429cc48e98dd4c6a44ab9542b8c37f2b86bc965bb1d8338b4f72191a616d0c5"
       },
       {
         "resourceIndex": 71,
@@ -167,8 +290,11 @@
         "header": {
           "width": 32,
           "height": 16,
-          "frameCount": 96
-        }
+          "frameCount": 96,
+          "atlasWidth": 1024,
+          "atlasHeight": 48
+        },
+        "headerFieldSha256": "0429cc48e98dd4c6a44ab9542b8c37f2b86bc965bb1d8338b4f72191a616d0c5"
       },
       {
         "resourceIndex": 72,
@@ -179,8 +305,11 @@
         "header": {
           "width": 32,
           "height": 16,
-          "frameCount": 96
-        }
+          "frameCount": 96,
+          "atlasWidth": 1024,
+          "atlasHeight": 48
+        },
+        "headerFieldSha256": "0429cc48e98dd4c6a44ab9542b8c37f2b86bc965bb1d8338b4f72191a616d0c5"
       },
       {
         "resourceIndex": 73,
@@ -191,8 +320,11 @@
         "header": {
           "width": 32,
           "height": 16,
-          "frameCount": 96
-        }
+          "frameCount": 96,
+          "atlasWidth": 1024,
+          "atlasHeight": 48
+        },
+        "headerFieldSha256": "0429cc48e98dd4c6a44ab9542b8c37f2b86bc965bb1d8338b4f72191a616d0c5"
       },
       {
         "resourceIndex": 74,
@@ -203,8 +335,11 @@
         "header": {
           "width": 32,
           "height": 16,
-          "frameCount": 96
-        }
+          "frameCount": 96,
+          "atlasWidth": 1024,
+          "atlasHeight": 48
+        },
+        "headerFieldSha256": "0429cc48e98dd4c6a44ab9542b8c37f2b86bc965bb1d8338b4f72191a616d0c5"
       }
     ],
     "black": {
@@ -338,6 +473,82 @@
     },
     "boundary": "The byte-proven branch distinguishes literal state 4 from the non-4 path reached by caller literal state 8; no human visibility meaning is assigned."
   },
+  "frameSelection": {
+    "resourceHeaderOffsets": {
+      "frameWidth": "0x04",
+      "frameHeight": "0x08",
+      "frameCount": "0x0c",
+      "atlasWidth": "0x0bcc",
+      "atlasHeight": "0x0bd0"
+    },
+    "normalFogAtlas": {
+      "frameWidth": 32,
+      "frameHeight": 16,
+      "frameCount": 96,
+      "atlasWidth": 1024,
+      "atlasHeight": 48,
+      "atlasColumns": 32,
+      "halfColumns": 16
+    },
+    "signedDivision": "x86 signed IDIV; for the caller-proven nonnegative selector domain 0..13, quotient = trunc(selector / halfColumns) and remainder = selector % halfColumns.",
+    "callerSelectorDomain": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13
+    ],
+    "formula": "frame = inner + (outer + 3 * trunc(selector / halfColumns)) * atlasColumns + 2 * (selector % halfColumns), with outer = 0..2 and inner = 0..1.",
+    "vectors": [
+      {
+        "selector": 0,
+        "frames": [
+          0,
+          1,
+          32,
+          33,
+          64,
+          65
+        ]
+      },
+      {
+        "selector": 9,
+        "frames": [
+          18,
+          19,
+          50,
+          51,
+          82,
+          83
+        ]
+      },
+      {
+        "selector": 13,
+        "frames": [
+          26,
+          27,
+          58,
+          59,
+          90,
+          91
+        ]
+      }
+    ],
+    "frameBounds": {
+      "minimum": 0,
+      "maximum": 91,
+      "withinFrameCount": 96
+    }
+  },
   "rawCodeRanges": [
     {
       "id": "FUN_00467de0",
@@ -379,7 +590,7 @@
       "va": "0x0046a5c8",
       "rawOffset": "0x0006a5c8",
       "bytes": "0f bf c7 05 95 06 00 00 0f bf d3 8d 04 80 03 f2 8d 54 24 34 8d 04 c0 0f bf f9 66 0f b6 04 86 83 c0 3c",
-      "meaning": "FUN_0046a530 reads the byte at the proved per-cell family address and adds 0x3c before selecting a loader record."
+      "meaning": "FUN_0046a530 forms map + 0x4a0c4 + mapX*180 + mapY, reads its family byte, and adds 0x3c before selecting a loader record."
     },
     {
       "va": "0x0046a5f1",
@@ -388,10 +599,22 @@
       "meaning": "The selected family plus 0x3c is scaled by record stride 0x0bf8 and reads the common loader record."
     },
     {
+      "va": "0x0046a634",
+      "rawOffset": "0x0006a634",
+      "bytes": "8b 83 c4 eb bc 00 66 8b ab fc df bc 00 99 f7 bb fc df bc 00 66 8b 8b 00 e0 bc 00",
+      "meaning": "FUN_0046a530 loads record+0x0bcc atlas width, divides it by record+0x04 frame width, and loads record+0x08 frame height."
+    },
+    {
       "va": "0x0046a64f",
       "rawOffset": "0x0006a64f",
       "bytes": "66 83 7c 24 54 04 89 6c 24 28 89 4c 24 1c c7 44 24 48 00 00 00 00 89 44 24 50 0f 85 2b 01 00 00",
       "meaning": "FUN_0046a530 branches on literal state 4 before entering its first 3-by-2 composition loop."
+    },
+    {
+      "va": "0x0046a6c0",
+      "rawOffset": "0x0006a6c0",
+      "bytes": "0f bf 44 24 50 0f bf 6c 24 58 99 2b c2 68 68 44 53 00 8b f8 8b c5 99 d1 ff f7 ff 8b 54 24 4c 8b c8 8d 04 4a 03 c8 8b c5 99 0f af 4c 24 54 f7 ff",
+      "meaning": "The state-4 path uses signed IDIV with halfColumns and combines quotient, remainder, outer, and inner loop values into the subframe index."
     },
     {
       "va": "0x0046a71e",
@@ -424,5 +647,5 @@
       "meaning": "The non-state-4 path also has inner <2 and outer <3 loop bounds, but its call target differs from the state-4 path."
     }
   ],
-  "unresolvedBoundary": "Visibility/exploration semantics, product-state mapping, map-file provenance of the family byte, wall-clock behavior, pixel placement, and the exact six-frame selection algebra remain unresolved. The compositor bytes contain runtime helper and record-field arithmetic, but this artifact intentionally supplies no frame-index formula without a closed static input-to-output proof."
+  "unresolvedBoundary": "Visibility/exploration semantics, product-state mapping, generic map-file provenance and runtime producer/lifetime of the family byte, wall-clock behavior, and pixel placement remain unresolved. K01's hash-bound static byte distribution is recorded only as a bounded map-data observation. The frame algebra is confined to the caller-proven selector domain and normal fog header contract; it does not assign a human meaning to either state or selector."
 }
