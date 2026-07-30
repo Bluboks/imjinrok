@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "acceptedReplayScope": "K01 internal class 2 state 1/2 cadence only: supplied raw unsigned-WORD phase/counter/limit values and a recovered pre-displacement or post-displacement entry route. This is not an original-clock or project-24-Hz conversion.",
+  "vectors": [
+    {
+      "id": "normal-state-holds-before-limit",
+      "input": { "route": "post-displacement", "alternateMovement": false, "phaseWord": 3, "cadenceCounterWord": 0, "cadenceLimitWord": 2 },
+      "expected": { "route": "post-displacement", "skippedDueToZeroPhase": false, "animationStateWrite": 1, "dirtyWrite": null, "phaseAdvanced": false, "phaseWord": 3, "phaseCopyWord": null, "cadenceCounterWord": 1 }
+    },
+    {
+      "id": "alternate-state-wraps-at-limit",
+      "input": { "route": "post-displacement", "alternateMovement": true, "phaseWord": 7, "cadenceCounterWord": 1, "cadenceLimitWord": 2 },
+      "expected": { "route": "post-displacement", "skippedDueToZeroPhase": false, "animationStateWrite": 2, "dirtyWrite": 1, "phaseAdvanced": true, "phaseWord": 0, "phaseCopyWord": 0, "cadenceCounterWord": 0 }
+    },
+    {
+      "id": "pre-displacement-zero-phase-skips-cadence",
+      "input": { "route": "pre-displacement", "alternateMovement": false, "phaseWord": 0, "cadenceCounterWord": 5, "cadenceLimitWord": 2 },
+      "expected": { "route": "pre-displacement", "skippedDueToZeroPhase": true, "animationStateWrite": null, "dirtyWrite": null, "phaseAdvanced": false, "phaseWord": 0, "phaseCopyWord": null, "cadenceCounterWord": 5 }
+    },
+    {
+      "id": "post-displacement-zero-phase-advances",
+      "input": { "route": "post-displacement", "alternateMovement": false, "phaseWord": 0, "cadenceCounterWord": 0, "cadenceLimitWord": 1 },
+      "expected": { "route": "post-displacement", "skippedDueToZeroPhase": false, "animationStateWrite": 1, "dirtyWrite": 1, "phaseAdvanced": true, "phaseWord": 1, "phaseCopyWord": 1, "cadenceCounterWord": 0 }
+    },
+    {
+      "id": "signed-counter-boundary-holds",
+      "input": { "route": "post-displacement", "alternateMovement": true, "phaseWord": 6, "cadenceCounterWord": 65534, "cadenceLimitWord": 0 },
+      "expected": { "route": "post-displacement", "skippedDueToZeroPhase": false, "animationStateWrite": 2, "dirtyWrite": null, "phaseAdvanced": false, "phaseWord": 6, "phaseCopyWord": null, "cadenceCounterWord": 65535 }
+    },
+    {
+      "id": "signed-phase-dividend-boundary",
+      "input": { "route": "post-displacement", "alternateMovement": false, "phaseWord": 32768, "cadenceCounterWord": 65535, "cadenceLimitWord": 65535 },
+      "expected": { "route": "post-displacement", "skippedDueToZeroPhase": false, "animationStateWrite": 1, "dirtyWrite": 1, "phaseAdvanced": true, "phaseWord": 65529, "phaseCopyWord": 65529, "cadenceCounterWord": 0 }
+    }
+  ]
+}

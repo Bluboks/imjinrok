@@ -65,6 +65,7 @@
 - [K01 action 59 subtype 0x10 고정 레코드·후속 효과](reverse-engineering/mechanics/k01-subtype-16-path.md)
 - [generic selection mode 1 · effect kind 2 다중 셀 열거와 callback 경계](reverse-engineering/mechanics/generic-mode1-kind2-enumeration.md)
 - [조선 창병·내부 클래스 2 애니메이션 파일럿](reverse-engineering/mechanics/unit-animation-pilot.md)
+- [K01 조선 창병 locomotion raw field·walk cadence](reverse-engineering/mechanics/k01-class2-locomotion-cadence.md)
 - [K01 권율·유성룡 핵심 애니메이션 파일럿](reverse-engineering/mechanics/k01-hero-animation-pilot.md)
 - [K01 일본 사무라이 핵심 애니메이션 파일럿](reverse-engineering/mechanics/k01-samurai-animation-pilot.md)
 - [K01 일본 농부 핵심 프레임](reverse-engineering/mechanics/k01-japanese-farmer-frames.md)

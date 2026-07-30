@@ -116,6 +116,10 @@ signed health `+0x3e`, full reference `+0x1b6/+0x1b8`을 사용한다.
 | `+0x48e` | word | 두 번째 프레임 소스 후보 | setter 경로 |
 | `+0x4b2` | word | 건설 상태 sprite slot 설정 | 클래스 49·52 범위 `정적 확정` |
 | `+0x4b4` | word | 건설 상태 frame offset | `typeBaseFrame - 7`, 클래스 49·52 범위 `정적 확정` |
+| `+0x4ea` | word | class 2 normal-movement cadence limit raw input | type record `+0x50`에서 생성 시 복사되고 `FUN_00425b20`의 signed `JL` 비교에 쓰이는 범위 `정적 확정`; 사람용 시간 단위는 미확정 |
+| `+0x4ec` | word | class 2 normal-movement cadence counter | 생성 시 0, `FUN_00425b20`이 16-bit increment·signed threshold 후 0 reset하는 범위 `정적 확정` |
+| `+0x4ee` | word | class 2 normal-movement raw accumulator input | type record `+0x3c`에서 생성 시 복사되어 `FUN_00425b20`이 `+0x4f2` 갱신에 읽는 범위 `정적 확정`; 속도·좌표 단위·후속 writer는 미확정 |
+| `+0x4f2` | word | class 2 normal-movement raw accumulator | 생성 시 0, `FUN_00425b20`의 `+0x4ee` 입력 경로가 갱신하는 범위 `정적 확정`; world displacement 의미는 미확정 |
 
 위 `정적 확정`은 각 파일럿이 다룬 클래스와 분기에 한정한다. 같은 오프셋이 모든 엔티티 종류에서 같은
 의미라는 일반 구조체 판정은 아직 하지 않는다.
