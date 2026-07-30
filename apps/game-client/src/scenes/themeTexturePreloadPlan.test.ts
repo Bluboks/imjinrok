@@ -1,17 +1,25 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { defaultTheme, getThemeFrameRefs } from "@shared";
-import { getMissingThemeTextureLoadRequests } from "./themeTexturePreloadPlan";
+import {
+  ThemeTextureDeferredBatchQueue,
+  getGameplayThemeTextureLoadPlan,
+  getMissingThemeTextureLoadRequests,
+} from "./themeTexturePreloadPlan";
 
-test("includes every missing default-theme texture in the Skirmish preload phase", () => {
+test("partitions default-theme textures into deterministic critical and deferred gameplay tiers", () => {
   const frameRefs = getThemeFrameRefs(defaultTheme);
-  const requests = getMissingThemeTextureLoadRequests(defaultTheme, frameRefs, () => false);
+  const plan = getGameplayThemeTextureLoadPlan(defaultTheme, () => false);
+  const plannedKeys = [...plan.critical, ...plan.deferred].map((request) => request.frame.textureKey);
 
   assert.deepEqual(
-    requests.map((request) => request.frame.textureKey),
-    frameRefs.map(({ frame }) => frame.textureKey),
+    [...plannedKeys].sort(),
+    frameRefs.map(({ frame }) => frame.textureKey).sort(),
   );
-  assert.equal(new Set(requests.map((request) => request.frame.textureKey)).size, requests.length);
+  assert.equal(new Set(plannedKeys).size, plannedKeys.length);
+  assert.ok(plan.critical.length > 0);
+  assert.ok(plan.deferred.length > 0);
+  assert.deepEqual(getGameplayThemeTextureLoadPlan(defaultTheme, () => false), plan);
 });
 
 test("builds the deterministic Skirmish preload plan from missing unique texture keys", () => {
@@ -59,4 +67,47 @@ test("retains a failed preload texture in the create-time retry plan until Phase
     () => true,
   );
   assert.deepEqual(noRetryAfterSuccess, []);
+});
+
+test("loads deferred theme textures in bounded unique batches and retains failures for retry", () => {
+  const [first, second, third] = getMissingThemeTextureLoadRequests(defaultTheme, getThemeFrameRefs(defaultTheme), () => false);
+  assert.ok(first && second && third);
+  const loaded = new Set<string>();
+  const queue = new ThemeTextureDeferredBatchQueue([first, first, second, third], 2);
+
+  assert.deepEqual(
+    queue.takeNextBatch((textureKey) => loaded.has(textureKey)).map((request) => request.frame.textureKey),
+    [first.frame.textureKey, second.frame.textureKey],
+  );
+  loaded.add(first.frame.textureKey);
+  assert.deepEqual(
+    queue.completeActiveBatch((textureKey) => loaded.has(textureKey)).map((request) => request.frame.textureKey),
+    [first.frame.textureKey],
+  );
+
+  assert.deepEqual(
+    queue.takeNextBatch((textureKey) => loaded.has(textureKey)).map((request) => request.frame.textureKey),
+    [third.frame.textureKey],
+  );
+  loaded.add(third.frame.textureKey);
+  queue.completeActiveBatch((textureKey) => loaded.has(textureKey));
+  assert.deepEqual(queue.takeNextBatch((textureKey) => loaded.has(textureKey)), []);
+
+  queue.retryMissing((textureKey) => loaded.has(textureKey));
+  assert.deepEqual(
+    queue.takeNextBatch((textureKey) => loaded.has(textureKey)).map((request) => request.frame.textureKey),
+    [second.frame.textureKey],
+  );
+});
+
+test("cancelling deferred loading prevents later batches and completion callbacks from producing work", () => {
+  const [first] = getMissingThemeTextureLoadRequests(defaultTheme, getThemeFrameRefs(defaultTheme), () => false);
+  assert.ok(first);
+  const queue = new ThemeTextureDeferredBatchQueue([first]);
+
+  queue.takeNextBatch(() => false);
+  queue.cancel();
+
+  assert.deepEqual(queue.completeActiveBatch(() => true), []);
+  assert.deepEqual(queue.takeNextBatch(() => false), []);
 });

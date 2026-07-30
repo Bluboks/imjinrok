@@ -10,7 +10,6 @@ import {
   createMapDefinitionFromId,
   getGridFacing,
   getNextCampaignScenario,
-  getThemeFrameRefs,
   getTerrainVisual,
   resolveEntityPortraitFrame,
   getTileAt,
@@ -51,7 +50,6 @@ import {
   type TerrainKindSlot,
   type TerrainType,
   type TerrainVisual,
-  type ThemeFrameRef,
   type UnitDefinitionId,
 } from "@shared";
 import {
@@ -216,7 +214,12 @@ import {
   type GameplayPreferences,
 } from "../gameplayPreferences.js";
 import { createGameplayRuntimeSpeed, stepGameplayRuntimeSpeed } from "../gameplayInputRuntime.js";
-import { getMissingThemeTextureLoadRequests, type ThemeTextureLoadRequest } from "./themeTexturePreloadPlan.js";
+import {
+  ThemeTextureDeferredBatchQueue,
+  getGameplayEntityRepresentativeFrame,
+  getGameplayThemeTextureLoadPlan,
+  type ThemeTextureLoadRequest,
+} from "./themeTexturePreloadPlan.js";
 import {
   decideMouseInputAction,
   type MouseHitKind,
@@ -556,6 +559,11 @@ export class SkirmishScene extends Phaser.Scene {
   private screenOverlayCamera: Phaser.Cameras.Scene2D.Camera | null = null;
   private readonly screenOverlayRoots = new Set<ScreenOverlayGameObject>();
   private readonly activeTheme: ThemeDefinition = defaultTheme;
+  private deferredThemeTextureQueue: ThemeTextureDeferredBatchQueue | null = null;
+  private deferredThemeLoadGeneration = 0;
+  private deferredThemeLoadErrorHandler: ((file: { key?: string; src?: string }) => void) | null = null;
+  private deferredThemeLoadCompleteHandler: (() => void) | null = null;
+  private deferredThemeLoadTimer: Phaser.Time.TimerEvent | null = null;
   private localPlayerId = "local-player";
   private playerVisibility: PlayerVisibilityState = createPlayerVisibility(defaultMap);
   private fogChunkDirtyMask = new Uint8Array(0);
@@ -654,7 +662,7 @@ export class SkirmishScene extends Phaser.Scene {
   }
 
   preload(): void {
-    this.queueActiveThemeTexturesForPreload();
+    this.queueGameplayCriticalThemeTexturesForPreload();
 
     for (const cue of GAMEPLAY_AUDIO_CUES) {
       if (!this.cache.audio.exists(cue.key)) {
@@ -792,10 +800,8 @@ export class SkirmishScene extends Phaser.Scene {
     this.setupControlGroupHotkeys();
     this.setupPlaybackHotkeys();
     this.setupPointerLockLifecycle();
-    this.ensureActiveThemeTexturesLoaded(() => {
-      this.redrawTerrain();
-      this.redrawElevationOverlay();
-    });
+    this.redrawTerrain();
+    this.redrawElevationOverlay();
     this.redrawAllFogOverlay();
     this.syncResourceRenderables();
     this.syncUnitRenderables();
@@ -814,6 +820,7 @@ export class SkirmishScene extends Phaser.Scene {
     this.redrawObjectiveAreaOverlay();
     this.updateObjectiveTrackerOverlay();
     this.updateMissionResultOverlay();
+    this.beginDeferredThemeTextureLoading();
   }
 
   override update(time: number, delta: number): void {
@@ -1238,6 +1245,7 @@ export class SkirmishScene extends Phaser.Scene {
   private handleShutdown(): void {
     this.closeCheatInput();
     this.stopGameplayAudio();
+    this.cancelDeferredThemeTextureLoading();
     this.input.manager.events.off(Phaser.Input.Events.POINTERLOCK_CHANGE, this.handlePointerLockChanged, this);
     this.input.keyboard?.off("keydown", this.handleControlGroupKeyDown, this);
     this.input.keyboard?.off("keydown", this.handlePlaybackKeyDown, this);
@@ -7628,7 +7636,11 @@ export class SkirmishScene extends Phaser.Scene {
     }
 
     const hash = this.hashTile(x, y, slot);
-    return frames[hash % frames.length] ?? frames[0] ?? null;
+    const selected = frames[hash % frames.length] ?? frames[0] ?? null;
+
+    return selected && this.textures.exists(selected.textureKey)
+      ? selected
+      : frames.find((frame) => this.textures.exists(frame.textureKey)) ?? null;
   }
 
   private hashTile(x: number, y: number, salt: string): number {
@@ -7942,38 +7954,11 @@ export class SkirmishScene extends Phaser.Scene {
     });
   }
 
-  private ensureActiveThemeTexturesLoaded(onComplete: () => void): void {
-    const missingTextureRequests = this.getMissingActiveThemeTextureLoadRequests();
-
-    if (missingTextureRequests.length === 0) {
-      onComplete();
-      return;
-    }
-
-    console.warn(
-      "Missing theme textures detected; retrying load:",
-      missingTextureRequests.map(({ frame }) => frame.fileName ?? frame.textureKey),
-    );
-
-    const handleLoadError = (file: { key?: string; src?: string }) => {
-      console.warn("Theme texture failed to load", { key: file.key, src: file.src });
-    };
-
-    this.load.on(Phaser.Loader.Events.FILE_LOAD_ERROR, handleLoadError);
-    this.load.once(Phaser.Loader.Events.COMPLETE, () => {
-      this.load.off(Phaser.Loader.Events.FILE_LOAD_ERROR, handleLoadError);
-      onComplete();
-    });
-
-    for (const request of missingTextureRequests) {
-      this.load.image(request.frame.textureKey, request.url);
-    }
-
-    this.load.start();
-  }
-
-  private queueActiveThemeTexturesForPreload(): void {
-    const textureRequests = this.getMissingActiveThemeTextureLoadRequests();
+  private queueGameplayCriticalThemeTexturesForPreload(): void {
+    const textureRequests = getGameplayThemeTextureLoadPlan(
+      this.activeTheme,
+      (textureKey) => this.textures.exists(textureKey),
+    ).critical;
 
     if (textureRequests.length === 0) {
       return;
@@ -7996,12 +7981,126 @@ export class SkirmishScene extends Phaser.Scene {
     }
   }
 
-  private getMissingActiveThemeTextureLoadRequests(): ThemeTextureLoadRequest[] {
-    return getMissingThemeTextureLoadRequests(
+  private beginDeferredThemeTextureLoading(): void {
+    this.cancelDeferredThemeTextureLoading();
+    const plan = getGameplayThemeTextureLoadPlan(
       this.activeTheme,
-      getThemeFrameRefs(this.activeTheme),
       (textureKey) => this.textures.exists(textureKey),
     );
+    this.deferredThemeTextureQueue = new ThemeTextureDeferredBatchQueue([
+      ...plan.critical,
+      ...plan.deferred,
+    ]);
+    this.startNextDeferredThemeTextureBatch();
+  }
+
+  private startNextDeferredThemeTextureBatch(): void {
+    const queue = this.deferredThemeTextureQueue;
+    if (!queue) {
+      return;
+    }
+
+    const batch = queue.takeNextBatch((textureKey) => this.textures.exists(textureKey));
+    if (batch.length === 0) {
+      return;
+    }
+
+    const generation = this.deferredThemeLoadGeneration;
+    const batchTextureKeys = new Set(batch.map(({ frame }) => frame.textureKey));
+    const handleLoadError = (file: { key?: string; src?: string }) => {
+      if (file.key && batchTextureKeys.has(file.key)) {
+        console.warn("Deferred theme texture failed to load", { key: file.key, src: file.src });
+      }
+    };
+    const handleLoadComplete = () => {
+      if (this.deferredThemeTextureQueue !== queue || this.deferredThemeLoadGeneration !== generation) {
+        return;
+      }
+
+      this.removeDeferredThemeTextureLoadListeners();
+      const loaded = queue.completeActiveBatch((textureKey) => this.textures.exists(textureKey));
+      if (loaded.length > 0) {
+        this.refreshDeferredThemeTexturePresentation(loaded);
+      }
+      this.scheduleNextDeferredThemeTextureBatch(queue, generation);
+    };
+
+    this.deferredThemeLoadErrorHandler = handleLoadError;
+    this.deferredThemeLoadCompleteHandler = handleLoadComplete;
+    this.load.on(Phaser.Loader.Events.FILE_LOAD_ERROR, handleLoadError);
+    this.load.once(Phaser.Loader.Events.COMPLETE, handleLoadComplete);
+
+    try {
+      for (const request of batch) {
+        this.load.image(request.frame.textureKey, request.url);
+      }
+      this.load.start();
+    } catch (error) {
+      this.removeDeferredThemeTextureLoadListeners();
+      queue.completeActiveBatch(() => false);
+      console.warn("Failed to start deferred theme texture load", { error });
+    }
+  }
+
+  private scheduleNextDeferredThemeTextureBatch(queue: ThemeTextureDeferredBatchQueue, generation: number): void {
+    this.deferredThemeLoadTimer?.remove(false);
+    this.deferredThemeLoadTimer = this.time.delayedCall(0, () => {
+      this.deferredThemeLoadTimer = null;
+      if (this.deferredThemeTextureQueue === queue && this.deferredThemeLoadGeneration === generation) {
+        this.startNextDeferredThemeTextureBatch();
+      }
+    });
+  }
+
+  private refreshDeferredThemeTexturePresentation(loaded: readonly ThemeTextureLoadRequest[]): void {
+    if (loaded.some(({ visual }) => visual.kind === "terrain")) {
+      this.redrawTerrain();
+      this.redrawElevationOverlay();
+    }
+
+    let resourcePresentationNeedsRefresh = false;
+    for (const resourceView of this.iterateKnownResourceViews()) {
+      const renderable = this.resourceRenderables.get(resourceView.resource.id);
+      const textureKey = resolveMapResourceVisualTextureKey(
+        CONTENT_REGISTRY,
+        this.map,
+        resourceView.resource.kind,
+        getResourceNodeState(resourceView.resource),
+      );
+      if (textureKey && renderable && !renderable.sourceImage?.visible) {
+        renderable.stateKey = "";
+        resourcePresentationNeedsRefresh = true;
+      }
+    }
+    if (resourcePresentationNeedsRefresh) {
+      this.syncResourceRenderables();
+    }
+
+    if (loaded.some(({ visual }) => visual.kind === "entity")) {
+      this.unitRenderables.forEach((renderable) => renderable.container.destroy(true));
+      this.unitRenderables.clear();
+      this.syncUnitRenderables();
+    }
+  }
+
+  private removeDeferredThemeTextureLoadListeners(): void {
+    if (this.deferredThemeLoadErrorHandler) {
+      this.load.off(Phaser.Loader.Events.FILE_LOAD_ERROR, this.deferredThemeLoadErrorHandler);
+      this.deferredThemeLoadErrorHandler = null;
+    }
+    if (this.deferredThemeLoadCompleteHandler) {
+      this.load.off(Phaser.Loader.Events.COMPLETE, this.deferredThemeLoadCompleteHandler);
+      this.deferredThemeLoadCompleteHandler = null;
+    }
+  }
+
+  private cancelDeferredThemeTextureLoading(): void {
+    this.deferredThemeLoadGeneration += 1;
+    this.deferredThemeLoadTimer?.remove(false);
+    this.deferredThemeLoadTimer = null;
+    this.removeDeferredThemeTextureLoadListeners();
+    this.deferredThemeTextureQueue?.cancel();
+    this.deferredThemeTextureQueue = null;
   }
 
   private getTileWorldDiamondBounds(x: number, y: number): Phaser.Geom.Rectangle {
@@ -8499,7 +8598,7 @@ export class SkirmishScene extends Phaser.Scene {
     const visual = this.getEntityVisual(unit.kind);
     const initialFacing = this.getUnitFacing(unit);
     const selection = visual ? this.getEntityAnimationSelection(unit, visual, initialFacing) : null;
-    const frame = selection?.clip.frames[0] ?? null;
+    const frame = this.getLoadedEntityPresentationFrame(visual, selection?.clip.frames[0] ?? null);
 
     selectionRing.lineStyle(2, 0xf3dd8f, 1);
     selectionRing.strokeEllipse(
@@ -8783,7 +8882,8 @@ export class SkirmishScene extends Phaser.Scene {
     const facing = this.getUnitFacing(unit, renderable.lastFacing);
     const selection = visual ? this.getEntityAnimationSelection(unit, visual, facing) : null;
     const baseLayer = renderable.spriteLayers[0];
-    const frame = selection && baseLayer ? this.advanceEntityAnimation(baseLayer, selection, deltaMs) : null;
+    const selectedFrame = selection && baseLayer ? this.advanceEntityAnimation(baseLayer, selection, deltaMs) : null;
+    const frame = visual ? this.getLoadedEntityPresentationFrame(visual, selectedFrame) : null;
 
     renderable.lastFacing = facing;
 
@@ -8857,6 +8957,15 @@ export class SkirmishScene extends Phaser.Scene {
     const visual = visualId ? this.activeTheme.visuals[visualId] : null;
 
     return visual?.kind === "entity" ? visual : null;
+  }
+
+  private getLoadedEntityPresentationFrame(visual: EntityVisual | null, selectedFrame: FrameRef | null): FrameRef | null {
+    if (selectedFrame && this.textures.exists(selectedFrame.textureKey)) {
+      return selectedFrame;
+    }
+
+    const representative = visual ? getGameplayEntityRepresentativeFrame(visual) : null;
+    return representative && this.textures.exists(representative.textureKey) ? representative : null;
   }
 
   private getEntityAnimationSelection(unit: UnitState, visual: EntityVisual, facing: Facing): EntityAnimationSelection | null {
