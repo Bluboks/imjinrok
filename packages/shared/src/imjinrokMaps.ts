@@ -23,6 +23,8 @@ export interface ImjinrokMapMetadata {
   sourceSpawns?: readonly { x: number; y: number }[];
   spawns: readonly { x: number; y: number }[];
   missionRouteWaypoints?: readonly { x: number; y: number }[];
+  /** Stable product navigation profile selected by this imported map's metadata. */
+  pathfindingProfileId?: string;
   terrainMaskRle?: string;
   sourceRecordProbe?: ImjinrokMapRecordProbe;
 }
@@ -66,6 +68,7 @@ export const imjinrokMapMetadatas = [
       { x: 6, y: 6 },
       { x: 52, y: 52 },
     ],
+    pathfindingProfileId: "imjinrok:source-greedy-local-adapter",
     terrainMaskRle: K01_TERRAIN_RLE,
     sourceRecordProbe: {
       layoutAssumption: "row-major 256x256 records of 16 bytes at 0xbd8c",
@@ -197,6 +200,9 @@ export function createImjinrokMapScaffold(mapId: string): MapDefinition | null {
   });
 
   map.sourceInitialView = { ...metadata.view };
+  if (metadata.pathfindingProfileId) {
+    map.pathfindingProfileId = metadata.pathfindingProfileId;
+  }
   map.tilesetId = `imjinrok-${metadata.tileTheme}`;
   map.resourceVisualSetId = "imjinrok-source-resource-adaptation";
   applyOriginalTerrainMask(map, metadata.terrainMaskRle);

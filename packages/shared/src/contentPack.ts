@@ -10,7 +10,7 @@ import {
   type TerrainDefinition,
   type UnitDefinition,
 } from "./content.js";
-import type { EnvironmentVisualProfile, ResourceVisualSetDefinition, TilesetDefinition } from "./tilesets.js";
+import type { EnvironmentVisualProfile, ResourceVisualSetDefinition, SourceEvidenceStatus, TilesetDefinition } from "./tilesets.js";
 import { getK01SourceTileVisualAssets, K01_SOURCE_TILE_IMAGE_GEOMETRY } from "./k01SourceTileVisuals.js";
 
 const KNOWN_DAMAGE_TYPES = new Set(["physical", "fire", "lightning", "drowning"]);
@@ -19,6 +19,8 @@ const KNOWN_DAMAGE_TYPES = new Set(["physical", "fire", "lightning", "drowning"]
 export interface PathfindingProfileDefinition {
   id: string;
   displayName: string;
+  /** Evidence scope for this selectable product navigation adapter. */
+  evidenceStatus?: SourceEvidenceStatus;
 }
 
 export interface ContentPackDefinition {
@@ -171,6 +173,13 @@ export const imjinrokSourceContentPack = {
         sourceAsset("fnt/tree0.spr", "871c0572134266838776bd3e90005287a14abfb3c56f5e9c2dab80f1aaa1c2fc"),
         sourceAsset("fnt/resource.spr", "04a2c1608a64a91922193c82a67895d00391e59cb9faa31b5916238f9416ff40"),
       ],
+    },
+  },
+  pathfindingProfiles: {
+    "imjinrok:source-greedy-local-adapter": {
+      id: "imjinrok:source-greedy-local-adapter",
+      displayName: "Imjinrok Source Greedy Local Adapter",
+      evidenceStatus: "source-backed-adaptation",
     },
   },
 } as const satisfies ContentPackDefinition;

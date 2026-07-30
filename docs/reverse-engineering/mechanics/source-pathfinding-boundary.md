@@ -9,7 +9,7 @@ footprint predicate, fallback과 waypoint postprocess는 어떤 좁은 범위까
 | --- | --- | --- |
 | 분석 | `정적 확정` | 아래 함수의 전체 raw body, generated function/reference metadata, call edge와 명시한 control/data-flow 범위 |
 | 재현 | `재현 완료` | cap 경계, 정확한 candidate vector/strict tie, goal·partial fallback, footprint block/OOB, frontier-capacity와 wrapper failure synthetic vector |
-| 구현 | `없음` | product navigation, scheduler, entity adapter를 변경하지 않았다. |
+| 구현 | `의도적 적응` | `imjinrok:source-greedy-local-adapter`는 아래의 bounded kernel을 product full-path contract에 연결한다. 이는 `source-backed-adaptation`이며 원작 전체 pathfinding parity 주장이 아니다. |
 
 이는 전체 이동 시스템 또는 원작 일치 주장이 아니다. `0x00ae27e4` terrain producer/의미, global workspace lifecycle,
 scheduler serialization, product coordinate mapping과 caller 이후 이동 lifecycle은 미확인이다.
@@ -99,6 +99,25 @@ mask/OOB, frontier-capacity and accepted-node failure를 검증한다. `insertio
 pnpm imjinrok:extract-source-pathfinding-evidence
 node --test tools/imjinrok/source-pathfinding-evidence.test.mjs
 ```
+
+## 제품 어댑터 경계
+
+`imjinrok:source-greedy-local-adapter`는 stable Pathfinder registry로 등록되며, K01 scaffold metadata가 이 id를
+선택한다. `core:a-star`는 계속 기본 profile이고 scenario profile은 기존 우선순위로 map selection을 덮어쓴다.
+
+어댑터는 source kernel의 actual candidate 순서, `±25` local window, strict squared-goal score/tie, frontier capacity,
+goal insertion stop, closest fallback과 insertion-parent trace만 사용한다. 최신 endpoint에서 bounded local search를 반복해
+trace에서 start를 제외하고 이어 붙이며, cycle/no-progress와 보수적인 전체 `6000` accepted-node budget에서 멈춘다.
+
+다음은 product policy이며 원본 동작으로 주장하지 않는다.
+
+- `isTilePassableForUnit`와 `getEntityBlockingTiles`를 이용한 terrain/resource/mobile collision callback
+- 기존 `resolveWalkableGoals`의 blocked-goal resolution 및 `allowPartial` full-path contract
+- local trace chaining, product goal-set adaptation, accepted-node budget과 snapshot/profile lifecycle
+
+이 adapter는 `FUN_004446a0`의 short waypoint postprocess를 구현하지 않는다. 또한 source kernel에는 `core:a-star`의
+diagonal corner-cut rejection을 추가하지 않는다. source mask producer/meaning, global workspace lifecycle/serialization,
+raw-to-product coordinate와 caller 이후 movement lifecycle은 계속 미확인이다.
 
 ## 다음 분석 작업
 

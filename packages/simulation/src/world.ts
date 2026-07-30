@@ -44,7 +44,20 @@ export {
   type OriginalRyuProjectileImpactResult,
 } from "./originalRyuProjectile.js";
 export type { EnvironmentState } from "./environment.js";
-export { CORE_A_STAR_PATHFINDER_ID, coreAStarPathfinder, findPathForUnit, isTerrainWalkable, resolvePathfindingProfileId, type FindPathOptions } from "./navigation.js";
+export {
+  CORE_A_STAR_PATHFINDER_ID,
+  SOURCE_GREEDY_ACCEPTED_NODE_LIMIT,
+  SOURCE_GREEDY_CANDIDATE_OFFSETS,
+  SOURCE_GREEDY_LOCAL_ADAPTER_PATHFINDER_ID,
+  coreAStarPathfinder,
+  findPathForUnit,
+  isTerrainWalkable,
+  resolvePathfindingProfileId,
+  runSourceGreedyLocalSearch,
+  sourceGreedyLocalAdapterPathfinder,
+  type FindPathOptions,
+  type SourceGreedyLocalSearchResult,
+} from "./navigation.js";
 export { defaultPathfinderRegistry, PathfinderRegistry, registerPathfinder, requirePathfinder, type RegisterPathfinderOptions } from "./pathfinderRegistry.js";
 export type { Pathfinder } from "./pathfinder.js";
 export { getFootprintTiles, validateBuildingPlacement, type BuildingPlacementValidationResult } from "./placement.js";
