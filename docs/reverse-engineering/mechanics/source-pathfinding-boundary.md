@@ -111,13 +111,20 @@ trace에서 start를 제외하고 이어 붙이며, cycle/no-progress와 보수�
 
 다음은 product policy이며 원본 동작으로 주장하지 않는다.
 
-- `isTilePassableForUnit`와 `getEntityBlockingTiles`를 이용한 terrain/resource/mobile collision callback
+- `isTilePassableForUnit`와 map-selected `MovementCollisionPolicy`를 이용한 terrain/resource/mobile collision callback
 - 기존 `resolveWalkableGoals`의 blocked-goal resolution 및 `allowPartial` full-path contract
 - local trace chaining, product goal-set adaptation, accepted-node budget과 snapshot/profile lifecycle
 
 이 adapter는 `FUN_004446a0`의 short waypoint postprocess를 구현하지 않는다. 또한 source kernel에는 `core:a-star`의
 diagonal corner-cut rejection을 추가하지 않는다. source mask producer/meaning, global workspace lifecycle/serialization,
 raw-to-product coordinate와 caller 이후 movement lifecycle은 계속 미확인이다.
+
+`core:strict-footprint-reservation`은 ground-contact position과 `UnitDefinition.footprint`만으로
+blocking footprint를 만들고 stable entity order의 same-tick reservation을 부여하는 프로젝트 전용 기본
+정책이다. map은 별도 stable `movementCollisionProfileId`로 다른 정책을 고를 수 있으므로 Pathfinder를
+바꾸지 않고 source-greedy adapter의 product collision callback과 movement-step admission을 함께 교체할 수
+있다. 이 seam은 `FUN_0043ab70`의 raw mask predicate 또는 원본 entity collision lifecycle을 재현했다는
+주장이 아니다.
 
 ## 다음 분석 작업
 

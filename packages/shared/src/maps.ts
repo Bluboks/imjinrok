@@ -85,6 +85,11 @@ export interface MapDefinition {
    * stable id to a registered Pathfinder when it creates a world.
    */
   pathfindingProfileId?: string;
+  /**
+   * Optional content-selected movement-admission policy. The simulation resolves
+   * this stable id independently from the selected route provider.
+   */
+  movementCollisionProfileId?: string;
 }
 
 export function getTileIndex(width: number, x: number, y: number): number {
@@ -136,6 +141,7 @@ export function createBlankMap(options?: Partial<Pick<MapDefinition, "id" | "nam
     environmentVisualProfileId: "core-default",
     resourceVisualSetId: "core-default",
     pathfindingProfileId: "core:a-star",
+    movementCollisionProfileId: "core:strict-footprint-reservation",
   };
 }
 

@@ -39,6 +39,24 @@ test("source catalog marks the K01 source-greedy navigation adapter as a source-
   });
 });
 
+test("core collision profile remains explicitly project-only", () => {
+  assert.deepEqual(coreContentPack.movementCollisionProfiles?.["core:strict-footprint-reservation"], {
+    id: "core:strict-footprint-reservation",
+    displayName: "Core Strict Footprint Reservation",
+    evidenceStatus: "project-only",
+  });
+});
+
+test("movement collision profile validation rejects empty display names", () => {
+  const registry = createContentRegistry();
+  registry.movementCollisionProfiles.invalid = { id: "invalid", displayName: "" };
+
+  assert.deepEqual(
+    validateContentRegistry(registry).issues.filter((issue) => issue.path.startsWith("movementCollisionProfiles.invalid")).map((issue) => issue.path),
+    ["movementCollisionProfiles.invalid.displayName"],
+  );
+});
+
 test("resource visual catalog maps only crop and tree project adaptations", () => {
   const resourceSet = imjinrokSourceContentPack.resourceVisualSets["imjinrok-source-resource-adaptation"];
 

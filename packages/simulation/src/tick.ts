@@ -7,7 +7,12 @@ import { arePlayersAllied, arePlayersEnemies } from "./diplomacy.js";
 import { createUnitState } from "./entities.js";
 import { getEnvironmentSightMultiplier, updateEnvironment } from "./environment.js";
 import { findPathForUnit } from "./navigation.js";
-import { canUnitOccupyPosition, createMovementReservation, reserveUnitPosition, type MovementReservation } from "./collision.js";
+import {
+  canUnitOccupyPosition,
+  createMovementReservationForState,
+  reserveUnitPositionForState,
+  type MovementReservation,
+} from "./collision.js";
 import { getFootprintTiles } from "./placement.js";
 import { getPlayerPopulationState, getPopulationCost } from "./population.js";
 import { applyCompletedResearchToUnit, completeResearch } from "./research.js";
@@ -45,7 +50,7 @@ export function advanceWorldTick(state: WorldState): void {
   advanceProductionQueues(state);
   advanceResearchQueues(state);
 
-  const movementReservation = createMovementReservation();
+  const movementReservation = createMovementReservationForState(state);
 
   for (const unit of iterateUnitsOrdered(state)) {
     if (state.units[unit.id]) {
@@ -350,7 +355,7 @@ function advanceUnitMovement(
     return;
   }
 
-  if (!reserveUnitPosition(movementReservation, unit, target)) {
+  if (!reserveUnitPositionForState(state, movementReservation, unit, target)) {
     repathBlockedMovementWaypoint(state, unit);
     return;
   }

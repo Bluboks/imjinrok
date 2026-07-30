@@ -23,6 +23,14 @@ export interface PathfindingProfileDefinition {
   evidenceStatus?: SourceEvidenceStatus;
 }
 
+/** Metadata only. Collision policy implementations stay in the simulation layer. */
+export interface MovementCollisionProfileDefinition {
+  id: string;
+  displayName: string;
+  /** Evidence scope for this selectable product movement-admission policy. */
+  evidenceStatus?: SourceEvidenceStatus | "project-only";
+}
+
 export interface ContentPackDefinition {
   id: string;
   displayName: string;
@@ -36,6 +44,7 @@ export interface ContentPackDefinition {
   environmentVisualProfiles?: Record<string, EnvironmentVisualProfile>;
   resourceVisualSets?: Record<string, ResourceVisualSetDefinition>;
   pathfindingProfiles?: Record<string, PathfindingProfileDefinition>;
+  movementCollisionProfiles?: Record<string, MovementCollisionProfileDefinition>;
 }
 
 export interface ContentRegistry {
@@ -49,6 +58,7 @@ export interface ContentRegistry {
   environmentVisualProfiles: Record<string, EnvironmentVisualProfile>;
   resourceVisualSets: Record<string, ResourceVisualSetDefinition>;
   pathfindingProfiles: Record<string, PathfindingProfileDefinition>;
+  movementCollisionProfiles: Record<string, MovementCollisionProfileDefinition>;
 }
 
 export interface ContentValidationIssue {
@@ -98,6 +108,13 @@ export const coreContentPack = {
     "core:a-star": {
       id: "core:a-star",
       displayName: "Core A*",
+    },
+  },
+  movementCollisionProfiles: {
+    "core:strict-footprint-reservation": {
+      id: "core:strict-footprint-reservation",
+      displayName: "Core Strict Footprint Reservation",
+      evidenceStatus: "project-only",
     },
   },
 } as const satisfies ContentPackDefinition;
@@ -198,6 +215,7 @@ export function createContentRegistry(packs: readonly ContentPackDefinition[] = 
     environmentVisualProfiles: mergeDefinitions(packs.map((pack) => pack.environmentVisualProfiles ?? {})),
     resourceVisualSets: mergeDefinitions(packs.map((pack) => pack.resourceVisualSets ?? {})),
     pathfindingProfiles: mergeDefinitions(packs.map((pack) => pack.pathfindingProfiles ?? {})),
+    movementCollisionProfiles: mergeDefinitions(packs.map((pack) => pack.movementCollisionProfiles ?? {})),
   };
 }
 
@@ -266,6 +284,8 @@ export function validateContentRegistry(registry: ContentRegistry): ContentValid
   validateDefinitionIds(registry.resourceVisualSets, "resourceVisualSets", issues);
   validateDefinitionIds(registry.pathfindingProfiles, "pathfindingProfiles", issues);
   validatePathfindingProfiles(registry.pathfindingProfiles, issues);
+  validateDefinitionIds(registry.movementCollisionProfiles, "movementCollisionProfiles", issues);
+  validateMovementCollisionProfiles(registry.movementCollisionProfiles, issues);
   validateResourceDefinitions(registry, issues);
   validateUnitDefinitions(registry, issues);
 
@@ -311,6 +331,17 @@ function validatePathfindingProfiles(
   }
 }
 
+function validateMovementCollisionProfiles(
+  profiles: Record<string, MovementCollisionProfileDefinition>,
+  issues: ContentValidationIssue[],
+): void {
+  for (const [profileId, profile] of Object.entries(profiles)) {
+    if (!profile.displayName.trim()) {
+      issues.push(createIssue(`movementCollisionProfiles.${profileId}.displayName`, "Movement collision profile display name is required."));
+    }
+  }
+}
+
 export function validateContentPack(pack: ContentPackDefinition): ContentValidationResult {
   return validateContentRegistry(createContentRegistry([pack]));
 }
@@ -348,6 +379,7 @@ function validateDefinitionOwnership(packs: readonly ContentPackDefinition[], is
     ["environmentVisualProfiles", (pack) => pack.environmentVisualProfiles],
     ["resourceVisualSets", (pack) => pack.resourceVisualSets],
     ["pathfindingProfiles", (pack) => pack.pathfindingProfiles],
+    ["movementCollisionProfiles", (pack) => pack.movementCollisionProfiles],
   ];
 
   for (const [namespace, getDefinitions] of namespaces) {
