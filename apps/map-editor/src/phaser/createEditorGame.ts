@@ -1,8 +1,30 @@
 import Phaser from "phaser";
 import { cartToIso } from "@simulation";
-import { getTileAt, resourceDefinitions, terrainDefinitions, type MapDefinition, type ResourceDefinition } from "@shared";
+import {
+  getTileAt,
+  resourceDefinitions,
+  sampleMapSurfaceElevation,
+  terrainDefinitions,
+  type GridPoint,
+  type MapDefinition,
+  type ResourceDefinition,
+} from "@shared";
 
 const RESOURCE_DEFINITIONS = resourceDefinitions as Readonly<Record<string, ResourceDefinition>>;
+
+function resolveEditorPreviewGroundContact(
+  map: MapDefinition,
+  mapOrigin: GridPoint,
+  point: GridPoint,
+): GridPoint {
+  const iso = cartToIso(point, map.tileWidth, map.tileHeight);
+  const surface = sampleMapSurfaceElevation(map, point);
+
+  return {
+    x: mapOrigin.x + iso.x,
+    y: mapOrigin.y + iso.y - surface.liftPixels,
+  };
+}
 
 class EditorPreviewScene extends Phaser.Scene {
   constructor(private readonly mapDefinition: MapDefinition) {
@@ -21,9 +43,9 @@ class EditorPreviewScene extends Phaser.Scene {
     for (let y = 0; y < this.mapDefinition.height; y += 1) {
       for (let x = 0; x < this.mapDefinition.width; x += 1) {
         const tile = getTileAt(this.mapDefinition, x, y);
-        const iso = cartToIso({ x, y }, this.mapDefinition.tileWidth, this.mapDefinition.tileHeight);
-        const worldX = originX + iso.x;
-        const worldY = originY + iso.y;
+        const groundContact = resolveEditorPreviewGroundContact(this.mapDefinition, { x: originX, y: originY }, { x, y });
+        const worldX = groundContact.x;
+        const worldY = groundContact.y;
         const points = [
           new Phaser.Geom.Point(worldX, worldY - halfHeight),
           new Phaser.Geom.Point(worldX + halfWidth, worldY),
@@ -51,9 +73,9 @@ class EditorPreviewScene extends Phaser.Scene {
     }
 
     this.mapDefinition.spawnPoints.forEach((spawnPoint) => {
-      const iso = cartToIso(spawnPoint, this.mapDefinition.tileWidth, this.mapDefinition.tileHeight);
+      const groundContact = resolveEditorPreviewGroundContact(this.mapDefinition, { x: originX, y: originY }, spawnPoint);
       graphics.fillStyle(0xf3dd8f, 1);
-      graphics.fillCircle(originX + iso.x, originY + iso.y - halfHeight, 6);
+      graphics.fillCircle(groundContact.x, groundContact.y - halfHeight, 6);
     });
   }
 }

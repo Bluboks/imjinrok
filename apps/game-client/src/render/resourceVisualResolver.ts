@@ -86,9 +86,9 @@ export function getRegisteredResourceVisualPreloadDescriptors(
 }
 
 /**
- * A source image uses its native aspect ratio and rests on the map diamond's
- * ground contact. The 64px reference width and container correction are a
- * project adaptation, not an original sprite pivot or scale claim.
+ * A source image uses its native aspect ratio and rests on its container's
+ * terrain ground contact. The 64px reference width is a project adaptation,
+ * not an original sprite pivot or scale claim.
  */
 export function resolveResourceVisualPlacement(
   mapTileWidth: number,
@@ -103,7 +103,7 @@ export function resolveResourceVisualPlacement(
     originY: 1,
     scale: mapTileWidth / 64,
     localX: 0,
-    localY: mapTileHeight / 3,
+    localY: 0,
   };
 }
 

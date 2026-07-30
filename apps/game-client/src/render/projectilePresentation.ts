@@ -108,8 +108,6 @@ export function filterVisibleProjectiles(
   ));
 }
 
-type ProjectilePresentationMap = Pick<MapDefinition, "tileWidth" | "tileHeight">;
-
 /**
  * Returns null for unregistered profiles. This is intentional: an unknown
  * profile must not silently borrow a source-like product primitive.
@@ -118,7 +116,7 @@ export function resolveProjectileVisualPlacement(
   projectile: ProjectileState,
   registry: ProjectileVisualRegistry,
   mapOrigin: GridPoint,
-  map: ProjectilePresentationMap,
+  map: MapDefinition,
 ): ProjectileVisualPlacement | null {
   const visual = registry.get(projectile.profileId);
 
@@ -168,7 +166,7 @@ export class ProjectilePresentationReconciler {
     projectiles: readonly ProjectileState[],
     registry: ProjectileVisualRegistry,
     mapOrigin: GridPoint,
-    map: ProjectilePresentationMap,
+    map: MapDefinition,
   ): void {
     const liveIds = new Set<string>();
     const canonicalProjectiles = [...projectiles].sort((left, right) => (
