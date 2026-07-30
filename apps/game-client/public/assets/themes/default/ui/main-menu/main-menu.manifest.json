@@ -1,13 +1,23 @@
 {
   "generatedBy": "tools/imjinrok/export-main-menu-assets.mjs",
-  "palette": {
-    "sourcePath": "original/imjinrok2/pal/initmenu.pal",
-    "sha256": "c41e62408a8275e7a0c3e5402974beda50382ffcc382db94056db9e18291370d",
-    "byteLength": 768
-  },
+  "palettes": [
+    {
+      "id": "initmenu",
+      "sourcePath": "original/imjinrok2/pal/initmenu.pal",
+      "sha256": "c41e62408a8275e7a0c3e5402974beda50382ffcc382db94056db9e18291370d",
+      "byteLength": 768
+    },
+    {
+      "id": "imjin2",
+      "sourcePath": "original/imjinrok2/pal/imjin2.pal",
+      "sha256": "5ba2c020e9bd89210a10550fb4baaee8ab8bb316d4a2c7e66bdb24c6c8c4323b",
+      "byteLength": 768
+    }
+  ],
   "resources": [
     {
       "id": "landing-title",
+      "paletteId": "initmenu",
       "sourcePath": "original/imjinrok2/yfnt/title.spr",
       "sourceSha256": "9cacc8892982dbe02047898530c5f44c5fba4b6115f9774fb690c9a0a763d03f",
       "layout": "spr",
@@ -26,6 +36,7 @@
     },
     {
       "id": "menu-border",
+      "paletteId": "initmenu",
       "sourcePath": "original/imjinrok2/yfnt/gamemenuborder.spr",
       "sourceSha256": "48f60d170a8305fbfc2a08d41b3de96bf19dfe99d9d3460996037df41ed6a8ed",
       "layout": "spr",
@@ -44,6 +55,7 @@
     },
     {
       "id": "menu-button",
+      "paletteId": "initmenu",
       "sourcePath": "original/imjinrok2/yfnt/gamemenubutton.spr",
       "sourceSha256": "ec73af9d1d5c739a8fd40fa9436a77fc92eb13f5ebb99a745d1279244129c387",
       "layout": "spr",
@@ -177,6 +189,7 @@
     },
     {
       "id": "nation-button",
+      "paletteId": "imjin2",
       "sourcePath": "original/imjinrok2/yfnt/NationButtons.spr",
       "sourceSha256": "98304a61e4d8bd4017e7da6763e4194c4d55422a4891c5cf534ab5dd6c362885",
       "layout": "spr",
@@ -189,52 +202,53 @@
         {
           "index": 0,
           "fileName": "nation-buttons/NationButtons_0000.png",
-          "sha256": "0652a91425ee8e01dc711a63fd631fce4b0b21716fde51e064b6a7ee6d3d287b"
+          "sha256": "baad6495d9e55623ed2d011ee7366d5081576c0b69512f67c883573e0dc3214a"
         },
         {
           "index": 1,
           "fileName": "nation-buttons/NationButtons_0001.png",
-          "sha256": "ab0dc1346fba4ca3c0627b9b9a8fa517a10c48a84a1c3d34d761008e83994af7"
+          "sha256": "a82c57c3608ced29b19dc1293c1b65d76b502b9efbbbc233a1d76d8cc0eac6da"
         },
         {
           "index": 2,
           "fileName": "nation-buttons/NationButtons_0002.png",
-          "sha256": "a5c09e819d04190e0be4e24d2e2235758815889ec06ae4ae1f28bc3539271eb2"
+          "sha256": "9ae4780c306ef5758ba08a135532fe697f408649ab26d849bf67868b2daae7a8"
         },
         {
           "index": 3,
           "fileName": "nation-buttons/NationButtons_0003.png",
-          "sha256": "49d303389a8954c23c20aab8e5247aba693842069813096d64916e5aa67beaa9"
+          "sha256": "5a08927ebfa7cb6558d115b4e531fdfdf54ec6fb4d3e27984953fb28150036d7"
         },
         {
           "index": 4,
           "fileName": "nation-buttons/NationButtons_0004.png",
-          "sha256": "3ae3858db024a25c5c44170e780d9a41b42d284e492ef01b4f208e78b69c275d"
+          "sha256": "19bea06b99db87be19441bf9e0c644b31b4c5f4342e2657bc2f137a26fafff5f"
         },
         {
           "index": 5,
           "fileName": "nation-buttons/NationButtons_0005.png",
-          "sha256": "dd6bb031aa03fe6e2f3f0d6f986a5942e9e552f04509ba07d14aa033651b633b"
+          "sha256": "a71174af06a3afccc3bb195e63a399e9e81a90e46428e61e9390f13f2b4a48fe"
         },
         {
           "index": 6,
           "fileName": "nation-buttons/NationButtons_0006.png",
-          "sha256": "b170b75419852bb8360ca2bf47514dccfc42d7325f566414f458e1a7dd1c00b9"
+          "sha256": "761a4209aa0ef31d8024cf8696e76d802b06f255ba638216b6a580636cb6c4e1"
         },
         {
           "index": 7,
           "fileName": "nation-buttons/NationButtons_0007.png",
-          "sha256": "e3a76c3820561ae35f3b6279538f10775e99a275dd6153349198b0b07a5dc975"
+          "sha256": "d5d288bb731414284b400d85caee4c736bf32a5c5cc64c920505f6fba4e285af"
         },
         {
           "index": 8,
           "fileName": "nation-buttons/NationButtons_0008.png",
-          "sha256": "43aec81115da9363fe6f74e06ddb7ca974d499090a0703e784fbd57e021cabba"
+          "sha256": "d51d3110179079e6240239c20a85b0d542a2940db698a6f7505d3ca7d8f78137"
         }
       ]
     },
     {
       "id": "stage-border",
+      "paletteId": "imjin2",
       "sourcePath": "original/imjinrok2/yfnt/selectstageborder.spr",
       "sourceSha256": "d3776a9766b8cc437c261c488adbd09f968be4502f3074c7cd8cf4c0363ebad9",
       "layout": "spr",
@@ -247,12 +261,13 @@
         {
           "index": 0,
           "fileName": "stage-border/selectstageborder_0000.png",
-          "sha256": "be123fe6524e4c702cc705df0a989dad34cdb66b0896c5efbcfb3ceb0b72c654"
+          "sha256": "5030c00c7a90ccc7163be0762ca3cd1407d82eac38fad14376e70e4ae78d688a"
         }
       ]
     },
     {
       "id": "stage-default",
+      "paletteId": "imjin2",
       "sourcePath": "original/imjinrok2/yfnt/titlestartstage.spr",
       "sourceSha256": "d457f6409dab0697b5434f49315a3bed3b552278b42619fc3719ed355e1ed1ba",
       "layout": "spr",
@@ -265,12 +280,13 @@
         {
           "index": 0,
           "fileName": "stage/title/titlestartstage_0000.png",
-          "sha256": "06c35c6c3c169225da517c7130c67ca791c781fa228aeb5fc0b86d0cc9bdb09d"
+          "sha256": "2b1b699a91820d6a1a1cc12fd6f7fe9a5ab98e56d834577004e14707f59dffae"
         }
       ]
     },
     {
       "id": "stage-korea",
+      "paletteId": "imjin2",
       "sourcePath": "original/imjinrok2/yfnt/titlestartstagekorea.spr",
       "sourceSha256": "65e6758ccf575925b9b20b346a786eeeae39fcc9bd8a96d2ec4c6c0916909c53",
       "layout": "spr",
@@ -283,12 +299,13 @@
         {
           "index": 0,
           "fileName": "stage/korea/titlestartstagekorea_0000.png",
-          "sha256": "b907551650e0a77b8631ee8d8f2da1637f6b0a451b7a34bcda964feb904ccae5"
+          "sha256": "98f7ab64ba214047bb85c3c174576607a6d33c9d2629489bccb7f8323042cb3d"
         }
       ]
     },
     {
       "id": "stage-japan",
+      "paletteId": "imjin2",
       "sourcePath": "original/imjinrok2/yfnt/titlestartstagejapan.spr",
       "sourceSha256": "29f202d78c67df2515643c38fc2608a27b5530ec4611380127acac456540bd45",
       "layout": "spr",
@@ -301,12 +318,13 @@
         {
           "index": 0,
           "fileName": "stage/japan/titlestartstagejapan_0000.png",
-          "sha256": "6531aef2b738bb2c6ade0562fcd1f69042aba6ff51f1ab609bbee4b5a957345f"
+          "sha256": "439ed88561c9583a05147fa342c0c381be3bfd1146f36a9922ff285e7248ef93"
         }
       ]
     },
     {
       "id": "stage-china",
+      "paletteId": "imjin2",
       "sourcePath": "original/imjinrok2/yfnt/titlestartstagechina.spr",
       "sourceSha256": "f570f95741097955a1fbdc7cff48682588043d00aa18d816cb82b0cc7e96311c",
       "layout": "spr",
@@ -319,12 +337,13 @@
         {
           "index": 0,
           "fileName": "stage/china/titlestartstagechina_0000.png",
-          "sha256": "58614105ff5874b9c4c621b5db1cf330368df7ba92277a0cd4e52768b8061e11"
+          "sha256": "4dcdbf4d420fa314ffcfcb9531039319106f0aac73e40552ec86fe1efc8bb9c1"
         }
       ]
     },
     {
       "id": "stage-to-select",
+      "paletteId": "imjin2",
       "sourcePath": "original/imjinrok2/yfnt/titlestartstagetoselect.spr",
       "sourceSha256": "98f0b6f38e7fc341f7a869fb4488c852d394093a2bc455c11a74ce843fa404ca",
       "layout": "spr",
@@ -337,12 +356,13 @@
         {
           "index": 0,
           "fileName": "stage/to-select/titlestartstagetoselect_0000.png",
-          "sha256": "134e7643b23c2e64a3bb58a519a1d02bbe0ed74dd97ecef9fd52688b37289c91"
+          "sha256": "89e19f26c2b9f533796d9770338f8a5db9504d36505dd8dac1bf6870cd545073"
         }
       ]
     },
     {
       "id": "select-box",
+      "paletteId": "imjin2",
       "sourcePath": "original/imjinrok2/fnt/selectbox.spr",
       "sourceSha256": "fe066fb527354f848876507d9da36cae1769f3676fe4554328b705a47c5ef0cd",
       "layout": "spr",
@@ -355,102 +375,102 @@
         {
           "index": 0,
           "fileName": "stage/select-box/selectbox_0000.png",
-          "sha256": "db5fb0695c6d3a269fad12fd3848f227242961af2d85a1e8a90050e4adbcc830"
+          "sha256": "65cc8fc5ad38b06c636dd86959f89693ff2cb63f3e5d6fbcd82a525f84a9282a"
         },
         {
           "index": 1,
           "fileName": "stage/select-box/selectbox_0001.png",
-          "sha256": "0d2ffffc1e4bab5a19367fc4ef6b6585743ce00cd23c60f05629d4055c56d096"
+          "sha256": "8f99a96f259bf091bcd11af4639939300b8c6d4965d0fd4e85e718bee25ade30"
         },
         {
           "index": 2,
           "fileName": "stage/select-box/selectbox_0002.png",
-          "sha256": "6d9d23ce4865400791b6344050ed15034cf70805c7c8731d2c44bee6d834abbf"
+          "sha256": "3c577d33a3469934303b844aab1618b99ec4a122c9eaaefe3f1ff5c1991d7f70"
         },
         {
           "index": 3,
           "fileName": "stage/select-box/selectbox_0003.png",
-          "sha256": "cdf64c7f9570ec9aedd2d4a377385033aed86614197108558fd16d4218219d9d"
+          "sha256": "50dbe1c25184d2855fa1c6a13a35f966c89455a8d3ce6d435cd2339fe53d823e"
         },
         {
           "index": 4,
           "fileName": "stage/select-box/selectbox_0004.png",
-          "sha256": "399d20caf8b8c1f752875baafc8611b871c5955dc3594e360b1c1eee800e06b3"
+          "sha256": "7ee0e31a7871d30ece42ce41613cd938665c7b7be88ef7121f953ca550a5fb83"
         },
         {
           "index": 5,
           "fileName": "stage/select-box/selectbox_0005.png",
-          "sha256": "947e0c603f9e855fa33e0b8d09e48923ffc7407c259c1364b69dec34c16d69bd"
+          "sha256": "06f272f47a4c0649d41773e07dcbc6bdbeb50e2f4f777316e7cf561ef183d275"
         },
         {
           "index": 6,
           "fileName": "stage/select-box/selectbox_0006.png",
-          "sha256": "855ccc917e1b257adf9b201de24ff818de4a6fc4feb96f697c1d5b592325e914"
+          "sha256": "7e38b74df5ebe843c3e1e41ddd2a682d756dd595c8e9b87e3c06668fc69f5676"
         },
         {
           "index": 7,
           "fileName": "stage/select-box/selectbox_0007.png",
-          "sha256": "883cb39477bd018e20fd0b54eb264786fb8c7e2fed479fc1f31ada350f70c3fe"
+          "sha256": "de04613a2270bcdff9677dadbefd3c72cd49c1f265891ea9afe44a25eb9579e2"
         },
         {
           "index": 8,
           "fileName": "stage/select-box/selectbox_0008.png",
-          "sha256": "ea86b8c91989150158c1d932bfa5722e8f56fbc8ca6d985fe7e56748901a6fcb"
+          "sha256": "2474644ac6262948d0a2a046ccaf743e571afaf50afac892f42e50b992e9cb51"
         },
         {
           "index": 9,
           "fileName": "stage/select-box/selectbox_0009.png",
-          "sha256": "8024f59a0bbd739559b55eb4ad57244a7d1a069d90722fe75305760486c45f98"
+          "sha256": "0e18ffbaa65c47be6f39ba352013aa7e716a5117f03596e5fc0cffc3cbb6d064"
         },
         {
           "index": 10,
           "fileName": "stage/select-box/selectbox_0010.png",
-          "sha256": "750fe7007dda23125e9620fea4cfd546acaa766a012deb7d4c6de2edf9f661d6"
+          "sha256": "d653ebf1eb46615b80683d35666d9461a56b3791855fc2e0a66429dad4d78a32"
         },
         {
           "index": 11,
           "fileName": "stage/select-box/selectbox_0011.png",
-          "sha256": "5bcb6ac7b3cac29763aca09d781231c26e513751cf6e4e88ec9afd3b88862133"
+          "sha256": "2fbdd8373348c4947cee2952bd1f4e7b80ebaf70e5a104d84a463b0774753835"
         },
         {
           "index": 12,
           "fileName": "stage/select-box/selectbox_0012.png",
-          "sha256": "0d9a0aa1161cbb7d26c9e79230b77ad3fb410ab291130eb4f835f08a391d3552"
+          "sha256": "f172a2aebed9aa5e97f236053880998398407201bd3dc2e582979c025d502471"
         },
         {
           "index": 13,
           "fileName": "stage/select-box/selectbox_0013.png",
-          "sha256": "0d9a0aa1161cbb7d26c9e79230b77ad3fb410ab291130eb4f835f08a391d3552"
+          "sha256": "f172a2aebed9aa5e97f236053880998398407201bd3dc2e582979c025d502471"
         },
         {
           "index": 14,
           "fileName": "stage/select-box/selectbox_0014.png",
-          "sha256": "0d9a0aa1161cbb7d26c9e79230b77ad3fb410ab291130eb4f835f08a391d3552"
+          "sha256": "f172a2aebed9aa5e97f236053880998398407201bd3dc2e582979c025d502471"
         },
         {
           "index": 15,
           "fileName": "stage/select-box/selectbox_0015.png",
-          "sha256": "0d9a0aa1161cbb7d26c9e79230b77ad3fb410ab291130eb4f835f08a391d3552"
+          "sha256": "f172a2aebed9aa5e97f236053880998398407201bd3dc2e582979c025d502471"
         },
         {
           "index": 16,
           "fileName": "stage/select-box/selectbox_0016.png",
-          "sha256": "0d9a0aa1161cbb7d26c9e79230b77ad3fb410ab291130eb4f835f08a391d3552"
+          "sha256": "f172a2aebed9aa5e97f236053880998398407201bd3dc2e582979c025d502471"
         },
         {
           "index": 17,
           "fileName": "stage/select-box/selectbox_0017.png",
-          "sha256": "0d9a0aa1161cbb7d26c9e79230b77ad3fb410ab291130eb4f835f08a391d3552"
+          "sha256": "f172a2aebed9aa5e97f236053880998398407201bd3dc2e582979c025d502471"
         },
         {
           "index": 18,
           "fileName": "stage/select-box/selectbox_0018.png",
-          "sha256": "0d9a0aa1161cbb7d26c9e79230b77ad3fb410ab291130eb4f835f08a391d3552"
+          "sha256": "f172a2aebed9aa5e97f236053880998398407201bd3dc2e582979c025d502471"
         },
         {
           "index": 19,
           "fileName": "stage/select-box/selectbox_0019.png",
-          "sha256": "0d9a0aa1161cbb7d26c9e79230b77ad3fb410ab291130eb4f835f08a391d3552"
+          "sha256": "f172a2aebed9aa5e97f236053880998398407201bd3dc2e582979c025d502471"
         }
       ]
     }

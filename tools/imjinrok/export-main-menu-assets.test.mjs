@@ -21,11 +21,23 @@ test("exports the hash-bound main menu catalog deterministically and exactly mat
 
   assert.equal(one.assetCount, 61);
   assert.deepEqual(one.manifest, two.manifest);
-  assert.deepEqual(one.manifest.palette, {
-    sourcePath: "original/imjinrok2/pal/initmenu.pal",
-    sha256: "c41e62408a8275e7a0c3e5402974beda50382ffcc382db94056db9e18291370d",
-    byteLength: 768,
-  });
+  assert.deepEqual(one.manifest.palettes, [
+    { id: "initmenu", sourcePath: "original/imjinrok2/pal/initmenu.pal", sha256: "c41e62408a8275e7a0c3e5402974beda50382ffcc382db94056db9e18291370d", byteLength: 768 },
+    { id: "imjin2", sourcePath: "original/imjinrok2/pal/imjin2.pal", sha256: "5ba2c020e9bd89210a10550fb4baaee8ab8bb316d4a2c7e66bdb24c6c8c4323b", byteLength: 768 },
+  ]);
+  assert.deepEqual(one.manifest.resources.map(({ id, paletteId }) => ({ id, paletteId })), [
+    { id: "landing-title", paletteId: "initmenu" },
+    { id: "menu-border", paletteId: "initmenu" },
+    { id: "menu-button", paletteId: "initmenu" },
+    { id: "nation-button", paletteId: "imjin2" },
+    { id: "stage-border", paletteId: "imjin2" },
+    { id: "stage-default", paletteId: "imjin2" },
+    { id: "stage-korea", paletteId: "imjin2" },
+    { id: "stage-japan", paletteId: "imjin2" },
+    { id: "stage-china", paletteId: "imjin2" },
+    { id: "stage-to-select", paletteId: "imjin2" },
+    { id: "select-box", paletteId: "imjin2" },
+  ]);
   assert.ok(one.manifest.resources.every((resource) => resource.sourcePath.startsWith("original/imjinrok2/") && resource.sourceSha256.length === 64));
   assert.ok(one.manifest.resources.flatMap((resource) => resource.exportedFrames).every((frame) => frame.fileName.includes("/") && frame.sha256.length === 64));
   assert.deepEqual(one.manifest.resources.map((resource) => ({ id: resource.id, dimensions: [resource.dimensions.width, resource.dimensions.height], frameCount: resource.frameCount, exportedFrameCount: resource.exportedFrames.length })), [
@@ -58,6 +70,13 @@ test("rejects altered palette or menu sprite bytes before writing their output",
   paletteBytes[0] ^= 0xff;
   writeFileSync(alteredPalette, paletteBytes);
   assert.throws(() => exportMainMenuAssets({ originalRoot: alteredRoot, assetDirectory: outputDirectory }), /pal\/initmenu\.pal SHA-256 mismatch/u);
+
+  cpSync(sourceRoot, alteredRoot, { recursive: true, force: true });
+  const alteredStagePalette = resolve(alteredRoot, "pal/imjin2.pal");
+  const stagePaletteBytes = readFileSync(alteredStagePalette);
+  stagePaletteBytes[0] ^= 0xff;
+  writeFileSync(alteredStagePalette, stagePaletteBytes);
+  assert.throws(() => exportMainMenuAssets({ originalRoot: alteredRoot, assetDirectory: outputDirectory }), /pal\/imjin2\.pal SHA-256 mismatch/u);
 
   cpSync(sourceRoot, alteredRoot, { recursive: true, force: true });
   const alteredTitle = resolve(alteredRoot, "yfnt/title.spr");
