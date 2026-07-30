@@ -25,7 +25,8 @@ K01의 internal class 78 `조선 유성룡`이 일반 공격 상태 5에서 실�
 
 분석 상태는 `static-confirmed-k01-class-78-auto-magic-issued-effects-and-command-boundary`,
 재현 상태는 `부분 재현`(`partial-reproduction-bounded-projections`), 구현 상태는
-`analysis-only-no-product-change`다.
+`부분 이식`이다. action 40의 좁은 product adapter만 구현했고 action 59/subtype 16과 원본
+pending/scheduler 전체는 이식하지 않았다.
 
 ## 근거와 재현 자산
 
@@ -238,7 +239,17 @@ input-side caller scheduling과 `FUN_0043c9c0` entity-update scheduling의 공�
 
 ## 프로젝트 경계
 
-이번 변경은 분석·문서·fixture·test만 추가한다. product behavior는 이식하지 않는다.
+2026-07-30 product adapter는 action 40의 좁은 observable projection만 `k01-ryu-seong-ryong-action-40`
+registered auto-ability profile로 추가했다. 이는 `부분 이식`이며 원본 전체 재현이나 action 59 구현이
+아니다. enabled player-global setting, active enemy `attack-unit` target, positive non-building target,
+`currentHp < trunc(maxHp * 2 / 3)`, mana 70 및 project tick `% 3 === 0`에서만 소유권을 이전한다.
+이 cadence는 source global LCG를 복원한 것이 아닌 명시적 project clock adaptation이며, 70/70 mana도
+한 cast를 위한 제품 값일 뿐 original stat parity가 아니다. source raw flags/registry/team prerequisite는
+제품 analogue가 없어 추가로 꾸며내지 않았다. 성공 update는 normal attack을 생략하고 converted target의
+이동/명령 상태를 비운다.
+
+원본 command record, fixed slots, timing, player/team/entity raw layout은 증거를 설명하는 내부 사실이지
+public architecture mandate가 아니다.
 원본 command record, fixed slots, timing, player/team/entity raw layout은 증거를 설명하는 내부 사실이지
 public architecture mandate가 아니다. 현재 프로젝트의 responsive/multi-selection/mana/health,
 Noto/Canvas adaptation은 의도적 superset으로 유지한다.

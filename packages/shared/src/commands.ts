@@ -94,6 +94,12 @@ export interface StopCommand {
   unitId: string;
 }
 
+/** Player-global automation; intentionally independent of unit selection. */
+export interface SetMagicAutoUseCommand {
+  type: "set-magic-auto-use";
+  enabled: boolean;
+}
+
 export type CheatCodeId =
   | "grant-resources"
   | "fast-production"
@@ -121,6 +127,7 @@ export type UnitCommand =
   | CancelConstructionCommand
   | SetRallyPointCommand
   | StopCommand
+  | SetMagicAutoUseCommand
   | CheatCommand;
 
 export interface CommandEnvelope {

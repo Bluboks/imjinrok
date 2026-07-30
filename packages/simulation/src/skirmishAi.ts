@@ -19,6 +19,12 @@ import { validateBuildingPlacement } from "./placement.js";
 import { getPlayerPopulationState } from "./population.js";
 import { isResearchCompleted, isResearchPending } from "./research.js";
 import { getResourceNodeState } from "./resources.js";
+import {
+  BUILTIN_BALANCED_SKIRMISH_AI_STRATEGY_ID,
+  getSkirmishAiStrategy,
+  registerSkirmishAiStrategy,
+  type SkirmishAiStrategy,
+} from "./skirmishAiStrategy.js";
 import type { UnitState, WorldState } from "./types.js";
 
 export type SkirmishAiDifficulty = "easy" | "normal" | "hard";
@@ -44,6 +50,8 @@ export interface SkirmishAiTuning {
 export interface SkirmishAiControllerOptions {
   difficulty?: SkirmishAiDifficulty;
   tuning?: Partial<SkirmishAiTuning>;
+  /** Stable registered strategy id. Existing callers retain builtin-balanced. */
+  strategyId?: string;
 }
 
 export const SKIRMISH_AI_TUNING: Record<SkirmishAiDifficulty, SkirmishAiTuning> = {
@@ -94,6 +102,13 @@ export const SKIRMISH_AI_TUNING: Record<SkirmishAiDifficulty, SkirmishAiTuning> 
   },
 };
 
+const builtinBalancedStrategy: SkirmishAiStrategy = {
+  id: BUILTIN_BALANCED_SKIRMISH_AI_STRATEGY_ID,
+  updatePlayer: ({ updateBuiltinBalancedPlayer }) => updateBuiltinBalancedPlayer(),
+};
+
+registerSkirmishAiStrategy(builtinBalancedStrategy);
+
 interface ResourceTarget {
   id: string;
   point: GridPoint;
@@ -103,6 +118,8 @@ interface ResourceTarget {
 
 export class SkirmishAiController {
   private readonly tuning: SkirmishAiTuning;
+  private readonly strategy: SkirmishAiStrategy;
+  private readonly initializedAutoAbilityPlayers = new Set<string>();
 
   constructor(
     private readonly playerIds: readonly string[],
@@ -112,6 +129,7 @@ export class SkirmishAiController {
       ...SKIRMISH_AI_TUNING[options.difficulty ?? "normal"],
       ...(options.tuning ?? {}),
     };
+    this.strategy = getSkirmishAiStrategy(options.strategyId ?? BUILTIN_BALANCED_SKIRMISH_AI_STRATEGY_ID);
   }
 
   update(state: WorldState): void {
@@ -121,14 +139,30 @@ export class SkirmishAiController {
       return;
     }
 
-    for (const playerId of this.playerIds) {
+    for (const playerId of [...this.playerIds].sort()) {
       if (state.players[playerId]) {
-        this.updatePlayer(state, playerId);
+        this.strategy.updatePlayer({
+          state,
+          playerId,
+          tuning: this.tuning,
+          issueCommand: issueWorldCommand,
+          updateBuiltinBalancedPlayer: () => this.updateBuiltinBalancedPlayer(state, playerId),
+        });
       }
     }
   }
 
-  private updatePlayer(state: WorldState, playerId: string): void {
+  private updateBuiltinBalancedPlayer(state: WorldState, playerId: string): void {
+    const player = state.players[playerId];
+    if (!this.initializedAutoAbilityPlayers.has(playerId)) {
+      // Undefined is the source-aligned disabled default; an explicit command
+      // (including false) wins over this built-in AI convenience exactly once.
+      if (player && player.magicAutoUseEnabled === undefined) {
+        player.magicAutoUseEnabled = true;
+      }
+      this.initializedAutoAbilityPlayers.add(playerId);
+    }
+
     const units = Object.values(state.units)
       .filter((unit) => unit.playerId === playerId)
       .sort((a, b) => a.id.localeCompare(b.id));

@@ -15,6 +15,8 @@ import { findHarvestableResourceTile, findResourceNode, findResourceTile, getRes
 import { isTilePassableForUnit, resolveFloodDrowning } from "./terrain.js";
 import { iterateUnitsOrdered, removeUnitFromWorld } from "./units.js";
 import { advanceUnitOrientationForProjectTarget, getSourceOrientationProfileForUnit } from "./orientation.js";
+import { getIdleCombatPolicy } from "./idleCombatPolicy.js";
+import { tryExecutePlayerAutoAbility } from "./autoAbilityPolicy.js";
 import { unitCanPerformAction, unitDefinitions, type BankResourceKind, type BuildingDefinitionId, type GridPoint, type ScenarioAreaDefinition, type UnitDefinition } from "../../shared/src/index.js";
 import type { UnitState, UnitTargetSelectorState, WorldState } from "./types.js";
 
@@ -1015,6 +1017,15 @@ function advanceUnitCombat(state: WorldState): void {
       continue;
     }
 
+    const activeAttackTarget = unit.currentOrder?.type === "attack-unit"
+      ? state.units[unit.currentOrder.targetUnitId]
+      : undefined;
+    if (tryExecutePlayerAutoAbility(state, unit, activeAttackTarget, clearUnitOrder)) {
+      // A successfully delivered project auto ability consumes this combat
+      // update, mirroring the confirmed class-78 normal-attack skip boundary.
+      continue;
+    }
+
     const target = getCombatTarget(state, unit, combat);
 
     if (isAggressiveTravelOrder(unit) && !target) {
@@ -1113,25 +1124,25 @@ function getCombatTarget(
     return null;
   }
 
-  const engagementRange = getEngagementRange(unit, combat);
+  if (isAggressiveTravelOrder(unit)) {
+    return findNearestEnemyInRange(state, unit, combat.aggroRange, combat);
+  }
 
-  return findNearestEnemyInRange(state, unit, engagementRange, combat);
+  if (unit.currentOrder) {
+    return findNearestEnemyInRange(state, unit, combat.range, combat);
+  }
+
+  const policy = getIdleCombatPolicy(unit.idleCombatPolicyId);
+  return policy.selectTarget({
+    state,
+    unit,
+    combat,
+    findNearestEnemyInRange: (range) => findNearestEnemyInRange(state, unit, range, combat),
+  });
 }
 
 function canReachAttackTargetPastMobileBlockers(state: WorldState, unit: UnitState, target: UnitState): boolean {
   return findPathForUnit(state, unit, target.position, { ignoreMobileBlockers: true }) !== null;
-}
-
-function getEngagementRange(unit: UnitState, combat: NonNullable<UnitDefinition["combat"]>): number {
-  if (isAggressiveTravelOrder(unit)) {
-    return combat.aggroRange;
-  }
-
-  if (!unit.currentOrder && unit.movementSpeed > 0) {
-    return combat.aggroRange;
-  }
-
-  return combat.range;
 }
 
 function shouldAcquireAttackTarget(state: WorldState, unit: UnitState, target: UnitState): boolean {

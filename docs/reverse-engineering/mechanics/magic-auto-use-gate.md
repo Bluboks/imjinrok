@@ -27,7 +27,8 @@ static-only다.
 
 분석 상태는 `static-confirmed-player-global-magic-auto-use-toggle`, 재현 상태는
 `partial-reproduction-complete-for-control-writer-reset-and-consumer-case-admission`,
-구현 상태는 `analysis-only-no-product-change`다.
+구현 상태는 `부분 이식`이다. player-global setting/command와 class 78의 좁은 product adapter만
+이식했으며, 9-class 전체 effect를 구현했다는 뜻은 아니다.
 
 - **검토 기록:** Root Codex가 2026-07-28에 read-only review를 수행했다.
 
@@ -161,10 +162,16 @@ class admission 뒤 cadence·helper·world state를 fixture에 synthetic success
 
 ## project superset 경계와 남은 질문
 
-제품 UI·simulation·shared contract는 바꾸지 않았다. 원본 8-player record, raw WORD gate,
+2026-07-30 product adapter는 `PlayerState.magicAutoUseEnabled`와 selection-independent
+`set-magic-auto-use` command를 추가했다. missing/false를 disabled로 해석하며, 이 값은 snapshot에
+직렬화된다. 이는 원본 writer의 enable=1/disable=0과 player-global 범위에 근거한 **의도적 적응**이다.
+원본 8-player record, raw WORD gate,
 control/action 숫자, 9-class switch는 좁은 compatibility evidence일 뿐 project public
 architecture가 아니다. 현행 responsive·multi-selection·mana·health와 Noto/Canvas 적응을
 그대로 유지한다.
+
+제품은 이번에 class 78만 별도 registered auto-ability profile로 연결한다. 나머지 8개 class와
+그 깊은 effect는 이 문서의 `부분 재현` 범위를 넘어가므로 실행하지 않는다.
 
 hero-production-priority `+0x254e`와 이번 magic auto-use `+0x254c`는 인접하지만 비교 방식,
 actions, consumer가 독립이다. 생산 버튼 right-click persistent HUD reservation/pinning도 계속
