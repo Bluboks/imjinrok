@@ -14,6 +14,7 @@ import { createInitialEnvironmentState } from "./environment.js";
 import { getFootprintTiles } from "./placement.js";
 import { resolveMovementCollisionProfileId } from "./movementCollisionPolicy.js";
 import { resolvePathfindingProfileId } from "./navigation.js";
+import { createProjectileSystemState } from "./projectiles.js";
 import { createPlayerResearchState } from "./research.js";
 import { resourceBlocksBuilding, resourceBlocksMovement } from "./resources.js";
 import { applyScenarioScriptedEvents, createScenarioRuntimeState } from "./scenario.js";
@@ -81,7 +82,7 @@ export { findHarvestableResourceTile, findNearestHarvestableResource, findResour
 export { applyScenarioScriptedEvents, completeScenarioRuntime, createScenarioRuntimeState, evaluateScenarioRuntime } from "./scenario.js";
 export { SIM_TICK_SECONDS, SIM_TICKS_PER_SECOND } from "./constants.js";
 export { isTileFlooded, isTilePassableForUnit } from "./terrain.js";
-export { advanceWorldTick } from "./tick.js";
+export { advanceWorldTick, type AdvanceWorldTickOptions } from "./tick.js";
 export {
   advanceSourceOrientation,
   createSourceOrientationState,
@@ -153,6 +154,8 @@ export function createInitialWorldState(
     playerResearch,
     playerCheats,
     combatEvents: [],
+    projectileSystem: createProjectileSystemState(),
+    projectileImpactEvents: [],
     lastAcceptedCommand: null,
   };
 

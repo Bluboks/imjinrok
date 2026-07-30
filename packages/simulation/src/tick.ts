@@ -22,6 +22,7 @@ import { iterateUnitsOrdered, removeUnitFromWorld } from "./units.js";
 import { advanceUnitOrientationForProjectTarget, getSourceOrientationProfileForUnit } from "./orientation.js";
 import { getIdleCombatPolicy } from "./idleCombatPolicy.js";
 import { tryExecutePlayerAutoAbility } from "./autoAbilityPolicy.js";
+import { advanceProjectileSystem, PRODUCT_PROJECTILE_REGISTRY, type ProjectileRegistry } from "./projectiles.js";
 import { unitCanPerformAction, unitDefinitions, type BankResourceKind, type BuildingDefinitionId, type GridPoint, type ScenarioAreaDefinition, type UnitDefinition } from "../../shared/src/index.js";
 import type { UnitState, UnitTargetSelectorState, WorldState } from "./types.js";
 
@@ -30,15 +31,22 @@ const DEFAULT_GATHER_CAPACITY = 10;
 const RESOURCE_RETARGET_RADIUS = 10;
 const REPAIR_HEALTH_PER_TICK = 4;
 const COMBAT_EVENT_RETENTION_TICKS = 8;
+const PROJECTILE_IMPACT_EVENT_RETENTION_TICKS = 8;
 const FAST_PRODUCTION_WORK_TICK_AMOUNT = 4;
 
-export function advanceWorldTick(state: WorldState): void {
+export interface AdvanceWorldTickOptions {
+  /** Product default; executable registries are caller-owned and never serialized. */
+  projectileRegistry?: ProjectileRegistry;
+}
+
+export function advanceWorldTick(state: WorldState, options: AdvanceWorldTickOptions = {}): void {
   if (state.scenario.status !== "running") {
     return;
   }
 
   state.tick += 1;
   pruneCombatEvents(state);
+  pruneProjectileImpactEvents(state);
   // Environment updates first so future systems read this tick's state.
   updateEnvironment(state);
   updateResourceRegrowth(state);
@@ -64,12 +72,25 @@ export function advanceWorldTick(state: WorldState): void {
     }
   }
 
+  advanceProjectileLifecycle(state, options.projectileRegistry ?? PRODUCT_PROJECTILE_REGISTRY);
   advanceUnitCombat(state);
   advanceSourceOrientationAdapters(state);
 
   resolveFloodDrowning(state);
 
   resolveScenarioRuntimeFollowUps(state);
+}
+
+/**
+ * Isolated before combat so projectiles created by a later combat phase cannot
+ * accidentally consume an advance in their spawn tick.
+ */
+function advanceProjectileLifecycle(state: WorldState, registry: ProjectileRegistry): void {
+  const result = advanceProjectileSystem(state.projectileSystem, registry);
+  state.projectileSystem = result.state;
+  for (const impact of result.impacts) {
+    state.projectileImpactEvents.push({ ...impact, tick: state.tick });
+  }
 }
 
 /**
@@ -1086,6 +1107,12 @@ function advanceUnitCombat(state: WorldState): void {
 
 function pruneCombatEvents(state: WorldState): void {
   state.combatEvents = state.combatEvents.filter((event) => state.tick - event.tick <= COMBAT_EVENT_RETENTION_TICKS);
+}
+
+function pruneProjectileImpactEvents(state: WorldState): void {
+  state.projectileImpactEvents = state.projectileImpactEvents.filter(
+    (event) => state.tick - event.tick <= PROJECTILE_IMPACT_EVENT_RETENTION_TICKS,
+  );
 }
 
 function pushCombatEvent(

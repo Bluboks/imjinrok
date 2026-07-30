@@ -77,6 +77,11 @@ export interface ProjectileImpactEvent {
   position: ProjectilePoint;
 }
 
+/** Serialized world-facing impact history entry. Executable policies are never stored here. */
+export interface ProjectileImpactLogEntry extends ProjectileImpactEvent {
+  tick: number;
+}
+
 export interface ProjectileMotionAdvance {
   position: ProjectilePoint;
   motion: ProjectileMotionState;
@@ -330,6 +335,58 @@ export function createProjectileSystemState(): ProjectileSystemState {
   return { nextProjectileSequence: 1, projectiles: [] };
 }
 
+/**
+ * Parses persisted projectile lifecycle data without requiring a particular
+ * executable registry. Profile and policy availability remains an explicit
+ * runtime concern when a caller advances the system with its registry.
+ */
+export function parseSerializedProjectileSystemState(value: unknown): ProjectileSystemState | null {
+  if (!isPlainRecord(value) || !isValidSequenceOrNull(value.nextProjectileSequence) || !Array.isArray(value.projectiles)) {
+    return null;
+  }
+
+  const projectiles: ProjectileState[] = [];
+  let previousSequence = 0;
+  for (const candidate of value.projectiles) {
+    const projectile = parseSerializedProjectile(candidate);
+    if (!projectile) return null;
+    const sequence = tryParseProjectileId(projectile.id);
+    if (sequence === null || sequence <= previousSequence) return null;
+    previousSequence = sequence;
+    projectiles.push(projectile);
+  }
+
+  if (value.nextProjectileSequence !== null && previousSequence >= value.nextProjectileSequence) {
+    return null;
+  }
+
+  return Object.freeze({
+    nextProjectileSequence: value.nextProjectileSequence,
+    projectiles: Object.freeze(projectiles),
+  });
+}
+
+/** Parses deterministic impact history independently of a projectile registry. */
+export function parseSerializedProjectileImpactLog(value: unknown): ProjectileImpactLogEntry[] | null {
+  if (!Array.isArray(value)) return null;
+
+  const entries: ProjectileImpactLogEntry[] = [];
+  let previousTick = -1;
+  let previousProjectileId = "";
+  for (const candidate of value) {
+    const entry = parseSerializedProjectileImpactLogEntry(candidate);
+    if (!entry) return null;
+    if (entry.tick < previousTick || (entry.tick === previousTick && entry.projectileId <= previousProjectileId)) {
+      return null;
+    }
+    previousTick = entry.tick;
+    previousProjectileId = entry.projectileId;
+    entries.push(entry);
+  }
+
+  return entries;
+}
+
 export function spawnProjectile(state: ProjectileSystemState, registry: ProjectileRegistry, request: SpawnProjectileRequest): { state: ProjectileSystemState; projectile: ProjectileState } {
   validateSystemState(state, registry);
   if (state.nextProjectileSequence === null) {
@@ -401,6 +458,131 @@ export function advanceProjectileSystem(state: ProjectileSystemState, registry: 
     state: Object.freeze({ nextProjectileSequence: state.nextProjectileSequence, projectiles }),
     impacts: Object.freeze(impacts),
   };
+}
+
+function parseSerializedProjectile(value: unknown): ProjectileState | null {
+  if (!isPlainRecord(value) || typeof value.id !== "string" || tryParseProjectileId(value.id) === null || !isStableId(value.profileId)) {
+    return null;
+  }
+  if (!isPlainRecord(value.start) || !isFinitePoint(value.start) || !isPlainRecord(value.destination) || !isFinitePoint(value.destination) || !isPlainRecord(value.position) || !isFinitePoint(value.position)) {
+    return null;
+  }
+  if ("sourceId" in value && !isStableId(value.sourceId)) return null;
+  if ("targetId" in value && !isStableId(value.targetId)) return null;
+  const targetReference = "targetReference" in value ? parseTargetReference(value.targetReference) : undefined;
+  if ("targetReference" in value && !targetReference) return null;
+  if (typeof value.targetId === "string" && targetReference && value.targetId !== targetReference.id) return null;
+  const payload = parseJsonRecord(value.payload);
+  const motion = parsePolicyBinding(value.motion);
+  if (!payload || !motion) return null;
+
+  return freezeProjectile({
+    id: value.id,
+    profileId: value.profileId,
+    ...(typeof value.sourceId === "string" ? { sourceId: value.sourceId } : {}),
+    ...(typeof value.targetId === "string" ? { targetId: value.targetId } : {}),
+    ...(targetReference ? { targetReference } : {}),
+    payload,
+    start: { x: value.start.x, y: value.start.y },
+    destination: { x: value.destination.x, y: value.destination.y },
+    position: { x: value.position.x, y: value.position.y },
+    motion,
+  });
+}
+
+function parseSerializedProjectileImpactLogEntry(value: unknown): ProjectileImpactLogEntry | null {
+  if (!isPlainRecord(value) || !isNonNegativeSafeInteger(value.tick) || typeof value.projectileId !== "string" || tryParseProjectileId(value.projectileId) === null || !isStableId(value.profileId) || !isStableId(value.eventId)) {
+    return null;
+  }
+  if ("sourceId" in value && !isStableId(value.sourceId)) return null;
+  if ("targetId" in value && !isStableId(value.targetId)) return null;
+  const targetReference = "targetReference" in value ? parseTargetReference(value.targetReference) : undefined;
+  if ("targetReference" in value && !targetReference) return null;
+  if (typeof value.targetId === "string" && targetReference && value.targetId !== targetReference.id) return null;
+  if (!isPlainRecord(value.position) || !isFinitePoint(value.position)) return null;
+  const payload = parseJsonRecord(value.payload);
+  if (!payload) return null;
+
+  return Object.freeze({
+    tick: value.tick,
+    projectileId: value.projectileId,
+    profileId: value.profileId,
+    eventId: value.eventId,
+    ...(typeof value.sourceId === "string" ? { sourceId: value.sourceId } : {}),
+    ...(typeof value.targetId === "string" ? { targetId: value.targetId } : {}),
+    ...(targetReference ? { targetReference } : {}),
+    payload,
+    position: Object.freeze({ x: value.position.x, y: value.position.y }),
+  });
+}
+
+function parsePolicyBinding(value: unknown): ProjectilePolicyBinding | null {
+  if (!isPlainRecord(value) || !isStableId(value.policyId)) return null;
+  const data = parseJsonRecord(value.data);
+  return data ? Object.freeze({ policyId: value.policyId, data }) : null;
+}
+
+function parseTargetReference(value: unknown): ProjectileTargetReference | null {
+  if (!isPlainRecord(value) || !isStableId(value.id)) return null;
+  if ("generation" in value && !isNonNegativeSafeInteger(value.generation)) return null;
+  return Object.freeze({ id: value.id, ...(typeof value.generation === "number" ? { generation: value.generation } : {}) });
+}
+
+const INVALID_JSON = Symbol("invalid projectile JSON");
+
+function parseJsonRecord(value: unknown): ProjectilePolicyData | null {
+  if (!isPlainRecord(value)) return null;
+  const copy: Record<string, ProjectileJson> = {};
+  for (const [key, entry] of Object.entries(value)) {
+    if (key === "__proto__" || key === "prototype" || key === "constructor") return null;
+    const parsed = parseJson(entry);
+    if (parsed === INVALID_JSON) return null;
+    copy[key] = parsed;
+  }
+  return Object.freeze(copy);
+}
+
+function parseJson(value: unknown): ProjectileJson | typeof INVALID_JSON {
+  if (value === null || typeof value === "boolean" || typeof value === "string") return value;
+  if (typeof value === "number") return Number.isFinite(value) ? value : INVALID_JSON;
+  if (Array.isArray(value)) {
+    const entries: ProjectileJson[] = [];
+    for (const entry of value) {
+      const parsed = parseJson(entry);
+      if (parsed === INVALID_JSON) return INVALID_JSON;
+      entries.push(parsed);
+    }
+    return Object.freeze(entries);
+  }
+  return parseJsonRecord(value) ?? INVALID_JSON;
+}
+
+function isPlainRecord(value: unknown): value is Record<string, unknown> {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const prototype = Object.getPrototypeOf(value);
+  return prototype === Object.prototype || prototype === null;
+}
+
+function isFinitePoint(value: Record<string, unknown>): value is Record<string, unknown> & ProjectilePoint {
+  return typeof value.x === "number" && Number.isFinite(value.x) && typeof value.y === "number" && Number.isFinite(value.y);
+}
+
+function isValidSequenceOrNull(value: unknown): value is number | null {
+  return value === null || isNonNegativeSafeInteger(value) && value >= 1 && value <= MAX_PROJECTILE_SEQUENCE;
+}
+
+function isNonNegativeSafeInteger(value: unknown): value is number {
+  return typeof value === "number" && Number.isSafeInteger(value) && value >= 0;
+}
+
+function isStableId(value: unknown): value is string {
+  return typeof value === "string" && Boolean(value.trim()) && value === value.trim();
+}
+
+function tryParseProjectileId(id: string): number | null {
+  if (!/^projectile-[0-9]{12}$/.test(id)) return null;
+  const sequence = Number(id.slice("projectile-".length));
+  return sequence >= 1 && sequence <= MAX_PROJECTILE_SEQUENCE && formatProjectileId(sequence) === id ? sequence : null;
 }
 
 function validateSystemState(state: ProjectileSystemState, registry: ProjectileRegistry): void {

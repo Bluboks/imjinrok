@@ -10,7 +10,14 @@ import {
   type ScenarioType,
   type SessionSummary,
 } from "@shared";
-import type { PlayerVisibilityState, SkirmishAiDifficulty, WorldSnapshot } from "@simulation";
+import {
+  createProjectileSystemState,
+  parseSerializedProjectileImpactLog,
+  parseSerializedProjectileSystemState,
+  type PlayerVisibilityState,
+  type SkirmishAiDifficulty,
+  type WorldSnapshot,
+} from "@simulation";
 
 export const QUICK_SAVE_VERSION = 4;
 export const SUPPORTED_QUICK_SAVE_VERSIONS = [2, 3, QUICK_SAVE_VERSION] as const;
@@ -212,6 +219,12 @@ export function normalizeSavedWorldSnapshot(snapshot: unknown): WorldSnapshot | 
   }
 
   const candidate = snapshot as Partial<WorldSnapshot>;
+  const projectileSystem = candidate.projectileSystem === undefined
+    ? createProjectileSystemState()
+    : parseSerializedProjectileSystemState(candidate.projectileSystem);
+  const projectileImpactEvents = candidate.projectileImpactEvents === undefined
+    ? []
+    : parseSerializedProjectileImpactLog(candidate.projectileImpactEvents);
 
   if (
     typeof candidate.tick !== "number" ||
@@ -232,7 +245,9 @@ export function normalizeSavedWorldSnapshot(snapshot: unknown): WorldSnapshot | 
     !isRecord(candidate.playerResources) ||
     (candidate.playerResearch !== undefined && !isRecord(candidate.playerResearch)) ||
     (candidate.playerCheats !== undefined && !isRecord(candidate.playerCheats)) ||
-    (candidate.combatEvents !== undefined && !Array.isArray(candidate.combatEvents))
+    (candidate.combatEvents !== undefined && !Array.isArray(candidate.combatEvents)) ||
+    projectileSystem === null ||
+    projectileImpactEvents === null
   ) {
     return null;
   }
@@ -244,6 +259,8 @@ export function normalizeSavedWorldSnapshot(snapshot: unknown): WorldSnapshot | 
   candidate.playerResearch ??= {};
   candidate.playerCheats ??= {};
   candidate.combatEvents ??= [];
+  candidate.projectileSystem = projectileSystem;
+  candidate.projectileImpactEvents = projectileImpactEvents;
   candidate.lastAcceptedCommand ??= null;
 
   return candidate as WorldSnapshot;
