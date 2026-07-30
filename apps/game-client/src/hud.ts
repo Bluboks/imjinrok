@@ -1,6 +1,7 @@
 import { unitDefinitions, type ActionDefinitionId, type DayPhase, type FactionId, type GridPoint, type MapDefinition, type ResearchDefinitionId, type ResourceAmountSet, type UnitDefinitionId, type WeatherKind } from "@shared";
 import type { CarriedResourceState, ConstructionState, PlayerPopulationState, PlayerVisibilityState, ProductionQueueItemState, RallyPointState, ResearchQueueItemState, UnitOrderState, UnitState } from "@simulation";
 import type { UiDomainAction } from "./ui/objectiveModalActions.js";
+import type { GameSpeedPreset } from "./gameplayPreferences.js";
 
 export const SELECTED_ENTITY_CHANGED_EVENT = "selected-entity:changed";
 export const SELECTED_ENTITY_REGISTRY_KEY = "selected-entity";
@@ -128,6 +129,7 @@ export interface BattlefieldSummaryActionView {
 export interface GamePlaybackView {
   paused: boolean;
   speed: number;
+  speedPreset?: GameSpeedPreset;
   controllable: boolean;
   audioMuted: boolean;
 }
