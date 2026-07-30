@@ -31,12 +31,31 @@
    발생하고, 실제 resources/population/research/selection-order/entity state/queue/portrait/magic 값이
    달라질 때만 registry와 event를 갱신한다. scene create와 shutdown에서 서명을 초기화한다.
 
+## 병합 후 통제 측정
+
+동일 조건의 cold-start 재측정을 수행했다. 두 번의 독립된 `agent-browser` session을 각각 새로 열고,
+viewport를 1440×900으로 고정했다. 각 session에서 menu가 완전히 로드된 뒤 15초를 기다렸고, 같은
+K01 진입 경로에서 `사전 브리핑 게임 시작` click부터 20초 대기 구간까지 trace를 기록했다.
+
+| 측정 | commit / trace | `RunTask` | `GLES2 CheckFramebufferStatus` | `FireAnimationFrame` |
+| --- | --- | --- | --- | --- |
+| 기준 | `8d0fd7e`, `/tmp/k01-cold2-baseline-trace.json` | max 44,831.957ms, sum 65,560.6ms | 51회, sum 44,243.2ms, max 2,321.75ms | 70회, p50 6.99ms, p90 18.491ms, p95 20.792ms, p99 103.615ms, >16.7ms 9회, >50ms 2회 |
+| 최적화 | 병합된 `dev`, `/tmp/k01-cold2-optimized-trace.json` | max 631.876ms, sum 20,289.9ms | 36회, sum 114.6ms, max 11.711ms | 172회, p50 7.539ms, p90 14.747ms, p95 18.417ms, p99 30.936ms, >16.7ms 13회, >50ms 0회 |
+
+cache warm 효과를 통제하기 위해 최적화 측정 뒤 기준 commit도 같은 절차로 다시 실행했다. 이 순서 통제
+기준 측정에서도 framebuffer는 51회, sum 32,724.2ms, max 1,835.694ms였고 `RunTask` max는
+33,173.39ms였다. 따라서 최초 기준 run의 매우 큰 FBO 비용은 단순 cache warm 차이만으로 설명되기보다,
+terrain/fog RenderTexture 생성·개별 draw 구조와 결합된 병목이라는 강한 구조적 증거다.
+
 ## 검증과 한계
 
 - RenderTexture batch의 정상 및 예외 종료, 60×60 chunk 수, HUD 최초 발행·동일값 억제·중첩값 변경을
   순수 테스트로 고정한다. scene 계약 테스트는 `clear → batch`, batch-only helper 사용을 검사한다.
-- 이 변경은 trace에서 보인 FBO bind/생성과 HUD 재구성의 구조적 원인을 제거하지만, 변경 후 같은
-  환경에서 새 trace를 아직 기록하지 않았다. 그러므로 수치적 개선 폭이나 startup load 시간 개선을
-  주장하지 않는다.
+- 기준 trace는 main-thread click이 trace-stop workflow 자체를 막아 wall-time sample 수가 최적화 run과
+  다르다. 그러므로 `RunTask` 합계나 animation-frame 분포를 직접 FPS 비율로 환산하지 않는다. 대신
+  startup max와 framebuffer 비용의 반복·순서통제 결과를 이 변경이 겨냥한 구조적 원인에 대한 근거로
+  사용한다.
+- 위 절대 수치는 headless SwiftShader 환경의 값이며, 특정 사용자 GPU·driver·브라우저에서의 FPS 또는
+  load time을 보장하거나 주장하지 않는다.
 - elevation overlay는 기존처럼 별도 game object를 사용한다. 장시간의 최초 asset decode/업로드와
   실제 GPU/driver 특성은 이번 범위 밖이다.
