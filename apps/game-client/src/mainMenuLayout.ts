@@ -1,31 +1,178 @@
-export interface MainMenuPreferenceControlsLayout {
-  speedY: number;
-  mouseY: number;
-  bottom: number;
+export interface MainMenuSourcePoint {
+  x: number;
+  y: number;
 }
 
-const PREFERENCE_SPEED_OFFSET_Y = 76;
-const PREFERENCE_MOUSE_OFFSET_Y = 21;
-const PREFERENCE_LINE_HEIGHT = 18;
-const PREFERENCE_TO_MENU_GAP = 20;
-
-export function getMainMenuPreferenceControlsLayout(titleY: number): MainMenuPreferenceControlsLayout {
-  const speedY = titleY + PREFERENCE_SPEED_OFFSET_Y;
-  const mouseY = speedY + PREFERENCE_MOUSE_OFFSET_Y;
-
-  return { speedY, mouseY, bottom: mouseY + PREFERENCE_LINE_HEIGHT };
+export interface MainMenuSourceRect extends MainMenuSourcePoint {
+  width: number;
+  height: number;
 }
 
-export function getMainMenuTop(height: number, titleY: number): number {
-  const baseMenuTop = Math.max(180, Math.min(titleY + 116, height * 0.33));
-  const preferences = getMainMenuPreferenceControlsLayout(titleY);
-
-  return Math.max(baseMenuTop, preferences.bottom + PREFERENCE_TO_MENU_GAP);
+export interface MainMenuCanvasLayout {
+  scale: number;
+  offsetX: number;
+  offsetY: number;
+  canvas: MainMenuSourceRect;
 }
 
-export function getMenuOptionStepY(height: number, menuTop: number, optionCount: number): number {
-  const minimumStepY = optionCount >= 7 ? 20 : 34;
-  const preferredStepY = (height - menuTop - 96) / Math.max(optionCount + 1, 2);
+/**
+ * Project adaptation hit areas are expressed in the profile's logical
+ * coordinate system. They are deliberately not labelled as original UI
+ * geometry until the executable input path is recovered.
+ */
+export interface MainMenuProjectAdaptationHitRects {
+  main: {
+    scenario: MainMenuSourceRect;
+    load: MainMenuSourceRect;
+    random: MainMenuSourceRect;
+    preferences: MainMenuSourceRect;
+  };
+  country: {
+    korea: MainMenuSourceRect;
+    japan: MainMenuSourceRect;
+    china: MainMenuSourceRect;
+    back: MainMenuSourceRect;
+  };
+  stage: {
+    border: MainMenuSourceRect;
+    firstSlotY: number;
+    slotHeight: number;
+    slot: MainMenuSourceRect;
+    back: MainMenuSourceRect;
+  };
+  panel: {
+    firstRowY: number;
+    rowHeight: number;
+    row: MainMenuSourceRect;
+    back: MainMenuSourceRect;
+  };
+}
 
-  return Math.min(46, Math.max(minimumStepY, preferredStepY));
+export interface MainMenuPresentationGeometry {
+  logicalWidth: number;
+  logicalHeight: number;
+  projectAdaptationHitRects: MainMenuProjectAdaptationHitRects;
+}
+
+/**
+ * Original Imjinrok source-art profile. Future remastered presentation may
+ * replace its logical canvas, assets, and geometry independently of engine
+ * viewport policy.
+ */
+export const IMJINROK_CLASSIC_MAIN_MENU_GEOMETRY = {
+  logicalWidth: 640,
+  logicalHeight: 480,
+  projectAdaptationHitRects: {
+    main: {
+      scenario: { x: 464, y: 30, width: 146, height: 98 },
+      load: { x: 464, y: 138, width: 146, height: 98 },
+      random: { x: 464, y: 352, width: 146, height: 96 },
+      preferences: { x: 464, y: 246, width: 146, height: 98 },
+    },
+    country: {
+      korea: { x: 58, y: 120, width: 150, height: 42 },
+      japan: { x: 58, y: 172, width: 150, height: 42 },
+      china: { x: 58, y: 224, width: 150, height: 42 },
+      back: { x: 58, y: 300, width: 150, height: 34 },
+    },
+    stage: {
+      border: { x: 285, y: 65, width: 320, height: 350 },
+      firstSlotY: 116,
+      slotHeight: 31,
+      slot: { x: 305, y: 116, width: 278, height: 29 },
+      back: { x: 305, y: 380, width: 278, height: 30 },
+    },
+    panel: {
+      firstRowY: 118,
+      rowHeight: 44,
+      row: { x: 461, y: 118, width: 154, height: 38 },
+      back: { x: 461, y: 390, width: 154, height: 38 },
+    },
+  },
+} as const satisfies MainMenuPresentationGeometry;
+
+export function resolveMainMenuCanvasLayout(
+  viewportWidth: number,
+  viewportHeight: number,
+  presentation: Pick<
+    MainMenuPresentationGeometry,
+    "logicalWidth" | "logicalHeight"
+  >,
+): MainMenuCanvasLayout {
+  assertPositiveFinite("viewportWidth", viewportWidth);
+  assertPositiveFinite("viewportHeight", viewportHeight);
+  assertPositiveFinite("presentation.logicalWidth", presentation.logicalWidth);
+  assertPositiveFinite(
+    "presentation.logicalHeight",
+    presentation.logicalHeight,
+  );
+
+  const scale = Math.min(
+    viewportWidth / presentation.logicalWidth,
+    viewportHeight / presentation.logicalHeight,
+  );
+  const canvasWidth = presentation.logicalWidth * scale;
+  const canvasHeight = presentation.logicalHeight * scale;
+
+  return {
+    scale,
+    offsetX: (viewportWidth - canvasWidth) / 2,
+    offsetY: (viewportHeight - canvasHeight) / 2,
+    canvas: {
+      x: (viewportWidth - canvasWidth) / 2,
+      y: (viewportHeight - canvasHeight) / 2,
+      width: canvasWidth,
+      height: canvasHeight,
+    },
+  };
+}
+
+export function projectMainMenuSourceRect(
+  layout: MainMenuCanvasLayout,
+  sourceRect: MainMenuSourceRect,
+): MainMenuSourceRect {
+  return {
+    x: layout.offsetX + sourceRect.x * layout.scale,
+    y: layout.offsetY + sourceRect.y * layout.scale,
+    width: sourceRect.width * layout.scale,
+    height: sourceRect.height * layout.scale,
+  };
+}
+
+export function getMainMenuSourcePoint(
+  layout: MainMenuCanvasLayout,
+  viewportPoint: MainMenuSourcePoint,
+): MainMenuSourcePoint | null {
+  const { canvas } = layout;
+  if (
+    viewportPoint.x < canvas.x ||
+    viewportPoint.x > canvas.x + canvas.width ||
+    viewportPoint.y < canvas.y ||
+    viewportPoint.y > canvas.y + canvas.height
+  ) {
+    return null;
+  }
+
+  return {
+    x: (viewportPoint.x - layout.offsetX) / layout.scale,
+    y: (viewportPoint.y - layout.offsetY) / layout.scale,
+  };
+}
+
+export function isMainMenuSourcePointInRect(
+  point: MainMenuSourcePoint,
+  rect: MainMenuSourceRect,
+): boolean {
+  return (
+    point.x >= rect.x &&
+    point.x <= rect.x + rect.width &&
+    point.y >= rect.y &&
+    point.y <= rect.y + rect.height
+  );
+}
+
+function assertPositiveFinite(name: string, value: number): void {
+  if (!Number.isFinite(value) || value <= 0) {
+    throw new RangeError(`${name} must be positive and finite; got ${value}`);
+  }
 }
