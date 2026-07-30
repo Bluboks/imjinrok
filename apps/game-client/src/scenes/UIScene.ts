@@ -1098,6 +1098,11 @@ export class UIScene extends Phaser.Scene {
   }
 
   private getPlaybackSpeedLabel(): string {
+    if (this.gamePlayback.speedPreset) {
+      const state = ["slowest", "slow", "normal", "fast", "fastest"].indexOf(this.gamePlayback.speedPreset);
+      return state >= 0 ? `${state + 1}/5` : "?";
+    }
+
     return `${this.gamePlayback.speed.toFixed(this.gamePlayback.speed % 1 === 0 ? 0 : 1)}x`;
   }
 

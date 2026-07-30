@@ -183,6 +183,18 @@ import {
   type SerializedPlayerVisibilityState,
 } from "../session.js";
 import { createFormationTargets } from "../formation.js";
+import {
+  readGameplayPreferences,
+  writeGameplayPreferences,
+  type GameplayPreferences,
+} from "../gameplayPreferences.js";
+import { createGameplayRuntimeSpeed, stepGameplayRuntimeSpeed } from "../gameplayInputRuntime.js";
+import {
+  decideMouseInputAction,
+  type MouseHitKind,
+  type MouseInputAction,
+  type MousePointerButton,
+} from "../input/mouseInputPolicy.js";
 import { launchGameWithPreGameBriefing } from "../preGameBriefingLaunch.js";
 import {
   assertSourceFogGroundLayerFamilies,
@@ -234,7 +246,6 @@ const UNIT_DOUBLE_CLICK_SELECT_MS = 420;
 const ENVIRONMENT_OVERLAY_DEPTH = SCREEN_OVERLAY_DEPTH - 140;
 const MIN_CAMERA_ZOOM = 0.55;
 const MAX_CAMERA_ZOOM = 1.8;
-const PLAYBACK_SPEEDS = [0.5, 1, 1.5, 2, 3] as const;
 const MAX_CLIENT_PRODUCTION_QUEUE_SIZE = 5;
 const CHEAT_INPUT_MAX_LENGTH = 32;
 const UNIT_SPRITE_GROUND_CONTACT = { x: 0, y: 0 } as const;
@@ -558,6 +569,7 @@ export class SkirmishScene extends Phaser.Scene {
   private dragCurrentScreen: Phaser.Math.Vector2 | null = null;
   private isDragSelecting = false;
   private isLeftMouseHeld = false;
+  private gameplayPreferences: GameplayPreferences = readGameplayPreferences();
   private launchContext: GameLaunchContext | null = null;
   private activeMissionDialogue: ActiveMissionDialogue | null = null;
   private missionDialoguePausedAt: number | null = null;
@@ -684,6 +696,7 @@ export class SkirmishScene extends Phaser.Scene {
     this.lastUnitSelectionClick = null;
     this.lastIdleWorkerUnitId = null;
     this.pendingTargetAction = null;
+    this.gameplayPreferences = readGameplayPreferences();
     this.setGameplayAudioMuted(this.readGameplayAudioMutedPreference(), false);
     this.hideMissionDialogueOverlay();
 
@@ -698,6 +711,7 @@ export class SkirmishScene extends Phaser.Scene {
     this.perfEnabled = new URLSearchParams(globalThis.location?.search ?? "").get("perf") === "1";
     this.map = this.resolveLaunchMap(data);
     this.sessionTransport = createSessionTransport(data, this.map, players);
+    this.applyInitialGameplayPlaybackSpeed();
     this.worldState = this.sessionTransport.getSnapshot();
     this.map = this.worldState.map;
     this.ensureSelectedResourceVisualTextures();
@@ -872,22 +886,12 @@ export class SkirmishScene extends Phaser.Scene {
       }
 
       this.requestPointerLock();
+      const action = this.resolveMouseInputAction(pointer, false);
 
-      if (!this.isLeftButtonEvent(pointer)) {
-        return;
+      if (this.getMousePointerButton(pointer) === "primary" && (action.kind === "select" || action.kind === "issue-default-action")) {
+        this.isLeftMouseHeld = true;
+        this.beginDragSelection();
       }
-
-      this.isLeftMouseHeld = true;
-
-      if (this.pendingBuildPlacement) {
-        return;
-      }
-
-      if (this.pendingTargetAction) {
-        return;
-      }
-
-      this.beginDragSelection();
     });
 
     this.input.on("pointermove", (pointer: Phaser.Input.Pointer) => {
@@ -918,47 +922,85 @@ export class SkirmishScene extends Phaser.Scene {
       }
 
       this.syncVirtualCursor(pointer, false);
+      this.applyMouseInputAction(pointer, this.resolveMouseInputAction(pointer, this.isDragSelecting));
+    });
+  }
 
-      if (this.isRightButtonEvent(pointer)) {
-        if (this.pendingBuildPlacement) {
-          this.cancelBuildPlacement();
-          return;
+  private resolveMouseInputAction(pointer: Phaser.Input.Pointer, dragging: boolean): MouseInputAction {
+    const button = this.getMousePointerButton(pointer);
+
+    if (!button) {
+      return { kind: "ignore" };
+    }
+
+    return decideMouseInputAction(this.gameplayPreferences.mouseControlMode, {
+      button,
+      dragging,
+      hasPendingTargetAction: Boolean(this.pendingBuildPlacement || this.pendingTargetAction),
+      hasControllableSelection: this.getSelectedUnits().length > 0,
+      hit: this.classifyMouseHitAtScreenPoint(this.virtualCursorScreen),
+    });
+  }
+
+  private applyMouseInputAction(pointer: Phaser.Input.Pointer, action: MouseInputAction): void {
+    switch (action.kind) {
+      case "cancel-pending-action":
+        this.cancelBuildPlacement();
+        this.cancelPendingTargetAction();
+        this.cancelDragSelection();
+        return;
+      case "confirm-pending-action":
+        if (this.isScreenPointInWorldField(this.virtualCursorScreen)) {
+          if (this.pendingBuildPlacement) {
+            this.issuePendingBuildPlacement(this.virtualCursorScreen);
+          } else {
+            this.issuePendingTargetAction(this.virtualCursorScreen);
+          }
         }
-
-        if (this.pendingTargetAction) {
-          this.cancelPendingTargetAction();
-          return;
-        }
-
+        this.cancelDragSelection();
+        return;
+      case "issue-default-action":
+        this.isLeftMouseHeld = false;
+        this.cancelDragSelection();
         if (this.isScreenPointInWorldField(this.virtualCursorScreen)) {
           this.issueDefaultActionAtScreenPoint(this.virtualCursorScreen);
         }
-
         return;
-      }
-
-      if (this.isLeftButtonEvent(pointer) || this.isLeftMouseHeld) {
+      case "select":
         this.isLeftMouseHeld = false;
-
-        if (this.pendingBuildPlacement) {
-          if (this.isScreenPointInWorldField(this.virtualCursorScreen)) {
-            this.issuePendingBuildPlacement(this.virtualCursorScreen);
-          }
-          this.cancelDragSelection();
-          return;
-        }
-
-        if (this.pendingTargetAction) {
-          if (this.isScreenPointInWorldField(this.virtualCursorScreen)) {
-            this.issuePendingTargetAction(this.virtualCursorScreen);
-          }
-          this.cancelDragSelection();
-          return;
-        }
-
         this.finishDragSelection(pointer);
-      }
-    });
+        return;
+      case "ignore":
+        return;
+    }
+  }
+
+  private getMousePointerButton(pointer: Phaser.Input.Pointer): MousePointerButton | null {
+    if (this.isRightButtonEvent(pointer)) {
+      return "secondary";
+    }
+
+    if (this.isLeftButtonEvent(pointer) || this.isLeftMouseHeld) {
+      return "primary";
+    }
+
+    return null;
+  }
+
+  private classifyMouseHitAtScreenPoint(point: Phaser.Math.Vector2): MouseHitKind {
+    if (!this.isScreenPointInWorldField(point)) {
+      return "world";
+    }
+
+    const worldPoint = this.screenToWorldPoint(point);
+    if (this.findUnitAtWorldPoint(worldPoint.x, worldPoint.y)) {
+      return "friendly-selectable";
+    }
+    if (this.findVisibleEnemyUnitAtWorldPoint(worldPoint.x, worldPoint.y)) {
+      return "enemy";
+    }
+
+    return this.findResourceTargetAtGridPoint(this.getGridPointFromScreenPoint(point)) ? "resource" : "world";
   }
 
   private isLeftButtonEvent(pointer: Phaser.Input.Pointer): boolean {
@@ -3873,13 +3915,17 @@ export class SkirmishScene extends Phaser.Scene {
   }
 
   private publishGamePlayback(): void {
-    const playback = this.sessionTransport?.getPlaybackState();
-
-    if (!playback) {
+    const transport = this.sessionTransport;
+    if (!transport) {
       return;
     }
+    const playback = transport.getPlaybackState();
 
-    const view = { ...playback, audioMuted: this.audioMuted };
+    const view = {
+      ...playback,
+      ...(transport.isRemote ? {} : { speedPreset: this.gameplayPreferences.gameSpeed }),
+      audioMuted: this.audioMuted,
+    };
 
     this.registry.set(GAME_PLAYBACK_REGISTRY_KEY, view);
     this.game.events.emit(GAME_PLAYBACK_CHANGED_EVENT, view);
@@ -4112,8 +4158,19 @@ export class SkirmishScene extends Phaser.Scene {
       return;
     }
 
-    this.sessionTransport?.setPlaybackSpeed(this.getAdjacentPlaybackSpeed(playback.speed, direction));
+    const runtimeSpeed = stepGameplayRuntimeSpeed(this.gameplayPreferences, direction);
+    this.gameplayPreferences = runtimeSpeed.preferences;
+    this.sessionTransport?.setPlaybackSpeed(runtimeSpeed.playbackSpeed);
+    writeGameplayPreferences(this.gameplayPreferences);
     this.publishGamePlayback();
+  }
+
+  private applyInitialGameplayPlaybackSpeed(): void {
+    if (!this.sessionTransport || this.sessionTransport.isRemote) {
+      return;
+    }
+
+    this.sessionTransport.setPlaybackSpeed(createGameplayRuntimeSpeed(this.gameplayPreferences).playbackSpeed);
   }
 
   private setPlaybackPaused(paused: boolean): boolean {
@@ -4208,14 +4265,6 @@ export class SkirmishScene extends Phaser.Scene {
     } catch (error) {
       console.warn("Failed to play mission voice audio cue", { voiceId: line.voiceId, error });
     }
-  }
-
-  private getAdjacentPlaybackSpeed(currentSpeed: number, direction: -1 | 1): number {
-    if (direction < 0) {
-      return [...PLAYBACK_SPEEDS].reverse().find((speed) => speed < currentSpeed - 0.01) ?? 0.5;
-    }
-
-    return PLAYBACK_SPEEDS.find((speed) => speed > currentSpeed + 0.01) ?? 3;
   }
 
   private serializeControlGroups(): SerializedControlGroups {
