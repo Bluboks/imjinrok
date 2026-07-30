@@ -143,6 +143,9 @@ export function replaySourcePathfinding({ start, goal, entity, terrain, width, h
       maximumFrontierSize = Math.max(maximumFrontierSize, frontier.length);
       acceptedNodeCounter += 1;
       if (entry.score < closest.score) closest = entry;
+      if (sameCoordinate(coordinate, goal)) {
+        return finishReplay("goal", coordinate, visited, expanded + 1, frontierCapacity, acceptedNodeCounter, maximumFrontierSize);
+      }
       if (frontier.length >= frontierCapacity) {
         frontierCapReached = true;
         break;
@@ -214,7 +217,7 @@ export function extractSourcePathfindingEvidence({ executablePath = DEFAULT_EXEC
       tie: "first frontier entry survives equal score",
       candidateWindow: `start x/y ±${SEARCH_RADIUS} inclusive`,
       completion: "actual goal, frontier-capacity, or exhausted frontier; closest strict-score fallback is retained",
-      waypointPostprocess: "FUN_004446a0 backtracks through decreasing visit-depth neighbors and writes a short next waypoint; product coordinate mapping remains unresolved",
+      waypointPostprocess: "FUN_00444770 performs decreasing-depth backtracking before its FUN_004446a0 call; this extractor binds FUN_004446a0 only as a postprocess call boundary",
     },
     footprintPredicate: { function: "FUN_0043ab70", blockedReturn: 1, clearReturn: 0, rectangle: "candidate anchor rectangle ending at x/y, dimensions entity +0x1e3/+0x1e4", mask: "entity +0x1ee against WORD 0x00ae27e4", outOfBounds: "blocked" },
     testVectors: {
@@ -235,14 +238,14 @@ export function extractSourcePathfindingEvidence({ executablePath = DEFAULT_EXEC
 }
 
 function finishReplay(reason, endpoint, visited, expanded, frontierCapacity, acceptedNodeCounter, maximumFrontierSize) {
-  const path = [];
+  const insertionParentTrace = [];
   let record = visited.get(coordinateKey(endpoint));
   while (record) {
-    path.push(record.coordinate);
+    insertionParentTrace.push(record.coordinate);
     record = record.parent ? visited.get(coordinateKey(record.parent)) : null;
   }
-  path.reverse();
-  return { returnValue: reason === "goal" ? 0 : 1, reason, frontierCapacity, maximumFrontierSize, expanded, acceptedNodeCounter, endpoint, path };
+  insertionParentTrace.reverse();
+  return { returnValue: reason === "goal" ? 0 : 1, reason, frontierCapacity, maximumFrontierSize, expanded, acceptedNodeCounter, endpoint, insertionParentTrace };
 }
 
 function blockedGoalTerrain() {

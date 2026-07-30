@@ -44,8 +44,11 @@ test("reproduces wrapper capacity boundaries, exact candidate order, and strict 
 test("reproduces goal, strict closest fallback, footprint block/OOB, frontier capacity, and wrapper failure vectors", () => {
   const open = Array(8 * 8).fill(0);
   const goal = replaySourcePathfinding({ start: { x: 2, y: 2 }, goal: { x: 3, y: 3 }, entity, terrain: open, width: 8, height: 8 });
-  assert.deepEqual(goal.path, [{ x: 2, y: 2 }, { x: 3, y: 3 }]);
+  assert.deepEqual(goal.insertionParentTrace, [{ x: 2, y: 2 }, { x: 3, y: 3 }]);
   assert.equal(goal.reason, "goal");
+  assert.equal(goal.acceptedNodeCounter, 1);
+  assert.equal(goal.maximumFrontierSize, 1);
+  assert.equal(goal.expanded, 1);
 
   const blockedGoal = [...open];
   blockedGoal[7 * 8 + 7] = 1;

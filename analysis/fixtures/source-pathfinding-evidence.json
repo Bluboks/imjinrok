@@ -365,7 +365,7 @@
     "tie": "first frontier entry survives equal score",
     "candidateWindow": "start x/y ±25 inclusive",
     "completion": "actual goal, frontier-capacity, or exhausted frontier; closest strict-score fallback is retained",
-    "waypointPostprocess": "FUN_004446a0 backtracks through decreasing visit-depth neighbors and writes a short next waypoint; product coordinate mapping remains unresolved"
+    "waypointPostprocess": "FUN_00444770 performs decreasing-depth backtracking before its FUN_004446a0 call; this extractor binds FUN_004446a0 only as a postprocess call boundary"
   },
   "footprintPredicate": {
     "function": "FUN_0043ab70",
@@ -419,14 +419,14 @@
       "returnValue": 0,
       "reason": "goal",
       "frontierCapacity": 26,
-      "maximumFrontierSize": 7,
+      "maximumFrontierSize": 1,
       "expanded": 1,
-      "acceptedNodeCounter": 7,
+      "acceptedNodeCounter": 1,
       "endpoint": {
         "x": 3,
         "y": 3
       },
-      "path": [
+      "insertionParentTrace": [
         {
           "x": 2,
           "y": 2
@@ -448,7 +448,7 @@
         "x": 6,
         "y": 7
       },
-      "path": [
+      "insertionParentTrace": [
         {
           "x": 2,
           "y": 2
@@ -487,7 +487,7 @@
           "x": 5,
           "y": 30
         },
-        "path": [
+        "insertionParentTrace": [
           {
             "x": 30,
             "y": 30

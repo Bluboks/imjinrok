@@ -31,7 +31,7 @@ scheduler serialization, product coordinate mapping과 caller 이후 이동 life
 | `FUN_00445290` | `0x00445290-0x0044532e` | accepted-node gate, Chebyshev→frontier capacity, core wrapper |
 | `FUN_00444770` | `0x00444770-0x00444ce5` | visit grid/frontier, strict score, candidate/search/fallback control flow |
 | `FUN_00444570` | `0x00444570-0x0044466b` | eight-call candidate coordinate state machine |
-| `FUN_004446a0` | `0x004446a0-0x00444764` | decreasing-depth backtrack and short next-waypoint postprocess boundary |
+| `FUN_004446a0` | `0x004446a0-0x00444764` | short next-waypoint postprocess **call boundary only** |
 | `FUN_0043ab70` | `0x0043ab70-0x0043ac4f` | entity footprint mask/OOB blocked predicate |
 | `FUN_00425b20` | `0x00425b20-0x004262e0` | `0x00425c59` caller edge only |
 
@@ -61,9 +61,11 @@ candidate helper는 guessed compass order로 정규화하지 않는다. 시작 s
 | 12 | 9 | `(x-1, y+2)` |
 | 9 | 2 | `(x, y)` |
 
-`FUN_004446a0`은 selected fallback/goal 쪽에서 decreasing visit-depth neighbor를 따라 short next waypoint를 output pointers에
-쓴다. 이 document/extractor는 해당 control-flow boundary와 call을 고정하지만, raw output coordinate를 product world/screen
-coordinate로 이름 붙이거나 full path product output으로 이식하지 않는다.
+decreasing visit-depth neighbor backtrack은 `FUN_00444770`의 `0x00444afc..0x00444c32`에 있다. 그 뒤의
+`FUN_004446a0`은 저장된 initial-depth coordinate의 step-vector 비교로 short waypoint를 선택하지만, 현재 extractor의
+byte anchor는 이 callee의 세부 output rule까지 고정하지 않는다. 따라서 `FUN_004446a0`에 대해 주장하는 범위는
+**postprocess call boundary**뿐이다. raw output coordinate를 product world/screen coordinate로 이름 붙이거나 full path
+product output으로 이식하지 않는다.
 
 ## Footprint predicate
 
@@ -75,8 +77,9 @@ mask table의 terrain/ownership/other human meaning은 아직 확정하지 않�
 
 생성 fixture는 [`analysis/fixtures/source-pathfinding-evidence.json`](../../../analysis/fixtures/source-pathfinding-evidence.json)이다.
 pure reproducer는 wrapper capacity boundaries, exact state vector, strict-score tie, goal success, blocked goal closest fallback,
-mask/OOB, frontier-capacity and accepted-node failure를 검증한다. fixture/source EXE/functions/references 한 byte 변조와 malformed
-pure input도 fail closed한다.
+mask/OOB, frontier-capacity and accepted-node failure를 검증한다. `insertionParentTrace`는 reference model이 candidate insertion에
+붙인 trace일 뿐, 원본이 저장한 parent path나 original waypoint output이 아니다. fixture/source EXE/functions/references 한 byte
+변조와 malformed pure input도 fail closed한다.
 
 ```sh
 pnpm imjinrok:extract-source-pathfinding-evidence
