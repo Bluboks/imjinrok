@@ -8,7 +8,7 @@
 | --- | --- | --- |
 | 분석 | `정적 확정` | 두 caller의 signed-word x/y guard, `lowNibble == 2`/other 수식, direct helper의 전체 return 분기, K01 `60×60` cell의 selector/lookup·object/frame fields |
 | 재현 | `재현 완료` | 3,600-cell x-major stream/digest·분포, low-nibble two/other, 네 map corner, helper의 synthetic positive/negative branch와 malformed/tampered input 거부 |
-| 구현 | `부분 이식·source-backed adaptation` | hash-bound K01의 raw second-argument delta stream은 보존한다. emitted PNG alpha coverage와 low-nibble boundary vector를 근거로 모든 web tile은 shared ground contact에 두고 deterministic terrain-footprint underlay 위에 source artwork를 합성한다. raw argument 축·pivot은 여전히 미확정이다. |
+| 구현 | `부분 이식·source-backed-adaptation` | hash-bound K01의 raw second-argument delta stream은 보존한다. emitted PNG alpha coverage와 low-nibble boundary vector를 근거로 모든 web tile은 shared ground contact에 두고, exported `grss1_0000` source-art footprint underlay 위에 source artwork를 합성한다. raw argument 축·pivot은 여전히 미확정이다. |
 
 이것은 기존 [K01 source tile object·frame selector](k01-source-tile-selector.md)의 **다음 placement 경계**다.
 기존 문서의 object/frame source identity와 3,600 pair frame-bound proof를 그대로 hash-bound로 재검증하지만,
@@ -101,13 +101,16 @@ delta를 `0` 또는 `16`의 stream으로 보존한다. `0`은 2,865, `16`은 735
 합성해, 이전처럼 `16`을 web `y=-16`으로 해석하면 low-nibble가 다른 이웃 경계가 798개 생김을 재현한다.
 source PNG만으로는 logical diamond 내부를 완전히 덮지 못한다(legacy mapping 153,600 pixel, shared-anchor mapping
 161,043 pixel). 따라서 product는 이 비교를 **원작 pixel parity 증거가 아닌 반증된 web-axis 가정**으로 사용한다:
-모든 cell은 shared ground contact에서 source artwork를 그리고, deterministic terrain-footprint underlay가 logical
-coverage를 0 uncovered pixel로 만든다. 이 underlay와 shared anchor는 `source-backed-adaptation`이다.
+모든 cell은 shared ground contact에서 source artwork를 그리고, K01 map stream에 실제로 포함된 normal-source
+`grss1_0000`을 `underlayAssetKey`로 먼저 합성한다. coverage test는 이 emitted PNG의 실제 alpha를 매 cell에
+합성해 logical coverage가 0 uncovered pixel임을 고정한다. frame-0 underlay choice와 shared anchor는
+`source-backed-adaptation`이며, original renderer가 같은 layer를 그렸다는 주장이 아니다.
 
 explicit terrain placement와 world/chunk bounds, explicit fog base, source fog composite는 같은 shared ground-contact
-contract를 소비한다. explicit fog base도 opaque tinted diamond를 먼저 그려 source alpha hole을 막고, source fog의
-64×48 composite는 family/selector identity를 유지하며 `0x020608` tint를 적용한다. tint, alpha, visibility semantics와
-pixel pivot은 원작에서 확정된 범위가 아니다.
+contract를 소비한다. chunk bounds는 flat artwork와 underlay의 source-canvas bounds를 모두 합친다. explicit fog base도
+같은 source-art underlay를 tinted alpha로 먼저 그려 source alpha hole을 막고, source fog의 64×48 composite는
+family/selector identity를 유지하며 `0x020608` tint를 적용한다. tint, alpha, visibility semantics와 pixel pivot은 원작에서
+확정된 범위가 아니다.
 
 ## Reproduction and failure boundary
 

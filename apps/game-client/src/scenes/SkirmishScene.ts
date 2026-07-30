@@ -144,6 +144,7 @@ import {
   getRegisteredExplicitTileVisualPreloadDescriptors,
   requireExplicitTileVisualTexture,
   resolveExplicitTileVisual,
+  resolveExplicitTileUnderlayVisual,
   resolveExplicitTileVisualPlacement,
   resolveExplicitTileVisualWorldBounds,
   resolveTileImagePlacement,
@@ -7060,12 +7061,14 @@ export class SkirmishScene extends Phaser.Scene {
   ): void {
     const tile = getTileAt(this.map, x, y);
     const explicitVisual = resolveExplicitTileVisual(CONTENT_REGISTRY, this.map, tile, "flat");
+    const explicitUnderlay = resolveExplicitTileUnderlayVisual(CONTENT_REGISTRY, this.map, tile);
 
     if (explicitVisual) {
-      // A source tile can have transparent pixels inside its logical diamond.
-      // Keep an opaque product terrain footprint below the source artwork so
-      // neither the camera background nor the fog base leaks through.
-      this.drawFallbackFogTile(renderTexture, bounds, fallbackTextureKey, worldX, worldY);
+      if (explicitUnderlay) {
+        this.drawExplicitTileFog(renderTexture, bounds, explicitUnderlay, visibility, worldX, worldY, 0);
+      } else {
+        this.drawFallbackFogTile(renderTexture, bounds, fallbackTextureKey, worldX, worldY);
+      }
       this.drawExplicitTileFog(renderTexture, bounds, explicitVisual, visibility, worldX, worldY, 0);
       return;
     }
@@ -7372,14 +7375,16 @@ export class SkirmishScene extends Phaser.Scene {
             const worldX = this.mapOrigin.x + iso.x;
             const worldY = this.mapOrigin.y + iso.y;
             const explicitVisual = resolveExplicitTileVisual(CONTENT_REGISTRY, this.map, tile, "flat");
+            const explicitUnderlay = resolveExplicitTileUnderlayVisual(CONTENT_REGISTRY, this.map, tile);
             const flatVisual = this.getFlatTerrainVisualForTerrain(tile.terrain);
             const flatFrame = flatVisual ? this.pickTerrainFrame(flatVisual, "base", x, y) : null;
 
             if (explicitVisual) {
-              // Source frames are alpha-bearing artwork, not guaranteed opaque
-              // terrain diamonds. The deterministic footprint underlay keeps
-              // logical map coverage continuous before compositing the frame.
-              renderTexture.draw(this.terrainTextureKeys.get(tile.terrain)!, worldX - minX - halfWidth - 1, worldY - minY - halfHeight - 1);
+              if (explicitUnderlay) {
+                this.drawExplicitTileVisual(renderTexture, { minX, minY }, explicitUnderlay, worldX, worldY, 0);
+              } else {
+                renderTexture.draw(this.terrainTextureKeys.get(tile.terrain)!, worldX - minX - halfWidth - 1, worldY - minY - halfHeight - 1);
+              }
               this.drawExplicitTileVisual(renderTexture, { minX, minY }, explicitVisual, worldX, worldY, 0);
             } else if (flatVisual && flatFrame && this.textures.exists(flatFrame.textureKey)) {
               renderTexture.draw(this.getTerrainRenderStamp(flatVisual, flatFrame), worldX - minX, worldY - minY);
@@ -7847,21 +7852,26 @@ export class SkirmishScene extends Phaser.Scene {
     for (let y = chunkY; y <= maxY; y += 1) {
       for (let x = chunkX; x <= maxX; x += 1) {
         const tile = getTileAt(this.map, x, y);
-        const descriptor = resolveExplicitTileVisual(CONTENT_REGISTRY, this.map, tile, "flat")
-          ?? (tile.elevation > 0 ? resolveExplicitTileVisual(CONTENT_REGISTRY, this.map, tile, "elevation") : null);
-        if (!descriptor) continue;
         const iso = cartToIso({ x, y }, this.map.tileWidth, this.map.tileHeight);
-        const visualBounds = resolveExplicitTileVisualWorldBounds(
-          descriptor,
-          { x: this.mapOrigin.x + iso.x, y: this.mapOrigin.y + iso.y },
-          this.map.tileWidth,
-          this.map.tileHeight,
-          descriptor.collection === "elevation" ? tile.elevation : 0,
-        );
-        left = Math.min(left, visualBounds.left);
-        top = Math.min(top, visualBounds.top);
-        right = Math.max(right, visualBounds.right);
-        bottom = Math.max(bottom, visualBounds.bottom);
+        const descriptors = [
+          resolveExplicitTileVisual(CONTENT_REGISTRY, this.map, tile, "flat"),
+          resolveExplicitTileUnderlayVisual(CONTENT_REGISTRY, this.map, tile),
+          tile.elevation > 0 ? resolveExplicitTileVisual(CONTENT_REGISTRY, this.map, tile, "elevation") : null,
+        ];
+        for (const descriptor of descriptors) {
+          if (!descriptor) continue;
+          const visualBounds = resolveExplicitTileVisualWorldBounds(
+            descriptor,
+            { x: this.mapOrigin.x + iso.x, y: this.mapOrigin.y + iso.y },
+            this.map.tileWidth,
+            this.map.tileHeight,
+            descriptor.collection === "elevation" ? tile.elevation : 0,
+          );
+          left = Math.min(left, visualBounds.left);
+          top = Math.min(top, visualBounds.top);
+          right = Math.max(right, visualBounds.right);
+          bottom = Math.max(bottom, visualBounds.bottom);
+        }
       }
     }
     return new Phaser.Geom.Rectangle(left, top, right - left, bottom - top);

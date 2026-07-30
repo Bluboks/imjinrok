@@ -106,8 +106,9 @@ export function exportK01SourceTileVisuals(options = {}) {
         values: { zero: 2865, positive16: 735 },
       },
       webPlacement: {
-        choice: "all cells use the shared ground-contact anchor; the raw delta is retained as evidence but is not interpreted as web y.",
-        basis: "tools/imjinrok/k01-terrain-composition-coverage.test.mjs measures emitted PNG alpha masks and finds 798 mixed-delta map neighbors; a deterministic terrain-footprint underlay supplies complete logical-map coverage.",
+        underlayAssetKey: createAssetKey("grss1", 0),
+        choice: "all cells use the shared ground-contact anchor; the raw delta is retained as evidence but is not interpreted as web y. K01 composes exported grss1 frame 0 as a source-art footprint underlay before the selected frame.",
+        basis: "tools/imjinrok/k01-terrain-composition-coverage.test.mjs measures emitted PNG alpha masks, finds 798 mixed-delta map neighbors, and verifies the actual grss1_0000 alpha mask covers every logical K01 diamond pixel.",
         evidenceStatus: "source-backed-adaptation",
       },
       note: "Map ground-contact placement, footprint underlay, and y-axis choice are product/mod renderer contracts, not proven original pixel pivot or screen-axis parity.",

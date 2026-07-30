@@ -20,6 +20,12 @@ export interface TileTilesetVisualSelection {
   flatAssetKey?: string;
   elevationAssetKey?: string;
   /**
+   * Optional opaque terrain-footprint artwork composited before `flatAssetKey`.
+   * It uses the same terrain-asset collection but intentionally has no source
+   * pixel translation: it establishes the shared map ground contact.
+   */
+  underlayAssetKey?: string;
+  /**
    * Optional asset-native pixel translation applied after the shared
    * ground-contact anchor. This is a map/content rendering contract; it does
    * not assign a terrain or world-coordinate meaning to the source data.
