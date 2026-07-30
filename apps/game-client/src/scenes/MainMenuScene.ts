@@ -31,6 +31,13 @@ import {
   type GameLaunchContext,
   type QuickSavePayload,
 } from "../session.js";
+import {
+  cycleMouseControlMode,
+  readGameplayPreferences,
+  stepGameSpeedPreset,
+  writeGameplayPreferences,
+  type GameplayPreferences,
+} from "../gameplayPreferences.js";
 import { launchGameWithPreGameBriefing } from "../preGameBriefingLaunch.js";
 
 const MENU_STYLE: Phaser.Types.GameObjects.Text.TextStyle = {
@@ -75,8 +82,11 @@ function createVsCpuTeams(playerIds: readonly string[]): Record<string, string> 
 export class MainMenuScene extends Phaser.Scene {
   private aiDifficulty: SkirmishAiDifficulty = "normal";
   private aiDifficultyText: Phaser.GameObjects.Text | null = null;
+  private gameSpeedPreferenceText: Phaser.GameObjects.Text | null = null;
+  private gameplayPreferences: GameplayPreferences = readGameplayPreferences();
   private menuContainer: Phaser.GameObjects.Container | null = null;
   private menuMode: MainMenuMode = "main";
+  private mouseControlModeText: Phaser.GameObjects.Text | null = null;
 
   constructor() {
     super("main-menu");
@@ -84,6 +94,7 @@ export class MainMenuScene extends Phaser.Scene {
 
   create(): void {
     this.aiDifficulty = this.readAiDifficultyPreference();
+    this.gameplayPreferences = readGameplayPreferences();
     this.cameras.main.setBackgroundColor("#0e1b1e");
     this.drawMenu();
 
@@ -96,6 +107,8 @@ export class MainMenuScene extends Phaser.Scene {
     this.input.keyboard?.on("keydown-SEVEN", this.handleOptionSevenHotkey, this);
     this.input.keyboard?.on("keydown-ESC", this.handleBackHotkey, this);
     this.input.keyboard?.on("keydown-D", this.cycleAiDifficulty, this);
+    this.input.keyboard?.on("keydown-G", this.cycleGameSpeedPreference, this);
+    this.input.keyboard?.on("keydown-M", this.cycleMouseControlModePreference, this);
     this.scale.on(Phaser.Scale.Events.RESIZE, this.handleResize, this);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, this.handleShutdown, this);
   }
@@ -106,6 +119,8 @@ export class MainMenuScene extends Phaser.Scene {
     this.menuContainer?.destroy(true);
     this.menuContainer = this.add.container(0, 0);
     this.aiDifficultyText = null;
+    this.gameSpeedPreferenceText = null;
+    this.mouseControlModeText = null;
 
     const titleY = Math.max(62, height * 0.14);
     const menuTop = Math.max(180, Math.min(titleY + 116, height * 0.33));
@@ -133,6 +148,10 @@ export class MainMenuScene extends Phaser.Scene {
       })
       .setOrigin(0.5),
     );
+
+    if (this.menuMode === "main") {
+      this.drawGameplayPreferenceControls(width / 2, titleY + 76);
+    }
 
     switch (this.menuMode) {
       case "campaign-country":
@@ -201,10 +220,14 @@ export class MainMenuScene extends Phaser.Scene {
     this.input.keyboard?.off("keydown-SEVEN", this.handleOptionSevenHotkey, this);
     this.input.keyboard?.off("keydown-ESC", this.handleBackHotkey, this);
     this.input.keyboard?.off("keydown-D", this.cycleAiDifficulty, this);
+    this.input.keyboard?.off("keydown-G", this.cycleGameSpeedPreference, this);
+    this.input.keyboard?.off("keydown-M", this.cycleMouseControlModePreference, this);
     this.scale.off(Phaser.Scale.Events.RESIZE, this.handleResize, this);
     this.menuContainer?.destroy(true);
     this.menuContainer = null;
     this.aiDifficultyText = null;
+    this.gameSpeedPreferenceText = null;
+    this.mouseControlModeText = null;
   }
 
   private drawCampaignCountryMenu(
@@ -525,6 +548,71 @@ export class MainMenuScene extends Phaser.Scene {
     this.aiDifficulty = AI_DIFFICULTIES[(currentIndex + 1) % AI_DIFFICULTIES.length] ?? "normal";
     this.writeAiDifficultyPreference(this.aiDifficulty);
     this.aiDifficultyText?.setText(this.getAiDifficultyMenuLabel());
+  }
+
+  private drawGameplayPreferenceControls(x: number, y: number): void {
+    const style: Phaser.Types.GameObjects.Text.TextStyle = {
+      fontFamily: "Noto Sans KR, Malgun Gothic, Apple SD Gothic Neo, Trebuchet MS, sans-serif",
+      fontSize: "15px",
+      color: "#b7d8c2",
+    };
+
+    this.gameSpeedPreferenceText = this.add
+      .text(x, y, this.getGameSpeedPreferenceLabel(), style)
+      .setOrigin(0.5)
+      .setInteractive({ useHandCursor: true })
+      .on("pointerup", () => this.cycleGameSpeedPreference());
+    this.mouseControlModeText = this.add
+      .text(x, y + 21, this.getMouseControlModePreferenceLabel(), style)
+      .setOrigin(0.5)
+      .setInteractive({ useHandCursor: true })
+      .on("pointerup", () => this.cycleMouseControlModePreference());
+    this.menuContainer?.add([this.gameSpeedPreferenceText, this.mouseControlModeText]);
+  }
+
+  private cycleGameSpeedPreference(): void {
+    this.gameplayPreferences = {
+      ...this.gameplayPreferences,
+      gameSpeed: stepGameSpeedPreset(this.gameplayPreferences.gameSpeed, 1),
+    };
+    this.persistGameplayPreferences();
+    this.gameSpeedPreferenceText?.setText(this.getGameSpeedPreferenceLabel());
+  }
+
+  private cycleMouseControlModePreference(): void {
+    this.gameplayPreferences = {
+      ...this.gameplayPreferences,
+      mouseControlMode: cycleMouseControlMode(this.gameplayPreferences.mouseControlMode),
+    };
+    this.persistGameplayPreferences();
+    this.mouseControlModeText?.setText(this.getMouseControlModePreferenceLabel());
+  }
+
+  private persistGameplayPreferences(): void {
+    writeGameplayPreferences(this.gameplayPreferences);
+  }
+
+  private getGameSpeedPreferenceLabel(): string {
+    return `G. 기본 게임 속도: ${this.getGameSpeedPreferenceName(this.gameplayPreferences.gameSpeed)}`;
+  }
+
+  private getMouseControlModePreferenceLabel(): string {
+    return `M. 마우스 조작: ${this.gameplayPreferences.mouseControlMode === "one-button" ? "원버튼" : "투버튼"}`;
+  }
+
+  private getGameSpeedPreferenceName(speed: GameplayPreferences["gameSpeed"]): string {
+    switch (speed) {
+      case "slowest":
+        return "매우 느림";
+      case "slow":
+        return "느림";
+      case "normal":
+        return "보통";
+      case "fast":
+        return "빠름";
+      case "fastest":
+        return "매우 빠름";
+    }
   }
 
   private readAiDifficultyPreference(): SkirmishAiDifficulty {
