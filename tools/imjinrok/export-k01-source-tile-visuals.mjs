@@ -103,7 +103,7 @@ export function exportK01SourceTileVisuals(options = {}) {
       imageGeometry: { width: 64, height: 48, footprintAnchor: { x: 32, y: 16 } },
       rawPlacementArgumentDelta: {
         source: "FUN_00469330/FUN_00469510 K01 second raw placement argument adjustment. Its screen/world axis and pixel pivot are unresolved.",
-        values: { zero: 2865, negative16: 735 },
+        values: { zero: 2865, positive16: 735 },
       },
       webPlacement: {
         choice: "all cells use the shared ground-contact anchor; the raw delta is retained as evidence but is not interpreted as web y.",
