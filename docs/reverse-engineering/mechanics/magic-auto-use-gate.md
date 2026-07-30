@@ -30,6 +30,12 @@ static-only다.
 구현 상태는 `부분 이식`이다. player-global setting/command와 class 78의 좁은 product adapter만
 이식했으며, 9-class 전체 effect를 구현했다는 뜻은 아니다.
 
+2026-07-30 UI 연결은 selection이 정확히 0일 때의 제품 4×3 grid slot 0에만 추가했다. gate 0은
+`자동마법설정`/source action 61/button.spr frame 27, nonzero projection은
+`자동마법해제`/action 62/frame 26을 사용한다. source-icon profile을 선택한 K01에만 exact control
+binding을 쓰며 generic/mod profile은 glyph fallback이다. UI는 typed request를 normal session command로
+전달할 뿐 simulation state를 직접 변경하지 않는다.
+
 - **검토 기록:** Root Codex가 2026-07-28에 read-only review를 수행했다.
 
 ## 입력 provenance

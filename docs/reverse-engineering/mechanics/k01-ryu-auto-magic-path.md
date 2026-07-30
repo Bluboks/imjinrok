@@ -28,6 +28,10 @@ K01의 internal class 78 `조선 유성룡`이 일반 공격 상태 5에서 실�
 `부분 이식`이다. action 40의 좁은 product adapter만 구현했고 action 59/subtype 16과 원본
 pending/scheduler 전체는 이식하지 않았다.
 
+player-global toggle의 2026-07-30 HUD 연결은 [마법 자동사용 gate](magic-auto-use-gate.md)의
+no-selection source-control 경계만 사용한다. 이 UI 연결은 나머지 여덟 class 또는 action 59의
+product effect/원작 일치를 주장하지 않는다.
+
 ## 근거와 재현 자산
 
 - extractor: `tools/imjinrok/extract-k01-ryu-auto-magic-path.mjs`

@@ -9,6 +9,9 @@ import {
   GAME_PLAYBACK_CHANGED_EVENT,
   GAME_PLAYBACK_CONTROL_EVENT,
   GAME_PLAYBACK_REGISTRY_KEY,
+  MAGIC_AUTO_USE_CHANGED_EVENT,
+  MAGIC_AUTO_USE_REGISTRY_KEY,
+  MAGIC_AUTO_USE_REQUESTED_EVENT,
   MINIMAP_ALERT_EVENT,
   MINIMAP_NAVIGATE_EVENT,
   MINIMAP_ENTITIES_CHANGED_EVENT,
@@ -34,6 +37,7 @@ import {
   type GamePlaybackControlView,
   type GamePlaybackView,
   type MinimapAlertView,
+  type MagicAutoUseView,
   type MinimapMapView,
   type MinimapResourcesView,
   type MinimapViewportView,
@@ -129,6 +133,7 @@ export class UIScene extends Phaser.Scene {
   private playerEconomy: PlayerEconomyView | null = null;
   private battlefieldSummary: BattlefieldSummaryView | null = null;
   private gamePlayback: GamePlaybackView = { paused: false, speed: 1, controllable: false, audioMuted: false };
+  private magicAutoUse: MagicAutoUseView | null = null;
   private objectiveModalActionBridge: ObjectiveModalActionBridge | null = null;
   private objectiveModalPresenter: ObjectiveModalPresenterController | null = null;
   private readonly objectiveModalRequestState = new ObjectiveModalRequestState();
@@ -171,6 +176,7 @@ export class UIScene extends Phaser.Scene {
       (this.registry.get(BATTLEFIELD_SUMMARY_REGISTRY_KEY) as BattlefieldSummaryView | null | undefined) ?? null;
     this.gamePlayback =
       (this.registry.get(GAME_PLAYBACK_REGISTRY_KEY) as GamePlaybackView | null | undefined) ?? this.gamePlayback;
+    this.magicAutoUse = (this.registry.get(MAGIC_AUTO_USE_REGISTRY_KEY) as MagicAutoUseView | null | undefined) ?? null;
     this.objectiveModalRequestState.close();
     this.objectiveModalPresenter?.shutdown();
     this.objectiveModalPresenter = new ObjectiveModalPresenterController(
@@ -201,6 +207,7 @@ export class UIScene extends Phaser.Scene {
     this.game.events.on(PLAYER_ECONOMY_CHANGED_EVENT, this.handlePlayerEconomyChanged, this);
     this.game.events.on(BATTLEFIELD_SUMMARY_CHANGED_EVENT, this.handleBattlefieldSummaryChanged, this);
     this.game.events.on(GAME_PLAYBACK_CHANGED_EVENT, this.handleGamePlaybackChanged, this);
+    this.game.events.on(MAGIC_AUTO_USE_CHANGED_EVENT, this.handleMagicAutoUseChanged, this);
     this.input.on("pointerdown", this.handlePointerDown, this);
     this.input.on("pointermove", this.handlePointerMove, this);
     this.input.on("pointerup", this.handlePointerUp, this);
@@ -338,6 +345,11 @@ export class UIScene extends Phaser.Scene {
     this.updatePlaybackControls();
   }
 
+  private handleMagicAutoUseChanged(view: MagicAutoUseView): void {
+    this.magicAutoUse = view;
+    this.redrawActionGrid();
+  }
+
   private handlePointerDown(pointer: Phaser.Input.Pointer): void {
     if (this.isObjectiveModalActive()) {
       return;
@@ -432,6 +444,7 @@ export class UIScene extends Phaser.Scene {
     this.game.events.off(PLAYER_ECONOMY_CHANGED_EVENT, this.handlePlayerEconomyChanged, this);
     this.game.events.off(BATTLEFIELD_SUMMARY_CHANGED_EVENT, this.handleBattlefieldSummaryChanged, this);
     this.game.events.off(GAME_PLAYBACK_CHANGED_EVENT, this.handleGamePlaybackChanged, this);
+    this.game.events.off(MAGIC_AUTO_USE_CHANGED_EVENT, this.handleMagicAutoUseChanged, this);
     this.input.off("pointerdown", this.handlePointerDown, this);
     this.input.off("pointermove", this.handlePointerMove, this);
     this.input.off("pointerup", this.handlePointerUp, this);
@@ -607,6 +620,13 @@ export class UIScene extends Phaser.Scene {
       },
       layout,
       resolveSourceCommandIconProfileForScenario(this.launchContext?.scenario?.id),
+      this.magicAutoUse,
+      (action) => {
+        if (this.isObjectiveModalActive()) {
+          return;
+        }
+        this.game.events.emit(MAGIC_AUTO_USE_REQUESTED_EVENT, { enabled: action.enabled, source: "button" });
+      },
     );
 
     return true;

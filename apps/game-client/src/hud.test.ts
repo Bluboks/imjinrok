@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import type { UnitState } from "@simulation";
-import { toSelectedEntityView } from "./hud.js";
+import { createMagicAutoUseView, toSelectedEntityView } from "./hud.js";
 
 test("selected entity views clone serializable portrait render metadata", () => {
   const unit: UnitState = {
@@ -25,4 +25,10 @@ test("selected entity views clone serializable portrait render metadata", () => 
     frameName: "idle",
     mirrorX: true,
   });
+});
+
+test("magic auto-use HUD views initialize legacy or missing player state as disabled", () => {
+  assert.deepEqual(createMagicAutoUseView("p1", undefined), { playerId: "p1", enabled: false });
+  assert.deepEqual(createMagicAutoUseView("p1", false), { playerId: "p1", enabled: false });
+  assert.deepEqual(createMagicAutoUseView("p1", true), { playerId: "p1", enabled: true });
 });
