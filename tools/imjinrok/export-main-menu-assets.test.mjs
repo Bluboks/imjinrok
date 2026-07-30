@@ -27,8 +27,8 @@ test("exports the hash-bound main menu catalog deterministically and exactly mat
   ]);
   assert.deepEqual(one.manifest.resources.map(({ id, paletteId }) => ({ id, paletteId })), [
     { id: "landing-title", paletteId: "initmenu" },
-    { id: "menu-border", paletteId: "initmenu" },
-    { id: "menu-button", paletteId: "initmenu" },
+    { id: "menu-border", paletteId: "imjin2" },
+    { id: "menu-button", paletteId: "imjin2" },
     { id: "stage-palette-menu-button-catalog", paletteId: "imjin2" },
     { id: "nation-button", paletteId: "imjin2" },
     { id: "stage-border", paletteId: "imjin2" },
@@ -41,6 +41,27 @@ test("exports the hash-bound main menu catalog deterministically and exactly mat
   ]);
   assert.ok(one.manifest.resources.every((resource) => resource.sourcePath.startsWith("original/imjinrok2/") && resource.sourceSha256.length === 64));
   assert.ok(one.manifest.resources.flatMap((resource) => resource.exportedFrames).every((frame) => frame.fileName.includes("/") && frame.sha256.length === 64));
+  assert.deepEqual(
+    one.manifest.resources
+      .filter((resource) => resource.id === "menu-border" || resource.id === "menu-button")
+      .map((resource) => ({
+        id: resource.id,
+        paletteId: resource.paletteId,
+        firstFrameSha256: resource.exportedFrames[0]?.sha256,
+      })),
+    [
+      {
+        id: "menu-border",
+        paletteId: "imjin2",
+        firstFrameSha256: "952c9e38c58c63a7746754ac4c7ffbb9e28fa1da07a8302430c4793095ef07c4",
+      },
+      {
+        id: "menu-button",
+        paletteId: "imjin2",
+        firstFrameSha256: "10e6ee784e96fadb823d89031245a2a7fd6ddf2f1c2d2b098047c138c39845a3",
+      },
+    ],
+  );
   assert.deepEqual(one.manifest.resources.map((resource) => ({ id: resource.id, dimensions: [resource.dimensions.width, resource.dimensions.height], frameCount: resource.frameCount, exportedFrameCount: resource.exportedFrames.length })), [
     { id: "landing-title", dimensions: [640, 480], frameCount: 1, exportedFrameCount: 1 },
     { id: "menu-border", dimensions: [172, 310], frameCount: 1, exportedFrameCount: 1 },
