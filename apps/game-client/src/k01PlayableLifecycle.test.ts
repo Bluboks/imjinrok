@@ -53,8 +53,7 @@ test("K01 fresh campaign lifecycle reaches a deterministic local opening snapsho
   assert.equal(briefing.startGameplay(scenes, context), false, "a completed briefing cannot start gameplay twice");
   assert.deepEqual(scenes.calls, [
     { type: "start", key: MISSION_BRIEFING_SCENE_KEY, data: context },
-    { type: "start", key: "skirmish", data: context },
-    { type: "launch", key: "ui", data: context },
+    { type: "start", key: "gameplay-launch", data: context },
   ]);
 
   const opening = createLocalK01Session(context, map);
