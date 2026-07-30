@@ -120,6 +120,10 @@ export interface UnitState {
   rallyPoint?: RallyPointState;
   /** Optional to preserve old snapshots and all units without a registered source orientation profile. */
   sourceOrientation?: SourceOrientationState;
+  /** Optional mod/legacy override; unknown ids keep the built-in idle behavior. */
+  idleCombatPolicyId?: string;
+  /** Optional mod/legacy override; unknown ids safely disable auto abilities. */
+  autoAbilityProfileId?: string;
   health: AttributePool;
   mana: AttributePool;
 }
@@ -130,6 +134,8 @@ export interface PlayerState {
   id: string;
   faction: FactionId;
   teamId?: PlayerTeamId;
+  /** Source-aligned reset default is disabled; optional preserves old snapshots. */
+  magicAutoUseEnabled?: boolean;
 }
 
 export interface PlayerResearchState {

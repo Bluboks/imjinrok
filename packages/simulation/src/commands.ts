@@ -379,6 +379,17 @@ export function validateCommand(state: WorldState, envelope: CommandEnvelope): C
 
       return { ok: true };
     }
+    case "set-magic-auto-use": {
+      if (!state.players[envelope.playerId]) {
+        return { ok: false, reason: "player not found" };
+      }
+
+      if (typeof envelope.command.enabled !== "boolean") {
+        return { ok: false, reason: "magic auto use setting is invalid" };
+      }
+
+      return { ok: true };
+    }
     case "cheat": {
       if (!state.players[envelope.playerId] || !state.playerResources[envelope.playerId]) {
         return { ok: false, reason: "player not found" };
@@ -779,6 +790,14 @@ export function applyCommand(state: WorldState, envelope: CommandEnvelope): void
         ...(envelope.command.resourceId ? { resourceId: envelope.command.resourceId } : {}),
         ...(rallyResourceKind ? { resourceKind: rallyResourceKind } : {}),
       };
+      return;
+    }
+    case "set-magic-auto-use": {
+      const player = state.players[envelope.playerId];
+
+      if (player) {
+        player.magicAutoUseEnabled = envelope.command.enabled;
+      }
       return;
     }
     case "cheat": {

@@ -1,5 +1,6 @@
 import { unitDefinitions, type GridPoint, type StartingUnitDefinition, type UnitDefinitionId } from "../../shared/src/index.js";
 import { createSourceOrientationState, getSourceOrientationProfileForUnit } from "./orientation.js";
+import { K01_RYU_AUTO_ABILITY_PROFILE_ID, K01_RYU_PROJECT_MANA_POOL, getAutoAbilityPolicyForUnit } from "./autoAbilityPolicy.js";
 import type { AttributePool, UnitState } from "./types.js";
 
 function createPool(max: number): AttributePool {
@@ -31,6 +32,12 @@ export function createUnitState(
   if (orientationProfile) {
     // The initial raw direction is a source-backed project spawn adaptation.
     unit.sourceOrientation = createSourceOrientationState(orientationProfile);
+  }
+
+  if (getAutoAbilityPolicyForUnit(unit)?.id === K01_RYU_AUTO_ABILITY_PROFILE_ID) {
+    // Product-only mana pool: enough for one source-backed action-40 cast;
+    // it is deliberately not asserted as an original unit-stat recovery.
+    unit.mana = createPool(K01_RYU_PROJECT_MANA_POOL);
   }
 
   return unit;
