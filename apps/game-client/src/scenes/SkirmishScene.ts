@@ -3493,7 +3493,7 @@ export class SkirmishScene extends Phaser.Scene {
 
   private getObjectiveFocusWorldPoint(objective: WorldState["scenario"]["objectives"][string]): Phaser.Math.Vector2 | null {
     if (objective.type === "move-unit-to-area" && objective.area) {
-      const point = this.getGridWorldPoint({
+      const point = this.getGridGroundContactWorldPoint({
         x: objective.area.x + objective.area.width / 2 - 0.5,
         y: objective.area.y + objective.area.height / 2 - 0.5,
       });
@@ -3724,7 +3724,7 @@ export class SkirmishScene extends Phaser.Scene {
         .lineStyle(3, color, 0.9)
         .strokePoints(points, true);
 
-      const center = this.getGridWorldPoint({
+      const center = this.getGridGroundContactWorldPoint({
         x: objective.area.x + objective.area.width / 2 - 0.5,
         y: objective.area.y + objective.area.height / 2 - 0.5,
       });
@@ -3740,7 +3740,7 @@ export class SkirmishScene extends Phaser.Scene {
   }
 
   private getObjectiveRouteWorldPoints(routeWaypoints: readonly GridPoint[] | undefined): Phaser.Geom.Point[] {
-    return (routeWaypoints ?? []).map((point) => this.getGridWorldPoint(point));
+    return (routeWaypoints ?? []).map((point) => this.getGridGroundContactWorldPoint(point));
   }
 
   private syncObjectiveAreaLabels(labelDefinitions: readonly ObjectiveAreaLabelDefinition[]): void {
@@ -3788,10 +3788,10 @@ export class SkirmishScene extends Phaser.Scene {
 
   private getObjectiveAreaWorldPoints(area: { x: number; y: number; width: number; height: number }): Phaser.Geom.Point[] {
     return [
-      this.getGridWorldPoint({ x: area.x - 0.5, y: area.y - 0.5 }),
-      this.getGridWorldPoint({ x: area.x + area.width - 0.5, y: area.y - 0.5 }),
-      this.getGridWorldPoint({ x: area.x + area.width - 0.5, y: area.y + area.height - 0.5 }),
-      this.getGridWorldPoint({ x: area.x - 0.5, y: area.y + area.height - 0.5 }),
+      this.getGridGroundContactWorldPoint({ x: area.x - 0.5, y: area.y - 0.5 }),
+      this.getGridGroundContactWorldPoint({ x: area.x + area.width - 0.5, y: area.y - 0.5 }),
+      this.getGridGroundContactWorldPoint({ x: area.x + area.width - 0.5, y: area.y + area.height - 0.5 }),
+      this.getGridGroundContactWorldPoint({ x: area.x - 0.5, y: area.y + area.height - 0.5 }),
     ];
   }
 
@@ -3799,6 +3799,12 @@ export class SkirmishScene extends Phaser.Scene {
     const iso = cartToIso(point, this.map.tileWidth, this.map.tileHeight);
 
     return new Phaser.Geom.Point(this.mapOrigin.x + iso.x, this.mapOrigin.y + iso.y);
+  }
+
+  private getGridGroundContactWorldPoint(point: GridPoint): Phaser.Geom.Point {
+    const groundContact = resolveGridGroundContactWorldPosition(point, this.mapOrigin, this.map);
+
+    return new Phaser.Geom.Point(groundContact.x, groundContact.y);
   }
 
   private updateScenarioStatusOverlay(): void {
@@ -6108,9 +6114,9 @@ export class SkirmishScene extends Phaser.Scene {
   }
 
   private showMoveTargetMarker(target: GridPoint): void {
-    const iso = cartToIso(target, this.map.tileWidth, this.map.tileHeight);
-    const worldX = this.mapOrigin.x + iso.x;
-    const worldY = this.mapOrigin.y + iso.y;
+    const groundContact = resolveGridGroundContactWorldPosition(target, this.mapOrigin, this.map);
+    const worldX = groundContact.x;
+    const worldY = groundContact.y;
     const marker = this.add.graphics();
     const halfWidth = this.map.tileWidth / 4;
     const halfHeight = this.map.tileHeight / 4;
@@ -6183,9 +6189,9 @@ export class SkirmishScene extends Phaser.Scene {
     fillColor: number,
     strokeColor: number,
   ): void {
-    const iso = cartToIso(tile, this.map.tileWidth, this.map.tileHeight);
-    const worldX = this.mapOrigin.x + iso.x;
-    const worldY = this.mapOrigin.y + iso.y;
+    const groundContact = resolveGridGroundContactWorldPosition(tile, this.mapOrigin, this.map);
+    const worldX = groundContact.x;
+    const worldY = groundContact.y;
     const halfWidth = this.map.tileWidth / 2;
     const halfHeight = this.map.tileHeight / 2;
     const points = [
@@ -6288,7 +6294,7 @@ export class SkirmishScene extends Phaser.Scene {
   }
 
   private centerCameraOnGridPoint(point: GridPoint): void {
-    const worldPoint = this.getGridWorldPoint(point);
+    const worldPoint = this.getGridGroundContactWorldPoint(point);
 
     this.centerCameraOnWorldPoint(worldPoint);
     this.publishMinimapViewport(true);
@@ -6310,9 +6316,9 @@ export class SkirmishScene extends Phaser.Scene {
     }
 
     const spawn = this.map.spawnPoints[0] ?? { x: 0, y: 0 };
-    const iso = cartToIso(spawn, this.map.tileWidth, this.map.tileHeight);
+    const position = resolveGridGroundContactWorldPosition(spawn, this.mapOrigin, this.map);
 
-    this.cameras.main.centerOn(this.mapOrigin.x + iso.x, this.mapOrigin.y + iso.y);
+    this.cameras.main.centerOn(position.x, position.y);
   }
 
   private getWorldFieldBounds(): Phaser.Geom.Rectangle {
@@ -8287,15 +8293,12 @@ export class SkirmishScene extends Phaser.Scene {
   }
 
   private getResourceWorldPosition(point: GridPoint): { x: number; y: number; depth: number } {
-    const iso = cartToIso(point, this.map.tileWidth, this.map.tileHeight);
-    const worldX = this.mapOrigin.x + iso.x;
-    const worldY = this.mapOrigin.y + iso.y;
-    const y = worldY - this.map.tileHeight / 3;
+    const groundContact = resolveGridGroundContactWorldPosition(point, this.mapOrigin, this.map);
 
     return {
-      x: worldX,
-      y,
-      depth: worldY + 8,
+      x: groundContact.x,
+      y: groundContact.y,
+      depth: groundContact.y + 8,
     };
   }
 

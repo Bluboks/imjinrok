@@ -140,14 +140,14 @@ test("uses a source-preserving project placement at the resource container groun
     originY: 1,
     scale: 1,
     localX: 0,
-    localY: 32 / 3,
+    localY: 0,
   });
   assert.deepEqual(resolveResourceVisualPlacement(96, 48), {
     originX: 0.5,
     originY: 1,
     scale: 1.5,
     localX: 0,
-    localY: 16,
+    localY: 0,
   });
   assert.throws(() => resolveResourceVisualPlacement(0, 32), /positive finite/);
 });

@@ -1,6 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  createBlankMap,
+  getTileIndex,
+} from "@shared";
+import {
   PRODUCT_IMMEDIATE_PROJECTILE_PROFILE,
   PRODUCT_LINEAR_PROJECTILE_PROFILE,
   TileVisibility,
@@ -18,7 +22,7 @@ import {
 } from "./projectilePresentation.js";
 
 const mapOrigin = { x: 320, y: 160 };
-const map = { tileWidth: 64, tileHeight: 32 };
+const map = createBlankMap({ width: 8, height: 8, tileWidth: 64, tileHeight: 32 });
 
 function projectile(
   id: string,
@@ -126,6 +130,24 @@ test("placement projects authoritative grid coordinates and applies only visual 
   assert.deepEqual(placement?.position, { x: 352, y: 163 });
   assert.equal(placement?.depth, 216);
   assert.deepEqual(placement?.travelDirection, { x: 0.8944271909999159, y: 0.4472135954999579 });
+});
+
+test("projectile elevation remains additive above the bilinearly sampled ground surface", () => {
+  const elevatedMap = createBlankMap({ width: 4, height: 4, tileWidth: 64, tileHeight: 32 });
+  const tiles = elevatedMap.layers[0]?.tiles;
+  assert.ok(tiles);
+  tiles[getTileIndex(elevatedMap.width, 1, 1)] = { ...tiles[getTileIndex(elevatedMap.width, 1, 1)]!, elevation: 2 };
+
+  const placement = resolveProjectileVisualPlacement(
+    projectile("projectile-elevated", PRODUCT_LINEAR_PROJECTILE_PROFILE.id, { x: 1, y: 1 }),
+    PRODUCT_PROJECTILE_VISUAL_REGISTRY,
+    mapOrigin,
+    elevatedMap,
+  );
+
+  assert.deepEqual(placement?.groundContact, { x: 320, y: 160 });
+  assert.deepEqual(placement?.position, { x: 320, y: 147 });
+  assert.equal(placement?.depth, 200);
 });
 
 test("fog filter draws only projectiles at presently visible mechanics positions", () => {
