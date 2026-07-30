@@ -35,6 +35,7 @@ export async function loadGameplaySceneBundle(): Promise<GameplaySceneBundle<typ
 }
 
 export type GameplaySceneLoadState = "idle" | "loading" | "ready" | "failed";
+export type GameplaySceneReadinessState = "idle" | "waiting-for-skirmish" | "ready" | "failed";
 
 /**
  * Owns one gameplay launch attempt. The separate loader and registrar ports
@@ -73,5 +74,39 @@ export class GameplaySceneLoadController {
       });
 
     return this.loadPromise;
+  }
+}
+
+/**
+ * Keeps the loading presentation in control until Skirmish has completed its
+ * Phaser create lifecycle. The caller owns the actual scene event listener.
+ */
+export class GameplaySceneReadinessController {
+  private state: GameplaySceneReadinessState = "idle";
+
+  getState(): GameplaySceneReadinessState {
+    return this.state;
+  }
+
+  begin(): boolean {
+    if (this.state !== "idle") {
+      return false;
+    }
+
+    this.state = "waiting-for-skirmish";
+    return true;
+  }
+
+  complete(): boolean {
+    if (this.state !== "waiting-for-skirmish") {
+      return false;
+    }
+
+    this.state = "ready";
+    return true;
+  }
+
+  fail(): void {
+    this.state = "failed";
   }
 }
