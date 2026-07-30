@@ -36,10 +36,8 @@ export const CORE_A_STAR_PATHFINDER_ID = "core:a-star";
 export const SOURCE_GREEDY_LOCAL_ADAPTER_PATHFINDER_ID = "imjinrok:source-greedy-local-adapter";
 
 const SOURCE_GREEDY_SEARCH_RADIUS = 25;
-const SOURCE_GREEDY_ACCEPTED_NODE_LIMIT = 6_000;
-// A local call can admit up to the largest source frontier capacity. Limiting
-// calls to floor(6000 / 80) leaves the product adapter inside that gate.
-const SOURCE_GREEDY_QUERY_LIMIT = Math.floor(SOURCE_GREEDY_ACCEPTED_NODE_LIMIT / 80);
+/** Product-wide accepted-node budget adapted conservatively from the source gate. */
+export const SOURCE_GREEDY_ACCEPTED_NODE_LIMIT = 6_000;
 
 /** Actual core-search order, not the helper-only y-biased vector. */
 export const SOURCE_GREEDY_CANDIDATE_OFFSETS: readonly GridPoint[] = [
@@ -109,7 +107,7 @@ function findPathWithCoreAStar(
  * source search's score/order/window/cap rules, then this adapter chains its
  * insertion-parent traces into the product's complete path contract.
  *
- * Goal adaptation, product passability/collision callbacks, query budgeting,
+ * Goal adaptation, product passability/collision callbacks, accepted-node budgeting,
  * and chaining are product policy. In particular this intentionally does not
  * reproduce the source waypoint postprocess, workspace lifecycle, terrain
  * mask producer, or caller-side movement lifecycle.
@@ -146,7 +144,7 @@ function findPathWithSourceGreedyLocalAdapter(
     return [];
   }
 
-  for (let query = 0; query < SOURCE_GREEDY_QUERY_LIMIT && acceptedNodes < SOURCE_GREEDY_ACCEPTED_NODE_LIMIT; query += 1) {
+  while (acceptedNodes < SOURCE_GREEDY_ACCEPTED_NODE_LIMIT) {
     const local = runSourceGreedyLocalSearch(
       state,
       unit,
@@ -160,7 +158,15 @@ function findPathWithSourceGreedyLocalAdapter(
 
     const trace = local.insertionParentTrace.slice(1);
 
-    if (trace.length === 0 || trace.some((point) => chainedEndpoints.has(toTileKey(point)))) {
+    // A local search that has admitted no candidate, produced no endpoint
+    // progress, or returns to a chained point cannot advance this product
+    // path. Every accepted, appended local segment consumes the finite total
+    // accepted-node budget, so no fabricated query-count cap is needed.
+    if (
+      local.acceptedNodes === 0 ||
+      trace.length === 0 ||
+      trace.some((point) => chainedEndpoints.has(toTileKey(point)))
+    ) {
       break;
     }
 

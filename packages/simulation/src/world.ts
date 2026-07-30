@@ -46,6 +46,7 @@ export {
 export type { EnvironmentState } from "./environment.js";
 export {
   CORE_A_STAR_PATHFINDER_ID,
+  SOURCE_GREEDY_ACCEPTED_NODE_LIMIT,
   SOURCE_GREEDY_CANDIDATE_OFFSETS,
   SOURCE_GREEDY_LOCAL_ADAPTER_PATHFINDER_ID,
   coreAStarPathfinder,

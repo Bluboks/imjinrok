@@ -3,6 +3,7 @@ import test from "node:test";
 import { createBlankMap, createImjinrokMapScaffold, getTileIndex, type GridPoint, type ScenarioDefinition } from "../../shared/src/index.js";
 import {
   CORE_A_STAR_PATHFINDER_ID,
+  SOURCE_GREEDY_ACCEPTED_NODE_LIMIT,
   SOURCE_GREEDY_CANDIDATE_OFFSETS,
   SOURCE_GREEDY_LOCAL_ADAPTER_PATHFINDER_ID,
   PathfinderRegistry,
@@ -103,6 +104,7 @@ test("core:a-star produces the same path for repeated equal-cost route choices",
 });
 
 test("source-greedy local adapter preserves the recovered candidate order and strict-score local boundary", () => {
+  assert.equal(SOURCE_GREEDY_ACCEPTED_NODE_LIMIT, 6_000);
   assert.deepEqual(SOURCE_GREEDY_CANDIDATE_OFFSETS, [
     { x: 1, y: 0 },
     { x: 0, y: 1 },
@@ -125,19 +127,20 @@ test("source-greedy local adapter preserves the recovered candidate order and st
   ];
 
   for (const { target, capacity } of capacities) {
-    const result = runSourceGreedyLocalSearch(state, unit, unit.position, target, new Set([key(target)]), new Set(), 6_000);
+    const result = runSourceGreedyLocalSearch(state, unit, unit.position, target, new Set([key(target)]), new Set(), SOURCE_GREEDY_ACCEPTED_NODE_LIMIT);
     assert.equal(result.frontierCapacity, capacity);
   }
 
-  const capped = runSourceGreedyLocalSearch(state, unit, unit.position, { x: 0, y: 1 }, new Set(["0,1"]), new Set(), 6_000);
+  const capped = runSourceGreedyLocalSearch(state, unit, unit.position, { x: 0, y: 1 }, new Set(["0,1"]), new Set(), SOURCE_GREEDY_ACCEPTED_NODE_LIMIT);
   assert.equal(capped.reachedGoal, false);
   assert.equal(capped.frontierCapacity, 80);
   assert.equal(capped.maximumFrontierSize, 80);
+  assert.ok(capped.acceptedNodes <= SOURCE_GREEDY_ACCEPTED_NODE_LIMIT);
 
   const acceptedBudget = runSourceGreedyLocalSearch(state, unit, unit.position, { x: 0, y: 1 }, new Set(["0,1"]), new Set(), 3);
   assert.equal(acceptedBudget.acceptedNodes, 3);
 
-  const insertedGoal = runSourceGreedyLocalSearch(state, unit, unit.position, { x: 31, y: 31 }, new Set(["31,31"]), new Set(), 6_000);
+  const insertedGoal = runSourceGreedyLocalSearch(state, unit, unit.position, { x: 31, y: 31 }, new Set(["31,31"]), new Set(), SOURCE_GREEDY_ACCEPTED_NODE_LIMIT);
   assert.equal(insertedGoal.reachedGoal, true);
   assert.equal(insertedGoal.acceptedNodes, 6);
   assert.deepEqual(insertedGoal.insertionParentTrace, [{ x: 30, y: 30 }, { x: 31, y: 31 }]);
@@ -219,6 +222,34 @@ test("source-greedy local adapter honors product mobile collisions and partial-p
   const partial = findPathForUnit(blocked, blockedMover, { x: 5, y: 5 }, { allowPartial: true });
   assert.ok(partial);
   assert.notDeepEqual(partial.at(-1), { x: 5, y: 5 });
+});
+
+test("source-greedy local adapter stops on an accepted no-progress trace instead of cycling", () => {
+  const state = createSourceGreedyState({ width: 8, height: 8 });
+  const unit = state.units["p1-villager-1"]!;
+  unit.position = { x: 4, y: 2 };
+
+  for (let y = 3; y <= 5; y += 1) {
+    for (let x = 3; x <= 5; x += 1) {
+      if (x !== 4 || y !== 4) {
+        state.map.layers[0]!.tiles[getTileIndex(state.map.width, x, y)]!.terrain = "forest";
+      }
+    }
+  }
+
+  const local = runSourceGreedyLocalSearch(
+    state,
+    unit,
+    unit.position,
+    { x: 4, y: 4 },
+    new Set(["4,4"]),
+    new Set(),
+    SOURCE_GREEDY_ACCEPTED_NODE_LIMIT,
+  );
+
+  assert.ok(local.acceptedNodes > 0);
+  assert.deepEqual(local.insertionParentTrace, [{ x: 4, y: 2 }]);
+  assert.equal(findPathForUnit(state, unit, { x: 4, y: 4 }, { allowPartial: true }), null);
 });
 
 function createPathfindingState(): WorldState {

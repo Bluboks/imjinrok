@@ -107,13 +107,13 @@ node --test tools/imjinrok/source-pathfinding-evidence.test.mjs
 
 어댑터는 source kernel의 actual candidate 순서, `±25` local window, strict squared-goal score/tie, frontier capacity,
 goal insertion stop, closest fallback과 insertion-parent trace만 사용한다. 최신 endpoint에서 bounded local search를 반복해
-trace에서 start를 제외하고 이어 붙이며, cycle/no-progress와 보수적인 `6000` accepted-node 기반 query budget에서 멈춘다.
+trace에서 start를 제외하고 이어 붙이며, cycle/no-progress와 보수적인 전체 `6000` accepted-node budget에서 멈춘다.
 
 다음은 product policy이며 원본 동작으로 주장하지 않는다.
 
 - `isTilePassableForUnit`와 `getEntityBlockingTiles`를 이용한 terrain/resource/mobile collision callback
 - 기존 `resolveWalkableGoals`의 blocked-goal resolution 및 `allowPartial` full-path contract
-- local trace chaining, product goal-set adaptation, query budget과 snapshot/profile lifecycle
+- local trace chaining, product goal-set adaptation, accepted-node budget과 snapshot/profile lifecycle
 
 이 adapter는 `FUN_004446a0`의 short waypoint postprocess를 구현하지 않는다. 또한 source kernel에는 `core:a-star`의
 diagonal corner-cut rejection을 추가하지 않는다. source mask producer/meaning, global workspace lifecycle/serialization,
