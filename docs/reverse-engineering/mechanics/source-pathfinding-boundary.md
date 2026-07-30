@@ -47,8 +47,8 @@ frontier에서 requested goal까지의 squared Euclidean score가 가장 작은 
 받고, parent depth에서 byte depth를 하나 증가시킨다. actual goal, frontier capacity 또는 frontier exhaustion에서 멈추며,
 strictly closest reachable score를 fallback으로 기억한다.
 
-candidate helper는 guessed compass order로 정규화하지 않는다. 시작 state 2에서 정확한 호출 순서는
-`2→4→8→1→3→6→12→9→2`이고, origin `(x,y)`에 대한 누적 좌표는 다음이다.
+candidate helper는 guessed compass order로 정규화하지 않는다. helper 자체의 시작 state 2 호출 순서는
+`2→4→8→1→3→6→12→9→2`이다. 이 helper-only vector는 helper origin `(x,y)`에 대해 다음처럼 누적된다.
 
 | state | next | candidate coordinate |
 | ---: | ---: | --- |
@@ -61,7 +61,21 @@ candidate helper는 guessed compass order로 정규화하지 않는다. 시작 s
 | 12 | 9 | `(x-1, y+2)` |
 | 9 | 2 | `(x, y)` |
 
-decreasing visit-depth neighbor backtrack은 `FUN_00444770`의 `0x00444afc..0x00444c32`에 있다. 그 뒤의
+이는 곧 core search candidate vector가 아니다. `FUN_00444770`은 helper call 전 `0x004448ac..0x004448d8`에서 globals를
+selected `(x, y-1)`로 초기화한다. 따라서 actual search의 selected/current `(x,y)` 기준 eight candidates는 아래 순서다.
+
+| call state | actual search candidate |
+| ---: | --- |
+| 2 | `(x+1, y)` |
+| 4 | `(x, y+1)` |
+| 8 | `(x-1, y)` |
+| 1 | `(x-1, y-1)` |
+| 3 | `(x+1, y-1)` |
+| 6 | `(x+1, y+1)` |
+| 12 | `(x-1, y+1)` |
+| 9 | `(x, y-1)` |
+
+decreasing visit-depth neighbor backtrack은 `FUN_00444770`의 `0x00444afc..0x00444c32`에 있으며 같은 y-1 helper anchor를 쓴다. 그 뒤의
 `FUN_004446a0`은 저장된 initial-depth coordinate의 step-vector 비교로 short waypoint를 선택하지만, 현재 extractor의
 byte anchor는 이 callee의 세부 output rule까지 고정하지 않는다. 따라서 `FUN_004446a0`에 대해 주장하는 범위는
 **postprocess call boundary**뿐이다. raw output coordinate를 product world/screen coordinate로 이름 붙이거나 full path

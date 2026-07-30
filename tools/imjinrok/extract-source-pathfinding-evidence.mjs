@@ -44,6 +44,7 @@ const EVIDENCE_POINTS = [
   [0x004452f7, "33 c9 66 3d 05 00 0f 9d c1 49 83 e1 d8 83 c1 50", "Chebyshev distance 3..4 selects 40 and 5+ selects 80"],
   [0x004447b5, "b9 a4 1f 00 00 33 c0 bf a4 a8 54 00 0f bf f6 f3 ab", "core clears 0x1fa4 DWORDs at 0x0054a8a4"],
   [0x0044484a, "8b 1c 95 c8 a4 54 00 3b 9f c8 a4 54 00 7d 09", "frontier selection retains the first entry on equal score and replaces only on strict smaller score"],
+  [0x004448ac, "8b c7 4a 8d 1c ad c8 a4 54 00 89 3d 38 27 55 00 a3 98 a8 54 00 c7 05 b0 a4 54 00 02 00 00 00 89 15 9c a8 54 00 c7 44 24 24 00 00 00 00", "before the eight helper calls, core initializes the helper globals to selected x and selected y minus 1"],
   [0x004448fd, "8d 59 e7 3b c3 0f 8c 31 01 00 00 83 c1 19 3b c1 0f 8f 26 01 00 00", "candidate x is limited to selected x plus or minus 25 inclusively"],
   [0x00444916, "3b d1 0f 8c 1b 01 00 00 83 c6 19 3b d6 0f 8f 10 01 00 00", "candidate y is limited to selected y plus or minus 25 inclusively"],
   [0x00444940, "0f bf 05 68 27 55 00 8d 14 c0 8d 04 50 8d 04 c0 8d 0c c5 58 52 63 00 e8 14 62 ff ff", "candidate screening calls FUN_0043ab70 with the selected entity profile"],
@@ -74,13 +75,18 @@ export function frontierCapacityForChebyshevDistance(distance) {
   return 80;
 }
 
-export function sourceCandidateVector(origin) {
-  assertCoordinate(origin, "origin");
-  let point = { ...origin };
+export function sourceHelperCandidateVector(helperOrigin) {
+  assertCoordinate(helperOrigin, "helperOrigin");
+  let point = { ...helperOrigin };
   return CANDIDATE_STEPS.map(({ state, delta, nextState }) => {
     point = { x: point.x + delta.x, y: point.y + delta.y };
     return { state, nextState, delta, coordinate: point };
   });
+}
+
+export function sourceSearchCandidateVector(current) {
+  assertCoordinate(current, "current");
+  return sourceHelperCandidateVector({ x: current.x, y: current.y - 1 });
 }
 
 export function selectStrictSmallestScore(frontier) {
@@ -131,7 +137,7 @@ export function replaySourcePathfinding({ start, goal, entity, terrain, width, h
     const selected = selectStrictSmallestScore(frontier);
     const current = frontier.splice(selected, 1)[0];
     if (sameCoordinate(current.coordinate, goal)) return finishReplay("goal", current.coordinate, visited, expanded, frontierCapacity, acceptedNodeCounter, maximumFrontierSize);
-    for (const candidate of sourceCandidateVector(current.coordinate)) {
+    for (const candidate of sourceSearchCandidateVector(current.coordinate)) {
       const coordinate = candidate.coordinate;
       if (Math.abs(coordinate.x - start.x) > SEARCH_RADIUS || Math.abs(coordinate.y - start.y) > SEARCH_RADIUS) continue;
       if (visited.has(coordinateKey(coordinate))) continue;
@@ -189,7 +195,8 @@ export function extractSourcePathfindingEvidence({ executablePath = DEFAULT_EXEC
     return { caller, callSite, callee };
   });
 
-  const vectorOrigin = { x: 10, y: 10 };
+  const helperVectorOrigin = { x: 10, y: 10 };
+  const searchCurrent = { x: 10, y: 10 };
   const openTerrain = Array(8 * 8).fill(0);
   const entity = { width: 1, height: 1, mask: 1 };
   return {
@@ -211,7 +218,14 @@ export function extractSourcePathfindingEvidence({ executablePath = DEFAULT_EXEC
       lifecycle: "global workspace reset/serialization ownership is unresolved outside the bounded call",
     },
     wrapper: { acceptedNodeCounterAddress: "0x007c6624", rejectWhenGreaterThan: ACCEPTED_NODE_LIMIT, frontierCapacityByChebyshevDistance: [{ range: "0..2", frontierCapacity: 26 }, { range: "3..4", frontierCapacity: 40 }, { range: "5+", frontierCapacity: 80 }] },
-    candidateStateMachine: { initialState: 2, callsPerExpansion: 8, vectorOrigin, vector: sourceCandidateVector(vectorOrigin) },
+    candidateStateMachine: {
+      initialState: 2,
+      callsPerExpansion: 8,
+      helperVectorOrigin,
+      helperVector: sourceHelperCandidateVector(helperVectorOrigin),
+      searchCurrent,
+      searchVector: sourceSearchCandidateVector(searchCurrent),
+    },
     search: {
       score: "strict smallest squared Euclidean distance to requested goal; no accumulated g cost",
       tie: "first frontier entry survives equal score",
@@ -223,10 +237,10 @@ export function extractSourcePathfindingEvidence({ executablePath = DEFAULT_EXEC
     testVectors: {
       capBoundaries: [0, 2, 3, 4, 5].map((distance) => ({ distance, frontierCapacity: frontierCapacityForChebyshevDistance(distance) })),
       strictTie: { frontier: [{ score: 9 }, { score: 4 }, { score: 4 }, { score: 5 }], selectedIndex: selectStrictSmallestScore([{ score: 9 }, { score: 4 }, { score: 4 }, { score: 5 }]) },
-      goalSuccess: replaySourcePathfinding({ start: { x: 2, y: 2 }, goal: { x: 3, y: 3 }, entity, terrain: openTerrain, width: 8, height: 8 }),
+      goalSuccess: replaySourcePathfinding({ start: { x: 2, y: 2 }, goal: { x: 3, y: 2 }, entity, terrain: openTerrain, width: 8, height: 8 }),
       closestPartialFallback: replaySourcePathfinding({ start: { x: 2, y: 2 }, goal: { x: 7, y: 7 }, entity, terrain: blockedGoalTerrain(), width: 8, height: 8 }),
       blockedAndOutOfBounds: { blocked: sourceFootprintBlocked({ x: 1, y: 1, entity, terrain: [0, 0, 0, 0, 1, 0, 0, 0, 0], width: 3, height: 3 }), outOfBounds: sourceFootprintBlocked({ x: -1, y: 0, entity, terrain: Array(9).fill(0), width: 3, height: 3 }) },
-      capAndFailure: { frontierCapacity: replaySourcePathfinding({ start: { x: 30, y: 30 }, goal: { x: 0, y: 1 }, entity, terrain: Array(80 * 80).fill(0), width: 80, height: 80 }), acceptedNodeLimit: replaySourcePathfinding({ start: { x: 2, y: 2 }, goal: { x: 3, y: 3 }, entity, terrain: openTerrain, width: 8, height: 8, acceptedNodeCounter: 6001 }) },
+      capAndFailure: { frontierCapacity: replaySourcePathfinding({ start: { x: 30, y: 30 }, goal: { x: 0, y: 1 }, entity, terrain: Array(80 * 80).fill(0), width: 80, height: 80 }), acceptedNodeLimit: replaySourcePathfinding({ start: { x: 2, y: 2 }, goal: { x: 3, y: 2 }, entity, terrain: openTerrain, width: 8, height: 8, acceptedNodeCounter: 6001 }) },
     },
     uncertainties: [
       "0x00ae27e4 producer and terrain semantics are unresolved.",
