@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   GameplaySceneLoadController,
+  GameplaySceneReadinessController,
   registerGameplaySceneBundle,
   type GameplaySceneRegistrationPort,
 } from "./gameplaySceneRegistration.js";
@@ -89,4 +90,35 @@ test("a failed gameplay import records failure and can be retried", async () => 
   assert.equal(controller.getState(), "failed");
   await controller.load(context, async () => ({ skirmish: "skirmish-scene", ui: "ui-scene" }), registration, () => undefined);
   assert.equal(controller.getState(), "ready");
+});
+
+test("Skirmish readiness permits exactly one deferred HUD launch", () => {
+  const controller = new GameplaySceneReadinessController();
+
+  assert.equal(controller.begin(), true);
+  assert.equal(controller.begin(), false);
+  assert.equal(controller.getState(), "waiting-for-skirmish");
+  assert.equal(controller.complete(), true);
+  assert.equal(controller.complete(), false);
+  assert.equal(controller.getState(), "ready");
+});
+
+test("a Skirmish startup failure prevents the deferred HUD launch", () => {
+  const controller = new GameplaySceneReadinessController();
+
+  assert.equal(controller.begin(), true);
+  controller.fail();
+
+  assert.equal(controller.getState(), "failed");
+  assert.equal(controller.complete(), false);
+});
+
+test("a HUD startup failure makes an already-ready launch terminal", () => {
+  const controller = new GameplaySceneReadinessController();
+
+  controller.begin();
+  controller.complete();
+  controller.fail();
+
+  assert.equal(controller.getState(), "failed");
 });
