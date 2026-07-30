@@ -16,8 +16,9 @@ const SOURCE_RASTER_TOP_PADDING = 200;
 
 /**
  * Produces a coordinate-complete product diagnostic from the committed K01
- * source-tile export. The projection is the statically recovered base formula;
- * source pivot, clipping, and original draw order remain deliberately absent.
+ * source-tile export. The projection and full-raster y-then-x draw order are
+ * statically recovered; broader source pivot and clipping semantics remain
+ * deliberately unresolved.
  */
 export function exportK01TerrainDiagnostic(options = {}) {
   const artifactPath = options.artifactPath ?? defaultArtifactPath;

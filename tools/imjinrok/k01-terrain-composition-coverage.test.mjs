@@ -10,7 +10,7 @@ const assetDirectory = resolve(repositoryRoot, "apps/game-client/public/assets/t
 const manifestPath = resolve(assetDirectory, "k01-source-tiles.manifest.json");
 const tileWidth = 64;
 const tileHeight = 32;
-  const sourceHeight = 48;
+const sourceHeight = 48;
 
 test("K01 selected-frame mosaic has measured gaps while its corrected source-art coverage pass fills the terrain domain", (t) => {
   const artifact = readArtifact();

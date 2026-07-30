@@ -8,7 +8,7 @@
 | --- | --- | --- |
 | 분석 | `정적 확정` | `FUN_00464cc0` signed-word x/y guard와 `(x-y)<<5`/`(x+y)<<4`, raw relative branch, 두 caller의 low-nibble branch, direct helper의 전체 return 분기, K01 `60×60` cell의 selector/lookup·object/frame fields |
 | 재현 | `재현 완료` | 3,600-cell x-major stream/digest·분포, base projection, low-nibble two/other, 네 map corner, helper의 synthetic positive/negative branch와 malformed/tampered input 거부 |
-| 구현 | `source-backed-adaptation` | hash-bound K01의 raw second-argument `0/16` delta stream을 보존해 `TileCell.elevation`의 base/one-raised discrete product level로 적응한다. source flat artwork는 `flatArtworkEmbedsRelief`를 명시하고 shared ground contact·`grss1_0000` underlay 위에 합성한다. raw argument 축·pivot과 원본 height 의미는 미확정이다. |
+| 구현 | `source-backed-adaptation` | hash-bound K01의 raw second-argument `0/16` delta stream을 `TileCell.elevation`의 base/one-raised discrete product level로 적응한다. bounded source raster는 `(32,0)` top-edge anchor와 `16→sourcePixelOffset.y=-16`을 소비하고 selected frame을 global y→x order로 replay한다. `grss1_0000` coverage pass는 measured alpha gap을 메우는 명시적 제품 적응이며 원본 layer 주장이 아니다. broader pivot/clip/palette와 원본 height 의미는 미확정이다. |
 
 이것은 기존 [K01 source tile object·frame selector](k01-source-tile-selector.md)의 **다음 placement 경계**다.
 기존 문서의 object/frame source identity와 3,600 pair frame-bound proof를 그대로 hash-bound로 재검증하지만,
@@ -24,11 +24,12 @@
 | `analysis/generated/imjinrok2/references.json` | 17,206,569 / `f64cfa6f04bc39573552f42a8b7bdd5b08fea1ba774d05865162d1d80daaf9a5` |
 
 생성기는 generated JSON의 전체 hash와 `sourceSha256`, 다음 함수의 Ghidra body/instruction digest, raw body digest,
-그리고 helper call edge `0x00464d00`, `0x00464d6e`, `0x00464dab`, `0x00469391`, `0x004693a9`, `0x00469575`, `0x0046958b`를 검사한다.
+그리고 helper call edge `0x00464d00`, `0x00464d6e`, `0x00464dab`, `0x00469391`, `0x004693a9`, `0x00469575`, `0x0046958b`와 raster caller edge `0x00467160→FUN_00469510`을 검사한다.
 
 | 함수 | raw byte range (끝 제외) | 역할을 확정한 범위 |
 | --- | --- | --- |
 | `FUN_00464cc0` | `0x00464cc0-0x00464dde` | signed x/y admission, `(x-y)<<5`/`(x+y)<<4` base output, `+0x4a0c4` byte-indexed runtime WORD-table addition과 low-nibble/helper relative branch |
+| `FUN_00466f20` | `0x00466f20-0x004676e0` | full-map surface dimensions, y-outer/x-inner raster order, screen point formation과 `FUN_00469510` dispatch |
 | `FUN_00469330` | `0x00469330-0x0046950c` | `argument1 - 0x1f`, low-nibble branch, argument 2 vertical adjustment, object/frame loader path |
 | `FUN_00469510` | `0x00469510-0x00469917` | `argument1 - 0x20`, 같은 low-nibble/helper adjustment, object/frame loader path와 local mode/clip gate |
 | `FUN_0046d650` | `0x0046d650-0x0046d6d8` | signed-word bounds, selector/lookup와 모든 return branch |
@@ -78,7 +79,8 @@ else:
 ```
 
 `FUN_00469330` uses the same branch but first forms `argument1 - 31`; `FUN_00469510` first forms `argument1 - 32`.
-Neither fixed subtract supplies enough evidence to name a screen axis or pixel anchor.
+`FUN_00466f20` caller 범위에서는 `FUN_00469510`의 first/second arguments가 아래 `screenX/screenY`로 고정되며,
+draw rectangle도 제한적으로 복원된다. 이 사실은 다른 caller의 axis/pivot 일반화가 아니다.
 
 source byte는 정확히 다음과 같다.
 
@@ -138,26 +140,23 @@ fixture의 map-corner vector도 source value를 고정한다. `(0,0)`은 low nib
 `export-k01-source-tile-visuals.mjs`는 canonical placement-evidence fixture를 다시 검증한 뒤 raw second-argument
 delta를 `0` 또는 `16`의 stream으로 보존한다. `0`은 2,865, `16`은 735개다. K01 adapter는 `16→TileCell.elevation=1`,
 `0→0`으로 명시적으로 적응하고 selected flat artwork에 `flatArtworkEmbedsRelief=true`를 남겨 generic overlay가 source
-relief를 이중 합성하지 않게 한다. 그러나
-`k01-terrain-composition-coverage.test.mjs`는 실제 emitted 64×48 PNG alpha mask와 3,600-cell map placement를
-합성해, 이전처럼 `16`을 web `y=-16`으로 해석하면 low-nibble가 다른 이웃 경계가 798개 생김을 재현한다.
-source PNG만으로는 logical diamond 내부를 완전히 덮지 못한다(legacy mapping 153,600 pixel, shared-anchor mapping
-161,043 pixel). 따라서 product는 이 비교를 **원작 pixel parity 증거가 아닌 반증된 web-axis 가정**으로 사용한다:
-모든 cell은 shared ground contact에서 source artwork를 그리고, K01 map stream에 실제로 포함된 normal-source
-`grss1_0000`을 `underlayAssetKey`로 먼저 합성한다. coverage test는 이 emitted PNG의 실제 alpha를 매 cell에
-합성해 logical coverage가 0 uncovered pixel임을 고정한다. frame-0 underlay choice와 shared anchor는
-`source-backed-adaptation`이며, original renderer가 같은 layer를 그렸다는 주장이 아니다.
+relief를 이중 합성하지 않게 한다.
 
-explicit terrain placement와 world/chunk bounds, explicit fog base, source fog composite는 같은 shared ground-contact
-contract를 소비한다. chunk bounds는 flat artwork와 underlay의 source-canvas bounds를 모두 합친다. explicit fog base도
-같은 source-art underlay를 tinted alpha로 먼저 그려 source alpha hole을 막고, source fog의 64×48 composite는
-family/selector identity를 유지하며 `0x020608` tint를 적용한다. tint, alpha, visibility semantics와 pixel pivot은 원작에서
-확정된 범위가 아니다.
+`FUN_00466f20` 범위의 raster arithmetic에 맞춘 product source-image adapter는 `64×48`, anchor `(32,0)`을 쓴다.
+cell의 raw shift가 16이면 selected frame과 coverage frame 모두 `sourcePixelOffset.y=-16`을 받으며, shift 0은 offset 0이다.
+source raster plan은 tile chunk order를 사용하지 않고 output world rectangle을 non-overlapping pixel regions으로만 나눈 뒤,
+각 region에서 full selected stream을 global **y→x** order로 replay한다. 이 bounded order는 original caller에서 정적 확정됐지만,
+product region partition 자체는 scalable web adaptation이다.
 
-높이가 있는 제품 타일도 지상 레이어를 생략하지 않는다. 지형은 shared ground-contact의 flat/underlay를 먼저
-bake하고 elevation/ramp/corner를 별도 overlay로 합성한다. fog도 같은 순서로 base fog를 먼저 그리고 optional
-elevation fog를 그린다. 이것은 source ramp/corner PNG의 투명 영역이 지상 또는 안개 coverage를 대체하지 못하게 하는
-**제품 합성 계약**이며, 원본의 elevation 의미·pixel pivot·draw order가 정적 확정됐다는 주장이 아니다.
+`k01-terrain-composition-coverage.test.mjs`와 coordinate-complete diagnostic은 corrected 3,600-cell terrain domain에서
+selected frame alpha만으로 `74,771` uncovered pixels가 남음을 고정한다. 따라서 K01의 explicit
+`source-raster-underlay` profile은 모든 corrected coverage frame을 먼저 합성하고, 이후 selected stream을 y→x로 replay한다.
+같은 measured domain에서 underlay pass까지 포함하면 uncovered pixel은 `0`이다. `grss1_0000` 선택과 two-pass ordering은
+`source-backed-adaptation`이며 original renderer가 같은 base layer를 그렸다는 주장이 아니다.
+
+explicit fog base도 `source-raster-underlay`일 때 selected frame의 corrected offset을 coverage frame에 복사한다. fog tint,
+alpha, visibility semantics와 source fog composite의 pivot은 원작에서 확정된 범위가 아니다. generic/mod map은 명시적
+profile이 없으면 기존 tile-chunk path를 유지한다.
 
 ## Reproduction and failure boundary
 
