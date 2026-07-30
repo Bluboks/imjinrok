@@ -21,6 +21,8 @@ export const MINIMAP_RESOURCES_CHANGED_EVENT = "minimap:resources-changed";
 export const MINIMAP_RESOURCES_REGISTRY_KEY = "minimap-resources";
 export const MINIMAP_VISIBILITY_CHANGED_EVENT = "minimap:visibility-changed";
 export const MINIMAP_VISIBILITY_REGISTRY_KEY = "minimap-visibility";
+export const MINIMAP_AVAILABILITY_CHANGED_EVENT = "minimap:availability-changed";
+export const MINIMAP_AVAILABILITY_REGISTRY_KEY = "minimap-availability";
 export const MINIMAP_ALERT_EVENT = "minimap:alert";
 export const PLAYER_ECONOMY_CHANGED_EVENT = "player-economy:changed";
 export const PLAYER_ECONOMY_REGISTRY_KEY = "player-economy";
@@ -229,6 +231,15 @@ export interface MinimapResourcesView {
 }
 
 export type MinimapVisibilityView = PlayerVisibilityState;
+
+/** UI-facing presentation/input state, evaluated from the selected map policy. */
+export interface MinimapAvailabilityView {
+  enabled: boolean;
+}
+
+export function createMinimapAvailabilityView(enabled: boolean): MinimapAvailabilityView {
+  return { enabled };
+}
 
 export interface MinimapAlertView {
   id: string;

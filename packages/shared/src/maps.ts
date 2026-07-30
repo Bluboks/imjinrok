@@ -101,7 +101,18 @@ export interface MapDefinition {
    * this stable id independently from the selected route provider.
    */
   movementCollisionProfileId?: string;
+  /**
+   * Stable product/mod policy id controlling whether the HUD minimap may be
+   * presented and navigated. The game client resolves this at scene setup.
+   */
+  minimapAvailabilityPolicyId?: MinimapAvailabilityPolicyId;
 }
+
+/**
+ * Opaque map-data identifier resolved by the game client's minimap policy
+ * registry. It intentionally does not make any claim about original behavior.
+ */
+export type MinimapAvailabilityPolicyId = string;
 
 export function getTileIndex(width: number, x: number, y: number): number {
   return y * width + x;
@@ -153,6 +164,7 @@ export function createBlankMap(options?: Partial<Pick<MapDefinition, "id" | "nam
     resourceVisualSetId: "core-default",
     pathfindingProfileId: "core:a-star",
     movementCollisionProfileId: "core:strict-footprint-reservation",
+    minimapAvailabilityPolicyId: "core:always-enabled",
   };
 }
 

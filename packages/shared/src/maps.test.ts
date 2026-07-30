@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { defaultMap } from "./maps.js";
+import { createBlankMap, defaultMap } from "./maps.js";
 
 test("default river-crossing map opts into a deterministic ten-minute light cycle", () => {
   assert.deepEqual(defaultMap.environment?.dayNight, {
@@ -15,4 +15,9 @@ test("default river-crossing map opts into a deterministic ten-minute light cycl
       { tick: 4_800, phase: "night", lightLevel01: 0.3 },
     ],
   });
+});
+
+test("generic maps explicitly select the always-enabled product minimap policy", () => {
+  assert.equal(createBlankMap().minimapAvailabilityPolicyId, "core:always-enabled");
+  assert.equal(defaultMap.minimapAvailabilityPolicyId, "core:always-enabled");
 });

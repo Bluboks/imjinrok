@@ -25,6 +25,8 @@ export interface ImjinrokMapMetadata {
   missionRouteWaypoints?: readonly { x: number; y: number }[];
   /** Stable product navigation profile selected by this imported map's metadata. */
   pathfindingProfileId?: string;
+  /** Stable product minimap policy selected by imported map metadata. */
+  minimapAvailabilityPolicyId?: MapDefinition["minimapAvailabilityPolicyId"];
   terrainMaskRle?: string;
   sourceRecordProbe?: ImjinrokMapRecordProbe;
 }
@@ -69,6 +71,9 @@ export const imjinrokMapMetadatas = [
       { x: 52, y: 52 },
     ],
     pathfindingProfileId: "imjinrok:source-greedy-local-adapter",
+    // Product policy only: the original compact-map gate's relevant producer
+    // reachability remains unresolved; see k01-beacon-minimap-lifecycle.md.
+    minimapAvailabilityPolicyId: "imjinrok:k01-local-completed-beacon",
     terrainMaskRle: K01_TERRAIN_RLE,
     sourceRecordProbe: {
       layoutAssumption: "row-major 256x256 records of 16 bytes at 0xbd8c",
@@ -202,6 +207,9 @@ export function createImjinrokMapScaffold(mapId: string): MapDefinition | null {
   map.sourceInitialView = { ...metadata.view };
   if (metadata.pathfindingProfileId) {
     map.pathfindingProfileId = metadata.pathfindingProfileId;
+  }
+  if (metadata.minimapAvailabilityPolicyId) {
+    map.minimapAvailabilityPolicyId = metadata.minimapAvailabilityPolicyId;
   }
   map.tilesetId = `imjinrok-${metadata.tileTheme}`;
   map.resourceVisualSetId = "imjinrok-source-resource-adaptation";
