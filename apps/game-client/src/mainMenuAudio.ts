@@ -63,7 +63,8 @@ export interface MainMenuAudioSceneContract {
   };
 }
 
-export function preloadMainMenuAudio(scene: MainMenuAudioSceneContract): void {
+export function queueMainMenuAudio(scene: MainMenuAudioSceneContract): boolean {
+  let queuedAny = false;
   for (const cue of MAIN_MENU_AUDIO_CUES) {
     if (scene.cache.audio.exists(cue.key)) {
       continue;
@@ -71,11 +72,16 @@ export function preloadMainMenuAudio(scene: MainMenuAudioSceneContract): void {
 
     try {
       scene.load.audio(cue.key, cue.url);
+      queuedAny = true;
     } catch (error) {
       console.warn("Failed to queue main menu audio cue", { cueKey: cue.key, error });
     }
   }
+  return queuedAny;
 }
+
+/** @deprecated Menu audio is intentionally queued after the landing screen paints. */
+export const preloadMainMenuAudio = queueMainMenuAudio;
 
 export function playMainMenuAudioCue(scene: MainMenuAudioSceneContract, cueKey: MainMenuAudioCueKey): boolean {
   if (scene.sound.mute || !scene.cache.audio.exists(cueKey)) {

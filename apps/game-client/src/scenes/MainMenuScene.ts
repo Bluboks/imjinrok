@@ -51,10 +51,16 @@ import {
   MAIN_MENU_BUTTON_AUDIO_CUE_KEY,
   MAIN_MENU_COUNTRY_SELECT_AUDIO_CUE_KEY,
   playMainMenuAudioCue,
-  preloadMainMenuAudio,
+  queueMainMenuAudio,
   startMainMenuBackgroundMusic,
   stopMainMenuBackgroundMusic,
 } from "../mainMenuAudio.js";
+import {
+  MAIN_MENU_ASSETS,
+  MAIN_MENU_RESOURCE_PLAN,
+  MainMenuDeferredActionQueue,
+  requiresDeferredMainMenuResources,
+} from "../mainMenuDeferredLoad.js";
 import { launchGameWithPreGameBriefing } from "../preGameBriefingLaunch.js";
 
 const AI_DIFFICULTIES = [
@@ -68,41 +74,6 @@ const FOUR_PLAYER_IDS = ["local-player", "cpu-1", "cpu-2", "cpu-3"] as const;
 const FOUR_AI_PLAYER_IDS = ["cpu-1", "cpu-2", "cpu-3"] as const;
 const AI_DIFFICULTY_STORAGE_KEY = "isorts.menu.aiDifficulty";
 const LAST_RANDOM_SKIRMISH_STORAGE_KEY = "isorts.menu.lastRandomSkirmish";
-
-const MAIN_MENU_ASSETS = {
-  landing: {
-    key: "main-menu:landing",
-    url: "/assets/themes/default/ui/main-menu/title/title_0000.png",
-  },
-  menuBorder: {
-    key: "main-menu:menu-border",
-    url: "/assets/themes/default/ui/main-menu/game-menu-border/gamemenuborder_0000.png",
-  },
-  menuButton: {
-    key: "main-menu:menu-button",
-    url: "/assets/themes/default/ui/main-menu/game-menu-buttons/gamemenubutton_0000.png",
-  },
-  nationButton: {
-    key: "main-menu:nation-button",
-    url: "/assets/themes/default/ui/main-menu/nation-buttons/NationButtons_0000.png",
-  },
-  stageBorder: {
-    key: "main-menu:stage-border",
-    url: "/assets/themes/default/ui/main-menu/stage-border/selectstageborder_0000.png",
-  },
-  stage: {
-    key: "main-menu:stage",
-    url: "/assets/themes/default/ui/main-menu/stage/title/titlestartstage_0000.png",
-  },
-  korea: {
-    key: "main-menu:stage-korea",
-    url: "/assets/themes/default/ui/main-menu/stage/korea/titlestartstagekorea_0000.png",
-  },
-  selectBox: {
-    key: "main-menu:select-box",
-    url: "/assets/themes/default/ui/main-menu/stage/select-box/selectbox_0000.png",
-  },
-} as const;
 
 // A future remastered presentation may replace logical canvas, assets, and
 // geometry independently from this classic source-art menu profile.
@@ -143,6 +114,9 @@ export class MainMenuScene extends Phaser.Scene {
   private keyboardHandlers = new Map<string, () => void>();
   private menuContainer: Phaser.GameObjects.Container | null = null;
   private menuMode: MainMenuScreen = "main";
+  private deferredLoadStarted = false;
+  private deferredLoadComplete = false;
+  private readonly deferredActions = new MainMenuDeferredActionQueue<MainMenuAction>();
   private readonly presentationGeometry = IMJINROK_CLASSIC_MAIN_MENU_GEOMETRY;
 
   constructor() {
@@ -150,8 +124,7 @@ export class MainMenuScene extends Phaser.Scene {
   }
 
   preload(): void {
-    preloadMainMenuAudio(this);
-    for (const asset of Object.values(MAIN_MENU_ASSETS)) {
+    for (const asset of MAIN_MENU_RESOURCE_PLAN.critical.images) {
       if (!this.textures.exists(asset.key)) {
         this.load.image(asset.key, asset.url);
       }
@@ -163,7 +136,6 @@ export class MainMenuScene extends Phaser.Scene {
     this.gameplayPreferences = readGameplayPreferences();
     this.cameras.main.setBackgroundColor("#090705");
     this.drawMenu();
-    startMainMenuBackgroundMusic(this);
 
     for (const key of [
       "ONE",
@@ -182,6 +154,79 @@ export class MainMenuScene extends Phaser.Scene {
     this.bindKeyboard("M", () => this.cycleMouseControlModePreference());
     this.scale.on(Phaser.Scale.Events.RESIZE, this.handleResize, this);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, this.handleShutdown, this);
+    this.beginDeferredMenuLoad();
+  }
+
+  private beginDeferredMenuLoad(): void {
+    if (this.deferredLoadStarted) {
+      return;
+    }
+    this.deferredLoadStarted = true;
+
+    this.load.on(Phaser.Loader.Events.FILE_LOAD_ERROR, this.handleDeferredLoadError, this);
+    this.load.once(Phaser.Loader.Events.COMPLETE, this.completeDeferredMenuLoad, this);
+
+    let queuedAny = queueMainMenuAudio(this);
+    for (const asset of MAIN_MENU_RESOURCE_PLAN.deferred.images) {
+      if (this.textures.exists(asset.key)) {
+        continue;
+      }
+      try {
+        this.load.image(asset.key, asset.url);
+        queuedAny = true;
+      } catch (error) {
+        console.warn("Failed to queue deferred main menu image", {
+          assetKey: asset.key,
+          error,
+        });
+      }
+    }
+
+    if (!queuedAny) {
+      this.completeDeferredMenuLoad();
+      return;
+    }
+
+    try {
+      this.load.start();
+    } catch (error) {
+      console.warn("Failed to start deferred main menu load", { error });
+      this.completeDeferredMenuLoad();
+    }
+  }
+
+  private handleDeferredLoadError(file: { key?: string; src?: string }): void {
+    console.warn("Deferred main menu resource failed to load", {
+      key: file.key,
+      src: file.src,
+    });
+  }
+
+  private completeDeferredMenuLoad(): void {
+    if (this.deferredLoadComplete) {
+      return;
+    }
+    this.deferredLoadComplete = true;
+    this.removeDeferredLoadListeners();
+    startMainMenuBackgroundMusic(this);
+
+    const pendingAction = this.deferredActions.markReady();
+    if (pendingAction) {
+      this.executeAction(pendingAction);
+    }
+  }
+
+  private removeDeferredLoadListeners(): void {
+    this.load.off(
+      Phaser.Loader.Events.FILE_LOAD_ERROR,
+      this.handleDeferredLoadError,
+      this,
+    );
+    this.load.off(
+      Phaser.Loader.Events.COMPLETE,
+      this.completeDeferredMenuLoad,
+      this,
+    );
   }
 
   private drawMenu(): void {
@@ -587,6 +632,14 @@ export class MainMenuScene extends Phaser.Scene {
   }
 
   private executeAction(action: MainMenuAction): void {
+    if (
+      requiresDeferredMainMenuResources(action) &&
+      !this.deferredActions.isReady
+    ) {
+      this.deferredActions.request(action);
+      return;
+    }
+
     playMainMenuAudioCue(
       this,
       action === "show-campaign-stage"
@@ -671,6 +724,10 @@ export class MainMenuScene extends Phaser.Scene {
     }
     this.keyboardHandlers.clear();
     this.scale.off(Phaser.Scale.Events.RESIZE, this.handleResize, this);
+    this.removeDeferredLoadListeners();
+    this.deferredActions.reset();
+    this.deferredLoadStarted = false;
+    this.deferredLoadComplete = false;
     stopMainMenuBackgroundMusic(this);
     this.menuContainer?.destroy(true);
     this.menuContainer = null;
