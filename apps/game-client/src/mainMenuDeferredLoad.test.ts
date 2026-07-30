@@ -39,10 +39,6 @@ test("initial landing resource policy keeps boot empty and defers all non-landin
           url: "/assets/themes/default/ui/main-menu/game-menu-buttons/gamemenubutton_0000.png",
         },
         {
-          key: "main-menu:nation-button",
-          url: "/assets/themes/default/ui/main-menu/nation-buttons/NationButtons_0000.png",
-        },
-        {
           key: "main-menu:stage-border",
           url: "/assets/themes/default/ui/main-menu/stage-border/selectstageborder_0000.png",
         },
@@ -53,6 +49,18 @@ test("initial landing resource policy keeps boot empty and defers all non-landin
         {
           key: "main-menu:stage-korea",
           url: "/assets/themes/default/ui/main-menu/stage/korea/titlestartstagekorea_0000.png",
+        },
+        {
+          key: "main-menu:stage-japan",
+          url: "/assets/themes/default/ui/main-menu/stage/japan/titlestartstagejapan_0000.png",
+        },
+        {
+          key: "main-menu:stage-china",
+          url: "/assets/themes/default/ui/main-menu/stage/china/titlestartstagechina_0000.png",
+        },
+        {
+          key: "main-menu:country-mask",
+          url: "/assets/themes/default/ui/main-menu/stage/to-select/titlestartstagetoselect_0000.png",
         },
         {
           key: "main-menu:select-box",

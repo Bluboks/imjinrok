@@ -28,9 +28,6 @@ export interface MainMenuProjectAdaptationHitRects {
     preferences: MainMenuSourceRect;
   };
   country: {
-    korea: MainMenuSourceRect;
-    japan: MainMenuSourceRect;
-    china: MainMenuSourceRect;
     back: MainMenuSourceRect;
   };
   stage: {
@@ -70,10 +67,7 @@ export const IMJINROK_CLASSIC_MAIN_MENU_GEOMETRY = {
       preferences: { x: 464, y: 246, width: 146, height: 98 },
     },
     country: {
-      korea: { x: 58, y: 120, width: 150, height: 42 },
-      japan: { x: 58, y: 172, width: 150, height: 42 },
-      china: { x: 58, y: 224, width: 150, height: 42 },
-      back: { x: 58, y: 300, width: 150, height: 34 },
+      back: { x: 18, y: 430, width: 118, height: 32 },
     },
     stage: {
       border: { x: 285, y: 65, width: 320, height: 350 },

@@ -43,6 +43,11 @@ import {
   type MainMenuScreen,
 } from "../mainMenuFlow.js";
 import {
+  resolveCampaignNationAtSourcePoint,
+  resolveCampaignNationMissionAction,
+  type CampaignNation,
+} from "../mainMenuCountrySelection.js";
+import {
   IMJINROK_CLASSIC_MAIN_MENU_GEOMETRY,
   resolveMainMenuCanvasLayout,
   type MainMenuSourceRect,
@@ -114,6 +119,7 @@ export class MainMenuScene extends Phaser.Scene {
   private keyboardHandlers = new Map<string, () => void>();
   private menuContainer: Phaser.GameObjects.Container | null = null;
   private menuMode: MainMenuScreen = "main";
+  private campaignNationHover: CampaignNation | null = null;
   private deferredLoadStarted = false;
   private deferredLoadComplete = false;
   private readonly deferredActions = new MainMenuDeferredActionQueue<MainMenuAction>();
@@ -298,28 +304,91 @@ export class MainMenuScene extends Phaser.Scene {
 
   private drawCampaignCountryMenu(): void {
     this.addSourceScreen(
-      MAIN_MENU_ASSETS.stage,
+      this.getCampaignCountryScreenAsset(),
       "국가 선택\n원본 배경 자산을 불러오지 못했습니다.",
     );
-    this.addText(108, 84, "나라 선택", {
-      fontSize: "19px",
-      color: "#3b2619",
-    }).setOrigin(0.5);
-    const countryEntries: readonly SourceMenuEntry[] = [
-      { label: "조선 (朝鮮)", action: "show-campaign-stage" },
-      { label: "일본 (日本)  ·  자료 미구현", action: "back", enabled: false },
-      { label: "명 (明)  ·  자료 미구현", action: "back", enabled: false },
-      { label: "돌아가기", action: "back" },
-    ];
-    const { country } = this.presentationGeometry.projectAdaptationHitRects;
+    this.addCampaignCountrySelectionMap();
+    this.addProjectAdaptationButton(
+      this.presentationGeometry.projectAdaptationHitRects.country.back,
+      "돌아가기",
+      "back",
+    );
+  }
 
-    countryEntries.forEach((entry, index) => {
-      const rect =
-        index === 3
-          ? country.back
-          : { ...country.korea, y: country.korea.y + index * 52 };
-      this.addNationEntry(rect, entry);
-    });
+  private getCampaignCountryScreenAsset() {
+    switch (this.campaignNationHover?.selectedScreen) {
+      case "korea":
+        return MAIN_MENU_ASSETS.korea;
+      case "japan":
+        return MAIN_MENU_ASSETS.japan;
+      case "china":
+        return MAIN_MENU_ASSETS.china;
+      default:
+        return MAIN_MENU_ASSETS.stage;
+    }
+  }
+
+  private addCampaignCountrySelectionMap(): void {
+    const zone = this.add
+      .zone(
+        0,
+        0,
+        this.presentationGeometry.logicalWidth,
+        this.presentationGeometry.logicalHeight,
+      )
+      .setOrigin(0, 0)
+      .setInteractive({ useHandCursor: true });
+    const updateHover = (_pointer: Phaser.Input.Pointer, localX: number, localY: number) => {
+      this.setCampaignNationHover(this.getCampaignNationAtSourcePoint(localX, localY));
+    };
+
+    zone.on("pointerover", updateHover);
+    zone.on("pointermove", updateHover);
+    zone.on("pointerout", () => this.setCampaignNationHover(null));
+    zone.on(
+      "pointerup",
+      (_pointer: Phaser.Input.Pointer, localX: number, localY: number) => {
+        const action = resolveCampaignNationMissionAction(
+          this.getCampaignNationAtSourcePoint(localX, localY),
+        );
+        if (action) {
+          this.executeAction(action);
+        }
+      },
+    );
+    this.menuContainer?.add(zone);
+  }
+
+  private getCampaignNationAtSourcePoint(
+    x: number,
+    y: number,
+  ): CampaignNation | null {
+    return resolveCampaignNationAtSourcePoint(
+      { x, y },
+      (sourceX, sourceY) => {
+        const pixel = this.textures.getPixel(
+          sourceX,
+          sourceY,
+          MAIN_MENU_ASSETS.countryMask.key,
+        );
+        return pixel
+          ? {
+              red: pixel.red,
+              green: pixel.green,
+              blue: pixel.blue,
+              alpha: pixel.alpha,
+            }
+          : null;
+      },
+    );
+  }
+
+  private setCampaignNationHover(nation: CampaignNation | null): void {
+    if (nation?.id === this.campaignNationHover?.id) {
+      return;
+    }
+    this.campaignNationHover = nation;
+    this.drawMenu();
   }
 
   private drawCampaignStageMenu(): void {
@@ -487,33 +556,6 @@ export class MainMenuScene extends Phaser.Scene {
     this.addSourceAction(rect, () => this.executeAction(action));
   }
 
-  private addNationEntry(
-    rect: MainMenuSourceRect,
-    entry: SourceMenuEntry,
-  ): void {
-    const button = this.addSourceImage(
-      MAIN_MENU_ASSETS.nationButton,
-      rect.x,
-      rect.y + 6,
-    );
-    button?.setAlpha(entry.enabled === false ? 0.46 : 1);
-    const text = this.addText(
-      rect.x + 34,
-      rect.y + rect.height / 2,
-      entry.label,
-      {
-        fontSize: "14px",
-        color: entry.enabled === false ? "#786a5a" : "#39261c",
-      },
-    )
-      .setOrigin(0, 0.5)
-      .setAlpha(entry.enabled === false ? 0.6 : 1);
-
-    if (entry.enabled !== false) {
-      this.addSourceAction(rect, () => this.executeAction(entry.action));
-    }
-  }
-
   private addStageBorder(): void {
     const { border } =
       this.presentationGeometry.projectAdaptationHitRects.stage;
@@ -648,6 +690,7 @@ export class MainMenuScene extends Phaser.Scene {
     );
     switch (action) {
       case "show-campaign-country":
+        this.campaignNationHover = null;
         this.menuMode = "campaign-country";
         this.drawMenu();
         return;
@@ -696,6 +739,7 @@ export class MainMenuScene extends Phaser.Scene {
         this.cycleMouseControlModePreference();
         return;
       case "back":
+        this.campaignNationHover = null;
         this.menuMode =
           this.menuMode === "campaign-stage" ? "campaign-country" : "main";
         this.drawMenu();

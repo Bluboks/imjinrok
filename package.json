@@ -65,6 +65,7 @@
     "imjinrok:extract-k01-map-low-nibble-writers": "node tools/imjinrok/extract-k01-map-low-nibble-writers.mjs",
     "imjinrok:extract-source-fog-render-evidence": "node tools/imjinrok/extract-source-fog-render-evidence.mjs --output analysis/fixtures/source-fog-render-evidence.json",
     "imjinrok:extract-gameplay-input-speed-settings-evidence": "node tools/imjinrok/extract-gameplay-input-speed-settings-evidence.mjs > analysis/fixtures/gameplay-input-speed-settings-evidence.json",
+    "imjinrok:extract-campaign-country-selection-evidence": "node tools/imjinrok/extract-campaign-country-selection-evidence.mjs",
     "imjinrok:extract-entity-type-catalog": "node tools/imjinrok/extract-entity-type-catalog.mjs --output analysis/generated/entity-type-catalog.json",
     "imjinrok:audit-sprite-mappings": "node --import tsx tools/imjinrok/audit-sprite-mappings.mjs",
     "imjinrok:setup-static-analysis": "bash tools/imjinrok/setup-static-analysis.sh",

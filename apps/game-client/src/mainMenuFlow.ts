@@ -126,11 +126,12 @@ function resolveCountryAction(
   point: MainMenuSourcePoint,
   presentation: MainMenuPresentationGeometry,
 ): MainMenuAction | null {
-  const { country } = presentation.projectAdaptationHitRects;
-  if (isMainMenuSourcePointInRect(point, country.korea)) {
-    return "show-campaign-stage";
-  }
-  return isMainMenuSourcePointInRect(point, country.back) ? "back" : null;
+  // Country territory hits are exact source-mask pixels. They are evaluated by
+  // MainMenuScene after the source texture is available, rather than by the
+  // project-adaptation rectangles used by the other menu panels.
+  void point;
+  void presentation;
+  return null;
 }
 
 function resolveStageAction(

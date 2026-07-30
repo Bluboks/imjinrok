@@ -75,12 +75,7 @@ test("main menu maps active pointer and keyboard actions by screen", () => {
     "load-latest-save",
   );
   assert.equal(
-    resolveMainMenuPointerAction(
-      "campaign-country",
-      { x: 105, y: 141 },
-      available,
-      IMJINROK_CLASSIC_MAIN_MENU_GEOMETRY,
-    ),
+    resolveMainMenuKeyboardAction("campaign-country", "ONE", available),
     "show-campaign-stage",
   );
   assert.equal(

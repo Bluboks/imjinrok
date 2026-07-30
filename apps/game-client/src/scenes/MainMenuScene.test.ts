@@ -23,9 +23,23 @@ test("campaign-stage Back is a clean project-adaptation button", () => {
 
   const projectAdaptationButton = sceneSource.slice(
     sceneSource.indexOf("private addProjectAdaptationButton"),
-    sceneSource.indexOf("private addNationEntry"),
+    sceneSource.indexOf("private addStageBorder"),
   );
   assert.match(projectAdaptationButton, /fillRoundedRect\(rect\.x, rect\.y, rect\.width, rect\.height, 4\)/u);
   assert.doesNotMatch(projectAdaptationButton, /addSourceImage\(/u);
 
+});
+
+test("campaign country screen uses the source map mask instead of a project list", () => {
+  const countryMenu = sceneSource.slice(
+    sceneSource.indexOf("private drawCampaignCountryMenu"),
+    sceneSource.indexOf("private drawCampaignStageMenu"),
+  );
+
+  assert.match(countryMenu, /this\.addCampaignCountrySelectionMap\(\)/u);
+  assert.doesNotMatch(countryMenu, /countryEntries|addNationEntry/u);
+  assert.match(sceneSource, /pointermove/u);
+  assert.match(sceneSource, /pointerout/u);
+  assert.match(sceneSource, /pointerup/u);
+  assert.match(sceneSource, /resolveCampaignNationMissionAction/u);
 });
