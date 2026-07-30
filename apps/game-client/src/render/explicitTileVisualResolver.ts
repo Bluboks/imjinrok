@@ -84,6 +84,20 @@ export function resolveExplicitTileVisual(
   };
 }
 
+/**
+ * Resolves an optional terrain-asset underlay without inheriting the flat
+ * artwork's source offset. It is a shared-ground-contact composition layer.
+ */
+export function resolveExplicitTileUnderlayVisual(
+  registry: TilesetRegistry,
+  map: Pick<TilesetMap, "id" | "tilesetId">,
+  tile: Pick<TileCell, "tilesetVisuals">,
+): ExplicitTileVisualDescriptor | null {
+  const underlayAssetKey = tile.tilesetVisuals?.underlayAssetKey;
+  if (underlayAssetKey === undefined) return null;
+  return resolveExplicitTileVisual(registry, map, { tilesetVisuals: { flatAssetKey: underlayAssetKey } }, "flat");
+}
+
 /** Preloads all registry assets because the launch map is selected after preload. */
 export function getRegisteredExplicitTileVisualPreloadDescriptors(
   registry: TilesetRegistry,
@@ -113,6 +127,10 @@ export function getMapExplicitTileVisualPreloadDescriptors(
         if (descriptor) {
           descriptors.set(descriptor.textureKey, descriptor);
         }
+      }
+      const underlay = resolveExplicitTileUnderlayVisual(registry, map, tile);
+      if (underlay) {
+        descriptors.set(underlay.textureKey, underlay);
       }
     }
   }

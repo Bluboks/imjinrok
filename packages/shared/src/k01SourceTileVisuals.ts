@@ -9,6 +9,12 @@ export const K01_SOURCE_TILE_IMAGE_GEOMETRY = {
   height: 48,
   footprintAnchor: { x: 32, y: 16 },
 } as const;
+/**
+ * K01-only source-art underlay adaptation. This exported normal-source frame
+ * has an opaque logical diamond alpha mask; it is not an original renderer
+ * composition claim.
+ */
+export const K01_SOURCE_TILE_UNDERLAY_ASSET_KEY = "k01-source:grss1:0000";
 
 export interface K01SourceTileVisualAsset {
   readonly assetKey: string;
@@ -84,6 +90,12 @@ export function getK01SourceTileVisualAssets(): readonly K01SourceTileVisualAsse
   return assets;
 }
 
+/** Validates the K01 grid while returning the shared source-art underlay. */
+export function getK01SourceTileUnderlayAssetKey(x: number, y: number): string {
+  getK01SourceTileFlatAssetKey(x, y);
+  return K01_SOURCE_TILE_UNDERLAY_ASSET_KEY;
+}
+
 export function applyK01SourceTileVisuals(tiles: TileCell[], width: number, height: number): void {
   if (width !== K01_SOURCE_TILE_VISUAL_DIMENSIONS.width || height !== K01_SOURCE_TILE_VISUAL_DIMENSIONS.height) {
     throw new Error(`K01 source tile visuals require ${K01_SOURCE_TILE_VISUAL_DIMENSIONS.width}x${K01_SOURCE_TILE_VISUAL_DIMENSIONS.height}; received ${width}x${height}.`);
@@ -99,6 +111,7 @@ export function applyK01SourceTileVisuals(tiles: TileCell[], width: number, heig
       tile.tilesetVisuals = {
         ...tile.tilesetVisuals,
         flatAssetKey: getK01SourceTileFlatAssetKey(x, y),
+        underlayAssetKey: getK01SourceTileUnderlayAssetKey(x, y),
         sourcePixelOffset: getK01SourceTilePlacementOffset(x, y),
       };
     }
@@ -133,6 +146,9 @@ export function assertK01SourceTileVisualArtifact(): void {
   const uniqueAssetKeys = new Set(assets.map((asset) => asset.assetKey));
   if (assets.length !== uniqueAssetKeys.size || assets.length !== 243) {
     throw new Error(`K01 source tile visual artifact requires 243 unique assets; received ${assets.length}.`);
+  }
+  if (!uniqueAssetKeys.has(K01_SOURCE_TILE_UNDERLAY_ASSET_KEY)) {
+    throw new Error(`K01 source tile visual artifact is missing underlay asset '${K01_SOURCE_TILE_UNDERLAY_ASSET_KEY}'.`);
   }
 }
 
