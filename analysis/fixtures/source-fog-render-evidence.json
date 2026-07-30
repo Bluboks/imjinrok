@@ -1,0 +1,651 @@
+{
+  "question": "What source-backed fog resource, neighbor-lookup, caller-state, and six-subframe composition contract do FUN_00467de0 and FUN_0046a530 establish?",
+  "analysisStatus": "정적 확정 (resource family, lookup, caller state branches, six-subframe composition, and frame algebra only)",
+  "reproductionStatus": "재현 완료 (hash-bound extraction, resource records, lookup/frame vectors, and loop bounds only)",
+  "implementationStatus": "없음",
+  "sources": {
+    "executable": {
+      "path": "original/imjinrok2/imjinrok2.exe",
+      "sha256": "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e"
+    },
+    "normalTileDirectory": "original/imjinrok2/tile/normal",
+    "k01Map": {
+      "path": "original/imjinrok2/stagemap/k01.map",
+      "size": 1097100,
+      "sha256": "43ec3a173032f74c12d3cce1db1078b076b651ed79070a0914673a5b65da99cb"
+    }
+  },
+  "functions": {
+    "caller": {
+      "name": "FUN_00467de0",
+      "address": "0x00467de0"
+    },
+    "compositor": {
+      "name": "FUN_0046a530",
+      "address": "0x0046a530"
+    }
+  },
+  "resources": {
+    "loaderRecordBase": "0x00bcdff8",
+    "loaderRecordStride": "0x0bf8",
+    "familyByteAddress": "map + 0x4a0c4 + mapX * 180 + mapY",
+    "familyToResourceIndex": "resourceIndex = familyByte + 0x3c",
+    "k01FamilyBytes": {
+      "scope": "K01 hash-bound map bytes only; this neither identifies the runtime producer nor generalizes to other maps.",
+      "mapOffset": "0x4a0c4",
+      "coordinateStorage": "map + 0x4a0c4 + x * 180 + y",
+      "dimensions": {
+        "width": 60,
+        "height": 60
+      },
+      "cellCount": 3600,
+      "valueStreamSha256": "7a9fcc150cf0128af19d57f742a6c160c6b5b8b003a81c069fb3167427208f88",
+      "domain": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        14
+      ],
+      "distribution": [
+        {
+          "value": 0,
+          "count": 2865
+        },
+        {
+          "value": 1,
+          "count": 95
+        },
+        {
+          "value": 2,
+          "count": 95
+        },
+        {
+          "value": 3,
+          "count": 101
+        },
+        {
+          "value": 4,
+          "count": 79
+        },
+        {
+          "value": 5,
+          "count": 38
+        },
+        {
+          "value": 6,
+          "count": 36
+        },
+        {
+          "value": 7,
+          "count": 54
+        },
+        {
+          "value": 8,
+          "count": 61
+        },
+        {
+          "value": 9,
+          "count": 52
+        },
+        {
+          "value": 10,
+          "count": 33
+        },
+        {
+          "value": 11,
+          "count": 35
+        },
+        {
+          "value": 12,
+          "count": 55
+        },
+        {
+          "value": 14,
+          "count": 1
+        }
+      ]
+    },
+    "fog": [
+      {
+        "resourceIndex": 60,
+        "recordAddress": "0x00bfae18",
+        "fileName": "fog0.spr",
+        "sourcePath": "original/imjinrok2/tile/normal/fog0.spr",
+        "sha256": "98c4f138a47503e112b7fd78fd13c0cc6cb9593ef37c18209cbf88bc7f4e4759",
+        "header": {
+          "width": 32,
+          "height": 16,
+          "frameCount": 96,
+          "atlasWidth": 1024,
+          "atlasHeight": 48
+        },
+        "headerFieldSha256": "0429cc48e98dd4c6a44ab9542b8c37f2b86bc965bb1d8338b4f72191a616d0c5"
+      },
+      {
+        "resourceIndex": 61,
+        "recordAddress": "0x00bfba10",
+        "fileName": "fog1.spr",
+        "sourcePath": "original/imjinrok2/tile/normal/fog1.spr",
+        "sha256": "0e64374263ceedb1253d7a55fc96681d3e2787e876021134747521bf88bf5701",
+        "header": {
+          "width": 32,
+          "height": 16,
+          "frameCount": 96,
+          "atlasWidth": 1024,
+          "atlasHeight": 48
+        },
+        "headerFieldSha256": "0429cc48e98dd4c6a44ab9542b8c37f2b86bc965bb1d8338b4f72191a616d0c5"
+      },
+      {
+        "resourceIndex": 62,
+        "recordAddress": "0x00bfc608",
+        "fileName": "fog2.spr",
+        "sourcePath": "original/imjinrok2/tile/normal/fog2.spr",
+        "sha256": "114fa8aab39b45423a3fe6b3574a194fbc056877ee02f3c2b32b10c8d867b1a0",
+        "header": {
+          "width": 32,
+          "height": 16,
+          "frameCount": 96,
+          "atlasWidth": 1024,
+          "atlasHeight": 48
+        },
+        "headerFieldSha256": "0429cc48e98dd4c6a44ab9542b8c37f2b86bc965bb1d8338b4f72191a616d0c5"
+      },
+      {
+        "resourceIndex": 63,
+        "recordAddress": "0x00bfd200",
+        "fileName": "fog3.spr",
+        "sourcePath": "original/imjinrok2/tile/normal/fog3.spr",
+        "sha256": "c5db36d2e772d2309d086911e96eba91b2052d221e8d67b3e7d7ddaeb1009065",
+        "header": {
+          "width": 32,
+          "height": 16,
+          "frameCount": 96,
+          "atlasWidth": 1024,
+          "atlasHeight": 48
+        },
+        "headerFieldSha256": "0429cc48e98dd4c6a44ab9542b8c37f2b86bc965bb1d8338b4f72191a616d0c5"
+      },
+      {
+        "resourceIndex": 64,
+        "recordAddress": "0x00bfddf8",
+        "fileName": "fog4.spr",
+        "sourcePath": "original/imjinrok2/tile/normal/fog4.spr",
+        "sha256": "c08dd146b67fe85d17900471273c7b6d3feaa06080d8fe83dda5b74b63892e79",
+        "header": {
+          "width": 32,
+          "height": 16,
+          "frameCount": 96,
+          "atlasWidth": 1024,
+          "atlasHeight": 48
+        },
+        "headerFieldSha256": "0429cc48e98dd4c6a44ab9542b8c37f2b86bc965bb1d8338b4f72191a616d0c5"
+      },
+      {
+        "resourceIndex": 65,
+        "recordAddress": "0x00bfe9f0",
+        "fileName": "fog5.spr",
+        "sourcePath": "original/imjinrok2/tile/normal/fog5.spr",
+        "sha256": "26ea4a1ed4a0865ace99e22639df0d513a508da54f73b956c60e2dc9d3a646ca",
+        "header": {
+          "width": 32,
+          "height": 16,
+          "frameCount": 96,
+          "atlasWidth": 1024,
+          "atlasHeight": 48
+        },
+        "headerFieldSha256": "0429cc48e98dd4c6a44ab9542b8c37f2b86bc965bb1d8338b4f72191a616d0c5"
+      },
+      {
+        "resourceIndex": 66,
+        "recordAddress": "0x00bff5e8",
+        "fileName": "fog6.spr",
+        "sourcePath": "original/imjinrok2/tile/normal/fog6.spr",
+        "sha256": "5670c1940397a807e10ffe132d472613508800671f1aa3da3e1f54b46133c5a0",
+        "header": {
+          "width": 32,
+          "height": 16,
+          "frameCount": 96,
+          "atlasWidth": 1024,
+          "atlasHeight": 48
+        },
+        "headerFieldSha256": "0429cc48e98dd4c6a44ab9542b8c37f2b86bc965bb1d8338b4f72191a616d0c5"
+      },
+      {
+        "resourceIndex": 67,
+        "recordAddress": "0x00c001e0",
+        "fileName": "fog7.spr",
+        "sourcePath": "original/imjinrok2/tile/normal/fog7.spr",
+        "sha256": "798f6d69678c7b9c40decbc220199219c9e17cfc6ae76470daebd49d0af99b55",
+        "header": {
+          "width": 32,
+          "height": 16,
+          "frameCount": 96,
+          "atlasWidth": 1024,
+          "atlasHeight": 48
+        },
+        "headerFieldSha256": "0429cc48e98dd4c6a44ab9542b8c37f2b86bc965bb1d8338b4f72191a616d0c5"
+      },
+      {
+        "resourceIndex": 68,
+        "recordAddress": "0x00c00dd8",
+        "fileName": "fog8.spr",
+        "sourcePath": "original/imjinrok2/tile/normal/fog8.spr",
+        "sha256": "4064773e38a13f43ede3f06975c61bb3405337eb6fcb90ccc3d7b4425eaf5f59",
+        "header": {
+          "width": 32,
+          "height": 16,
+          "frameCount": 96,
+          "atlasWidth": 1024,
+          "atlasHeight": 48
+        },
+        "headerFieldSha256": "0429cc48e98dd4c6a44ab9542b8c37f2b86bc965bb1d8338b4f72191a616d0c5"
+      },
+      {
+        "resourceIndex": 69,
+        "recordAddress": "0x00c019d0",
+        "fileName": "fog9.spr",
+        "sourcePath": "original/imjinrok2/tile/normal/fog9.spr",
+        "sha256": "22ba6fc52a03bbed16f063dcd16fdf47437bdab642ecbcb58af2c0aff03676be",
+        "header": {
+          "width": 32,
+          "height": 16,
+          "frameCount": 96,
+          "atlasWidth": 1024,
+          "atlasHeight": 48
+        },
+        "headerFieldSha256": "0429cc48e98dd4c6a44ab9542b8c37f2b86bc965bb1d8338b4f72191a616d0c5"
+      },
+      {
+        "resourceIndex": 70,
+        "recordAddress": "0x00c025c8",
+        "fileName": "fog10.spr",
+        "sourcePath": "original/imjinrok2/tile/normal/fog10.spr",
+        "sha256": "bf6b260f412305fd29b0a6a8454fb6bb112e0344ac2f96b465f6f62923437c7c",
+        "header": {
+          "width": 32,
+          "height": 16,
+          "frameCount": 96,
+          "atlasWidth": 1024,
+          "atlasHeight": 48
+        },
+        "headerFieldSha256": "0429cc48e98dd4c6a44ab9542b8c37f2b86bc965bb1d8338b4f72191a616d0c5"
+      },
+      {
+        "resourceIndex": 71,
+        "recordAddress": "0x00c031c0",
+        "fileName": "fog11.spr",
+        "sourcePath": "original/imjinrok2/tile/normal/fog11.spr",
+        "sha256": "3633f57e785791c0f5e9e6f632fed1575b23fbf7756177be2162dbd6ce602e47",
+        "header": {
+          "width": 32,
+          "height": 16,
+          "frameCount": 96,
+          "atlasWidth": 1024,
+          "atlasHeight": 48
+        },
+        "headerFieldSha256": "0429cc48e98dd4c6a44ab9542b8c37f2b86bc965bb1d8338b4f72191a616d0c5"
+      },
+      {
+        "resourceIndex": 72,
+        "recordAddress": "0x00c03db8",
+        "fileName": "fog12.spr",
+        "sourcePath": "original/imjinrok2/tile/normal/fog12.spr",
+        "sha256": "3ed4ced064f3998f143a344f0f17cac528d91953fd41a97deb3add1b7330ba5d",
+        "header": {
+          "width": 32,
+          "height": 16,
+          "frameCount": 96,
+          "atlasWidth": 1024,
+          "atlasHeight": 48
+        },
+        "headerFieldSha256": "0429cc48e98dd4c6a44ab9542b8c37f2b86bc965bb1d8338b4f72191a616d0c5"
+      },
+      {
+        "resourceIndex": 73,
+        "recordAddress": "0x00c049b0",
+        "fileName": "fog13.spr",
+        "sourcePath": "original/imjinrok2/tile/normal/fog13.spr",
+        "sha256": "b363feaf9cd89b964a7d306f0638f2f41cc57bf8b8efd0e1d8dd818c9aee5ee7",
+        "header": {
+          "width": 32,
+          "height": 16,
+          "frameCount": 96,
+          "atlasWidth": 1024,
+          "atlasHeight": 48
+        },
+        "headerFieldSha256": "0429cc48e98dd4c6a44ab9542b8c37f2b86bc965bb1d8338b4f72191a616d0c5"
+      },
+      {
+        "resourceIndex": 74,
+        "recordAddress": "0x00c055a8",
+        "fileName": "fog14.spr",
+        "sourcePath": "original/imjinrok2/tile/normal/fog14.spr",
+        "sha256": "efb2eb836d4552a9bea57a37f97370cb2de1e1a55d4f34271889ad0a083fc669",
+        "header": {
+          "width": 32,
+          "height": 16,
+          "frameCount": 96,
+          "atlasWidth": 1024,
+          "atlasHeight": 48
+        },
+        "headerFieldSha256": "0429cc48e98dd4c6a44ab9542b8c37f2b86bc965bb1d8338b4f72191a616d0c5"
+      }
+    ],
+    "black": {
+      "resourceIndex": 75,
+      "recordAddress": "0x00c061a0",
+      "fileName": "black.spr",
+      "sourcePath": "original/imjinrok2/tile/normal/black.spr",
+      "sha256": "9ef53a565bfe804e8a272f73f9749c05681b6b9e3af4090f7e4eea61237292d0",
+      "header": {
+        "width": 64,
+        "height": 32,
+        "frameCount": 1
+      }
+    }
+  },
+  "neighborLookup": {
+    "address": "0x004bf9c4",
+    "rawOffset": "0x000bf9c4",
+    "byteRange": "0x004bf9c4-0x004bf9d4 (end exclusive)",
+    "sha256": "9df1139c03ffc0cb749f8cc292d6a07825f95d7cb52fe62c746f7cb3bc747dae",
+    "inputRange": "0..15",
+    "values": [
+      0,
+      9,
+      8,
+      2,
+      10,
+      1,
+      12,
+      5,
+      11,
+      13,
+      3,
+      6,
+      0,
+      4,
+      7,
+      0
+    ],
+    "vectors": [
+      {
+        "input": 0,
+        "output": 0
+      },
+      {
+        "input": 1,
+        "output": 9
+      },
+      {
+        "input": 2,
+        "output": 8
+      },
+      {
+        "input": 3,
+        "output": 2
+      },
+      {
+        "input": 4,
+        "output": 10
+      },
+      {
+        "input": 5,
+        "output": 1
+      },
+      {
+        "input": 6,
+        "output": 12
+      },
+      {
+        "input": 7,
+        "output": 5
+      },
+      {
+        "input": 8,
+        "output": 11
+      },
+      {
+        "input": 9,
+        "output": 13
+      },
+      {
+        "input": 10,
+        "output": 3
+      },
+      {
+        "input": 11,
+        "output": 6
+      },
+      {
+        "input": 12,
+        "output": 0
+      },
+      {
+        "input": 13,
+        "output": 4
+      },
+      {
+        "input": 14,
+        "output": 7
+      },
+      {
+        "input": 15,
+        "output": 0
+      }
+    ]
+  },
+  "callerContract": {
+    "separateNeighborStateValues": [
+      4,
+      8
+    ],
+    "skippedMaskValues": [
+      0,
+      15
+    ],
+    "lookupThenCompositorCall": true
+  },
+  "composition": {
+    "subframeGrid": {
+      "columns": 3,
+      "rows": 2,
+      "subframeCount": 6
+    },
+    "state4": {
+      "stateValue": 4,
+      "blitFunction": "FUN_0044e3c0"
+    },
+    "state8": {
+      "stateValue": 8,
+      "blitFunction": "FUN_00452b30"
+    },
+    "boundary": "The byte-proven branch distinguishes literal state 4 from the non-4 path reached by caller literal state 8; no human visibility meaning is assigned."
+  },
+  "frameSelection": {
+    "resourceHeaderOffsets": {
+      "frameWidth": "0x04",
+      "frameHeight": "0x08",
+      "frameCount": "0x0c",
+      "atlasWidth": "0x0bcc",
+      "atlasHeight": "0x0bd0"
+    },
+    "normalFogAtlas": {
+      "frameWidth": 32,
+      "frameHeight": 16,
+      "frameCount": 96,
+      "atlasWidth": 1024,
+      "atlasHeight": 48,
+      "atlasColumns": 32,
+      "halfColumns": 16
+    },
+    "signedDivision": "x86 signed IDIV; for the caller-proven nonnegative selector domain 0..13, quotient = trunc(selector / halfColumns) and remainder = selector % halfColumns.",
+    "callerSelectorDomain": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13
+    ],
+    "formula": "frame = inner + (outer + 3 * trunc(selector / halfColumns)) * atlasColumns + 2 * (selector % halfColumns), with outer = 0..2 and inner = 0..1.",
+    "vectors": [
+      {
+        "selector": 0,
+        "frames": [
+          0,
+          1,
+          32,
+          33,
+          64,
+          65
+        ]
+      },
+      {
+        "selector": 9,
+        "frames": [
+          18,
+          19,
+          50,
+          51,
+          82,
+          83
+        ]
+      },
+      {
+        "selector": 13,
+        "frames": [
+          26,
+          27,
+          58,
+          59,
+          90,
+          91
+        ]
+      }
+    ],
+    "frameBounds": {
+      "minimum": 0,
+      "maximum": 91,
+      "withinFrameCount": 96
+    }
+  },
+  "rawCodeRanges": [
+    {
+      "id": "FUN_00467de0",
+      "byteRange": "0x00467de0-0x004689ce (end exclusive)",
+      "bodySha256": "1a2c8ddfb7e2801514c0848d1c7ecb18628df35b5cf4785ecd2507c2b5a74604"
+    },
+    {
+      "id": "FUN_0046a530",
+      "byteRange": "0x0046a530-0x0046a8e8 (end exclusive)",
+      "bodySha256": "b4dc5ba4f0d8be3cac135ccfd02a372173dfcf01dad79f262cf8468572ea8e7a"
+    }
+  ],
+  "evidencePoints": [
+    {
+      "va": "0x00468743",
+      "rawOffset": "0x00068743",
+      "bytes": "8d 4a ff 33 c0 85 c9 7c 12 8b 4c 24 1c 80 b9 5d 4d 7d 00 04 75 05 b8 03 00 00 00 8b 8e a4 2d 00 00 42 3b d1 7d 0f 8b 54 24 1c 80 ba 5f 4d 7d 00 04 75 02 0c 0c",
+      "meaning": "FUN_00467de0 begins the state-4 neighbor mask and sets the vertical-neighbor bit pairs only after in-bounds checks."
+    },
+    {
+      "va": "0x00468842",
+      "rawOffset": "0x00068842",
+      "bytes": "66 3d 0f 00 74 21 0f bf c0 8b 54 24 18 66 0f b6 88 c4 f9 4b 00 8b 44 24 14 51 6a 04 52 50 57 53 8b ce e8 c7 1c 00 00",
+      "meaning": "The nonzero/non-0x0f state-4 mask indexes 0x004bf9c4, then calls FUN_0046a530 with literal state 4."
+    },
+    {
+      "va": "0x00468869",
+      "rawOffset": "0x00068869",
+      "bytes": "0f bf 4c 24 18 33 c0 8d 51 ff 85 d2 89 54 24 10 7c 12 8b 54 24 1c 80 ba 5d 4d 7d 00 08 75 05 b8 03 00 00 00",
+      "meaning": "FUN_00467de0 starts a separate mask accumulation path by comparing neighbors to literal state 8."
+    },
+    {
+      "va": "0x0046895b",
+      "rawOffset": "0x0006895b",
+      "bytes": "66 85 c0 74 27 66 3d 0f 00 74 21 0f bf c0 8b 54 24 18 66 0f b6 88 c4 f9 4b 00 8b 44 24 14 51 6a 08 52 50 57 53 8b ce e8 a9 1b 00 00",
+      "meaning": "The nonzero/non-0x0f state-8 mask uses the same lookup table and calls FUN_0046a530 with literal state 8."
+    },
+    {
+      "va": "0x0046a5c8",
+      "rawOffset": "0x0006a5c8",
+      "bytes": "0f bf c7 05 95 06 00 00 0f bf d3 8d 04 80 03 f2 8d 54 24 34 8d 04 c0 0f bf f9 66 0f b6 04 86 83 c0 3c",
+      "meaning": "FUN_0046a530 forms map + 0x4a0c4 + mapX*180 + mapY, reads its family byte, and adds 0x3c before selecting a loader record."
+    },
+    {
+      "va": "0x0046a5f1",
+      "rawOffset": "0x0006a5f1",
+      "bytes": "8d 1c 76 50 c1 e3 07 2b de 8d 44 24 3c c1 e3 03 52 50 8b 83 00 e0 bc 00",
+      "meaning": "The selected family plus 0x3c is scaled by record stride 0x0bf8 and reads the common loader record."
+    },
+    {
+      "va": "0x0046a634",
+      "rawOffset": "0x0006a634",
+      "bytes": "8b 83 c4 eb bc 00 66 8b ab fc df bc 00 99 f7 bb fc df bc 00 66 8b 8b 00 e0 bc 00",
+      "meaning": "FUN_0046a530 loads record+0x0bcc atlas width, divides it by record+0x04 frame width, and loads record+0x08 frame height."
+    },
+    {
+      "va": "0x0046a64f",
+      "rawOffset": "0x0006a64f",
+      "bytes": "66 83 7c 24 54 04 89 6c 24 28 89 4c 24 1c c7 44 24 48 00 00 00 00 89 44 24 50 0f 85 2b 01 00 00",
+      "meaning": "FUN_0046a530 branches on literal state 4 before entering its first 3-by-2 composition loop."
+    },
+    {
+      "va": "0x0046a6c0",
+      "rawOffset": "0x0006a6c0",
+      "bytes": "0f bf 44 24 50 0f bf 6c 24 58 99 2b c2 68 68 44 53 00 8b f8 8b c5 99 d1 ff f7 ff 8b 54 24 4c 8b c8 8d 04 4a 03 c8 8b c5 99 0f af 4c 24 54 f7 ff",
+      "meaning": "The state-4 path uses signed IDIV with halfColumns and combines quotient, remainder, outer, and inner loop values into the subframe index."
+    },
+    {
+      "va": "0x0046a71e",
+      "rawOffset": "0x0006a71e",
+      "bytes": "52 8b 54 24 54 50 8b 44 24 50 51 52 50 b9 18 94 55 00 e8 8b 3c fe ff",
+      "meaning": "The state-4 composition path calls FUN_0044e3c0 after the common preceding path succeeds."
+    },
+    {
+      "va": "0x0046a74a",
+      "rawOffset": "0x0006a74a",
+      "bytes": "66 83 f9 02 89 4c 24 54 89 44 24 1c 89 7c 24 44 0f 8c 41 ff ff ff 8b 44 24 48 8b 4c 24 18 8b 7c 24 10 8b 54 24 4c 40 03 f9 03 d1 66 3d 03 00 89 44 24 48 89 7c 24 10 89 54 24 4c 0f 8c fe fe ff ff",
+      "meaning": "The state-4 path repeats its inner loop while index < 2 and outer loop while index < 3, for six subframes."
+    },
+    {
+      "va": "0x0046a79a",
+      "rawOffset": "0x0006a79a",
+      "bytes": "8b 54 24 44 89 7c 24 18 0f bf c9 0f bf c5 8d 4c 39 ff 89 54 24 20",
+      "meaning": "The non-state-4 branch initializes a distinct composition path."
+    },
+    {
+      "va": "0x0046a850",
+      "rawOffset": "0x0006a850",
+      "bytes": "52 8b 54 24 24 50 8b 44 24 18 51 52 50 b9 18 94 55 00 e8 c9 82 fe ff",
+      "meaning": "The distinct non-state-4 composition path calls FUN_00452b30 after the common preceding path succeeds."
+    },
+    {
+      "va": "0x0046a889",
+      "rawOffset": "0x0006a889",
+      "bytes": "66 83 f9 02 89 4c 24 54 89 54 24 4c 89 7c 24 10 0f 8c 35 ff ff ff 0f bf 4c 24 1c 8b 7c 24 14 8b 54 24 48 03 f9 42 89 7c 24 14 8b 7c 24 18 03 f9 8b 4c 24 1c 89 7c 24 18 8b 7c 24 20 03 f9 66 83 fa 03 89 54 24 48 89 7c 24 20 0f 8c db fe ff ff",
+      "meaning": "The non-state-4 path also has inner <2 and outer <3 loop bounds, but its call target differs from the state-4 path."
+    }
+  ],
+  "unresolvedBoundary": "Visibility/exploration semantics, product-state mapping, generic map-file provenance and runtime producer/lifetime of the family byte, wall-clock behavior, and pixel placement remain unresolved. K01's hash-bound static byte distribution is recorded only as a bounded map-data observation. The frame algebra is confined to the caller-proven selector domain and normal fog header contract; it does not assign a human meaning to either state or selector."
+}

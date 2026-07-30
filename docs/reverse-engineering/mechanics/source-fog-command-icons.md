@@ -6,7 +6,7 @@
 
 | 구분 | 상태 | 범위 |
 | --- | --- | --- |
-| 분석 | 자원 identity와 원본 action 2/3/5/11/16/19/21/35/39·61..64→button pixel frame 결합은 정적 확정; fog frame 선택·mask 의미는 미확인 | SHA-256, SPR header, exported button frames, original control path |
+| 분석 | 자원 identity와 원본 action 2/3/5/11/16/19/21/35/39·61..64→button pixel frame 결합은 정적 확정; fog의 resource family·16-byte lookup·state별 six-subframe frame algebra는 [별도 static evidence](source-fog-rendering.md)에서 정적 확정, visibility 의미는 미확인 | SHA-256, SPR header, exported button frames, original control path |
 | 재현 | 추출 범위 재현 완료 | hash/header 검증, 결정론 PNG·manifest export |
 | 구현 | 원본 기반 source binding + 의도적 적응 | K01 opt-in command profile은 확인된 button pixel frame을 사용하고, responsive 4×3/12 product grid와 두 semantic adaptation은 별도로 유지 |
 
@@ -53,4 +53,4 @@ bridge는 map id가 아니라 `tilesetId: "imjinrok-normal"`을 선택한 지도
 
 focused tests는 original SHA/header mismatch가 extraction을 중단하는지와 exported button frame geometry·PNG hash 및 두 output manifest가 일치하는지, visible/explored/unseen catalog result·invalid mask·missing source texture 오류, exact/adaptation metadata·profile opt-in source/glyph actionGrid branch, 기존 4×3/12 slot geometry를 확인한다.
 
-남은 작업은 fog 96-frame scheduler와 original neighbor-mask/index rule의 static analysis다. profile의 `attack-move`와 `build`는 의도적 adaptation으로 남으며 original control semantics 또는 3×3 UI layout을 제품에 이식했다고 주장하지 않는다.
+남은 작업은 fog state의 visibility 의미, 갱신 scheduler, family-byte producer/lifetime, pixel placement의 정적 분석이다. profile의 `attack-move`와 `build`는 의도적 adaptation으로 남으며 original control semantics 또는 3×3 UI layout을 제품에 이식했다고 주장하지 않는다.
