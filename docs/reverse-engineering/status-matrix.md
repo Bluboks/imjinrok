@@ -1,6 +1,6 @@
 # 역공학 상태표
 
-기준일: 2026-07-29
+기준일: 2026-07-30
 
 상태 용어는 [증거 및 상태 기준](evidence-levels.md)을 따른다.
 
@@ -13,6 +13,7 @@
 | 임진록 tileset 컨테이너 인벤토리 | source file/header 범위 정적 확정 | 재현 완료 | 없음 | map cell render field에서 filename·frame을 고르는 selector와 range/default branch 정적 분석 |
 | 임진록 main tileset loader 경계 | signed-WORD 0/1/2→normal/snow/brown prefix·default normal, 76-entry filename table/sentinel, `0x00bcdff8`/`0x0bf8` record loop와 `0x4c` cleanup 정적 확정 | 재현 완료 | 없음 | K01 밖 map/theme의 selector와 loader record payload/frame-table consumer 범위 분석 |
 | K01 source tile object·frame selector | K01 map `+0x3a3a4/+0x42234+x*180+y` → normal loader object/frame, 3,600 pair source/header bound 정적 확정 | 재현 완료 | K01-only explicit flat visual assignment 부분 이식; 243 selected PNG/export artifact와 web anchor/chunk overhang은 의도적 adapter | original pixel placement/pivot, 다른 map/theme, terrain/passability/elevation/world 의미 |
+| K01 tile placement-level·object/frame boundary | `FUN_00469330`/`FUN_00469510`의 signed x/y guard, `+0x32514` low-nibble==2 분기, `FUN_0046d650` selector/lookup return과 second raw placement-argument subtract, K01 3,600 cell의 object/frame source binding 정적 확정 | K01 전수 stream, low-nibble two/other·corner·synthetic helper branches 및 malformed/tampered rejection 재현 완료 | 없음; product renderer 변경 없음 | screen/world axis·pixel anchor/pivot, helper의 height/elevation 인간 의미, 다른 map/theme 및 renderer parity |
 | 공통 함수 지도 | 추정 | 부분 재현 | 구조화 산출물 존재 | 일반 참조·점프 테이블에서 주요 경계와 동적 인덱스 수동 검토 |
 | 엔티티 타입 정체 | 클래스 1~95 이름·슬롯·기본 프레임·flags·SPR 경로 정적 확정 | 전수 추출·결정론 검증 완료 | 고유 연결 표시 이름과 봉화대 자원 반영 | flags 비트·행동·수치 의미는 메커니즘별 복원 |
 | 엔티티 자료구조 | 추정 | 미재현 | 별도 프로젝트 모델 존재 | 생성·읽기·쓰기 경로 교차 확인 |
