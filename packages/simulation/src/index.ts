@@ -44,6 +44,14 @@ export {
 export * from "./world.js";
 export { SkirmishAiController, SKIRMISH_AI_TUNING, type SkirmishAiControllerOptions, type SkirmishAiDifficulty, type SkirmishAiTuning } from "./skirmishAi.js";
 export {
+  CORE_CURRENT_VISIBILITY_SKIRMISH_AI_PERCEPTION_POLICY_ID,
+  CORE_OMNISCIENT_SKIRMISH_AI_PERCEPTION_POLICY_ID,
+  getSkirmishAiPerceptionPolicy,
+  registerSkirmishAiPerceptionPolicy,
+  type SkirmishAiPerceptionContext,
+  type SkirmishAiPerceptionPolicy,
+} from "./skirmishAiPerception.js";
+export {
   BUILTIN_IDLE_COMBAT_POLICY_ID,
   getIdleCombatPolicy,
   registerIdleCombatPolicy,

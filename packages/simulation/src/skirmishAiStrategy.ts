@@ -1,11 +1,13 @@
 import type { IssueCommandResult, issueCommand } from "./commands.js";
 import type { SkirmishAiTuning } from "./skirmishAi.js";
-import type { WorldState } from "./types.js";
+import type { UnitState, WorldState } from "./types.js";
 
 export interface SkirmishAiStrategyContext {
   state: WorldState;
   playerId: string;
   tuning: Readonly<SkirmishAiTuning>;
+  /** Current deterministic observations selected by the controller's perception policy. */
+  enemyUnits: readonly UnitState[];
   /** Stable command boundary for strategies that do not mutate orders directly. */
   issueCommand: (state: WorldState, envelope: Parameters<typeof issueCommand>[1]) => IssueCommandResult;
   /** Compatibility hook used only by the built-in profile. */
