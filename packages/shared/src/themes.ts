@@ -1668,6 +1668,7 @@ export function getVisualFrameRefs(visual: VisualDefinition): readonly FrameRef[
       return Object.values(visual.slots).flatMap((frames) => frames ?? []);
     case "entity":
       return [
+        ...(visual.portrait ? [visual.portrait] : []),
         ...Object.values(visual.states).flatMap((state) => Object.values(state.clips).flatMap((clip) => clip?.frames ?? [])),
         ...(visual.layers ?? []).flatMap((layer) =>
           Object.values(layer.states).flatMap((state) => Object.values(state.clips).flatMap((clip) => clip?.frames ?? [])),

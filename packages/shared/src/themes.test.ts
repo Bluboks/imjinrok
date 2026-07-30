@@ -4,8 +4,9 @@ import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { extractOriginalSpriteTable } from "../../../tools/imjinrok/extract-sprite-table.mjs";
-import { defaultTheme, getGridFacing, getThemeFrameRefs } from "./index.js";
+import { defaultTheme, getGridFacing, getThemeFrameRefs, resolveEntityPortraitFrame } from "./index.js";
 import type { EntityVisual, Facing } from "./visuals.js";
+import type { ThemeDefinition } from "./themes.js";
 
 const repositoryRoot = join(dirname(fileURLToPath(import.meta.url)), "../../..");
 const defaultThemeAssetRoot = join(repositoryRoot, "apps/game-client/public/assets/themes/default");
@@ -39,6 +40,60 @@ test("default theme entity bindings point to loadable source-converted assets", 
     .filter((path) => !existsSync(path));
 
   assert.deepEqual(missing, []);
+});
+
+test("theme frame enumeration includes explicit entity portraits", () => {
+  const portrait = { textureKey: "test-portrait", fileName: "portrait.png" };
+  const visual: EntityVisual = {
+    id: "test-entity",
+    kind: "entity",
+    assetPath: "entities/test",
+    render: { srcPxPerWu: 32 },
+    defaults: { size: { w: 32, h: 32 }, pivot: { anchor: { x: 16, y: 16 } } },
+    portrait,
+    states: {
+      idle: { clips: { default: { frames: [{ textureKey: "test-idle" }], fps: 1 } } },
+    },
+  };
+  const theme: ThemeDefinition = {
+    id: "test",
+    displayName: "Test",
+    assetRoot: "/assets/themes/test",
+    display: { policy: "pixel-perfect", defaultPxPerWu: 32 },
+    visuals: { "test-entity": visual },
+    terrainBindings: {},
+    entityBindings: { test: "test-entity" },
+  };
+
+  assert.deepEqual(
+    getThemeFrameRefs(theme).map(({ frame }) => frame.textureKey).sort(),
+    ["test-idle", "test-portrait"],
+  );
+});
+
+test("default theme entity bindings resolve deterministic selection portraits from theme frames", () => {
+  const themeFrames = getThemeFrameRefs(defaultTheme);
+
+  for (const [binding, visualId] of Object.entries(defaultTheme.entityBindings)) {
+    const visual = defaultTheme.visuals[visualId];
+
+    assert.equal(visual?.kind, "entity", `${binding} must bind an entity visual`);
+
+    if (visual?.kind !== "entity") {
+      continue;
+    }
+
+    const portrait = resolveEntityPortraitFrame(visual);
+    assert.ok(portrait, `${binding} must resolve a representative portrait frame`);
+    assert.ok(
+      themeFrames.some(({ frame }) =>
+        frame.textureKey === portrait.frame.textureKey &&
+        frame.fileName === portrait.frame.fileName &&
+        frame.frameName === portrait.frame.frameName,
+      ),
+      `${binding} portrait frame must be preloaded by the theme`,
+    );
+  }
 });
 
 test("original executable sprite pointer table backs K01/K02 theme source sprites", () => {
