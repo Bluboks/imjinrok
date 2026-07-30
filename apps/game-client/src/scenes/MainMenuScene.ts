@@ -38,6 +38,11 @@ import {
   writeGameplayPreferences,
   type GameplayPreferences,
 } from "../gameplayPreferences.js";
+import {
+  getMainMenuPreferenceControlsLayout,
+  getMainMenuTop,
+  getMenuOptionStepY,
+} from "../mainMenuLayout.js";
 import { launchGameWithPreGameBriefing } from "../preGameBriefingLaunch.js";
 
 const MENU_STYLE: Phaser.Types.GameObjects.Text.TextStyle = {
@@ -123,7 +128,8 @@ export class MainMenuScene extends Phaser.Scene {
     this.mouseControlModeText = null;
 
     const titleY = Math.max(62, height * 0.14);
-    const menuTop = Math.max(180, Math.min(titleY + 116, height * 0.33));
+    const baseMenuTop = Math.max(180, Math.min(titleY + 116, height * 0.33));
+    const menuTop = this.menuMode === "main" ? getMainMenuTop(height, titleY) : baseMenuTop;
     const menuStyle: Phaser.Types.GameObjects.Text.TextStyle = {
       ...MENU_STYLE,
       fontSize: `${Phaser.Math.Clamp(Math.floor(width / 38), 20, 26)}px`,
@@ -150,7 +156,7 @@ export class MainMenuScene extends Phaser.Scene {
     );
 
     if (this.menuMode === "main") {
-      this.drawGameplayPreferenceControls(width / 2, titleY + 76);
+      this.drawGameplayPreferenceControls(width / 2, getMainMenuPreferenceControlsLayout(titleY));
     }
 
     switch (this.menuMode) {
@@ -295,7 +301,7 @@ export class MainMenuScene extends Phaser.Scene {
     height: number,
     menuStyle: Phaser.Types.GameObjects.Text.TextStyle,
   ): number {
-    const menuStepY = Phaser.Math.Clamp((height - y - 96) / Math.max(options.length + 1, 2), 34, 46);
+    const menuStepY = getMenuOptionStepY(height, y, options.length);
 
     options.forEach((option, index) => {
       const text = this.add
@@ -550,7 +556,7 @@ export class MainMenuScene extends Phaser.Scene {
     this.aiDifficultyText?.setText(this.getAiDifficultyMenuLabel());
   }
 
-  private drawGameplayPreferenceControls(x: number, y: number): void {
+  private drawGameplayPreferenceControls(x: number, layout: { speedY: number; mouseY: number }): void {
     const style: Phaser.Types.GameObjects.Text.TextStyle = {
       fontFamily: "Noto Sans KR, Malgun Gothic, Apple SD Gothic Neo, Trebuchet MS, sans-serif",
       fontSize: "15px",
@@ -558,12 +564,12 @@ export class MainMenuScene extends Phaser.Scene {
     };
 
     this.gameSpeedPreferenceText = this.add
-      .text(x, y, this.getGameSpeedPreferenceLabel(), style)
+      .text(x, layout.speedY, this.getGameSpeedPreferenceLabel(), style)
       .setOrigin(0.5)
       .setInteractive({ useHandCursor: true })
       .on("pointerup", () => this.cycleGameSpeedPreference());
     this.mouseControlModeText = this.add
-      .text(x, y + 21, this.getMouseControlModePreferenceLabel(), style)
+      .text(x, layout.mouseY, this.getMouseControlModePreferenceLabel(), style)
       .setOrigin(0.5)
       .setInteractive({ useHandCursor: true })
       .on("pointerup", () => this.cycleMouseControlModePreference());

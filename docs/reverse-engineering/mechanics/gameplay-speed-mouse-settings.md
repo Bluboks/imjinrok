@@ -54,13 +54,13 @@ anchor, EXE hash와 mouse sprite hash/header를 확인하고
 `analysis/fixtures/gameplay-input-speed-settings-evidence.json`을 생성한다. 테스트는 base `50ms`에서
 state `0..5`가 `[64,60,50,40,30,30]`이 되는 vector와 EXE/resource tamper rejection을 고정한다.
 
-클라이언트의 `gameplayPreferences.ts`는 source state를 five-preset 및 fixed tick multiplier로
-변환한다. browser persistence와 pointer policy는 generic engine input action (`select`, pending
-confirm/cancel, default action)만 내보내며 실제 command dispatch는 다음 integration slice가 맡는다.
+클라이언트의 `gameplayPreferences.ts`와 `gameplayInputRuntime.ts`는 source state를 five-preset 및
+fixed tick multiplier로 변환하고, local session 시작·runtime speed step·HUD state publication에
+연결한다. browser persistence와 pointer policy는 의도적 적응이다. `mouseInputPolicy.ts`는 generic
+engine input action (`select`, pending confirm/cancel, default action)을 내보내고, `SkirmishScene`은
+그 action을 기존 command dispatch에 한 번만 연결한다.
 
 ## 다음 작업
 
-- `SkirmishScene` owner가 이 module을 읽어 initial speed·runtime speed persistence·semantic pointer
-  action routing만 연결한다.
 - source pointer dispatch의 더 넓은 static evidence가 생기기 전에는 web one-button/two-button
   semantics를 원본 일치라고 표기하지 않는다.
