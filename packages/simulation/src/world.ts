@@ -68,6 +68,16 @@ export { applyScenarioScriptedEvents, completeScenarioRuntime, createScenarioRun
 export { SIM_TICK_SECONDS, SIM_TICKS_PER_SECOND } from "./constants.js";
 export { isTileFlooded, isTilePassableForUnit } from "./terrain.js";
 export { advanceWorldTick } from "./tick.js";
+export {
+  advanceSourceOrientation,
+  createSourceOrientationState,
+  getRawDirectionForFacing,
+  getSourceOrientationProfileForUnit,
+  K01_TURTLE_TANK_ORIENTATION_PROFILE,
+  registerSourceOrientationProfile,
+  type SourceOrientationProfile,
+  type SourceOrientationState,
+} from "./orientation.js";
 export { iterateUnitsOrdered } from "./units.js";
 export { areTilesVisible, createPlayerVisibility, getTileVisibility, updatePlayerVisibility, updatePlayerVisibilityWithChanges, TileVisibility, type PlayerVisibilityChangeOptions, type PlayerVisibilityState, type PlayerVisibilityUpdate } from "./visibility.js";
 

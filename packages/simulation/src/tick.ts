@@ -14,6 +14,7 @@ import { applyCompletedResearchToUnit, completeResearch } from "./research.js";
 import { findHarvestableResourceTile, findResourceNode, findResourceTile, getResourceDefinition, harvestResource, isResourceHarvestable, updateResourceRegrowth } from "./resources.js";
 import { isTilePassableForUnit, resolveFloodDrowning } from "./terrain.js";
 import { iterateUnitsOrdered, removeUnitFromWorld } from "./units.js";
+import { advanceUnitOrientationForProjectTarget, getSourceOrientationProfileForUnit } from "./orientation.js";
 import { unitCanPerformAction, unitDefinitions, type BankResourceKind, type BuildingDefinitionId, type GridPoint, type ScenarioAreaDefinition, type UnitDefinition } from "../../shared/src/index.js";
 import type { UnitState, UnitTargetSelectorState, WorldState } from "./types.js";
 
@@ -57,10 +58,33 @@ export function advanceWorldTick(state: WorldState): void {
   }
 
   advanceUnitCombat(state);
+  advanceSourceOrientationAdapters(state);
 
   resolveFloodDrowning(state);
 
   resolveScenarioRuntimeFollowUps(state);
+}
+
+/**
+ * Product tick/order targets are an explicit source-backed adaptation. The
+ * recovered scheduler and action selectors do not prove that every project
+ * tick/order reaches the original raw-16 helper.
+ */
+function advanceSourceOrientationAdapters(state: WorldState): void {
+  for (const unit of iterateUnitsOrdered(state)) {
+    if (!getSourceOrientationProfileForUnit(unit)) {
+      continue;
+    }
+
+    const attackTarget = unit.currentOrder?.type === "attack-unit"
+      ? state.units[unit.currentOrder.targetUnitId]
+      : undefined;
+    const target = attackTarget?.position ?? unit.movementTarget;
+
+    if (target) {
+      advanceUnitOrientationForProjectTarget(unit, target);
+    }
+  }
 }
 
 function advanceUnitScriptedBehavior(state: WorldState, unit: UnitState): void {

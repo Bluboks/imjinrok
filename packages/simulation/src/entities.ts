@@ -1,4 +1,5 @@
 import { unitDefinitions, type GridPoint, type StartingUnitDefinition, type UnitDefinitionId } from "../../shared/src/index.js";
+import { createSourceOrientationState, getSourceOrientationProfileForUnit } from "./orientation.js";
 import type { AttributePool, UnitState } from "./types.js";
 
 function createPool(max: number): AttributePool {
@@ -16,7 +17,7 @@ export function createUnitState(
 ): UnitState {
   const attributes = unitDefinitions[kind].baseAttributes;
 
-  return {
+  const unit: UnitState = {
     id,
     playerId,
     kind,
@@ -25,6 +26,14 @@ export function createUnitState(
     health: createPool(attributes.health),
     mana: createPool(attributes.mana),
   };
+
+  const orientationProfile = getSourceOrientationProfileForUnit(unit);
+  if (orientationProfile) {
+    // The initial raw direction is a source-backed project spawn adaptation.
+    unit.sourceOrientation = createSourceOrientationState(orientationProfile);
+  }
+
+  return unit;
 }
 
 export function createPlayerUnits(

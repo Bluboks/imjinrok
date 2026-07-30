@@ -49,8 +49,10 @@ class 12·13·14·82 아홉 record를 각각 `japanese-gunner`, `japanese-samura
 `japanese-turtle-tank`, `japanese-konishi`의 exact static identity/source binding으로 연결했다.
 class 12 `japanese-gunner`의 상태 8/1/4/7 frame·8방향·mirror, class 13 `japanese-samurai`의 상태 8/1/4/7 frame·8방향·mirror와 class 14
 `japanese-turtle-tank`의 상태 8/1/4 grid frame·mirror도 정적 확정·이식했다. class 14의
-intermediate 16-ring turn과 creation-default transient destruction은 정적 확정·재현했지만
-generic Facing/runtime tick mapping에는 이식하지 않았다.
+intermediate 16-ring turn은 raw16과 마지막 grid-facing을 분리한 source-backed runtime adaptation으로
+이식했다. project movement/attack target을 한 tick당 한 번 helper target으로 쓰는 정책과 spawn default는
+원본 accepted update/time gate 또는 모든 action reachability의 원작 일치가 아니다. creation-default
+transient destruction은 정적 확정·재현했지만 runtime에는 이식하지 않았다.
 class 82 `japanese-konishi`의 상태 8/1/4/7도 세 source SPR의 grid frame·mirror를
 정적 확정·이식했다. K01 action만 in-bounds 요청 좌표를 terrain/passability·occupancy·open-point
 탐색 없이 생성하는 exact-position 정책을 부분 이식했다. 원본 1,200-slot pool, generation,
