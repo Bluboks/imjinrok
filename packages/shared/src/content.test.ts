@@ -117,6 +117,17 @@ test("new source identity kinds preserve their explicit project gameplay adapter
   );
 });
 
+test("only the statically identified Ryu normal-combat entry opts into the subtype-0c projectile profile", () => {
+  const projectileSelections = Object.values(unitDefinitions)
+    .flatMap((unit) => unit.combat?.projectileProfileId ? [unit.id] : []);
+
+  assert.deepEqual(projectileSelections, ["ryu-seong-ryong"]);
+  assert.equal(
+    unitDefinitions["ryu-seong-ryong"].combat?.projectileProfileId,
+    "k01-ryu-subtype-0c-static-port",
+  );
+});
+
 function omitIdentity({
   id: _id,
   displayName: _displayName,

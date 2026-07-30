@@ -651,7 +651,15 @@ export const unitDefinitions = {
     portraitGlyph: "Ry",
     portraitColor: 0x8fb4d8,
     groupBorderColor: 0xd0b46a,
-    combat: { damage: 10, range: 1.5, cooldownTicks: 18, aggroRange: 7 },
+    // Only the class-78 normal-attack subtype-0c route/motion is source-backed.
+    // Combat numbers and delivery scheduling remain product policy.
+    combat: {
+      damage: 10,
+      range: 1.5,
+      cooldownTicks: 18,
+      aggroRange: 7,
+      projectileProfileId: "k01-ryu-subtype-0c-static-port",
+    },
     renderRadius: 6,
     selectionRadius: 6,
     hitRadius: 16,

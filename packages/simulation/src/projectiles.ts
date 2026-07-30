@@ -92,9 +92,32 @@ export type ProjectileCollisionOutcome = "continue" | "impact" | "expire";
 
 export interface ProjectileMotionPolicy {
   id: string;
-  createState(input: Readonly<{ profile: ProjectileProfile; start: ProjectilePoint; destination: ProjectilePoint }>): ProjectileMotionState;
-  advance(input: Readonly<{ projectile: ProjectileState; profile: ProjectileProfile }>): ProjectileMotionAdvance;
-  validateState(input: Readonly<{ projectile: ProjectileState; profile: ProjectileProfile }>): void;
+  createState(input: Readonly<{
+    profile: ProjectileProfile;
+    start: ProjectilePoint;
+    destination: ProjectilePoint;
+    coordinateTransform?: ProjectileCoordinateTransform;
+  }>): ProjectileMotionState;
+  advance(input: Readonly<{
+    projectile: ProjectileState;
+    profile: ProjectileProfile;
+    coordinateTransform?: ProjectileCoordinateTransform;
+  }>): ProjectileMotionAdvance;
+  validateState(input: Readonly<{
+    projectile: ProjectileState;
+    profile: ProjectileProfile;
+    coordinateTransform?: ProjectileCoordinateTransform;
+  }>): void;
+}
+
+/**
+ * Product-owned bridge between world coordinates and a source-scoped motion
+ * port. A profile may select one by stable id; registries can replace it.
+ */
+export interface ProjectileCoordinateTransform {
+  id: string;
+  toSourcePoint(input: Readonly<{ point: ProjectilePoint; profile: ProjectileProfile }>): ProjectilePoint;
+  toProductPoint(input: Readonly<{ point: ProjectilePoint; profile: ProjectileProfile }>): ProjectilePoint;
 }
 
 export interface ProjectileCollisionPolicy {
@@ -108,8 +131,17 @@ export interface ProjectileImpactPolicy {
   createEvent(input: Readonly<{ projectile: ProjectileState; profile: ProjectileProfile }>): ProjectileImpactEvent | undefined;
 }
 
-type MotionPolicyInput = Readonly<{ projectile: ProjectileState; profile: ProjectileProfile }>;
-type MotionPolicyCreateInput = Readonly<{ profile: ProjectileProfile; start: ProjectilePoint; destination: ProjectilePoint }>;
+type MotionPolicyInput = Readonly<{
+  projectile: ProjectileState;
+  profile: ProjectileProfile;
+  coordinateTransform?: ProjectileCoordinateTransform;
+}>;
+type MotionPolicyCreateInput = Readonly<{
+  profile: ProjectileProfile;
+  start: ProjectilePoint;
+  destination: ProjectilePoint;
+  coordinateTransform?: ProjectileCoordinateTransform;
+}>;
 type CollisionPolicyInput = Readonly<{ projectile: ProjectileState; profile: ProjectileProfile }>;
 type CollisionResolveInput = Readonly<{ projectile: ProjectileState; profile: ProjectileProfile; arrived: boolean }>;
 type ImpactPolicyInput = Readonly<{ projectile: ProjectileState; profile: ProjectileProfile }>;
@@ -120,6 +152,8 @@ export interface ProjectileRegistry {
   getMotionPolicy(id: string): ProjectileMotionPolicy | undefined;
   getCollisionPolicy(id: string): ProjectileCollisionPolicy | undefined;
   getImpactPolicy(id: string): ProjectileImpactPolicy | undefined;
+  /** Optional for compatibility with registries that contain no coordinate-bridged profiles. */
+  getCoordinateTransform?(id: string): ProjectileCoordinateTransform | undefined;
 }
 
 export interface CreateProjectileRegistryInput {
@@ -127,6 +161,7 @@ export interface CreateProjectileRegistryInput {
   motionPolicies: readonly ProjectileMotionPolicy[];
   collisionPolicies: readonly ProjectileCollisionPolicy[];
   impactPolicies: readonly ProjectileImpactPolicy[];
+  coordinateTransforms?: readonly ProjectileCoordinateTransform[];
 }
 
 export interface AdvanceProjectileSystemResult {
@@ -137,6 +172,7 @@ export interface AdvanceProjectileSystemResult {
 export const PRODUCT_IMMEDIATE_MOTION_POLICY_ID = "product-motion-immediate-v1";
 export const PRODUCT_LINEAR_MOTION_POLICY_ID = "product-motion-linear-v1";
 export const K01_RYU_SUBTYPE_0C_MOTION_POLICY_ID = "k01-ryu-subtype-0c-motion-static-port";
+export const PRODUCT_COORDINATE_ROUND_TRANSFORM_ID = "product-coordinate-round-v1";
 export const PRODUCT_TARGET_AT_ARRIVAL_COLLISION_POLICY_ID = "product-collision-target-at-arrival-v1";
 export const PRODUCT_NO_COLLISION_POLICY_ID = "product-collision-none-v1";
 export const PRODUCT_EVENT_IMPACT_POLICY_ID = "product-impact-event-v1";
@@ -162,7 +198,10 @@ export const PRODUCT_LINEAR_PROJECTILE_PROFILE = freezeProfile({
  */
 export const K01_RYU_SUBTYPE_0C_PROJECTILE_PROFILE = freezeProfile({
   id: "k01-ryu-subtype-0c-static-port",
-  motion: { policyId: K01_RYU_SUBTYPE_0C_MOTION_POLICY_ID, data: {} },
+  motion: {
+    policyId: K01_RYU_SUBTYPE_0C_MOTION_POLICY_ID,
+    data: { coordinateTransformId: PRODUCT_COORDINATE_ROUND_TRANSFORM_ID },
+  },
   collision: { policyId: PRODUCT_TARGET_AT_ARRIVAL_COLLISION_POLICY_ID, data: {} },
   impact: {
     policyId: PRODUCT_EVENT_IMPACT_POLICY_ID,
@@ -171,6 +210,23 @@ export const K01_RYU_SUBTYPE_0C_PROJECTILE_PROFILE = freezeProfile({
 });
 
 const MAX_PROJECTILE_SEQUENCE = 999_999_999_999;
+
+/**
+ * Temporary product coordinate policy: round finite world endpoints before
+ * the source port enforces its audited 0..32767 integer subset. This is not
+ * an original coordinate-scale claim and is replaceable through the registry.
+ */
+const productCoordinateRoundTransform: ProjectileCoordinateTransform = Object.freeze({
+  id: PRODUCT_COORDINATE_ROUND_TRANSFORM_ID,
+  toSourcePoint: ({ point }: Readonly<{ point: ProjectilePoint; profile: ProjectileProfile }>) => {
+    validatePoint(point, "product coordinate endpoint");
+    return { x: Math.round(point.x), y: Math.round(point.y) };
+  },
+  toProductPoint: ({ point }: Readonly<{ point: ProjectilePoint; profile: ProjectileProfile }>) => {
+    validatePoint(point, "source route point");
+    return copyPoint(point);
+  },
+});
 
 const immediateMotionPolicy: ProjectileMotionPolicy = Object.freeze({
   id: PRODUCT_IMMEDIATE_MOTION_POLICY_ID,
@@ -213,25 +269,39 @@ const linearMotionPolicy: ProjectileMotionPolicy = Object.freeze({
 
 const ryuSubtype0cMotionPolicy: ProjectileMotionPolicy = Object.freeze({
   id: K01_RYU_SUBTYPE_0C_MOTION_POLICY_ID,
-  createState: ({ start, destination }: MotionPolicyCreateInput) => {
+  createState: ({ profile, start, destination, coordinateTransform }: MotionPolicyCreateInput) => {
+    const coordinateTransformId = readStableId(profile.motion.data, "coordinateTransformId");
+    if (!coordinateTransform || coordinateTransform.id !== coordinateTransformId) {
+      throw new Error(`Ryu profile ${profile.id} requires coordinate transform ${coordinateTransformId}`);
+    }
+    const sourceStart = coordinateTransform.toSourcePoint(Object.freeze({ point: copyPoint(start), profile }));
+    const sourceDestination = coordinateTransform.toSourcePoint(Object.freeze({ point: copyPoint(destination), profile }));
+    validatePoint(sourceStart, "transformed Ryu start");
+    validatePoint(sourceDestination, "transformed Ryu destination");
     const route = buildOriginalRyuProjectileRoute({
-      startX: start.x,
-      startY: start.y,
-      endX: destination.x,
-      endY: destination.y,
+      startX: sourceStart.x,
+      startY: sourceStart.y,
+      endX: sourceDestination.x,
+      endY: sourceDestination.y,
     });
     return {
       policyId: K01_RYU_SUBTYPE_0C_MOTION_POLICY_ID,
-      data: { route: route.points.map((point) => [point.x, point.y]), routeIndex: 0 },
+      data: { sourceRoute: route.points.map((point) => [point.x, point.y]), routeIndex: 0 },
     };
   },
-  advance: ({ projectile }: MotionPolicyInput) => {
-    const route = readRyuRoute(projectile.motion.data);
+  advance: ({ projectile, profile, coordinateTransform }: MotionPolicyInput) => {
+    const coordinateTransformId = readStableId(profile.motion.data, "coordinateTransformId");
+    if (!coordinateTransform || coordinateTransform.id !== coordinateTransformId) {
+      throw new Error(`Ryu profile ${profile.id} requires coordinate transform ${coordinateTransformId}`);
+    }
+    const route = readRyuSourceRoute(projectile.motion.data);
     const routeIndex = readNonNegativeInteger(projectile.motion.data, "routeIndex");
-    const point = route[routeIndex];
-    if (!point) {
+    const sourcePoint = route[routeIndex];
+    if (!sourcePoint) {
       throw new Error(`projectile ${projectile.id} has an invalid Ryu route index`);
     }
+    const point = coordinateTransform.toProductPoint(Object.freeze({ point: sourcePoint, profile }));
+    validatePoint(point, "transformed Ryu route point");
     if (routeIndex === route.length - 1) {
       return { position: point, motion: projectile.motion, arrived: true };
     }
@@ -239,13 +309,13 @@ const ryuSubtype0cMotionPolicy: ProjectileMotionPolicy = Object.freeze({
       position: point,
       motion: {
         policyId: K01_RYU_SUBTYPE_0C_MOTION_POLICY_ID,
-        data: { route: projectile.motion.data.route!, routeIndex: routeIndex + 1 },
+        data: { sourceRoute: projectile.motion.data.sourceRoute!, routeIndex: routeIndex + 1 },
       },
       arrived: false,
     };
   },
   validateState: ({ projectile }: MotionPolicyInput) => {
-    const route = readRyuRoute(projectile.motion.data);
+    const route = readRyuSourceRoute(projectile.motion.data);
     const routeIndex = readNonNegativeInteger(projectile.motion.data, "routeIndex");
     if (routeIndex >= route.length) {
       throw new RangeError("Ryu routeIndex must address a route point");
@@ -296,6 +366,7 @@ export function createProjectileRegistry(input: CreateProjectileRegistryInput): 
   const motionPolicies = createMotionPolicyMap(input.motionPolicies);
   const collisionPolicies = createCollisionPolicyMap(input.collisionPolicies);
   const impactPolicies = createImpactPolicyMap(input.impactPolicies);
+  const coordinateTransforms = createCoordinateTransformMap(input.coordinateTransforms ?? []);
   const profiles = new Map<string, ProjectileProfile>();
   for (const candidate of input.profiles) {
     const profile = freezeProfile(candidate);
@@ -305,6 +376,12 @@ export function createProjectileRegistry(input: CreateProjectileRegistryInput): 
     if (!motionPolicies.has(profile.motion.policyId) || !collisionPolicies.has(profile.collision.policyId) || !impactPolicies.has(profile.impact.policyId)) {
       throw new Error(`projectile profile ${profile.id} references an unknown policy id`);
     }
+    if ("coordinateTransformId" in profile.motion.data) {
+      const coordinateTransformId = readStableId(profile.motion.data, "coordinateTransformId");
+      if (!coordinateTransforms.has(coordinateTransformId)) {
+        throw new Error(`projectile profile ${profile.id} references an unknown coordinate transform: ${coordinateTransformId}`);
+      }
+    }
     profiles.set(profile.id, profile);
   }
   return Object.freeze({
@@ -312,14 +389,16 @@ export function createProjectileRegistry(input: CreateProjectileRegistryInput): 
     getMotionPolicy: (id: string) => motionPolicies.get(id),
     getCollisionPolicy: (id: string) => collisionPolicies.get(id),
     getImpactPolicy: (id: string) => impactPolicies.get(id),
+    getCoordinateTransform: (id: string) => coordinateTransforms.get(id),
   });
 }
 
 export const PRODUCT_PROJECTILE_REGISTRY = createProjectileRegistry({
-  profiles: [PRODUCT_IMMEDIATE_PROJECTILE_PROFILE, PRODUCT_LINEAR_PROJECTILE_PROFILE],
+  profiles: [PRODUCT_IMMEDIATE_PROJECTILE_PROFILE, PRODUCT_LINEAR_PROJECTILE_PROFILE, K01_RYU_SUBTYPE_0C_PROJECTILE_PROFILE],
   motionPolicies: builtInMotionPolicies,
   collisionPolicies: builtInCollisionPolicies,
   impactPolicies: builtInImpactPolicies,
+  coordinateTransforms: [productCoordinateRoundTransform],
 });
 
 export function createProjectileRegistryWithK01RyuSubtype0c(): ProjectileRegistry {
@@ -328,6 +407,7 @@ export function createProjectileRegistryWithK01RyuSubtype0c(): ProjectileRegistr
     motionPolicies: builtInMotionPolicies,
     collisionPolicies: builtInCollisionPolicies,
     impactPolicies: builtInImpactPolicies,
+    coordinateTransforms: [productCoordinateRoundTransform],
   });
 }
 
@@ -402,6 +482,7 @@ export function spawnProjectile(state: ProjectileSystemState, registry: Projecti
     throw new Error("targetId must match targetReference.id when both are supplied");
   }
   const motionPolicy = getRequiredMotionPolicy(registry, profile.motion.policyId);
+  const coordinateTransform = getProfileCoordinateTransform(registry, profile);
   const projectile: ProjectileState = {
     id: formatProjectileId(state.nextProjectileSequence),
     profileId: profile.id,
@@ -412,7 +493,12 @@ export function spawnProjectile(state: ProjectileSystemState, registry: Projecti
     start: copyPoint(request.start),
     destination: copyPoint(request.destination),
     position: copyPoint(request.start),
-    motion: cloneBinding(motionPolicy.createState(Object.freeze({ profile, start: copyPoint(request.start), destination: copyPoint(request.destination) }))),
+    motion: cloneBinding(motionPolicy.createState(Object.freeze({
+      profile,
+      start: copyPoint(request.start),
+      destination: copyPoint(request.destination),
+      ...(coordinateTransform ? { coordinateTransform } : {}),
+    }))),
   };
   validateProjectile(projectile, registry);
   return {
@@ -433,7 +519,12 @@ export function advanceProjectileSystem(state: ProjectileSystemState, registry: 
     const projectile = freezeProjectile(storedProjectile);
     const profile = getRequiredProfile(registry, projectile.profileId);
     const motionPolicy = getRequiredMotionPolicy(registry, profile.motion.policyId);
-    const advanced = motionPolicy.advance(Object.freeze({ projectile, profile }));
+    const coordinateTransform = getProfileCoordinateTransform(registry, profile);
+    const advanced = motionPolicy.advance(Object.freeze({
+      projectile,
+      profile,
+      ...(coordinateTransform ? { coordinateTransform } : {}),
+    }));
     if (!advanced || typeof advanced !== "object" || typeof advanced.arrived !== "boolean") {
       throw new TypeError(`motion policy ${motionPolicy.id} must return a boolean arrived flag`);
     }
@@ -619,7 +710,12 @@ function validateProjectile(projectile: ProjectileState, registry: ProjectileReg
   if (projectile.motion.policyId !== profile.motion.policyId) {
     throw new Error(`projectile ${projectile.id} motion does not match profile ${profile.id}`);
   }
-  getRequiredMotionPolicy(registry, projectile.motion.policyId).validateState(Object.freeze({ projectile, profile }));
+  const coordinateTransform = getProfileCoordinateTransform(registry, profile);
+  getRequiredMotionPolicy(registry, projectile.motion.policyId).validateState(Object.freeze({
+    projectile,
+    profile,
+    ...(coordinateTransform ? { coordinateTransform } : {}),
+  }));
   getRequiredCollisionPolicy(registry, profile.collision.policyId).validateProjectile(Object.freeze({ projectile, profile }));
 }
 
@@ -738,11 +834,44 @@ function createImpactPolicyMap(policies: readonly ProjectileImpactPolicy[]): Map
   return result;
 }
 
+function createCoordinateTransformMap(
+  transforms: readonly ProjectileCoordinateTransform[],
+): Map<string, ProjectileCoordinateTransform> {
+  const result = new Map<string, ProjectileCoordinateTransform>();
+  for (const transform of transforms) {
+    validateStableId(transform.id, "coordinate transform id");
+    if (typeof transform.toSourcePoint !== "function" || typeof transform.toProductPoint !== "function") {
+      throw new TypeError(`coordinate transform ${transform.id} must provide toSourcePoint and toProductPoint`);
+    }
+    if (result.has(transform.id)) throw new Error(`duplicate coordinate transform id: ${transform.id}`);
+    result.set(transform.id, Object.freeze({
+      id: transform.id,
+      toSourcePoint: transform.toSourcePoint,
+      toProductPoint: transform.toProductPoint,
+    }));
+  }
+  return result;
+}
+
 function getRequiredProfile(registry: ProjectileRegistry, id: string): ProjectileProfile {
   validateStableId(id, "projectile profileId");
   const profile = registry.getProfile(id);
   if (!profile) throw new Error(`unknown projectile profile: ${id}`);
   return profile;
+}
+
+function getProfileCoordinateTransform(
+  registry: ProjectileRegistry,
+  profile: ProjectileProfile,
+): ProjectileCoordinateTransform | undefined {
+  if (!("coordinateTransformId" in profile.motion.data)) {
+    return undefined;
+  }
+  const id = readStableId(profile.motion.data, "coordinateTransformId");
+  const transform = registry.getCoordinateTransform?.(id);
+  if (!transform) throw new Error(`unknown projectile coordinate transform: ${id}`);
+  if (transform.id !== id) throw new Error(`projectile coordinate transform lookup returned ${transform.id} for ${id}`);
+  return transform;
 }
 
 function getRequiredMotionPolicy(registry: ProjectileRegistry, id: string): ProjectileMotionPolicy {
@@ -830,12 +959,14 @@ function readStableId(data: ProjectilePolicyData, key: string): string {
   return value;
 }
 
-function readRyuRoute(data: ProjectilePolicyData): ProjectilePoint[] {
-  const rawRoute = data.route;
-  if (!Array.isArray(rawRoute) || rawRoute.length === 0) throw new RangeError("Ryu route must contain at least one point");
+function readRyuSourceRoute(data: ProjectilePolicyData): ProjectilePoint[] {
+  const rawRoute = data.sourceRoute;
+  if (!Array.isArray(rawRoute) || rawRoute.length === 0) {
+    throw new RangeError("Ryu source route must contain at least one point");
+  }
   return rawRoute.map((entry) => {
     if (!Array.isArray(entry) || entry.length !== 2 || !Number.isInteger(entry[0]) || !Number.isInteger(entry[1]) || entry[0] < 0 || entry[0] > 0x7fff || entry[1] < 0 || entry[1] > 0x7fff) {
-      throw new RangeError("Ryu route points must use the audited 0..32767 subset");
+      throw new RangeError("Ryu source route points must use the audited 0..32767 subset");
     }
     return { x: entry[0], y: entry[1] };
   });

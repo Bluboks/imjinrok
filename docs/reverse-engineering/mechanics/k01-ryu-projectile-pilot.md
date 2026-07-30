@@ -314,10 +314,31 @@ EXE 해시의 jump-table 산출물을 거부한다. simulation 테스트는 추�
 - effect kind `9`의 WORD wrap, signed 분기, 최소 피해 수식
 - 대상 부재·세대 불일치, raw health gate, signed buffer→health 적용 순서
 
-현행 `advanceUnitCombat`은 유성룡을 프로젝트 임시 수치인 damage 10, range 1.5,
-cooldown 18의 즉시 공격으로 처리한다. 이를 교체하려면 아직 미확정인 원본 좌표·시간 변환과
-공격 전 대상 검색·사거리가 필요하다. 현재 모듈을 임의의 24 Hz 상수로 연결하지 않았으므로
-실제 플레이 전투 구현 상태는 계속 `프로토타입`, 이 문서가 증명한 독립 계산 단위만 `부분 이식`이다.
+2026-07-31 product integration은 `ryu-seong-ryong`의 **일반 combat** entry에만 stable profile
+`k01-ryu-subtype-0c-static-port`를 선택하게 한다. 이는 action 40 자동 마법이 아니라, class 78의
+state 5·phase 7에서 subtype `0x0c`를 생성하는 별도 일반 공격 경로의 제한된 product binding이다.
+다른 content는 projectile opt-in을 받지 않아 기존 즉시 피해 동작을 유지한다.
+
+profile의 sampled route와 target-arrival boundary만 이 문서의 `정적 확정`·`재현 완료` 범위를
+소비한다. 현재 world `GridPoint`는 fraction일 수 있지만 source port는 integer `0..32767` subset만
+받으므로, profile은 registry-replaceable `product-coordinate-round-v1` bidirectional bridge를 명시적으로 선택한다.
+이 bridge는 finite product endpoint를 반올림한 뒤 source port의 integer/domain 검증을 그대로 통과시키고,
+snapshot에는 retained source route만 저장한다. 각 lifecycle advance가 선택된 bridge로 현재 source point를
+product coordinate로 다시 변환한다. 따라서 범위 밖 변환은
+loud failure이며, 반올림이나 기본 bridge의 동일 numeric coordinate 사용은 원본 좌표 scale,
+원본 range guard, 또는 원작 위치 parity를 주장하지 않는 임시 product policy다.
+
+product world tick은 projectile lifecycle을 한 번 advance하고, 이 profile은 retained source route point를
+한 번씩 소비한다. 이 one-product-tick-per-retained-point 규칙과 combat payload가 impact lifecycle에서
+소비되는 순서는 product integration policy다. 원본 accepted scheduler step과 raw 24 Hz bridge의 exact
+mapping은 아직 없다. 기존 project damage 10, range 1.5, cooldown 18도 source stat parity로 바꾸거나
+표기하지 않는다. payload/damage scheduling은 현재 product combat contract를 유지하며, kind 9 raw damage
+formula를 live combat에 이식했다는 주장이 아니다.
+
+launch payload는 target id, player, kind를 다시 검증하므로 target removal 및 다른 player/kind로의 id
+재사용은 impact를 안전하게 무시한다. product snapshot에는 entity generation이 없어서 같은 player와 kind를
+가진 완전히 동일한 id 재사용까지 원본 generation check처럼 구별할 수는 없으며, 이를 source parity로
+표기하지 않는다.
 
 ## 남은 불확실성과 다음 질문
 
