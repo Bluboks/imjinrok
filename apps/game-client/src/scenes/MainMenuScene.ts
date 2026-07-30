@@ -4,12 +4,10 @@ import {
   createMapDefinitionFromId,
   createRandomSkirmishMap,
   defaultMap,
-  getCampaignContinueScenario,
   imjinrokCampaignScenarios,
   imjinrokK01Scenario,
   imjinrokK02Scenario,
   IMJINROK_CAMPAIGN_PROGRESS_STORAGE_KEY,
-  isCampaignComplete,
   isCampaignScenarioCompleted,
   isCampaignScenarioUnlocked,
   normalizeCampaignProgressState,
@@ -39,25 +37,72 @@ import {
   type GameplayPreferences,
 } from "../gameplayPreferences.js";
 import {
-  getMainMenuPreferenceControlsLayout,
-  getMainMenuTop,
-  getMenuOptionStepY,
+  resolveMainMenuKeyboardAction,
+  type MainMenuAction,
+  type MainMenuActionAvailability,
+  type MainMenuScreen,
+} from "../mainMenuFlow.js";
+import {
+  MAIN_MENU_PROJECT_ADAPTATION_HIT_RECTS,
+  resolveMainMenuCanvasLayout,
+  type MainMenuSourceRect,
 } from "../mainMenuLayout.js";
+import {
+  MAIN_MENU_BUTTON_AUDIO_CUE_KEY,
+  MAIN_MENU_COUNTRY_SELECT_AUDIO_CUE_KEY,
+  playMainMenuAudioCue,
+  preloadMainMenuAudio,
+  startMainMenuBackgroundMusic,
+  stopMainMenuBackgroundMusic,
+} from "../mainMenuAudio.js";
 import { launchGameWithPreGameBriefing } from "../preGameBriefingLaunch.js";
 
-const MENU_STYLE: Phaser.Types.GameObjects.Text.TextStyle = {
-  fontFamily: "Noto Sans KR, Malgun Gothic, Apple SD Gothic Neo, Trebuchet MS, sans-serif",
-  fontSize: "26px",
-  color: "#eef4df",
-};
-
-const AI_DIFFICULTIES = ["easy", "normal", "hard"] as const satisfies readonly SkirmishAiDifficulty[];
+const AI_DIFFICULTIES = [
+  "easy",
+  "normal",
+  "hard",
+] as const satisfies readonly SkirmishAiDifficulty[];
 const DUEL_PLAYER_IDS = ["local-player", "cpu-1"] as const;
 const DUEL_AI_PLAYER_IDS = ["cpu-1"] as const;
 const FOUR_PLAYER_IDS = ["local-player", "cpu-1", "cpu-2", "cpu-3"] as const;
 const FOUR_AI_PLAYER_IDS = ["cpu-1", "cpu-2", "cpu-3"] as const;
 const AI_DIFFICULTY_STORAGE_KEY = "isorts.menu.aiDifficulty";
 const LAST_RANDOM_SKIRMISH_STORAGE_KEY = "isorts.menu.lastRandomSkirmish";
+
+const MAIN_MENU_ASSETS = {
+  landing: {
+    key: "main-menu:landing",
+    url: "/assets/themes/default/ui/main-menu/title/title_0000.png",
+  },
+  menuBorder: {
+    key: "main-menu:menu-border",
+    url: "/assets/themes/default/ui/main-menu/game-menu-border/gamemenuborder_0000.png",
+  },
+  menuButton: {
+    key: "main-menu:menu-button",
+    url: "/assets/themes/default/ui/main-menu/game-menu-buttons/gamemenubutton_0000.png",
+  },
+  nationButton: {
+    key: "main-menu:nation-button",
+    url: "/assets/themes/default/ui/main-menu/nation-buttons/NationButtons_0000.png",
+  },
+  stageBorder: {
+    key: "main-menu:stage-border",
+    url: "/assets/themes/default/ui/main-menu/stage-border/selectstageborder_0000.png",
+  },
+  stage: {
+    key: "main-menu:stage",
+    url: "/assets/themes/default/ui/main-menu/stage/title/titlestartstage_0000.png",
+  },
+  korea: {
+    key: "main-menu:stage-korea",
+    url: "/assets/themes/default/ui/main-menu/stage/korea/titlestartstagekorea_0000.png",
+  },
+  selectBox: {
+    key: "main-menu:select-box",
+    url: "/assets/themes/default/ui/main-menu/stage/select-box/selectbox_0000.png",
+  },
+} as const;
 
 interface LastRandomSkirmishConfig {
   mode: "duel" | "four-player";
@@ -66,150 +111,513 @@ interface LastRandomSkirmishConfig {
   savedAt?: string;
 }
 
-type MainMenuMode = "main" | "campaign-country" | "campaign-stage";
-
-interface MenuOption {
+interface SourceMenuEntry {
   label: string;
-  action: () => void;
+  action: MainMenuAction;
   enabled?: boolean;
 }
 
-function createVsCpuTeams(playerIds: readonly string[]): Record<string, string> {
-  const teams: Record<string, string> = {};
-
-  playerIds.forEach((playerId, index) => {
-    teams[playerId] = index === 0 ? "local" : "cpu";
-  });
-
-  return teams;
+function createVsCpuTeams(
+  playerIds: readonly string[],
+): Record<string, string> {
+  return Object.fromEntries(
+    playerIds.map((playerId, index) => [
+      playerId,
+      index === 0 ? "local" : "cpu",
+    ]),
+  );
 }
 
+/**
+ * A 640×480 source-art presentation layered in a RESIZE Phaser scene.  The
+ * pointer rectangles are intentionally project adaptation geometry; source
+ * sprites are preserved without stretching and are always centered in the
+ * browser viewport.
+ */
 export class MainMenuScene extends Phaser.Scene {
   private aiDifficulty: SkirmishAiDifficulty = "normal";
-  private aiDifficultyText: Phaser.GameObjects.Text | null = null;
-  private gameSpeedPreferenceText: Phaser.GameObjects.Text | null = null;
   private gameplayPreferences: GameplayPreferences = readGameplayPreferences();
+  private keyboardHandlers = new Map<string, () => void>();
   private menuContainer: Phaser.GameObjects.Container | null = null;
-  private menuMode: MainMenuMode = "main";
-  private mouseControlModeText: Phaser.GameObjects.Text | null = null;
+  private menuMode: MainMenuScreen = "main";
 
   constructor() {
     super("main-menu");
   }
 
+  preload(): void {
+    preloadMainMenuAudio(this);
+    for (const asset of Object.values(MAIN_MENU_ASSETS)) {
+      if (!this.textures.exists(asset.key)) {
+        this.load.image(asset.key, asset.url);
+      }
+    }
+  }
+
   create(): void {
     this.aiDifficulty = this.readAiDifficultyPreference();
     this.gameplayPreferences = readGameplayPreferences();
-    this.cameras.main.setBackgroundColor("#0e1b1e");
+    this.cameras.main.setBackgroundColor("#090705");
     this.drawMenu();
+    startMainMenuBackgroundMusic(this);
 
-    this.input.keyboard?.on("keydown-ONE", this.handleOptionOneHotkey, this);
-    this.input.keyboard?.on("keydown-TWO", this.handleOptionTwoHotkey, this);
-    this.input.keyboard?.on("keydown-THREE", this.handleOptionThreeHotkey, this);
-    this.input.keyboard?.on("keydown-FOUR", this.handleOptionFourHotkey, this);
-    this.input.keyboard?.on("keydown-FIVE", this.handleOptionFiveHotkey, this);
-    this.input.keyboard?.on("keydown-SIX", this.handleOptionSixHotkey, this);
-    this.input.keyboard?.on("keydown-SEVEN", this.handleOptionSevenHotkey, this);
-    this.input.keyboard?.on("keydown-ESC", this.handleBackHotkey, this);
-    this.input.keyboard?.on("keydown-D", this.cycleAiDifficulty, this);
-    this.input.keyboard?.on("keydown-G", this.cycleGameSpeedPreference, this);
-    this.input.keyboard?.on("keydown-M", this.cycleMouseControlModePreference, this);
+    for (const key of [
+      "ONE",
+      "TWO",
+      "THREE",
+      "FOUR",
+      "FIVE",
+      "SIX",
+      "SEVEN",
+      "ESC",
+    ] as const) {
+      this.bindKeyboard(key, () => this.handleKeyboardAction(key));
+    }
+    this.bindKeyboard("D", () => this.cycleAiDifficulty());
+    this.bindKeyboard("G", () => this.cycleGameSpeedPreference());
+    this.bindKeyboard("M", () => this.cycleMouseControlModePreference());
     this.scale.on(Phaser.Scale.Events.RESIZE, this.handleResize, this);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, this.handleShutdown, this);
   }
 
   private drawMenu(): void {
-    const { width, height } = this.scale;
-
+    const layout = resolveMainMenuCanvasLayout(
+      this.scale.width,
+      this.scale.height,
+    );
     this.menuContainer?.destroy(true);
-    this.menuContainer = this.add.container(0, 0);
-    this.aiDifficultyText = null;
-    this.gameSpeedPreferenceText = null;
-    this.mouseControlModeText = null;
-
-    const titleY = Math.max(62, height * 0.14);
-    const baseMenuTop = Math.max(180, Math.min(titleY + 116, height * 0.33));
-    const menuTop = this.menuMode === "main" ? getMainMenuTop(height, titleY) : baseMenuTop;
-    const menuStyle: Phaser.Types.GameObjects.Text.TextStyle = {
-      ...MENU_STYLE,
-      fontSize: `${Phaser.Math.Clamp(Math.floor(width / 38), 20, 26)}px`,
-    };
-
-    this.menuContainer.add(
-      this.add
-      .text(width / 2, 100, "isorts", {
-        fontFamily: "Georgia, Times New Roman, serif",
-        fontSize: "56px",
-        color: "#f7f0d6",
-      })
-      .setOrigin(0.5)
-      .setPosition(width / 2, titleY),
-    );
-
-    this.menuContainer.add(
-      this.add.text(width / 2, titleY + 52, "임진록 2 웹 포팅", {
-        fontFamily: "Noto Sans KR, Malgun Gothic, Apple SD Gothic Neo, Trebuchet MS, sans-serif",
-        fontSize: "18px",
-        color: "#a8c3b0",
-      })
-      .setOrigin(0.5),
-    );
-
-    if (this.menuMode === "main") {
-      this.drawGameplayPreferenceControls(width / 2, getMainMenuPreferenceControlsLayout(titleY));
-    }
+    this.menuContainer = this.add
+      .container(layout.offsetX, layout.offsetY)
+      .setScale(layout.scale);
 
     switch (this.menuMode) {
       case "campaign-country":
-        this.drawCampaignCountryMenu(width, height, menuTop, menuStyle);
+        this.drawCampaignCountryMenu();
         return;
       case "campaign-stage":
-        this.drawCampaignStageMenu(width, height, menuTop, menuStyle);
+        this.drawCampaignStageMenu();
+        return;
+      case "random":
+        this.drawRandomMenu();
+        return;
+      case "preferences":
+        this.drawPreferencesMenu();
         return;
       case "main":
       default:
-        break;
+        this.drawMainMenu();
+    }
+  }
+
+  private drawMainMenu(): void {
+    this.addSourceScreen(
+      MAIN_MENU_ASSETS.landing,
+      "임진록 2\n원본 메인 화면 자산을 불러오지 못했습니다.",
+    );
+    const latestSave = this.readLatestQuickSavePayload();
+
+    this.addSourceAction(
+      MAIN_MENU_PROJECT_ADAPTATION_HIT_RECTS.main.scenario,
+      () => this.executeAction("show-campaign-country"),
+    );
+    this.addSourceAction(
+      MAIN_MENU_PROJECT_ADAPTATION_HIT_RECTS.main.load,
+      () => this.executeAction("load-latest-save"),
+      latestSave !== null,
+    );
+    this.addSourceAction(
+      MAIN_MENU_PROJECT_ADAPTATION_HIT_RECTS.main.preferences,
+      () => this.executeAction("show-preferences"),
+    );
+    this.addSourceAction(
+      MAIN_MENU_PROJECT_ADAPTATION_HIT_RECTS.main.random,
+      () => this.executeAction("show-random"),
+    );
+
+    if (!latestSave) {
+      this.addDisabledOverlay(
+        MAIN_MENU_PROJECT_ADAPTATION_HIT_RECTS.main.load,
+        "저장 없음",
+      );
+    }
+    this.addDisabledOverlay(
+      { x: 12, y: 408, width: 118, height: 62 },
+      "웹판 미지원",
+    );
+  }
+
+  private drawCampaignCountryMenu(): void {
+    this.addSourceScreen(
+      MAIN_MENU_ASSETS.stage,
+      "국가 선택\n원본 배경 자산을 불러오지 못했습니다.",
+    );
+    this.addText(108, 84, "나라 선택", {
+      fontSize: "19px",
+      color: "#3b2619",
+    }).setOrigin(0.5);
+    const countryEntries: readonly SourceMenuEntry[] = [
+      { label: "조선 (朝鮮)", action: "show-campaign-stage" },
+      { label: "일본 (日本)  ·  자료 미구현", action: "back", enabled: false },
+      { label: "명 (明)  ·  자료 미구현", action: "back", enabled: false },
+      { label: "돌아가기", action: "back" },
+    ];
+    const { country } = MAIN_MENU_PROJECT_ADAPTATION_HIT_RECTS;
+
+    countryEntries.forEach((entry, index) => {
+      const rect =
+        index === 3
+          ? country.back
+          : { ...country.korea, y: country.korea.y + index * 52 };
+      this.addNationEntry(rect, entry);
+    });
+  }
+
+  private drawCampaignStageMenu(): void {
+    this.addSourceScreen(
+      MAIN_MENU_ASSETS.korea,
+      "조선 시나리오\n원본 배경 자산을 불러오지 못했습니다.",
+    );
+    this.addStageBorder();
+    const progress = this.readCampaignProgress();
+    const scenarios = [imjinrokK01Scenario, imjinrokK02Scenario] as const;
+
+    for (let index = 0; index < 8; index += 1) {
+      const scenario = scenarios[index];
+      const unlocked = scenario
+        ? isCampaignScenarioUnlocked(
+            imjinrokCampaignScenarios,
+            progress,
+            scenario.id,
+          )
+        : false;
+      const label = scenario
+        ? this.getCampaignStageLabel(index + 1, scenario, progress, unlocked)
+        : `${index + 1}. 자료 미구현`;
+      const enabled = Boolean(scenario && unlocked);
+      const rect = this.getStageSlotRect(index);
+
+      if (enabled) {
+        this.addSourceAction(rect, () =>
+          this.executeAction(index === 0 ? "launch-k01" : "launch-k02"),
+        );
+        this.addSourceImage(
+          MAIN_MENU_ASSETS.selectBox,
+          rect.x + 3,
+          rect.y - 1,
+          0.7,
+        );
+      }
+      this.addText(rect.x + 39, rect.y + 14, label, {
+        fontSize: "12px",
+        color: enabled ? "#382319" : "#76695a",
+      })
+        .setOrigin(0, 0.5)
+        .setAlpha(enabled ? 1 : 0.72);
     }
 
-    const campaignProgress = this.readCampaignProgress();
-    const continueScenario = getCampaignContinueScenario(imjinrokCampaignScenarios, campaignProgress);
-    const campaignComplete = isCampaignComplete(imjinrokCampaignScenarios, campaignProgress);
-    const latestSave = this.readLatestQuickSavePayload();
-    const latestRandom = this.readLastRandomSkirmishConfig();
-    const options: MenuOption[] = [
-      { label: `1. 저장 게임 계속 - ${latestSave ? this.getQuickSaveMenuLabel(latestSave) : "저장 없음"}`, action: () => void this.startSavedGame(latestSave), enabled: latestSave !== null },
-      { label: "2. 시나리오", action: () => this.showCampaignCountryMenu(), enabled: true },
-      {
-        label: campaignComplete
-          ? "3. 캠페인 계속 - 완료됨"
-          : `3. 캠페인 계속 - ${continueScenario?.name ?? imjinrokK01Scenario.name}`,
-        action: () => this.handleContinueCampaignAction(),
-        enabled: true,
-      },
-      { label: "4. 임의 지도 1v1 CPU전", action: () => void this.startRandomSingleplayer(), enabled: true },
-      { label: "5. 임의 지도 4인 CPU전", action: () => void this.startRandomFourPlayerSkirmish(), enabled: true },
-      { label: "6. 원본 4인 전장 CPU전", action: () => void this.startCpuSkirmish(), enabled: true },
-      { label: `7. 최근 임의 지도 다시 - ${latestRandom ? this.getLastRandomSkirmishMenuLabel(latestRandom) : "기록 없음"}`, action: () => void this.startLastRandomSkirmish(), enabled: latestRandom !== null },
-    ];
-
-    const menuStepY = this.addMenuOptions(options, width / 2, menuTop, height, menuStyle);
-
-    this.aiDifficultyText = this.add
-      .text(width / 2, menuTop + options.length * menuStepY, this.getAiDifficultyMenuLabel(), menuStyle)
-      .setOrigin(0.5)
-      .setInteractive({ useHandCursor: true })
-      .on("pointerup", () => this.cycleAiDifficulty());
-    this.menuContainer.add(this.aiDifficultyText);
-
-    this.menuContainer.add(
-      this.add.text(width / 2, height - 54, "싱글플레이 빌드", {
-        fontFamily: "Noto Sans KR, Malgun Gothic, Apple SD Gothic Neo, Trebuchet MS, sans-serif",
-        fontSize: "12px",
-        color: "#8fb4a2",
-        align: "center",
-      })
-      .setOrigin(0.5),
+    this.addPanelTextButton(
+      MAIN_MENU_PROJECT_ADAPTATION_HIT_RECTS.stage.back,
+      "돌아가기",
+      "back",
     );
+  }
+
+  private drawRandomMenu(): void {
+    this.addSourceScreen(
+      MAIN_MENU_ASSETS.landing,
+      "임의게임\n원본 메뉴 자산을 불러오지 못했습니다.",
+    );
+    this.addRightPanel("임의게임", [
+      { label: "1. 임의 지도 1v1 CPU전", action: "start-random-duel" },
+      { label: "2. 임의 지도 4인 CPU전", action: "start-random-four-player" },
+      { label: "3. 원본 4인 전장 CPU전", action: "start-cpu-skirmish" },
+      {
+        label: `4. 최근 임의 지도${this.readLastRandomSkirmishConfig() ? " 다시 시작" : " · 기록 없음"}`,
+        action: "start-last-random",
+        enabled: this.readLastRandomSkirmishConfig() !== null,
+      },
+    ]);
+  }
+
+  private drawPreferencesMenu(): void {
+    this.addSourceScreen(
+      MAIN_MENU_ASSETS.landing,
+      "환경 설정\n원본 메뉴 자산을 불러오지 못했습니다.",
+    );
+    this.addRightPanel("환경 설정", [
+      {
+        label: `1. 게임 속도 · ${this.getGameSpeedPreferenceName(this.gameplayPreferences.gameSpeed)}`,
+        action: "cycle-game-speed",
+      },
+      {
+        label: `2. 마우스 · ${this.gameplayPreferences.mouseControlMode === "one-button" ? "원버튼" : "투버튼"}`,
+        action: "cycle-mouse-mode",
+      },
+      {
+        label: `3. CPU 난이도 · ${this.getAiDifficultyLabel(this.aiDifficulty)}`,
+        action: "cycle-ai-difficulty",
+      },
+    ]);
+    this.addText(536, 350, "G · M · D 단축키로도 변경할 수 있습니다.", {
+      fontSize: "10px",
+      color: "#554133",
+      align: "center",
+      wordWrap: { width: 140 },
+    }).setOrigin(0.5, 0);
+  }
+
+  private addRightPanel(
+    title: string,
+    entries: readonly SourceMenuEntry[],
+  ): void {
+    this.addSourceImage(MAIN_MENU_ASSETS.menuBorder, 452, 86);
+    this.addText(538, 103, title, {
+      fontSize: "18px",
+      color: "#3d261a",
+    }).setOrigin(0.5);
+    entries.forEach((entry, index) => {
+      const rect = this.getPanelRowRect(index);
+      this.addPanelTextButton(
+        rect,
+        entry.label,
+        entry.action,
+        entry.enabled !== false,
+      );
+    });
+    this.addPanelTextButton(
+      MAIN_MENU_PROJECT_ADAPTATION_HIT_RECTS.panel.back,
+      "돌아가기",
+      "back",
+    );
+  }
+
+  private addPanelTextButton(
+    rect: MainMenuSourceRect,
+    label: string,
+    action: MainMenuAction,
+    enabled = true,
+  ): void {
+    this.addSourceImage(MAIN_MENU_ASSETS.menuButton, rect.x + 5, rect.y);
+    const text = this.addText(
+      rect.x + rect.width / 2,
+      rect.y + rect.height / 2,
+      label,
+      {
+        fontSize: "11px",
+        color: enabled ? "#3c281b" : "#786a5a",
+        align: "center",
+        wordWrap: { width: rect.width - 14 },
+      },
+    )
+      .setOrigin(0.5)
+      .setAlpha(enabled ? 1 : 0.68);
+
+    if (enabled) {
+      this.addSourceAction(rect, () => this.executeAction(action));
+    }
+  }
+
+  private addNationEntry(
+    rect: MainMenuSourceRect,
+    entry: SourceMenuEntry,
+  ): void {
+    const button = this.addSourceImage(
+      MAIN_MENU_ASSETS.nationButton,
+      rect.x,
+      rect.y + 6,
+    );
+    button?.setAlpha(entry.enabled === false ? 0.46 : 1);
+    const text = this.addText(
+      rect.x + 34,
+      rect.y + rect.height / 2,
+      entry.label,
+      {
+        fontSize: "14px",
+        color: entry.enabled === false ? "#786a5a" : "#39261c",
+      },
+    )
+      .setOrigin(0, 0.5)
+      .setAlpha(entry.enabled === false ? 0.6 : 1);
+
+    if (entry.enabled !== false) {
+      this.addSourceAction(rect, () => this.executeAction(entry.action));
+    }
+  }
+
+  private addStageBorder(): void {
+    const { border } = MAIN_MENU_PROJECT_ADAPTATION_HIT_RECTS.stage;
+    this.addSourceImage(MAIN_MENU_ASSETS.stageBorder, border.x, border.y);
+  }
+
+  private addSourceScreen(
+    asset: (typeof MAIN_MENU_ASSETS)[keyof typeof MAIN_MENU_ASSETS],
+    fallbackText: string,
+  ): void {
+    if (this.textures.exists(asset.key)) {
+      this.addSourceImage(asset, 0, 0)?.setOrigin(0, 0);
+      return;
+    }
+
+    const fallback = this.add
+      .graphics()
+      .fillStyle(0x17110a, 1)
+      .fillRect(0, 0, 640, 480)
+      .lineStyle(2, 0xa48a50, 1)
+      .strokeRect(12, 12, 616, 456);
+    this.menuContainer?.add(fallback);
+    this.addText(320, 240, fallbackText, {
+      fontSize: "18px",
+      color: "#e6d6ae",
+      align: "center",
+    }).setOrigin(0.5);
+  }
+
+  private addSourceImage(
+    asset: (typeof MAIN_MENU_ASSETS)[keyof typeof MAIN_MENU_ASSETS],
+    x: number,
+    y: number,
+    alpha = 1,
+  ): Phaser.GameObjects.Image | null {
+    if (!this.textures.exists(asset.key)) {
+      return null;
+    }
+
+    const image = this.add
+      .image(x, y, asset.key)
+      .setOrigin(0, 0)
+      .setAlpha(alpha);
+    this.menuContainer?.add(image);
+    return image;
+  }
+
+  private addText(
+    x: number,
+    y: number,
+    text: string,
+    style: Phaser.Types.GameObjects.Text.TextStyle,
+  ): Phaser.GameObjects.Text {
+    const label = this.add.text(x, y, text, {
+      fontFamily: "Batang, AppleMyungjo, Nanum Myeongjo, serif",
+      stroke: "#e5dcbf",
+      strokeThickness: 0.4,
+      ...style,
+    });
+    this.menuContainer?.add(label);
+    return label;
+  }
+
+  private addSourceAction(
+    rect: MainMenuSourceRect,
+    action: () => void,
+    enabled = true,
+  ): void {
+    if (!enabled) {
+      return;
+    }
+    const zone = this.add
+      .zone(rect.x, rect.y, rect.width, rect.height)
+      .setOrigin(0, 0)
+      .setInteractive({ useHandCursor: true });
+    zone.on("pointerup", action);
+    this.menuContainer?.add(zone);
+  }
+
+  private addDisabledOverlay(rect: MainMenuSourceRect, label: string): void {
+    const graphics = this.add
+      .graphics()
+      .fillStyle(0x120d08, 0.9)
+      .fillRect(rect.x, rect.y, rect.width, rect.height);
+    this.menuContainer?.add(graphics);
+    this.addText(rect.x + rect.width / 2, rect.y + rect.height / 2, label, {
+      fontSize: "13px",
+      color: "#b9ab91",
+    }).setOrigin(0.5);
+  }
+
+  private handleKeyboardAction(key: string): void {
+    const action = resolveMainMenuKeyboardAction(
+      this.menuMode,
+      key,
+      this.getActionAvailability(),
+    );
+    if (action) {
+      this.executeAction(action);
+    }
+  }
+
+  private executeAction(action: MainMenuAction): void {
+    playMainMenuAudioCue(
+      this,
+      action === "show-campaign-stage"
+        ? MAIN_MENU_COUNTRY_SELECT_AUDIO_CUE_KEY
+        : MAIN_MENU_BUTTON_AUDIO_CUE_KEY,
+    );
+    switch (action) {
+      case "show-campaign-country":
+        this.menuMode = "campaign-country";
+        this.drawMenu();
+        return;
+      case "show-campaign-stage":
+        this.menuMode = "campaign-stage";
+        this.drawMenu();
+        return;
+      case "show-random":
+        this.menuMode = "random";
+        this.drawMenu();
+        return;
+      case "show-preferences":
+        this.menuMode = "preferences";
+        this.drawMenu();
+        return;
+      case "load-latest-save":
+        this.startSavedGame(this.readLatestQuickSavePayload());
+        return;
+      case "launch-k01":
+        this.startCampaignScenario(imjinrokK01Scenario);
+        return;
+      case "launch-k02":
+        if (this.getActionAvailability().isK02Unlocked) {
+          this.startCampaignScenario(imjinrokK02Scenario);
+        }
+        return;
+      case "start-random-duel":
+        this.startRandomSingleplayer();
+        return;
+      case "start-random-four-player":
+        this.startRandomFourPlayerSkirmish();
+        return;
+      case "start-cpu-skirmish":
+        this.startCpuSkirmish();
+        return;
+      case "start-last-random":
+        this.startLastRandomSkirmish();
+        return;
+      case "cycle-ai-difficulty":
+        this.cycleAiDifficulty();
+        return;
+      case "cycle-game-speed":
+        this.cycleGameSpeedPreference();
+        return;
+      case "cycle-mouse-mode":
+        this.cycleMouseControlModePreference();
+        return;
+      case "back":
+        this.menuMode =
+          this.menuMode === "campaign-stage" ? "campaign-country" : "main";
+        this.drawMenu();
+    }
+  }
+
+  private getActionAvailability(): MainMenuActionAvailability {
+    return {
+      hasQuickSave: this.readLatestQuickSavePayload() !== null,
+      isK02Unlocked: isCampaignScenarioUnlocked(
+        imjinrokCampaignScenarios,
+        this.readCampaignProgress(),
+        imjinrokK02Scenario.id,
+      ),
+      hasLastRandom: this.readLastRandomSkirmishConfig() !== null,
+    };
   }
 
   private handleResize(): void {
@@ -217,249 +625,44 @@ export class MainMenuScene extends Phaser.Scene {
   }
 
   private handleShutdown(): void {
-    this.input.keyboard?.off("keydown-ONE", this.handleOptionOneHotkey, this);
-    this.input.keyboard?.off("keydown-TWO", this.handleOptionTwoHotkey, this);
-    this.input.keyboard?.off("keydown-THREE", this.handleOptionThreeHotkey, this);
-    this.input.keyboard?.off("keydown-FOUR", this.handleOptionFourHotkey, this);
-    this.input.keyboard?.off("keydown-FIVE", this.handleOptionFiveHotkey, this);
-    this.input.keyboard?.off("keydown-SIX", this.handleOptionSixHotkey, this);
-    this.input.keyboard?.off("keydown-SEVEN", this.handleOptionSevenHotkey, this);
-    this.input.keyboard?.off("keydown-ESC", this.handleBackHotkey, this);
-    this.input.keyboard?.off("keydown-D", this.cycleAiDifficulty, this);
-    this.input.keyboard?.off("keydown-G", this.cycleGameSpeedPreference, this);
-    this.input.keyboard?.off("keydown-M", this.cycleMouseControlModePreference, this);
+    for (const [key, listener] of this.keyboardHandlers) {
+      this.input.keyboard?.off(`keydown-${key}`, listener);
+    }
+    this.keyboardHandlers.clear();
     this.scale.off(Phaser.Scale.Events.RESIZE, this.handleResize, this);
+    stopMainMenuBackgroundMusic(this);
     this.menuContainer?.destroy(true);
     this.menuContainer = null;
-    this.aiDifficultyText = null;
-    this.gameSpeedPreferenceText = null;
-    this.mouseControlModeText = null;
   }
 
-  private drawCampaignCountryMenu(
-    width: number,
-    height: number,
-    menuTop: number,
-    menuStyle: Phaser.Types.GameObjects.Text.TextStyle,
-  ): void {
-    this.menuContainer?.add(
-      this.add.text(width / 2, menuTop - 48, "나라를 선택하시오", {
-        ...menuStyle,
-        fontSize: "22px",
-        color: "#d0b46a",
-      }).setOrigin(0.5),
-    );
-
-    this.addMenuOptions(
-      [
-        { label: "1. 조선 (朝鮮)", action: () => this.showCampaignStageMenu(), enabled: true },
-        { label: "2. 일본 (日本)", action: () => undefined, enabled: false },
-        { label: "3. 명 (明)", action: () => undefined, enabled: false },
-        { label: "4. 돌아가기", action: () => this.showMainMenu(), enabled: true },
-      ],
-      width / 2,
-      menuTop + 8,
-      height,
-      menuStyle,
-    );
+  private getStageSlotRect(index: number): MainMenuSourceRect {
+    const { stage } = MAIN_MENU_PROJECT_ADAPTATION_HIT_RECTS;
+    return { ...stage.slot, y: stage.firstSlotY + index * stage.slotHeight };
   }
 
-  private drawCampaignStageMenu(
-    width: number,
-    height: number,
-    menuTop: number,
-    menuStyle: Phaser.Types.GameObjects.Text.TextStyle,
-  ): void {
-    const campaignProgress = this.readCampaignProgress();
-    const options: MenuOption[] = [
-      ...imjinrokCampaignScenarios.map((scenario, index) => {
-        const unlocked = isCampaignScenarioUnlocked(imjinrokCampaignScenarios, campaignProgress, scenario.id);
-
-        return {
-          label: this.getCampaignStageMenuLabel(index + 1, scenario, campaignProgress, unlocked),
-          action: () => void this.startCampaignScenario(scenario),
-          enabled: unlocked,
-        };
-      }),
-      { label: `${imjinrokCampaignScenarios.length + 1}. 돌아가기`, action: () => this.showCampaignCountryMenu(), enabled: true },
-    ];
-
-    this.menuContainer?.add(
-      this.add.text(width / 2, menuTop - 48, "조선 (朝鮮)", {
-        ...menuStyle,
-        fontSize: "22px",
-        color: "#d0b46a",
-      }).setOrigin(0.5),
-    );
-    this.addMenuOptions(options, width / 2, menuTop + 8, height, menuStyle);
+  private bindKeyboard(key: string, listener: () => void): void {
+    this.keyboardHandlers.set(key, listener);
+    this.input.keyboard?.on(`keydown-${key}`, listener);
   }
 
-  private addMenuOptions(
-    options: readonly MenuOption[],
-    x: number,
-    y: number,
-    height: number,
-    menuStyle: Phaser.Types.GameObjects.Text.TextStyle,
-  ): number {
-    const menuStepY = getMenuOptionStepY(height, y, options.length);
-
-    options.forEach((option, index) => {
-      const text = this.add
-        .text(x, y + index * menuStepY, option.label, menuStyle)
-        .setOrigin(0.5);
-
-      if (option.enabled !== false) {
-        text.setInteractive({ useHandCursor: true }).on("pointerup", option.action);
-      } else {
-        text.setColor("#6f9180").setAlpha(0.58);
-      }
-      this.menuContainer?.add(text);
-    });
-
-    return menuStepY;
-  }
-
-  private handleOptionOneHotkey(): void {
-    switch (this.menuMode) {
-      case "campaign-country":
-        this.showCampaignStageMenu();
-        return;
-      case "campaign-stage":
-        this.startCampaignMissionK01();
-        return;
-      case "main":
-      default:
-        this.startSavedGame(this.readLatestQuickSavePayload());
-    }
-  }
-
-  private handleOptionTwoHotkey(): void {
-    switch (this.menuMode) {
-      case "campaign-stage":
-        this.startCampaignMissionK02();
-        return;
-      case "main":
-        this.showCampaignCountryMenu();
-        return;
-      case "campaign-country":
-      default:
-        return;
-    }
-  }
-
-  private handleOptionThreeHotkey(): void {
-    switch (this.menuMode) {
-      case "campaign-stage":
-        this.showCampaignCountryMenu();
-        return;
-      case "main":
-        this.handleContinueCampaignAction();
-        return;
-      case "campaign-country":
-      default:
-        return;
-    }
-  }
-
-  private handleOptionFourHotkey(): void {
-    switch (this.menuMode) {
-      case "campaign-country":
-        this.showMainMenu();
-        return;
-      case "main":
-        this.startRandomSingleplayer();
-        return;
-      case "campaign-stage":
-      default:
-        return;
-    }
-  }
-
-  private handleOptionFiveHotkey(): void {
-    if (this.menuMode === "main") {
-      this.startRandomFourPlayerSkirmish();
-    }
-  }
-
-  private handleOptionSixHotkey(): void {
-    if (this.menuMode === "main") {
-      this.startCpuSkirmish();
-    }
-  }
-
-  private handleOptionSevenHotkey(): void {
-    if (this.menuMode === "main") {
-      this.startLastRandomSkirmish();
-    }
-  }
-
-  private handleBackHotkey(): void {
-    switch (this.menuMode) {
-      case "campaign-stage":
-        this.showCampaignCountryMenu();
-        return;
-      case "campaign-country":
-        this.showMainMenu();
-        return;
-      case "main":
-      default:
-        return;
-    }
-  }
-
-  private showMainMenu(): void {
-    this.menuMode = "main";
-    this.drawMenu();
-  }
-
-  private showCampaignCountryMenu(): void {
-    this.menuMode = "campaign-country";
-    this.drawMenu();
-  }
-
-  private showCampaignStageMenu(): void {
-    this.menuMode = "campaign-stage";
-    this.drawMenu();
+  private getPanelRowRect(index: number): MainMenuSourceRect {
+    const { panel } = MAIN_MENU_PROJECT_ADAPTATION_HIT_RECTS;
+    return { ...panel.row, y: panel.firstRowY + index * panel.rowHeight };
   }
 
   private launchGame(context: GameLaunchContext): void {
     launchGameWithPreGameBriefing(this.scene, context);
   }
 
-  private startCampaignMissionK01(): void {
-    this.startCampaignScenario(imjinrokK01Scenario);
-  }
-
-  private startCampaignMissionK02(): void {
-    if (isCampaignScenarioUnlocked(imjinrokCampaignScenarios, this.readCampaignProgress(), imjinrokK02Scenario.id)) {
-      this.startCampaignScenario(imjinrokK02Scenario);
-    }
-  }
-
-  private handleContinueCampaignAction(): void {
-    const campaignProgress = this.readCampaignProgress();
-
-    if (isCampaignComplete(imjinrokCampaignScenarios, campaignProgress)) {
-      this.showCampaignStageMenu();
-      return;
-    }
-
-    this.startCampaignScenario(getCampaignContinueScenario(imjinrokCampaignScenarios, campaignProgress) ?? imjinrokK01Scenario);
-  }
-
   private startSavedGame(payload: QuickSavePayload | null): void {
     const context = payload ? this.createSavedGameLaunchContext(payload) : null;
-
-    if (!context) {
-      return;
+    if (context) {
+      this.launchGame(context);
     }
-
-    this.launchGame(context);
   }
 
   private startCampaignScenario(scenario: ScenarioDefinition): void {
     const map = createImjinrokMapScaffold(scenario.mapId) ?? defaultMap;
-
     this.launchGame(createCampaignMissionLaunchContext(scenario, map));
   }
 
@@ -467,56 +670,72 @@ export class MainMenuScene extends Phaser.Scene {
     const seed = this.createRandomSeed();
     const size = 96;
     const map = createRandomSkirmishMap(seed, size);
-
-    this.writeLastRandomSkirmishConfig({ mode: "duel", seed, size, savedAt: new Date().toISOString() });
-    this.launchGame({
-      entryMode: "singleplayer",
-      connectionMode: "local",
-      scenarioType: "skirmish",
-      session: null,
-      serverOnline: false,
-      mapId: map.id,
-      mapDefinition: map,
-      playerIds: [...DUEL_PLAYER_IDS],
-      playerTeams: createVsCpuTeams(DUEL_PLAYER_IDS),
-      aiPlayerIds: [...DUEL_AI_PLAYER_IDS],
-      aiDifficulty: this.aiDifficulty,
+    this.writeLastRandomSkirmishConfig({
+      mode: "duel",
+      seed,
+      size,
+      savedAt: new Date().toISOString(),
     });
+    this.launchGame(
+      this.createSkirmishLaunchContext(
+        map,
+        DUEL_PLAYER_IDS,
+        DUEL_AI_PLAYER_IDS,
+      ),
+    );
   }
 
   private startRandomFourPlayerSkirmish(): void {
     const seed = this.createRandomSeed();
     const size = 128;
     const map = createRandomSkirmishMap(seed, size);
-
-    this.writeLastRandomSkirmishConfig({ mode: "four-player", seed, size, savedAt: new Date().toISOString() });
-    this.launchGame({
-      entryMode: "singleplayer",
-      connectionMode: "local",
-      scenarioType: "skirmish",
-      session: null,
-      serverOnline: false,
-      mapId: map.id,
-      mapDefinition: map,
-      playerIds: [...FOUR_PLAYER_IDS],
-      playerTeams: createVsCpuTeams(FOUR_PLAYER_IDS),
-      aiPlayerIds: [...FOUR_AI_PLAYER_IDS],
-      aiDifficulty: this.aiDifficulty,
+    this.writeLastRandomSkirmishConfig({
+      mode: "four-player",
+      seed,
+      size,
+      savedAt: new Date().toISOString(),
     });
+    this.launchGame(
+      this.createSkirmishLaunchContext(
+        map,
+        FOUR_PLAYER_IDS,
+        FOUR_AI_PLAYER_IDS,
+      ),
+    );
   }
 
   private startLastRandomSkirmish(): void {
     const config = this.readLastRandomSkirmishConfig();
-
     if (!config) {
       return;
     }
-
     const map = createRandomSkirmishMap(config.seed, config.size);
-    const playerIds = config.mode === "four-player" ? FOUR_PLAYER_IDS : DUEL_PLAYER_IDS;
-    const aiPlayerIds = config.mode === "four-player" ? FOUR_AI_PLAYER_IDS : DUEL_AI_PLAYER_IDS;
+    const playerIds =
+      config.mode === "four-player" ? FOUR_PLAYER_IDS : DUEL_PLAYER_IDS;
+    const aiPlayerIds =
+      config.mode === "four-player" ? FOUR_AI_PLAYER_IDS : DUEL_AI_PLAYER_IDS;
+    this.launchGame(
+      this.createSkirmishLaunchContext(map, playerIds, aiPlayerIds),
+    );
+  }
 
-    this.launchGame({
+  private startCpuSkirmish(): void {
+    const map = createImjinrokMapScaffold("imjinrok-cpu-4p-128") ?? defaultMap;
+    this.launchGame(
+      this.createSkirmishLaunchContext(
+        map,
+        FOUR_PLAYER_IDS,
+        FOUR_AI_PLAYER_IDS,
+      ),
+    );
+  }
+
+  private createSkirmishLaunchContext(
+    map: ReturnType<typeof createRandomSkirmishMap>,
+    playerIds: readonly string[],
+    aiPlayerIds: readonly string[],
+  ): GameLaunchContext {
+    return {
       entryMode: "singleplayer",
       connectionMode: "local",
       scenarioType: "skirmish",
@@ -528,52 +747,17 @@ export class MainMenuScene extends Phaser.Scene {
       playerTeams: createVsCpuTeams(playerIds),
       aiPlayerIds: [...aiPlayerIds],
       aiDifficulty: this.aiDifficulty,
-    });
-  }
-
-  private startCpuSkirmish(): void {
-    const map = createImjinrokMapScaffold("imjinrok-cpu-4p-128") ?? defaultMap;
-
-    this.launchGame({
-      entryMode: "singleplayer",
-      connectionMode: "local",
-      scenarioType: "skirmish",
-      session: null,
-      serverOnline: false,
-      mapId: map.id,
-      mapDefinition: map,
-      playerIds: [...FOUR_PLAYER_IDS],
-      playerTeams: createVsCpuTeams(FOUR_PLAYER_IDS),
-      aiPlayerIds: [...FOUR_AI_PLAYER_IDS],
-      aiDifficulty: this.aiDifficulty,
-    });
+    };
   }
 
   private cycleAiDifficulty(): void {
     const currentIndex = AI_DIFFICULTIES.indexOf(this.aiDifficulty);
-    this.aiDifficulty = AI_DIFFICULTIES[(currentIndex + 1) % AI_DIFFICULTIES.length] ?? "normal";
+    this.aiDifficulty =
+      AI_DIFFICULTIES[(currentIndex + 1) % AI_DIFFICULTIES.length] ?? "normal";
     this.writeAiDifficultyPreference(this.aiDifficulty);
-    this.aiDifficultyText?.setText(this.getAiDifficultyMenuLabel());
-  }
-
-  private drawGameplayPreferenceControls(x: number, layout: { speedY: number; mouseY: number }): void {
-    const style: Phaser.Types.GameObjects.Text.TextStyle = {
-      fontFamily: "Noto Sans KR, Malgun Gothic, Apple SD Gothic Neo, Trebuchet MS, sans-serif",
-      fontSize: "15px",
-      color: "#b7d8c2",
-    };
-
-    this.gameSpeedPreferenceText = this.add
-      .text(x, layout.speedY, this.getGameSpeedPreferenceLabel(), style)
-      .setOrigin(0.5)
-      .setInteractive({ useHandCursor: true })
-      .on("pointerup", () => this.cycleGameSpeedPreference());
-    this.mouseControlModeText = this.add
-      .text(x, layout.mouseY, this.getMouseControlModePreferenceLabel(), style)
-      .setOrigin(0.5)
-      .setInteractive({ useHandCursor: true })
-      .on("pointerup", () => this.cycleMouseControlModePreference());
-    this.menuContainer?.add([this.gameSpeedPreferenceText, this.mouseControlModeText]);
+    if (this.menuMode === "preferences") {
+      this.drawMenu();
+    }
   }
 
   private cycleGameSpeedPreference(): void {
@@ -581,32 +765,41 @@ export class MainMenuScene extends Phaser.Scene {
       ...this.gameplayPreferences,
       gameSpeed: stepGameSpeedPreset(this.gameplayPreferences.gameSpeed, 1),
     };
-    this.persistGameplayPreferences();
-    this.gameSpeedPreferenceText?.setText(this.getGameSpeedPreferenceLabel());
+    writeGameplayPreferences(this.gameplayPreferences);
+    if (this.menuMode === "preferences") {
+      this.drawMenu();
+    }
   }
 
   private cycleMouseControlModePreference(): void {
     this.gameplayPreferences = {
       ...this.gameplayPreferences,
-      mouseControlMode: cycleMouseControlMode(this.gameplayPreferences.mouseControlMode),
+      mouseControlMode: cycleMouseControlMode(
+        this.gameplayPreferences.mouseControlMode,
+      ),
     };
-    this.persistGameplayPreferences();
-    this.mouseControlModeText?.setText(this.getMouseControlModePreferenceLabel());
-  }
-
-  private persistGameplayPreferences(): void {
     writeGameplayPreferences(this.gameplayPreferences);
+    if (this.menuMode === "preferences") {
+      this.drawMenu();
+    }
   }
 
-  private getGameSpeedPreferenceLabel(): string {
-    return `G. 기본 게임 속도: ${this.getGameSpeedPreferenceName(this.gameplayPreferences.gameSpeed)}`;
+  private getCampaignStageLabel(
+    index: number,
+    scenario: ScenarioDefinition,
+    progress: CampaignProgressState,
+    unlocked: boolean,
+  ): string {
+    const displayName = scenario.name.replace(/^\d+\.\s*/, "");
+    if (isCampaignScenarioCompleted(progress, scenario.id)) {
+      return `${index}. ${displayName} · 완료`;
+    }
+    return `${index}. ${displayName}${unlocked ? "" : " · 잠김"}`;
   }
 
-  private getMouseControlModePreferenceLabel(): string {
-    return `M. 마우스 조작: ${this.gameplayPreferences.mouseControlMode === "one-button" ? "원버튼" : "투버튼"}`;
-  }
-
-  private getGameSpeedPreferenceName(speed: GameplayPreferences["gameSpeed"]): string {
+  private getGameSpeedPreferenceName(
+    speed: GameplayPreferences["gameSpeed"],
+  ): string {
     switch (speed) {
       case "slowest":
         return "매우 느림";
@@ -621,28 +814,6 @@ export class MainMenuScene extends Phaser.Scene {
     }
   }
 
-  private readAiDifficultyPreference(): SkirmishAiDifficulty {
-    try {
-      const storedDifficulty = globalThis.localStorage?.getItem(AI_DIFFICULTY_STORAGE_KEY);
-
-      return AI_DIFFICULTIES.find((difficulty) => difficulty === storedDifficulty) ?? "normal";
-    } catch {
-      return "normal";
-    }
-  }
-
-  private writeAiDifficultyPreference(difficulty: SkirmishAiDifficulty): void {
-    try {
-      globalThis.localStorage?.setItem(AI_DIFFICULTY_STORAGE_KEY, difficulty);
-    } catch {
-      // Menu preference is optional; the in-memory difficulty still applies.
-    }
-  }
-
-  private getAiDifficultyMenuLabel(): string {
-    return `CPU 난이도: ${this.getAiDifficultyLabel(this.aiDifficulty)}`;
-  }
-
   private getAiDifficultyLabel(difficulty: SkirmishAiDifficulty): string {
     switch (difficulty) {
       case "easy":
@@ -654,58 +825,59 @@ export class MainMenuScene extends Phaser.Scene {
     }
   }
 
-  private getCampaignStageMenuLabel(
-    index: number,
-    scenario: ScenarioDefinition,
-    progress: CampaignProgressState,
-    unlocked: boolean,
-  ): string {
-    const displayName = scenario.name.replace(/^\d+\.\s*/, "");
-    let status = "";
-
-    if (isCampaignScenarioCompleted(progress, scenario.id)) {
-      status = " [완료]";
-    } else if (!unlocked) {
-      status = " [잠김]";
+  private readAiDifficultyPreference(): SkirmishAiDifficulty {
+    try {
+      const storedDifficulty = globalThis.localStorage?.getItem(
+        AI_DIFFICULTY_STORAGE_KEY,
+      );
+      return (
+        AI_DIFFICULTIES.find((difficulty) => difficulty === storedDifficulty) ??
+        "normal"
+      );
+    } catch {
+      return "normal";
     }
-
-    return `${index}. ${displayName}${status}`;
   }
 
-  private getQuickSaveMenuLabel(payload: QuickSavePayload): string {
-    const scenarioName = payload.launchContext.scenario?.name ?? payload.snapshot.scenario.id;
-
-    return `${scenarioName} / ${this.formatQuickSaveTime(payload.savedAt)}`;
+  private writeAiDifficultyPreference(difficulty: SkirmishAiDifficulty): void {
+    try {
+      globalThis.localStorage?.setItem(AI_DIFFICULTY_STORAGE_KEY, difficulty);
+    } catch {
+      // In-memory preferences remain active when browser storage is unavailable.
+    }
   }
 
-  private getLastRandomSkirmishMenuLabel(config: LastRandomSkirmishConfig): string {
-    const mode = config.mode === "four-player" ? "4인" : "1v1";
-
-    return `${mode} ${config.seed.toString(36).toUpperCase()}`;
-  }
-
-  private createSavedGameLaunchContext(payload: QuickSavePayload): GameLaunchContext | null {
+  private createSavedGameLaunchContext(
+    payload: QuickSavePayload,
+  ): GameLaunchContext | null {
     const snapshot = normalizeSavedWorldSnapshot(payload.snapshot);
-    const controlGroups = payload.controlGroups ? normalizeSerializedControlGroups(payload.controlGroups) : null;
-    const activeMissionDialogue = normalizeOptionalMissionDialogueState(payload.activeMissionDialogue);
-
-    if (!snapshot || activeMissionDialogue === null || (payload.controlGroups !== undefined && !controlGroups)) {
+    const controlGroups = payload.controlGroups
+      ? normalizeSerializedControlGroups(payload.controlGroups)
+      : null;
+    const activeMissionDialogue = normalizeOptionalMissionDialogueState(
+      payload.activeMissionDialogue,
+    );
+    if (
+      !snapshot ||
+      activeMissionDialogue === null ||
+      (payload.controlGroups !== undefined && !controlGroups)
+    ) {
       return null;
     }
-
     const playerIds = Object.keys(snapshot.players);
-    const playerTeams: Record<string, string> = {};
-    const aiPlayerIds = inferQuickSaveAiPlayerIds(snapshot, payload.launchContext.aiPlayerIds);
-
-    for (const [playerId, player] of Object.entries(snapshot.players)) {
-      playerTeams[playerId] = player.teamId ?? playerId;
-    }
-
+    const playerTeams = Object.fromEntries(
+      Object.entries(snapshot.players).map(([id, player]) => [
+        id,
+        player.teamId ?? id,
+      ]),
+    );
     const restartMapDefinition =
       payload.launchContext.mapDefinition ??
-      createMapDefinitionFromId(payload.launchContext.mapId ?? snapshot.map.id, { randomSize: snapshot.map.width }) ??
+      createMapDefinitionFromId(
+        payload.launchContext.mapId ?? snapshot.map.id,
+        { randomSize: snapshot.map.width },
+      ) ??
       snapshot.map;
-
     return {
       ...payload.launchContext,
       entryMode: "singleplayer",
@@ -716,33 +888,47 @@ export class MainMenuScene extends Phaser.Scene {
       mapDefinition: restartMapDefinition,
       playerIds,
       playerTeams,
-      aiPlayerIds,
+      aiPlayerIds: inferQuickSaveAiPlayerIds(
+        snapshot,
+        payload.launchContext.aiPlayerIds,
+      ),
       resumeSnapshot: snapshot,
-      ...(payload.playerVisibility ? { resumePlayerVisibility: payload.playerVisibility } : {}),
+      ...(payload.playerVisibility
+        ? { resumePlayerVisibility: payload.playerVisibility }
+        : {}),
       ...(controlGroups ? { resumeControlGroups: controlGroups } : {}),
-      ...(payload.knownResources ? { resumeKnownResources: payload.knownResources } : {}),
-      ...(activeMissionDialogue ? { resumeMissionDialogue: activeMissionDialogue } : {}),
-      ...(payload.triggeredMissionDialogueIds ? { triggeredMissionDialogueIds: payload.triggeredMissionDialogueIds } : {}),
+      ...(payload.knownResources
+        ? { resumeKnownResources: payload.knownResources }
+        : {}),
+      ...(activeMissionDialogue
+        ? { resumeMissionDialogue: activeMissionDialogue }
+        : {}),
+      ...(payload.triggeredMissionDialogueIds
+        ? { triggeredMissionDialogueIds: payload.triggeredMissionDialogueIds }
+        : {}),
     };
   }
 
   private readLatestQuickSavePayload(): QuickSavePayload | null {
     try {
-      const rawPayload = globalThis.localStorage?.getItem(LATEST_QUICK_SAVE_STORAGE_KEY);
-
+      const rawPayload = globalThis.localStorage?.getItem(
+        LATEST_QUICK_SAVE_STORAGE_KEY,
+      );
       if (!rawPayload) {
         return null;
       }
-
       const payload = JSON.parse(rawPayload) as Partial<QuickSavePayload>;
-      const activeMissionDialogue = normalizeOptionalMissionDialogueState(payload.activeMissionDialogue);
-      const controlGroups = payload.controlGroups === undefined
-        ? undefined
-        : normalizeSerializedControlGroups(payload.controlGroups);
-      const knownResources = payload.knownResources === undefined
-        ? undefined
-        : normalizeSerializedKnownResources(payload.knownResources);
-
+      const activeMissionDialogue = normalizeOptionalMissionDialogueState(
+        payload.activeMissionDialogue,
+      );
+      const controlGroups =
+        payload.controlGroups === undefined
+          ? undefined
+          : normalizeSerializedControlGroups(payload.controlGroups);
+      const knownResources =
+        payload.knownResources === undefined
+          ? undefined
+          : normalizeSerializedKnownResources(payload.knownResources);
       if (
         !isSupportedQuickSaveVersion(payload.version) ||
         typeof payload.contextKey !== "string" ||
@@ -752,12 +938,12 @@ export class MainMenuScene extends Phaser.Scene {
         !isOptionalStringArray(payload.triggeredMissionDialogueIds) ||
         (payload.controlGroups !== undefined && !controlGroups) ||
         (payload.knownResources !== undefined && !knownResources) ||
-        (payload.playerVisibility !== undefined && !deserializePlayerVisibilityState(payload.playerVisibility)) ||
+        (payload.playerVisibility !== undefined &&
+          !deserializePlayerVisibilityState(payload.playerVisibility)) ||
         !normalizeSavedWorldSnapshot(payload.snapshot)
       ) {
         return null;
       }
-
       return {
         ...payload,
         ...(activeMissionDialogue ? { activeMissionDialogue } : {}),
@@ -771,17 +957,21 @@ export class MainMenuScene extends Phaser.Scene {
 
   private readLastRandomSkirmishConfig(): LastRandomSkirmishConfig | null {
     try {
-      const rawConfig = globalThis.localStorage?.getItem(LAST_RANDOM_SKIRMISH_STORAGE_KEY);
-
+      const rawConfig = globalThis.localStorage?.getItem(
+        LAST_RANDOM_SKIRMISH_STORAGE_KEY,
+      );
       if (!rawConfig) {
         return null;
       }
-
       const config = JSON.parse(rawConfig) as Partial<LastRandomSkirmishConfig>;
-      const mode = config.mode === "four-player" ? "four-player" : config.mode === "duel" ? "duel" : null;
+      const mode =
+        config.mode === "four-player"
+          ? "four-player"
+          : config.mode === "duel"
+            ? "duel"
+            : null;
       const seed = config.seed;
       const size = config.size;
-
       if (
         !mode ||
         !Number.isSafeInteger(seed) ||
@@ -791,12 +981,10 @@ export class MainMenuScene extends Phaser.Scene {
         !Number.isSafeInteger(size) ||
         size === undefined ||
         size < 48 ||
-        size > 192 ||
-        (config.savedAt !== undefined && typeof config.savedAt !== "string")
+        size > 192
       ) {
         return null;
       }
-
       return {
         mode,
         seed: seed >>> 0,
@@ -808,34 +996,28 @@ export class MainMenuScene extends Phaser.Scene {
     }
   }
 
-  private writeLastRandomSkirmishConfig(config: LastRandomSkirmishConfig): void {
+  private writeLastRandomSkirmishConfig(
+    config: LastRandomSkirmishConfig,
+  ): void {
     try {
-      globalThis.localStorage?.setItem(LAST_RANDOM_SKIRMISH_STORAGE_KEY, JSON.stringify(config));
+      globalThis.localStorage?.setItem(
+        LAST_RANDOM_SKIRMISH_STORAGE_KEY,
+        JSON.stringify(config),
+      );
     } catch {
-      // Recent random map history is optional; starting the match should not depend on storage.
+      // Starting a local match must not depend on optional browser storage.
     }
-  }
-
-  private formatQuickSaveTime(value: string): string {
-    const date = new Date(value);
-
-    if (Number.isNaN(date.getTime())) {
-      return value;
-    }
-
-    return date.toLocaleString("ko-KR", {
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
   }
 
   private readCampaignProgress(): CampaignProgressState {
     try {
-      const rawProgress = globalThis.localStorage?.getItem(IMJINROK_CAMPAIGN_PROGRESS_STORAGE_KEY);
-
-      return normalizeCampaignProgressState(rawProgress ? JSON.parse(rawProgress) : null, imjinrokCampaignScenarios);
+      const rawProgress = globalThis.localStorage?.getItem(
+        IMJINROK_CAMPAIGN_PROGRESS_STORAGE_KEY,
+      );
+      return normalizeCampaignProgressState(
+        rawProgress ? JSON.parse(rawProgress) : null,
+        imjinrokCampaignScenarios,
+      );
     } catch {
       return normalizeCampaignProgressState(null, imjinrokCampaignScenarios);
     }
@@ -843,7 +1025,6 @@ export class MainMenuScene extends Phaser.Scene {
 
   private createRandomSeed(): number {
     const values = new Uint32Array(1);
-
     globalThis.crypto?.getRandomValues(values);
     return values[0] || Math.floor(this.time.now * 1000);
   }
