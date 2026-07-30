@@ -131,6 +131,29 @@ test("uses the map elevation profile step height for source-art placement and bo
   );
 });
 
+test("keeps base and underlay coverage at the raw tile anchor while an elevation layer meets the sampled plateau surface", () => {
+  const map = createBlankMap();
+  const tile = map.layers[0]?.tiles[0];
+  assert.ok(tile);
+  map.tilesetId = "imjinrok-normal";
+  tile.tilesetVisuals = { flatAssetKey: "grass", underlayAssetKey: "grass", elevationAssetKey: "1" };
+
+  const registry = createContentRegistry();
+  const base = resolveExplicitTileVisual(registry, map, tile, "flat");
+  const underlay = resolveExplicitTileUnderlayVisual(registry, map, tile);
+  const elevation = resolveExplicitTileVisual(registry, map, tile, "elevation");
+  assert.ok(base);
+  assert.ok(underlay);
+  assert.ok(elevation);
+
+  const rawTileAnchor = { x: 120, y: 80 };
+  const plateauSurface = { x: 120, y: 62 };
+  assert.deepEqual(resolveExplicitTileVisualPlacement(base, rawTileAnchor, 64, 32, 0, 18).position, rawTileAnchor);
+  assert.deepEqual(resolveExplicitTileVisualPlacement(underlay, rawTileAnchor, 64, 32, 0, 18).position, rawTileAnchor);
+  assert.deepEqual(resolveExplicitTileVisualPlacement(elevation, rawTileAnchor, 64, 32, 1, 18).position, plateauSurface);
+  assert.deepEqual(resolveExplicitTileVisualPlacement(elevation, plateauSurface, 64, 32, 0, 18).position, plateauSurface);
+});
+
 test("applies finite asset-native offsets consistently to placement and world bounds", () => {
   const map = createBlankMap();
   const tile = map.layers[0]?.tiles[0];
@@ -151,6 +174,10 @@ test("applies finite asset-native offsets consistently to placement and world bo
   assert.throws(
     () => resolveTileImagePlacement({ imageGeometry: descriptor.imageGeometry, sourcePixelOffset: { x: Number.NaN, y: 0 } }, { x: 0, y: 0 }, 64, 32),
     /sourcePixelOffset/,
+  );
+  assert.throws(
+    () => resolveTileImagePlacement({ imageGeometry: descriptor.imageGeometry }, { x: Number.NaN, y: 0 }, 64, 32),
+    /ground-contact coordinates must be finite; received NaN,0/u,
   );
 });
 

@@ -49,5 +49,8 @@ test("profile and surface sampling fail closed for invalid authored data", () =>
   assert.ok(tile);
   tile.elevation = 0.5;
   assert.throws(() => sampleMapSurfaceElevation(map, { x: 0, y: 0 }), /invalid discrete elevation/u);
-  assert.throws(() => sampleMapSurfaceElevation(map, { x: Number.NaN, y: 0 }), /finite/u);
+  assert.throws(
+    () => sampleMapSurfaceElevation(map, { x: Number.NaN, y: 0 }),
+    /Surface elevation coordinates must be finite; received NaN,0/u,
+  );
 });

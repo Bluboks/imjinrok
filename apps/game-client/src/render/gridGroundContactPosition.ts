@@ -11,6 +11,7 @@ export function resolveGridGroundContactWorldPosition(
   mapOrigin: GridPoint,
   map: MapDefinition,
 ): GridPoint {
+  assertFinitePoint(mapOrigin, "Map ground-contact origin");
   const iso = cartToIso(point, map.tileWidth, map.tileHeight);
   const surface = sampleMapSurfaceElevation(map, point);
 
@@ -18,4 +19,10 @@ export function resolveGridGroundContactWorldPosition(
     x: mapOrigin.x + iso.x,
     y: mapOrigin.y + iso.y - surface.liftPixels,
   };
+}
+
+function assertFinitePoint(point: GridPoint, label: string): void {
+  if (!Number.isFinite(point.x) || !Number.isFinite(point.y)) {
+    throw new RangeError(`${label} coordinates must be finite; received ${point.x},${point.y}.`);
+  }
 }

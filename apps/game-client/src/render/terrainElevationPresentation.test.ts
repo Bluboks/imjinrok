@@ -32,6 +32,10 @@ test("ramp and corner overlays use the next shared elevation step above their ce
     () => resolveTerrainElevationOverlayLiftPixels(presentation, "ramp_ne", 0),
     /finite and positive/u,
   );
+  assert.throws(
+    () => resolveTerrainElevationOverlayLiftPixels({ liftPixels: Number.NaN }, "plateauTop", 18),
+    /non-negative finite pixel value; received NaN/u,
+  );
 });
 
 test("adjacent plateau and ramp boundaries share the custom elevation profile step", () => {

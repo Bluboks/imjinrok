@@ -100,7 +100,7 @@ function assertMapSurface(map: MapDefinition): void {
 
 function assertFinitePoint(point: GridPoint): void {
   if (!Number.isFinite(point.x) || !Number.isFinite(point.y)) {
-    throw new TypeError("Surface elevation coordinates must be finite.");
+    throw new RangeError(`Surface elevation coordinates must be finite; received ${point.x},${point.y}.`);
   }
 }
 
