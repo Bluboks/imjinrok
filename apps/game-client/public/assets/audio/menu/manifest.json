@@ -1,0 +1,23 @@
+[
+  {
+    "key": "audio:menu:background-music",
+    "url": "/assets/audio/menu/menumusic.wav",
+    "sourcePath": "music/menumusic.YAV",
+    "sourceSha256": "64b84670dd7d4dccb8160f7fd8a18566b47b06d6a5bdec7d55891147465797d3",
+    "durationMs": 40823.58276643991
+  },
+  {
+    "key": "audio:menu:button",
+    "url": "/assets/audio/menu/titlebutton.wav",
+    "sourcePath": "eft/titlebutton.YAV",
+    "sourceSha256": "ef4b5800f22aeb8e84932c2f57b6c43fed7ef78ddef0e87cd91ad72570d89955",
+    "durationMs": 513.7414965986394
+  },
+  {
+    "key": "audio:menu:country-select",
+    "url": "/assets/audio/menu/selectcountry.wav",
+    "sourcePath": "eft/selectcountry.YAV",
+    "sourceSha256": "4cb6223164c874dc60052c53f3f04dabe89070c45adc8e05b12d1492d8714942",
+    "durationMs": 267.39229024943313
+  }
+]
