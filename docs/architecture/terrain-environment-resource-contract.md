@@ -37,6 +37,13 @@ object/frame의 제한된 경로를 정적 확정했다. `crop0` frame 0→`rice
 `assertValidMapDefinition`은 존재하지 않는 reference, 알려지지 않은 terrain/resource, 음수 elevation,
 잘못된 layer 길이를 오류로 낸다.
 
+`MapDefinition.elevationProfile`은 모드 작성자가 정하는 physical surface sampling 계약이다. `TileCell.elevation`은
+기존처럼 음수가 아닌 **정수** surface level이고, profile을 생략한 map은 `tileHeight / 2` pixel step과 `bilinear`
+sampling을 사용한다. `stepHeight`는 finite positive 값이어야 하고 `sampling`은 `bilinear` 또는 `nearest`여야 한다.
+`sampleMapSurfaceElevation`은 연속 이동 좌표에서 `{ level, liftPixels }`를 반환하며 기본 profile 또는 caller의
+명시적 sampling override를 쓴다. bilinear 결과만 fractional일 수 있으며 authored tile level을 fractional로 만드는
+것은 validation error다. 이는 모딩 가능한 product surface contract이며 original height semantics 주장이 아니다.
+
 `ContentPackDefinition`은 gameplay definition과 독립된 tileset/environment/resource visual registry를
 가질 수 있다. `imjinrok-source-assets` pack은 gameplay terrain/resource/unit을 재선언하지 않는 source
 catalog pack이다. 이를 `isorts-core`와 조합해야 map reference가 resolve된다.
