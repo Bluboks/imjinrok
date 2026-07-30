@@ -8,7 +8,7 @@
 | --- | --- | --- |
 | 분석 | 정적 확정 | `imjin2`·`night1`~`night4` 파일 identity, loader destination, state constructor/advance, palette/event 순서 |
 | 재현 | 재현 완료 | constructor, 540/16 wrap, 모든 schedule event, gate, malformed input·변조 입력 거부 |
-| 구현 | 없음 | 이 문서는 제품 day/night 또는 true-color rendering을 바꾸지 않는다 |
+| 구현 | 부분 이식 | K01만 8,640 admitted-update cycle과 seven palette identity step을 opt-in한다. 한 product simulation tick을 한 admitted update로 취급하는 것은 의도적 calibration이며, renderer는 source-byte-backed overlay adapter다. |
 
 ## 고정 입력과 증거
 
@@ -56,4 +56,17 @@ Palette/event checks happen after that transition work:
 
 `analysis/fixtures/imjinrok-day-night-schedule-vectors.json`은 compact deterministic fixture다. test는 initial state, 540 boundary, phase-16/cycle wrap, 일곱 schedule branch와 operation order, held gate, forced palette branch, malformed synthetic state, tampered EXE, 모든 다섯 tampered palette input, stale references를 검사한다.
 
-이 증거는 raw update calls per wall-clock second, 24 Hz conversion, phase-light flag의 의도된 사람용 이름, sight radius 변화, palette-shader/true-color port, map별 enablement, `FUN_00492630` caller를 확정하지 않는다. 기존 product day/night behavior는 이 질문들이 source-backed scope를 가질 때까지 별도 intentional adaptation으로 유지한다.
+제품의 `imjinrok-k01` scaffold만 `cycleTicks: 8640`, `dayStartTick: 0`, `nightStartTick: 4320` 및
+`night3 → night2 → night1` (tick `0/2/4`), `night1 → night2 → night3 → night4`
+(tick `4320/4322/4324/4326`) visual step을 선택한다. tick `0`의 `night3`는 wrap event의 palette identity이고,
+각 simulation tick을 one admitted update로 대응하는 정책은 원본 wall-clock/24 Hz equivalence 주장이 아닌
+**의도적 calibration**이다. K01은 `nightSightMultiplier`를 설정하지 않으므로 sight는 `1`을 유지한다.
+
+생성된 palette JSON은 source SHA-256과 768개 source RGB6 byte를 포함한다. 웹 renderer는 이 byte에서
+결정론적으로 한 overlay tint/alpha를 계산하는 **source-backed-adaptation**만 수행한다. 이것은 original
+indexed palette update나 true-color LUT/shader 일치가 아니다. 선택된 profile/palette resource가 없거나 SHA/data가
+맞지 않으면 renderer가 명시적으로 실패한다.
+
+이 증거는 raw update calls per wall-clock second, 24 Hz conversion, phase-light flag의 의도된 사람용 이름,
+sight radius 변화, palette-shader/true-color port, 원본 map별 enablement, `FUN_00492630` caller를 확정하지 않는다.
+generic map의 기존 light curve와 fog는 별도 intentional adaptation으로 유지한다.

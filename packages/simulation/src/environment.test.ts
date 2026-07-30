@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { createBlankMap } from "../../shared/src/index.js";
-import { advanceWorldTick, createInitialWorldState, createPlayerVisibility, getEnvironmentLightLevel, getTileVisibility, TileVisibility, toWorldSnapshot, updatePlayerVisibility } from "./index.js";
+import { createBlankMap, createImjinrokMapScaffold } from "../../shared/src/index.js";
+import { advanceWorldTick, createInitialWorldState, createPlayerVisibility, getEnvironmentLightLevel, getEnvironmentSightMultiplier, getTileVisibility, TileVisibility, toWorldSnapshot, updatePlayerVisibility } from "./index.js";
 
 test("initial world defaults to clear day environment", () => {
   const state = createInitialWorldState(createBlankMap(), ["p1"]);
@@ -157,6 +157,19 @@ test("world snapshot includes environment state", () => {
   const snapshot = toWorldSnapshot(state);
 
   assert.deepEqual(snapshot.environment, state.environment);
+});
+
+test("K01 source schedule selects exact palette identities at boundaries and wraps", () => {
+  const map = createImjinrokMapScaffold("imjinrok-k01");
+  assert.ok(map);
+  const state = createInitialWorldState(map, []);
+
+  for (const [tick, paletteId] of [[0, "night3"], [1, "night3"], [2, "night2"], [3, "night2"], [4, "night1"], [4319, "night1"], [4320, "night1"], [4322, "night2"], [4324, "night3"], [4326, "night4"], [8639, "night4"], [8640, "night3"]] as const) {
+    advanceTicks(state, tick - state.tick);
+    assert.equal(state.environment.visualPaletteId, paletteId, `tick ${tick}`);
+  }
+  assert.equal(getEnvironmentSightMultiplier(state.environment, map.environment), 1);
+  assert.deepEqual(toWorldSnapshot(state).environment, state.environment);
 });
 
 test("default visibility keeps full sight without environment preset", () => {

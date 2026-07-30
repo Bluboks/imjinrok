@@ -35,10 +35,16 @@ export interface TilesetDefinition {
 export interface EnvironmentVisualProfile {
   id: string;
   displayName: string;
-  paletteAssets?: readonly VisualAssetRef[];
+  paletteAssets?: readonly PaletteVisualAsset[];
   effectAssets?: readonly VisualAssetRef[];
   evidenceStatus: SourceEvidenceStatus;
   sourceAssets?: readonly SourceAssetCatalogEntry[];
+}
+
+/** Hash-bound palette data consumed by a renderer adapter, not an image frame. */
+export interface PaletteVisualAsset extends VisualAssetRef {
+  id: string;
+  sourceSha256: string;
 }
 
 export type ResourceVisualState = "active" | "depleted";

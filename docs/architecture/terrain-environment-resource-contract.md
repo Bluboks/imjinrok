@@ -10,6 +10,7 @@
 | tileset·자원·환경 source file 존재와 hash | `원본 사실` | fixture의 경로·SHA-256 |
 | representative PNG/palette manifest export | `source-backed project adaptation` | hash가 고정된 frame 0 export; 원본 선택 규칙 아님 |
 | map의 `tilesetId`·visual profile·resource visual set 선택 | `프로젝트 전용` | 명시적 registry 참조와 loud validation |
+| K01 palette step identity | `원본 기반` | bounded 8,640 admitted-update schedule과 `night1`~`night4` identity; product tick calibration은 별도 적응 |
 | light curve와 dawn/day/dusk/night simulation output | `의도적 적응` | opt-in fixed-tick curve |
 | K01 원본 tile source object/frame selector | `원본 사실` | `FUN_00469330`의 K01 normal source object/frame 범위; pixel placement와 terrain 의미는 별도 |
 | K01 exact visual export·map assignment | `source-backed project adaptation` | 243 normal PNG와 K01-only explicit flat asset assignment; web anchor/chunk placement adapter |
@@ -40,11 +41,11 @@ object/frame의 제한된 경로를 정적 확정했다. `crop0` frame 0→`rice
 가질 수 있다. `imjinrok-source-assets` pack은 gameplay terrain/resource/unit을 재선언하지 않는 source
 catalog pack이다. 이를 `isorts-core`와 조합해야 map reference가 resolve된다.
 
-K01/K02 scaffold는 `imjinrok-normal` tileset identity만 선택한다. K01은 source selector가 확정한 3,600개
+K01/K02 scaffold는 `imjinrok-normal` tileset identity를 선택한다. K01은 source selector가 확정한 3,600개
 object/frame stream을 243개 exported normal PNG의 explicit **flat** selection으로 적용한다. 이것은 terrain
 type/passability/elevation을 바꾸지 않으며 `hill`/`diff` filename도 world meaning으로 승격하지 않는다. K02에는
-이 K01-only selection을 적용하지 않는다. source night catalog나 cycle은 K01 map에 적용하지 않는다. K01에 자원
-node를 새로 추가하지 않으며, existing K01 resource tile가 없는 상태도 그대로다.
+이 K01-only selection을 적용하지 않는다. K01의 bounded palette schedule은 아래의 별도 visual-step contract만
+적용하며, K01에 자원 node를 새로 추가하지 않고 existing K01 resource tile가 없는 상태도 그대로다.
 
 ## light curve
 
@@ -56,6 +57,12 @@ palette timing을 추측하지 않는 opt-in project adaptation이다. determini
 기본 `river-crossing` skirmish map은 10 tick/s 기준 6,000 tick(10분) project-authored cycle을 opt-in하며,
 tick 0에서 dawn으로 시작해 600 tick 뒤 day가 된다. K01/K02와 다른 Imjinrok source map에는 원본 일정
 근거가 없으므로 이 cycle을 적용하지 않는다.
+
+K01은 `imjinrok-source-day-night-palette` profile과 generic `visualSteps` contract를 opt-in한다. source fixture가
+확정한 8,640 admitted-update cycle에서 tick `0/2/4`는 `night3/night2/night1`, tick
+`4320/4322/4324/4326`은 `night1/night2/night3/night4`를 선택한다. 프로젝트 simulation tick 하나를 admitted update
+하나로 취급하는 것은 **의도적 calibration**이고 raw update rate/24 Hz equivalence는 미확인이다. K01에는
+`nightSightMultiplier`가 없으므로 visual selection은 sight를 바꾸지 않는다.
 
 ## renderer bridge contact
 
@@ -72,8 +79,11 @@ tick 0에서 dawn으로 시작해 600 tick 뒤 day가 된다. K01/K02와 다른 
    매핑되지 않은 kind/state는 `null`이고 preload는 빈 배열이다. scene preload는 launch map 확정 전이므로
    registry의 모든 등록 descriptor를 결정론적으로 읽는다. 명시했지만 등록되지 않은 set 또는 선택된
    descriptor의 preload 누락은 오류다.
-3. environment: opt-in state의 `lightLevel01`; `EnvironmentVisualProfile`은
-   `evidenceStatus !== "unresolved"`인 asset만 자동 선택한다.
+3. environment: opt-in state의 `lightLevel01`과 `visualPaletteId`; `visualSteps`는 map-selected profile의 stable
+   palette ID를 골라 snapshot/network에도 그대로 보존한다. Imjinrok palette manifest는 generated 768 RGB6 bytes와
+   source SHA-256을 제공하고, adapter는 이것에서 deterministic tint/alpha를 계산한다. 이 renderer policy는
+   **source-backed-adaptation**이며 original indexed palette/true-color shader match가 아니다. selected profile,
+   palette ID, hash 또는 byte data가 없으면 loud failure다. fog behavior는 이 adapter가 바꾸지 않는다.
 
 Imjinrok crop/tree adaptation은 active state frame 0만 가진다. depleted state와 `gold`/`stone`은 `null`
 fallback으로 기존 renderer behavior를 보존한다. active crop/tree는 native pixel aspect ratio를 유지하고

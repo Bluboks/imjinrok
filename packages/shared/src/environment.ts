@@ -9,6 +9,13 @@ export interface DayNightLightKeyframe {
   lightLevel01: number;
 }
 
+/** A deterministic, renderer-facing palette selection at a fixed cycle tick. */
+export interface DayNightVisualStep {
+  tick: number;
+  /** Stable palette identity owned by the map's environment visual profile. */
+  paletteId: string;
+}
+
 export interface DayNightCycleDefinition {
   cycleTicks: number;
   nightStartTick: number;
@@ -19,6 +26,11 @@ export interface DayNightCycleDefinition {
    * day/night state and deliberately makes no claim about original timing.
    */
   lightCurve?: readonly DayNightLightKeyframe[];
+  /**
+   * Optional stepped visual selection. This does not change the legacy light
+   * curve or imply a renderer-equivalent palette implementation.
+   */
+  visualSteps?: readonly DayNightVisualStep[];
 }
 
 export interface DayNightValidationIssue {
@@ -42,42 +54,65 @@ export function validateDayNightCycle(dayNight: DayNightCycleDefinition): DayNig
   }
 
   const curve = dayNight.lightCurve;
-  if (curve === undefined) {
-    return issues;
-  }
-  if (!Array.isArray(curve)) {
-    issues.push({ path: "lightCurve", message: "Light curve must be an array of keyframes." });
-    return issues;
-  }
-  if (curve.length < 2) {
-    issues.push({ path: "lightCurve", message: "Light curve must contain at least two keyframes." });
-  }
-
-  const knownTicks = new Set<number>();
-  curve.forEach((keyframe, index) => {
-    const path = `lightCurve[${index}]`;
-    const tickValid = Number.isInteger(keyframe.tick)
-      && cycleTicksValid
-      && keyframe.tick >= 0
-      && keyframe.tick < dayNight.cycleTicks;
-
-    if (!tickValid) {
-      issues.push({ path: `${path}.tick`, message: "Keyframe tick must be an integer within the cycle." });
-    } else if (knownTicks.has(keyframe.tick)) {
-      issues.push({ path: `${path}.tick`, message: `Duplicate keyframe tick '${keyframe.tick}'.` });
+  if (curve !== undefined) {
+    if (!Array.isArray(curve)) {
+      issues.push({ path: "lightCurve", message: "Light curve must be an array of keyframes." });
     } else {
-      knownTicks.add(keyframe.tick);
-    }
+      if (curve.length < 2) {
+        issues.push({ path: "lightCurve", message: "Light curve must contain at least two keyframes." });
+      }
 
-    if (!isDayPhase(keyframe.phase)) {
-      issues.push({ path: `${path}.phase`, message: "Keyframe phase must be dawn, day, dusk, or night." });
+      const knownTicks = new Set<number>();
+      curve.forEach((keyframe, index) => {
+        const path = `lightCurve[${index}]`;
+        validateSteppedTick(keyframe.tick, `${path}.tick`, "Keyframe", dayNight.cycleTicks, cycleTicksValid, knownTicks, issues);
+
+        if (!isDayPhase(keyframe.phase)) {
+          issues.push({ path: `${path}.phase`, message: "Keyframe phase must be dawn, day, dusk, or night." });
+        }
+        if (!Number.isFinite(keyframe.lightLevel01) || keyframe.lightLevel01 < 0 || keyframe.lightLevel01 > 1) {
+          issues.push({ path: `${path}.lightLevel01`, message: "Keyframe light level must be a finite number from 0 through 1." });
+        }
+      });
     }
-    if (!Number.isFinite(keyframe.lightLevel01) || keyframe.lightLevel01 < 0 || keyframe.lightLevel01 > 1) {
-      issues.push({ path: `${path}.lightLevel01`, message: "Keyframe light level must be a finite number from 0 through 1." });
+  }
+
+  const visualSteps = dayNight.visualSteps;
+  if (visualSteps !== undefined) {
+    if (!Array.isArray(visualSteps) || visualSteps.length === 0) {
+      issues.push({ path: "visualSteps", message: "Visual steps must be a non-empty array." });
+    } else {
+      const knownTicks = new Set<number>();
+      visualSteps.forEach((step, index) => {
+        const path = `visualSteps[${index}]`;
+        validateSteppedTick(step.tick, `${path}.tick`, "Visual step", dayNight.cycleTicks, cycleTicksValid, knownTicks, issues);
+        if (!step.paletteId.trim()) {
+          issues.push({ path: `${path}.paletteId`, message: "Visual step palette id is required." });
+        }
+      });
     }
-  });
+  }
 
   return issues;
+}
+
+function validateSteppedTick(
+  tick: number,
+  path: string,
+  label: string,
+  cycleTicks: number,
+  cycleTicksValid: boolean,
+  knownTicks: Set<number>,
+  issues: DayNightValidationIssue[],
+): void {
+  const tickValid = Number.isInteger(tick) && cycleTicksValid && tick >= 0 && tick < cycleTicks;
+  if (!tickValid) {
+    issues.push({ path, message: `${label} tick must be an integer within the cycle.` });
+  } else if (knownTicks.has(tick)) {
+    issues.push({ path, message: `Duplicate ${label.toLowerCase()} tick '${tick}'.` });
+  } else {
+    knownTicks.add(tick);
+  }
 }
 
 export function assertValidDayNightCycle(dayNight: DayNightCycleDefinition): void {

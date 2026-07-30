@@ -154,6 +154,11 @@ import {
   resolveMapResourceVisualTextureKey,
   resolveResourceVisualPlacement,
 } from "../render/resourceVisualResolver.js";
+import {
+  createSourcePaletteOverlayAdapter,
+  getRegisteredEnvironmentPalettePreloadDescriptors,
+  resolveSelectedEnvironmentPalette,
+} from "../render/environmentPaletteVisualResolver.js";
 import { getAssetScale, getFrameOrigin, getFramePivot, getGroundContactPlacement, REFERENCE_PX_PER_WU, RENDER_DEPTH_BIAS } from "../render/visualScale.js";
 import {
   createCampaignMissionLaunchContext,
@@ -645,6 +650,12 @@ export class SkirmishScene extends Phaser.Scene {
         this.load.image(descriptor.textureKey, descriptor.url);
       }
     }
+
+    for (const descriptor of getRegisteredEnvironmentPalettePreloadDescriptors(CONTENT_REGISTRY)) {
+      if (!this.cache.json.exists(descriptor.cacheKey)) {
+        this.load.json(descriptor.cacheKey, descriptor.url);
+      }
+    }
   }
 
   create(data: GameLaunchContext): void {
@@ -686,6 +697,7 @@ export class SkirmishScene extends Phaser.Scene {
     this.map = this.worldState.map;
     this.ensureSelectedResourceVisualTextures();
     this.ensureSelectedExplicitTileVisualTextures();
+    this.ensureSelectedEnvironmentPaletteData();
     this.lastSyncedTick = this.worldState.tick;
     this.syncConstructionAudioState(false);
     this.syncProgressAudioState(false);
@@ -1332,8 +1344,12 @@ export class SkirmishScene extends Phaser.Scene {
     const width = this.scale.width;
     const height = this.scale.height;
     const visualState = resolveEnvironmentOverlayLightContract(getEnvironmentLightLevel(environment));
+    const paletteDescriptor = resolveSelectedEnvironmentPalette(CONTENT_REGISTRY, this.map, environment);
+    const paletteAdapter = paletteDescriptor
+      ? createSourcePaletteOverlayAdapter(paletteDescriptor, this.cache.json.get(paletteDescriptor.cacheKey))
+      : null;
     const rainFrame = environment.weather === "rain" ? this.worldState.tick % 48 : 0;
-    const signature = `${width}x${height}:${environment.weather}:${environment.dayPhase}:${visualState.lightSignature}:${rainFrame}`;
+    const signature = `${width}x${height}:${environment.weather}:${environment.dayPhase}:${visualState.lightSignature}:${paletteAdapter?.paletteId ?? "none"}:${rainFrame}`;
 
     if (!force && signature === this.environmentOverlaySignature) {
       return;
@@ -1344,6 +1360,10 @@ export class SkirmishScene extends Phaser.Scene {
 
     if (visualState.nightAlpha > 0) {
       graphics.fillStyle(0x071426, visualState.nightAlpha).fillRect(0, 0, width, height);
+    }
+
+    if (paletteAdapter) {
+      graphics.fillStyle(paletteAdapter.rgb, paletteAdapter.alpha).fillRect(0, 0, width, height);
     }
 
     if (environment.weather === "rain") {
@@ -7934,6 +7954,13 @@ export class SkirmishScene extends Phaser.Scene {
   private ensureSelectedExplicitTileVisualTextures(): void {
     for (const descriptor of getMapExplicitTileVisualPreloadDescriptors(CONTENT_REGISTRY, this.map)) {
       requireExplicitTileVisualTexture(descriptor.textureKey, (key) => this.textures.exists(key));
+    }
+  }
+
+  private ensureSelectedEnvironmentPaletteData(): void {
+    const descriptor = resolveSelectedEnvironmentPalette(CONTENT_REGISTRY, this.map, this.worldState.environment);
+    if (descriptor && !this.cache.json.exists(descriptor.cacheKey)) {
+      throw new Error(`Selected environment palette '${descriptor.paletteId}' is not loaded for profile '${descriptor.profileId}'.`);
     }
   }
 

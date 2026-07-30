@@ -122,16 +122,16 @@ export const imjinrokSourceContentPack = {
     "imjinrok-brown": createImjinrokTileset("brown"),
   },
   environmentVisualProfiles: {
-    "imjinrok-source-night-catalog": {
-      id: "imjinrok-source-night-catalog",
-      displayName: "Imjinrok Night Palette Catalog",
+    "imjinrok-source-day-night-palette": {
+      id: "imjinrok-source-day-night-palette",
+      displayName: "Imjinrok Day/Night Palette Adapter",
       paletteAssets: [
-        { url: "/assets/themes/default/environment/imjinrok-night/night1.pal.json", frame: 0 },
-        { url: "/assets/themes/default/environment/imjinrok-night/night2.pal.json", frame: 0 },
-        { url: "/assets/themes/default/environment/imjinrok-night/night3.pal.json", frame: 0 },
-        { url: "/assets/themes/default/environment/imjinrok-night/night4.pal.json", frame: 0 },
+        { id: "night1", url: "/assets/themes/default/environment/imjinrok-night/night1.pal.json", frame: 0, sourceSha256: "b085583412b8bb79bdf9b72d836881be37f6f36ad50d073db06bebd1c2670122" },
+        { id: "night2", url: "/assets/themes/default/environment/imjinrok-night/night2.pal.json", frame: 1, sourceSha256: "c45727bd8ffed04bf572da5ab38b14b7fcb819f540a15a2e5d13730357bda17d" },
+        { id: "night3", url: "/assets/themes/default/environment/imjinrok-night/night3.pal.json", frame: 2, sourceSha256: "4fe0c28dc64480c6f00876c5ee484e1b3caa77b3b63b27387c6cf7702c3d2f97" },
+        { id: "night4", url: "/assets/themes/default/environment/imjinrok-night/night4.pal.json", frame: 3, sourceSha256: "f8328d22007407df426dff9e489f43718e28772d03b3ddd5f663a5dd57156e95" },
       ],
-      evidenceStatus: "unresolved",
+      evidenceStatus: "source-backed-adaptation",
       sourceAssets: [
         sourceAsset("pal/night1.pal", "b085583412b8bb79bdf9b72d836881be37f6f36ad50d073db06bebd1c2670122"),
         sourceAsset("pal/night2.pal", "c45727bd8ffed04bf572da5ab38b14b7fcb819f540a15a2e5d13730357bda17d"),
@@ -238,11 +238,40 @@ export function validateContentRegistry(registry: ContentRegistry): ContentValid
   validateDefinitionIds(registry.units, "units", issues);
   validateDefinitionIds(registry.tilesets, "tilesets", issues);
   validateDefinitionIds(registry.environmentVisualProfiles, "environmentVisualProfiles", issues);
+  validateEnvironmentVisualProfiles(registry.environmentVisualProfiles, issues);
   validateDefinitionIds(registry.resourceVisualSets, "resourceVisualSets", issues);
   validateResourceDefinitions(registry, issues);
   validateUnitDefinitions(registry, issues);
 
   return toValidationResult(issues);
+}
+
+function validateEnvironmentVisualProfiles(
+  profiles: Record<string, EnvironmentVisualProfile>,
+  issues: ContentValidationIssue[],
+): void {
+  for (const [profileId, profile] of Object.entries(profiles)) {
+    const paletteIds = new Set<string>();
+    for (const [index, asset] of (profile.paletteAssets ?? []).entries()) {
+      const path = `environmentVisualProfiles.${profileId}.paletteAssets[${index}]`;
+      if (!asset.id.trim()) {
+        issues.push(createIssue(`${path}.id`, "Palette asset id is required."));
+      } else if (paletteIds.has(asset.id)) {
+        issues.push(createIssue(`${path}.id`, `Duplicate palette asset id '${asset.id}'.`));
+      } else {
+        paletteIds.add(asset.id);
+      }
+      if (!Number.isInteger(asset.frame) || asset.frame < 0) {
+        issues.push(createIssue(`${path}.frame`, "Palette asset frame must be a non-negative integer."));
+      }
+      if (!asset.url.trim()) {
+        issues.push(createIssue(`${path}.url`, "Palette asset url is required."));
+      }
+      if (!/^[a-f0-9]{64}$/u.test(asset.sourceSha256)) {
+        issues.push(createIssue(`${path}.sourceSha256`, "Palette asset source SHA-256 must be a lowercase 64-character digest."));
+      }
+    }
+  }
 }
 
 export function validateContentPack(pack: ContentPackDefinition): ContentValidationResult {

@@ -119,6 +119,21 @@ test("quick-load world snapshots preserve timed weather overrides", () => {
   });
 });
 
+test("quick-load normalization retains a valid selected palette identity", () => {
+  const snapshot = createInitialWorldState(defaultMap, ["p1", "p2"]);
+  snapshot.environment = {
+    weather: "clear",
+    timeOfDay01: 0.5,
+    dayPhase: "night",
+    lightLevel01: 0.25,
+    visualPaletteId: "night3",
+  };
+
+  const normalized = normalizeSavedWorldSnapshot(snapshot);
+
+  assert.deepEqual(normalized?.environment, snapshot.environment);
+});
+
 test("fresh launch contexts strip save-only resume state", () => {
   const snapshot = createInitialWorldState(defaultMap, ["p1", "p2"]);
   const context: GameLaunchContext = {

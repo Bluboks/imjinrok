@@ -49,3 +49,26 @@ test("resource visual catalog maps only crop and tree project adaptations", () =
   assert.equal(resourceSet.resources.stone, undefined);
   assert.ok(resourceSet.sourceAssets?.some((asset) => asset.sourcePath === "fnt/resource.spr"));
 });
+
+test("environment palette profiles reject duplicate ids and invalid source frame metadata", () => {
+  const registry = createContentRegistry();
+  registry.environmentVisualProfiles.invalid = {
+    id: "invalid",
+    displayName: "Invalid palette profile",
+    evidenceStatus: "source-backed-adaptation",
+    paletteAssets: [
+      { id: "night", url: "", frame: -1, sourceSha256: "stale" },
+      { id: "night", url: "/palette.json", frame: 0, sourceSha256: "a".repeat(64) },
+    ],
+  };
+
+  assert.deepEqual(
+    validateContentRegistry(registry).issues.filter((issue) => issue.path.startsWith("environmentVisualProfiles.invalid")).map((issue) => issue.path),
+    [
+      "environmentVisualProfiles.invalid.paletteAssets[0].frame",
+      "environmentVisualProfiles.invalid.paletteAssets[0].url",
+      "environmentVisualProfiles.invalid.paletteAssets[0].sourceSha256",
+      "environmentVisualProfiles.invalid.paletteAssets[1].id",
+    ],
+  );
+});

@@ -208,6 +208,26 @@ export function createImjinrokMapScaffold(mapId: string): MapDefinition | null {
   }
   carveMissionRoute(map, metadata.missionRouteWaypoints);
   if (metadata.id === "imjinrok-k01") {
+    // The palette identity/ticks are exact bounded source schedule facts. One
+    // product simulation update per source admitted update is an explicit
+    // calibration; true-color rendering remains a separate adapter.
+    map.environmentVisualProfileId = "imjinrok-source-day-night-palette";
+    map.environment = {
+      dayNight: {
+        cycleTicks: 8_640,
+        dayStartTick: 0,
+        nightStartTick: 4_320,
+        visualSteps: [
+          { tick: 0, paletteId: "night3" },
+          { tick: 2, paletteId: "night2" },
+          { tick: 4, paletteId: "night1" },
+          { tick: 4_320, paletteId: "night1" },
+          { tick: 4_322, paletteId: "night2" },
+          { tick: 4_324, paletteId: "night3" },
+          { tick: 4_326, paletteId: "night4" },
+        ],
+      },
+    };
     const groundLayer = map.layers[0];
     if (!groundLayer) throw new Error("K01 scaffold has no ground layer for source tile visual assignment.");
     applyK01SourceTileVisuals(groundLayer.tiles, map.width, map.height);

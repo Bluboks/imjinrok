@@ -39,6 +39,7 @@ export function validateMapDefinition(map: MapDefinition, registry: ContentRegis
   for (const environmentIssue of map.environment?.dayNight ? validateDayNightCycle(map.environment.dayNight) : []) {
     issues.push(issue(`environment.dayNight.${environmentIssue.path}`, environmentIssue.message));
   }
+  validateDayNightVisualSteps(map, registry, issues);
 
   const expectedTileCount = map.width * map.height;
   map.layers.forEach((layer, layerIndex) => {
@@ -61,6 +62,28 @@ export function validateMapDefinition(map: MapDefinition, registry: ContentRegis
   });
 
   return { ok: issues.length === 0, issues };
+}
+
+function validateDayNightVisualSteps(map: MapDefinition, registry: ContentRegistry, issues: MapValidationIssue[]): void {
+  const visualSteps = map.environment?.dayNight?.visualSteps;
+  if (!visualSteps) {
+    return;
+  }
+  const profileId = map.environmentVisualProfileId;
+  if (!profileId) {
+    issues.push(issue("environmentVisualProfileId", "Day/night visual steps require an environment visual profile."));
+    return;
+  }
+  const profile = registry.environmentVisualProfiles[profileId];
+  if (!profile) {
+    return;
+  }
+  const paletteIds = new Set(profile.paletteAssets?.map((asset) => asset.id) ?? []);
+  visualSteps.forEach((step, index) => {
+    if (!paletteIds.has(step.paletteId)) {
+      issues.push(issue(`environment.dayNight.visualSteps[${index}].paletteId`, `Unknown palette '${step.paletteId}' in environment visual profile '${profileId}'.`));
+    }
+  });
 }
 
 export function assertValidMapDefinition(map: MapDefinition, registry: ContentRegistry): void {

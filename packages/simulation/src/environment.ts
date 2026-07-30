@@ -9,6 +9,8 @@ export interface EnvironmentState {
   dayPhase: DayPhase;
   /** Present only for maps that opt into a light curve. */
   lightLevel01?: number;
+  /** Stable renderer-facing identity selected from an opt-in visual schedule. */
+  visualPaletteId?: string;
 }
 
 export function createInitialEnvironmentState(map: MapDefinition): EnvironmentState {
@@ -30,6 +32,11 @@ export function updateEnvironment(state: WorldState): void {
     delete state.environment.lightLevel01;
   } else {
     state.environment.lightLevel01 = nextEnvironment.lightLevel01;
+  }
+  if (nextEnvironment.visualPaletteId === undefined) {
+    delete state.environment.visualPaletteId;
+  } else {
+    state.environment.visualPaletteId = nextEnvironment.visualPaletteId;
   }
 }
 
@@ -69,13 +76,26 @@ function deriveEnvironmentState(map: MapDefinition, tick: number): EnvironmentSt
 
   const cycleTick = tick % dayNight.cycleTicks;
   const lightCurveState = deriveLightCurveState(cycleTick, dayNight);
+  const visualPaletteId = deriveVisualPaletteId(cycleTick, dayNight);
 
   return {
     weather,
     timeOfDay01: cycleTick / dayNight.cycleTicks,
     dayPhase: lightCurveState?.dayPhase ?? (isNightTick(cycleTick, dayNight.nightStartTick, dayNight.dayStartTick) ? "night" : "day"),
     ...(lightCurveState ? { lightLevel01: lightCurveState.lightLevel01 } : {}),
+    ...(visualPaletteId ? { visualPaletteId } : {}),
   };
+}
+
+function deriveVisualPaletteId(cycleTick: number, dayNight: EnvironmentPreset["dayNight"]): string | null {
+  const steps = dayNight?.visualSteps;
+  if (!steps || steps.length === 0) {
+    return null;
+  }
+  const ordered = [...steps].sort((left, right) => left.tick - right.tick);
+  const selected = ordered.reduce<typeof ordered[number] | null>((current, step) => step.tick <= cycleTick ? step : current, null)
+    ?? ordered[ordered.length - 1];
+  return selected?.paletteId ?? null;
 }
 
 function deriveLightCurveState(cycleTick: number, dayNight: EnvironmentPreset["dayNight"]): Pick<EnvironmentState, "dayPhase" | "lightLevel01"> | null {
