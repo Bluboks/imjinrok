@@ -25,6 +25,9 @@ export const GAMEPLAY_AUDIO_CUES = [
   { key: "audio:voice:move-farmer-k1", url: "assets/audio/voice/move_farmerk1.wav", volume: 0.72, cooldownMs: 750 },
   { key: "audio:voice:attack-farmer-k1", url: "assets/audio/voice/attack_farmerk1.wav", volume: 0.72, cooldownMs: 850 },
   { key: "audio:voice:die-farmer-k1", url: "assets/audio/voice/die_farmerk1.wav", volume: 0.76, cooldownMs: 700 },
+  { key: "audio:voice:select-farmer-j1", url: "assets/audio/voice/select_farmerj1.wav", volume: 0.72, cooldownMs: 650 },
+  { key: "audio:voice:move-farmer-j1", url: "assets/audio/voice/move_farmerj1.wav", volume: 0.72, cooldownMs: 750 },
+  { key: "audio:voice:attack-farmer-j1", url: "assets/audio/voice/attack_farmerj1.wav", volume: 0.72, cooldownMs: 850 },
   { key: "audio:voice:select-sword-k1", url: "assets/audio/voice/select_swordk1.wav", volume: 0.72, cooldownMs: 650 },
   { key: "audio:voice:move-sword-k1", url: "assets/audio/voice/move_swordk1.wav", volume: 0.72, cooldownMs: 750 },
   { key: "audio:voice:attack-sword-k1", url: "assets/audio/voice/attack_swordk1.wav", volume: 0.76, cooldownMs: 850 },
@@ -111,15 +114,10 @@ export const UNIT_AUDIO_CUES: Partial<Record<UnitDefinitionId, Partial<Record<Un
     move: "audio:voice:move-gun-j1",
     select: "audio:voice:select-gun-j1",
   },
-  "ryu-seong-ryong": {
-    attack: "audio:voice:attack-general-k4",
-    move: "audio:voice:move-general-k42",
-    select: "audio:voice:select-general-k42",
-  },
-  "gwon-yul": {
-    attack: "audio:voice:attack-general-k4",
-    move: "audio:voice:move-general-k42",
-    select: "audio:voice:select-general-k42",
+  "japanese-farmer": {
+    attack: "audio:voice:attack-farmer-j1",
+    move: "audio:voice:move-farmer-j1",
+    select: "audio:voice:select-farmer-j1",
   },
   "royal-cart": {
     move: "audio:voice:move-general-k42",
