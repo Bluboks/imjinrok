@@ -10,8 +10,10 @@
 - 재현 상태: **범위 한정 재현 완료**. 생성, 새 화자, 같은 화자 교체, surface lock 실패,
   음성 resource 실패, admission no-op, lookup `-1`의 조건부 unsafe 경계, reset, mode별 clear를
   결정론 vector로 재현한다.
-- 구현 상태: **분석 전용, production 변경 없음**. 이 record는 현재 프로젝트 selection panel의
-  건설·생산·연구 record가 아니라 원본 `SPEECH` 화자 portrait/label slot이다.
+- 구현 상태: **부분 이식**. K01 사전 브리핑은 source portrait ID→17-entry label table과
+  확정 slot bottom label 좌표를 사용한다. 새 화자 초상화는 원본의 `+5` progress 단위를
+  0%에서 100%까지 표현한다. 원본 dispatcher의 wall-clock scheduler는 아직 정적 확정되지
+  않았으므로 웹의 24 Hz step cadence와 마지막 대사 클릭 dismiss는 의도적 적응이다.
 
 따라서 이전 문서의 “selection-panel slot”은 위치를 가리키던 탐색 명칭일 뿐 mechanic 의미가
 아니다. kind exact `1`은 **이전 label index와 새로 조회한 SPEECH 화자 index가 다르다**는
@@ -228,6 +230,10 @@ script record identifier → producer lookup → 동일 index label pointer의 d
 responsive layout, multi-selection, mana, health와 추가 상태는 project-owned superset이다.
 이번 slot record와 semantic binding이 없으므로 production UI는 변경하지 않는다. 원본
 고정 4-slot speech architecture도 public project contract로 승격하지 않는다.
+
+사전 브리핑의 K01 adapter는 이와 별개로 `ScenarioBriefingDefinition.portraitLabels`의 optional
+mapping contract를 통해 source label을 소비한다. 따라서 mod briefing은 recovered table이 없으면
+label을 생략할 수 있고, 원본 label table을 임의의 generic speaker 이름으로 일반화하지 않는다.
 
 다음 좁은 질문은 기존 dispatcher 명칭을 더 확장하는 것이 아니라, 실제 gameplay 선택 UI
 owner와 건설·생산·연구 progress producer를 별도로 찾아 현재 project selection view data와

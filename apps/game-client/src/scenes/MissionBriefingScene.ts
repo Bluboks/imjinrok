@@ -12,8 +12,9 @@ import { collectMissionBriefingBackdropFrames } from "../missionBriefingBackdrop
 import {
   createMissionBriefingReplayState,
   getMissionBriefingClickAction,
-  getMissionBriefingIntroFrameAlphas,
   getMissionBriefingIntroStage,
+  getMissionBriefingPortraitScale,
+  getMissionBriefingTitleFrameIndex,
 } from "../missionPresentationTimeline.js";
 import { getOriginalSpeechSlot, resolveOriginalSpeechLayout } from "../originalSpeechLayout.js";
 import {
@@ -58,7 +59,6 @@ export class MissionBriefingScene extends Phaser.Scene {
   private launchController = new PreGameBriefingLaunchController();
   private container: Phaser.GameObjects.Container | null = null;
   private backdropImage: Phaser.GameObjects.Image | null = null;
-  private introImage: Phaser.GameObjects.Image | null = null;
   private introStartedAt: number | null = null;
   private hideAt: number | null = null;
   private lineIndex = 0;
@@ -66,8 +66,14 @@ export class MissionBriefingScene extends Phaser.Scene {
   private nextLineAt: number | null = null;
   private introCompleted = false;
   private lineScheduled = false;
+  private dismissed = false;
   private musicPlaying = false;
-  private readonly introducedPortraitKeys = new Set<string>();
+  private readonly introducedPortraitAt = new Map<string, number>();
+  private readonly portraitTransitionImages = new Map<string, {
+    image: Phaser.GameObjects.Image;
+    targetScale: number;
+    startedAt: number;
+  }>();
 
   constructor() {
     super(MISSION_BRIEFING_SCENE_KEY);
@@ -125,6 +131,7 @@ export class MissionBriefingScene extends Phaser.Scene {
     }
 
     this.updateBackdrop(time);
+    this.updatePortraitTransitions(time);
     if (!this.lineScheduled && this.isIntroReady(time)) {
       this.lineScheduled = true;
       this.scheduleLine(time);
@@ -152,7 +159,7 @@ export class MissionBriefingScene extends Phaser.Scene {
     this.scale.off(Phaser.Scale.Events.RESIZE, this.handleResize, this);
     this.stopAudio();
     this.destroyPresentation();
-    this.introducedPortraitKeys.clear();
+    this.introducedPortraitAt.clear();
   }
 
   private resetPresentation(): void {
@@ -164,8 +171,9 @@ export class MissionBriefingScene extends Phaser.Scene {
     this.lineRevealAt = replay.lineRevealAt;
     this.nextLineAt = replay.nextLineAt;
     this.lineScheduled = replay.lineScheduled;
+    this.dismissed = replay.dismissed;
     this.hideAt = this.context?.scenario?.briefing?.noEnd ? Number.POSITIVE_INFINITY : this.time.now + BRIEFING_DURATION_MS;
-    this.introducedPortraitKeys.clear();
+    this.introducedPortraitAt.clear();
   }
 
   private drawPresentation(): void {
@@ -181,7 +189,7 @@ export class MissionBriefingScene extends Phaser.Scene {
     container.add(graphics);
     this.addBackdrop(container, width, height, briefing);
 
-    if (line) {
+    if (line || this.dismissed) {
       this.addSpeechPresentation(container, briefing.lines, line, this.lineIndex, width, height);
     }
 
@@ -195,6 +203,7 @@ export class MissionBriefingScene extends Phaser.Scene {
     const buttonY = Math.max(8, height - 40);
     const startX = width - 12 - buttonWidth;
     this.addButton(container, graphics, startX - buttonGap - buttonWidth, buttonY, buttonWidth, "다시보기", () => {
+      this.stopVoice();
       this.resetPresentation();
       this.redrawPresentation();
     });
@@ -218,6 +227,9 @@ export class MissionBriefingScene extends Phaser.Scene {
   }
 
   private getActiveLine(briefing: ScenarioBriefingDefinition): ScenarioBriefingLineDefinition | undefined {
+    if (this.dismissed) {
+      return undefined;
+    }
     const revealPending = this.lineRevealAt !== null && this.time.now < this.lineRevealAt;
     return !this.lineScheduled || revealPending ? undefined : briefing.lines[this.lineIndex];
   }
@@ -229,39 +241,29 @@ export class MissionBriefingScene extends Phaser.Scene {
     briefing: ScenarioBriefingDefinition,
   ): void {
     const frames = collectMissionBriefingBackdropFrames(briefing);
-    const baseFrame = frames[0];
-    const completedFrame = frames.at(-1);
-    if (!baseFrame || !this.textures.exists(baseFrame.key)) {
+    const frameIndex = getMissionBriefingTitleFrameIndex(frames, this.introStartedAt ?? this.time.now, this.time.now, this.introCompleted);
+    const frame = frames[frameIndex];
+    if (!frame || !this.textures.exists(frame.key)) {
       return;
     }
 
     const scale = Math.min(width / BACKDROP_SOURCE_WIDTH, height / BACKDROP_SOURCE_HEIGHT);
-    const alphas = this.getBackdropAlphas(this.time.now);
-    this.backdropImage = this.add.image(width / 2, height / 2, baseFrame.key).setScale(scale).setAlpha(alphas.base);
+    this.backdropImage = this.add.image(width / 2, height / 2, frame.key).setScale(scale);
     container.add(this.backdropImage);
-    if (completedFrame && this.textures.exists(completedFrame.key)) {
-      this.introImage = this.add.image(width / 2, height / 2, completedFrame.key).setScale(scale).setAlpha(alphas.completed);
-      container.add(this.introImage);
-    }
-  }
-
-  private getBackdropAlphas(time: number): { base: number; completed: number } {
-    return getMissionBriefingIntroFrameAlphas(this.introStartedAt ?? time, time, this.introCompleted);
   }
 
   private updateBackdrop(time: number): void {
     const briefing = this.context?.scenario?.briefing;
-    if (!briefing || !this.backdropImage || !this.introImage) {
+    if (!briefing || !this.backdropImage) {
       return;
     }
 
-    const completedFrame = collectMissionBriefingBackdropFrames(briefing).at(-1);
-    const alphas = this.getBackdropAlphas(time);
-    this.backdropImage.setAlpha(alphas.base);
-    if (completedFrame && this.introImage.texture.key !== completedFrame.key) {
-      this.introImage.setTexture(completedFrame.key);
+    const frames = collectMissionBriefingBackdropFrames(briefing);
+    const frameIndex = getMissionBriefingTitleFrameIndex(frames, this.introStartedAt ?? time, time, this.introCompleted);
+    const frame = frames[frameIndex];
+    if (frame && this.backdropImage.texture.key !== frame.key) {
+      this.backdropImage.setTexture(frame.key);
     }
-    this.introImage.setAlpha(alphas.completed);
   }
 
   private addButton(
@@ -308,6 +310,7 @@ export class MissionBriefingScene extends Phaser.Scene {
       this.isIntroReady(time),
       this.lineRevealAt !== null && time < this.lineRevealAt,
       this.lineIndex + 1 >= briefing.lines.length,
+      this.dismissed,
     );
     if (action === "complete-intro") {
       this.introCompleted = true;
@@ -320,7 +323,15 @@ export class MissionBriefingScene extends Phaser.Scene {
       this.revealLine(time);
       return;
     }
-    if (action === "hold-line") {
+    if (action === "dismiss-line") {
+      this.dismissed = true;
+      this.lineRevealAt = null;
+      this.nextLineAt = null;
+      this.stopVoice();
+      this.redrawPresentation();
+      return;
+    }
+    if (action === "no-op") {
       return;
     }
 
@@ -335,7 +346,12 @@ export class MissionBriefingScene extends Phaser.Scene {
   }
 
   private isIntroReady(time: number): boolean {
-    return getMissionBriefingIntroStage(this.introStartedAt ?? time, time, this.introCompleted) === "ready";
+    return getMissionBriefingIntroStage(
+      collectMissionBriefingBackdropFrames(this.context?.scenario?.briefing),
+      this.introStartedAt ?? time,
+      time,
+      this.introCompleted,
+    ) === "ready";
   }
 
   private scheduleLine(time: number, respectDelay = true): void {
@@ -376,25 +392,36 @@ export class MissionBriefingScene extends Phaser.Scene {
     }
     this.container = null;
     this.backdropImage = null;
-    this.introImage = null;
+    this.portraitTransitionImages.clear();
   }
 
   private addSpeechPresentation(
     container: Phaser.GameObjects.Container,
     lines: readonly ScenarioBriefingLineDefinition[],
-    activeLine: ScenarioBriefingLineDefinition,
+    activeLine: ScenarioBriefingLineDefinition | undefined,
     lineIndex: number,
     viewportWidth: number,
     viewportHeight: number,
   ): void {
-    const activeSlot = getOriginalSpeechSlot(activeLine);
-    for (const participant of this.getParticipants(lines, lineIndex)) {
+    const activeSlot = activeLine ? getOriginalSpeechSlot(activeLine) : null;
+    const participantLineIndex = this.dismissed ? lines.length - 1 : lineIndex;
+    for (const participant of this.getParticipants(lines, participantLineIndex)) {
       const portraitKey = `${participant.speechSlot}:${normalizeMissionPortraitId(participant.portraitId)}`;
-      const isNew = !this.introducedPortraitKeys.has(portraitKey);
-      this.introducedPortraitKeys.add(portraitKey);
-      this.addPortrait(container, participant, participant.speechSlot === activeSlot, viewportWidth, viewportHeight, isNew);
+      const introductionStartedAt = this.introducedPortraitAt.get(portraitKey) ?? this.time.now;
+      this.introducedPortraitAt.set(portraitKey, introductionStartedAt);
+      this.addPortrait(
+        container,
+        participant,
+        participant.speechSlot === activeSlot,
+        viewportWidth,
+        viewportHeight,
+        introductionStartedAt,
+      );
     }
 
+    if (!activeLine || activeSlot === null) {
+      return;
+    }
     const layout = resolveOriginalSpeechLayout(viewportWidth, viewportHeight, activeSlot);
     container.add(this.add.text(layout.text.x, layout.text.centerY, activeLine.text, {
       fontFamily: "Noto Sans KR, Malgun Gothic, Apple SD Gothic Neo, sans-serif",
@@ -424,7 +451,7 @@ export class MissionBriefingScene extends Phaser.Scene {
     active: boolean,
     viewportWidth: number,
     viewportHeight: number,
-    animateIntroduction: boolean,
+    introductionStartedAt: number,
   ): void {
     const cue = portraitCueById.get(normalizeMissionPortraitId(participant.portraitId));
     if (!cue || !this.textures.exists(cue.key)) {
@@ -433,14 +460,32 @@ export class MissionBriefingScene extends Phaser.Scene {
 
     const { portrait } = resolveOriginalSpeechLayout(viewportWidth, viewportHeight, participant.speechSlot);
     const targetScale = portrait.width / 130;
+    const introductionScale = getMissionBriefingPortraitScale(introductionStartedAt, this.time.now);
     const image = this.add.image(portrait.x + portrait.width / 2, portrait.y + portrait.height / 2, cue.key)
-      .setScale(animateIntroduction ? 0 : targetScale);
+      .setScale(targetScale * introductionScale);
     if (!active) {
       image.setTint(0x534668);
     }
     container.add(image);
-    if (animateIntroduction) {
-      this.tweens.add({ targets: image, scaleX: targetScale, scaleY: targetScale, duration: 240, ease: "Cubic.easeOut" });
+    const portraitKey = `${participant.speechSlot}:${normalizeMissionPortraitId(participant.portraitId)}`;
+    this.portraitTransitionImages.set(portraitKey, { image, targetScale, startedAt: introductionStartedAt });
+
+    const label = this.context?.scenario?.briefing?.portraitLabels?.[normalizeMissionPortraitId(participant.portraitId)];
+    if (label) {
+      const layout = resolveOriginalSpeechLayout(viewportWidth, viewportHeight, participant.speechSlot);
+      container.add(this.add.text(layout.label.centerX, layout.label.y, label, {
+        fontFamily: "Noto Sans KR, Malgun Gothic, Apple SD Gothic Neo, sans-serif",
+        fontSize: `${Math.max(1, Math.round(12 * layout.scale))}px`,
+        color: active ? "#f1dfaa" : "#9a8d9d",
+        stroke: "#000000",
+        strokeThickness: Math.max(1, Math.round(layout.scale)),
+      }).setOrigin(0.5, 0));
+    }
+  }
+
+  private updatePortraitTransitions(time: number): void {
+    for (const transition of this.portraitTransitionImages.values()) {
+      transition.image.setScale(transition.targetScale * getMissionBriefingPortraitScale(transition.startedAt, time));
     }
   }
 

@@ -1,8 +1,12 @@
-export const MISSION_BRIEFING_INTRO_HOLD_MS = 520;
-export const MISSION_BRIEFING_INTRO_FADE_MS = 420;
+export const MISSION_BRIEFING_PORTRAIT_PROGRESS_STEP_PERCENT = 5;
+export const MISSION_BRIEFING_PORTRAIT_STEP_COUNT = 100 / MISSION_BRIEFING_PORTRAIT_PROGRESS_STEP_PERCENT;
+// The source dispatcher advances portrait progress by five percentage points on
+// each visit. Its wall-clock scheduler is not statically recovered; this is the
+// project's fixed 24 Hz presentation calibration, not a parity timing claim.
+export const MISSION_BRIEFING_PORTRAIT_STEP_MS = 1_000 / 24;
 
-export type MissionBriefingIntroStage = "holding" | "fading" | "ready";
-export type MissionBriefingClickAction = "complete-intro" | "reveal-line" | "advance-line" | "hold-line";
+export type MissionBriefingIntroStage = "playing" | "ready";
+export type MissionBriefingClickAction = "complete-intro" | "reveal-line" | "advance-line" | "dismiss-line" | "no-op";
 export type MissionDialogueClickAction = "advance-line" | "finish-dialogue";
 
 export interface MissionDialoguePointerAdvance {
@@ -14,11 +18,6 @@ export interface PresentationPauseOwnership {
   ownsPlaybackPause: boolean;
 }
 
-export interface MissionBriefingIntroFrameAlphas {
-  base: number;
-  completed: number;
-}
-
 export interface MissionBriefingReplayState {
   introStartedAt: number;
   introCompleted: false;
@@ -26,6 +25,11 @@ export interface MissionBriefingReplayState {
   lineRevealAt: null;
   nextLineAt: null;
   lineScheduled: false;
+  dismissed: false;
+}
+
+interface TimedTitleFrame {
+  durationMs: number;
 }
 
 export function beginPresentationPause(playbackWasPaused: boolean): PresentationPauseOwnership {
@@ -44,57 +48,60 @@ export function isPresentationExternallyPaused(
   return pauseMenuOpen || (playbackPaused && !ownsPlaybackPause);
 }
 
+export function getMissionBriefingTitleSequenceDurationMs(
+  frames: readonly TimedTitleFrame[] | undefined,
+): number {
+  return (frames ?? []).reduce((durationMs, frame) => durationMs + normalizeFrameDuration(frame.durationMs), 0);
+}
+
 export function getMissionBriefingIntroStage(
+  frames: readonly TimedTitleFrame[] | undefined,
   startedAt: number,
   time: number,
   completed: boolean,
 ): MissionBriefingIntroStage {
-  if (completed) {
+  if (completed || getMissionBriefingTitleSequenceDurationMs(frames) === 0) {
     return "ready";
   }
 
-  const elapsedMs = Math.max(0, time - startedAt);
-
-  if (elapsedMs < MISSION_BRIEFING_INTRO_HOLD_MS) {
-    return "holding";
-  }
-
-  if (elapsedMs < MISSION_BRIEFING_INTRO_HOLD_MS + MISSION_BRIEFING_INTRO_FADE_MS) {
-    return "fading";
-  }
-
-  return "ready";
+  return Math.max(0, time - startedAt) >= getMissionBriefingTitleSequenceDurationMs(frames) ? "ready" : "playing";
 }
 
-export function getMissionBriefingIntroFadeAlpha(
+/** Returns the source title frame visible at `time`, or -1 when no sequence exists. */
+export function getMissionBriefingTitleFrameIndex(
+  frames: readonly TimedTitleFrame[] | undefined,
   startedAt: number,
   time: number,
   completed: boolean,
 ): number {
-  const stage = getMissionBriefingIntroStage(startedAt, time, completed);
-
-  if (stage === "holding") {
-    return 0;
+  const sequence = frames ?? [];
+  if (sequence.length === 0) {
+    return -1;
   }
-  if (stage === "ready") {
-    return 1;
+  if (completed) {
+    return sequence.length - 1;
   }
 
-  const fadeElapsedMs = Math.max(0, time - startedAt - MISSION_BRIEFING_INTRO_HOLD_MS);
-  const progress = Math.min(1, fadeElapsedMs / MISSION_BRIEFING_INTRO_FADE_MS);
-
-  return 1 - (1 - progress) * (1 - progress);
+  const elapsedMs = Math.max(0, time - startedAt);
+  let boundaryMs = 0;
+  for (const [index, frame] of sequence.entries()) {
+    boundaryMs += normalizeFrameDuration(frame.durationMs);
+    if (elapsedMs < boundaryMs) {
+      return index;
+    }
+  }
+  return sequence.length - 1;
 }
 
-export function getMissionBriefingIntroFrameAlphas(
+/** Quantized 0..1 portrait scale matching the source's 5% progress increments. */
+export function getMissionBriefingPortraitScale(
   startedAt: number,
   time: number,
-  completed: boolean,
-): MissionBriefingIntroFrameAlphas {
-  return {
-    base: 1,
-    completed: getMissionBriefingIntroFadeAlpha(startedAt, time, completed),
-  };
+): number {
+  const elapsedMs = Math.max(0, time - startedAt);
+  const progressSteps = Math.min(MISSION_BRIEFING_PORTRAIT_STEP_COUNT, Math.floor(elapsedMs / MISSION_BRIEFING_PORTRAIT_STEP_MS));
+
+  return progressSteps * MISSION_BRIEFING_PORTRAIT_PROGRESS_STEP_PERCENT / 100;
 }
 
 export function createMissionBriefingReplayState(time: number): MissionBriefingReplayState {
@@ -105,6 +112,7 @@ export function createMissionBriefingReplayState(time: number): MissionBriefingR
     lineRevealAt: null,
     nextLineAt: null,
     lineScheduled: false,
+    dismissed: false,
   };
 }
 
@@ -112,7 +120,11 @@ export function getMissionBriefingClickAction(
   introReady: boolean,
   lineRevealPending: boolean,
   isLastLine: boolean,
+  dismissed = false,
 ): MissionBriefingClickAction {
+  if (dismissed) {
+    return "no-op";
+  }
   if (!introReady) {
     return "complete-intro";
   }
@@ -120,7 +132,7 @@ export function getMissionBriefingClickAction(
     return "reveal-line";
   }
 
-  return isLastLine ? "hold-line" : "advance-line";
+  return isLastLine ? "dismiss-line" : "advance-line";
 }
 
 export function getMissionDialogueClickAction(
@@ -138,4 +150,8 @@ export function getMissionDialoguePointerAdvance(
     action: getMissionDialogueClickAction(lineIndex, lineCount),
     consumesWorldInput: true,
   };
+}
+
+function normalizeFrameDuration(durationMs: number): number {
+  return Number.isFinite(durationMs) && durationMs > 0 ? Math.floor(durationMs) : 0;
 }
