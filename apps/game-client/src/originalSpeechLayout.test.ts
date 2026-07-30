@@ -9,6 +9,7 @@ test("preserves the original SPEECH coordinates at 640x480", () => {
     offsetY: 0,
     portrait: { x: 26, y: 49, width: 130, height: 120 },
     text: { x: 188, centerY: 190, maxWidth: 278 },
+    label: { centerX: 91, y: 169 },
   });
   assert.deepEqual(resolveOriginalSpeechLayout(640, 480, 3).portrait, {
     x: 490,
@@ -25,6 +26,7 @@ test("scales uniformly and centers the original canvas without distorting it", (
     offsetY: 0,
     portrait: { x: 52, y: 420, width: 260, height: 240 },
     text: { x: 376, centerY: 380, maxWidth: 556 },
+    label: { centerX: 182, y: 660 },
   });
   assert.deepEqual(resolveOriginalSpeechLayout(1280, 720, 1), {
     scale: 1.5,
@@ -32,6 +34,7 @@ test("scales uniformly and centers the original canvas without distorting it", (
     offsetY: 0,
     portrait: { x: 895, y: 73.5, width: 195, height: 180 },
     text: { x: 442, centerY: 285, maxWidth: 417 },
+    label: { centerX: 992.5, y: 253.5 },
   });
 });
 

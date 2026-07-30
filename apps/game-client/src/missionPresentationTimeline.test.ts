@@ -2,41 +2,38 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { imjinrokK01Scenario } from "@shared";
 import {
-  MISSION_BRIEFING_INTRO_FADE_MS,
-  MISSION_BRIEFING_INTRO_HOLD_MS,
+  MISSION_BRIEFING_PORTRAIT_STEP_MS,
   beginPresentationPause,
   createMissionBriefingReplayState,
   getMissionBriefingClickAction,
-  getMissionBriefingIntroFadeAlpha,
-  getMissionBriefingIntroFrameAlphas,
   getMissionBriefingIntroStage,
+  getMissionBriefingPortraitScale,
+  getMissionBriefingTitleFrameIndex,
+  getMissionBriefingTitleSequenceDurationMs,
   getMissionDialogueClickAction,
   getMissionDialoguePointerAdvance,
   isPresentationExternallyPaused,
   shouldResumePresentationPlayback,
 } from "./missionPresentationTimeline.js";
 
-test("briefing intro holds the blank frame, then fades the completed frame", () => {
-  assert.equal(getMissionBriefingIntroStage(1_000, 1_000, false), "holding");
-  assert.equal(getMissionBriefingIntroFadeAlpha(1_000, 1_000, false), 0);
-  assert.deepEqual(getMissionBriefingIntroFrameAlphas(1_000, 1_000, false), { base: 1, completed: 0 });
-  assert.equal(getMissionBriefingIntroStage(1_000, 1_000 + MISSION_BRIEFING_INTRO_HOLD_MS, false), "fading");
-  assert.ok(getMissionBriefingIntroFadeAlpha(1_000, 1_000 + MISSION_BRIEFING_INTRO_HOLD_MS + 100, false) > 0);
-  assert.equal(
-    getMissionBriefingIntroStage(1_000, 1_000 + MISSION_BRIEFING_INTRO_HOLD_MS + MISSION_BRIEFING_INTRO_FADE_MS, false),
-    "ready",
-  );
-  assert.equal(getMissionBriefingIntroFadeAlpha(1_000, 1_000, true), 1);
-  assert.deepEqual(
-    getMissionBriefingIntroFrameAlphas(1_000, 1_000 + MISSION_BRIEFING_INTRO_HOLD_MS + 100, false),
-    {
-      base: 1,
-      completed: getMissionBriefingIntroFadeAlpha(1_000, 1_000 + MISSION_BRIEFING_INTRO_HOLD_MS + 100, false),
-    },
-  );
+const k01TitleSequence = imjinrokK01Scenario.briefing?.titleSequence;
+
+test("K01 briefing title sequence preserves every source frame boundary", () => {
+  assert.equal(getMissionBriefingTitleSequenceDurationMs(k01TitleSequence), 665);
+  assert.equal(getMissionBriefingTitleFrameIndex(k01TitleSequence, 1_000, 1_000, false), 0);
+  assert.equal(getMissionBriefingTitleFrameIndex(k01TitleSequence, 1_000, 1_499, false), 0);
+  assert.equal(getMissionBriefingTitleFrameIndex(k01TitleSequence, 1_000, 1_500, false), 1);
+
+  for (let index = 1; index < 12; index += 1) {
+    assert.equal(getMissionBriefingTitleFrameIndex(k01TitleSequence, 1_000, 1_500 + (index - 1) * 15, false), index);
+  }
+
+  assert.equal(getMissionBriefingIntroStage(k01TitleSequence, 1_000, 1_664, false), "playing");
+  assert.equal(getMissionBriefingIntroStage(k01TitleSequence, 1_000, 1_665, false), "ready");
+  assert.equal(getMissionBriefingTitleFrameIndex(k01TitleSequence, 1_000, 1_000, true), 11);
 });
 
-test("briefing replay restarts as a base-only intro with no scheduled line", () => {
+test("briefing replay restarts the source timeline and its dismissed dialogue state", () => {
   const replay = createMissionBriefingReplayState(4_000);
 
   assert.deepEqual(replay, {
@@ -46,11 +43,16 @@ test("briefing replay restarts as a base-only intro with no scheduled line", () 
     lineRevealAt: null,
     nextLineAt: null,
     lineScheduled: false,
+    dismissed: false,
   });
-  assert.deepEqual(getMissionBriefingIntroFrameAlphas(replay.introStartedAt, replay.introStartedAt, replay.introCompleted), {
-    base: 1,
-    completed: 0,
-  });
+  assert.equal(getMissionBriefingTitleFrameIndex(k01TitleSequence, replay.introStartedAt, replay.introStartedAt, replay.introCompleted), 0);
+});
+
+test("portrait introduction uses the source five-percent step rule with project fixed-cadence calibration", () => {
+  assert.equal(getMissionBriefingPortraitScale(1_000, 1_000), 0);
+  assert.equal(getMissionBriefingPortraitScale(1_000, 1_000 + MISSION_BRIEFING_PORTRAIT_STEP_MS - 0.01), 0);
+  assert.equal(getMissionBriefingPortraitScale(1_000, 1_000 + MISSION_BRIEFING_PORTRAIT_STEP_MS), 0.05);
+  assert.equal(getMissionBriefingPortraitScale(1_000, 2_000), 1);
 });
 
 test("presentation pauses distinguish self-owned playback pause from external pause", () => {
@@ -73,11 +75,11 @@ test("K01 delayed K1 line is revealed before a click can advance past it", () =>
   assert.equal(getMissionBriefingClickAction(false, true, false), "complete-intro");
   assert.equal(getMissionBriefingClickAction(true, true, false), "reveal-line");
   assert.equal(getMissionBriefingClickAction(true, false, false), "advance-line");
-  assert.equal(getMissionBriefingClickAction(true, false, true), "hold-line");
 });
 
-test("the final briefing line is held for the explicit game-start button", () => {
-  assert.equal(getMissionBriefingClickAction(true, false, true), "hold-line");
+test("the final pre-game briefing click dismisses once as a project input adaptation", () => {
+  assert.equal(getMissionBriefingClickAction(true, false, true), "dismiss-line");
+  assert.equal(getMissionBriefingClickAction(true, false, true, true), "no-op");
 });
 
 test("dialogue clicks advance each line and finish only after the final line", () => {

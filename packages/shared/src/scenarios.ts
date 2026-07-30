@@ -73,6 +73,8 @@ export interface ScenarioBriefingDefinition {
   battleType?: string;
   cast?: readonly string[];
   objective: string;
+  /** Source speaker labels keyed by portrait ID; optional for generic/mod briefings. */
+  portraitLabels?: Readonly<Record<string, string>>;
   titleSequence?: readonly ScenarioBriefingTitleFrameDefinition[];
   lines: ScenarioBriefingLineDefinition[];
 }
@@ -319,6 +321,28 @@ const joseonBriefingTitleSequence = [
   { sourceAsset: "ybriefingfnt/k01/k0111.spr", durationMs: 15 },
 ] as const satisfies readonly ScenarioBriefingTitleFrameDefinition[];
 
+// `FUN_004a7410` copies this recovered 17-entry SPEECH identifier/label table;
+// the source label renderer then selects the matching entry by portrait ID.
+const joseonBriefingPortraitLabels = {
+  K1: "조선 권율",
+  K2: "조선 이순신",
+  K3: "조선 유성룡",
+  K4: "조선 사명대사",
+  K5: "조선 곽재우",
+  J1: "일본 고니시",
+  J2: "일본 가토",
+  J3: "일본 와카자키",
+  J4: "일본 세이쇼오",
+  J5: "일본 우기다",
+  C1: "명 이여송",
+  C2: "명 조승훈",
+  C3: "명 심유경",
+  C4: "명 진린",
+  C5: "명 여여문",
+  K10: "조선 선조",
+  K6: "조선 허준",
+} as const satisfies Readonly<Record<string, string>>;
+
 export type K01ReinforcementIdentityMapping =
   | "exact-static-identity-source"
   | "proxy";
@@ -552,6 +576,7 @@ export const imjinrokK01Scenario = {
     battleType: "육상전",
     cast: ["유성룡", "선조", "권율"],
     objective: "1. 봉화대를 짓고 적군 섬멸 (유성룡, 권율은 살아 남아야 한다.)",
+    portraitLabels: joseonBriefingPortraitLabels,
     titleSequence: joseonBriefingTitleSequence,
     lines: [
       {
@@ -801,6 +826,7 @@ export const imjinrokK02Scenario = {
     battleType: "육상전",
     cast: ["유성룡", "선조", "권율"],
     objective: "1. 어가를 평양성까지 대피시킨다. (유성룡은 살아 남아야 한다.)",
+    portraitLabels: joseonBriefingPortraitLabels,
     titleSequence: joseonBriefingTitleSequence,
     lines: [
       {

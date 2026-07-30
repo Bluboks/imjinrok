@@ -20,6 +20,10 @@ export interface ResolvedOriginalSpeechLayout {
     centerY: number;
     maxWidth: number;
   };
+  label: {
+    centerX: number;
+    y: number;
+  };
 }
 
 const PORTRAIT_RECTS: Readonly<Record<OriginalSpeechSlot, Readonly<OriginalSpeechRect>>> = {
@@ -67,6 +71,10 @@ export function resolveOriginalSpeechLayout(
       x: offsetX + 188 * scale,
       centerY: offsetY + 190 * scale,
       maxWidth: 278 * scale,
+    },
+    label: {
+      centerX: offsetX + (sourcePortrait.x + sourcePortrait.width / 2) * scale,
+      y: offsetY + (sourcePortrait.y + sourcePortrait.height) * scale,
     },
   };
 }
