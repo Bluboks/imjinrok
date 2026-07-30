@@ -20,6 +20,11 @@ import { getPlayerPopulationState } from "./population.js";
 import { isResearchCompleted, isResearchPending } from "./research.js";
 import { getResourceNodeState } from "./resources.js";
 import {
+  CORE_OMNISCIENT_SKIRMISH_AI_PERCEPTION_POLICY_ID,
+  getSkirmishAiPerceptionPolicy,
+  type SkirmishAiPerceptionPolicy,
+} from "./skirmishAiPerception.js";
+import {
   BUILTIN_BALANCED_SKIRMISH_AI_STRATEGY_ID,
   getSkirmishAiStrategy,
   registerSkirmishAiStrategy,
@@ -52,6 +57,11 @@ export interface SkirmishAiControllerOptions {
   tuning?: Partial<SkirmishAiTuning>;
   /** Stable registered strategy id. Existing callers retain builtin-balanced. */
   strategyId?: string;
+  /**
+   * Stable registered perception policy id. Defaults to core:omniscient for
+   * direct-controller compatibility; product local skirmishes opt into fair visibility.
+   */
+  perceptionPolicyId?: string;
 }
 
 export const SKIRMISH_AI_TUNING: Record<SkirmishAiDifficulty, SkirmishAiTuning> = {
@@ -119,6 +129,7 @@ interface ResourceTarget {
 export class SkirmishAiController {
   private readonly tuning: SkirmishAiTuning;
   private readonly strategy: SkirmishAiStrategy;
+  private readonly perceptionPolicy: SkirmishAiPerceptionPolicy;
   private readonly initializedAutoAbilityPlayers = new Set<string>();
 
   constructor(
@@ -130,6 +141,9 @@ export class SkirmishAiController {
       ...(options.tuning ?? {}),
     };
     this.strategy = getSkirmishAiStrategy(options.strategyId ?? BUILTIN_BALANCED_SKIRMISH_AI_STRATEGY_ID);
+    this.perceptionPolicy = getSkirmishAiPerceptionPolicy(
+      options.perceptionPolicyId ?? CORE_OMNISCIENT_SKIRMISH_AI_PERCEPTION_POLICY_ID,
+    );
   }
 
   update(state: WorldState): void {
@@ -141,18 +155,32 @@ export class SkirmishAiController {
 
     for (const playerId of [...this.playerIds].sort()) {
       if (state.players[playerId]) {
+        const enemyUnits = this.collectPerceivedEnemyUnits(state, playerId);
         this.strategy.updatePlayer({
           state,
           playerId,
           tuning: this.tuning,
+          enemyUnits,
           issueCommand: issueWorldCommand,
-          updateBuiltinBalancedPlayer: () => this.updateBuiltinBalancedPlayer(state, playerId),
+          updateBuiltinBalancedPlayer: () => this.updateBuiltinBalancedPlayer(state, playerId, enemyUnits),
         });
       }
     }
   }
 
-  private updateBuiltinBalancedPlayer(state: WorldState, playerId: string): void {
+  private collectPerceivedEnemyUnits(state: WorldState, playerId: string): UnitState[] {
+    const unitsById = new Map<string, UnitState>();
+
+    for (const unit of this.perceptionPolicy.selectEnemyUnits({ state, playerId })) {
+      if (state.units[unit.id] === unit && arePlayersEnemies(state, unit.playerId, playerId)) {
+        unitsById.set(unit.id, unit);
+      }
+    }
+
+    return [...unitsById.values()].sort((left, right) => left.id.localeCompare(right.id));
+  }
+
+  private updateBuiltinBalancedPlayer(state: WorldState, playerId: string, enemyUnits: readonly UnitState[]): void {
     const player = state.players[playerId];
     if (!this.initializedAutoAbilityPlayers.has(playerId)) {
       // Undefined is the source-aligned disabled default; an explicit command
@@ -210,11 +238,11 @@ export class SkirmishAiController {
     this.ensureDefensiveBeacons(state, playerId, workers, units, townCenters, reservedWorkerIds);
 
     barracks.forEach((building) => {
-      this.ensureAttackRally(state, playerId, building);
+      this.ensureAttackRally(state, playerId, building, enemyUnits);
       this.issueTrainMilitaryUnit(state, playerId, building, units);
     });
 
-    const baseThreat = findNearestThreatNearBase(state, playerId, completedUnits, this.tuning.baseDefenseRadius);
+    const baseThreat = findNearestThreatNearBase(completedUnits, enemyUnits, this.tuning.baseDefenseRadius);
     const defenderIds = new Set<string>();
 
     if (baseThreat) {
@@ -236,7 +264,7 @@ export class SkirmishAiController {
       });
     }
 
-    this.issueAttackWave(state, playerId, fighters, defenderIds);
+    this.issueAttackWave(state, playerId, fighters, defenderIds, enemyUnits);
 
     workers.forEach((unit, index) => {
       if (reservedWorkerIds.has(unit.id)) {
@@ -244,7 +272,7 @@ export class SkirmishAiController {
       }
 
       if (this.shouldSendWorkerHarasser(state, index)) {
-        const enemy = findNearestReachableEnemyUnit(state, unit);
+        const enemy = findNearestReachableEnemyUnit(state, unit, enemyUnits);
 
         if (enemy) {
           this.issueAttackMove(state, playerId, unit, enemy.position);
@@ -642,8 +670,13 @@ export class SkirmishAiController {
     this.issueRallyPoint(state, playerId, building, target.point, target.id);
   }
 
-  private ensureAttackRally(state: WorldState, playerId: string, building: UnitState): void {
-    const enemy = findNearestReachableRallyEnemy(state, playerId, building, "swordsman") ?? findNearestEnemyUnit(state, building);
+  private ensureAttackRally(
+    state: WorldState,
+    playerId: string,
+    building: UnitState,
+    enemyUnits: readonly UnitState[],
+  ): void {
+    const enemy = findNearestReachableRallyEnemy(state, playerId, building, "swordsman", enemyUnits) ?? findNearestEnemyUnit(building, enemyUnits);
 
     if (!enemy) {
       return;
@@ -709,6 +742,7 @@ export class SkirmishAiController {
     playerId: string,
     fighters: readonly UnitState[],
     defenderIds: ReadonlySet<string>,
+    enemyUnits: readonly UnitState[],
   ): void {
     if (state.tick < this.tuning.attackStartTicks || state.tick % this.tuning.attackIntervalTicks !== 0) {
       return;
@@ -720,7 +754,7 @@ export class SkirmishAiController {
       .slice(0, waveSize);
 
     for (const unit of candidates) {
-      const enemy = findNearestReachableEnemyUnit(state, unit);
+      const enemy = findNearestReachableEnemyUnit(state, unit, enemyUnits);
 
       if (enemy) {
         this.issueAttackMove(state, playerId, unit, enemy.position);
@@ -1056,15 +1090,11 @@ function findNearestReachableResource(
   return null;
 }
 
-function findNearestEnemyUnit(state: WorldState, unit: UnitState): UnitState | null {
+function findNearestEnemyUnit(unit: UnitState, enemyUnits: readonly UnitState[]): UnitState | null {
   let nearestEnemy: UnitState | null = null;
   let nearestDistanceSq = Number.POSITIVE_INFINITY;
 
-  for (const candidate of Object.values(state.units).sort((a, b) => a.id.localeCompare(b.id))) {
-    if (!arePlayersEnemies(state, candidate.playerId, unit.playerId)) {
-      continue;
-    }
-
+  for (const candidate of enemyUnits) {
     const distanceSq = getDistanceSq(unit.position, candidate.position);
     if (distanceSq < nearestDistanceSq) {
       nearestEnemy = candidate;
@@ -1075,8 +1105,8 @@ function findNearestEnemyUnit(state: WorldState, unit: UnitState): UnitState | n
   return nearestEnemy;
 }
 
-function findNearestReachableEnemyUnit(state: WorldState, unit: UnitState): UnitState | null {
-  for (const enemy of collectEnemyUnitsByDistance(state, unit)) {
+function findNearestReachableEnemyUnit(state: WorldState, unit: UnitState, enemyUnits: readonly UnitState[]): UnitState | null {
+  for (const enemy of collectEnemyUnitsByDistance(unit, enemyUnits)) {
     if (findPathForUnit(state, unit, enemy.position)) {
       return enemy;
     }
@@ -1090,6 +1120,7 @@ function findNearestReachableRallyEnemy(
   playerId: string,
   building: UnitState,
   unitKind: UnitDefinitionId,
+  enemyUnits: readonly UnitState[],
 ): UnitState | null {
   const spawn = findUnitSpawnPoint(state, building, unitKind);
 
@@ -1099,7 +1130,7 @@ function findNearestReachableRallyEnemy(
 
   const probe = createUnitState(`${building.id}-rally-probe`, playerId, unitKind, spawn);
 
-  return findNearestReachableEnemyUnit(state, probe);
+  return findNearestReachableEnemyUnit(state, probe, enemyUnits);
 }
 
 function findNearestReachableProductionResource(
@@ -1137,9 +1168,8 @@ function findNearestUnit(units: readonly UnitState[], position: GridPoint): Unit
 }
 
 function findNearestThreatNearBase(
-  state: WorldState,
-  playerId: string,
   units: readonly UnitState[],
+  enemyUnits: readonly UnitState[],
   radius: number,
 ): UnitState | null {
   const buildings = units.filter((unit) => unitDefinitions[unit.kind].category === "building");
@@ -1152,11 +1182,7 @@ function findNearestThreatNearBase(
   let nearestThreat: UnitState | null = null;
   let nearestDistanceSq = Number.POSITIVE_INFINITY;
 
-  for (const threat of Object.values(state.units).sort((a, b) => a.id.localeCompare(b.id))) {
-    if (!arePlayersEnemies(state, threat.playerId, playerId)) {
-      continue;
-    }
-
+  for (const threat of enemyUnits) {
     for (const building of buildings) {
       const distanceSq = getDistanceSq(threat.position, building.position);
 
@@ -1172,9 +1198,8 @@ function findNearestThreatNearBase(
   return nearestThreat;
 }
 
-function collectEnemyUnitsByDistance(state: WorldState, unit: UnitState): UnitState[] {
-  return Object.values(state.units)
-    .filter((candidate) => arePlayersEnemies(state, candidate.playerId, unit.playerId))
+function collectEnemyUnitsByDistance(unit: UnitState, enemyUnits: readonly UnitState[]): UnitState[] {
+  return enemyUnits.slice()
     .sort((a, b) => {
       const distanceDelta = getDistanceSq(unit.position, a.position) - getDistanceSq(unit.position, b.position);
 

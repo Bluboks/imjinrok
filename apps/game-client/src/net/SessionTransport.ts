@@ -1,5 +1,5 @@
 import { resourceDefinitions, type CommandEnvelope, type MapDefinition, type ResourceDefinition, type ScenarioDefinition } from "@shared";
-import { advanceWorldTick, completeScenarioRuntime, createInitialWorldState, createPlayerResearchState, createProjectileSystemState, issueCommand as issueWorldCommand, parseSerializedProjectileImpactLog, parseSerializedProjectileSystemState, PRODUCT_PROJECTILE_REGISTRY, SIM_TICK_SECONDS, SkirmishAiController, type IssueCommandResult, type ProjectileRegistry, type ScenarioStatus, type SkirmishAiControllerOptions, type WorldSnapshot, type WorldState } from "@simulation";
+import { advanceWorldTick, completeScenarioRuntime, CORE_CURRENT_VISIBILITY_SKIRMISH_AI_PERCEPTION_POLICY_ID, createInitialWorldState, createPlayerResearchState, createProjectileSystemState, issueCommand as issueWorldCommand, parseSerializedProjectileImpactLog, parseSerializedProjectileSystemState, PRODUCT_PROJECTILE_REGISTRY, SIM_TICK_SECONDS, SkirmishAiController, type IssueCommandResult, type ProjectileRegistry, type ScenarioStatus, type SkirmishAiControllerOptions, type WorldSnapshot, type WorldState } from "@simulation";
 import type { GameLaunchContext } from "../session.js";
 import { NetworkClient } from "./NetworkClient.js";
 
@@ -439,7 +439,10 @@ export function createSessionTransport(
     return new LocalSessionTransport(
       initialSnapshot,
       getLocalAiPlayerIds(context),
-      context.aiDifficulty ? { difficulty: context.aiDifficulty } : {},
+      {
+        ...(context.aiDifficulty ? { difficulty: context.aiDifficulty } : {}),
+        perceptionPolicyId: CORE_CURRENT_VISIBILITY_SKIRMISH_AI_PERCEPTION_POLICY_ID,
+      },
       map,
       simulationOptions.projectileRegistry ?? PRODUCT_PROJECTILE_REGISTRY,
     );

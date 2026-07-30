@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { defaultMap, defaultSkirmishScenario, imjinrokK02Scenario, type ScenarioDefinition } from "@shared";
+import { createBlankMap, defaultMap, defaultSkirmishScenario, imjinrokK02Scenario, type ScenarioDefinition } from "@shared";
 import {
   createInitialWorldState,
   PRODUCT_IMMEDIATE_PROJECTILE_PROFILE,
@@ -314,6 +314,46 @@ test("local skirmish sessions keep generic skirmish AI controllers", () => {
   assert.equal(transport.getSnapshot().tick, 35);
   assert.equal(cpuUnits.length > 9, true);
   assert.equal(cpuUnits.some((unit) => unit.currentOrder !== undefined), true);
+});
+
+test("local skirmish sessions use current visibility for strategic AI targets", () => {
+  const map = createBlankMap({ id: "local-skirmish-night-visibility", width: 64, height: 64 });
+  map.environment = {
+    dayNight: {
+      cycleTicks: 1000,
+      nightStartTick: 0,
+      dayStartTick: 999,
+      nightSightMultiplier: 0.5,
+    },
+  };
+  const snapshot = createInitialWorldState(map, ["p1", "p2"], defaultSkirmishScenario, { p1: "local", p2: "cpu" });
+  const fighter = snapshot.units["p2-swordsman-1"]!;
+  const enemy = snapshot.units["p1-villager-1"]!;
+
+  snapshot.units = {
+    [fighter.id]: fighter,
+    [enemy.id]: enemy,
+  };
+  fighter.position = { x: 30, y: 30 };
+  enemy.position = { x: 36, y: 30 };
+  snapshot.tick = 539;
+
+  const transport = createSessionTransport(
+    {
+      ...createAiLaunchContext("skirmish"),
+      mapId: map.id,
+      mapDefinition: map,
+      resumeSnapshot: snapshot,
+    },
+    map,
+    ["p1", "p2"],
+    {} as never,
+  );
+
+  transport.update(50, 50);
+
+  assert.equal(transport.getSnapshot().tick, 540);
+  assert.equal(transport.getSnapshot().units[fighter.id]?.currentOrder, undefined);
 });
 
 test("local session transport can force defeat for surrender", () => {

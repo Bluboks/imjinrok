@@ -721,6 +721,95 @@ test("skirmish AI skips unreachable attack targets and picks a reachable enemy",
   assert.deepEqual(fighter.currentOrder?.target, reachableEnemy.position);
 });
 
+test("current-visibility skirmish AI selects a hidden enemy only after daylight", () => {
+  const map = createSightLimitedMap();
+  const state = createInitialWorldState(map, ["p1", "p2"]);
+  const fighter = createUnitState("p2-swordsman-test", "p2", "swordsman", { x: 30, y: 30 });
+  const enemy = createUnitState("p1-villager-target", "p1", "villager", { x: 36, y: 30 });
+  const ai = new SkirmishAiController(["p2"], { perceptionPolicyId: "core:current-visibility" });
+
+  state.units = { [fighter.id]: fighter, [enemy.id]: enemy };
+  state.tick = 540;
+
+  ai.update(state);
+  assert.equal(fighter.currentOrder, undefined);
+
+  state.environment.dayPhase = "day";
+  ai.update(state);
+
+  assert.equal(fighter.currentOrder?.type, "attack-move");
+  assert.deepEqual(fighter.currentOrder?.type === "attack-move" ? fighter.currentOrder.target : undefined, enemy.position);
+});
+
+test("current-visibility skirmish AI does not defend or harass enemies outside night sight", () => {
+  const defenseMap = createSightLimitedMap();
+  const defenseState = createInitialWorldState(defenseMap, ["p1", "p2"]);
+  const townCenter = createUnitState("p2-town-center-test", "p2", "town-center", { x: 30, y: 30 });
+  const defender = createUnitState("p2-swordsman-test", "p2", "swordsman", { x: 25, y: 30 });
+  const threat = createUnitState("p1-swordsman-threat", "p1", "swordsman", { x: 38, y: 30 });
+  const fairAi = new SkirmishAiController(["p2"], {
+    perceptionPolicyId: "core:current-visibility",
+    tuning: { maxDefensiveBeacons: 0 },
+  });
+
+  defenseState.units = {
+    [townCenter.id]: townCenter,
+    [defender.id]: defender,
+    [threat.id]: threat,
+  };
+  defenseState.tick = 45;
+  fairAi.update(defenseState);
+  assert.equal(defender.currentOrder, undefined);
+
+  defenseState.environment.dayPhase = "day";
+  fairAi.update(defenseState);
+  assert.deepEqual(defender.currentOrder?.type === "attack-move" ? defender.currentOrder.target : undefined, threat.position);
+
+  const harassmentMap = createSightLimitedMap();
+  const harassmentState = createInitialWorldState(harassmentMap, ["p1", "p2"]);
+  const harassmentTownCenter = createUnitState("p2-town-center-harass", "p2", "town-center", { x: 2, y: 2 });
+  const barracks = createUnitState("p2-barracks-harass", "p2", "barracks", { x: 5, y: 2 });
+  const harasser = createUnitState("p2-villager-harass", "p2", "villager", { x: 30, y: 30 });
+  const target = createUnitState("p1-villager-harass", "p1", "villager", { x: 36, y: 30 });
+  const harassAi = new SkirmishAiController(["p2"], {
+    perceptionPolicyId: "core:current-visibility",
+    tuning: {
+      attackStartTicks: 1,
+      attackIntervalTicks: 45,
+      workerHarasserCount: 1,
+      maxDefensiveBeacons: 0,
+    },
+  });
+
+  harassmentState.units = {
+    [harassmentTownCenter.id]: harassmentTownCenter,
+    [barracks.id]: barracks,
+    [harasser.id]: harasser,
+    [target.id]: target,
+  };
+  harassmentState.tick = 45;
+  harassAi.update(harassmentState);
+  assert.equal(harasser.currentOrder, undefined);
+
+  harassmentState.environment.dayPhase = "day";
+  harassAi.update(harassmentState);
+  assert.deepEqual(harasser.currentOrder?.type === "attack-move" ? harasser.currentOrder.target : undefined, target.position);
+});
+
+test("default omniscient skirmish AI retains legacy hidden-target selection", () => {
+  const map = createSightLimitedMap();
+  const state = createInitialWorldState(map, ["p1", "p2"]);
+  const fighter = createUnitState("p2-swordsman-test", "p2", "swordsman", { x: 30, y: 30 });
+  const enemy = createUnitState("p1-villager-target", "p1", "villager", { x: 36, y: 30 });
+  const ai = new SkirmishAiController(["p2"]);
+
+  state.units = { [fighter.id]: fighter, [enemy.id]: enemy };
+  state.tick = 540;
+  ai.update(state);
+
+  assert.deepEqual(fighter.currentOrder?.type === "attack-move" ? fighter.currentOrder.target : undefined, enemy.position);
+});
+
 function getResourceYield(map: MapDefinition, resourceId: string): BankResourceKind | null {
   for (let y = 0; y < map.height; y += 1) {
     for (let x = 0; x < map.width; x += 1) {
@@ -733,6 +822,19 @@ function getResourceYield(map: MapDefinition, resourceId: string): BankResourceK
   }
 
   return null;
+}
+
+function createSightLimitedMap(): MapDefinition {
+  const map = createBlankMap({ width: 64, height: 64 });
+  map.environment = {
+    dayNight: {
+      cycleTicks: 10,
+      nightStartTick: 0,
+      dayStartTick: 6,
+      nightSightMultiplier: 0.5,
+    },
+  };
+  return map;
 }
 
 function getSquaredDistance(a: { x: number; y: number }, b: { x: number; y: number }): number {
