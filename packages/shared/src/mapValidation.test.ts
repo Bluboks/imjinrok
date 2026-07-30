@@ -3,7 +3,7 @@ import test from "node:test";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { createBlankMap } from "./maps.js";
-import { createContentRegistry, imjinrokSourceContentPack } from "./contentPack.js";
+import { createContentRegistry, defaultContentPacks, imjinrokSourceContentPack } from "./contentPack.js";
 import { assertValidMapDefinition, validateMapDefinition } from "./mapValidation.js";
 import { createImjinrokMapScaffold } from "./imjinrokMaps.js";
 
@@ -22,6 +22,34 @@ test("unknown visual contract references fail loudly", () => {
 
   assert.deepEqual(result.issues, [{ path: "tilesetId", message: "Unknown tileset 'missing-tileset'." }]);
   assert.throws(() => assertValidMapDefinition(map, createContentRegistry()), /Invalid map definition 'blank-frontier': tilesetId/);
+});
+
+test("maps validate optional pathfinding profile selections against content metadata", () => {
+  const map = createBlankMap();
+  map.pathfindingProfileId = "mod:deterministic";
+  const registry = createContentRegistry([
+    ...defaultContentPacks,
+    {
+      id: "pathfinding-test-pack",
+      displayName: "Pathfinding Test Pack",
+      version: "1.0.0",
+      pathfindingProfiles: {
+        "mod:deterministic": { id: "mod:deterministic", displayName: "Deterministic Mod Pathfinder" },
+      },
+    },
+  ]);
+
+  assert.equal(validateMapDefinition(map, registry).ok, true);
+
+  map.pathfindingProfileId = "missing:pathfinder";
+  assert.deepEqual(validateMapDefinition(map, registry).issues, [
+    { path: "pathfindingProfileId", message: "Unknown pathfinding profile 'missing:pathfinder'." },
+  ]);
+
+  map.pathfindingProfileId = "";
+  assert.deepEqual(validateMapDefinition(map, registry).issues, [
+    { path: "pathfindingProfileId", message: "Pathfinding profile id must not be empty." },
+  ]);
 });
 
 test("legacy maps without visual references remain valid", () => {

@@ -35,6 +35,7 @@ export function validateMapDefinition(map: MapDefinition, registry: ContentRegis
   validateReference(map.tilesetId, registry.tilesets, "tilesetId", "tileset", issues);
   validateReference(map.environmentVisualProfileId, registry.environmentVisualProfiles, "environmentVisualProfileId", "environment visual profile", issues);
   validateReference(map.resourceVisualSetId, registry.resourceVisualSets, "resourceVisualSetId", "resource visual set", issues);
+  validatePathfindingProfileReference(map.pathfindingProfileId, registry.pathfindingProfiles, issues);
 
   for (const environmentIssue of map.environment?.dayNight ? validateDayNightCycle(map.environment.dayNight) : []) {
     issues.push(issue(`environment.dayNight.${environmentIssue.path}`, environmentIssue.message));
@@ -103,6 +104,23 @@ function validateReference(
 ): void {
   if (reference !== undefined && !definitions[reference]) {
     issues.push(issue(path, `Unknown ${kind} '${reference}'.`));
+  }
+}
+
+function validatePathfindingProfileReference(
+  profileId: string | undefined,
+  profiles: Readonly<Record<string, unknown>>,
+  issues: MapValidationIssue[],
+): void {
+  if (profileId === undefined) {
+    return;
+  }
+  if (!profileId.trim()) {
+    issues.push(issue("pathfindingProfileId", "Pathfinding profile id must not be empty."));
+    return;
+  }
+  if (!profiles[profileId]) {
+    issues.push(issue("pathfindingProfileId", `Unknown pathfinding profile '${profileId}'.`));
   }
 }
 

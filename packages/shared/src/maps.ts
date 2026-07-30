@@ -56,6 +56,11 @@ export interface MapDefinition {
   tilesetId?: string;
   environmentVisualProfileId?: string;
   resourceVisualSetId?: string;
+  /**
+   * Optional content-selected navigation profile. The simulation resolves this
+   * stable id to a registered Pathfinder when it creates a world.
+   */
+  pathfindingProfileId?: string;
 }
 
 export function getTileIndex(width: number, x: number, y: number): number {
@@ -106,6 +111,7 @@ export function createBlankMap(options?: Partial<Pick<MapDefinition, "id" | "nam
     tilesetId: "core-default",
     environmentVisualProfileId: "core-default",
     resourceVisualSetId: "core-default",
+    pathfindingProfileId: "core:a-star",
   };
 }
 

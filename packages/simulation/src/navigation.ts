@@ -3,8 +3,11 @@ import {
   terrainDefinitions,
   type GridPoint,
   type MapDefinition,
+  type ScenarioDefinition,
 } from "../../shared/src/index.js";
 import { getEntityBlockingTiles } from "./collision.js";
+import { defaultPathfinderRegistry, requirePathfinder } from "./pathfinderRegistry.js";
+import type { FindPathOptions, Pathfinder } from "./pathfinder.js";
 import { isTilePassableForUnit } from "./terrain.js";
 import type { UnitState, WorldState } from "./types.js";
 
@@ -23,16 +26,34 @@ const MAX_PATHFINDING_ITERATIONS = 100_000;
 const MAX_GOAL_SEARCH_NODES = 8_192;
 const MAX_GOAL_CANDIDATES = 64;
 
-export interface FindPathOptions {
-  allowPartial?: boolean;
-  /**
-   * Use only for reachability checks. Movement paths keep mobile footprints
-   * blocked so their waypoints remain immediately occupiable.
-   */
-  ignoreMobileBlockers?: boolean;
+export type { FindPathOptions } from "./pathfinder.js";
+
+export const CORE_A_STAR_PATHFINDER_ID = "core:a-star";
+
+export const coreAStarPathfinder: Pathfinder = {
+  id: CORE_A_STAR_PATHFINDER_ID,
+  findPath: findPathWithCoreAStar,
+};
+
+defaultPathfinderRegistry.register(coreAStarPathfinder);
+
+/** Scenario selection takes precedence over the optional map selection. */
+export function resolvePathfindingProfileId(map: MapDefinition, scenario: ScenarioDefinition): string {
+  const profileId = scenario.pathfindingProfileId ?? map.pathfindingProfileId ?? CORE_A_STAR_PATHFINDER_ID;
+  requirePathfinder(profileId);
+  return profileId;
 }
 
 export function findPathForUnit(
+  state: WorldState,
+  unit: UnitState,
+  target: GridPoint,
+  options: FindPathOptions = {},
+): GridPoint[] | null {
+  return requirePathfinder(state.pathfindingProfileId).findPath(state, unit, target, options);
+}
+
+function findPathWithCoreAStar(
   state: WorldState,
   unit: UnitState,
   target: GridPoint,
