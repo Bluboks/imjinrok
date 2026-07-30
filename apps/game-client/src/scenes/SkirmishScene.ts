@@ -144,6 +144,12 @@ import {
   type PresentationPauseOwnership,
 } from "../missionPresentationTimeline.js";
 import { placeStaticVisual } from "../render/placeStaticVisual.js";
+import {
+  FOG_VISIBILITY_CHUNK_SIZE,
+  getChunkGridSize,
+  TERRAIN_RENDER_CHUNK_SIZE,
+} from "../render/chunkPolicy.js";
+import { runRenderTextureBatch } from "../render/renderTextureBatch.js";
 import { getEntityAnimationStateKey } from "../render/entityAnimationState.js";
 import { resolveEntityAnimationSelection } from "../render/sourceOrientationAnimation.js";
 import {
@@ -219,6 +225,7 @@ import {
   type FogVisibility,
   type SourceFogComposite,
 } from "../ui/sourceFogAndCommandAssets.js";
+import { shouldPublishSerializableView } from "../ui/serializableViewPublication.js";
 import {
   BUILD_DONE_AUDIO_CUE_KEY,
   COMMAND_REJECTED_AUDIO_CUE_KEY,
@@ -238,7 +245,6 @@ import {
 const DRAG_THRESHOLD_SQ = 36;
 const EDGE_PAN_SIZE = 28;
 const EDGE_PAN_SPEED = 520;
-const TERRAIN_CHUNK_SIZE = 16;
 const VIEWPORT_EVENT_INTERVAL_MS = 1000 / 30;
 const SCREEN_OVERLAY_DEPTH = 1_000_000;
 const GAME_AUDIO_MUTED_STORAGE_KEY = "isorts.audio.muted";
@@ -528,6 +534,9 @@ export class SkirmishScene extends Phaser.Scene {
   private readonly combatEffectGraphics = new Set<Phaser.GameObjects.Graphics>();
   private readonly terrainTextureKeys = new Map<TerrainType, string>();
   private readonly fogTextureKeys = new Map<TileVisibility, string>();
+  private playerEconomySignature: string | null = null;
+  private magicAutoUseSignature: string | null = null;
+  private selectionSignature: string | null = null;
   private screenOverlayCamera: Phaser.Cameras.Scene2D.Camera | null = null;
   private readonly screenOverlayRoots = new Set<ScreenOverlayGameObject>();
   private readonly activeTheme: ThemeDefinition = defaultTheme;
@@ -686,6 +695,7 @@ export class SkirmishScene extends Phaser.Scene {
 
   create(data: GameLaunchContext): void {
     this.closeCheatInput();
+    this.resetHudPublicationSignatures();
     this.revealMapCheatActive = false;
     this.activeMissionDialogue = null;
     this.missionResultAudioStatus = null;
@@ -1220,6 +1230,7 @@ export class SkirmishScene extends Phaser.Scene {
     this.game.events.off(MAGIC_AUTO_USE_REQUESTED_EVENT, this.handleMagicAutoUseRequested, this);
     this.scale.off(Phaser.Scale.Events.RESIZE, this.handleResize, this);
     this.clearHudRegistryState();
+    this.resetHudPublicationSignatures();
     this.terrainChunks.forEach((chunk) => chunk.destroy());
     this.terrainChunks.length = 0;
     this.disposeTerrainRenderStamps();
@@ -1282,6 +1293,12 @@ export class SkirmishScene extends Phaser.Scene {
       GAME_PLAYBACK_REGISTRY_KEY,
       MAGIC_AUTO_USE_REGISTRY_KEY,
     ]);
+  }
+
+  private resetHudPublicationSignatures(): void {
+    this.playerEconomySignature = null;
+    this.magicAutoUseSignature = null;
+    this.selectionSignature = null;
   }
 
   private setupScreenOverlayCamera(): void {
@@ -5706,6 +5723,13 @@ export class SkirmishScene extends Phaser.Scene {
       research: this.createPlayerResearchView(this.localPlayerId),
     };
 
+    const publication = shouldPublishSerializableView(this.playerEconomySignature, view);
+
+    if (!publication.shouldPublish) {
+      return;
+    }
+
+    this.playerEconomySignature = publication.signature;
     this.registry.set(PLAYER_ECONOMY_REGISTRY_KEY, view);
     this.game.events.emit(PLAYER_ECONOMY_CHANGED_EVENT, view);
   }
@@ -5715,6 +5739,13 @@ export class SkirmishScene extends Phaser.Scene {
       this.localPlayerId,
       this.worldState.players[this.localPlayerId]?.magicAutoUseEnabled,
     );
+    const publication = shouldPublishSerializableView(this.magicAutoUseSignature, view);
+
+    if (!publication.shouldPublish) {
+      return;
+    }
+
+    this.magicAutoUseSignature = publication.signature;
     this.registry.set(MAGIC_AUTO_USE_REGISTRY_KEY, view);
     this.game.events.emit(MAGIC_AUTO_USE_CHANGED_EVENT, view);
   }
@@ -6526,6 +6557,13 @@ export class SkirmishScene extends Phaser.Scene {
       );
     });
 
+    const publication = shouldPublishSerializableView(this.selectionSignature, selection);
+
+    if (!publication.shouldPublish) {
+      return;
+    }
+
+    this.selectionSignature = publication.signature;
     this.registry.set(SELECTED_ENTITY_REGISTRY_KEY, selection);
     this.game.events.emit(SELECTED_ENTITY_CHANGED_EVENT, selection);
   }
@@ -6915,7 +6953,7 @@ export class SkirmishScene extends Phaser.Scene {
 
     const update = updatePlayerVisibilityWithChanges(this.playerVisibility, this.worldState, this.localPlayerId, {
       dirtyChunks: this.fogChunkDirtyMask,
-      chunkSize: TERRAIN_CHUNK_SIZE,
+      chunkSize: FOG_VISIBILITY_CHUNK_SIZE,
     });
 
     this.playerVisibility = update.visibility;
@@ -6974,9 +7012,10 @@ export class SkirmishScene extends Phaser.Scene {
   private configureFogChunkGrid(): void {
     this.disposeFogOverlay();
     this.disposeSourceFogStamps();
-    this.fogChunksPerRow = Math.ceil(this.map.width / TERRAIN_CHUNK_SIZE);
-    this.fogChunksPerColumn = Math.ceil(this.map.height / TERRAIN_CHUNK_SIZE);
-    this.fogChunkDirtyMask = new Uint8Array(this.fogChunksPerRow * this.fogChunksPerColumn);
+    const grid = getChunkGridSize(this.map.width, this.map.height, FOG_VISIBILITY_CHUNK_SIZE);
+    this.fogChunksPerRow = grid.columns;
+    this.fogChunksPerColumn = grid.rows;
+    this.fogChunkDirtyMask = new Uint8Array(grid.count);
     this.fogChunks.length = this.fogChunkDirtyMask.length;
     this.fogChunks.fill(null);
   }
@@ -7052,41 +7091,42 @@ export class SkirmishScene extends Phaser.Scene {
     let tileDrawCount = 0;
 
     renderTexture.clear();
+    runRenderTextureBatch(renderTexture, () => {
+      for (let y = bounds.chunkY; y <= bounds.maxY; y += 1) {
+        for (let x = bounds.chunkX; x <= bounds.maxX; x += 1) {
+          const visibility = (this.playerVisibility.tiles[y * this.playerVisibility.width + x] ?? TileVisibility.Unexplored) as TileVisibility;
 
-    for (let y = bounds.chunkY; y <= bounds.maxY; y += 1) {
-      for (let x = bounds.chunkX; x <= bounds.maxX; x += 1) {
-        const visibility = (this.playerVisibility.tiles[y * this.playerVisibility.width + x] ?? TileVisibility.Unexplored) as TileVisibility;
-
-        if (visibility === TileVisibility.Visible) {
-          continue;
-        }
-
-        const textureKey = this.fogTextureKeys.get(visibility);
-
-        if (!textureKey) {
-          continue;
-        }
-
-        const iso = cartToIso({ x, y }, this.map.tileWidth, this.map.tileHeight);
-        const worldX = this.mapOrigin.x + iso.x;
-        const worldY = this.mapOrigin.y + iso.y;
-        const tile = getTileAt(this.map, x, y);
-        const drewElevationFog = this.drawElevationFogTile(renderTexture, bounds, visibility, x, y, worldX, worldY);
-
-        if (!drewElevationFog) {
-          if (tile.elevation <= 0) {
-            this.drawBaseFogTile(renderTexture, bounds, textureKey, visibility, x, y, worldX, worldY);
-          } else {
-            this.drawFallbackFogTile(renderTexture, bounds, textureKey, worldX, worldY);
+          if (visibility === TileVisibility.Visible) {
+            continue;
           }
+
+          const textureKey = this.fogTextureKeys.get(visibility);
+
+          if (!textureKey) {
+            continue;
+          }
+
+          const iso = cartToIso({ x, y }, this.map.tileWidth, this.map.tileHeight);
+          const worldX = this.mapOrigin.x + iso.x;
+          const worldY = this.mapOrigin.y + iso.y;
+          const tile = getTileAt(this.map, x, y);
+          const drewElevationFog = this.drawElevationFogTile(renderTexture, bounds, visibility, x, y, worldX, worldY);
+
+          if (!drewElevationFog) {
+            if (tile.elevation <= 0) {
+              this.drawBaseFogTile(renderTexture, bounds, textureKey, visibility, x, y, worldX, worldY);
+            } else {
+              this.drawFallbackFogTile(renderTexture, bounds, textureKey, worldX, worldY);
+            }
+          }
+
+          this.drawSourceFogComposite(renderTexture, bounds, visibility, x, y, worldX, worldY);
+
+          hasFog = true;
+          tileDrawCount += 1;
         }
-
-        this.drawSourceFogComposite(renderTexture, bounds, visibility, x, y, worldX, worldY);
-
-        hasFog = true;
-        tileDrawCount += 1;
       }
-    }
+    });
 
     renderTexture.setVisible(hasFog);
     return tileDrawCount;
@@ -7137,7 +7177,7 @@ export class SkirmishScene extends Phaser.Scene {
     const halfWidth = this.map.tileWidth / 2;
     const halfHeight = this.map.tileHeight / 2;
 
-    renderTexture.draw(textureKey, worldX - bounds.minX - halfWidth - 1, worldY - bounds.minY - halfHeight - 1);
+    renderTexture.batchDraw(textureKey, worldX - bounds.minX - halfWidth - 1, worldY - bounds.minY - halfHeight - 1);
   }
 
   private drawSourceFogComposite(
@@ -7181,7 +7221,7 @@ export class SkirmishScene extends Phaser.Scene {
       this.map.tileWidth,
       this.map.tileHeight,
     );
-    renderTexture.draw(this.getSourceFogStamp(source), placement.position.x - bounds.minX, placement.position.y - bounds.minY);
+    renderTexture.batchDraw(this.getSourceFogStamp(source), placement.position.x - bounds.minX, placement.position.y - bounds.minY);
   }
 
   private getFogVisibilityAt(x: number, y: number): TileVisibility {
@@ -7292,7 +7332,7 @@ export class SkirmishScene extends Phaser.Scene {
     const pivot = getFramePivot(visual, frame);
     const liftPx = (pivot.liftPx ?? 0) * scale * liftSteps;
 
-    renderTexture.draw(stamp, worldX - bounds.minX, worldY - bounds.minY - liftPx);
+    renderTexture.batchDraw(stamp, worldX - bounds.minX, worldY - bounds.minY - liftPx);
   }
 
   private ensureFogChunkRenderTexture(chunkIndex: number, bounds: FogChunkBounds): Phaser.GameObjects.RenderTexture {
@@ -7314,10 +7354,10 @@ export class SkirmishScene extends Phaser.Scene {
   private getFogChunkBounds(chunkIndex: number): FogChunkBounds {
     const chunkColumn = chunkIndex % this.fogChunksPerRow;
     const chunkRow = Math.floor(chunkIndex / this.fogChunksPerRow);
-    const chunkX = chunkColumn * TERRAIN_CHUNK_SIZE;
-    const chunkY = chunkRow * TERRAIN_CHUNK_SIZE;
-    const maxX = Math.min(this.map.width - 1, chunkX + TERRAIN_CHUNK_SIZE - 1);
-    const maxY = Math.min(this.map.height - 1, chunkY + TERRAIN_CHUNK_SIZE - 1);
+    const chunkX = chunkColumn * FOG_VISIBILITY_CHUNK_SIZE;
+    const chunkY = chunkRow * FOG_VISIBILITY_CHUNK_SIZE;
+    const maxX = Math.min(this.map.width - 1, chunkX + FOG_VISIBILITY_CHUNK_SIZE - 1);
+    const maxY = Math.min(this.map.height - 1, chunkY + FOG_VISIBILITY_CHUNK_SIZE - 1);
     const visualBounds = this.getTerrainChunkWorldBounds(chunkX, chunkY, maxX, maxY);
     const minX = visualBounds.left - 2;
     const flatMinY = visualBounds.top - 2;
@@ -7393,10 +7433,10 @@ export class SkirmishScene extends Phaser.Scene {
     const halfWidth = this.map.tileWidth / 2;
     const halfHeight = this.map.tileHeight / 2;
 
-    for (let chunkY = 0; chunkY < this.map.height; chunkY += TERRAIN_CHUNK_SIZE) {
-      for (let chunkX = 0; chunkX < this.map.width; chunkX += TERRAIN_CHUNK_SIZE) {
-        const maxX = Math.min(this.map.width - 1, chunkX + TERRAIN_CHUNK_SIZE - 1);
-        const maxY = Math.min(this.map.height - 1, chunkY + TERRAIN_CHUNK_SIZE - 1);
+    for (let chunkY = 0; chunkY < this.map.height; chunkY += TERRAIN_RENDER_CHUNK_SIZE) {
+      for (let chunkX = 0; chunkX < this.map.width; chunkX += TERRAIN_RENDER_CHUNK_SIZE) {
+        const maxX = Math.min(this.map.width - 1, chunkX + TERRAIN_RENDER_CHUNK_SIZE - 1);
+        const maxY = Math.min(this.map.height - 1, chunkY + TERRAIN_RENDER_CHUNK_SIZE - 1);
         const bounds = this.getTerrainChunkWorldBounds(chunkX, chunkY, maxX, maxY);
         const minX = bounds.left - 2;
         const minY = bounds.top - 2;
@@ -7407,35 +7447,37 @@ export class SkirmishScene extends Phaser.Scene {
           .setOrigin(0, 0)
           .setDepth(minY);
 
-        for (let y = chunkY; y <= maxY; y += 1) {
-          for (let x = chunkX; x <= maxX; x += 1) {
-            const tile = getTileAt(this.map, x, y);
-            if (tile.elevation > 0) {
-              continue;
-            }
-
-            const iso = cartToIso({ x, y }, this.map.tileWidth, this.map.tileHeight);
-            const worldX = this.mapOrigin.x + iso.x;
-            const worldY = this.mapOrigin.y + iso.y;
-            const explicitVisual = resolveExplicitTileVisual(CONTENT_REGISTRY, this.map, tile, "flat");
-            const explicitUnderlay = resolveExplicitTileUnderlayVisual(CONTENT_REGISTRY, this.map, tile);
-            const flatVisual = this.getFlatTerrainVisualForTerrain(tile.terrain);
-            const flatFrame = flatVisual ? this.pickTerrainFrame(flatVisual, "base", x, y) : null;
-
-            if (explicitVisual) {
-              if (explicitUnderlay) {
-                this.drawExplicitTileVisual(renderTexture, { minX, minY }, explicitUnderlay, worldX, worldY, 0);
-              } else {
-                renderTexture.draw(this.terrainTextureKeys.get(tile.terrain)!, worldX - minX - halfWidth - 1, worldY - minY - halfHeight - 1);
+        runRenderTextureBatch(renderTexture, () => {
+          for (let y = chunkY; y <= maxY; y += 1) {
+            for (let x = chunkX; x <= maxX; x += 1) {
+              const tile = getTileAt(this.map, x, y);
+              if (tile.elevation > 0) {
+                continue;
               }
-              this.drawExplicitTileVisual(renderTexture, { minX, minY }, explicitVisual, worldX, worldY, 0);
-            } else if (flatVisual && flatFrame && this.textures.exists(flatFrame.textureKey)) {
-              renderTexture.draw(this.getTerrainRenderStamp(flatVisual, flatFrame), worldX - minX, worldY - minY);
-            } else {
-              renderTexture.draw(this.terrainTextureKeys.get(tile.terrain)!, worldX - minX - halfWidth - 1, worldY - minY - halfHeight - 1);
+
+              const iso = cartToIso({ x, y }, this.map.tileWidth, this.map.tileHeight);
+              const worldX = this.mapOrigin.x + iso.x;
+              const worldY = this.mapOrigin.y + iso.y;
+              const explicitVisual = resolveExplicitTileVisual(CONTENT_REGISTRY, this.map, tile, "flat");
+              const explicitUnderlay = resolveExplicitTileUnderlayVisual(CONTENT_REGISTRY, this.map, tile);
+              const flatVisual = this.getFlatTerrainVisualForTerrain(tile.terrain);
+              const flatFrame = flatVisual ? this.pickTerrainFrame(flatVisual, "base", x, y) : null;
+
+              if (explicitVisual) {
+                if (explicitUnderlay) {
+                  this.drawExplicitTileVisual(renderTexture, { minX, minY }, explicitUnderlay, worldX, worldY, 0);
+                } else {
+                  renderTexture.batchDraw(this.terrainTextureKeys.get(tile.terrain)!, worldX - minX - halfWidth - 1, worldY - minY - halfHeight - 1);
+                }
+                this.drawExplicitTileVisual(renderTexture, { minX, minY }, explicitVisual, worldX, worldY, 0);
+              } else if (flatVisual && flatFrame && this.textures.exists(flatFrame.textureKey)) {
+                renderTexture.batchDraw(this.getTerrainRenderStamp(flatVisual, flatFrame), worldX - minX, worldY - minY);
+              } else {
+                renderTexture.batchDraw(this.terrainTextureKeys.get(tile.terrain)!, worldX - minX - halfWidth - 1, worldY - minY - halfHeight - 1);
+              }
             }
           }
-        }
+        });
 
         this.terrainChunks.push(renderTexture);
       }
@@ -7588,7 +7630,7 @@ export class SkirmishScene extends Phaser.Scene {
       this.map.tileHeight,
       elevationSteps,
     );
-    renderTexture.draw(
+    renderTexture.batchDraw(
       this.getExplicitTileRenderStamp(descriptor),
       placement.position.x - bounds.minX,
       placement.position.y - bounds.minY,
@@ -7652,7 +7694,7 @@ export class SkirmishScene extends Phaser.Scene {
       this.map.tileHeight,
       elevationSteps,
     );
-    renderTexture.draw(
+    renderTexture.batchDraw(
       this.getExplicitTileFogStamp(descriptor, visibility),
       placement.position.x - bounds.minX,
       placement.position.y - bounds.minY,
@@ -7796,10 +7838,10 @@ export class SkirmishScene extends Phaser.Scene {
   }
 
   private getTerrainChunkDepthForTile(x: number, y: number): number {
-    const chunkX = Math.floor(x / TERRAIN_CHUNK_SIZE) * TERRAIN_CHUNK_SIZE;
-    const chunkY = Math.floor(y / TERRAIN_CHUNK_SIZE) * TERRAIN_CHUNK_SIZE;
-    const maxX = Math.min(this.map.width - 1, chunkX + TERRAIN_CHUNK_SIZE - 1);
-    const maxY = Math.min(this.map.height - 1, chunkY + TERRAIN_CHUNK_SIZE - 1);
+    const chunkX = Math.floor(x / TERRAIN_RENDER_CHUNK_SIZE) * TERRAIN_RENDER_CHUNK_SIZE;
+    const chunkY = Math.floor(y / TERRAIN_RENDER_CHUNK_SIZE) * TERRAIN_RENDER_CHUNK_SIZE;
+    const maxX = Math.min(this.map.width - 1, chunkX + TERRAIN_RENDER_CHUNK_SIZE - 1);
+    const maxY = Math.min(this.map.height - 1, chunkY + TERRAIN_RENDER_CHUNK_SIZE - 1);
     const corners = [
       this.getTileWorldDiamondBounds(chunkX, chunkY),
       this.getTileWorldDiamondBounds(maxX, chunkY),
