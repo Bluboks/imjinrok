@@ -25,16 +25,16 @@ import {
 
 const CLASSIC_SOURCE_PROFILE_ORIGIN = { x: 320, y: 160 };
 
-test("K01 source tiles retain shared-anchor underlay and flat placement across the complete map footprint", () => {
+test("K01 source tiles retain recovered top-edge placement across the complete map footprint", () => {
   const vector = createK01TerrainRasterVector();
 
   assert.deepEqual(vector, {
     cellCount: 3_600,
-    sharedGroundContactFlatCount: 3_600,
+    sharedGroundContactFlatCount: 2_865,
     sharedGroundContactUnderlayCount: 3_600,
-    zeroSourceOffsetCount: 3_600,
+    zeroSourceOffsetCount: 2_865,
     elevationCounts: { level0: 2_865, level1: 735 },
-    footprint: { left: -1_600, top: 144, right: 2_240, bottom: 2_080 },
+    footprint: { left: -1_600, top: 160, right: 2_240, bottom: 2_096 },
     flatCellEntity: {
       terrainSurface: { x: 288, y: 176 },
       entityGroundContact: { x: 288, y: 176 },
@@ -89,13 +89,14 @@ function createK01TerrainRasterVector() {
       const flat = resolveExplicitTileVisual(registry, map, tile, "flat");
       const underlay = resolveExplicitTileUnderlayVisual(registry, map, tile);
       assert.ok(flat, `K01 cell ${x},${y} must resolve its explicit source flat`);
-      assert.ok(underlay, `K01 cell ${x},${y} must resolve its source-art underlay`);
+      assert.ok(underlay, `K01 cell ${x},${y} must retain its explicit source-backed coverage underlay`);
 
       const flatPlacement = resolveExplicitTileVisualPlacement(flat, terrainSurface, map.tileWidth, map.tileHeight);
+      const expectedOffsetY = tile.elevation === 1 ? -16 : 0;
+      assert.deepEqual(flatPlacement.position, { x: terrainSurface.x, y: terrainSurface.y + expectedOffsetY }, `K01 flat ${x},${y} must use recovered top-edge placement`);
+      if (flatPlacement.position.y === terrainSurface.y) sharedGroundContactFlatCount += 1;
       const underlayPlacement = resolveExplicitTileVisualPlacement(underlay, terrainSurface, map.tileWidth, map.tileHeight);
-      assert.deepEqual(flatPlacement.position, terrainSurface, `K01 flat ${x},${y} must use shared ground contact`);
-      assert.deepEqual(underlayPlacement.position, terrainSurface, `K01 underlay ${x},${y} must precede at shared ground contact`);
-      sharedGroundContactFlatCount += 1;
+      assert.deepEqual(underlayPlacement.position, terrainSurface, `K01 coverage underlay ${x},${y} must stay at the raw tile anchor`);
       sharedGroundContactUnderlayCount += 1;
 
       if (flat.sourcePixelOffset.x === 0 && flat.sourcePixelOffset.y === 0) {
