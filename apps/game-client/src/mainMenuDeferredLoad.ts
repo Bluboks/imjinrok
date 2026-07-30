@@ -31,10 +31,6 @@ export const MAIN_MENU_RESOURCE_PLAN = {
         url: "/assets/themes/default/ui/main-menu/game-menu-buttons/gamemenubutton_0000.png",
       },
       {
-        key: "main-menu:nation-button",
-        url: "/assets/themes/default/ui/main-menu/nation-buttons/NationButtons_0000.png",
-      },
-      {
         key: "main-menu:stage-border",
         url: "/assets/themes/default/ui/main-menu/stage-border/selectstageborder_0000.png",
       },
@@ -45,6 +41,18 @@ export const MAIN_MENU_RESOURCE_PLAN = {
       {
         key: "main-menu:stage-korea",
         url: "/assets/themes/default/ui/main-menu/stage/korea/titlestartstagekorea_0000.png",
+      },
+      {
+        key: "main-menu:stage-japan",
+        url: "/assets/themes/default/ui/main-menu/stage/japan/titlestartstagejapan_0000.png",
+      },
+      {
+        key: "main-menu:stage-china",
+        url: "/assets/themes/default/ui/main-menu/stage/china/titlestartstagechina_0000.png",
+      },
+      {
+        key: "main-menu:country-mask",
+        url: "/assets/themes/default/ui/main-menu/stage/to-select/titlestartstagetoselect_0000.png",
       },
       {
         key: "main-menu:select-box",
@@ -75,11 +83,13 @@ export const MAIN_MENU_ASSETS = {
   landing: LANDING_IMAGE,
   menuBorder: MAIN_MENU_RESOURCE_PLAN.deferred.images[0],
   menuButton: MAIN_MENU_RESOURCE_PLAN.deferred.images[1],
-  nationButton: MAIN_MENU_RESOURCE_PLAN.deferred.images[2],
-  stageBorder: MAIN_MENU_RESOURCE_PLAN.deferred.images[3],
-  stage: MAIN_MENU_RESOURCE_PLAN.deferred.images[4],
-  korea: MAIN_MENU_RESOURCE_PLAN.deferred.images[5],
-  selectBox: MAIN_MENU_RESOURCE_PLAN.deferred.images[6],
+  stageBorder: MAIN_MENU_RESOURCE_PLAN.deferred.images[2],
+  stage: MAIN_MENU_RESOURCE_PLAN.deferred.images[3],
+  korea: MAIN_MENU_RESOURCE_PLAN.deferred.images[4],
+  japan: MAIN_MENU_RESOURCE_PLAN.deferred.images[5],
+  china: MAIN_MENU_RESOURCE_PLAN.deferred.images[6],
+  countryMask: MAIN_MENU_RESOURCE_PLAN.deferred.images[7],
+  selectBox: MAIN_MENU_RESOURCE_PLAN.deferred.images[8],
 } as const;
 
 const DEFERRED_MAIN_MENU_ACTIONS = new Set<MainMenuAction>([

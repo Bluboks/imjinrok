@@ -65,6 +65,11 @@ source screen을 같은 uniform projection으로 표시한다. 조선 territory 
 mission list로 이동한다. 일본과 명은 hover 화면을 계속 보이지만, 목록 자료를 임의로 만들지 않으므로
 activation은 inert다. `1` 키는 기존 조선 keyboard access이고 Escape/back navigation도 유지한다.
 
+구현 경계는 `apps/game-client/src/mainMenuCountrySelection.ts`의 순수 mask/color·availability helper와
+`apps/game-client/src/scenes/MainMenuScene.ts`의 Phaser texture/pointer adapter다. 같은 module의
+`mainMenuCountrySelection.test.ts`는 세 hover, territory 이탈, 조선 activation·일본/명 inert와
+letterbox source-coordinate projection을 검증한다.
+
 브라우저의 `pointermove`/`pointerout`/`pointerup`은 웹 입력 adaptation이다. 원본은 selection
 control의 virtual input method까지는 확인했지만, 그 method가 어떤 physical mouse edge를 요구하는지
 이 범위에서는 확정하지 않았다.
