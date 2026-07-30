@@ -57,6 +57,7 @@
     "imjinrok:extract-k01-opening-building-bindings": "node tools/imjinrok/extract-k01-opening-building-bindings.mjs",
     "imjinrok:extract-k01-reinforcement-placement-policy": "node tools/imjinrok/extract-k01-reinforcement-placement-policy.mjs --json",
     "imjinrok:extract-k01-tile-placement-elevation-evidence": "node tools/imjinrok/extract-k01-tile-placement-elevation-evidence.mjs --output analysis/fixtures/k01-tile-placement-elevation-evidence.json",
+    "imjinrok:extract-source-pathfinding-evidence": "node tools/imjinrok/extract-source-pathfinding-evidence.mjs --output analysis/fixtures/source-pathfinding-evidence.json",
     "imjinrok:extract-building-state-pilot": "node tools/imjinrok/extract-building-state-pilot.mjs --json",
     "imjinrok:extract-beacon-state-pilot": "node tools/imjinrok/extract-beacon-state-pilot.mjs --json",
     "imjinrok:extract-k01-map-low-nibble-writers": "node tools/imjinrok/extract-k01-map-low-nibble-writers.mjs",
