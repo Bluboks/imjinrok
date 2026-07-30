@@ -1,4 +1,5 @@
 import { unitDefinitions, type UnitDefinitionId } from "./content.js";
+import { resolveEntityPortraitFrame } from "./entityPortrait.js";
 import type { ScenarioDefinition } from "./scenarios.js";
 import type { ThemeDefinition } from "./themes.js";
 import type { EntityVisual } from "./visuals.js";
@@ -13,6 +14,8 @@ export interface K01UnitAnimationEvidence {
   readonly originalClasses: readonly number[];
   readonly missionSources: readonly ("initial-map" | "k0120-reinforcement")[];
   readonly sourceStates: readonly string[];
+  /** Theme state keys that carry the scoped source output. Defaults to sourceStates. */
+  readonly themeStates?: readonly string[];
   /** States selected by the current normal runtime presentation adapter. */
   readonly runtimeStates: readonly ("idle" | "move" | "attack")[];
   readonly quarantines: readonly K01UnitAnimationQuarantine[];
@@ -22,6 +25,11 @@ export interface K01UnitAnimationEvidence {
     readonly rawDirections: readonly number[];
   };
   readonly evidenceDocument: string;
+  /**
+   * Source frame selected by the K01 opening/runtime adapter. This is a frame
+   * identity check, not a claim about an original portrait or body-state name.
+   */
+  readonly defaultFrameFileName?: string;
 }
 
 export interface K01UnitAnimationQuarantine {
@@ -34,6 +42,8 @@ export interface K01UnitAnimationCoverageResult extends K01UnitAnimationEvidence
   readonly missingStates: readonly string[];
   readonly missingFrames: readonly string[];
   readonly missingSourceOrientationDirections: readonly number[];
+  readonly missingDefaultFrame: boolean;
+  readonly missingExplicitSelectionRepresentative: boolean;
 }
 
 const noRuntimeDeathLifecycle: K01UnitAnimationQuarantine = {
@@ -57,6 +67,7 @@ export const K01_UNIT_ANIMATION_EVIDENCE = [
       noRuntimeDeathLifecycle,
     ],
     evidenceDocument: "docs/reverse-engineering/mechanics/k01-korean-farmer-core-frames.md",
+    defaultFrameFileName: "farmerk_0000.png",
   },
   {
     kind: "swordsman",
@@ -69,6 +80,7 @@ export const K01_UNIT_ANIMATION_EVIDENCE = [
       noRuntimeDeathLifecycle,
     ],
     evidenceDocument: "docs/reverse-engineering/mechanics/k01-core-unit-animation-states.md",
+    defaultFrameFileName: "swordk_0128.png",
   },
   {
     kind: "archer",
@@ -81,6 +93,7 @@ export const K01_UNIT_ANIMATION_EVIDENCE = [
       noRuntimeDeathLifecycle,
     ],
     evidenceDocument: "docs/reverse-engineering/mechanics/k01-core-unit-animation-states.md",
+    defaultFrameFileName: "archerk_0000.png",
   },
   {
     kind: "korean-monk",
@@ -90,6 +103,7 @@ export const K01_UNIT_ANIMATION_EVIDENCE = [
     runtimeStates: ["idle", "move", "attack"],
     quarantines: [noRuntimeDeathLifecycle],
     evidenceDocument: "docs/reverse-engineering/mechanics/k01-opening-unit-bindings.md",
+    defaultFrameFileName: "budak_0100.png",
   },
   {
     kind: "japanese-swordsman",
@@ -102,6 +116,7 @@ export const K01_UNIT_ANIMATION_EVIDENCE = [
       noRuntimeDeathLifecycle,
     ],
     evidenceDocument: "docs/reverse-engineering/mechanics/k01-core-unit-animation-states.md",
+    defaultFrameFileName: "swordj_0000.png",
   },
   {
     kind: "japanese-gunner",
@@ -114,6 +129,7 @@ export const K01_UNIT_ANIMATION_EVIDENCE = [
       noRuntimeDeathLifecycle,
     ],
     evidenceDocument: "docs/reverse-engineering/mechanics/k01-normal-reinforcement-animation-batch.md",
+    defaultFrameFileName: "gunj1_0000.png",
   },
   {
     kind: "japanese-samurai",
@@ -123,6 +139,7 @@ export const K01_UNIT_ANIMATION_EVIDENCE = [
     runtimeStates: ["idle", "move", "attack"],
     quarantines: [noRuntimeDeathLifecycle],
     evidenceDocument: "docs/reverse-engineering/mechanics/k01-samurai-animation-pilot.md",
+    defaultFrameFileName: "horseswordj2_0000.png",
   },
   {
     kind: "japanese-shrine-maiden",
@@ -132,6 +149,7 @@ export const K01_UNIT_ANIMATION_EVIDENCE = [
     runtimeStates: ["idle", "move", "attack"],
     quarantines: [noRuntimeDeathLifecycle],
     evidenceDocument: "docs/reverse-engineering/mechanics/k01-opening-unit-bindings.md",
+    defaultFrameFileName: "advbudaj_0120.png",
   },
   {
     kind: "japanese-farmer",
@@ -144,6 +162,7 @@ export const K01_UNIT_ANIMATION_EVIDENCE = [
       noRuntimeDeathLifecycle,
     ],
     evidenceDocument: "docs/reverse-engineering/mechanics/k01-japanese-farmer-frames.md",
+    defaultFrameFileName: "Farmerj_0000.png",
   },
   {
     kind: "gwon-yul",
@@ -153,6 +172,7 @@ export const K01_UNIT_ANIMATION_EVIDENCE = [
     runtimeStates: ["idle", "move", "attack"],
     quarantines: [noRuntimeDeathLifecycle],
     evidenceDocument: "docs/reverse-engineering/mechanics/k01-hero-animation-pilot.md",
+    defaultFrameFileName: "generalk13_0000.png",
   },
   {
     kind: "ryu-seong-ryong",
@@ -162,6 +182,7 @@ export const K01_UNIT_ANIMATION_EVIDENCE = [
     runtimeStates: ["idle", "move", "attack"],
     quarantines: [noRuntimeDeathLifecycle],
     evidenceDocument: "docs/reverse-engineering/mechanics/k01-hero-animation-pilot.md",
+    defaultFrameFileName: "generalk31_0000.png",
   },
   {
     kind: "japanese-turtle-tank",
@@ -178,6 +199,7 @@ export const K01_UNIT_ANIMATION_EVIDENCE = [
       rawDirections: [1000, 1001, 1002, 1003, 1004, 1005, 1006, 1007],
     },
     evidenceDocument: "docs/reverse-engineering/mechanics/k01-turtle-tank-animation-pilot.md",
+    defaultFrameFileName: "ghosttankj_0016.png",
   },
   {
     kind: "japanese-konishi",
@@ -187,7 +209,120 @@ export const K01_UNIT_ANIMATION_EVIDENCE = [
     runtimeStates: ["idle", "move", "attack"],
     quarantines: [noRuntimeDeathLifecycle],
     evidenceDocument: "docs/reverse-engineering/mechanics/k01-konishi-animation-pilot.md",
+    defaultFrameFileName: "generalj12_0000.png",
   },
+] as const satisfies readonly K01UnitAnimationEvidence[];
+
+/**
+ * K01 opening buildings are guarded independently from mobile animation.
+ * Their static evidence establishes identity plus source base frame 7 only;
+ * construction, damage, overlay, timing, pivot, and lift stay quarantined.
+ */
+export const K01_BUILDING_VISUAL_EVIDENCE = [
+  {
+    kind: "barracks",
+    originalClasses: [50],
+    missionSources: ["initial-map"],
+    sourceStates: ["base-frame-7"],
+    themeStates: ["idle"],
+    runtimeStates: ["idle"],
+    defaultFrameFileName: "barrackk_0007.png",
+    quarantines: [{ state: "building-states", reason: "K01 catalog evidence binds only class-50 base frame 7; construction, damage, overlays, timing, pivot, and lift remain unverified." }],
+    evidenceDocument: "docs/reverse-engineering/data-structures/entity-type-catalog.md",
+  },
+  {
+    kind: "house",
+    originalClasses: [48],
+    missionSources: ["initial-map"],
+    sourceStates: ["base-frame-7"],
+    themeStates: ["idle"],
+    runtimeStates: ["idle"],
+    defaultFrameFileName: "millk_0007.png",
+    quarantines: [{ state: "building-states", reason: "K01 class-48 evidence binds only base frame 7; construction, damage, overlays, timing, pivot, and lift remain unverified." }],
+    evidenceDocument: "docs/reverse-engineering/mechanics/k01-opening-building-bindings.md",
+  },
+  {
+    kind: "japanese-camp-barracks",
+    originalClasses: [60],
+    missionSources: ["initial-map"],
+    sourceStates: ["base-frame-7"],
+    themeStates: ["idle"],
+    runtimeStates: ["idle"],
+    defaultFrameFileName: "barrackj_0007.png",
+    quarantines: [{ state: "building-states", reason: "K01 class-60 evidence binds only base frame 7; construction, damage, overlays, timing, pivot, and lift remain unverified." }],
+    evidenceDocument: "docs/reverse-engineering/mechanics/k01-opening-building-bindings.md",
+  },
+  {
+    kind: "japanese-camp-firehouse",
+    originalClasses: [62],
+    missionSources: ["initial-map"],
+    sourceStates: ["base-frame-7"],
+    themeStates: ["idle"],
+    runtimeStates: ["idle"],
+    defaultFrameFileName: "firehousej_0007.png",
+    quarantines: [{ state: "building-states", reason: "K01 catalog evidence binds only class-62 base frame 7; construction, damage, overlays, timing, pivot, and lift remain unverified." }],
+    evidenceDocument: "docs/reverse-engineering/data-structures/entity-type-catalog.md",
+  },
+  {
+    kind: "japanese-camp-house",
+    originalClasses: [57],
+    missionSources: ["initial-map"],
+    sourceStates: ["base-frame-7"],
+    themeStates: ["idle"],
+    runtimeStates: ["idle"],
+    defaultFrameFileName: "millj_0007.png",
+    quarantines: [{ state: "building-states", reason: "K01 catalog evidence binds only class-57 base frame 7; construction, damage, overlays, timing, pivot, and lift remain unverified." }],
+    evidenceDocument: "docs/reverse-engineering/data-structures/entity-type-catalog.md",
+  },
+  {
+    kind: "japanese-camp-tower",
+    originalClasses: [63],
+    missionSources: ["initial-map"],
+    sourceStates: ["base-frame-7"],
+    themeStates: ["idle"],
+    runtimeStates: ["idle"],
+    defaultFrameFileName: "towerj_0007.png",
+    quarantines: [{ state: "building-states", reason: "K01 class-63 evidence binds only base frame 7; construction, damage, overlays, timing, pivot, and lift remain unverified." }],
+    evidenceDocument: "docs/reverse-engineering/mechanics/k01-opening-building-bindings.md",
+  },
+  {
+    kind: "japanese-hq",
+    originalClasses: [58],
+    missionSources: ["initial-map"],
+    sourceStates: ["base-frame-7"],
+    themeStates: ["idle"],
+    runtimeStates: ["idle"],
+    defaultFrameFileName: "jhq_0007.png",
+    quarantines: [{ state: "building-states", reason: "K01 class-58 evidence binds only base frame 7; construction, damage, overlays, timing, pivot, and lift remain unverified." }],
+    evidenceDocument: "docs/reverse-engineering/mechanics/k01-opening-building-bindings.md",
+  },
+  {
+    kind: "korean-training-command",
+    originalClasses: [51],
+    missionSources: ["initial-map"],
+    sourceStates: ["base-frame-7"],
+    themeStates: ["idle"],
+    runtimeStates: ["idle"],
+    defaultFrameFileName: "advbarrackk_0007.png",
+    quarantines: [{ state: "building-states", reason: "K01 class-51 evidence binds only base frame 7; construction, damage, overlays, timing, pivot, and lift remain unverified." }],
+    evidenceDocument: "docs/reverse-engineering/mechanics/k01-opening-building-bindings.md",
+  },
+  {
+    kind: "town-center",
+    originalClasses: [49],
+    missionSources: ["initial-map"],
+    sourceStates: ["base-frame-7"],
+    themeStates: ["idle"],
+    runtimeStates: ["idle"],
+    defaultFrameFileName: "hqk_0007.png",
+    quarantines: [{ state: "building-states", reason: "K01 class-49 base frame 7 is scoped; construction and damage have separate bounded evidence, while timing, pivot, and lift remain unverified." }],
+    evidenceDocument: "docs/reverse-engineering/mechanics/k01-opening-building-bindings.md",
+  },
+] as const satisfies readonly K01UnitAnimationEvidence[];
+
+export const K01_ENTITY_VISUAL_EVIDENCE = [
+  ...K01_UNIT_ANIMATION_EVIDENCE,
+  ...K01_BUILDING_VISUAL_EVIDENCE,
 ] as const satisfies readonly K01UnitAnimationEvidence[];
 
 export function collectScenarioSpawnKinds(scenario: Pick<ScenarioDefinition, "startingUnits" | "playerStarts" | "scriptedEvents">): readonly UnitDefinitionId[] {
@@ -218,20 +353,43 @@ export function collectK01MobileSpawnKinds(scenario: Pick<ScenarioDefinition, "s
   return collectScenarioSpawnKinds(scenario).filter((kind) => unitDefinitions[kind].category !== "building");
 }
 
+export function collectK01BuildingSpawnKinds(scenario: Pick<ScenarioDefinition, "startingUnits" | "playerStarts" | "scriptedEvents">): readonly UnitDefinitionId[] {
+  return collectScenarioSpawnKinds(scenario).filter((kind) => unitDefinitions[kind].category === "building");
+}
+
 export function assessK01UnitAnimationCoverage(
   theme: ThemeDefinition,
 ): readonly K01UnitAnimationCoverageResult[] {
-  return K01_UNIT_ANIMATION_EVIDENCE.map((evidence) => {
+  return assessK01VisualCoverage(theme, K01_UNIT_ANIMATION_EVIDENCE);
+}
+
+export function assessK01EntityVisualCoverage(
+  theme: ThemeDefinition,
+): readonly K01UnitAnimationCoverageResult[] {
+  return assessK01VisualCoverage(theme, K01_ENTITY_VISUAL_EVIDENCE);
+}
+
+function assessK01VisualCoverage(
+  theme: ThemeDefinition,
+  evidenceEntries: readonly K01UnitAnimationEvidence[],
+): readonly K01UnitAnimationCoverageResult[] {
+  return evidenceEntries.map((evidence) => {
     const visualId = theme.entityBindings[evidence.kind] ?? null;
     const visual = visualId ? theme.visuals[visualId] : null;
     const entityVisual = visual?.kind === "entity" ? visual : null;
+    const selectionRepresentative = entityVisual ? resolveEntityPortraitFrame(entityVisual) : null;
+    const requiredThemeStates = evidence.themeStates ?? evidence.sourceStates;
 
     return {
       ...evidence,
       visualId,
-      missingStates: findMissingStates(entityVisual, evidence.sourceStates),
-      missingFrames: findMissingFrames(entityVisual, evidence.sourceStates),
+      missingStates: findMissingStates(entityVisual, requiredThemeStates),
+      missingFrames: findMissingFrames(entityVisual, requiredThemeStates),
       missingSourceOrientationDirections: findMissingSourceOrientationDirections(entityVisual, evidence),
+      missingDefaultFrame: evidence.defaultFrameFileName !== undefined &&
+        entityVisual?.states.idle?.clips.default?.frames[0]?.fileName !== evidence.defaultFrameFileName,
+      missingExplicitSelectionRepresentative: evidence.defaultFrameFileName !== undefined &&
+        (entityVisual?.portrait === undefined || selectionRepresentative?.frame.fileName !== evidence.defaultFrameFileName),
     };
   });
 }

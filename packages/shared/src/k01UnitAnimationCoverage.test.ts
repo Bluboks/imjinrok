@@ -1,13 +1,24 @@
 import assert from "node:assert/strict";
+import { existsSync } from "node:fs";
+import { dirname, join } from "node:path";
 import test from "node:test";
+import { fileURLToPath } from "node:url";
 import {
+  assessK01EntityVisualCoverage,
   assessK01UnitAnimationCoverage,
+  collectK01BuildingSpawnKinds,
   collectK01MobileSpawnKinds,
   collectScenarioSpawnKinds,
   defaultTheme,
   imjinrokK01Scenario,
+  K01_BUILDING_VISUAL_EVIDENCE,
+  K01_ENTITY_VISUAL_EVIDENCE,
   K01_UNIT_ANIMATION_EVIDENCE,
+  resolveEntityPortraitFrame,
 } from "./index.js";
+
+const repositoryRoot = join(dirname(fileURLToPath(import.meta.url)), "../../..");
+const defaultThemeAssetRoot = join(repositoryRoot, "apps/game-client/public/assets/themes/default");
 
 test("K01 initial and scripted mobile kinds have an explicit source animation evidence entry", () => {
   const allSpawnKinds = collectScenarioSpawnKinds(imjinrokK01Scenario);
@@ -38,6 +49,42 @@ test("K01 initial and scripted mobile kinds have an explicit source animation ev
     "villager",
   ]);
   assert.deepEqual(mobileSpawnKinds, K01_UNIT_ANIMATION_EVIDENCE.map(({ kind }) => kind).sort());
+});
+
+test("K01 initial and scripted entity roster has exact source-backed default visual coverage", () => {
+  const allSpawnKinds = collectScenarioSpawnKinds(imjinrokK01Scenario);
+  const buildingSpawnKinds = collectK01BuildingSpawnKinds(imjinrokK01Scenario);
+  const coverage = assessK01EntityVisualCoverage(defaultTheme);
+
+  assert.deepEqual(buildingSpawnKinds, K01_BUILDING_VISUAL_EVIDENCE.map(({ kind }) => kind).sort());
+  assert.deepEqual(allSpawnKinds, K01_ENTITY_VISUAL_EVIDENCE.map(({ kind }) => kind).sort());
+
+  for (const result of coverage) {
+    assert.ok(result.visualId, `${result.kind} requires an entity visual binding`);
+    assert.deepEqual(result.missingStates, [], `${result.kind} source visual state binding drifted`);
+    assert.deepEqual(result.missingFrames, [], `${result.kind} source visual frame binding drifted`);
+    assert.equal(result.missingDefaultFrame, false, `${result.kind} default source frame drifted`);
+    assert.equal(
+      result.missingExplicitSelectionRepresentative,
+      false,
+      `${result.kind} must use its explicit source-frame selection representative`,
+    );
+    assert.ok(result.quarantines.length > 0, `${result.kind} must name unresolved visual scope`);
+
+    const visual = defaultTheme.visuals[result.visualId!];
+    assert.equal(visual?.kind, "entity", `${result.kind} must bind an entity visual`);
+    if (visual?.kind !== "entity") {
+      continue;
+    }
+
+    const portrait = resolveEntityPortraitFrame(visual);
+    assert.equal(portrait?.frame, visual.portrait, `${result.kind} must not select a runtime portrait fallback`);
+    assert.equal(
+      existsSync(join(defaultThemeAssetRoot, visual.assetPath, portrait?.frame.fileName ?? "")),
+      true,
+      `${result.kind} representative must resolve to a loadable converted source frame`,
+    );
+  }
 });
 
 test("K01 source-evidenced states have live source-backed clips and quarantines are explicit", () => {

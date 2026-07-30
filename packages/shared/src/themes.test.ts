@@ -944,14 +944,15 @@ test("default theme maps source-exported building construction frames", () => {
       manifestPath: "entities/japanese-camp-house/millj.manifest.json",
       source: "original/imjinrok2/char/millj.spr",
       frameCount: 36,
-      idleFrame: "millj_0008.png",
+      idleFrame: "millj_0007.png",
+      completeFrame: "millj_0008.png",
     },
     {
       binding: "japanese-camp-firehouse",
       manifestPath: "entities/japanese-camp-firehouse/firehousej.manifest.json",
       source: "original/imjinrok2/char/firehousej.spr",
       frameCount: 40,
-      idleFrame: "firehousej_0009.png",
+      idleFrame: "firehousej_0007.png",
       completeFrame: "firehousej_0008.png",
     },
     {
@@ -1057,38 +1058,25 @@ test("default theme applies the statically recovered Korean beacon identity and 
   );
 });
 
-test("default theme animates Japanese camp building idle frames from source sprites", () => {
+test("K01 Japanese camp building defaults do not infer unverified idle animations", () => {
   const houseVisual = defaultTheme.visuals[defaultTheme.entityBindings["japanese-camp-house"]] as EntityVisual;
   const firehouseVisual = defaultTheme.visuals[defaultTheme.entityBindings["japanese-camp-firehouse"]] as EntityVisual;
-  const houseOverlay = houseVisual.layers?.find((layer) => layer.id === "idle-overlay");
 
   assert.deepEqual(
-    houseOverlay?.states.idle?.clips.default?.frames.map((frame) => frame.fileName),
-    frameNames("millj", 9, 18),
+    houseVisual.states.idle?.clips.default?.frames.map((frame) => frame.fileName),
+    ["millj_0007.png"],
   );
   assert.deepEqual(
     firehouseVisual.states.idle?.clips.default?.frames.map((frame) => frame.fileName),
-    frameNames("firehousej", 9, 19),
+    ["firehousej_0007.png"],
   );
+  assert.equal(houseVisual.layers, undefined);
 });
 
-test("default theme models Korean barracks flag as an idle overlay layer", () => {
+test("K01 Korean barracks default does not infer an unverified flag overlay", () => {
   const visual = defaultTheme.visuals[defaultTheme.entityBindings.barracks] as EntityVisual;
-  const flagLayer = visual.layers?.find((layer) => layer.id === "flag");
 
-  assert.ok(flagLayer);
-  assert.deepEqual(
-    flagLayer.states.idle?.clips.default?.frames.map((frame) => frame.fileName),
-    [
-      "barrackk_0009.png",
-      "barrackk_0010.png",
-      "barrackk_0011.png",
-      "barrackk_0012.png",
-      "barrackk_0013.png",
-      "barrackk_0014.png",
-      "barrackk_0015.png",
-    ],
-  );
+  assert.equal(visual.layers, undefined);
 });
 
 function readManifest(relativePath: string): {
