@@ -47,6 +47,7 @@
 - [임진록 tileset 컨테이너 인벤토리](reverse-engineering/mechanics/imjinrok-tileset-container-inventory.md)
 - [임진록 main tileset loader 경계](reverse-engineering/mechanics/imjinrok-tileset-loader-boundary.md)
 - [K01 source tile object·frame selector](reverse-engineering/mechanics/k01-source-tile-selector.md)
+- [임진록 낮·밤 팔레트 schedule](reverse-engineering/mechanics/imjinrok-day-night-palette-schedule.md)
 - [`pannel.spr` HUD blit 결합](reverse-engineering/mechanics/pannel-spr-hud-blit.md)
 - [단일 선택 renderer dispatch의 lock·호출 순서](reverse-engineering/mechanics/single-selection-renderer-dispatch.md)
 - [선택 패널 slot dispatcher](reverse-engineering/mechanics/selection-panel-slot-dispatch.md)

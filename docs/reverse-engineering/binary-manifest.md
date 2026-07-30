@@ -107,6 +107,11 @@ Ghidra의 메모리 지도에는 PE 네 섹션 외에 헤더와 분석용 `tdb` 
 | `script/K0110` | `d9dcc3c78d0373181677afc63fe9331ff561387e36877a62912ca66515f4aea8` | K01 인덱스 1의 임무 목표 텍스트 입력 |
 | `script/K0210` | `53a0a6f03b6ff7bc8d2456b5c66712054a73a2c4b921fff6c62f765552bd4331` | 인접 인덱스 2의 목표 텍스트 교차 검사 |
 | `stagemap/k01.map` | `43ec3a173032f74c12d3cce1db1078b076b651ed79070a0914673a5b65da99cb` | 인덱스 1의 K01 map 결합 |
+| `pal/imjin2.pal` | `5ba2c020e9bd89210a10550fb4baaee8ab8bb316d4a2c7e66bdb24c6c8c4323b` | 낮·밤 palette loader의 base palette file identity |
+| `pal/night1.pal` | `b085583412b8bb79bdf9b72d836881be37f6f36ad50d073db06bebd1c2670122` | 낮·밤 schedule palette 1 identity |
+| `pal/night2.pal` | `c45727bd8ffed04bf572da5ab38b14b7fcb819f540a15a2e5d13730357bda17d` | 낮·밤 schedule palette 2 identity |
+| `pal/night3.pal` | `4fe0c28dc64480c6f00876c5ee484e1b3caa77b3b63b27387c6cf7702c3d2f97` | 낮·밤 schedule palette 3 identity |
+| `pal/night4.pal` | `f8328d22007407df426dff9e489f43718e28772d03b3ddd5f663a5dd57156e95` | 낮·밤 schedule palette 4 identity |
 
 향후 매니페스트에는 다음을 포함한다.
 
