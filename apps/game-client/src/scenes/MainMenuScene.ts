@@ -43,7 +43,7 @@ import {
   type MainMenuScreen,
 } from "../mainMenuFlow.js";
 import {
-  MAIN_MENU_PROJECT_ADAPTATION_HIT_RECTS,
+  IMJINROK_CLASSIC_MAIN_MENU_GEOMETRY,
   resolveMainMenuCanvasLayout,
   type MainMenuSourceRect,
 } from "../mainMenuLayout.js";
@@ -104,6 +104,9 @@ const MAIN_MENU_ASSETS = {
   },
 } as const;
 
+// A future remastered presentation may replace logical canvas, assets, and
+// geometry independently from this classic source-art menu profile.
+
 interface LastRandomSkirmishConfig {
   mode: "duel" | "four-player";
   seed: number;
@@ -129,10 +132,10 @@ function createVsCpuTeams(
 }
 
 /**
- * A 640×480 source-art presentation layered in a RESIZE Phaser scene.  The
- * pointer rectangles are intentionally project adaptation geometry; source
- * sprites are preserved without stretching and are always centered in the
- * browser viewport.
+ * The classic 640×480 source-art presentation layered in a RESIZE Phaser
+ * scene. The pointer rectangles are intentionally project adaptation geometry;
+ * source sprites are preserved without stretching and centered in the browser
+ * viewport.
  */
 export class MainMenuScene extends Phaser.Scene {
   private aiDifficulty: SkirmishAiDifficulty = "normal";
@@ -140,6 +143,7 @@ export class MainMenuScene extends Phaser.Scene {
   private keyboardHandlers = new Map<string, () => void>();
   private menuContainer: Phaser.GameObjects.Container | null = null;
   private menuMode: MainMenuScreen = "main";
+  private readonly presentationGeometry = IMJINROK_CLASSIC_MAIN_MENU_GEOMETRY;
 
   constructor() {
     super("main-menu");
@@ -184,6 +188,7 @@ export class MainMenuScene extends Phaser.Scene {
     const layout = resolveMainMenuCanvasLayout(
       this.scale.width,
       this.scale.height,
+      this.presentationGeometry,
     );
     this.menuContainer?.destroy(true);
     this.menuContainer = this.add
@@ -217,26 +222,26 @@ export class MainMenuScene extends Phaser.Scene {
     const latestSave = this.readLatestQuickSavePayload();
 
     this.addSourceAction(
-      MAIN_MENU_PROJECT_ADAPTATION_HIT_RECTS.main.scenario,
+      this.presentationGeometry.projectAdaptationHitRects.main.scenario,
       () => this.executeAction("show-campaign-country"),
     );
     this.addSourceAction(
-      MAIN_MENU_PROJECT_ADAPTATION_HIT_RECTS.main.load,
+      this.presentationGeometry.projectAdaptationHitRects.main.load,
       () => this.executeAction("load-latest-save"),
       latestSave !== null,
     );
     this.addSourceAction(
-      MAIN_MENU_PROJECT_ADAPTATION_HIT_RECTS.main.preferences,
+      this.presentationGeometry.projectAdaptationHitRects.main.preferences,
       () => this.executeAction("show-preferences"),
     );
     this.addSourceAction(
-      MAIN_MENU_PROJECT_ADAPTATION_HIT_RECTS.main.random,
+      this.presentationGeometry.projectAdaptationHitRects.main.random,
       () => this.executeAction("show-random"),
     );
 
     if (!latestSave) {
       this.addDisabledOverlay(
-        MAIN_MENU_PROJECT_ADAPTATION_HIT_RECTS.main.load,
+        this.presentationGeometry.projectAdaptationHitRects.main.load,
         "저장 없음",
       );
     }
@@ -261,7 +266,7 @@ export class MainMenuScene extends Phaser.Scene {
       { label: "명 (明)  ·  자료 미구현", action: "back", enabled: false },
       { label: "돌아가기", action: "back" },
     ];
-    const { country } = MAIN_MENU_PROJECT_ADAPTATION_HIT_RECTS;
+    const { country } = this.presentationGeometry.projectAdaptationHitRects;
 
     countryEntries.forEach((entry, index) => {
       const rect =
@@ -316,7 +321,7 @@ export class MainMenuScene extends Phaser.Scene {
     }
 
     this.addPanelTextButton(
-      MAIN_MENU_PROJECT_ADAPTATION_HIT_RECTS.stage.back,
+      this.presentationGeometry.projectAdaptationHitRects.stage.back,
       "돌아가기",
       "back",
     );
@@ -385,7 +390,7 @@ export class MainMenuScene extends Phaser.Scene {
       );
     });
     this.addPanelTextButton(
-      MAIN_MENU_PROJECT_ADAPTATION_HIT_RECTS.panel.back,
+      this.presentationGeometry.projectAdaptationHitRects.panel.back,
       "돌아가기",
       "back",
     );
@@ -445,7 +450,8 @@ export class MainMenuScene extends Phaser.Scene {
   }
 
   private addStageBorder(): void {
-    const { border } = MAIN_MENU_PROJECT_ADAPTATION_HIT_RECTS.stage;
+    const { border } =
+      this.presentationGeometry.projectAdaptationHitRects.stage;
     this.addSourceImage(MAIN_MENU_ASSETS.stageBorder, border.x, border.y);
   }
 
@@ -461,15 +467,30 @@ export class MainMenuScene extends Phaser.Scene {
     const fallback = this.add
       .graphics()
       .fillStyle(0x17110a, 1)
-      .fillRect(0, 0, 640, 480)
+      .fillRect(
+        0,
+        0,
+        this.presentationGeometry.logicalWidth,
+        this.presentationGeometry.logicalHeight,
+      )
       .lineStyle(2, 0xa48a50, 1)
-      .strokeRect(12, 12, 616, 456);
+      .strokeRect(
+        12,
+        12,
+        this.presentationGeometry.logicalWidth - 24,
+        this.presentationGeometry.logicalHeight - 24,
+      );
     this.menuContainer?.add(fallback);
-    this.addText(320, 240, fallbackText, {
-      fontSize: "18px",
-      color: "#e6d6ae",
-      align: "center",
-    }).setOrigin(0.5);
+    this.addText(
+      this.presentationGeometry.logicalWidth / 2,
+      this.presentationGeometry.logicalHeight / 2,
+      fallbackText,
+      {
+        fontSize: "18px",
+        color: "#e6d6ae",
+        align: "center",
+      },
+    ).setOrigin(0.5);
   }
 
   private addSourceImage(
@@ -636,7 +657,7 @@ export class MainMenuScene extends Phaser.Scene {
   }
 
   private getStageSlotRect(index: number): MainMenuSourceRect {
-    const { stage } = MAIN_MENU_PROJECT_ADAPTATION_HIT_RECTS;
+    const { stage } = this.presentationGeometry.projectAdaptationHitRects;
     return { ...stage.slot, y: stage.firstSlotY + index * stage.slotHeight };
   }
 
@@ -646,7 +667,7 @@ export class MainMenuScene extends Phaser.Scene {
   }
 
   private getPanelRowRect(index: number): MainMenuSourceRect {
-    const { panel } = MAIN_MENU_PROJECT_ADAPTATION_HIT_RECTS;
+    const { panel } = this.presentationGeometry.projectAdaptationHitRects;
     return { ...panel.row, y: panel.firstRowY + index * panel.rowHeight };
   }
 

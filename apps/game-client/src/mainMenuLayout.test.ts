@@ -2,32 +2,42 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
-  MAIN_MENU_PROJECT_ADAPTATION_HIT_RECTS,
+  IMJINROK_CLASSIC_MAIN_MENU_GEOMETRY,
   getMainMenuSourcePoint,
   projectMainMenuSourceRect,
   resolveMainMenuCanvasLayout,
 } from "./mainMenuLayout.js";
 
 test("main menu keeps the 640 by 480 source canvas uniform and letterboxed", () => {
-  assert.deepEqual(resolveMainMenuCanvasLayout(640, 480), {
-    scale: 1,
-    offsetX: 0,
-    offsetY: 0,
-    canvas: { x: 0, y: 0, width: 640, height: 480 },
-  });
-  assert.deepEqual(resolveMainMenuCanvasLayout(1280, 720), {
-    scale: 1.5,
-    offsetX: 160,
-    offsetY: 0,
-    canvas: { x: 160, y: 0, width: 960, height: 720 },
-  });
+  assert.deepEqual(
+    resolveMainMenuCanvasLayout(640, 480, IMJINROK_CLASSIC_MAIN_MENU_GEOMETRY),
+    {
+      scale: 1,
+      offsetX: 0,
+      offsetY: 0,
+      canvas: { x: 0, y: 0, width: 640, height: 480 },
+    },
+  );
+  assert.deepEqual(
+    resolveMainMenuCanvasLayout(1280, 720, IMJINROK_CLASSIC_MAIN_MENU_GEOMETRY),
+    {
+      scale: 1.5,
+      offsetX: 160,
+      offsetY: 0,
+      canvas: { x: 160, y: 0, width: 960, height: 720 },
+    },
+  );
 });
 
 test("main menu projects source art and hit regions through the same transform", () => {
-  const layout = resolveMainMenuCanvasLayout(960, 960);
+  const layout = resolveMainMenuCanvasLayout(
+    960,
+    960,
+    IMJINROK_CLASSIC_MAIN_MENU_GEOMETRY,
+  );
   const rect = projectMainMenuSourceRect(
     layout,
-    MAIN_MENU_PROJECT_ADAPTATION_HIT_RECTS.main.scenario,
+    IMJINROK_CLASSIC_MAIN_MENU_GEOMETRY.projectAdaptationHitRects.main.scenario,
   );
 
   assert.deepEqual(rect, { x: 696, y: 165, width: 219, height: 147 });
@@ -39,10 +49,14 @@ test("main menu projects source art and hit regions through the same transform",
 });
 
 test("main menu preserves pointer source coordinates through a letterboxed non-integer scale", () => {
-  const layout = resolveMainMenuCanvasLayout(1280, 577);
+  const layout = resolveMainMenuCanvasLayout(
+    1280,
+    577,
+    IMJINROK_CLASSIC_MAIN_MENU_GEOMETRY,
+  );
   const projected = projectMainMenuSourceRect(
     layout,
-    MAIN_MENU_PROJECT_ADAPTATION_HIT_RECTS.main.scenario,
+    IMJINROK_CLASSIC_MAIN_MENU_GEOMETRY.projectAdaptationHitRects.main.scenario,
   );
   const restored = getMainMenuSourcePoint(layout, {
     x: projected.x + projected.width / 2,
@@ -56,9 +70,33 @@ test("main menu preserves pointer source coordinates through a letterboxed non-i
 });
 
 test("main menu rejects invalid viewport dimensions", () => {
-  assert.throws(() => resolveMainMenuCanvasLayout(0, 480), /viewportWidth/);
   assert.throws(
-    () => resolveMainMenuCanvasLayout(640, Number.NaN),
+    () =>
+      resolveMainMenuCanvasLayout(0, 480, IMJINROK_CLASSIC_MAIN_MENU_GEOMETRY),
+    /viewportWidth/,
+  );
+  assert.throws(
+    () =>
+      resolveMainMenuCanvasLayout(
+        640,
+        Number.NaN,
+        IMJINROK_CLASSIC_MAIN_MENU_GEOMETRY,
+      ),
     /viewportHeight/,
   );
+});
+
+test("a remastered logical canvas is not forced through the classic 640 by 480 profile", () => {
+  const remastered = {
+    ...IMJINROK_CLASSIC_MAIN_MENU_GEOMETRY,
+    logicalWidth: 1920,
+    logicalHeight: 1080,
+  };
+
+  assert.deepEqual(resolveMainMenuCanvasLayout(1920, 1200, remastered), {
+    scale: 1,
+    offsetX: 0,
+    offsetY: 60,
+    canvas: { x: 0, y: 60, width: 1920, height: 1080 },
+  });
 });

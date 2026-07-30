@@ -1,11 +1,3 @@
-/**
- * Main-menu source sprites are authored for this fixed canvas.  The screen
- * controls below are intentionally project adaptations: the original pointer
- * rectangles have not yet been statically recovered.
- */
-export const MAIN_MENU_SOURCE_WIDTH = 640;
-export const MAIN_MENU_SOURCE_HEIGHT = 480;
-
 export interface MainMenuSourcePoint {
   x: number;
   y: number;
@@ -24,53 +16,103 @@ export interface MainMenuCanvasLayout {
 }
 
 /**
- * Project adaptation hit areas, expressed in the unscaled 640×480 source
- * coordinate system.  They are deliberately not labelled as original UI
+ * Project adaptation hit areas are expressed in the profile's logical
+ * coordinate system. They are deliberately not labelled as original UI
  * geometry until the executable input path is recovered.
  */
-export const MAIN_MENU_PROJECT_ADAPTATION_HIT_RECTS = {
+export interface MainMenuProjectAdaptationHitRects {
   main: {
-    scenario: { x: 464, y: 30, width: 146, height: 98 },
-    load: { x: 464, y: 138, width: 146, height: 98 },
-    random: { x: 464, y: 352, width: 146, height: 96 },
-    preferences: { x: 464, y: 246, width: 146, height: 98 },
-  },
+    scenario: MainMenuSourceRect;
+    load: MainMenuSourceRect;
+    random: MainMenuSourceRect;
+    preferences: MainMenuSourceRect;
+  };
   country: {
-    korea: { x: 58, y: 120, width: 150, height: 42 },
-    japan: { x: 58, y: 172, width: 150, height: 42 },
-    china: { x: 58, y: 224, width: 150, height: 42 },
-    back: { x: 58, y: 300, width: 150, height: 34 },
-  },
+    korea: MainMenuSourceRect;
+    japan: MainMenuSourceRect;
+    china: MainMenuSourceRect;
+    back: MainMenuSourceRect;
+  };
   stage: {
-    border: { x: 285, y: 65, width: 320, height: 350 },
-    firstSlotY: 116,
-    slotHeight: 31,
-    slot: { x: 305, y: 116, width: 278, height: 29 },
-    back: { x: 305, y: 380, width: 278, height: 30 },
-  },
+    border: MainMenuSourceRect;
+    firstSlotY: number;
+    slotHeight: number;
+    slot: MainMenuSourceRect;
+    back: MainMenuSourceRect;
+  };
   panel: {
-    firstRowY: 118,
-    rowHeight: 44,
-    row: { x: 461, y: 118, width: 154, height: 38 },
-    back: { x: 461, y: 390, width: 154, height: 38 },
+    firstRowY: number;
+    rowHeight: number;
+    row: MainMenuSourceRect;
+    back: MainMenuSourceRect;
+  };
+}
+
+export interface MainMenuPresentationGeometry {
+  logicalWidth: number;
+  logicalHeight: number;
+  projectAdaptationHitRects: MainMenuProjectAdaptationHitRects;
+}
+
+/**
+ * Original Imjinrok source-art profile. Future remastered presentation may
+ * replace its logical canvas, assets, and geometry independently of engine
+ * viewport policy.
+ */
+export const IMJINROK_CLASSIC_MAIN_MENU_GEOMETRY = {
+  logicalWidth: 640,
+  logicalHeight: 480,
+  projectAdaptationHitRects: {
+    main: {
+      scenario: { x: 464, y: 30, width: 146, height: 98 },
+      load: { x: 464, y: 138, width: 146, height: 98 },
+      random: { x: 464, y: 352, width: 146, height: 96 },
+      preferences: { x: 464, y: 246, width: 146, height: 98 },
+    },
+    country: {
+      korea: { x: 58, y: 120, width: 150, height: 42 },
+      japan: { x: 58, y: 172, width: 150, height: 42 },
+      china: { x: 58, y: 224, width: 150, height: 42 },
+      back: { x: 58, y: 300, width: 150, height: 34 },
+    },
+    stage: {
+      border: { x: 285, y: 65, width: 320, height: 350 },
+      firstSlotY: 116,
+      slotHeight: 31,
+      slot: { x: 305, y: 116, width: 278, height: 29 },
+      back: { x: 305, y: 380, width: 278, height: 30 },
+    },
+    panel: {
+      firstRowY: 118,
+      rowHeight: 44,
+      row: { x: 461, y: 118, width: 154, height: 38 },
+      back: { x: 461, y: 390, width: 154, height: 38 },
+    },
   },
-} as const satisfies Readonly<
-  Record<string, Readonly<Record<string, MainMenuSourceRect | number>>>
->;
+} as const satisfies MainMenuPresentationGeometry;
 
 export function resolveMainMenuCanvasLayout(
   viewportWidth: number,
   viewportHeight: number,
+  presentation: Pick<
+    MainMenuPresentationGeometry,
+    "logicalWidth" | "logicalHeight"
+  >,
 ): MainMenuCanvasLayout {
   assertPositiveFinite("viewportWidth", viewportWidth);
   assertPositiveFinite("viewportHeight", viewportHeight);
+  assertPositiveFinite("presentation.logicalWidth", presentation.logicalWidth);
+  assertPositiveFinite(
+    "presentation.logicalHeight",
+    presentation.logicalHeight,
+  );
 
   const scale = Math.min(
-    viewportWidth / MAIN_MENU_SOURCE_WIDTH,
-    viewportHeight / MAIN_MENU_SOURCE_HEIGHT,
+    viewportWidth / presentation.logicalWidth,
+    viewportHeight / presentation.logicalHeight,
   );
-  const canvasWidth = MAIN_MENU_SOURCE_WIDTH * scale;
-  const canvasHeight = MAIN_MENU_SOURCE_HEIGHT * scale;
+  const canvasWidth = presentation.logicalWidth * scale;
+  const canvasHeight = presentation.logicalHeight * scale;
 
   return {
     scale,

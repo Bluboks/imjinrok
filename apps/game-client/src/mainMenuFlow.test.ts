@@ -6,6 +6,7 @@ import {
   resolveMainMenuPointerAction,
   type MainMenuActionAvailability,
 } from "./mainMenuFlow.js";
+import { IMJINROK_CLASSIC_MAIN_MENU_GEOMETRY } from "./mainMenuLayout.js";
 
 const locked: MainMenuActionAvailability = {
   hasQuickSave: false,
@@ -21,7 +22,12 @@ const available: MainMenuActionAvailability = {
 
 test("main menu leaves unavailable source-art actions inert", () => {
   assert.equal(
-    resolveMainMenuPointerAction("main", { x: 530, y: 174 }, locked),
+    resolveMainMenuPointerAction(
+      "main",
+      { x: 530, y: 174 },
+      locked,
+      IMJINROK_CLASSIC_MAIN_MENU_GEOMETRY,
+    ),
     null,
   );
   assert.equal(resolveMainMenuKeyboardAction("main", "TWO", locked), null);
@@ -30,22 +36,38 @@ test("main menu leaves unavailable source-art actions inert", () => {
       "campaign-country",
       { x: 105, y: 190 },
       available,
+      IMJINROK_CLASSIC_MAIN_MENU_GEOMETRY,
     ),
     null,
   );
   assert.equal(
-    resolveMainMenuPointerAction("campaign-stage", { x: 380, y: 159 }, locked),
+    resolveMainMenuPointerAction(
+      "campaign-stage",
+      { x: 380, y: 159 },
+      locked,
+      IMJINROK_CLASSIC_MAIN_MENU_GEOMETRY,
+    ),
     null,
   );
   assert.equal(
-    resolveMainMenuPointerAction("random", { x: 500, y: 254 }, locked),
+    resolveMainMenuPointerAction(
+      "random",
+      { x: 500, y: 254 },
+      locked,
+      IMJINROK_CLASSIC_MAIN_MENU_GEOMETRY,
+    ),
     null,
   );
 });
 
 test("main menu maps active pointer and keyboard actions by screen", () => {
   assert.equal(
-    resolveMainMenuPointerAction("main", { x: 530, y: 79 }, available),
+    resolveMainMenuPointerAction(
+      "main",
+      { x: 530, y: 79 },
+      available,
+      IMJINROK_CLASSIC_MAIN_MENU_GEOMETRY,
+    ),
     "show-campaign-country",
   );
   assert.equal(
@@ -57,6 +79,7 @@ test("main menu maps active pointer and keyboard actions by screen", () => {
       "campaign-country",
       { x: 105, y: 141 },
       available,
+      IMJINROK_CLASSIC_MAIN_MENU_GEOMETRY,
     ),
     "show-campaign-stage",
   );
@@ -69,6 +92,7 @@ test("main menu maps active pointer and keyboard actions by screen", () => {
       "campaign-stage",
       { x: 380, y: 160 },
       available,
+      IMJINROK_CLASSIC_MAIN_MENU_GEOMETRY,
     ),
     "launch-k02",
   );

@@ -1,6 +1,6 @@
 import {
-  MAIN_MENU_PROJECT_ADAPTATION_HIT_RECTS,
   isMainMenuSourcePointInRect,
+  type MainMenuPresentationGeometry,
   type MainMenuSourcePoint,
   type MainMenuSourceRect,
 } from "./mainMenuLayout.js";
@@ -39,23 +39,24 @@ export function resolveMainMenuPointerAction(
   screen: MainMenuScreen,
   point: MainMenuSourcePoint,
   availability: MainMenuActionAvailability,
+  presentation: MainMenuPresentationGeometry,
 ): MainMenuAction | null {
   switch (screen) {
     case "main":
-      return resolveMainAction(point, availability);
+      return resolveMainAction(point, availability, presentation);
     case "campaign-country":
-      return resolveCountryAction(point);
+      return resolveCountryAction(point, presentation);
     case "campaign-stage":
-      return resolveStageAction(point, availability);
+      return resolveStageAction(point, availability, presentation);
     case "random":
-      return resolvePanelAction(point, availability, [
+      return resolvePanelAction(point, availability, presentation, [
         "start-random-duel",
         "start-random-four-player",
         "start-cpu-skirmish",
         "start-last-random",
       ]);
     case "preferences":
-      return resolvePanelAction(point, availability, [
+      return resolvePanelAction(point, availability, presentation, [
         "cycle-game-speed",
         "cycle-mouse-mode",
         "cycle-ai-difficulty",
@@ -101,8 +102,9 @@ export function resolveMainMenuKeyboardAction(
 function resolveMainAction(
   point: MainMenuSourcePoint,
   availability: MainMenuActionAvailability,
+  presentation: MainMenuPresentationGeometry,
 ): MainMenuAction | null {
-  const { main } = MAIN_MENU_PROJECT_ADAPTATION_HIT_RECTS;
+  const { main } = presentation.projectAdaptationHitRects;
   if (isMainMenuSourcePointInRect(point, main.scenario)) {
     return "show-campaign-country";
   }
@@ -122,8 +124,9 @@ function resolveMainAction(
 
 function resolveCountryAction(
   point: MainMenuSourcePoint,
+  presentation: MainMenuPresentationGeometry,
 ): MainMenuAction | null {
-  const { country } = MAIN_MENU_PROJECT_ADAPTATION_HIT_RECTS;
+  const { country } = presentation.projectAdaptationHitRects;
   if (isMainMenuSourcePointInRect(point, country.korea)) {
     return "show-campaign-stage";
   }
@@ -133,8 +136,9 @@ function resolveCountryAction(
 function resolveStageAction(
   point: MainMenuSourcePoint,
   availability: MainMenuActionAvailability,
+  presentation: MainMenuPresentationGeometry,
 ): MainMenuAction | null {
-  const { stage } = MAIN_MENU_PROJECT_ADAPTATION_HIT_RECTS;
+  const { stage } = presentation.projectAdaptationHitRects;
   if (isMainMenuSourcePointInRect(point, stage.back)) {
     return "back";
   }
@@ -155,9 +159,10 @@ function resolveStageAction(
 function resolvePanelAction(
   point: MainMenuSourcePoint,
   availability: MainMenuActionAvailability,
+  presentation: MainMenuPresentationGeometry,
   actions: readonly MainMenuAction[],
 ): MainMenuAction | null {
-  const { panel } = MAIN_MENU_PROJECT_ADAPTATION_HIT_RECTS;
+  const { panel } = presentation.projectAdaptationHitRects;
   if (isMainMenuSourcePointInRect(point, panel.back)) {
     return "back";
   }
