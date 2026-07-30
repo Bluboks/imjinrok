@@ -99,8 +99,10 @@ test("exports deterministic representative terrain, resource, and palette manife
 
   assert.deepEqual(grassManifest.exportedFrames, [{ index: 0, fileName: "grss1_0000.png" }]);
   assert.deepEqual(resourceManifest.exportedFrames, [{ index: 0, fileName: "resource_0000.png" }]);
-  assert.equal(paletteManifest.evidenceStatus, "unresolved");
+  assert.equal(paletteManifest.evidenceStatus, "source-backed-adaptation");
   assert.equal(paletteManifest.source, "pal/night1.pal");
+  assert.equal(paletteManifest.byteLength, 768);
+  assert.equal(paletteManifest.rgb6.length, 768);
 });
 
 function copyCatalogSources(report) {

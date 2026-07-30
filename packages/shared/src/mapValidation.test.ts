@@ -123,6 +123,10 @@ test("map validation reports concrete invalid day/night curve paths", () => {
         { tick: 0, phase: "night", lightLevel01: 2 },
         { tick: 0, phase: "day", lightLevel01: Number.NaN },
       ],
+      visualSteps: [
+        { tick: 8, paletteId: "" },
+        { tick: 8, paletteId: "night1" },
+      ],
     },
   };
 
@@ -137,18 +141,77 @@ test("map validation reports concrete invalid day/night curve paths", () => {
     "environment.dayNight.lightCurve[0].lightLevel01",
     "environment.dayNight.lightCurve[1].tick",
     "environment.dayNight.lightCurve[1].lightLevel01",
+    "environment.dayNight.visualSteps[0].tick",
+    "environment.dayNight.visualSteps[0].paletteId",
+    "environment.dayNight.visualSteps[1].tick",
+    "environment.dayNight.visualSteps[0].paletteId",
+    "environment.dayNight.visualSteps[1].paletteId",
   ]);
 });
 
-test("K01 retains its normal tileset identity, exact explicit source tiles, and no inferred night cycle", () => {
+test("K01 opts into the source schedule identity without applying a sight modifier", () => {
   const map = createImjinrokMapScaffold("imjinrok-k01");
   assert.ok(map);
 
   assert.equal(map.tilesetId, "imjinrok-normal");
-  assert.equal(map.environmentVisualProfileId, "core-default");
-  assert.equal(map.environment, undefined);
+  assert.equal(map.environmentVisualProfileId, "imjinrok-source-day-night-palette");
+  assert.deepEqual(map.environment?.dayNight, {
+    cycleTicks: 8_640,
+    dayStartTick: 0,
+    nightStartTick: 4_320,
+    visualSteps: [
+      { tick: 0, paletteId: "night3" },
+      { tick: 2, paletteId: "night2" },
+      { tick: 4, paletteId: "night1" },
+      { tick: 4_320, paletteId: "night1" },
+      { tick: 4_322, paletteId: "night2" },
+      { tick: 4_324, paletteId: "night3" },
+      { tick: 4_326, paletteId: "night4" },
+    ],
+  });
   assert.equal(map.layers.every((layer) => layer.tiles.every((tile) => tile.tilesetVisuals?.flatAssetKey?.startsWith("k01-source:") === true)), true);
   assert.equal(validateMapDefinition(map, createContentRegistry()).ok, true);
+});
+
+test("day/night visual steps require a selected palette profile and known palette ids", () => {
+  const map = createBlankMap();
+  map.environment = {
+    dayNight: {
+      cycleTicks: 8,
+      dayStartTick: 0,
+      nightStartTick: 4,
+      visualSteps: [{ tick: 0, paletteId: "missing" }],
+    },
+  };
+  delete map.environmentVisualProfileId;
+  assert.deepEqual(validateMapDefinition(map, createContentRegistry()).issues, [
+    { path: "environmentVisualProfileId", message: "Day/night visual steps require an environment visual profile." },
+  ]);
+
+  map.environmentVisualProfileId = "imjinrok-source-day-night-palette";
+  assert.deepEqual(validateMapDefinition(map, createContentRegistry()).issues, [
+    { path: "environment.dayNight.visualSteps[0].paletteId", message: "Unknown palette 'missing' in environment visual profile 'imjinrok-source-day-night-palette'." },
+  ]);
+});
+
+test("day/night visual steps reject duplicate cycle ticks", () => {
+  const map = createBlankMap();
+  map.environmentVisualProfileId = "imjinrok-source-day-night-palette";
+  map.environment = {
+    dayNight: {
+      cycleTicks: 8,
+      dayStartTick: 0,
+      nightStartTick: 4,
+      visualSteps: [
+        { tick: 0, paletteId: "night1" },
+        { tick: 0, paletteId: "night2" },
+      ],
+    },
+  };
+
+  assert.deepEqual(validateMapDefinition(map, createContentRegistry()).issues, [
+    { path: "environment.dayNight.visualSteps[1].tick", message: "Duplicate visual step tick '0'." },
+  ]);
 });
 
 test("source visual contracts retain catalogued source hashes without semantic promotion", () => {
@@ -158,9 +221,12 @@ test("source visual contracts retain catalogued source hashes without semantic p
   const hashes = new Map(fixture.sourceFiles.map((entry) => [entry.sourcePath, entry.sha256]));
   const normalTileset = imjinrokSourceContentPack.tilesets["imjinrok-normal"];
   const resourceSet = imjinrokSourceContentPack.resourceVisualSets["imjinrok-source-resource-adaptation"];
+  const paletteProfile = imjinrokSourceContentPack.environmentVisualProfiles["imjinrok-source-day-night-palette"];
 
   assert.equal(normalTileset.evidenceStatus, "unresolved");
   assert.equal(resourceSet.evidenceStatus, "source-backed-adaptation");
+  assert.equal(paletteProfile.evidenceStatus, "source-backed-adaptation");
+  assert.deepEqual(paletteProfile.paletteAssets?.map((asset) => [asset.id, asset.frame]), [["night1", 0], ["night2", 1], ["night3", 2], ["night4", 3]]);
   for (const asset of [...(normalTileset.sourceAssets ?? []), ...(resourceSet.sourceAssets ?? [])]) {
     assert.equal(hashes.get(asset.sourcePath), asset.sha256, asset.sourcePath);
   }

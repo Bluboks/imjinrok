@@ -54,7 +54,7 @@ test("SkirmishScene consumes the light contract in its environment overlay signa
   const sceneSource = readFileSync(scenePath, "utf8");
 
   assert.match(sceneSource, /resolveEnvironmentOverlayLightContract\(getEnvironmentLightLevel\(environment\)\)/);
-  assert.match(sceneSource, /environment\.dayPhase\}:\$\{visualState\.lightSignature\}:\$\{rainFrame\}/);
+  assert.match(sceneSource, /environment\.dayPhase\}:\$\{visualState\.lightSignature\}:\$\{paletteAdapter\?\.paletteId \?\? "none"\}:\$\{rainFrame\}/);
   assert.match(sceneSource, /fillStyle\(0x071426, visualState\.nightAlpha\)/);
 });
 

@@ -277,6 +277,13 @@ function normalizeSavedEnvironment(value: unknown): WorldSnapshot["environment"]
     normalized.weatherOverrideUntilTick = Math.max(0, Math.floor(value.weatherOverrideUntilTick));
   }
 
+  if (typeof value.lightLevel01 === "number" && Number.isFinite(value.lightLevel01)) {
+    normalized.lightLevel01 = Math.min(1, Math.max(0, value.lightLevel01));
+  }
+  if (typeof value.visualPaletteId === "string" && value.visualPaletteId.trim()) {
+    normalized.visualPaletteId = value.visualPaletteId;
+  }
+
   return normalized;
 }
 

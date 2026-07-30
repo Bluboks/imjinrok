@@ -48,11 +48,16 @@ function convertSprite(originalRoot, outputDirectory, sourcePath) {
 
 function writePaletteManifest(originalRoot, outputDirectory, sourcePath) {
   const source = readFileSync(resolve(originalRoot, sourcePath));
+  if (source.length !== 768) {
+    throw new Error(`${sourcePath}: expected exactly 768 palette bytes; received ${source.length}`);
+  }
   const outputName = `${sourcePath.split("/").at(-1)}.json`;
   writeFileSync(resolve(outputDirectory, outputName), `${JSON.stringify({
     source: sourcePath,
     sha256: createHash("sha256").update(source).digest("hex"),
-    evidenceStatus: "unresolved",
+    byteLength: source.length,
+    rgb6: Array.from(source),
+    evidenceStatus: "source-backed-adaptation",
   }, null, 2)}\n`);
 }
 

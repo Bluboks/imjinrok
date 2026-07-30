@@ -295,6 +295,13 @@ function normalizeRuntimeEnvironment(value: unknown): WorldState["environment"] 
     environment.weatherOverrideUntilTick = Math.max(0, Math.floor(candidate.weatherOverrideUntilTick));
   }
 
+  if (typeof candidate.lightLevel01 === "number" && Number.isFinite(candidate.lightLevel01)) {
+    environment.lightLevel01 = Math.min(1, Math.max(0, candidate.lightLevel01));
+  }
+  if (typeof candidate.visualPaletteId === "string" && candidate.visualPaletteId.trim()) {
+    environment.visualPaletteId = candidate.visualPaletteId;
+  }
+
   return environment;
 }
 
