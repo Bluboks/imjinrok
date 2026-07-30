@@ -12,6 +12,7 @@ import {
 import { createUnitState } from "./entities.js";
 import { createInitialEnvironmentState } from "./environment.js";
 import { getFootprintTiles } from "./placement.js";
+import { resolvePathfindingProfileId } from "./navigation.js";
 import { createPlayerResearchState } from "./research.js";
 import { resourceBlocksBuilding, resourceBlocksMovement } from "./resources.js";
 import { applyScenarioScriptedEvents, createScenarioRuntimeState } from "./scenario.js";
@@ -43,7 +44,9 @@ export {
   type OriginalRyuProjectileImpactResult,
 } from "./originalRyuProjectile.js";
 export type { EnvironmentState } from "./environment.js";
-export { findPathForUnit, isTerrainWalkable } from "./navigation.js";
+export { CORE_A_STAR_PATHFINDER_ID, coreAStarPathfinder, findPathForUnit, isTerrainWalkable, resolvePathfindingProfileId, type FindPathOptions } from "./navigation.js";
+export { defaultPathfinderRegistry, PathfinderRegistry, registerPathfinder, requirePathfinder, type RegisterPathfinderOptions } from "./pathfinderRegistry.js";
+export type { Pathfinder } from "./pathfinder.js";
 export { getFootprintTiles, validateBuildingPlacement, type BuildingPlacementValidationResult } from "./placement.js";
 export { canQueuePopulation, DEFAULT_POPULATION_LIMIT, getPlayerPopulationState, getPopulationCost, getPopulationProvided, type PlayerPopulationState } from "./population.js";
 export { applyCompletedResearchToUnit, completeResearch, createPlayerResearchState, isResearchCompleted, isResearchPending } from "./research.js";
@@ -103,6 +106,7 @@ export function createInitialWorldState(
   const state: WorldState = {
     tick: 0,
     map: worldMap,
+    pathfindingProfileId: resolvePathfindingProfileId(worldMap, scenario),
     environment: createInitialEnvironmentState(worldMap),
     scenario: createScenarioRuntimeState(scenario),
     players,

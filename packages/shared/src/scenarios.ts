@@ -196,6 +196,8 @@ export interface ScenarioDefinition {
   description: string;
   scenarioType: ScenarioType;
   mapId: string;
+  /** Overrides the map's optional navigation profile for this scenario. */
+  pathfindingProfileId?: string;
   playerIds?: readonly string[];
   playerTeams?: Readonly<Record<string, string>>;
   completionMode?: "objectives" | "scripted";

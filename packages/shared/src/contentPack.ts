@@ -15,6 +15,12 @@ import { getK01SourceTileVisualAssets, K01_SOURCE_TILE_IMAGE_GEOMETRY } from "./
 
 const KNOWN_DAMAGE_TYPES = new Set(["physical", "fire", "lightning", "drowning"]);
 
+/** Metadata only. Pathfinder implementations stay in the simulation layer. */
+export interface PathfindingProfileDefinition {
+  id: string;
+  displayName: string;
+}
+
 export interface ContentPackDefinition {
   id: string;
   displayName: string;
@@ -27,6 +33,7 @@ export interface ContentPackDefinition {
   tilesets?: Record<string, TilesetDefinition>;
   environmentVisualProfiles?: Record<string, EnvironmentVisualProfile>;
   resourceVisualSets?: Record<string, ResourceVisualSetDefinition>;
+  pathfindingProfiles?: Record<string, PathfindingProfileDefinition>;
 }
 
 export interface ContentRegistry {
@@ -39,6 +46,7 @@ export interface ContentRegistry {
   tilesets: Record<string, TilesetDefinition>;
   environmentVisualProfiles: Record<string, EnvironmentVisualProfile>;
   resourceVisualSets: Record<string, ResourceVisualSetDefinition>;
+  pathfindingProfiles: Record<string, PathfindingProfileDefinition>;
 }
 
 export interface ContentValidationIssue {
@@ -82,6 +90,12 @@ export const coreContentPack = {
       displayName: "Core Default",
       resources: {},
       evidenceStatus: "source-backed-adaptation",
+    },
+  },
+  pathfindingProfiles: {
+    "core:a-star": {
+      id: "core:a-star",
+      displayName: "Core A*",
     },
   },
 } as const satisfies ContentPackDefinition;
@@ -174,6 +188,7 @@ export function createContentRegistry(packs: readonly ContentPackDefinition[] = 
     tilesets: mergeDefinitions(packs.map((pack) => pack.tilesets ?? {})),
     environmentVisualProfiles: mergeDefinitions(packs.map((pack) => pack.environmentVisualProfiles ?? {})),
     resourceVisualSets: mergeDefinitions(packs.map((pack) => pack.resourceVisualSets ?? {})),
+    pathfindingProfiles: mergeDefinitions(packs.map((pack) => pack.pathfindingProfiles ?? {})),
   };
 }
 
@@ -240,6 +255,8 @@ export function validateContentRegistry(registry: ContentRegistry): ContentValid
   validateDefinitionIds(registry.environmentVisualProfiles, "environmentVisualProfiles", issues);
   validateEnvironmentVisualProfiles(registry.environmentVisualProfiles, issues);
   validateDefinitionIds(registry.resourceVisualSets, "resourceVisualSets", issues);
+  validateDefinitionIds(registry.pathfindingProfiles, "pathfindingProfiles", issues);
+  validatePathfindingProfiles(registry.pathfindingProfiles, issues);
   validateResourceDefinitions(registry, issues);
   validateUnitDefinitions(registry, issues);
 
@@ -270,6 +287,17 @@ function validateEnvironmentVisualProfiles(
       if (!/^[a-f0-9]{64}$/u.test(asset.sourceSha256)) {
         issues.push(createIssue(`${path}.sourceSha256`, "Palette asset source SHA-256 must be a lowercase 64-character digest."));
       }
+    }
+  }
+}
+
+function validatePathfindingProfiles(
+  profiles: Record<string, PathfindingProfileDefinition>,
+  issues: ContentValidationIssue[],
+): void {
+  for (const [profileId, profile] of Object.entries(profiles)) {
+    if (!profile.displayName.trim()) {
+      issues.push(createIssue(`pathfindingProfiles.${profileId}.displayName`, "Pathfinding profile display name is required."));
     }
   }
 }
@@ -310,6 +338,7 @@ function validateDefinitionOwnership(packs: readonly ContentPackDefinition[], is
     ["tilesets", (pack) => pack.tilesets],
     ["environmentVisualProfiles", (pack) => pack.environmentVisualProfiles],
     ["resourceVisualSets", (pack) => pack.resourceVisualSets],
+    ["pathfindingProfiles", (pack) => pack.pathfindingProfiles],
   ];
 
   for (const [namespace, getDefinitions] of namespaces) {
