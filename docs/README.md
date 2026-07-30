@@ -41,6 +41,7 @@
 - [K01 목표 모달 presenter·input lifecycle](reverse-engineering/mechanics/objective-modal-presenter-lifecycle.md)
 - [공통 임무 목표 모달 font·측정·줄바꿈](reverse-engineering/mechanics/objective-modal-typography.md)
 - [gameplay selection/command grid](reverse-engineering/mechanics/gameplay-selection-command-panel.md)
+- [게임 속도·마우스 인터페이스 상태 경계](reverse-engineering/mechanics/gameplay-speed-mouse-settings.md)
 - [command-grid cell-size common-loader 결합](reverse-engineering/mechanics/command-grid-cell-size-binding.md)
 - [원본 command control의 `button.spr` pixel-frame 결합](reverse-engineering/mechanics/command-icon-frame-binding.md)
 - [K01 source fog 자산·command icon 추출 경계](reverse-engineering/mechanics/source-fog-command-icons.md)
