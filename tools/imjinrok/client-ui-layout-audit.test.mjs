@@ -103,14 +103,32 @@ test("client UI layout audit routes provisional surfaces to original binary trac
   ]);
   assert.equal(
     preGameBriefingLayout.originalEvidenceStatus,
-    "static-proven-for-SPEECH-slots-and-text;project-adaptation-for-base-to-completed-frame-fade-and-portrait-scale-in",
+    "source-preserved-title-sequence-boundaries;static-proven-for-SPEECH-slots-text-and-labels;project-adaptation-for-24Hz-wall-clock-portrait-cadence-and-final-click-dismiss",
   );
-  assert.match(preGameBriefingLayout.followUp, /base-to-completed fade and portrait scale-in as project presentation/u);
+  assert.equal(
+    preGameBriefingLayout.currentBasis,
+    "source-preserved-title-sequence-and-static-proven-SPEECH-slots-text-labels-with-project-portrait-cadence-and-final-click-adaptations",
+  );
+  assert.match(preGameBriefingLayout.followUp, /source-preserved title-frame boundaries/u);
+  assert.match(preGameBriefingLayout.followUp, /SPEECH slots, text, and labels/u);
+  assert.match(preGameBriefingLayout.followUp, /project 24Hz portrait wall-clock calibration and final-click dismiss/u);
   assert.equal(
     preGameBriefingLayout.patterns.every(
       (pattern) => pattern.present && Number.isInteger(pattern.line),
     ),
     true,
+  );
+  assert.deepEqual(
+    preGameBriefingLayout.patterns.map((pattern) => pattern.text),
+    [
+      "getMissionBriefingTitleFrameIndex(",
+      "const targetScale = portrait.width / 130;",
+      "const introductionScale = getMissionBriefingPortraitScale(introductionStartedAt, this.time.now);",
+      ".setScale(targetScale * introductionScale);",
+      "transition.image.setScale(transition.targetScale * getMissionBriefingPortraitScale(transition.startedAt, time));",
+      "const label = this.context?.scenario?.briefing?.portraitLabels?.[normalizeMissionPortraitId(participant.portraitId)];",
+      "layout.label.centerX, layout.label.y, label",
+    ],
   );
 });
 
