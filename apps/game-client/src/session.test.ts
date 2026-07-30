@@ -78,6 +78,8 @@ test("legacy world snapshots are normalized with missing runtime collections", (
   delete legacySnapshot.playerResearch;
   delete legacySnapshot.playerCheats;
   delete legacySnapshot.combatEvents;
+  delete legacySnapshot.projectileSystem;
+  delete legacySnapshot.projectileImpactEvents;
   delete legacySnapshot.lastAcceptedCommand;
 
   const normalized = normalizeSavedWorldSnapshot(legacySnapshot);
@@ -93,7 +95,43 @@ test("legacy world snapshots are normalized with missing runtime collections", (
   assert.deepEqual(normalized.playerResearch, {});
   assert.deepEqual(normalized.playerCheats, {});
   assert.deepEqual(normalized.combatEvents, []);
+  assert.deepEqual(normalized.projectileSystem, { nextProjectileSequence: 1, projectiles: [] });
+  assert.deepEqual(normalized.projectileImpactEvents, []);
   assert.equal(normalized.lastAcceptedCommand, null);
+});
+
+test("malformed present projectile lifecycle save data is rejected while unknown mod profiles remain serializable", () => {
+  const malformed = createInitialWorldState(defaultMap, ["p1", "p2"]);
+  malformed.projectileSystem = {
+    nextProjectileSequence: 2,
+    projectiles: [{
+      id: "projectile-000000000001",
+      profileId: "mod:projectile",
+      payload: {},
+      start: { x: 0, y: 0 },
+      destination: { x: 1, y: 1 },
+      position: { x: 0, y: 0 },
+      motion: { policyId: "mod:motion", data: {} },
+    }],
+  };
+  malformed.projectileImpactEvents = [{
+    tick: 2,
+    projectileId: "projectile-000000000001",
+    profileId: "mod:projectile",
+    eventId: "mod:impact",
+    payload: { amount: 3 },
+    position: { x: 1, y: 1 },
+  }];
+
+  assert.ok(normalizeSavedWorldSnapshot(malformed));
+
+  const invalid = structuredClone(malformed) as WorldSnapshot;
+  invalid.projectileSystem = { nextProjectileSequence: 2, projectiles: [{ id: "not-canonical" }] } as WorldSnapshot["projectileSystem"];
+  assert.equal(normalizeSavedWorldSnapshot(invalid), null);
+
+  invalid.projectileSystem = malformed.projectileSystem;
+  invalid.projectileImpactEvents = [{ ...malformed.projectileImpactEvents[0]!, payload: { constructor: "unsafe" } }];
+  assert.equal(normalizeSavedWorldSnapshot(invalid), null);
 });
 
 test("quick-load world snapshots preserve timed weather overrides", () => {
@@ -354,6 +392,18 @@ test("local session transport hydrates current source map metadata on quick-load
 
   assert.equal(transport.replaceSnapshot(legacySnapshot, defaultSkirmishScenario), true);
   assert.deepEqual(transport.getSnapshot().map.sourceInitialView, { x: 13, y: 8 });
+});
+
+test("local session transport defaults legacy missing projectile lifecycle state", () => {
+  const state = createInitialWorldState(defaultMap, ["p1", "p2"]);
+  const legacySnapshot = structuredClone(state) as Partial<WorldSnapshot>;
+  delete legacySnapshot.projectileSystem;
+  delete legacySnapshot.projectileImpactEvents;
+
+  const transport = new LocalSessionTransport(state);
+  assert.equal(transport.replaceSnapshot(legacySnapshot as WorldSnapshot, defaultSkirmishScenario), true);
+  assert.deepEqual(transport.getSnapshot().projectileSystem, { nextProjectileSequence: 1, projectiles: [] });
+  assert.deepEqual(transport.getSnapshot().projectileImpactEvents, []);
 });
 
 test("local session transport preserves timed weather overrides on quick-load", () => {

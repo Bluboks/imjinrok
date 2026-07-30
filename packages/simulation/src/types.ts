@@ -16,6 +16,7 @@ import type {
 } from "../../shared/src/index.js";
 import type { EnvironmentState } from "./environment.js";
 import type { SourceOrientationState } from "./orientation.js";
+import type { ProjectileImpactLogEntry, ProjectileSystemState } from "./projectiles.js";
 
 export type ResourceBank = ResourceAmountSet;
 
@@ -220,6 +221,10 @@ export interface WorldState {
   playerResearch: Record<string, PlayerResearchState>;
   playerCheats: Record<string, PlayerCheatState>;
   combatEvents: CombatEventState[];
+  /** Product projectile lifecycle state; policy executables remain outside snapshots. */
+  projectileSystem: ProjectileSystemState;
+  /** Bounded deterministic lifecycle events for consumers such as damage and presentation. */
+  projectileImpactEvents: ProjectileImpactLogEntry[];
   lastAcceptedCommand: CommandEnvelope | null;
 }
 

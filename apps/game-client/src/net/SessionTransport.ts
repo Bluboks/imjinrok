@@ -1,5 +1,5 @@
 import { resourceDefinitions, type CommandEnvelope, type MapDefinition, type ResourceDefinition, type ScenarioDefinition } from "@shared";
-import { advanceWorldTick, completeScenarioRuntime, createInitialWorldState, createPlayerResearchState, issueCommand as issueWorldCommand, SIM_TICK_SECONDS, SkirmishAiController, type IssueCommandResult, type ScenarioStatus, type SkirmishAiControllerOptions, type WorldSnapshot, type WorldState } from "@simulation";
+import { advanceWorldTick, completeScenarioRuntime, createInitialWorldState, createPlayerResearchState, createProjectileSystemState, issueCommand as issueWorldCommand, parseSerializedProjectileImpactLog, parseSerializedProjectileSystemState, SIM_TICK_SECONDS, SkirmishAiController, type IssueCommandResult, type ScenarioStatus, type SkirmishAiControllerOptions, type WorldSnapshot, type WorldState } from "@simulation";
 import type { GameLaunchContext } from "../session.js";
 import { NetworkClient } from "./NetworkClient.js";
 
@@ -255,6 +255,8 @@ function normalizeWorldSnapshot(
   normalized.playerResearch ??= {};
   normalized.playerCheats ??= {};
   normalized.combatEvents ??= [];
+  normalized.projectileSystem = normalizeRuntimeProjectileSystem(normalized.projectileSystem);
+  normalized.projectileImpactEvents = normalizeRuntimeProjectileImpactEvents(normalized.projectileImpactEvents);
   normalized.lastAcceptedCommand ??= null;
   hydrateScenarioObjectiveMetadata(normalized, scenario);
   hydrateMapMetadata(normalized, mapMetadataSource);
@@ -267,6 +269,20 @@ function normalizeWorldSnapshot(
   hydrateRallyResourceKinds(normalized);
 
   return normalized;
+}
+
+function normalizeRuntimeProjectileSystem(value: unknown): WorldState["projectileSystem"] {
+  if (value === undefined) return createProjectileSystemState();
+  const parsed = parseSerializedProjectileSystemState(value);
+  if (!parsed) throw new TypeError("world snapshot contains malformed projectile lifecycle state");
+  return parsed;
+}
+
+function normalizeRuntimeProjectileImpactEvents(value: unknown): WorldState["projectileImpactEvents"] {
+  if (value === undefined) return [];
+  const parsed = parseSerializedProjectileImpactLog(value);
+  if (!parsed) throw new TypeError("world snapshot contains malformed projectile impact events");
+  return parsed;
 }
 
 function normalizeRuntimeEnvironment(value: unknown): WorldState["environment"] {
