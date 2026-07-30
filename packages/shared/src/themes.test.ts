@@ -511,7 +511,7 @@ test("Japanese gunner uses the statically recovered class-12 core-state frame bl
     phaseCount: 8,
     frameStarts: { s: 60, sw: 60, w: 60, nw: 60, n: 60, ne: 60, e: 60, se: 60 },
   });
-  assert.deepEqual(visual.states.walk?.clips, visual.states.move?.clips);
+  assert.deepEqual(visual.states.walk, visual.states.move);
   for (const state of ["idle", "move", "walk", "attack", "death"] as const) {
     const clips = visual.states[state]?.clips;
     assert.equal(clips?.n?.mirrorX, true);
