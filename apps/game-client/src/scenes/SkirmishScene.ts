@@ -139,6 +139,7 @@ import {
 } from "../missionPresentationTimeline.js";
 import { placeStaticVisual } from "../render/placeStaticVisual.js";
 import { getEntityAnimationStateKey } from "../render/entityAnimationState.js";
+import { resolveEntityAnimationSelection } from "../render/sourceOrientationAnimation.js";
 import {
   getMapExplicitTileVisualPreloadDescriptors,
   getRegisteredExplicitTileVisualPreloadDescriptors,
@@ -8643,6 +8644,12 @@ export class SkirmishScene extends Phaser.Scene {
 
     if (!stateKey) {
       return null;
+    }
+
+    // Construction uses its selected static progress frame and must not be
+    // affected by source-orientation presentation metadata.
+    if (stateKey !== "construction") {
+      return resolveEntityAnimationSelection(visual, stateKey, facing, unit.sourceOrientation);
     }
 
     const state = visual.states[stateKey];

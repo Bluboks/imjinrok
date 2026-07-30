@@ -7,6 +7,12 @@ export interface EntityAnimationClipResolution {
   source: "source-orientation" | "directional";
 }
 
+/** Shape consumed by the Skirmish entity animation tracker. */
+export interface EntityAnimationSelectionResolution {
+  key: string;
+  clip: AnimationClip;
+}
+
 export type SourceOrientationAnimationState = Pick<
   SourceOrientationState,
   "profileId" | "movementRaw16" | "attackGrid8"
@@ -63,4 +69,20 @@ export function resolveEntityAnimationClip(
   }
 
   return null;
+}
+
+/**
+ * Presentation bridge for non-construction entity states. Keeping the scene's
+ * tracker key with the resolved clip makes raw-direction changes restart the
+ * animation just like ordinary facing changes.
+ */
+export function resolveEntityAnimationSelection(
+  visual: Pick<EntityVisual, "id" | "states">,
+  stateKey: string,
+  fallbackFacing: Facing,
+  sourceOrientation?: SourceOrientationAnimationState,
+): EntityAnimationSelectionResolution | null {
+  const resolved = resolveEntityAnimationClip(visual, stateKey, fallbackFacing, sourceOrientation);
+
+  return resolved ? { key: resolved.clipKey, clip: resolved.clip } : null;
 }
