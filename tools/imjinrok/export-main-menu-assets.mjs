@@ -19,6 +19,7 @@ const RESOURCES = [
   resource("landing-title", "initmenu", "yfnt/title.spr", "title", [0], "9cacc8892982dbe02047898530c5f44c5fba4b6115f9774fb690c9a0a763d03f", 640, 480, 1),
   resource("menu-border", "initmenu", "yfnt/gamemenuborder.spr", "game-menu-border", [0], "48f60d170a8305fbfc2a08d41b3de96bf19dfe99d9d3460996037df41ed6a8ed", 172, 310, 1),
   resource("menu-button", "initmenu", "yfnt/gamemenubutton.spr", "game-menu-buttons", allFrames(24), "ec73af9d1d5c739a8fd40fa9436a77fc92eb13f5ebb99a745d1279244129c387", 144, 38, 24),
+  resource("stage-palette-menu-button-catalog", "imjin2", "yfnt/gamemenubutton.spr", "stage/menu-button", allFrames(24), "ec73af9d1d5c739a8fd40fa9436a77fc92eb13f5ebb99a745d1279244129c387", 144, 38, 24),
   resource("nation-button", "imjin2", "yfnt/NationButtons.spr", "nation-buttons", allFrames(9), "98304a61e4d8bd4017e7da6763e4194c4d55422a4891c5cf534ab5dd6c362885", 58, 30, 9),
   resource("stage-border", "imjin2", "yfnt/selectstageborder.spr", "stage-border", [0], "d3776a9766b8cc437c261c488adbd09f968be4502f3074c7cd8cf4c0363ebad9", 320, 350, 1),
   resource("stage-default", "imjin2", "yfnt/titlestartstage.spr", "stage/title", [0], "d457f6409dab0697b5434f49315a3bed3b552278b42619fc3719ed355e1ed1ba", 640, 480, 1),

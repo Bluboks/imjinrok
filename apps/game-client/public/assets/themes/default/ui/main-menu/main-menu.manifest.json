@@ -188,6 +188,140 @@
       ]
     },
     {
+      "id": "stage-palette-menu-button-catalog",
+      "paletteId": "imjin2",
+      "sourcePath": "original/imjinrok2/yfnt/gamemenubutton.spr",
+      "sourceSha256": "ec73af9d1d5c739a8fd40fa9436a77fc92eb13f5ebb99a745d1279244129c387",
+      "layout": "spr",
+      "dimensions": {
+        "width": 144,
+        "height": 38
+      },
+      "frameCount": 24,
+      "exportedFrames": [
+        {
+          "index": 0,
+          "fileName": "stage/menu-button/gamemenubutton_0000.png",
+          "sha256": "10e6ee784e96fadb823d89031245a2a7fd6ddf2f1c2d2b098047c138c39845a3"
+        },
+        {
+          "index": 1,
+          "fileName": "stage/menu-button/gamemenubutton_0001.png",
+          "sha256": "bbceed9ab280b8d76ebca79bd242e4c07c971da585a7ee45d8f8426e321461aa"
+        },
+        {
+          "index": 2,
+          "fileName": "stage/menu-button/gamemenubutton_0002.png",
+          "sha256": "9bad5a4ff486106fa6033404e9ba9a2ec27e9b82d7ecc84dd05c607bf76ebc15"
+        },
+        {
+          "index": 3,
+          "fileName": "stage/menu-button/gamemenubutton_0003.png",
+          "sha256": "ad7c7495267e612301d437da65b019d8781104b33e6643faafa34e1d29d1b6d6"
+        },
+        {
+          "index": 4,
+          "fileName": "stage/menu-button/gamemenubutton_0004.png",
+          "sha256": "263287aa7422802cf38ecfe1750a8d275ac0e00ea6b95f5c99cc7bdbbc755f11"
+        },
+        {
+          "index": 5,
+          "fileName": "stage/menu-button/gamemenubutton_0005.png",
+          "sha256": "35230bc1bcdce48abe6c8712f9c734d4ffd6ecb9420a3a715f8f08a84773c005"
+        },
+        {
+          "index": 6,
+          "fileName": "stage/menu-button/gamemenubutton_0006.png",
+          "sha256": "44757326ca6981681b102b1a35e5fdf4f5ef2f07d1d26b6a63dcbfaf8bbbbe5c"
+        },
+        {
+          "index": 7,
+          "fileName": "stage/menu-button/gamemenubutton_0007.png",
+          "sha256": "fa1ec869d3520a650bdf38cfe4423169e1396a4789d5faa203de4d2611b6a7a7"
+        },
+        {
+          "index": 8,
+          "fileName": "stage/menu-button/gamemenubutton_0008.png",
+          "sha256": "1d27c50b6373c48e291f68a428ce0e05a792a5097a3e715e0ffb34861cbf71ee"
+        },
+        {
+          "index": 9,
+          "fileName": "stage/menu-button/gamemenubutton_0009.png",
+          "sha256": "2b24a6ac49200b0f3540b2b3481337b263fc49b85ebcc698c6404219ceefa724"
+        },
+        {
+          "index": 10,
+          "fileName": "stage/menu-button/gamemenubutton_0010.png",
+          "sha256": "ee9303c94b7dcce11f84997a90d964958c27b44fdaaa6a507464e45fd2de411d"
+        },
+        {
+          "index": 11,
+          "fileName": "stage/menu-button/gamemenubutton_0011.png",
+          "sha256": "fdd2caa4aa23d05f87966977fb7b7fce897d31d958dc0b5c3698794dd34275b7"
+        },
+        {
+          "index": 12,
+          "fileName": "stage/menu-button/gamemenubutton_0012.png",
+          "sha256": "ab0c1225f77b2a40596a7fc27d1b5243107de39421e1ff548f788dec5667194d"
+        },
+        {
+          "index": 13,
+          "fileName": "stage/menu-button/gamemenubutton_0013.png",
+          "sha256": "c547f135850761852cc91dd50e422e554242a326309da342d3efe131b1143784"
+        },
+        {
+          "index": 14,
+          "fileName": "stage/menu-button/gamemenubutton_0014.png",
+          "sha256": "8cee4a5cb982568a5a2bfd2f81e2ecdc0939341056efce6c4d2185454d188441"
+        },
+        {
+          "index": 15,
+          "fileName": "stage/menu-button/gamemenubutton_0015.png",
+          "sha256": "053b922036a2b5446cb74ad2b655b308e1c225f6967f12b67ca84f0dc1b197f3"
+        },
+        {
+          "index": 16,
+          "fileName": "stage/menu-button/gamemenubutton_0016.png",
+          "sha256": "49f1617a7ab82e19bdbcc27bbfb6ff16d8843a48a18204ca36763de5412b53b5"
+        },
+        {
+          "index": 17,
+          "fileName": "stage/menu-button/gamemenubutton_0017.png",
+          "sha256": "1e97b9577b7000cd415bf1331e13f765adea3348e27970fe91a5a386881edd91"
+        },
+        {
+          "index": 18,
+          "fileName": "stage/menu-button/gamemenubutton_0018.png",
+          "sha256": "3c8d072f8b9bb21fc11263d0161d341e870c1f666c61243ae39dd9e77170135d"
+        },
+        {
+          "index": 19,
+          "fileName": "stage/menu-button/gamemenubutton_0019.png",
+          "sha256": "6f65c762a8f2ddbda322f5aae4862227eebd5acc46839557f7e3f78282d227d9"
+        },
+        {
+          "index": 20,
+          "fileName": "stage/menu-button/gamemenubutton_0020.png",
+          "sha256": "cff93afede25a0d4cda3ea0b5add32cb45f140c7bde93e09eb63a3489bd91fa6"
+        },
+        {
+          "index": 21,
+          "fileName": "stage/menu-button/gamemenubutton_0021.png",
+          "sha256": "b7c6730bd38bf1868a6ec48317abdf09008177f124c735b0756a8189d0f327a6"
+        },
+        {
+          "index": 22,
+          "fileName": "stage/menu-button/gamemenubutton_0022.png",
+          "sha256": "b7c6730bd38bf1868a6ec48317abdf09008177f124c735b0756a8189d0f327a6"
+        },
+        {
+          "index": 23,
+          "fileName": "stage/menu-button/gamemenubutton_0023.png",
+          "sha256": "b7c6730bd38bf1868a6ec48317abdf09008177f124c735b0756a8189d0f327a6"
+        }
+      ]
+    },
+    {
       "id": "nation-button",
       "paletteId": "imjin2",
       "sourcePath": "original/imjinrok2/yfnt/NationButtons.spr",

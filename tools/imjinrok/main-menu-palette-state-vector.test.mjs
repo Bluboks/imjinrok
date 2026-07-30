@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { copyFileSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import test from "node:test";
@@ -32,13 +32,22 @@ test("static vector binds the landing and country/mission palette state paths", 
   assert.equal(report.palettePaths.landingTitle.value, "pal\\initmenu.pal");
   assert.equal(report.palettePaths.stageFlow.value, "pal\\imjin2.pal");
   assert.equal(report.palettePaths.stageResources.length, 5);
+  assert.deepEqual(report.sourceAssets.stagePaletteMenuButtonCatalog, {
+    id: "stage-palette-menu-button-catalog",
+    sourcePath: "yfnt/gamemenubutton.spr",
+    sha256: "ec73af9d1d5c739a8fd40fa9436a77fc92eb13f5ebb99a745d1279244129c387",
+    paletteId: "imjin2",
+  });
+  assert.match(report.catalogUse, /Catalog-only/u);
+  assert.match(report.catalogUse, /stage Back control/u);
+  assert.match(report.unresolvedUseSite, /No original Back-control use-site is claimed/u);
 
   for (const vector of fixture.vectors) {
     assert.deepEqual(reproduceMainMenuPaletteSelection(vector.input), vector.expected, vector.id);
   }
 });
 
-test("rejects tampered executable, reference, and jump-table evidence", (t) => {
+test("rejects tampered executable, static artifacts, and source sprite evidence", (t) => {
   const directory = mkdtempSync(join(tmpdir(), "imjinrok-main-menu-palette-state-"));
   t.after(() => rmSync(directory, { recursive: true, force: true }));
 
@@ -56,6 +65,13 @@ test("rejects tampered executable, reference, and jump-table evidence", (t) => {
   copyFileSync(jumpTablesPath, alteredJumpTables);
   flipByte(alteredJumpTables, 0);
   assert.throws(() => verifyMainMenuPaletteStateVector({ executablePath, referencesPath, jumpTablesPath: alteredJumpTables }), /jump-tables\.json SHA-256 mismatch/u);
+
+  const alteredOriginalRoot = join(directory, "original");
+  const alteredButton = join(alteredOriginalRoot, "yfnt/gamemenubutton.spr");
+  mkdirSync(join(alteredOriginalRoot, "yfnt"), { recursive: true });
+  copyFileSync(resolve(repositoryRoot, "original/imjinrok2/yfnt/gamemenubutton.spr"), alteredButton);
+  flipByte(alteredButton, 0);
+  assert.throws(() => verifyMainMenuPaletteStateVector({ originalRoot: alteredOriginalRoot, executablePath, referencesPath, jumpTablesPath }), /yfnt\/gamemenubutton\.spr SHA-256 mismatch/u);
 });
 
 test("rejects a palette-selection vector outside the static scope", () => {
