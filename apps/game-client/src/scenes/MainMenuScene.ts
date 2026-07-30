@@ -320,7 +320,7 @@ export class MainMenuScene extends Phaser.Scene {
         .setAlpha(enabled ? 1 : 0.72);
     }
 
-    this.addPanelTextButton(
+    this.addProjectAdaptationButton(
       this.presentationGeometry.projectAdaptationHitRects.stage.back,
       "돌아가기",
       "back",
@@ -420,6 +420,26 @@ export class MainMenuScene extends Phaser.Scene {
     if (enabled) {
       this.addSourceAction(rect, () => this.executeAction(action));
     }
+  }
+
+  private addProjectAdaptationButton(
+    rect: MainMenuSourceRect,
+    label: string,
+    action: MainMenuAction,
+  ): void {
+    const button = this.add
+      .graphics()
+      .fillStyle(0x3b281d, 0.96)
+      .fillRoundedRect(rect.x, rect.y, rect.width, rect.height, 4)
+      .lineStyle(1, 0xae8c58, 1)
+      .strokeRoundedRect(rect.x, rect.y, rect.width, rect.height, 4);
+    this.menuContainer?.add(button);
+    this.addText(rect.x + rect.width / 2, rect.y + rect.height / 2, label, {
+      fontSize: "12px",
+      color: "#ead8a5",
+      align: "center",
+    }).setOrigin(0.5);
+    this.addSourceAction(rect, () => this.executeAction(action));
   }
 
   private addNationEntry(

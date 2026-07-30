@@ -19,7 +19,7 @@ test("exports the hash-bound main menu catalog deterministically and exactly mat
   const one = exportMainMenuAssets({ assetDirectory: join(first, "assets") });
   const two = exportMainMenuAssets({ assetDirectory: join(second, "assets") });
 
-  assert.equal(one.assetCount, 61);
+  assert.equal(one.assetCount, 85);
   assert.deepEqual(one.manifest, two.manifest);
   assert.deepEqual(one.manifest.palettes, [
     { id: "initmenu", sourcePath: "original/imjinrok2/pal/initmenu.pal", sha256: "c41e62408a8275e7a0c3e5402974beda50382ffcc382db94056db9e18291370d", byteLength: 768 },
@@ -29,6 +29,7 @@ test("exports the hash-bound main menu catalog deterministically and exactly mat
     { id: "landing-title", paletteId: "initmenu" },
     { id: "menu-border", paletteId: "initmenu" },
     { id: "menu-button", paletteId: "initmenu" },
+    { id: "stage-palette-menu-button-catalog", paletteId: "imjin2" },
     { id: "nation-button", paletteId: "imjin2" },
     { id: "stage-border", paletteId: "imjin2" },
     { id: "stage-default", paletteId: "imjin2" },
@@ -44,6 +45,7 @@ test("exports the hash-bound main menu catalog deterministically and exactly mat
     { id: "landing-title", dimensions: [640, 480], frameCount: 1, exportedFrameCount: 1 },
     { id: "menu-border", dimensions: [172, 310], frameCount: 1, exportedFrameCount: 1 },
     { id: "menu-button", dimensions: [144, 38], frameCount: 24, exportedFrameCount: 24 },
+    { id: "stage-palette-menu-button-catalog", dimensions: [144, 38], frameCount: 24, exportedFrameCount: 24 },
     { id: "nation-button", dimensions: [58, 30], frameCount: 9, exportedFrameCount: 9 },
     { id: "stage-border", dimensions: [320, 350], frameCount: 1, exportedFrameCount: 1 },
     { id: "stage-default", dimensions: [640, 480], frameCount: 1, exportedFrameCount: 1 },

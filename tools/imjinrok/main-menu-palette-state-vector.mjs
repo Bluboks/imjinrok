@@ -58,7 +58,14 @@ const STAGE_RESOURCE_STRINGS = [
   [0x004bb044, "yfnt\\titlestartstagetoselect.spr"],
 ];
 
-export function verifyMainMenuPaletteStateVector({ executablePath = defaultExecutablePath, referencesPath = defaultReferencesPath, jumpTablesPath = defaultJumpTablesPath } = {}) {
+const STAGE_PALETTE_MENU_BUTTON_CATALOG = {
+  id: "stage-palette-menu-button-catalog",
+  sourcePath: "yfnt/gamemenubutton.spr",
+  sha256: "ec73af9d1d5c739a8fd40fa9436a77fc92eb13f5ebb99a745d1279244129c387",
+  paletteId: "imjin2",
+};
+
+export function verifyMainMenuPaletteStateVector({ originalRoot = defaultOriginalRoot, executablePath = defaultExecutablePath, referencesPath = defaultReferencesPath, jumpTablesPath = defaultJumpTablesPath } = {}) {
   const { buffer, image } = readPeImage(executablePath);
   assertEqual(sha256(buffer), EXPECTED_EXECUTABLE_SHA256, `${executablePath} SHA-256`);
 
@@ -88,6 +95,11 @@ export function verifyMainMenuPaletteStateVector({ executablePath = defaultExecu
       stageFlow: readExpectedString(buffer, image, 0x004bbb58, "pal\\imjin2.pal"),
       stageResources: STAGE_RESOURCE_STRINGS.map(([va, expected]) => readExpectedString(buffer, image, va, expected)),
     },
+    sourceAssets: {
+      stagePaletteMenuButtonCatalog: verifySourceAsset(originalRoot, STAGE_PALETTE_MENU_BUTTON_CATALOG),
+    },
+    catalogUse: "Catalog-only: this imjin2 decode is not used for the stage Back control. Every nonempty source frame carries a mismatched label (계속, 옵션, 초기메뉴, 저장, 로드, 재시작, or 종료); frames 21-23 are empty.",
+    unresolvedUseSite: "The bounded original EXE path statically confirms the country/mission screen's imjin2 palette state, but does not directly reference yfnt\\gamemenubutton.spr. No original Back-control use-site is claimed.",
   };
 }
 
@@ -117,6 +129,7 @@ export function createMainMenuPaletteStateFixture() {
     sourceJumpTablesSha256: EXPECTED_JUMP_TABLES_SHA256,
     analysisStatus: "static-confirmed",
     reproductionStatus: "reproduced",
+    sourceAssets: [STAGE_PALETTE_MENU_BUTTON_CATALOG],
     vectors: [
       { id: "landing-title-uses-initmenu-buffer", input: { view: "landing-title" }, expected: reproduceMainMenuPaletteSelection({ view: "landing-title" }) },
       { id: "country-mission-selection-restores-imjin2-before-stage-sprites", input: { view: "country-mission-selection" }, expected: reproduceMainMenuPaletteSelection({ view: "country-mission-selection" }) },
@@ -144,4 +157,10 @@ function readExpectedString(buffer, image, va, expected) {
   const actual = readCString(buffer, requireRawOffset(image, va));
   assertEqual(actual, expected, `string at 0x${va.toString(16)}`);
   return { va: `0x${va.toString(16).padStart(8, "0")}`, value: actual };
+}
+
+function verifySourceAsset(originalRoot, asset) {
+  const bytes = readFileSync(resolve(originalRoot, asset.sourcePath));
+  assertEqual(sha256(bytes), asset.sha256, `${asset.sourcePath} SHA-256`);
+  return asset;
 }
