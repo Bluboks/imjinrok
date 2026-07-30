@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "policy": {
     "semanticStatus": "mixed",
     "acceptedEvidence": "All 95 original type identities, uniquely matched current visual source identities, SPEECH portraits, Korean HQ and signal-beacon body states, K01 opening classes 48/49/51/58/60/63 catalog base frame 7 bindings, K01 classes 2/3/4/7/11/12/13/16/31/82 normal core states in their documented limits, class-7/31 creation-default state-4 fallback to state-8 idle, +0x47a!=0 carry/carry-idle states, and resource-work states 10/11/16 plus scoped raw state-16 cadence numeric boundaries are statically proven in their documented scopes. Generic project gather intentionally adapts original state 10, while class-7 project build/repair intentionally adapt original state 11 source layouts; these adapters neither map project resource names to selector identities nor establish original human meanings. Class-14 Japanese turtle-tank idle/move/attack grid states plus its non-theme 16-ring turn and creation-default transient destruction contracts, and the K01 heroes' idle, movement, attack, and death frame/direction mappings are statically proven in their documented scopes.",
@@ -21,6 +21,10 @@
     {
       "path": "packages/shared/src/scenarios.ts",
       "sha256": "7b846132241d27b2af26fd83b67d07b13ea791570917d35f23e8c5128e0ca0e0"
+    },
+    {
+      "path": "packages/shared/src/k01UnitAnimationCoverage.ts",
+      "sha256": "2fcd21aaaf459db92be34ba58c0bb5187d1e6c4af1e64ff38dbbcc44d21c66f5"
     },
     {
       "path": "apps/game-client/src/scenes/SkirmishScene.ts",
@@ -108,7 +112,7 @@
     },
     {
       "path": "tools/imjinrok/audit-sprite-mappings.mjs",
-      "sha256": "a07b24781b11c57e2d2a2841808079333e2f170dc132f709a1df9cc3cc4130fd"
+      "sha256": "077574b2165f885bd1e17be003ed8c90552484d7f0b96a980bf06fc1f8ae037c"
     },
     {
       "path": "apps/game-client/public/assets/themes/default/ui/mission-portraits/hero.manifest.json",
@@ -133,7 +137,10 @@
     "projectBindingConflictCount": 0,
     "portraitCueCount": 17,
     "unverifiedPortraitCueCount": 0,
-    "findingCount": 50
+    "k01EntityVisualCount": 22,
+    "k01RuntimeStateGapCount": 0,
+    "k01SelectionPortraitCount": 22,
+    "findingCount": 78
   },
   "visuals": [
     {
@@ -24192,6 +24199,1300 @@
       }
     ]
   },
+  "k01EntityVisualCoverage": {
+    "policy": "K01 runtime coverage records exact source-backed states and explicitly retains every unsupported scope as a quarantine. Selection representatives are source frames for product UI, not a claim about an original selection-panel portrait resource.",
+    "entries": [
+      {
+        "kind": "villager",
+        "originalClasses": [
+          7
+        ],
+        "missionSources": [
+          "initial-map"
+        ],
+        "sourceStates": [
+          "idle",
+          "move",
+          "death"
+        ],
+        "runtimeStates": [
+          "idle",
+          "move"
+        ],
+        "quarantines": [
+          {
+            "state": "attack",
+            "reason": "Class-7 state 4 is only proven as a creation-default fallback to idle, not as a product attack clip."
+          },
+          {
+            "state": "death-runtime",
+            "reason": "The current simulation does not retain a terminal visual lifecycle, so the source-proven death clip is not selected by the normal runtime state adapter."
+          }
+        ],
+        "evidenceDocument": "docs/reverse-engineering/mechanics/k01-korean-farmer-core-frames.md",
+        "defaultFrameFileName": "farmerk_0000.png",
+        "visualId": "villager-korean-farmer",
+        "missingStates": [],
+        "missingFrames": [],
+        "missingSourceOrientationDirections": [],
+        "missingDefaultFrame": false,
+        "missingExplicitSelectionRepresentative": false
+      },
+      {
+        "kind": "swordsman",
+        "originalClasses": [
+          2
+        ],
+        "missionSources": [
+          "initial-map"
+        ],
+        "sourceStates": [
+          "idle",
+          "move",
+          "attack",
+          "death"
+        ],
+        "runtimeStates": [
+          "idle",
+          "move",
+          "attack"
+        ],
+        "quarantines": [
+          {
+            "state": "state-2",
+            "reason": "The alternate movement frame block is recovered, but its environment meaning and project policy remain intentionally unbound."
+          },
+          {
+            "state": "death-runtime",
+            "reason": "The current simulation does not retain a terminal visual lifecycle, so the source-proven death clip is not selected by the normal runtime state adapter."
+          }
+        ],
+        "evidenceDocument": "docs/reverse-engineering/mechanics/k01-core-unit-animation-states.md",
+        "defaultFrameFileName": "swordk_0128.png",
+        "visualId": "korean-swordsman",
+        "missingStates": [],
+        "missingFrames": [],
+        "missingSourceOrientationDirections": [],
+        "missingDefaultFrame": false,
+        "missingExplicitSelectionRepresentative": false
+      },
+      {
+        "kind": "archer",
+        "originalClasses": [
+          4
+        ],
+        "missionSources": [
+          "initial-map"
+        ],
+        "sourceStates": [
+          "idle",
+          "move",
+          "attack",
+          "death"
+        ],
+        "runtimeStates": [
+          "idle",
+          "move",
+          "attack"
+        ],
+        "quarantines": [
+          {
+            "state": "state-2",
+            "reason": "The alternate movement frame block is recovered, but its environment meaning and project policy remain intentionally unbound."
+          },
+          {
+            "state": "death-runtime",
+            "reason": "The current simulation does not retain a terminal visual lifecycle, so the source-proven death clip is not selected by the normal runtime state adapter."
+          }
+        ],
+        "evidenceDocument": "docs/reverse-engineering/mechanics/k01-core-unit-animation-states.md",
+        "defaultFrameFileName": "archerk_0000.png",
+        "visualId": "korean-archer",
+        "missingStates": [],
+        "missingFrames": [],
+        "missingSourceOrientationDirections": [],
+        "missingDefaultFrame": false,
+        "missingExplicitSelectionRepresentative": false
+      },
+      {
+        "kind": "korean-monk",
+        "originalClasses": [
+          11
+        ],
+        "missionSources": [
+          "initial-map"
+        ],
+        "sourceStates": [
+          "idle",
+          "move",
+          "attack",
+          "death"
+        ],
+        "runtimeStates": [
+          "idle",
+          "move",
+          "attack"
+        ],
+        "quarantines": [
+          {
+            "state": "death-runtime",
+            "reason": "The current simulation does not retain a terminal visual lifecycle, so the source-proven death clip is not selected by the normal runtime state adapter."
+          }
+        ],
+        "evidenceDocument": "docs/reverse-engineering/mechanics/k01-opening-unit-bindings.md",
+        "defaultFrameFileName": "budak_0100.png",
+        "visualId": "korean-monk",
+        "missingStates": [],
+        "missingFrames": [],
+        "missingSourceOrientationDirections": [],
+        "missingDefaultFrame": false,
+        "missingExplicitSelectionRepresentative": false
+      },
+      {
+        "kind": "japanese-swordsman",
+        "originalClasses": [
+          3
+        ],
+        "missionSources": [
+          "initial-map"
+        ],
+        "sourceStates": [
+          "idle",
+          "move",
+          "attack",
+          "death"
+        ],
+        "runtimeStates": [
+          "idle",
+          "move",
+          "attack"
+        ],
+        "quarantines": [
+          {
+            "state": "state-2",
+            "reason": "The alternate movement frame block is recovered, but its environment meaning and project policy remain intentionally unbound."
+          },
+          {
+            "state": "death-runtime",
+            "reason": "The current simulation does not retain a terminal visual lifecycle, so the source-proven death clip is not selected by the normal runtime state adapter."
+          }
+        ],
+        "evidenceDocument": "docs/reverse-engineering/mechanics/k01-core-unit-animation-states.md",
+        "defaultFrameFileName": "swordj_0000.png",
+        "visualId": "japanese-swordsman",
+        "missingStates": [],
+        "missingFrames": [],
+        "missingSourceOrientationDirections": [],
+        "missingDefaultFrame": false,
+        "missingExplicitSelectionRepresentative": false
+      },
+      {
+        "kind": "japanese-gunner",
+        "originalClasses": [
+          12
+        ],
+        "missionSources": [
+          "initial-map",
+          "k0120-reinforcement"
+        ],
+        "sourceStates": [
+          "idle",
+          "move",
+          "attack",
+          "death"
+        ],
+        "runtimeStates": [
+          "idle",
+          "move",
+          "attack"
+        ],
+        "quarantines": [
+          {
+            "state": "state-2",
+            "reason": "The second movement variant has no approved project-state policy."
+          },
+          {
+            "state": "death-runtime",
+            "reason": "The current simulation does not retain a terminal visual lifecycle, so the source-proven death clip is not selected by the normal runtime state adapter."
+          }
+        ],
+        "evidenceDocument": "docs/reverse-engineering/mechanics/k01-normal-reinforcement-animation-batch.md",
+        "defaultFrameFileName": "gunj1_0000.png",
+        "visualId": "japanese-gunner",
+        "missingStates": [],
+        "missingFrames": [],
+        "missingSourceOrientationDirections": [],
+        "missingDefaultFrame": false,
+        "missingExplicitSelectionRepresentative": false
+      },
+      {
+        "kind": "japanese-samurai",
+        "originalClasses": [
+          13
+        ],
+        "missionSources": [
+          "initial-map",
+          "k0120-reinforcement"
+        ],
+        "sourceStates": [
+          "idle",
+          "move",
+          "attack",
+          "death"
+        ],
+        "runtimeStates": [
+          "idle",
+          "move",
+          "attack"
+        ],
+        "quarantines": [
+          {
+            "state": "death-runtime",
+            "reason": "The current simulation does not retain a terminal visual lifecycle, so the source-proven death clip is not selected by the normal runtime state adapter."
+          }
+        ],
+        "evidenceDocument": "docs/reverse-engineering/mechanics/k01-samurai-animation-pilot.md",
+        "defaultFrameFileName": "horseswordj2_0000.png",
+        "visualId": "japanese-samurai",
+        "missingStates": [],
+        "missingFrames": [],
+        "missingSourceOrientationDirections": [],
+        "missingDefaultFrame": false,
+        "missingExplicitSelectionRepresentative": false
+      },
+      {
+        "kind": "japanese-shrine-maiden",
+        "originalClasses": [
+          16
+        ],
+        "missionSources": [
+          "initial-map"
+        ],
+        "sourceStates": [
+          "idle",
+          "move",
+          "attack",
+          "death"
+        ],
+        "runtimeStates": [
+          "idle",
+          "move",
+          "attack"
+        ],
+        "quarantines": [
+          {
+            "state": "death-runtime",
+            "reason": "The current simulation does not retain a terminal visual lifecycle, so the source-proven death clip is not selected by the normal runtime state adapter."
+          }
+        ],
+        "evidenceDocument": "docs/reverse-engineering/mechanics/k01-opening-unit-bindings.md",
+        "defaultFrameFileName": "advbudaj_0120.png",
+        "visualId": "japanese-shrine-maiden",
+        "missingStates": [],
+        "missingFrames": [],
+        "missingSourceOrientationDirections": [],
+        "missingDefaultFrame": false,
+        "missingExplicitSelectionRepresentative": false
+      },
+      {
+        "kind": "japanese-farmer",
+        "originalClasses": [
+          31
+        ],
+        "missionSources": [
+          "initial-map"
+        ],
+        "sourceStates": [
+          "idle",
+          "move",
+          "death"
+        ],
+        "runtimeStates": [
+          "idle",
+          "move"
+        ],
+        "quarantines": [
+          {
+            "state": "attack",
+            "reason": "Class-31 state 4 has no static-confirmed source-to-frame mapping."
+          },
+          {
+            "state": "death-runtime",
+            "reason": "The current simulation does not retain a terminal visual lifecycle, so the source-proven death clip is not selected by the normal runtime state adapter."
+          }
+        ],
+        "evidenceDocument": "docs/reverse-engineering/mechanics/k01-japanese-farmer-frames.md",
+        "defaultFrameFileName": "Farmerj_0000.png",
+        "visualId": "japanese-farmer",
+        "missingStates": [],
+        "missingFrames": [],
+        "missingSourceOrientationDirections": [],
+        "missingDefaultFrame": false,
+        "missingExplicitSelectionRepresentative": false
+      },
+      {
+        "kind": "gwon-yul",
+        "originalClasses": [
+          76
+        ],
+        "missionSources": [
+          "initial-map"
+        ],
+        "sourceStates": [
+          "idle",
+          "move",
+          "attack",
+          "death"
+        ],
+        "runtimeStates": [
+          "idle",
+          "move",
+          "attack"
+        ],
+        "quarantines": [
+          {
+            "state": "death-runtime",
+            "reason": "The current simulation does not retain a terminal visual lifecycle, so the source-proven death clip is not selected by the normal runtime state adapter."
+          }
+        ],
+        "evidenceDocument": "docs/reverse-engineering/mechanics/k01-hero-animation-pilot.md",
+        "defaultFrameFileName": "generalk13_0000.png",
+        "visualId": "korean-gwon-yul",
+        "missingStates": [],
+        "missingFrames": [],
+        "missingSourceOrientationDirections": [],
+        "missingDefaultFrame": false,
+        "missingExplicitSelectionRepresentative": false
+      },
+      {
+        "kind": "ryu-seong-ryong",
+        "originalClasses": [
+          78
+        ],
+        "missionSources": [
+          "initial-map"
+        ],
+        "sourceStates": [
+          "idle",
+          "move",
+          "attack",
+          "death"
+        ],
+        "runtimeStates": [
+          "idle",
+          "move",
+          "attack"
+        ],
+        "quarantines": [
+          {
+            "state": "death-runtime",
+            "reason": "The current simulation does not retain a terminal visual lifecycle, so the source-proven death clip is not selected by the normal runtime state adapter."
+          }
+        ],
+        "evidenceDocument": "docs/reverse-engineering/mechanics/k01-hero-animation-pilot.md",
+        "defaultFrameFileName": "generalk31_0000.png",
+        "visualId": "korean-ryu-seong-ryong",
+        "missingStates": [],
+        "missingFrames": [],
+        "missingSourceOrientationDirections": [],
+        "missingDefaultFrame": false,
+        "missingExplicitSelectionRepresentative": false
+      },
+      {
+        "kind": "japanese-turtle-tank",
+        "originalClasses": [
+          14
+        ],
+        "missionSources": [
+          "k0120-reinforcement"
+        ],
+        "sourceStates": [
+          "idle",
+          "move",
+          "attack"
+        ],
+        "runtimeStates": [
+          "idle",
+          "move",
+          "attack"
+        ],
+        "quarantines": [
+          {
+            "state": "death",
+            "reason": "The recovered creation-default destruction path is a transient effect contract, not a generic entity death clip."
+          }
+        ],
+        "sourceOrientation": {
+          "state": "move",
+          "profileId": "k01-japanese-turtle-tank-raw16",
+          "rawDirections": [
+            1000,
+            1001,
+            1002,
+            1003,
+            1004,
+            1005,
+            1006,
+            1007
+          ]
+        },
+        "evidenceDocument": "docs/reverse-engineering/mechanics/k01-turtle-tank-animation-pilot.md",
+        "defaultFrameFileName": "ghosttankj_0016.png",
+        "visualId": "japanese-turtle-tank",
+        "missingStates": [],
+        "missingFrames": [],
+        "missingSourceOrientationDirections": [],
+        "missingDefaultFrame": false,
+        "missingExplicitSelectionRepresentative": false
+      },
+      {
+        "kind": "japanese-konishi",
+        "originalClasses": [
+          82
+        ],
+        "missionSources": [
+          "k0120-reinforcement"
+        ],
+        "sourceStates": [
+          "idle",
+          "move",
+          "attack",
+          "death"
+        ],
+        "runtimeStates": [
+          "idle",
+          "move",
+          "attack"
+        ],
+        "quarantines": [
+          {
+            "state": "death-runtime",
+            "reason": "The current simulation does not retain a terminal visual lifecycle, so the source-proven death clip is not selected by the normal runtime state adapter."
+          }
+        ],
+        "evidenceDocument": "docs/reverse-engineering/mechanics/k01-konishi-animation-pilot.md",
+        "defaultFrameFileName": "generalj12_0000.png",
+        "visualId": "japanese-konishi",
+        "missingStates": [],
+        "missingFrames": [],
+        "missingSourceOrientationDirections": [],
+        "missingDefaultFrame": false,
+        "missingExplicitSelectionRepresentative": false
+      },
+      {
+        "kind": "barracks",
+        "originalClasses": [
+          50
+        ],
+        "missionSources": [
+          "initial-map"
+        ],
+        "sourceStates": [
+          "base-frame-7"
+        ],
+        "themeStates": [
+          "idle"
+        ],
+        "runtimeStates": [
+          "idle"
+        ],
+        "defaultFrameFileName": "barrackk_0007.png",
+        "quarantines": [
+          {
+            "state": "building-states",
+            "reason": "K01 catalog evidence binds only class-50 base frame 7; construction, damage, overlays, timing, pivot, and lift remain unverified."
+          }
+        ],
+        "evidenceDocument": "docs/reverse-engineering/data-structures/entity-type-catalog.md",
+        "visualId": "korean-barracks",
+        "missingStates": [],
+        "missingFrames": [],
+        "missingSourceOrientationDirections": [],
+        "missingDefaultFrame": false,
+        "missingExplicitSelectionRepresentative": false
+      },
+      {
+        "kind": "house",
+        "originalClasses": [
+          48
+        ],
+        "missionSources": [
+          "initial-map"
+        ],
+        "sourceStates": [
+          "base-frame-7"
+        ],
+        "themeStates": [
+          "idle"
+        ],
+        "runtimeStates": [
+          "idle"
+        ],
+        "defaultFrameFileName": "millk_0007.png",
+        "quarantines": [
+          {
+            "state": "building-states",
+            "reason": "K01 class-48 evidence binds only base frame 7; construction, damage, overlays, timing, pivot, and lift remain unverified."
+          }
+        ],
+        "evidenceDocument": "docs/reverse-engineering/mechanics/k01-opening-building-bindings.md",
+        "visualId": "korean-mill-house-proxy",
+        "missingStates": [],
+        "missingFrames": [],
+        "missingSourceOrientationDirections": [],
+        "missingDefaultFrame": false,
+        "missingExplicitSelectionRepresentative": false
+      },
+      {
+        "kind": "japanese-camp-barracks",
+        "originalClasses": [
+          60
+        ],
+        "missionSources": [
+          "initial-map"
+        ],
+        "sourceStates": [
+          "base-frame-7"
+        ],
+        "themeStates": [
+          "idle"
+        ],
+        "runtimeStates": [
+          "idle"
+        ],
+        "defaultFrameFileName": "barrackj_0007.png",
+        "quarantines": [
+          {
+            "state": "building-states",
+            "reason": "K01 class-60 evidence binds only base frame 7; construction, damage, overlays, timing, pivot, and lift remain unverified."
+          }
+        ],
+        "evidenceDocument": "docs/reverse-engineering/mechanics/k01-opening-building-bindings.md",
+        "visualId": "japanese-camp-barracks",
+        "missingStates": [],
+        "missingFrames": [],
+        "missingSourceOrientationDirections": [],
+        "missingDefaultFrame": false,
+        "missingExplicitSelectionRepresentative": false
+      },
+      {
+        "kind": "japanese-camp-firehouse",
+        "originalClasses": [
+          62
+        ],
+        "missionSources": [
+          "initial-map"
+        ],
+        "sourceStates": [
+          "base-frame-7"
+        ],
+        "themeStates": [
+          "idle"
+        ],
+        "runtimeStates": [
+          "idle"
+        ],
+        "defaultFrameFileName": "firehousej_0007.png",
+        "quarantines": [
+          {
+            "state": "building-states",
+            "reason": "K01 catalog evidence binds only class-62 base frame 7; construction, damage, overlays, timing, pivot, and lift remain unverified."
+          }
+        ],
+        "evidenceDocument": "docs/reverse-engineering/data-structures/entity-type-catalog.md",
+        "visualId": "japanese-camp-firehouse",
+        "missingStates": [],
+        "missingFrames": [],
+        "missingSourceOrientationDirections": [],
+        "missingDefaultFrame": false,
+        "missingExplicitSelectionRepresentative": false
+      },
+      {
+        "kind": "japanese-camp-house",
+        "originalClasses": [
+          57
+        ],
+        "missionSources": [
+          "initial-map"
+        ],
+        "sourceStates": [
+          "base-frame-7"
+        ],
+        "themeStates": [
+          "idle"
+        ],
+        "runtimeStates": [
+          "idle"
+        ],
+        "defaultFrameFileName": "millj_0007.png",
+        "quarantines": [
+          {
+            "state": "building-states",
+            "reason": "K01 catalog evidence binds only class-57 base frame 7; construction, damage, overlays, timing, pivot, and lift remain unverified."
+          }
+        ],
+        "evidenceDocument": "docs/reverse-engineering/data-structures/entity-type-catalog.md",
+        "visualId": "japanese-camp-house",
+        "missingStates": [],
+        "missingFrames": [],
+        "missingSourceOrientationDirections": [],
+        "missingDefaultFrame": false,
+        "missingExplicitSelectionRepresentative": false
+      },
+      {
+        "kind": "japanese-camp-tower",
+        "originalClasses": [
+          63
+        ],
+        "missionSources": [
+          "initial-map"
+        ],
+        "sourceStates": [
+          "base-frame-7"
+        ],
+        "themeStates": [
+          "idle"
+        ],
+        "runtimeStates": [
+          "idle"
+        ],
+        "defaultFrameFileName": "towerj_0007.png",
+        "quarantines": [
+          {
+            "state": "building-states",
+            "reason": "K01 class-63 evidence binds only base frame 7; construction, damage, overlays, timing, pivot, and lift remain unverified."
+          }
+        ],
+        "evidenceDocument": "docs/reverse-engineering/mechanics/k01-opening-building-bindings.md",
+        "visualId": "japanese-camp-tower",
+        "missingStates": [],
+        "missingFrames": [],
+        "missingSourceOrientationDirections": [],
+        "missingDefaultFrame": false,
+        "missingExplicitSelectionRepresentative": false
+      },
+      {
+        "kind": "japanese-hq",
+        "originalClasses": [
+          58
+        ],
+        "missionSources": [
+          "initial-map"
+        ],
+        "sourceStates": [
+          "base-frame-7"
+        ],
+        "themeStates": [
+          "idle"
+        ],
+        "runtimeStates": [
+          "idle"
+        ],
+        "defaultFrameFileName": "jhq_0007.png",
+        "quarantines": [
+          {
+            "state": "building-states",
+            "reason": "K01 class-58 evidence binds only base frame 7; construction, damage, overlays, timing, pivot, and lift remain unverified."
+          }
+        ],
+        "evidenceDocument": "docs/reverse-engineering/mechanics/k01-opening-building-bindings.md",
+        "visualId": "japanese-hq",
+        "missingStates": [],
+        "missingFrames": [],
+        "missingSourceOrientationDirections": [],
+        "missingDefaultFrame": false,
+        "missingExplicitSelectionRepresentative": false
+      },
+      {
+        "kind": "korean-training-command",
+        "originalClasses": [
+          51
+        ],
+        "missionSources": [
+          "initial-map"
+        ],
+        "sourceStates": [
+          "base-frame-7"
+        ],
+        "themeStates": [
+          "idle"
+        ],
+        "runtimeStates": [
+          "idle"
+        ],
+        "defaultFrameFileName": "advbarrackk_0007.png",
+        "quarantines": [
+          {
+            "state": "building-states",
+            "reason": "K01 class-51 evidence binds only base frame 7; construction, damage, overlays, timing, pivot, and lift remain unverified."
+          }
+        ],
+        "evidenceDocument": "docs/reverse-engineering/mechanics/k01-opening-building-bindings.md",
+        "visualId": "korean-training-command",
+        "missingStates": [],
+        "missingFrames": [],
+        "missingSourceOrientationDirections": [],
+        "missingDefaultFrame": false,
+        "missingExplicitSelectionRepresentative": false
+      },
+      {
+        "kind": "town-center",
+        "originalClasses": [
+          49
+        ],
+        "missionSources": [
+          "initial-map"
+        ],
+        "sourceStates": [
+          "base-frame-7"
+        ],
+        "themeStates": [
+          "idle"
+        ],
+        "runtimeStates": [
+          "idle"
+        ],
+        "defaultFrameFileName": "hqk_0007.png",
+        "quarantines": [
+          {
+            "state": "building-states",
+            "reason": "K01 class-49 base frame 7 is scoped; construction and damage have separate bounded evidence, while timing, pivot, and lift remain unverified."
+          }
+        ],
+        "evidenceDocument": "docs/reverse-engineering/mechanics/k01-opening-building-bindings.md",
+        "visualId": "korean-hq",
+        "missingStates": [],
+        "missingFrames": [],
+        "missingSourceOrientationDirections": [],
+        "missingDefaultFrame": false,
+        "missingExplicitSelectionRepresentative": false
+      }
+    ],
+    "selectionPortraitRegistry": [
+      {
+        "kind": "villager",
+        "visualId": "villager-korean-farmer",
+        "frame": {
+          "textureKey": "default_entity_villager_farmerk_0000",
+          "fileName": "farmerk_0000.png"
+        },
+        "mirrorX": false,
+        "sourceFrameFileName": "farmerk_0000.png",
+        "evidenceDocument": "docs/reverse-engineering/mechanics/k01-korean-farmer-core-frames.md",
+        "sourceStates": [
+          "idle",
+          "move",
+          "death"
+        ],
+        "quarantines": [
+          {
+            "state": "attack",
+            "reason": "Class-7 state 4 is only proven as a creation-default fallback to idle, not as a product attack clip."
+          },
+          {
+            "state": "death-runtime",
+            "reason": "The current simulation does not retain a terminal visual lifecycle, so the source-proven death clip is not selected by the normal runtime state adapter."
+          }
+        ],
+        "semanticStatus": "source-frame-representative"
+      },
+      {
+        "kind": "swordsman",
+        "visualId": "korean-swordsman",
+        "frame": {
+          "textureKey": "default_entity_swordsman_swordk_0128",
+          "fileName": "swordk_0128.png"
+        },
+        "mirrorX": false,
+        "sourceFrameFileName": "swordk_0128.png",
+        "evidenceDocument": "docs/reverse-engineering/mechanics/k01-core-unit-animation-states.md",
+        "sourceStates": [
+          "idle",
+          "move",
+          "attack",
+          "death"
+        ],
+        "quarantines": [
+          {
+            "state": "state-2",
+            "reason": "The alternate movement frame block is recovered, but its environment meaning and project policy remain intentionally unbound."
+          },
+          {
+            "state": "death-runtime",
+            "reason": "The current simulation does not retain a terminal visual lifecycle, so the source-proven death clip is not selected by the normal runtime state adapter."
+          }
+        ],
+        "semanticStatus": "source-frame-representative"
+      },
+      {
+        "kind": "archer",
+        "visualId": "korean-archer",
+        "frame": {
+          "textureKey": "default_entity_archer_archerk_0000",
+          "fileName": "archerk_0000.png"
+        },
+        "mirrorX": false,
+        "sourceFrameFileName": "archerk_0000.png",
+        "evidenceDocument": "docs/reverse-engineering/mechanics/k01-core-unit-animation-states.md",
+        "sourceStates": [
+          "idle",
+          "move",
+          "attack",
+          "death"
+        ],
+        "quarantines": [
+          {
+            "state": "state-2",
+            "reason": "The alternate movement frame block is recovered, but its environment meaning and project policy remain intentionally unbound."
+          },
+          {
+            "state": "death-runtime",
+            "reason": "The current simulation does not retain a terminal visual lifecycle, so the source-proven death clip is not selected by the normal runtime state adapter."
+          }
+        ],
+        "semanticStatus": "source-frame-representative"
+      },
+      {
+        "kind": "korean-monk",
+        "visualId": "korean-monk",
+        "frame": {
+          "textureKey": "default_entity_korean_monk_budak_0100",
+          "fileName": "budak_0100.png"
+        },
+        "mirrorX": false,
+        "sourceFrameFileName": "budak_0100.png",
+        "evidenceDocument": "docs/reverse-engineering/mechanics/k01-opening-unit-bindings.md",
+        "sourceStates": [
+          "idle",
+          "move",
+          "attack",
+          "death"
+        ],
+        "quarantines": [
+          {
+            "state": "death-runtime",
+            "reason": "The current simulation does not retain a terminal visual lifecycle, so the source-proven death clip is not selected by the normal runtime state adapter."
+          }
+        ],
+        "semanticStatus": "source-frame-representative"
+      },
+      {
+        "kind": "japanese-swordsman",
+        "visualId": "japanese-swordsman",
+        "frame": {
+          "textureKey": "default_entity_japanese_swordsman_swordj_0000",
+          "fileName": "swordj_0000.png"
+        },
+        "mirrorX": false,
+        "sourceFrameFileName": "swordj_0000.png",
+        "evidenceDocument": "docs/reverse-engineering/mechanics/k01-core-unit-animation-states.md",
+        "sourceStates": [
+          "idle",
+          "move",
+          "attack",
+          "death"
+        ],
+        "quarantines": [
+          {
+            "state": "state-2",
+            "reason": "The alternate movement frame block is recovered, but its environment meaning and project policy remain intentionally unbound."
+          },
+          {
+            "state": "death-runtime",
+            "reason": "The current simulation does not retain a terminal visual lifecycle, so the source-proven death clip is not selected by the normal runtime state adapter."
+          }
+        ],
+        "semanticStatus": "source-frame-representative"
+      },
+      {
+        "kind": "japanese-gunner",
+        "visualId": "japanese-gunner",
+        "frame": {
+          "textureKey": "default_entity_japanese_gunner_gunj1_0000",
+          "fileName": "gunj1_0000.png"
+        },
+        "mirrorX": false,
+        "sourceFrameFileName": "gunj1_0000.png",
+        "evidenceDocument": "docs/reverse-engineering/mechanics/k01-normal-reinforcement-animation-batch.md",
+        "sourceStates": [
+          "idle",
+          "move",
+          "attack",
+          "death"
+        ],
+        "quarantines": [
+          {
+            "state": "state-2",
+            "reason": "The second movement variant has no approved project-state policy."
+          },
+          {
+            "state": "death-runtime",
+            "reason": "The current simulation does not retain a terminal visual lifecycle, so the source-proven death clip is not selected by the normal runtime state adapter."
+          }
+        ],
+        "semanticStatus": "source-frame-representative"
+      },
+      {
+        "kind": "japanese-samurai",
+        "visualId": "japanese-samurai",
+        "frame": {
+          "textureKey": "default_entity_japanese_samurai_horseswordj2_0000",
+          "fileName": "horseswordj2_0000.png"
+        },
+        "mirrorX": false,
+        "sourceFrameFileName": "horseswordj2_0000.png",
+        "evidenceDocument": "docs/reverse-engineering/mechanics/k01-samurai-animation-pilot.md",
+        "sourceStates": [
+          "idle",
+          "move",
+          "attack",
+          "death"
+        ],
+        "quarantines": [
+          {
+            "state": "death-runtime",
+            "reason": "The current simulation does not retain a terminal visual lifecycle, so the source-proven death clip is not selected by the normal runtime state adapter."
+          }
+        ],
+        "semanticStatus": "source-frame-representative"
+      },
+      {
+        "kind": "japanese-shrine-maiden",
+        "visualId": "japanese-shrine-maiden",
+        "frame": {
+          "textureKey": "default_entity_japanese_shrine_maiden_advbudaj_0120",
+          "fileName": "advbudaj_0120.png"
+        },
+        "mirrorX": false,
+        "sourceFrameFileName": "advbudaj_0120.png",
+        "evidenceDocument": "docs/reverse-engineering/mechanics/k01-opening-unit-bindings.md",
+        "sourceStates": [
+          "idle",
+          "move",
+          "attack",
+          "death"
+        ],
+        "quarantines": [
+          {
+            "state": "death-runtime",
+            "reason": "The current simulation does not retain a terminal visual lifecycle, so the source-proven death clip is not selected by the normal runtime state adapter."
+          }
+        ],
+        "semanticStatus": "source-frame-representative"
+      },
+      {
+        "kind": "japanese-farmer",
+        "visualId": "japanese-farmer",
+        "frame": {
+          "textureKey": "default_entity_japanese_farmer_Farmerj_0000",
+          "fileName": "Farmerj_0000.png"
+        },
+        "mirrorX": false,
+        "sourceFrameFileName": "Farmerj_0000.png",
+        "evidenceDocument": "docs/reverse-engineering/mechanics/k01-japanese-farmer-frames.md",
+        "sourceStates": [
+          "idle",
+          "move",
+          "death"
+        ],
+        "quarantines": [
+          {
+            "state": "attack",
+            "reason": "Class-31 state 4 has no static-confirmed source-to-frame mapping."
+          },
+          {
+            "state": "death-runtime",
+            "reason": "The current simulation does not retain a terminal visual lifecycle, so the source-proven death clip is not selected by the normal runtime state adapter."
+          }
+        ],
+        "semanticStatus": "source-frame-representative"
+      },
+      {
+        "kind": "gwon-yul",
+        "visualId": "korean-gwon-yul",
+        "frame": {
+          "textureKey": "default_entity_gwon_yul_generalk13_0000",
+          "fileName": "generalk13_0000.png"
+        },
+        "mirrorX": false,
+        "sourceFrameFileName": "generalk13_0000.png",
+        "evidenceDocument": "docs/reverse-engineering/mechanics/k01-hero-animation-pilot.md",
+        "sourceStates": [
+          "idle",
+          "move",
+          "attack",
+          "death"
+        ],
+        "quarantines": [
+          {
+            "state": "death-runtime",
+            "reason": "The current simulation does not retain a terminal visual lifecycle, so the source-proven death clip is not selected by the normal runtime state adapter."
+          }
+        ],
+        "semanticStatus": "source-frame-representative"
+      },
+      {
+        "kind": "ryu-seong-ryong",
+        "visualId": "korean-ryu-seong-ryong",
+        "frame": {
+          "textureKey": "default_entity_ryu_seong_ryong_generalk31_0000",
+          "fileName": "generalk31_0000.png"
+        },
+        "mirrorX": false,
+        "sourceFrameFileName": "generalk31_0000.png",
+        "evidenceDocument": "docs/reverse-engineering/mechanics/k01-hero-animation-pilot.md",
+        "sourceStates": [
+          "idle",
+          "move",
+          "attack",
+          "death"
+        ],
+        "quarantines": [
+          {
+            "state": "death-runtime",
+            "reason": "The current simulation does not retain a terminal visual lifecycle, so the source-proven death clip is not selected by the normal runtime state adapter."
+          }
+        ],
+        "semanticStatus": "source-frame-representative"
+      },
+      {
+        "kind": "japanese-turtle-tank",
+        "visualId": "japanese-turtle-tank",
+        "frame": {
+          "textureKey": "default_entity_japanese_turtle_tank_ghosttankj_0016",
+          "fileName": "ghosttankj_0016.png"
+        },
+        "mirrorX": false,
+        "sourceFrameFileName": "ghosttankj_0016.png",
+        "evidenceDocument": "docs/reverse-engineering/mechanics/k01-turtle-tank-animation-pilot.md",
+        "sourceStates": [
+          "idle",
+          "move",
+          "attack"
+        ],
+        "quarantines": [
+          {
+            "state": "death",
+            "reason": "The recovered creation-default destruction path is a transient effect contract, not a generic entity death clip."
+          }
+        ],
+        "semanticStatus": "source-frame-representative"
+      },
+      {
+        "kind": "japanese-konishi",
+        "visualId": "japanese-konishi",
+        "frame": {
+          "textureKey": "default_entity_japanese_konishi_generalj12_0000",
+          "fileName": "generalj12_0000.png"
+        },
+        "mirrorX": false,
+        "sourceFrameFileName": "generalj12_0000.png",
+        "evidenceDocument": "docs/reverse-engineering/mechanics/k01-konishi-animation-pilot.md",
+        "sourceStates": [
+          "idle",
+          "move",
+          "attack",
+          "death"
+        ],
+        "quarantines": [
+          {
+            "state": "death-runtime",
+            "reason": "The current simulation does not retain a terminal visual lifecycle, so the source-proven death clip is not selected by the normal runtime state adapter."
+          }
+        ],
+        "semanticStatus": "source-frame-representative"
+      },
+      {
+        "kind": "barracks",
+        "visualId": "korean-barracks",
+        "frame": {
+          "textureKey": "default_entity_barracks_barrackk_0007",
+          "fileName": "barrackk_0007.png"
+        },
+        "mirrorX": false,
+        "sourceFrameFileName": "barrackk_0007.png",
+        "evidenceDocument": "docs/reverse-engineering/data-structures/entity-type-catalog.md",
+        "sourceStates": [
+          "base-frame-7"
+        ],
+        "quarantines": [
+          {
+            "state": "building-states",
+            "reason": "K01 catalog evidence binds only class-50 base frame 7; construction, damage, overlays, timing, pivot, and lift remain unverified."
+          }
+        ],
+        "semanticStatus": "source-frame-representative"
+      },
+      {
+        "kind": "house",
+        "visualId": "korean-mill-house-proxy",
+        "frame": {
+          "textureKey": "default_entity_house_millk_0007",
+          "fileName": "millk_0007.png"
+        },
+        "mirrorX": false,
+        "sourceFrameFileName": "millk_0007.png",
+        "evidenceDocument": "docs/reverse-engineering/mechanics/k01-opening-building-bindings.md",
+        "sourceStates": [
+          "base-frame-7"
+        ],
+        "quarantines": [
+          {
+            "state": "building-states",
+            "reason": "K01 class-48 evidence binds only base frame 7; construction, damage, overlays, timing, pivot, and lift remain unverified."
+          }
+        ],
+        "semanticStatus": "source-frame-representative"
+      },
+      {
+        "kind": "japanese-camp-barracks",
+        "visualId": "japanese-camp-barracks",
+        "frame": {
+          "textureKey": "default_entity_japanese_camp_barracks_barrackj_0007",
+          "fileName": "barrackj_0007.png"
+        },
+        "mirrorX": false,
+        "sourceFrameFileName": "barrackj_0007.png",
+        "evidenceDocument": "docs/reverse-engineering/mechanics/k01-opening-building-bindings.md",
+        "sourceStates": [
+          "base-frame-7"
+        ],
+        "quarantines": [
+          {
+            "state": "building-states",
+            "reason": "K01 class-60 evidence binds only base frame 7; construction, damage, overlays, timing, pivot, and lift remain unverified."
+          }
+        ],
+        "semanticStatus": "source-frame-representative"
+      },
+      {
+        "kind": "japanese-camp-firehouse",
+        "visualId": "japanese-camp-firehouse",
+        "frame": {
+          "textureKey": "default_entity_japanese_camp_firehouse_firehousej_0007",
+          "fileName": "firehousej_0007.png"
+        },
+        "mirrorX": false,
+        "sourceFrameFileName": "firehousej_0007.png",
+        "evidenceDocument": "docs/reverse-engineering/data-structures/entity-type-catalog.md",
+        "sourceStates": [
+          "base-frame-7"
+        ],
+        "quarantines": [
+          {
+            "state": "building-states",
+            "reason": "K01 catalog evidence binds only class-62 base frame 7; construction, damage, overlays, timing, pivot, and lift remain unverified."
+          }
+        ],
+        "semanticStatus": "source-frame-representative"
+      },
+      {
+        "kind": "japanese-camp-house",
+        "visualId": "japanese-camp-house",
+        "frame": {
+          "textureKey": "default_entity_japanese_camp_house_millj_0007",
+          "fileName": "millj_0007.png"
+        },
+        "mirrorX": false,
+        "sourceFrameFileName": "millj_0007.png",
+        "evidenceDocument": "docs/reverse-engineering/data-structures/entity-type-catalog.md",
+        "sourceStates": [
+          "base-frame-7"
+        ],
+        "quarantines": [
+          {
+            "state": "building-states",
+            "reason": "K01 catalog evidence binds only class-57 base frame 7; construction, damage, overlays, timing, pivot, and lift remain unverified."
+          }
+        ],
+        "semanticStatus": "source-frame-representative"
+      },
+      {
+        "kind": "japanese-camp-tower",
+        "visualId": "japanese-camp-tower",
+        "frame": {
+          "textureKey": "default_entity_japanese_camp_tower_towerj_0007",
+          "fileName": "towerj_0007.png"
+        },
+        "mirrorX": false,
+        "sourceFrameFileName": "towerj_0007.png",
+        "evidenceDocument": "docs/reverse-engineering/mechanics/k01-opening-building-bindings.md",
+        "sourceStates": [
+          "base-frame-7"
+        ],
+        "quarantines": [
+          {
+            "state": "building-states",
+            "reason": "K01 class-63 evidence binds only base frame 7; construction, damage, overlays, timing, pivot, and lift remain unverified."
+          }
+        ],
+        "semanticStatus": "source-frame-representative"
+      },
+      {
+        "kind": "japanese-hq",
+        "visualId": "japanese-hq",
+        "frame": {
+          "textureKey": "default_entity_japanese_hq_jhq_0007",
+          "fileName": "jhq_0007.png"
+        },
+        "mirrorX": false,
+        "sourceFrameFileName": "jhq_0007.png",
+        "evidenceDocument": "docs/reverse-engineering/mechanics/k01-opening-building-bindings.md",
+        "sourceStates": [
+          "base-frame-7"
+        ],
+        "quarantines": [
+          {
+            "state": "building-states",
+            "reason": "K01 class-58 evidence binds only base frame 7; construction, damage, overlays, timing, pivot, and lift remain unverified."
+          }
+        ],
+        "semanticStatus": "source-frame-representative"
+      },
+      {
+        "kind": "korean-training-command",
+        "visualId": "korean-training-command",
+        "frame": {
+          "textureKey": "default_entity_korean_training_command_advbarrackk_0007",
+          "fileName": "advbarrackk_0007.png"
+        },
+        "mirrorX": false,
+        "sourceFrameFileName": "advbarrackk_0007.png",
+        "evidenceDocument": "docs/reverse-engineering/mechanics/k01-opening-building-bindings.md",
+        "sourceStates": [
+          "base-frame-7"
+        ],
+        "quarantines": [
+          {
+            "state": "building-states",
+            "reason": "K01 class-51 evidence binds only base frame 7; construction, damage, overlays, timing, pivot, and lift remain unverified."
+          }
+        ],
+        "semanticStatus": "source-frame-representative"
+      },
+      {
+        "kind": "town-center",
+        "visualId": "korean-hq",
+        "frame": {
+          "textureKey": "default_entity_town_center_hqk_0007",
+          "fileName": "hqk_0007.png"
+        },
+        "mirrorX": false,
+        "sourceFrameFileName": "hqk_0007.png",
+        "evidenceDocument": "docs/reverse-engineering/mechanics/k01-opening-building-bindings.md",
+        "sourceStates": [
+          "base-frame-7"
+        ],
+        "quarantines": [
+          {
+            "state": "building-states",
+            "reason": "K01 class-49 base frame 7 is scoped; construction and damage have separate bounded evidence, while timing, pivot, and lift remain unverified."
+          }
+        ],
+        "semanticStatus": "source-frame-representative"
+      }
+    ]
+  },
   "findings": [
     {
       "severity": "blocking",
@@ -24387,6 +25688,230 @@
       "scope": "base",
       "state": "walk",
       "detail": "Facing labels are assigned by a hard-coded source-frame order."
+    },
+    {
+      "severity": "info",
+      "code": "k01-runtime-visual-quarantine",
+      "kind": "villager",
+      "state": "attack",
+      "evidenceDocument": "docs/reverse-engineering/mechanics/k01-korean-farmer-core-frames.md",
+      "detail": "Class-7 state 4 is only proven as a creation-default fallback to idle, not as a product attack clip."
+    },
+    {
+      "severity": "info",
+      "code": "k01-runtime-visual-quarantine",
+      "kind": "japanese-farmer",
+      "state": "attack",
+      "evidenceDocument": "docs/reverse-engineering/mechanics/k01-japanese-farmer-frames.md",
+      "detail": "Class-31 state 4 has no static-confirmed source-to-frame mapping."
+    },
+    {
+      "severity": "info",
+      "code": "k01-runtime-visual-quarantine",
+      "kind": "barracks",
+      "state": "building-states",
+      "evidenceDocument": "docs/reverse-engineering/data-structures/entity-type-catalog.md",
+      "detail": "K01 catalog evidence binds only class-50 base frame 7; construction, damage, overlays, timing, pivot, and lift remain unverified."
+    },
+    {
+      "severity": "info",
+      "code": "k01-runtime-visual-quarantine",
+      "kind": "house",
+      "state": "building-states",
+      "evidenceDocument": "docs/reverse-engineering/mechanics/k01-opening-building-bindings.md",
+      "detail": "K01 class-48 evidence binds only base frame 7; construction, damage, overlays, timing, pivot, and lift remain unverified."
+    },
+    {
+      "severity": "info",
+      "code": "k01-runtime-visual-quarantine",
+      "kind": "japanese-camp-barracks",
+      "state": "building-states",
+      "evidenceDocument": "docs/reverse-engineering/mechanics/k01-opening-building-bindings.md",
+      "detail": "K01 class-60 evidence binds only base frame 7; construction, damage, overlays, timing, pivot, and lift remain unverified."
+    },
+    {
+      "severity": "info",
+      "code": "k01-runtime-visual-quarantine",
+      "kind": "japanese-camp-firehouse",
+      "state": "building-states",
+      "evidenceDocument": "docs/reverse-engineering/data-structures/entity-type-catalog.md",
+      "detail": "K01 catalog evidence binds only class-62 base frame 7; construction, damage, overlays, timing, pivot, and lift remain unverified."
+    },
+    {
+      "severity": "info",
+      "code": "k01-runtime-visual-quarantine",
+      "kind": "japanese-camp-house",
+      "state": "building-states",
+      "evidenceDocument": "docs/reverse-engineering/data-structures/entity-type-catalog.md",
+      "detail": "K01 catalog evidence binds only class-57 base frame 7; construction, damage, overlays, timing, pivot, and lift remain unverified."
+    },
+    {
+      "severity": "info",
+      "code": "k01-runtime-visual-quarantine",
+      "kind": "japanese-camp-tower",
+      "state": "building-states",
+      "evidenceDocument": "docs/reverse-engineering/mechanics/k01-opening-building-bindings.md",
+      "detail": "K01 class-63 evidence binds only base frame 7; construction, damage, overlays, timing, pivot, and lift remain unverified."
+    },
+    {
+      "severity": "info",
+      "code": "k01-runtime-visual-quarantine",
+      "kind": "japanese-hq",
+      "state": "building-states",
+      "evidenceDocument": "docs/reverse-engineering/mechanics/k01-opening-building-bindings.md",
+      "detail": "K01 class-58 evidence binds only base frame 7; construction, damage, overlays, timing, pivot, and lift remain unverified."
+    },
+    {
+      "severity": "info",
+      "code": "k01-runtime-visual-quarantine",
+      "kind": "korean-training-command",
+      "state": "building-states",
+      "evidenceDocument": "docs/reverse-engineering/mechanics/k01-opening-building-bindings.md",
+      "detail": "K01 class-51 evidence binds only base frame 7; construction, damage, overlays, timing, pivot, and lift remain unverified."
+    },
+    {
+      "severity": "info",
+      "code": "k01-runtime-visual-quarantine",
+      "kind": "town-center",
+      "state": "building-states",
+      "evidenceDocument": "docs/reverse-engineering/mechanics/k01-opening-building-bindings.md",
+      "detail": "K01 class-49 base frame 7 is scoped; construction and damage have separate bounded evidence, while timing, pivot, and lift remain unverified."
+    },
+    {
+      "severity": "info",
+      "code": "k01-runtime-visual-quarantine",
+      "kind": "japanese-turtle-tank",
+      "state": "death",
+      "evidenceDocument": "docs/reverse-engineering/mechanics/k01-turtle-tank-animation-pilot.md",
+      "detail": "The recovered creation-default destruction path is a transient effect contract, not a generic entity death clip."
+    },
+    {
+      "severity": "info",
+      "code": "k01-runtime-visual-quarantine",
+      "kind": "villager",
+      "state": "death-runtime",
+      "evidenceDocument": "docs/reverse-engineering/mechanics/k01-korean-farmer-core-frames.md",
+      "detail": "The current simulation does not retain a terminal visual lifecycle, so the source-proven death clip is not selected by the normal runtime state adapter."
+    },
+    {
+      "severity": "info",
+      "code": "k01-runtime-visual-quarantine",
+      "kind": "swordsman",
+      "state": "death-runtime",
+      "evidenceDocument": "docs/reverse-engineering/mechanics/k01-core-unit-animation-states.md",
+      "detail": "The current simulation does not retain a terminal visual lifecycle, so the source-proven death clip is not selected by the normal runtime state adapter."
+    },
+    {
+      "severity": "info",
+      "code": "k01-runtime-visual-quarantine",
+      "kind": "archer",
+      "state": "death-runtime",
+      "evidenceDocument": "docs/reverse-engineering/mechanics/k01-core-unit-animation-states.md",
+      "detail": "The current simulation does not retain a terminal visual lifecycle, so the source-proven death clip is not selected by the normal runtime state adapter."
+    },
+    {
+      "severity": "info",
+      "code": "k01-runtime-visual-quarantine",
+      "kind": "korean-monk",
+      "state": "death-runtime",
+      "evidenceDocument": "docs/reverse-engineering/mechanics/k01-opening-unit-bindings.md",
+      "detail": "The current simulation does not retain a terminal visual lifecycle, so the source-proven death clip is not selected by the normal runtime state adapter."
+    },
+    {
+      "severity": "info",
+      "code": "k01-runtime-visual-quarantine",
+      "kind": "japanese-swordsman",
+      "state": "death-runtime",
+      "evidenceDocument": "docs/reverse-engineering/mechanics/k01-core-unit-animation-states.md",
+      "detail": "The current simulation does not retain a terminal visual lifecycle, so the source-proven death clip is not selected by the normal runtime state adapter."
+    },
+    {
+      "severity": "info",
+      "code": "k01-runtime-visual-quarantine",
+      "kind": "japanese-gunner",
+      "state": "death-runtime",
+      "evidenceDocument": "docs/reverse-engineering/mechanics/k01-normal-reinforcement-animation-batch.md",
+      "detail": "The current simulation does not retain a terminal visual lifecycle, so the source-proven death clip is not selected by the normal runtime state adapter."
+    },
+    {
+      "severity": "info",
+      "code": "k01-runtime-visual-quarantine",
+      "kind": "japanese-samurai",
+      "state": "death-runtime",
+      "evidenceDocument": "docs/reverse-engineering/mechanics/k01-samurai-animation-pilot.md",
+      "detail": "The current simulation does not retain a terminal visual lifecycle, so the source-proven death clip is not selected by the normal runtime state adapter."
+    },
+    {
+      "severity": "info",
+      "code": "k01-runtime-visual-quarantine",
+      "kind": "japanese-shrine-maiden",
+      "state": "death-runtime",
+      "evidenceDocument": "docs/reverse-engineering/mechanics/k01-opening-unit-bindings.md",
+      "detail": "The current simulation does not retain a terminal visual lifecycle, so the source-proven death clip is not selected by the normal runtime state adapter."
+    },
+    {
+      "severity": "info",
+      "code": "k01-runtime-visual-quarantine",
+      "kind": "japanese-farmer",
+      "state": "death-runtime",
+      "evidenceDocument": "docs/reverse-engineering/mechanics/k01-japanese-farmer-frames.md",
+      "detail": "The current simulation does not retain a terminal visual lifecycle, so the source-proven death clip is not selected by the normal runtime state adapter."
+    },
+    {
+      "severity": "info",
+      "code": "k01-runtime-visual-quarantine",
+      "kind": "gwon-yul",
+      "state": "death-runtime",
+      "evidenceDocument": "docs/reverse-engineering/mechanics/k01-hero-animation-pilot.md",
+      "detail": "The current simulation does not retain a terminal visual lifecycle, so the source-proven death clip is not selected by the normal runtime state adapter."
+    },
+    {
+      "severity": "info",
+      "code": "k01-runtime-visual-quarantine",
+      "kind": "ryu-seong-ryong",
+      "state": "death-runtime",
+      "evidenceDocument": "docs/reverse-engineering/mechanics/k01-hero-animation-pilot.md",
+      "detail": "The current simulation does not retain a terminal visual lifecycle, so the source-proven death clip is not selected by the normal runtime state adapter."
+    },
+    {
+      "severity": "info",
+      "code": "k01-runtime-visual-quarantine",
+      "kind": "japanese-konishi",
+      "state": "death-runtime",
+      "evidenceDocument": "docs/reverse-engineering/mechanics/k01-konishi-animation-pilot.md",
+      "detail": "The current simulation does not retain a terminal visual lifecycle, so the source-proven death clip is not selected by the normal runtime state adapter."
+    },
+    {
+      "severity": "info",
+      "code": "k01-runtime-visual-quarantine",
+      "kind": "swordsman",
+      "state": "state-2",
+      "evidenceDocument": "docs/reverse-engineering/mechanics/k01-core-unit-animation-states.md",
+      "detail": "The alternate movement frame block is recovered, but its environment meaning and project policy remain intentionally unbound."
+    },
+    {
+      "severity": "info",
+      "code": "k01-runtime-visual-quarantine",
+      "kind": "archer",
+      "state": "state-2",
+      "evidenceDocument": "docs/reverse-engineering/mechanics/k01-core-unit-animation-states.md",
+      "detail": "The alternate movement frame block is recovered, but its environment meaning and project policy remain intentionally unbound."
+    },
+    {
+      "severity": "info",
+      "code": "k01-runtime-visual-quarantine",
+      "kind": "japanese-swordsman",
+      "state": "state-2",
+      "evidenceDocument": "docs/reverse-engineering/mechanics/k01-core-unit-animation-states.md",
+      "detail": "The alternate movement frame block is recovered, but its environment meaning and project policy remain intentionally unbound."
+    },
+    {
+      "severity": "info",
+      "code": "k01-runtime-visual-quarantine",
+      "kind": "japanese-gunner",
+      "state": "state-2",
+      "evidenceDocument": "docs/reverse-engineering/mechanics/k01-normal-reinforcement-animation-batch.md",
+      "detail": "The second movement variant has no approved project-state policy."
     },
     {
       "severity": "blocking",

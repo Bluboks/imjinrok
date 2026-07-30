@@ -10,6 +10,7 @@ import {
   collectK01MobileSpawnKinds,
   collectScenarioSpawnKinds,
   defaultTheme,
+  getK01SelectionPortraitRegistry,
   imjinrokK01Scenario,
   K01_BUILDING_VISUAL_EVIDENCE,
   K01_ENTITY_VISUAL_EVIDENCE,
@@ -103,4 +104,51 @@ test("K01 source-evidenced states have live source-backed clips and quarantines 
     assert.ok(result.quarantines.length > 0, `${result.kind} must state any intentionally unsupported scope`);
     assert.ok(result.quarantines.every(({ state, reason }) => state.length > 0 && reason.length > 0));
   }
+});
+
+test("K01 selection registry exposes every spawnable entity's validated source-frame representative", () => {
+  const registry = getK01SelectionPortraitRegistry(defaultTheme);
+
+  assert.deepEqual(
+    registry.map(({ kind }) => kind).sort(),
+    collectScenarioSpawnKinds(imjinrokK01Scenario),
+  );
+
+  for (const entry of registry) {
+    assert.equal(entry.semanticStatus, "source-frame-representative");
+    assert.equal(entry.frame.fileName, entry.sourceFrameFileName);
+    assert.ok(entry.evidenceDocument.startsWith("docs/reverse-engineering/"));
+    assert.ok(entry.quarantines.length > 0, `${entry.kind} must retain unsupported visual scope`);
+    assert.equal(
+      existsSync(join(defaultThemeAssetRoot, defaultTheme.visuals[entry.visualId]!.assetPath, entry.sourceFrameFileName)),
+      true,
+      `${entry.kind} representative must be a converted source frame`,
+    );
+  }
+});
+
+test("K01 selection registry omits a drifted representative instead of falling back", () => {
+  const visualId = defaultTheme.entityBindings.villager;
+  const visual = defaultTheme.visuals[visualId];
+
+  assert.equal(visual?.kind, "entity");
+  if (visual?.kind !== "entity" || visual.portrait === undefined) {
+    return;
+  }
+
+  const driftedTheme = {
+    ...defaultTheme,
+    visuals: {
+      ...defaultTheme.visuals,
+      [visualId]: {
+        ...visual,
+        portrait: { ...visual.portrait, fileName: "farmerk_0247.png" },
+      },
+    },
+  };
+
+  assert.equal(
+    getK01SelectionPortraitRegistry(driftedTheme).some(({ kind }) => kind === "villager"),
+    false,
+  );
 });
