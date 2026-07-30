@@ -34,7 +34,7 @@ export class MinimapAvailabilityPolicyRegistry {
   }
 
   register(policy: MinimapAvailabilityPolicy, options: RegisterMinimapAvailabilityPolicyOptions = {}): void {
-    assertMinimapAvailabilityPolicyId(policy.id);
+    assertMinimapAvailabilityPolicy(policy);
 
     if (this.policies.has(policy.id) && options.replace !== true) {
       throw new Error(`Minimap availability policy '${policy.id}' is already registered.`);
@@ -87,7 +87,14 @@ export function evaluateMinimapAvailability(
   context: MinimapAvailabilityPolicyContext,
   registry: MinimapAvailabilityPolicyRegistry = defaultMinimapAvailabilityPolicyRegistry,
 ): boolean {
-  return requireMinimapAvailabilityPolicyForMap(map, registry).isEnabled(context);
+  const policy = requireMinimapAvailabilityPolicyForMap(map, registry);
+  const enabled = policy.isEnabled(context);
+
+  if (typeof enabled !== "boolean") {
+    throw new Error(`Minimap availability policy '${policy.id}' must return a boolean enabled state.`);
+  }
+
+  return enabled;
 }
 
 function isLiveCompletedLocalBeacon(unit: UnitState, localPlayerId: string): boolean {
@@ -100,5 +107,13 @@ function assertMinimapAvailabilityPolicyId(id: string): void {
   }
   if (id !== id.trim()) {
     throw new Error(`Minimap availability policy id '${id}' must not have surrounding whitespace.`);
+  }
+}
+
+function assertMinimapAvailabilityPolicy(policy: MinimapAvailabilityPolicy): void {
+  assertMinimapAvailabilityPolicyId(policy.id);
+
+  if (typeof policy.isEnabled !== "function") {
+    throw new Error(`Minimap availability policy '${policy.id}' must define an isEnabled function.`);
   }
 }

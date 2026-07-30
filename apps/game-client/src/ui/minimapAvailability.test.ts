@@ -35,6 +35,7 @@ test("K01 product policy remains enabled until the final live local completed be
 
 test("K01 product policy excludes wrong-owner, dead, and removed beacons", () => {
   assert.equal(evaluateMinimapAvailability(k01Map, context({ wrongOwner: beacon({ playerId: "cpu-1" }) })), false);
+  assert.equal(evaluateMinimapAvailability(k01Map, context({ wrongKind: beacon({ kind: "town-center" }) })), false);
   assert.equal(evaluateMinimapAvailability(k01Map, context({ dead: beacon({ health: { current: 0, max: 760 } }) })), false);
   assert.equal(evaluateMinimapAvailability(k01Map, context({})), false);
 });
@@ -61,6 +62,25 @@ test("mods can replace or extend the minimap availability registry", () => {
   assert.equal(evaluateMinimapAvailability({ minimapAvailabilityPolicyId: "mod:requires-unit" }, context({}), registry), false);
   assert.equal(evaluateMinimapAvailability({ minimapAvailabilityPolicyId: "mod:requires-unit" }, context({ beacon: beacon() }), registry), true);
   assert.equal(evaluateMinimapAvailability(createBlankMap(), context({}), registry), false);
+});
+
+test("registry rejects policies without callable availability evaluators", () => {
+  const registry = new MinimapAvailabilityPolicyRegistry();
+
+  assert.throws(
+    () => registry.register({ id: "mod:invalid-evaluator", isEnabled: true } as unknown as Parameters<typeof registry.register>[0]),
+    /Minimap availability policy 'mod:invalid-evaluator' must define an isEnabled function/,
+  );
+});
+
+test("evaluation rejects policies that return non-boolean availability states", () => {
+  const registry = new MinimapAvailabilityPolicyRegistry();
+  registry.register({ id: "mod:invalid-result", isEnabled: () => "enabled" as unknown as boolean });
+
+  assert.throws(
+    () => evaluateMinimapAvailability({ minimapAvailabilityPolicyId: "mod:invalid-result" }, context({}), registry),
+    /Minimap availability policy 'mod:invalid-result' must return a boolean enabled state/,
+  );
 });
 
 function context(units: Record<string, UnitState>) {
