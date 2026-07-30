@@ -159,6 +159,7 @@ import {
   getRegisteredEnvironmentPalettePreloadDescriptors,
   resolveSelectedEnvironmentPalette,
 } from "../render/environmentPaletteVisualResolver.js";
+import { resolveGridGroundContactWorldPosition } from "../render/gridGroundContactPosition.js";
 import { getAssetScale, getFrameOrigin, getFramePivot, getGroundContactPlacement, REFERENCE_PX_PER_WU, RENDER_DEPTH_BIAS } from "../render/visualScale.js";
 import {
   createCampaignMissionLaunchContext,
@@ -6784,9 +6785,9 @@ export class SkirmishScene extends Phaser.Scene {
   }
 
   private getGridPointWorldPosition(point: GridPoint): Phaser.Math.Vector2 {
-    const iso = cartToIso(point, this.map.tileWidth, this.map.tileHeight);
+    const groundContact = resolveGridGroundContactWorldPosition(point, this.mapOrigin, this.map);
 
-    return new Phaser.Math.Vector2(this.mapOrigin.x + iso.x, this.mapOrigin.y + iso.y - this.map.tileHeight / 2);
+    return new Phaser.Math.Vector2(groundContact.x, groundContact.y);
   }
 
   private refreshLocalVisibility(): number {
