@@ -81,6 +81,7 @@
 | `extract-imjinrok-environment-assets.mjs`, `imjinrok-environment-assets.test.mjs` | 유지 | normal/snow/brown tileset의 78개씩 source path·size·SHA-256·extension/family stem과 sprite-like header/frame range를 결정론 fixture로 catalog한다. source byte 또는 header 변조는 거부하며, tile/frame 의미·renderer 연결은 주장하지 않는다. |
 | `extract-imjinrok-tileset-loader-boundary.mjs`, `imjinrok-tileset-loader-boundary.test.mjs` | 유지 | `FUN_00443160`의 signed-WORD prefix selector·76-entry filename table/sentinel·record stride와 `FUN_00443320` cleanup count를 source-bound fixture로 검증한다. disk-only `diff13l.ytl`/`hill0.ypr`는 이 main table 밖으로만 기록하며 renderer/frame/map-cell 의미는 주장하지 않는다. |
 | `extract-k01-source-tile-selector.mjs`, `k01-source-tile-selector.test.mjs` | 유지 | K01 map `+0x3a3a4/+0x42234+x*180+y`의 object/frame byte를 main loader normal source/header에 결합하고 3,600 pair를 digest로 재현한다. renderer parity·terrain/passability/elevation 의미는 주장하지 않는다. |
+| `extract-k01-tile-placement-elevation-evidence.mjs`, `k01-tile-placement-elevation-evidence.test.mjs` | 유지 | `FUN_00469330`/`FUN_00469510`의 signed x/y·`+0x32514` low-nibble branch와 `FUN_0046d650`의 selector/lookup return을 K01 3,600-cell stream으로 재현하고 기존 source object/frame header boundary를 다시 고정한다. helper의 height/elevation 인간 의미, axis/pivot과 product renderer parity는 주장하지 않는다. |
 | `codec.mjs`, `convert-sprites.mjs` | 유지 | SPR·YTL·PAL 구조 해석과 시각화용 변환. 게임 상태 의미는 별도 분석 |
 | `convert-audio.mjs` | 유지 | 원본 음성 자원의 웹용 변환. 이벤트 타이밍의 근거가 아님 |
 | `inspect-scripts.mjs` | 유지 | 원본 스크립트 레코드 탐색 |

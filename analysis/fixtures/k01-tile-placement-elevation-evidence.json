@@ -1,0 +1,399 @@
+{
+  "question": "For hash-bound K01 cells, how do FUN_00469330/FUN_00469510 and FUN_0046d650 derive the second placement coordinate and source object/frame bytes?",
+  "analysisStatus": "static-confirmed-for-K01-cell-placement-offset-and-source-object-frame-boundary",
+  "reproductionStatus": "reproduction-complete-for-all-K01-cell-vectors-and-fail-closed-reference-inputs",
+  "implementationStatus": "analysis-only-no-product-renderer-change",
+  "sources": {
+    "executable": {
+      "path": "original/imjinrok2/imjinrok2.exe",
+      "size": 843833,
+      "sha256": "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e"
+    },
+    "map": {
+      "path": "original/imjinrok2/stagemap/k01.map",
+      "size": 1097100,
+      "sha256": "43ec3a173032f74c12d3cce1db1078b076b651ed79070a0914673a5b65da99cb"
+    },
+    "staticAnalysis": {
+      "functions": {
+        "path": "analysis/generated/imjinrok2/functions.json",
+        "size": 1468333,
+        "sha256": "7e071fdfe425d22447780c265fe1d3fd271a1bedd1773682bebcb8ddc6d2e16e",
+        "sourceSha256": "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e",
+        "functionProvenance": [
+          {
+            "entry": "0x00469330",
+            "bodyRange": "0x00469330-0x0046950b",
+            "instructionCount": 150,
+            "instructionSha256": "f94f79c8a00da772f524665f0df56ba09b9bea8a861bd67d99fec4c7b30ec099",
+            "rawBodySha256": "f1a131328d7fe0c85e26b90d4c7d28371f6f9ae41bd56f03dab68c9ab8510ec7",
+            "callees": [
+              "0x0044af50",
+              "0x0044afa0",
+              "0x00454390",
+              "0x0046d650"
+            ]
+          },
+          {
+            "entry": "0x00469510",
+            "bodyRange": "0x00469510-0x00469916",
+            "instructionCount": 341,
+            "instructionSha256": "28849833f557b0f4863c88318828d72b8039639450bd42b5623927dd8ef036e3",
+            "rawBodySha256": "1d05579e1c2179989bd1441cb54510de8df4ecb24157dac496fda7f3c6c8f9ce",
+            "callees": [
+              "0x0044af50",
+              "0x0044afa0",
+              "0x00454250",
+              "0x004542e0",
+              "0x004547c0",
+              "0x00454960",
+              "0x0046d650"
+            ]
+          },
+          {
+            "entry": "0x0046d650",
+            "bodyRange": "0x0046d650-0x0046d6d7",
+            "instructionCount": 50,
+            "instructionSha256": "c0ee5121eb2700198c121447334f0b7572d28dce08e9e971020293233036d385",
+            "rawBodySha256": "bb8e887ed7cd73e5f881f75c033532c60aa7a9f66c5dd755f9e1a05cc12b7e8a",
+            "callees": []
+          }
+        ]
+      },
+      "references": {
+        "path": "analysis/generated/imjinrok2/references.json",
+        "size": 17206569,
+        "sha256": "f64cfa6f04bc39573552f42a8b7bdd5b08fea1ba774d05865162d1d80daaf9a5",
+        "sourceSha256": "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e",
+        "requiredCallEdges": [
+          {
+            "from": "0x00469391",
+            "fromFunctionEntry": "0x00469330",
+            "to": "0x0046d650",
+            "type": "UNCONDITIONAL_CALL"
+          },
+          {
+            "from": "0x004693a9",
+            "fromFunctionEntry": "0x00469330",
+            "to": "0x0046d650",
+            "type": "UNCONDITIONAL_CALL"
+          },
+          {
+            "from": "0x00469575",
+            "fromFunctionEntry": "0x00469510",
+            "to": "0x0046d650",
+            "type": "UNCONDITIONAL_CALL"
+          },
+          {
+            "from": "0x0046958b",
+            "fromFunctionEntry": "0x00469510",
+            "to": "0x0046d650",
+            "type": "UNCONDITIONAL_CALL"
+          }
+        ]
+      }
+    },
+    "sourceTileSelector": {
+      "fixture": "analysis/fixtures/k01-source-tile-selector.json",
+      "pairStream": {
+        "coordinateOrder": "x-major storage traversal: ordinal = x * height + y",
+        "count": 3600,
+        "byteCount": 7200,
+        "sha256": "23abe630e1ceadd2c0fb323350a6df2b1c4bf28c9989fa14ef21a94ed2b3fd22",
+        "uniquePairCount": 243,
+        "dimensions": {
+          "width": 60,
+          "height": 60
+        }
+      },
+      "usedObjectCount": 40,
+      "allK01ObjectFramesWithinValidatedSourceHeaders": true
+    }
+  },
+  "map": {
+    "dimensions": {
+      "width": 60,
+      "height": 60
+    },
+    "coordinateContract": "x and y are signed 16-bit stack arguments; valid K01 cells are 0 <= x < width and 0 <= y < height.",
+    "storageOrder": "x-major address calculation: x * 180 + y",
+    "fields": {
+      "lowNibble": "uint8(map + 0x32514 + x * 180 + y) & 0x0f",
+      "placementSelector": "uint8(map + 0x79824 + x * 180 + y)",
+      "placementLookup": "uint8(map + 0x147d5 + placementSelector * 0x1fa4 + x * 180 + y)",
+      "objectIndex": "uint8(map + 0x3a3a4 + x * 180 + y)",
+      "frameIndex": "uint8(map + 0x42234 + x * 180 + y)"
+    }
+  },
+  "placement": {
+    "helper": {
+      "function": "FUN_0046d650",
+      "returnRule": "out-of-bounds => int16(-1); lookup == 15 => uint8(selector); lookup != 0 => int16(uint8(selector) - 1); otherwise => 0",
+      "neutralName": "placement-level selector",
+      "K01Distribution": {
+        "placementSelector": {
+          "0": 1331,
+          "1": 617,
+          "2": 1335,
+          "3": 128,
+          "4": 189
+        },
+        "placementLookup": {
+          "0": 3600
+        },
+        "placementLevel": {
+          "0": 3600
+        }
+      }
+    },
+    "lowNibbleBranch": {
+      "trueCondition": "in-bounds && lowNibble == 2",
+      "trueAdjustment": "verticalArgument2 - (int16(helperReturn) << 4)",
+      "otherAdjustment": "verticalArgument2 - ((abs(int16(helperReturn)) + 1) << 4)",
+      "K01Distribution": {
+        "lowNibble": {
+          "1": 735,
+          "2": 2865
+        },
+        "branch": {
+          "other-low-nibble": 735,
+          "low-nibble-equals-2": 2865
+        },
+        "verticalShift": {
+          "0": 2865,
+          "16": 735
+        }
+      }
+    },
+    "functionLocalFixedSubtract": {
+      "FUN_00469330": "argument1 - 31 (0x1f)",
+      "FUN_00469510": "argument1 - 32 (0x20)",
+      "boundary": "The raw argument names and screen/world axis meaning are not assigned by this evidence."
+    },
+    "syntheticHelperBranchVectors": [
+      {
+        "selector": 4,
+        "lookup": 15,
+        "result": 4
+      },
+      {
+        "selector": 4,
+        "lookup": 1,
+        "result": 3
+      },
+      {
+        "selector": 0,
+        "lookup": 1,
+        "result": -1
+      },
+      {
+        "selector": 4,
+        "lookup": 0,
+        "result": 0
+      },
+      {
+        "selector": 4,
+        "lookup": null,
+        "result": -1,
+        "boundary": "out-of-bounds helper return"
+      }
+    ]
+  },
+  "cellStream": {
+    "coordinateOrder": "x-major: ordinal = x * height + y",
+    "count": 3600,
+    "bytesPerCell": 8,
+    "sha256": "78d0d96e0157e60cf9d2e2e4325941510f8911dbc9a57422ad00220874ad406c",
+    "fieldByteOrder": [
+      "lowNibble",
+      "placementSelector",
+      "placementLookup",
+      "placementLevelInt16LowByte",
+      "lowNibbleEquals2",
+      "verticalShift",
+      "objectIndex",
+      "frameIndex"
+    ],
+    "dimensions": {
+      "width": 60,
+      "height": 60
+    }
+  },
+  "representativeCells": [
+    {
+      "x": 0,
+      "y": 0,
+      "storageOffset": 0,
+      "lowNibble": 1,
+      "placementSelector": 2,
+      "placementLookup": 0,
+      "placementLevel": 0,
+      "placementBranch": "other-low-nibble",
+      "verticalShift": 16,
+      "objectIndex": 0,
+      "frameIndex": 39
+    },
+    {
+      "x": 0,
+      "y": 1,
+      "storageOffset": 1,
+      "lowNibble": 2,
+      "placementSelector": 2,
+      "placementLookup": 0,
+      "placementLevel": 0,
+      "placementBranch": "low-nibble-equals-2",
+      "verticalShift": 0,
+      "objectIndex": 0,
+      "frameIndex": 4
+    },
+    {
+      "x": 0,
+      "y": 59,
+      "storageOffset": 59,
+      "lowNibble": 1,
+      "placementSelector": 2,
+      "placementLookup": 0,
+      "placementLevel": 0,
+      "placementBranch": "other-low-nibble",
+      "verticalShift": 16,
+      "objectIndex": 0,
+      "frameIndex": 40
+    },
+    {
+      "x": 59,
+      "y": 0,
+      "storageOffset": 10620,
+      "lowNibble": 2,
+      "placementSelector": 2,
+      "placementLookup": 0,
+      "placementLevel": 0,
+      "placementBranch": "low-nibble-equals-2",
+      "verticalShift": 0,
+      "objectIndex": 0,
+      "frameIndex": 4
+    },
+    {
+      "x": 59,
+      "y": 59,
+      "storageOffset": 10679,
+      "lowNibble": 2,
+      "placementSelector": 4,
+      "placementLookup": 0,
+      "placementLevel": 0,
+      "placementBranch": "low-nibble-equals-2",
+      "verticalShift": 0,
+      "objectIndex": 31,
+      "frameIndex": 18
+    }
+  ],
+  "rawCodeRanges": [
+    {
+      "id": "FUN_00469330 complete body",
+      "byteRange": "0x00469330-0x0046950c (end exclusive)",
+      "bodySha256": "f1a131328d7fe0c85e26b90d4c7d28371f6f9ae41bd56f03dab68c9ab8510ec7"
+    },
+    {
+      "id": "FUN_00469510 complete body",
+      "byteRange": "0x00469510-0x00469917 (end exclusive)",
+      "bodySha256": "1d05579e1c2179989bd1441cb54510de8df4ecb24157dac496fda7f3c6c8f9ce"
+    },
+    {
+      "id": "FUN_0046d650 complete body",
+      "byteRange": "0x0046d650-0x0046d6d8 (end exclusive)",
+      "bodySha256": "bb8e887ed7cd73e5f881f75c033532c60aa7a9f66c5dd755f9e1a05cc12b7e8a"
+    }
+  ],
+  "evidencePoints": [
+    {
+      "va": "0x00469351",
+      "rawOffset": "0x00069351",
+      "bytes": "8b 8e a0 2d 00 00 0f bf c7 3b c1 7d 47 66 85 ed 7c 42 8b 96 a4 2d 00 00 0f bf cd 3b ca 7d 35",
+      "meaning": "FUN_00469330 signed x/y bounds against map +0x2da0/+0x2da4"
+    },
+    {
+      "va": "0x00469370",
+      "rawOffset": "0x00069370",
+      "bytes": "8d 84 80 5d 16 00 00 8d 14 c0 8d 04 91 8a 0c 30 80 e1 0f 66 0f be c1 66 3d 02 00",
+      "meaning": "FUN_00469330 reads low nibble at map +0x32514+x*180+y and compares exactly 2"
+    },
+    {
+      "va": "0x0046938d",
+      "rawOffset": "0x0006938d",
+      "bytes": "55 57 8b ce e8 ba 42 00 00 8b 5c 24 28 c1 e0 04 2b d8",
+      "meaning": "FUN_00469330 true branch calls helper(map,x,y) then subtracts helper<<4 from argument 2"
+    },
+    {
+      "va": "0x004693a5",
+      "rawOffset": "0x000693a5",
+      "bytes": "55 57 8b ce e8 a2 42 00 00 0f bf c0 99 33 c2 2b c2 40 c1 e0 04",
+      "meaning": "FUN_00469330 other branch subtracts (abs(int16(helper))+1)<<4 from argument 2"
+    },
+    {
+      "va": "0x0046952c",
+      "rawOffset": "0x0006952c",
+      "bytes": "66 85 ff 89 44 24 38 7c 52 8b 8e a0 2d 00 00 0f bf c7 3b c1 7d 45 66 85 ed 7c 40 8b 96 a4 2d 00 00 0f bf cd",
+      "meaning": "FUN_00469510 signed x/y bounds before the low-nibble decision"
+    },
+    {
+      "va": "0x00469554",
+      "rawOffset": "0x00069554",
+      "bytes": "8d 84 80 5d 16 00 00 8d 14 c0 8d 04 91 8a 0c 30 80 e1 0f 66 0f be c1 66 3d 02 00",
+      "meaning": "FUN_00469510 reads low nibble at map +0x32514+x*180+y and compares exactly 2"
+    },
+    {
+      "va": "0x00469571",
+      "rawOffset": "0x00069571",
+      "bytes": "55 57 8b ce e8 d6 40 00 00 c1 e0 04 8b d0 8b 44 24 3c 2b c2",
+      "meaning": "FUN_00469510 true branch calls helper(map,x,y) then subtracts helper<<4 from argument 2"
+    },
+    {
+      "va": "0x00469587",
+      "rawOffset": "0x00069587",
+      "bytes": "55 57 8b ce e8 c0 40 00 00 0f bf c0 99 33 c2 2b c2 40 c1 e0 04",
+      "meaning": "FUN_00469510 other branch subtracts (abs(int16(helper))+1)<<4 from argument 2"
+    },
+    {
+      "va": "0x004695ab",
+      "rawOffset": "0x000695ab",
+      "bytes": "8d 84 9b e1 19 00 00 0f bf cd 8d 14 c0 89 4c 24 18 8d 04 91 66 0f b6 14 30",
+      "meaning": "FUN_00469510 object byte at map +0x3a3a4+x*180+y"
+    },
+    {
+      "va": "0x004695c4",
+      "rawOffset": "0x000695c4",
+      "bytes": "8d 84 9b 65 1d 00 00 0f bf fa 8d 04 c0",
+      "meaning": "FUN_00469510 frame byte address begins at map +0x42234+x*180+y"
+    },
+    {
+      "va": "0x004695e2",
+      "rawOffset": "0x000695e2",
+      "bytes": "66 0f b6 04 31 8d 34 7f",
+      "meaning": "FUN_00469510 reads the unsigned frame byte and scales the selected loader record"
+    },
+    {
+      "va": "0x0046d650",
+      "rawOffset": "0x0006d650",
+      "bytes": "66 8b 44 24 04 53 66 85 c0 57 7c 20 0f bf d0 3b 91 a0 2d 00 00 7d 15 66 8b 44 24 10 66 85 c0 7c 0b 0f bf f8 3b b9 a4 2d 00 00 7c 09",
+      "meaning": "FUN_0046d650 reads signed-word x from stack argument 1 and y from argument 2, returning -1 outside map bounds"
+    },
+    {
+      "va": "0x0046d685",
+      "rawOffset": "0x0006d685",
+      "bytes": "8d 84 92 01 36 00 00 56 8d 04 c0 8d 04 87 8a 1c 08",
+      "meaning": "FUN_0046d650 reads uint8 selector at map +0x79824+x*180+y"
+    },
+    {
+      "va": "0x0046d696",
+      "rawOffset": "0x0006d696",
+      "bytes": "8b c3 25 ff 00 00 00 8d 34 80 8d 34 f6 8d 94 b2 49 07 00 00 5e 8d 14 92 8d 14 d2 8d 14 97 8a 0c 0a",
+      "meaning": "FUN_0046d650 uses selector*0x1fa4 for lookup at map +0x147d5+selector*0x1fa4+x*180+y"
+    },
+    {
+      "va": "0x0046d6b7",
+      "rawOffset": "0x0006d6b7",
+      "bytes": "80 f9 0f 75 0a 66 33 c0 5f 8a c3 5b c2 08 00 84 c9 74 06 5f 48 5b c2 08 00",
+      "meaning": "FUN_0046d650 returns selector for lookup 15, selector-1 for other nonzero lookup, otherwise 0"
+    }
+  ],
+  "unresolvedBoundary": "K01's 3,600 helper lookups are all zero, so this evidence does not justify calling the helper terrain elevation or height. It does not establish screen/world axis semantics, pixel anchor/pivot, human terrain/passability/fog meaning, other map/theme behavior, or product renderer parity."
+}
