@@ -26,6 +26,7 @@ import {
   advanceWorldTick,
   areTilesVisible,
   completeScenarioRuntime,
+  CORE_EXPLICIT_TARGET_TRACKING_AUTHORITY_POLICY_ID,
   createPlayerVisibility,
   createInitialWorldState,
   findPathForUnit,
@@ -3198,7 +3199,12 @@ test("attack-move ignores unreachable enemies and continues toward its destinati
 });
 
 test("attack-unit command chases the chosen target beyond aggro range", () => {
-  const state = createInitialWorldState(defaultMap, ["p1", "p2"]);
+  const state = createInitialWorldState(defaultMap, ["p1", "p2"], {
+    ...defaultSkirmishScenario,
+    id: "attack-unit-chase-compatibility",
+    attackTargetAuthorityPolicyId: CORE_EXPLICIT_TARGET_TRACKING_AUTHORITY_POLICY_ID,
+    objectives: [],
+  });
   const attacker = state.units["p1-swordsman-1"]!;
   const target = state.units["p2-villager-1"]!;
 
@@ -3236,7 +3242,12 @@ test("attack-unit command chases the chosen target beyond aggro range", () => {
 
 test("attack-unit command rejects unreachable targets outside combat range", () => {
   const map = createBlankMap({ width: 20, height: 12 });
-  const state = createInitialWorldState(map, ["p1", "p2"]);
+  const state = createInitialWorldState(map, ["p1", "p2"], {
+    ...defaultSkirmishScenario,
+    id: "attack-unit-unreachable-compatibility",
+    attackTargetAuthorityPolicyId: CORE_EXPLICIT_TARGET_TRACKING_AUTHORITY_POLICY_ID,
+    objectives: [],
+  });
   const attacker = createUnitState("p1-attacker", "p1", "swordsman", { x: 4, y: 6 });
   const target = createUnitState("p2-target", "p2", "swordsman", { x: 16, y: 6 });
 
@@ -3270,7 +3281,12 @@ test("attack-unit command rejects unreachable targets outside combat range", () 
 
 test("attack-unit order clears if the target becomes unreachable before contact", () => {
   const map = createBlankMap({ width: 20, height: 12 });
-  const state = createInitialWorldState(map, ["p1", "p2"]);
+  const state = createInitialWorldState(map, ["p1", "p2"], {
+    ...defaultSkirmishScenario,
+    id: "attack-unit-unreachable-clear-compatibility",
+    attackTargetAuthorityPolicyId: CORE_EXPLICIT_TARGET_TRACKING_AUTHORITY_POLICY_ID,
+    objectives: [],
+  });
   const attacker = createUnitState("p1-attacker", "p1", "swordsman", { x: 4, y: 6 });
   const target = createUnitState("p2-target", "p2", "swordsman", { x: 16, y: 6 });
 

@@ -21,6 +21,7 @@ import { isTilePassableForUnit, resolveFloodDrowning } from "./terrain.js";
 import { iterateUnitsOrdered, removeUnitFromWorld } from "./units.js";
 import { advanceUnitOrientationForProjectTarget, getSourceOrientationProfileForUnit } from "./orientation.js";
 import { getIdleCombatPolicy } from "./idleCombatPolicy.js";
+import { createCurrentVisibilityResolver, getAttackTargetAuthorityPolicy, isAttackTargetAuthorized, type AttackTargetAuthorityPolicy } from "./attackTargetAuthorityPolicy.js";
 import { tryExecutePlayerAutoAbility } from "./autoAbilityPolicy.js";
 import { advanceProjectileSystem, PRODUCT_PROJECTILE_REGISTRY, type ProjectileRegistry } from "./projectiles.js";
 import {
@@ -49,11 +50,13 @@ export function advanceWorldTick(state: WorldState, options: AdvanceWorldTickOpt
     return;
   }
 
+  const attackTargetAuthorityPolicy = getAttackTargetAuthorityPolicy(state.attackTargetAuthorityPolicyId);
   state.tick += 1;
   pruneCombatEvents(state);
   pruneProjectileImpactEvents(state);
   // Environment updates first so future systems read this tick's state.
   updateEnvironment(state);
+  advanceExplicitAttackTargetAuthorities(state, attackTargetAuthorityPolicy);
   updateResourceRegrowth(state);
   resolveFloodDrowning(state);
   applyScenarioScriptedEvents(state);
@@ -86,6 +89,29 @@ export function advanceWorldTick(state: WorldState, options: AdvanceWorldTickOpt
   resolveFloodDrowning(state);
 
   resolveScenarioRuntimeFollowUps(state);
+}
+
+/**
+ * Fair policies stop before movement, combat, orientation, or abilities can
+ * consume a hidden target's live state. There is no remembered target-position
+ * model, so losing authority deterministically cancels the order.
+ */
+function advanceExplicitAttackTargetAuthorities(
+  state: WorldState,
+  policy: AttackTargetAuthorityPolicy,
+): void {
+  const getCurrentVisibility = createCurrentVisibilityResolver(state);
+
+  for (const unit of iterateUnitsOrdered(state)) {
+    if (unit.currentOrder?.type !== "attack-unit") {
+      continue;
+    }
+
+    const target = state.units[unit.currentOrder.targetUnitId];
+    if (!target || !isAttackTargetAuthorized(policy, state, unit, target, getCurrentVisibility)) {
+      clearUnitOrder(unit);
+    }
+  }
 }
 
 /**

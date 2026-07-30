@@ -15,6 +15,7 @@ import { getFootprintTiles } from "./placement.js";
 import { resolveMovementCollisionProfileId } from "./movementCollisionPolicy.js";
 import { resolvePathfindingProfileId } from "./navigation.js";
 import { createProjectileSystemState } from "./projectiles.js";
+import { resolveAttackTargetAuthorityPolicyId } from "./attackTargetAuthorityPolicy.js";
 import { createPlayerResearchState } from "./research.js";
 import { resourceBlocksBuilding, resourceBlocksMovement } from "./resources.js";
 import { applyScenarioScriptedEvents, createScenarioRuntimeState } from "./scenario.js";
@@ -26,6 +27,18 @@ export type { AttributePool, CarriedResourceState, CombatEventState, Constructio
 export { getBuildTimeTicks, getConstructionProgress, isUnitUnderConstruction } from "./construction.js";
 export { applyCommand, findBuildWorkPath, issueCommand, validateCommand, type CommandValidationResult, type IssueCommandResult } from "./commands.js";
 export { arePlayersAllied, arePlayersEnemies, getPlayerTeamId } from "./diplomacy.js";
+export {
+  CORE_CURRENT_VISIBILITY_STOP_AUTHORITY_POLICY_ID,
+  CORE_EXPLICIT_TARGET_TRACKING_AUTHORITY_POLICY_ID,
+  createCurrentVisibilityResolver,
+  getAttackTargetAuthorityPolicy,
+  isAttackTargetAuthorized,
+  registerAttackTargetAuthorityPolicy,
+  requireAttackTargetAuthorityPolicy,
+  resolveAttackTargetAuthorityPolicyId,
+  type AttackTargetAuthorityPolicy,
+  type AttackTargetAuthorityPolicyContext,
+} from "./attackTargetAuthorityPolicy.js";
 export { resolveDamageAmount, type DamagePacket } from "./damage.js";
 export {
   advanceOriginalProjectilePoolRandomState,
@@ -144,6 +157,7 @@ export function createInitialWorldState(
   const state: WorldState = {
     tick: 0,
     map: worldMap,
+    attackTargetAuthorityPolicyId: resolveAttackTargetAuthorityPolicyId(scenario.attackTargetAuthorityPolicyId),
     pathfindingProfileId: resolvePathfindingProfileId(worldMap, scenario),
     movementCollisionProfileId: resolveMovementCollisionProfileId(worldMap.movementCollisionProfileId),
     environment: createInitialEnvironmentState(worldMap),
