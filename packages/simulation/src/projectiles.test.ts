@@ -4,8 +4,9 @@ import test from "node:test";
 import {
   advanceProjectileSystem,
   createProjectileRegistry,
-  createProjectileRegistryWithK01RyuSubtype0c,
   createProjectileSystemState,
+  K01_RYU_SUBTYPE_0C_PROJECTILE_PROFILE,
+  PRODUCT_COORDINATE_ROUND_TRANSFORM_ID,
   PRODUCT_EVENT_IMPACT_POLICY_ID,
   PRODUCT_IMMEDIATE_MOTION_POLICY_ID,
   PRODUCT_IMMEDIATE_PROJECTILE_PROFILE,
@@ -92,18 +93,96 @@ test("behavior policies are registry-selected and registry profiles are defensiv
   }, TypeError);
 });
 
-test("the opt-in Ryu adapter consumes the audited sampled route without choosing a 24 Hz cadence", () => {
-  const registry = createProjectileRegistryWithK01RyuSubtype0c();
-  const spawned = spawnProjectile(createProjectileSystemState(), registry, {
-    profileId: "k01-ryu-subtype-0c-static-port", start: { x: 0, y: 0 }, destination: { x: 15, y: 8 }, targetId: "unit:target",
+test("the normal registry resolves the opt-in Ryu profile and consumes one sampled route point per advance", () => {
+  assert.equal(
+    PRODUCT_PROJECTILE_REGISTRY.getProfile(K01_RYU_SUBTYPE_0C_PROJECTILE_PROFILE.id)?.id,
+    K01_RYU_SUBTYPE_0C_PROJECTILE_PROFILE.id,
+  );
+  const spawned = spawnProjectile(createProjectileSystemState(), PRODUCT_PROJECTILE_REGISTRY, {
+    profileId: K01_RYU_SUBTYPE_0C_PROJECTILE_PROFILE.id, start: { x: 0, y: 0 }, destination: { x: 15, y: 8 }, targetId: "unit:target",
   });
-  const inFlight = advanceProjectileSystem(spawned.state, registry);
+  const inFlight = advanceProjectileSystem(spawned.state, PRODUCT_PROJECTILE_REGISTRY);
   assert.deepEqual(inFlight.impacts, []);
   assert.deepEqual(inFlight.state.projectiles[0]?.position, { x: 0, y: 0 });
-  assert.deepEqual(advanceProjectileSystem(inFlight.state, registry).impacts, [{
-    projectileId: "projectile-000000000001", profileId: "k01-ryu-subtype-0c-static-port",
+  assert.deepEqual(advanceProjectileSystem(inFlight.state, PRODUCT_PROJECTILE_REGISTRY).impacts, [{
+    projectileId: "projectile-000000000001", profileId: K01_RYU_SUBTYPE_0C_PROJECTILE_PROFILE.id,
     eventId: "original-effect-kind-9", targetId: "unit:target", payload: {}, position: { x: 14, y: 7 },
   }]);
+});
+
+test("Ryu coordinate bridging is profile-selected, registry-replaceable, and keeps source-domain failures loud", () => {
+  const rounded = spawnProjectile(createProjectileSystemState(), PRODUCT_PROJECTILE_REGISTRY, {
+    profileId: K01_RYU_SUBTYPE_0C_PROJECTILE_PROFILE.id,
+    start: { x: 0.4, y: 0.4 },
+    destination: { x: 15.4, y: 8.4 },
+    targetId: "unit:target",
+  });
+  assert.deepEqual(rounded.projectile.motion.data, {
+    sourceRoute: [[0, 0], [14, 7]],
+    routeIndex: 0,
+  });
+  assert.throws(() => spawnProjectile(createProjectileSystemState(), PRODUCT_PROJECTILE_REGISTRY, {
+    profileId: K01_RYU_SUBTYPE_0C_PROJECTILE_PROFILE.id,
+    start: { x: 32767.6, y: 0 },
+    destination: { x: 32767.6, y: 0 },
+    targetId: "unit:target",
+  }), /0\.\.32767/);
+
+  const replacementRegistry = createProjectileRegistry({
+    profiles: [K01_RYU_SUBTYPE_0C_PROJECTILE_PROFILE],
+    motionPolicies: [PRODUCT_PROJECTILE_REGISTRY.getMotionPolicy(K01_RYU_SUBTYPE_0C_PROJECTILE_PROFILE.motion.policyId)!],
+    collisionPolicies: [PRODUCT_PROJECTILE_REGISTRY.getCollisionPolicy(PRODUCT_TARGET_AT_ARRIVAL_COLLISION_POLICY_ID)!],
+    impactPolicies: [PRODUCT_PROJECTILE_REGISTRY.getImpactPolicy(PRODUCT_EVENT_IMPACT_POLICY_ID)!],
+    coordinateTransforms: [{
+      id: PRODUCT_COORDINATE_ROUND_TRANSFORM_ID,
+      toSourcePoint: ({ point }) => ({ x: Math.round(point.x * 10), y: Math.round(point.y * 10) }),
+      toProductPoint: ({ point }) => ({ x: point.x / 10, y: point.y / 10 }),
+    }],
+  });
+  const replaced = spawnProjectile(createProjectileSystemState(), replacementRegistry, {
+    profileId: K01_RYU_SUBTYPE_0C_PROJECTILE_PROFILE.id,
+    start: { x: 0.04, y: 0.04 },
+    destination: { x: 1.54, y: 0.84 },
+    targetId: "unit:target",
+  });
+  assert.deepEqual(replaced.projectile.motion.data, {
+    sourceRoute: [[0, 0], [14, 7]],
+    routeIndex: 0,
+  });
+  const replacedFirstStep = advanceProjectileSystem(replaced.state, replacementRegistry);
+  assert.deepEqual(replacedFirstStep.state.projectiles[0]?.position, { x: 0, y: 0 });
+  assert.deepEqual(advanceProjectileSystem(replacedFirstStep.state, replacementRegistry).impacts[0]?.position, { x: 1.4, y: 0.7 });
+
+  const sourcePolicies = {
+    motionPolicies: [PRODUCT_PROJECTILE_REGISTRY.getMotionPolicy(K01_RYU_SUBTYPE_0C_PROJECTILE_PROFILE.motion.policyId)!],
+    collisionPolicies: [PRODUCT_PROJECTILE_REGISTRY.getCollisionPolicy(PRODUCT_TARGET_AT_ARRIVAL_COLLISION_POLICY_ID)!],
+    impactPolicies: [PRODUCT_PROJECTILE_REGISTRY.getImpactPolicy(PRODUCT_EVENT_IMPACT_POLICY_ID)!],
+  };
+  assert.throws(() => createProjectileRegistry({
+    profiles: [K01_RYU_SUBTYPE_0C_PROJECTILE_PROFILE],
+    ...sourcePolicies,
+  }), /unknown coordinate transform/);
+  assert.throws(() => createProjectileRegistry({
+    profiles: [], motionPolicies: [], collisionPolicies: [], impactPolicies: [],
+    coordinateTransforms: [
+      { id: "test:duplicate", toSourcePoint: ({ point }) => point, toProductPoint: ({ point }) => point },
+      { id: "test:duplicate", toSourcePoint: ({ point }) => point, toProductPoint: ({ point }) => point },
+    ],
+  }), /duplicate coordinate transform id/);
+  const invalidRegistry = createProjectileRegistry({
+    profiles: [K01_RYU_SUBTYPE_0C_PROJECTILE_PROFILE],
+    ...sourcePolicies,
+    coordinateTransforms: [{
+      id: PRODUCT_COORDINATE_ROUND_TRANSFORM_ID,
+      toSourcePoint: ({ point }) => ({ x: Math.round(point.x), y: Math.round(point.y) }),
+      toProductPoint: () => ({ x: Number.NaN, y: 0 }),
+    }],
+  });
+  const invalid = spawnProjectile(createProjectileSystemState(), invalidRegistry, {
+    profileId: K01_RYU_SUBTYPE_0C_PROJECTILE_PROFILE.id,
+    start: { x: 0, y: 0 }, destination: { x: 15, y: 8 }, targetId: "unit:target",
+  });
+  assert.throws(() => advanceProjectileSystem(invalid.state, invalidRegistry), /transformed Ryu route point must contain finite/);
 });
 
 test("a mod collision policy can impact during flight without a WorldState query", () => {

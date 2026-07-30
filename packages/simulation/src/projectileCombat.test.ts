@@ -4,6 +4,7 @@ import { createBlankMap, type UnitDefinition } from "../../shared/src/index.js";
 import {
   advanceWorldTick,
   createInitialWorldState,
+  K01_RYU_SUBTYPE_0C_PROJECTILE_PROFILE,
   PRODUCT_IMMEDIATE_PROJECTILE_PROFILE,
   PRODUCT_PROJECTILE_REGISTRY,
   resolveProjectileDeliveryProfileId,
@@ -58,6 +59,36 @@ test("an opted-in unit delays damage until its next projectile lifecycle phase",
   assert.equal(state.combatEvents.length, 1);
 });
 
+test("Ryu normal combat uses the registered subtype-0c route and damages only on impact", () => {
+  const { state, attacker, target } = createRyuCombatWorld();
+  const healthBefore = target.health.current;
+
+  advanceWorldTick(state);
+
+  assert.equal(target.health.current, healthBefore);
+  assert.equal(state.projectileSystem.projectiles[0]?.profileId, K01_RYU_SUBTYPE_0C_PROJECTILE_PROFILE.id);
+  assert.deepEqual(state.projectileSystem.projectiles[0]?.motion.data, {
+    sourceRoute: [[2, 2]],
+    routeIndex: 0,
+  });
+  assert.equal(state.combatEvents.length, 0);
+
+  advanceWorldTick(state);
+
+  assert.equal(target.health.current, healthBefore - 10);
+  assert.equal(state.projectileSystem.projectiles.length, 0);
+  assert.deepEqual(state.projectileImpactEvents.map((impact) => ({
+    profileId: impact.profileId,
+    eventId: impact.eventId,
+    position: impact.position,
+  })), [{
+    profileId: K01_RYU_SUBTYPE_0C_PROJECTILE_PROFILE.id,
+    eventId: "original-effect-kind-9",
+    position: { x: 2, y: 2 },
+  }]);
+  assert.equal(state.combatEvents[0]?.sourceUnitId, attacker.id);
+});
+
 test("combat projectile impacts are consumed once and ignore missing or dead targets", () => {
   const missing = createCombatWorld();
   missing.attacker.projectileProfileId = PRODUCT_IMMEDIATE_PROJECTILE_PROFILE.id;
@@ -92,6 +123,25 @@ test("combat projectiles do not hit a different replacement reusing a target id"
 
   assert.equal(replacement.health.current, healthBefore);
   assert.equal(state.combatEvents.length, 0);
+});
+
+test("Ryu projectile impacts safely ignore removed and incompatible id-reused targets", () => {
+  const removed = createRyuCombatWorld();
+  advanceWorldTick(removed.state);
+  delete removed.state.units[removed.target.id];
+  advanceWorldTick(removed.state);
+  assert.equal(removed.state.projectileSystem.projectiles.length, 0);
+  assert.equal(removed.state.combatEvents.length, 0);
+
+  const reused = createRyuCombatWorld();
+  advanceWorldTick(reused.state);
+  const replacement = createUnitState(reused.target.id, "p2", "town-center", { x: 3, y: 2 });
+  reused.state.units[replacement.id] = replacement;
+  const healthBefore = replacement.health.current;
+  advanceWorldTick(reused.state);
+
+  assert.equal(replacement.health.current, healthBefore);
+  assert.equal(reused.state.combatEvents.length, 0);
 });
 
 test("same-tick combat impacts resolve in canonical projectile order", () => {
@@ -138,6 +188,20 @@ test("unit override selects an injected registry profile and unknown profiles fa
   const unknown = createCombatWorld();
   unknown.attacker.projectileProfileId = "test:unknown-profile";
   assert.throws(() => advanceWorldTick(unknown.state), /unknown projectile profile: test:unknown-profile/);
+});
+
+test("the Ryu content binding fails loudly when a supplied registry omits its profile", () => {
+  const { state } = createRyuCombatWorld();
+  const registry: ProjectileRegistry = {
+    getProfile: (id) => id === K01_RYU_SUBTYPE_0C_PROJECTILE_PROFILE.id
+      ? undefined
+      : PRODUCT_PROJECTILE_REGISTRY.getProfile(id),
+    getMotionPolicy: (id) => PRODUCT_PROJECTILE_REGISTRY.getMotionPolicy(id),
+    getCollisionPolicy: (id) => PRODUCT_PROJECTILE_REGISTRY.getCollisionPolicy(id),
+    getImpactPolicy: (id) => PRODUCT_PROJECTILE_REGISTRY.getImpactPolicy(id),
+  };
+
+  assert.throws(() => advanceWorldTick(state, { projectileRegistry: registry }), /unknown projectile profile: k01-ryu-subtype-0c-static-port/);
 });
 
 test("unrelated impact payloads remain in lifecycle history without causing combat damage", () => {
@@ -212,6 +276,18 @@ test("legacy units without an override use content delivery selection only when 
 function createCombatWorld() {
   const state = createInitialWorldState(createBlankMap(), ["p1", "p2"]);
   const attacker = createUnitState("p1-attacker", "p1", "swordsman", { x: 2, y: 2 });
+  const target = createUnitState("p2-target", "p2", "house", { x: 3, y: 2 });
+  state.units = {
+    [attacker.id]: attacker,
+    [target.id]: target,
+  };
+  attacker.currentOrder = { type: "attack-unit", targetUnitId: target.id };
+  return { state, attacker, target };
+}
+
+function createRyuCombatWorld() {
+  const state = createInitialWorldState(createBlankMap(), ["p1", "p2"]);
+  const attacker = createUnitState("p1-ryu", "p1", "ryu-seong-ryong", { x: 2, y: 2 });
   const target = createUnitState("p2-target", "p2", "house", { x: 3, y: 2 });
   state.units = {
     [attacker.id]: attacker,
