@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import type { UnitState } from "@simulation";
-import { createMagicAutoUseView, toSelectedEntityView } from "./hud.js";
+import { createMagicAutoUseView, createMinimapAvailabilityView, toSelectedEntityView } from "./hud.js";
 
 test("selected entity views clone serializable portrait render metadata", () => {
   const unit: UnitState = {
@@ -31,4 +31,9 @@ test("magic auto-use HUD views initialize legacy or missing player state as disa
   assert.deepEqual(createMagicAutoUseView("p1", undefined), { playerId: "p1", enabled: false });
   assert.deepEqual(createMagicAutoUseView("p1", false), { playerId: "p1", enabled: false });
   assert.deepEqual(createMagicAutoUseView("p1", true), { playerId: "p1", enabled: true });
+});
+
+test("minimap availability HUD views expose a typed enabled state", () => {
+  assert.deepEqual(createMinimapAvailabilityView(false), { enabled: false });
+  assert.deepEqual(createMinimapAvailabilityView(true), { enabled: true });
 });
