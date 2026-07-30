@@ -8,7 +8,7 @@
   "sourceFiles": [
     {
       "path": "packages/shared/src/themes.ts",
-      "sha256": "e5895f20706501737576a288170866036c7a7bab2234cd2144de2d9918f16902"
+      "sha256": "1a3507dcc80ff70edf2766e0c2d5b13e48147521eb5e31a06b495993f9f63083"
     },
     {
       "path": "packages/shared/src/visuals.ts",
@@ -119,9 +119,9 @@
     "visualCount": 26,
     "unitVisualCount": 15,
     "buildingVisualCount": 11,
-    "stateMappingCount": 99,
-    "clipCount": 715,
-    "frameReferenceCount": 5437,
+    "stateMappingCount": 97,
+    "clipCount": 713,
+    "frameReferenceCount": 5410,
     "missingFrameReferenceCount": 0,
     "unverifiedVisualCount": 1,
     "mixedVisualCount": 23,
@@ -423,30 +423,10 @@
             {
               "facing": "default",
               "frameFiles": [
-                "firehousej_0009.png",
-                "firehousej_0010.png",
-                "firehousej_0011.png",
-                "firehousej_0012.png",
-                "firehousej_0013.png",
-                "firehousej_0014.png",
-                "firehousej_0015.png",
-                "firehousej_0016.png",
-                "firehousej_0017.png",
-                "firehousej_0018.png",
-                "firehousej_0019.png"
+                "firehousej_0007.png"
               ],
               "frameIndexes": [
-                9,
-                10,
-                11,
-                12,
-                13,
-                14,
-                15,
-                16,
-                17,
-                18,
-                19
+                7
               ],
               "mirrorX": false,
               "missingFrames": []
@@ -555,46 +535,10 @@
             {
               "facing": "default",
               "frameFiles": [
-                "millj_0008.png"
+                "millj_0007.png"
               ],
               "frameIndexes": [
-                8
-              ],
-              "mirrorX": false,
-              "missingFrames": []
-            }
-          ]
-        },
-        {
-          "scope": "layer:idle-overlay",
-          "state": "idle",
-          "declaredFacings": [],
-          "clips": [
-            {
-              "facing": "default",
-              "frameFiles": [
-                "millj_0009.png",
-                "millj_0010.png",
-                "millj_0011.png",
-                "millj_0012.png",
-                "millj_0013.png",
-                "millj_0014.png",
-                "millj_0015.png",
-                "millj_0016.png",
-                "millj_0017.png",
-                "millj_0018.png"
-              ],
-              "frameIndexes": [
-                9,
-                10,
-                11,
-                12,
-                13,
-                14,
-                15,
-                16,
-                17,
-                18
+                7
               ],
               "mirrorX": false,
               "missingFrames": []
@@ -12091,36 +12035,6 @@
               ],
               "frameIndexes": [
                 7
-              ],
-              "mirrorX": false,
-              "missingFrames": []
-            }
-          ]
-        },
-        {
-          "scope": "layer:flag",
-          "state": "idle",
-          "declaredFacings": [],
-          "clips": [
-            {
-              "facing": "default",
-              "frameFiles": [
-                "barrackk_0009.png",
-                "barrackk_0010.png",
-                "barrackk_0011.png",
-                "barrackk_0012.png",
-                "barrackk_0013.png",
-                "barrackk_0014.png",
-                "barrackk_0015.png"
-              ],
-              "frameIndexes": [
-                9,
-                10,
-                11,
-                12,
-                13,
-                14,
-                15
               ],
               "mirrorX": false,
               "missingFrames": []
@@ -24315,17 +24229,7 @@
       "visualId": "japanese-camp-firehouse",
       "detail": "Idle/full-health and construction/damage semantics are inferred from frame positions.",
       "idleFrameIndexes": [
-        9,
-        10,
-        11,
-        12,
-        13,
-        14,
-        15,
-        16,
-        17,
-        18,
-        19
+        7
       ],
       "constructionFrameIndexes": [
         0,
@@ -24345,17 +24249,7 @@
       "visualId": "japanese-camp-house",
       "detail": "Idle/full-health and construction/damage semantics are inferred from frame positions.",
       "idleFrameIndexes": [
-        8,
-        9,
-        10,
-        11,
-        12,
-        13,
-        14,
-        15,
-        16,
-        17,
-        18
+        7
       ],
       "constructionFrameIndexes": [
         0,
@@ -24395,14 +24289,7 @@
       "visualId": "korean-barracks",
       "detail": "Idle/full-health and construction/damage semantics are inferred from frame positions.",
       "idleFrameIndexes": [
-        7,
-        9,
-        10,
-        11,
-        12,
-        13,
-        14,
-        15
+        7
       ],
       "constructionFrameIndexes": [
         0,
