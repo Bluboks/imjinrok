@@ -95,9 +95,20 @@ export interface AnimationClip {
   progressFrameThresholds?: readonly number[];
 }
 
+/**
+ * Optional lossless source-direction clips. The outer key is a stable, serialized
+ * orientation profile id and the inner key is that profile's raw direction value.
+ */
+export type SourceOrientationClipMap = Readonly<Record<number, AnimationClip>>;
+
 export interface EntityVisualState {
   facings?: readonly Facing[];
   clips: Partial<Record<Facing | "default", AnimationClip>>;
+  /**
+   * Movement-only source-direction presentation supplied by themes that opt in.
+   * Consumers must retain normal directional clips as a fallback.
+   */
+  sourceOrientationClips?: Readonly<Record<string, SourceOrientationClipMap>>;
 }
 
 export interface EntityVisualLayer {

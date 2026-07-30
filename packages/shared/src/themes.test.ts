@@ -711,7 +711,7 @@ test("Japanese samurai uses the statically recovered core-state frame blocks", (
   }
 });
 
-test("Japanese turtle tank uses only the statically recovered grid core-state frames", () => {
+test("Japanese turtle tank keeps grid core-state frames and opts movement into recovered intermediate turns", () => {
   const manifest = readManifest(
     "entities/japanese-turtle-tank/ghosttankj.manifest.json",
   );
@@ -754,6 +754,39 @@ test("Japanese turtle tank uses only the statically recovered grid core-state fr
     for (const facing of ["s", "sw", "w", "nw", "se"] as const) {
       assert.equal(clips?.[facing]?.mirrorX, undefined);
     }
+  }
+
+  const expectedIntermediateTurns = {
+    1000: { start: 24, mirrorX: false },
+    1001: { start: 40, mirrorX: false },
+    1002: { start: 56, mirrorX: false },
+    1003: { start: 56, mirrorX: true },
+    1004: { start: 40, mirrorX: true },
+    1005: { start: 24, mirrorX: true },
+    1006: { start: 8, mirrorX: true },
+    1007: { start: 8, mirrorX: false },
+  } as const;
+  const profileId = "k01-japanese-turtle-tank-raw16";
+
+  for (const stateName of ["move", "walk"] as const) {
+    const clips = visual.states[stateName]?.sourceOrientationClips?.[profileId];
+    assert.ok(clips);
+
+    for (const [rawDirection, expected] of Object.entries(expectedIntermediateTurns)) {
+      const clip = clips[Number(rawDirection)];
+      assert.deepEqual(
+        clip?.frames.map(({ fileName }) => fileName),
+        Array.from({ length: 8 }, (_value, phase) => `ghosttankj_${String(expected.start + phase).padStart(4, "0")}.png`),
+      );
+      assert.equal(clip?.mirrorX ?? false, expected.mirrorX);
+      assert.equal(clip?.fps, visual.states.move?.clips.s?.fps);
+      assert.equal(clip?.loop, true);
+    }
+  }
+
+  const preloadedKeys = new Set(getThemeFrameRefs(defaultTheme).map(({ frame }) => frame.textureKey));
+  for (const frameIndex of [8, 24, 40, 56]) {
+    assert.ok(preloadedKeys.has(`default_entity_japanese_turtle_tank_ghosttankj_${String(frameIndex).padStart(4, "0")}`));
   }
 });
 
