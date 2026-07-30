@@ -44,6 +44,7 @@
     "imjinrok:extract-hero-priority-queue-gate": "node tools/imjinrok/extract-hero-priority-queue-gate.mjs --json",
     "imjinrok:extract-magic-auto-use-gate": "node tools/imjinrok/extract-magic-auto-use-gate.mjs --json",
     "imjinrok:extract-unit-animation-pilot": "node tools/imjinrok/extract-unit-animation-pilot.mjs --json",
+    "imjinrok:extract-k01-class2-locomotion-cadence": "node tools/imjinrok/extract-k01-class2-locomotion-cadence.mjs --json",
     "imjinrok:extract-k01-hero-movement-pilot": "node tools/imjinrok/extract-k01-hero-movement-pilot.mjs --json",
     "imjinrok:extract-k01-hero-basic-attack-pilot": "node tools/imjinrok/extract-k01-hero-basic-attack-pilot.mjs --json",
     "imjinrok:extract-k01-samurai-animation-pilot": "node tools/imjinrok/extract-k01-samurai-animation-pilot.mjs --json",

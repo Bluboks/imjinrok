@@ -30,6 +30,7 @@ pnpm imjinrok:setup-static-analysis
 pnpm imjinrok:analyze-exe
 pnpm imjinrok:verify-static-analysis
 pnpm imjinrok:extract-entity-type-catalog
+pnpm imjinrok:extract-k01-class2-locomotion-cadence
 pnpm imjinrok:extract-k01-hero-movement-pilot
 pnpm imjinrok:audit-sprite-mappings
 ```
