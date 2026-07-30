@@ -69,10 +69,11 @@ mask와 AND하고 any-nonzero면 blocked를 반환한다. `FUN_0043ad30` mode-1 
 닫히지 않았다. 그러므로 occupied destination에서 action/state failure·overlap·retry가 전체적으로 어떤
 순서가 되는지는 아직 확정할 수 없다.
 
-그러므로 현재 simulation의 collision/occupancy 정책은 원작 adapter가 아니다. generic default는
-모든 `blocksMovement` footprint를 simulation ground-contact position에서 결정적으로 점유시키고,
-같은 tick의 empty waypoint에는 stable entity order로 reservation을 부여하는 프로젝트 전용 정책이다.
-K01-specific ID나 원작 slot grid를 simulation core에 넣지 않는다.
+그러므로 현재 simulation의 collision/occupancy 정책은 원작 adapter가 아니다. 기본
+`core:strict-footprint-reservation`은 모든 `blocksMovement` footprint를 simulation ground-contact
+position에서 결정적으로 점유시키고, 같은 tick의 empty waypoint에는 stable entity order로 reservation을
+부여하는 프로젝트 전용 정책이다. map의 stable `movementCollisionProfileId`는 이 admission/reservation
+정책만 독립적으로 교체한다. K01-specific ID나 원작 slot grid를 simulation core에 넣지 않는다.
 
 ## 재현 벡터
 

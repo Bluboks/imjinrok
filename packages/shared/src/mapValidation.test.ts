@@ -52,6 +52,34 @@ test("maps validate optional pathfinding profile selections against content meta
   ]);
 });
 
+test("maps validate optional movement collision profile selections against content metadata", () => {
+  const map = createBlankMap();
+  map.movementCollisionProfileId = "mod:deterministic";
+  const registry = createContentRegistry([
+    ...defaultContentPacks,
+    {
+      id: "movement-collision-test-pack",
+      displayName: "Movement Collision Test Pack",
+      version: "1.0.0",
+      movementCollisionProfiles: {
+        "mod:deterministic": { id: "mod:deterministic", displayName: "Deterministic Mod Collision" },
+      },
+    },
+  ]);
+
+  assert.equal(validateMapDefinition(map, registry).ok, true);
+
+  map.movementCollisionProfileId = "missing:collision";
+  assert.deepEqual(validateMapDefinition(map, registry).issues, [
+    { path: "movementCollisionProfileId", message: "Unknown movement collision profile 'missing:collision'." },
+  ]);
+
+  map.movementCollisionProfileId = "";
+  assert.deepEqual(validateMapDefinition(map, registry).issues, [
+    { path: "movementCollisionProfileId", message: "Movement collision profile id must not be empty." },
+  ]);
+});
+
 test("legacy maps without visual references remain valid", () => {
   const map = createBlankMap();
   delete map.tilesetId;
