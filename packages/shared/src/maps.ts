@@ -21,11 +21,21 @@ export interface TileTilesetVisualSelection {
   elevationAssetKey?: string;
 }
 
+/**
+ * Optional map-selected fog family. The value is profile-defined, so custom
+ * maps can opt into their own fog renderer without making map identity part
+ * of the client render policy.
+ */
+export interface TileFogVisualSelection {
+  familyIndex?: number;
+}
+
 export interface TileCell {
   terrain: TerrainType;
   elevation: number;
   resource?: ResourceNode;
   tilesetVisuals?: TileTilesetVisualSelection;
+  fogVisuals?: TileFogVisualSelection;
 }
 
 export interface TileLayer {
@@ -54,6 +64,8 @@ export interface MapDefinition {
   environment?: EnvironmentPreset;
   /** Optional so saved/custom maps created before visual packs remain valid. */
   tilesetId?: string;
+  /** Optional renderer fog profile; omitted maps keep the generic fog. */
+  fogVisualProfileId?: string;
   environmentVisualProfileId?: string;
   resourceVisualSetId?: string;
 }

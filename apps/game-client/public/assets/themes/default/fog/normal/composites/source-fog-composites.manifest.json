@@ -1,0 +1,2958 @@
+{
+  "generatedBy": "tools/imjinrok/export-source-fog-composites.mjs",
+  "sourceEvidence": "analysis/fixtures/source-fog-render-evidence.json",
+  "imageGeometry": {
+    "width": 64,
+    "height": 48,
+    "subframeGrid": {
+      "columns": 2,
+      "rows": 3
+    }
+  },
+  "productRenderingAdapter": {
+    "note": "Source family/frame selection is static-backed. Product visibility-to-state mapping, alpha, scheduler, and world placement are adaptations, not original pixel parity."
+  },
+  "k01FamilyArtifact": "packages/shared/src/generated/k01SourceFogArtifact.ts",
+  "assets": [
+    {
+      "familyIndex": 0,
+      "selector": 0,
+      "sourceFrameIndices": [
+        0,
+        1,
+        32,
+        33,
+        64,
+        65
+      ],
+      "fileName": "fog0_selector00.png",
+      "sha256": "7641aaf1b4d530b8c2dc6694fddfcb8ba3af4358198b6eaaf630c29624a86111"
+    },
+    {
+      "familyIndex": 0,
+      "selector": 1,
+      "sourceFrameIndices": [
+        2,
+        3,
+        34,
+        35,
+        66,
+        67
+      ],
+      "fileName": "fog0_selector01.png",
+      "sha256": "0d4a304be646af25e4fbc121979374373ed3400ff63e019e667320a1e1f9b0d8"
+    },
+    {
+      "familyIndex": 0,
+      "selector": 2,
+      "sourceFrameIndices": [
+        4,
+        5,
+        36,
+        37,
+        68,
+        69
+      ],
+      "fileName": "fog0_selector02.png",
+      "sha256": "86be69a9c269b05930782b9add8bf0974d250be18b7a56f97b6e30fd26f21085"
+    },
+    {
+      "familyIndex": 0,
+      "selector": 3,
+      "sourceFrameIndices": [
+        6,
+        7,
+        38,
+        39,
+        70,
+        71
+      ],
+      "fileName": "fog0_selector03.png",
+      "sha256": "52e2f771bf532a8d0340964840561a75419c033dd9432390156a12c8a17bb26c"
+    },
+    {
+      "familyIndex": 0,
+      "selector": 4,
+      "sourceFrameIndices": [
+        8,
+        9,
+        40,
+        41,
+        72,
+        73
+      ],
+      "fileName": "fog0_selector04.png",
+      "sha256": "390d1822dc3f6bb8f0d56e9dad460192d4830dd5f9a067e34c5a18a1a23f23d1"
+    },
+    {
+      "familyIndex": 0,
+      "selector": 5,
+      "sourceFrameIndices": [
+        10,
+        11,
+        42,
+        43,
+        74,
+        75
+      ],
+      "fileName": "fog0_selector05.png",
+      "sha256": "bd0505ec3d379653e508a44175501ac2625eb0cc96e7f7a84603eec445bfa44d"
+    },
+    {
+      "familyIndex": 0,
+      "selector": 6,
+      "sourceFrameIndices": [
+        12,
+        13,
+        44,
+        45,
+        76,
+        77
+      ],
+      "fileName": "fog0_selector06.png",
+      "sha256": "f8fb83509d103381d0dd662e5f9c6f25c7f47de50909d3412d1437f0baeed092"
+    },
+    {
+      "familyIndex": 0,
+      "selector": 7,
+      "sourceFrameIndices": [
+        14,
+        15,
+        46,
+        47,
+        78,
+        79
+      ],
+      "fileName": "fog0_selector07.png",
+      "sha256": "96887c69d30aee9aa4af3fbc4bf71dd98ee680d14e7a4732606690e13a062d2c"
+    },
+    {
+      "familyIndex": 0,
+      "selector": 8,
+      "sourceFrameIndices": [
+        16,
+        17,
+        48,
+        49,
+        80,
+        81
+      ],
+      "fileName": "fog0_selector08.png",
+      "sha256": "e84128e09106a454650996ea79bcdb7c816b7a3c2314cd6f9482bf2b07612978"
+    },
+    {
+      "familyIndex": 0,
+      "selector": 9,
+      "sourceFrameIndices": [
+        18,
+        19,
+        50,
+        51,
+        82,
+        83
+      ],
+      "fileName": "fog0_selector09.png",
+      "sha256": "a1ed859b5d598c1304c88909690e06363a363dfe5d3f116dacaac06df36d681a"
+    },
+    {
+      "familyIndex": 0,
+      "selector": 10,
+      "sourceFrameIndices": [
+        20,
+        21,
+        52,
+        53,
+        84,
+        85
+      ],
+      "fileName": "fog0_selector10.png",
+      "sha256": "3f79cf76e3dae76cca4aa867fab39e21abf0d5084389ecda93e3a4a2da7e4ae4"
+    },
+    {
+      "familyIndex": 0,
+      "selector": 11,
+      "sourceFrameIndices": [
+        22,
+        23,
+        54,
+        55,
+        86,
+        87
+      ],
+      "fileName": "fog0_selector11.png",
+      "sha256": "613acd9c044fe5943ae4336ae57725f029627a675890f53712533c1b940d1841"
+    },
+    {
+      "familyIndex": 0,
+      "selector": 12,
+      "sourceFrameIndices": [
+        24,
+        25,
+        56,
+        57,
+        88,
+        89
+      ],
+      "fileName": "fog0_selector12.png",
+      "sha256": "36a37c8e784b496cc7ec2c9e5f5653b9357ccf415c503b5418f3866c70f12bca"
+    },
+    {
+      "familyIndex": 0,
+      "selector": 13,
+      "sourceFrameIndices": [
+        26,
+        27,
+        58,
+        59,
+        90,
+        91
+      ],
+      "fileName": "fog0_selector13.png",
+      "sha256": "30ecb58f5e3c58d4f14c0f716c98eb7bf19ead09d3c489ec2c1d56cdfc944bd8"
+    },
+    {
+      "familyIndex": 1,
+      "selector": 0,
+      "sourceFrameIndices": [
+        0,
+        1,
+        32,
+        33,
+        64,
+        65
+      ],
+      "fileName": "fog1_selector00.png",
+      "sha256": "4b3d915259e325a57fdf3e5176f3241d939e2447a4b145cc09a745fdcf8d6f70"
+    },
+    {
+      "familyIndex": 1,
+      "selector": 1,
+      "sourceFrameIndices": [
+        2,
+        3,
+        34,
+        35,
+        66,
+        67
+      ],
+      "fileName": "fog1_selector01.png",
+      "sha256": "200d87426ca65fe44b7980583715cfafa4f6ccf37d6829f3654712d61901a7c1"
+    },
+    {
+      "familyIndex": 1,
+      "selector": 2,
+      "sourceFrameIndices": [
+        4,
+        5,
+        36,
+        37,
+        68,
+        69
+      ],
+      "fileName": "fog1_selector02.png",
+      "sha256": "04dd19a397935f1f136838a621254f8bd73cd71cdffa6f739207a3c1b9c7a08f"
+    },
+    {
+      "familyIndex": 1,
+      "selector": 3,
+      "sourceFrameIndices": [
+        6,
+        7,
+        38,
+        39,
+        70,
+        71
+      ],
+      "fileName": "fog1_selector03.png",
+      "sha256": "1fd583f25686e21fedb26f041ec694b4ab38a7c4138ff20dcdb2eb6ec2cfa25f"
+    },
+    {
+      "familyIndex": 1,
+      "selector": 4,
+      "sourceFrameIndices": [
+        8,
+        9,
+        40,
+        41,
+        72,
+        73
+      ],
+      "fileName": "fog1_selector04.png",
+      "sha256": "3f3513d29f0dc1cab04aa7b062a05021edb2e92655d94b122cc80fb714e50b58"
+    },
+    {
+      "familyIndex": 1,
+      "selector": 5,
+      "sourceFrameIndices": [
+        10,
+        11,
+        42,
+        43,
+        74,
+        75
+      ],
+      "fileName": "fog1_selector05.png",
+      "sha256": "250326ff4479afb38b6bfe3d7e0834cab6062b4c4c8f3bbd5393365df2dc77e6"
+    },
+    {
+      "familyIndex": 1,
+      "selector": 6,
+      "sourceFrameIndices": [
+        12,
+        13,
+        44,
+        45,
+        76,
+        77
+      ],
+      "fileName": "fog1_selector06.png",
+      "sha256": "e51ca2039f633faf156d034eeb34ff46c9cf504d06dc0a5a618938838f8e0d81"
+    },
+    {
+      "familyIndex": 1,
+      "selector": 7,
+      "sourceFrameIndices": [
+        14,
+        15,
+        46,
+        47,
+        78,
+        79
+      ],
+      "fileName": "fog1_selector07.png",
+      "sha256": "9b8e9e5725b79c65c46ad67c911f3a6f21b991a1b00d6033161120ab6b010ddd"
+    },
+    {
+      "familyIndex": 1,
+      "selector": 8,
+      "sourceFrameIndices": [
+        16,
+        17,
+        48,
+        49,
+        80,
+        81
+      ],
+      "fileName": "fog1_selector08.png",
+      "sha256": "9fd8b66384143fa6dd2b2d1ed4ec38fcaf3e8e510768b6fba53fa9d49fb7ece7"
+    },
+    {
+      "familyIndex": 1,
+      "selector": 9,
+      "sourceFrameIndices": [
+        18,
+        19,
+        50,
+        51,
+        82,
+        83
+      ],
+      "fileName": "fog1_selector09.png",
+      "sha256": "f81f6a97d6295f8aff258e1f54893a32a17e22a794f058ef62598eef089f464b"
+    },
+    {
+      "familyIndex": 1,
+      "selector": 10,
+      "sourceFrameIndices": [
+        20,
+        21,
+        52,
+        53,
+        84,
+        85
+      ],
+      "fileName": "fog1_selector10.png",
+      "sha256": "742b8387dbf6dd72f4c3086ed02b8f2dfb9d19699d23925c2377d1293174fd8b"
+    },
+    {
+      "familyIndex": 1,
+      "selector": 11,
+      "sourceFrameIndices": [
+        22,
+        23,
+        54,
+        55,
+        86,
+        87
+      ],
+      "fileName": "fog1_selector11.png",
+      "sha256": "ea13ae2441d64916d87cea69e264a661ad606174c554c0749e6b6e771949d1b1"
+    },
+    {
+      "familyIndex": 1,
+      "selector": 12,
+      "sourceFrameIndices": [
+        24,
+        25,
+        56,
+        57,
+        88,
+        89
+      ],
+      "fileName": "fog1_selector12.png",
+      "sha256": "3bb81f1cc03391fa10941fac737c48d845dd8a906ab5eb760b00bb783863068f"
+    },
+    {
+      "familyIndex": 1,
+      "selector": 13,
+      "sourceFrameIndices": [
+        26,
+        27,
+        58,
+        59,
+        90,
+        91
+      ],
+      "fileName": "fog1_selector13.png",
+      "sha256": "c5c3d3f45925e807a0d2cf90f5dce3181efb3ce4a177d19cd5f95f680a86a115"
+    },
+    {
+      "familyIndex": 2,
+      "selector": 0,
+      "sourceFrameIndices": [
+        0,
+        1,
+        32,
+        33,
+        64,
+        65
+      ],
+      "fileName": "fog2_selector00.png",
+      "sha256": "c0ea5fc8e4a2f9044a318b2634b0ba1f9d959a6230d8bc478f8f0460a4dfaf1c"
+    },
+    {
+      "familyIndex": 2,
+      "selector": 1,
+      "sourceFrameIndices": [
+        2,
+        3,
+        34,
+        35,
+        66,
+        67
+      ],
+      "fileName": "fog2_selector01.png",
+      "sha256": "f9c78d4bf1760546d8569686a2987a77e018128f402ffd0082dac8f0ff2f4600"
+    },
+    {
+      "familyIndex": 2,
+      "selector": 2,
+      "sourceFrameIndices": [
+        4,
+        5,
+        36,
+        37,
+        68,
+        69
+      ],
+      "fileName": "fog2_selector02.png",
+      "sha256": "d30aa110dd3b468608b2a4df1db85b7fde1e21e77b6c209759bd695af65b92cf"
+    },
+    {
+      "familyIndex": 2,
+      "selector": 3,
+      "sourceFrameIndices": [
+        6,
+        7,
+        38,
+        39,
+        70,
+        71
+      ],
+      "fileName": "fog2_selector03.png",
+      "sha256": "b5ea96ae4b7ee6c2e95282d1e3e49058fa1f8c6a96866de321202a2df3bae949"
+    },
+    {
+      "familyIndex": 2,
+      "selector": 4,
+      "sourceFrameIndices": [
+        8,
+        9,
+        40,
+        41,
+        72,
+        73
+      ],
+      "fileName": "fog2_selector04.png",
+      "sha256": "0f1a7cb5b1493b976999ceca40b8d96924e3a7a54f3f6b91489428cce5e1ac23"
+    },
+    {
+      "familyIndex": 2,
+      "selector": 5,
+      "sourceFrameIndices": [
+        10,
+        11,
+        42,
+        43,
+        74,
+        75
+      ],
+      "fileName": "fog2_selector05.png",
+      "sha256": "e42b08b1521d29230da6c41d6a45a46b256f03a8b963dca80c1fac100f86db56"
+    },
+    {
+      "familyIndex": 2,
+      "selector": 6,
+      "sourceFrameIndices": [
+        12,
+        13,
+        44,
+        45,
+        76,
+        77
+      ],
+      "fileName": "fog2_selector06.png",
+      "sha256": "9c12a2c3c8cf13b3670cbba50ce3933ac5d283129483f114909af27be514354f"
+    },
+    {
+      "familyIndex": 2,
+      "selector": 7,
+      "sourceFrameIndices": [
+        14,
+        15,
+        46,
+        47,
+        78,
+        79
+      ],
+      "fileName": "fog2_selector07.png",
+      "sha256": "ab16ce3c529daacb7f6ce70dafdeedb87c28afe030915ad7b6c78ef7c39e91cd"
+    },
+    {
+      "familyIndex": 2,
+      "selector": 8,
+      "sourceFrameIndices": [
+        16,
+        17,
+        48,
+        49,
+        80,
+        81
+      ],
+      "fileName": "fog2_selector08.png",
+      "sha256": "1e6cf0c5ce20c9ce382055b7176c491e03d2d361ca4abf3a6d08c850d08f821f"
+    },
+    {
+      "familyIndex": 2,
+      "selector": 9,
+      "sourceFrameIndices": [
+        18,
+        19,
+        50,
+        51,
+        82,
+        83
+      ],
+      "fileName": "fog2_selector09.png",
+      "sha256": "04d24576491fd7c02554b3fb96591a7af8e43a1645eef0d13662db9839c26221"
+    },
+    {
+      "familyIndex": 2,
+      "selector": 10,
+      "sourceFrameIndices": [
+        20,
+        21,
+        52,
+        53,
+        84,
+        85
+      ],
+      "fileName": "fog2_selector10.png",
+      "sha256": "2b80244f92112086825749e195c1a1c9eabc374da75bb586f9df4ce0f0fb82d5"
+    },
+    {
+      "familyIndex": 2,
+      "selector": 11,
+      "sourceFrameIndices": [
+        22,
+        23,
+        54,
+        55,
+        86,
+        87
+      ],
+      "fileName": "fog2_selector11.png",
+      "sha256": "9e7e569e5ddb2c6ee44391ba83835bfcb70ef5b4ac0accea2c0ab40d93384722"
+    },
+    {
+      "familyIndex": 2,
+      "selector": 12,
+      "sourceFrameIndices": [
+        24,
+        25,
+        56,
+        57,
+        88,
+        89
+      ],
+      "fileName": "fog2_selector12.png",
+      "sha256": "3936d12d7010c952cec2bb040c8b2b8c22ecd6b1913ffd4fb2ad7306537c446d"
+    },
+    {
+      "familyIndex": 2,
+      "selector": 13,
+      "sourceFrameIndices": [
+        26,
+        27,
+        58,
+        59,
+        90,
+        91
+      ],
+      "fileName": "fog2_selector13.png",
+      "sha256": "0c74386113caf69415f80406af33e6f0cd551b6452da906b7e3ff25f0596c1c1"
+    },
+    {
+      "familyIndex": 3,
+      "selector": 0,
+      "sourceFrameIndices": [
+        0,
+        1,
+        32,
+        33,
+        64,
+        65
+      ],
+      "fileName": "fog3_selector00.png",
+      "sha256": "898eb3e69b71609c00dde45bf3bf5199c759a0d4db0db9d35fe532e664baea1f"
+    },
+    {
+      "familyIndex": 3,
+      "selector": 1,
+      "sourceFrameIndices": [
+        2,
+        3,
+        34,
+        35,
+        66,
+        67
+      ],
+      "fileName": "fog3_selector01.png",
+      "sha256": "222c12ba83fc8dcaba89d779f42946cebb45227a3116814bef78a45e54f2e6f6"
+    },
+    {
+      "familyIndex": 3,
+      "selector": 2,
+      "sourceFrameIndices": [
+        4,
+        5,
+        36,
+        37,
+        68,
+        69
+      ],
+      "fileName": "fog3_selector02.png",
+      "sha256": "9e4ba8ff48dafcf0054173f3013ff5ff4c83ffb7d4f74e333dfdaaa40033ad10"
+    },
+    {
+      "familyIndex": 3,
+      "selector": 3,
+      "sourceFrameIndices": [
+        6,
+        7,
+        38,
+        39,
+        70,
+        71
+      ],
+      "fileName": "fog3_selector03.png",
+      "sha256": "fab95e08e2697077346f02a9b4002726a695cd84ab8b9f529b3945ed6ac78817"
+    },
+    {
+      "familyIndex": 3,
+      "selector": 4,
+      "sourceFrameIndices": [
+        8,
+        9,
+        40,
+        41,
+        72,
+        73
+      ],
+      "fileName": "fog3_selector04.png",
+      "sha256": "45d13779a7375b58955ca50cf044d92156ba61f47a7833a071359264be55e131"
+    },
+    {
+      "familyIndex": 3,
+      "selector": 5,
+      "sourceFrameIndices": [
+        10,
+        11,
+        42,
+        43,
+        74,
+        75
+      ],
+      "fileName": "fog3_selector05.png",
+      "sha256": "e831add32ed5b7ed9fe856320a7880b0f1aba65378ee3e91aa1ad75444d34e27"
+    },
+    {
+      "familyIndex": 3,
+      "selector": 6,
+      "sourceFrameIndices": [
+        12,
+        13,
+        44,
+        45,
+        76,
+        77
+      ],
+      "fileName": "fog3_selector06.png",
+      "sha256": "ada992513c15165811823c13210cf7f123f845fcb336e1a855d574e7793e853e"
+    },
+    {
+      "familyIndex": 3,
+      "selector": 7,
+      "sourceFrameIndices": [
+        14,
+        15,
+        46,
+        47,
+        78,
+        79
+      ],
+      "fileName": "fog3_selector07.png",
+      "sha256": "51d612d1162830df38b7e1a1eca6111693f6a501fad4292be1a1dfba872edbe0"
+    },
+    {
+      "familyIndex": 3,
+      "selector": 8,
+      "sourceFrameIndices": [
+        16,
+        17,
+        48,
+        49,
+        80,
+        81
+      ],
+      "fileName": "fog3_selector08.png",
+      "sha256": "9229b94dd206c00acd1fed2b3537b6db7702e89da617e300342aee7ebd78018a"
+    },
+    {
+      "familyIndex": 3,
+      "selector": 9,
+      "sourceFrameIndices": [
+        18,
+        19,
+        50,
+        51,
+        82,
+        83
+      ],
+      "fileName": "fog3_selector09.png",
+      "sha256": "023939d334c99c1de5ac8fd0caaf73b606d715ea62dd204f4a3c70087ccdd329"
+    },
+    {
+      "familyIndex": 3,
+      "selector": 10,
+      "sourceFrameIndices": [
+        20,
+        21,
+        52,
+        53,
+        84,
+        85
+      ],
+      "fileName": "fog3_selector10.png",
+      "sha256": "2f9b420ac21629f7b1fce9a80e2e7f21020739d34372b4934032646a30ec68b3"
+    },
+    {
+      "familyIndex": 3,
+      "selector": 11,
+      "sourceFrameIndices": [
+        22,
+        23,
+        54,
+        55,
+        86,
+        87
+      ],
+      "fileName": "fog3_selector11.png",
+      "sha256": "5882a7595f45a86f0b9e1e77c6acb4febf1850e8ba62787b56f7a24c14e95d29"
+    },
+    {
+      "familyIndex": 3,
+      "selector": 12,
+      "sourceFrameIndices": [
+        24,
+        25,
+        56,
+        57,
+        88,
+        89
+      ],
+      "fileName": "fog3_selector12.png",
+      "sha256": "634161d4de7c4cf18e95746f81e770b56c1c645ddd2fb79e6956aa23097346ae"
+    },
+    {
+      "familyIndex": 3,
+      "selector": 13,
+      "sourceFrameIndices": [
+        26,
+        27,
+        58,
+        59,
+        90,
+        91
+      ],
+      "fileName": "fog3_selector13.png",
+      "sha256": "14e798a787ac3dd18c1134663b009848b8c5bc22cfbac287a048cef76bf3eb94"
+    },
+    {
+      "familyIndex": 4,
+      "selector": 0,
+      "sourceFrameIndices": [
+        0,
+        1,
+        32,
+        33,
+        64,
+        65
+      ],
+      "fileName": "fog4_selector00.png",
+      "sha256": "ac418ba8490567f3f3954dd7d8cf399c07f55721aa7b742feb95cdef94f5a07e"
+    },
+    {
+      "familyIndex": 4,
+      "selector": 1,
+      "sourceFrameIndices": [
+        2,
+        3,
+        34,
+        35,
+        66,
+        67
+      ],
+      "fileName": "fog4_selector01.png",
+      "sha256": "7517b627d1a766159e33063a7e3b6e17f3716a366052387461c4e67bb8d04d24"
+    },
+    {
+      "familyIndex": 4,
+      "selector": 2,
+      "sourceFrameIndices": [
+        4,
+        5,
+        36,
+        37,
+        68,
+        69
+      ],
+      "fileName": "fog4_selector02.png",
+      "sha256": "f6910c9c6db39fb0c8c760a60e2e141c9073628943191227901287402d2742aa"
+    },
+    {
+      "familyIndex": 4,
+      "selector": 3,
+      "sourceFrameIndices": [
+        6,
+        7,
+        38,
+        39,
+        70,
+        71
+      ],
+      "fileName": "fog4_selector03.png",
+      "sha256": "7771b23ccabb58b12be0c513494fc66416ad120df896898d65d6ac04b5136315"
+    },
+    {
+      "familyIndex": 4,
+      "selector": 4,
+      "sourceFrameIndices": [
+        8,
+        9,
+        40,
+        41,
+        72,
+        73
+      ],
+      "fileName": "fog4_selector04.png",
+      "sha256": "a0956c9c001c78d57fb16df87297404c984e7503231a6a636e203ab1f38ab81e"
+    },
+    {
+      "familyIndex": 4,
+      "selector": 5,
+      "sourceFrameIndices": [
+        10,
+        11,
+        42,
+        43,
+        74,
+        75
+      ],
+      "fileName": "fog4_selector05.png",
+      "sha256": "1a649bff468da38a03a09d5368558167fa0e2f467ce96590658d9aa1ba928321"
+    },
+    {
+      "familyIndex": 4,
+      "selector": 6,
+      "sourceFrameIndices": [
+        12,
+        13,
+        44,
+        45,
+        76,
+        77
+      ],
+      "fileName": "fog4_selector06.png",
+      "sha256": "b30bf86c6941886f456323a4a45bda71097a16f0b31118e1352c9c90827e2cd4"
+    },
+    {
+      "familyIndex": 4,
+      "selector": 7,
+      "sourceFrameIndices": [
+        14,
+        15,
+        46,
+        47,
+        78,
+        79
+      ],
+      "fileName": "fog4_selector07.png",
+      "sha256": "d0000d15f5334ba59ab547984edc0ecde0849d10caa7dd8c5060dfd915187693"
+    },
+    {
+      "familyIndex": 4,
+      "selector": 8,
+      "sourceFrameIndices": [
+        16,
+        17,
+        48,
+        49,
+        80,
+        81
+      ],
+      "fileName": "fog4_selector08.png",
+      "sha256": "739a3c0697f65997bb697813c9f689bc798a65e389ec82fc5357529c171b07cf"
+    },
+    {
+      "familyIndex": 4,
+      "selector": 9,
+      "sourceFrameIndices": [
+        18,
+        19,
+        50,
+        51,
+        82,
+        83
+      ],
+      "fileName": "fog4_selector09.png",
+      "sha256": "a7b67af7f48752fbaaeaafdf15708a8bf8b6b8efce157bd4ca25c5d48062360a"
+    },
+    {
+      "familyIndex": 4,
+      "selector": 10,
+      "sourceFrameIndices": [
+        20,
+        21,
+        52,
+        53,
+        84,
+        85
+      ],
+      "fileName": "fog4_selector10.png",
+      "sha256": "f4928c257bed154f9c6c54d4e7f5821940f5b5e9f9535adba85a95c75ae5b9df"
+    },
+    {
+      "familyIndex": 4,
+      "selector": 11,
+      "sourceFrameIndices": [
+        22,
+        23,
+        54,
+        55,
+        86,
+        87
+      ],
+      "fileName": "fog4_selector11.png",
+      "sha256": "cc3100be6bfdff52a0b2846d295742aaf22e220013cb0e0828067609758ad41f"
+    },
+    {
+      "familyIndex": 4,
+      "selector": 12,
+      "sourceFrameIndices": [
+        24,
+        25,
+        56,
+        57,
+        88,
+        89
+      ],
+      "fileName": "fog4_selector12.png",
+      "sha256": "50b2e3e112d937cf4c956ccbe9beedb193d2cec8b2a979f67bfd70144184dbe4"
+    },
+    {
+      "familyIndex": 4,
+      "selector": 13,
+      "sourceFrameIndices": [
+        26,
+        27,
+        58,
+        59,
+        90,
+        91
+      ],
+      "fileName": "fog4_selector13.png",
+      "sha256": "9563bc3c830a1d7071061132c2f5e0d93f886691b3ab8b560c6eeeee7c4a59c8"
+    },
+    {
+      "familyIndex": 5,
+      "selector": 0,
+      "sourceFrameIndices": [
+        0,
+        1,
+        32,
+        33,
+        64,
+        65
+      ],
+      "fileName": "fog5_selector00.png",
+      "sha256": "275981bc639697b5897a2e5b3f10139107c97eea184703cf4e9a709f3ecd8ac0"
+    },
+    {
+      "familyIndex": 5,
+      "selector": 1,
+      "sourceFrameIndices": [
+        2,
+        3,
+        34,
+        35,
+        66,
+        67
+      ],
+      "fileName": "fog5_selector01.png",
+      "sha256": "ab588c5e495dbd343f1a5abb6d551f2f94f4e66599a5eca59251f6b01c0b6104"
+    },
+    {
+      "familyIndex": 5,
+      "selector": 2,
+      "sourceFrameIndices": [
+        4,
+        5,
+        36,
+        37,
+        68,
+        69
+      ],
+      "fileName": "fog5_selector02.png",
+      "sha256": "d52114926acbc4c16482c0ccbd6852af4bb56f76dce0a8e3575cde8e0f195aa1"
+    },
+    {
+      "familyIndex": 5,
+      "selector": 3,
+      "sourceFrameIndices": [
+        6,
+        7,
+        38,
+        39,
+        70,
+        71
+      ],
+      "fileName": "fog5_selector03.png",
+      "sha256": "cab5bc2828bc7bc41cd0420ea62add9f243e49be642b01a382ae5557c3f3be0d"
+    },
+    {
+      "familyIndex": 5,
+      "selector": 4,
+      "sourceFrameIndices": [
+        8,
+        9,
+        40,
+        41,
+        72,
+        73
+      ],
+      "fileName": "fog5_selector04.png",
+      "sha256": "bdd31ab3778490856e9ffe91b0e04cc8d8036e33db994f6b720c1e2576466d3d"
+    },
+    {
+      "familyIndex": 5,
+      "selector": 5,
+      "sourceFrameIndices": [
+        10,
+        11,
+        42,
+        43,
+        74,
+        75
+      ],
+      "fileName": "fog5_selector05.png",
+      "sha256": "f81ba34a51b420d61ca8682b53943517719290b0c3fad41bd9778173767fcd83"
+    },
+    {
+      "familyIndex": 5,
+      "selector": 6,
+      "sourceFrameIndices": [
+        12,
+        13,
+        44,
+        45,
+        76,
+        77
+      ],
+      "fileName": "fog5_selector06.png",
+      "sha256": "4eabbd7ba050076244280139a19dc9029f71786e830ce27bc28879243934bf37"
+    },
+    {
+      "familyIndex": 5,
+      "selector": 7,
+      "sourceFrameIndices": [
+        14,
+        15,
+        46,
+        47,
+        78,
+        79
+      ],
+      "fileName": "fog5_selector07.png",
+      "sha256": "152f877260631d74dfb0e0bb1c798e8e2ff2930d886fe228d59c1afadc199a10"
+    },
+    {
+      "familyIndex": 5,
+      "selector": 8,
+      "sourceFrameIndices": [
+        16,
+        17,
+        48,
+        49,
+        80,
+        81
+      ],
+      "fileName": "fog5_selector08.png",
+      "sha256": "3836071065e6b54f511164a1f0fcfb731c8cb467f908a9ae96a4206adee72180"
+    },
+    {
+      "familyIndex": 5,
+      "selector": 9,
+      "sourceFrameIndices": [
+        18,
+        19,
+        50,
+        51,
+        82,
+        83
+      ],
+      "fileName": "fog5_selector09.png",
+      "sha256": "61bf824098f74037e4a878450de4b5338d83a11bb10c32ef0eba4cffc0ed5386"
+    },
+    {
+      "familyIndex": 5,
+      "selector": 10,
+      "sourceFrameIndices": [
+        20,
+        21,
+        52,
+        53,
+        84,
+        85
+      ],
+      "fileName": "fog5_selector10.png",
+      "sha256": "11ac8741dc162b19835d598d5d750adfc3375704cd4023e8ee0ee196f4971a84"
+    },
+    {
+      "familyIndex": 5,
+      "selector": 11,
+      "sourceFrameIndices": [
+        22,
+        23,
+        54,
+        55,
+        86,
+        87
+      ],
+      "fileName": "fog5_selector11.png",
+      "sha256": "92f2b044f79f4a6eada1fb268a9a13436c16c8dd3cabdd7e3a5ad5fd61bb2729"
+    },
+    {
+      "familyIndex": 5,
+      "selector": 12,
+      "sourceFrameIndices": [
+        24,
+        25,
+        56,
+        57,
+        88,
+        89
+      ],
+      "fileName": "fog5_selector12.png",
+      "sha256": "d144533ebdca4841506c7feefbdbdf06bd38db61f3c09e6b46a0c0bbf710f0e4"
+    },
+    {
+      "familyIndex": 5,
+      "selector": 13,
+      "sourceFrameIndices": [
+        26,
+        27,
+        58,
+        59,
+        90,
+        91
+      ],
+      "fileName": "fog5_selector13.png",
+      "sha256": "6161446577d8edea88e83d95032dd66e97ae77b4100cf2482be0d05ddbf80567"
+    },
+    {
+      "familyIndex": 6,
+      "selector": 0,
+      "sourceFrameIndices": [
+        0,
+        1,
+        32,
+        33,
+        64,
+        65
+      ],
+      "fileName": "fog6_selector00.png",
+      "sha256": "7f40091d9ddd3a6f5f849d241897cc3d29b619b1200d681df66d69dcb0d34901"
+    },
+    {
+      "familyIndex": 6,
+      "selector": 1,
+      "sourceFrameIndices": [
+        2,
+        3,
+        34,
+        35,
+        66,
+        67
+      ],
+      "fileName": "fog6_selector01.png",
+      "sha256": "161d7b71fd181c3422a033529b880f742f365a23b3d1725c629ebceb9d9fc96f"
+    },
+    {
+      "familyIndex": 6,
+      "selector": 2,
+      "sourceFrameIndices": [
+        4,
+        5,
+        36,
+        37,
+        68,
+        69
+      ],
+      "fileName": "fog6_selector02.png",
+      "sha256": "0bb4248f063e705e4c0a36419db98a4d07ec870e097d84b04921605ceee76288"
+    },
+    {
+      "familyIndex": 6,
+      "selector": 3,
+      "sourceFrameIndices": [
+        6,
+        7,
+        38,
+        39,
+        70,
+        71
+      ],
+      "fileName": "fog6_selector03.png",
+      "sha256": "cc52eb0c7e508316ba97cdc8b869d0b57faab674c23c0bc299191e70bc86e317"
+    },
+    {
+      "familyIndex": 6,
+      "selector": 4,
+      "sourceFrameIndices": [
+        8,
+        9,
+        40,
+        41,
+        72,
+        73
+      ],
+      "fileName": "fog6_selector04.png",
+      "sha256": "394b5ff18586e8eac11cd0af36adb9b13fb735e860850475d00befff13539083"
+    },
+    {
+      "familyIndex": 6,
+      "selector": 5,
+      "sourceFrameIndices": [
+        10,
+        11,
+        42,
+        43,
+        74,
+        75
+      ],
+      "fileName": "fog6_selector05.png",
+      "sha256": "40e262d1f614792f9889d3f229a6bf524e1082fcddad406b01e5518f33d30585"
+    },
+    {
+      "familyIndex": 6,
+      "selector": 6,
+      "sourceFrameIndices": [
+        12,
+        13,
+        44,
+        45,
+        76,
+        77
+      ],
+      "fileName": "fog6_selector06.png",
+      "sha256": "d05c7a258336138f7b0157d60310b08fb72cbd33897931cc8b6cc748b36db870"
+    },
+    {
+      "familyIndex": 6,
+      "selector": 7,
+      "sourceFrameIndices": [
+        14,
+        15,
+        46,
+        47,
+        78,
+        79
+      ],
+      "fileName": "fog6_selector07.png",
+      "sha256": "f3cf3ae0697ced540621f62aca4353840be19ff1b4ee54b880988b2d5f9cb0f8"
+    },
+    {
+      "familyIndex": 6,
+      "selector": 8,
+      "sourceFrameIndices": [
+        16,
+        17,
+        48,
+        49,
+        80,
+        81
+      ],
+      "fileName": "fog6_selector08.png",
+      "sha256": "d8b423e9fa76a5927e03178f8d4c2a7ace400ba9758c6d22fce7221c0a05712a"
+    },
+    {
+      "familyIndex": 6,
+      "selector": 9,
+      "sourceFrameIndices": [
+        18,
+        19,
+        50,
+        51,
+        82,
+        83
+      ],
+      "fileName": "fog6_selector09.png",
+      "sha256": "25704b069b8e40372dd1e4a1abc2cb0b0fd8cefb9662bd0e944a38a3b7041565"
+    },
+    {
+      "familyIndex": 6,
+      "selector": 10,
+      "sourceFrameIndices": [
+        20,
+        21,
+        52,
+        53,
+        84,
+        85
+      ],
+      "fileName": "fog6_selector10.png",
+      "sha256": "ee308af01b82353db7ae24dd3bd3c98b14460cb46fb54ebdfe0881224a4c1ede"
+    },
+    {
+      "familyIndex": 6,
+      "selector": 11,
+      "sourceFrameIndices": [
+        22,
+        23,
+        54,
+        55,
+        86,
+        87
+      ],
+      "fileName": "fog6_selector11.png",
+      "sha256": "a1d6796cae7910a55ba5c305277d136d396205b94f87cb743888a7424da08a9e"
+    },
+    {
+      "familyIndex": 6,
+      "selector": 12,
+      "sourceFrameIndices": [
+        24,
+        25,
+        56,
+        57,
+        88,
+        89
+      ],
+      "fileName": "fog6_selector12.png",
+      "sha256": "de76360cdae632d95ff30b0cf0c3d260ecc7d050b21e5b722845ba3f46184ab5"
+    },
+    {
+      "familyIndex": 6,
+      "selector": 13,
+      "sourceFrameIndices": [
+        26,
+        27,
+        58,
+        59,
+        90,
+        91
+      ],
+      "fileName": "fog6_selector13.png",
+      "sha256": "84903ed1c0d500aaa053a2922535b503fec029957df43b48d7b139db4a0e7f03"
+    },
+    {
+      "familyIndex": 7,
+      "selector": 0,
+      "sourceFrameIndices": [
+        0,
+        1,
+        32,
+        33,
+        64,
+        65
+      ],
+      "fileName": "fog7_selector00.png",
+      "sha256": "58b935712e21680c36a163d22de242517ca3108d20f3c3a9b85f0321ee8e5894"
+    },
+    {
+      "familyIndex": 7,
+      "selector": 1,
+      "sourceFrameIndices": [
+        2,
+        3,
+        34,
+        35,
+        66,
+        67
+      ],
+      "fileName": "fog7_selector01.png",
+      "sha256": "5a34cd528c77be61d3d4e2428c0ec23a092a03e2f71954320275d2fcb40c3b68"
+    },
+    {
+      "familyIndex": 7,
+      "selector": 2,
+      "sourceFrameIndices": [
+        4,
+        5,
+        36,
+        37,
+        68,
+        69
+      ],
+      "fileName": "fog7_selector02.png",
+      "sha256": "70a61ec7e0b176b166d853901733be977c0ce85c8729dc532962da5a865f31aa"
+    },
+    {
+      "familyIndex": 7,
+      "selector": 3,
+      "sourceFrameIndices": [
+        6,
+        7,
+        38,
+        39,
+        70,
+        71
+      ],
+      "fileName": "fog7_selector03.png",
+      "sha256": "eb1ce6781dc9028fcc735181f35f55d5c43590a26349e829d39a35ceab65458e"
+    },
+    {
+      "familyIndex": 7,
+      "selector": 4,
+      "sourceFrameIndices": [
+        8,
+        9,
+        40,
+        41,
+        72,
+        73
+      ],
+      "fileName": "fog7_selector04.png",
+      "sha256": "738ea4f6c496093a476aae6e1f0e6f0f0f8c4449cd2fb49408706064e009313d"
+    },
+    {
+      "familyIndex": 7,
+      "selector": 5,
+      "sourceFrameIndices": [
+        10,
+        11,
+        42,
+        43,
+        74,
+        75
+      ],
+      "fileName": "fog7_selector05.png",
+      "sha256": "634cde467c5249c58baf3cd887d2032e38cb3c14e73e5eea475ceb5e08ebd01b"
+    },
+    {
+      "familyIndex": 7,
+      "selector": 6,
+      "sourceFrameIndices": [
+        12,
+        13,
+        44,
+        45,
+        76,
+        77
+      ],
+      "fileName": "fog7_selector06.png",
+      "sha256": "7ff834b120715c24e86cd13461ecb5fce6fda2301823d1602c09c7bc5f6bda20"
+    },
+    {
+      "familyIndex": 7,
+      "selector": 7,
+      "sourceFrameIndices": [
+        14,
+        15,
+        46,
+        47,
+        78,
+        79
+      ],
+      "fileName": "fog7_selector07.png",
+      "sha256": "f90fdc62d077ac0c5ebe22a6a8e8da5924869bb524b188ff5ece4e291209a7e2"
+    },
+    {
+      "familyIndex": 7,
+      "selector": 8,
+      "sourceFrameIndices": [
+        16,
+        17,
+        48,
+        49,
+        80,
+        81
+      ],
+      "fileName": "fog7_selector08.png",
+      "sha256": "f89d59e9a2af564ddf3fa89df18c21c8e63297f98340e5d645b6673103ea4da8"
+    },
+    {
+      "familyIndex": 7,
+      "selector": 9,
+      "sourceFrameIndices": [
+        18,
+        19,
+        50,
+        51,
+        82,
+        83
+      ],
+      "fileName": "fog7_selector09.png",
+      "sha256": "a18840284affcbe07c66a595d44ba29e84cb1609085cc98765bead7b0cb5dda3"
+    },
+    {
+      "familyIndex": 7,
+      "selector": 10,
+      "sourceFrameIndices": [
+        20,
+        21,
+        52,
+        53,
+        84,
+        85
+      ],
+      "fileName": "fog7_selector10.png",
+      "sha256": "e97e65f031719361864bc1ec2eb261c59b3acbcae4431b6c841753d079711b0f"
+    },
+    {
+      "familyIndex": 7,
+      "selector": 11,
+      "sourceFrameIndices": [
+        22,
+        23,
+        54,
+        55,
+        86,
+        87
+      ],
+      "fileName": "fog7_selector11.png",
+      "sha256": "f5f19df4eb36f6c31761f5a9c76156fa8877f6c20098b1ec15cac98a4ecf9008"
+    },
+    {
+      "familyIndex": 7,
+      "selector": 12,
+      "sourceFrameIndices": [
+        24,
+        25,
+        56,
+        57,
+        88,
+        89
+      ],
+      "fileName": "fog7_selector12.png",
+      "sha256": "b6ab15f4f8dde65b502c9f3e9e6b2bae1ec81aaec52a9bd24fbc55909cce585d"
+    },
+    {
+      "familyIndex": 7,
+      "selector": 13,
+      "sourceFrameIndices": [
+        26,
+        27,
+        58,
+        59,
+        90,
+        91
+      ],
+      "fileName": "fog7_selector13.png",
+      "sha256": "c47abfa2ca68ccc051cc2a270b5d1ede639904de1ee58836bd7486017e9204c5"
+    },
+    {
+      "familyIndex": 8,
+      "selector": 0,
+      "sourceFrameIndices": [
+        0,
+        1,
+        32,
+        33,
+        64,
+        65
+      ],
+      "fileName": "fog8_selector00.png",
+      "sha256": "668ba0c22818abe9cda1fb959fd015eb40ef036a0ac6ea1324b444462ffc1195"
+    },
+    {
+      "familyIndex": 8,
+      "selector": 1,
+      "sourceFrameIndices": [
+        2,
+        3,
+        34,
+        35,
+        66,
+        67
+      ],
+      "fileName": "fog8_selector01.png",
+      "sha256": "c14a29ab88c08bb54ad747bd7c186f9ac7d3df1c9284b3a667fdb1c0b3bd51c9"
+    },
+    {
+      "familyIndex": 8,
+      "selector": 2,
+      "sourceFrameIndices": [
+        4,
+        5,
+        36,
+        37,
+        68,
+        69
+      ],
+      "fileName": "fog8_selector02.png",
+      "sha256": "75e325b0a7d79add8bbab4bfd6e31002cb2884c3e487321a363d460e46c14461"
+    },
+    {
+      "familyIndex": 8,
+      "selector": 3,
+      "sourceFrameIndices": [
+        6,
+        7,
+        38,
+        39,
+        70,
+        71
+      ],
+      "fileName": "fog8_selector03.png",
+      "sha256": "b574aaf28616433c247a64ee0fcfe983c42fe9c84caba28c7e7480f5f9ebc5b6"
+    },
+    {
+      "familyIndex": 8,
+      "selector": 4,
+      "sourceFrameIndices": [
+        8,
+        9,
+        40,
+        41,
+        72,
+        73
+      ],
+      "fileName": "fog8_selector04.png",
+      "sha256": "4671c0d937240630c67f8a4dfd8675f318016de0edc76170d53e5e9e7369c863"
+    },
+    {
+      "familyIndex": 8,
+      "selector": 5,
+      "sourceFrameIndices": [
+        10,
+        11,
+        42,
+        43,
+        74,
+        75
+      ],
+      "fileName": "fog8_selector05.png",
+      "sha256": "cc20e7b022cdba9f9859cd45c624c753490f115ee3e99724cfe0b08e9a15ea1d"
+    },
+    {
+      "familyIndex": 8,
+      "selector": 6,
+      "sourceFrameIndices": [
+        12,
+        13,
+        44,
+        45,
+        76,
+        77
+      ],
+      "fileName": "fog8_selector06.png",
+      "sha256": "757295518bff0970077475d077300174005ffdcf60a97e2611bde62cb313eaa6"
+    },
+    {
+      "familyIndex": 8,
+      "selector": 7,
+      "sourceFrameIndices": [
+        14,
+        15,
+        46,
+        47,
+        78,
+        79
+      ],
+      "fileName": "fog8_selector07.png",
+      "sha256": "a880a06d7fd9194c7c24717861663d21cff689f8c2dec9333312c2c21a094ffb"
+    },
+    {
+      "familyIndex": 8,
+      "selector": 8,
+      "sourceFrameIndices": [
+        16,
+        17,
+        48,
+        49,
+        80,
+        81
+      ],
+      "fileName": "fog8_selector08.png",
+      "sha256": "0052438c2cfbb6a83f35ecde10f712101478ecfbe04f809db9a103740e0fda6e"
+    },
+    {
+      "familyIndex": 8,
+      "selector": 9,
+      "sourceFrameIndices": [
+        18,
+        19,
+        50,
+        51,
+        82,
+        83
+      ],
+      "fileName": "fog8_selector09.png",
+      "sha256": "9c10c616c4b27da9471c8b43d44abb468c58417c73acea412885dbe0aad08fe6"
+    },
+    {
+      "familyIndex": 8,
+      "selector": 10,
+      "sourceFrameIndices": [
+        20,
+        21,
+        52,
+        53,
+        84,
+        85
+      ],
+      "fileName": "fog8_selector10.png",
+      "sha256": "54b88c4bcd896427d93a1f85e52de551e33528a2be95d0ee75f11b12e189dd41"
+    },
+    {
+      "familyIndex": 8,
+      "selector": 11,
+      "sourceFrameIndices": [
+        22,
+        23,
+        54,
+        55,
+        86,
+        87
+      ],
+      "fileName": "fog8_selector11.png",
+      "sha256": "2fe5090e0c272cf587272d09a9c9c021444dcba44c94424345d6fddcacd0683a"
+    },
+    {
+      "familyIndex": 8,
+      "selector": 12,
+      "sourceFrameIndices": [
+        24,
+        25,
+        56,
+        57,
+        88,
+        89
+      ],
+      "fileName": "fog8_selector12.png",
+      "sha256": "8e8c5ef72f660fb99018196fc2324b0b19c79c9ef63c1fded44d2c0cb9f584e3"
+    },
+    {
+      "familyIndex": 8,
+      "selector": 13,
+      "sourceFrameIndices": [
+        26,
+        27,
+        58,
+        59,
+        90,
+        91
+      ],
+      "fileName": "fog8_selector13.png",
+      "sha256": "6a2756798dd3dab6b7c6f6c8e0d8e5867f94b4574b223d8bfa931329e052e237"
+    },
+    {
+      "familyIndex": 9,
+      "selector": 0,
+      "sourceFrameIndices": [
+        0,
+        1,
+        32,
+        33,
+        64,
+        65
+      ],
+      "fileName": "fog9_selector00.png",
+      "sha256": "e655ab96e313f0b0e2c62ffdeb7913f07472e1e9c2fcdfcd3add2395aa355666"
+    },
+    {
+      "familyIndex": 9,
+      "selector": 1,
+      "sourceFrameIndices": [
+        2,
+        3,
+        34,
+        35,
+        66,
+        67
+      ],
+      "fileName": "fog9_selector01.png",
+      "sha256": "44501401a49977bbccdeb7695b7715376de72ca4489cfbd989430270ce70a419"
+    },
+    {
+      "familyIndex": 9,
+      "selector": 2,
+      "sourceFrameIndices": [
+        4,
+        5,
+        36,
+        37,
+        68,
+        69
+      ],
+      "fileName": "fog9_selector02.png",
+      "sha256": "7782205d25d2be5afa783c771dbc3a749e18922435eba47fe2d7df2e95f72770"
+    },
+    {
+      "familyIndex": 9,
+      "selector": 3,
+      "sourceFrameIndices": [
+        6,
+        7,
+        38,
+        39,
+        70,
+        71
+      ],
+      "fileName": "fog9_selector03.png",
+      "sha256": "0a45bc7418f2b146d45308f2cee78d6571f13c7d223dbb013513c1623f9eb743"
+    },
+    {
+      "familyIndex": 9,
+      "selector": 4,
+      "sourceFrameIndices": [
+        8,
+        9,
+        40,
+        41,
+        72,
+        73
+      ],
+      "fileName": "fog9_selector04.png",
+      "sha256": "2deac3bbcf48242866899ec25479323dba4ce020bc8a93963cace248d86a3a68"
+    },
+    {
+      "familyIndex": 9,
+      "selector": 5,
+      "sourceFrameIndices": [
+        10,
+        11,
+        42,
+        43,
+        74,
+        75
+      ],
+      "fileName": "fog9_selector05.png",
+      "sha256": "8192b11c627c07e4b8baf69cd8107a808ec4d919c1bce578aea1236752ebd5d4"
+    },
+    {
+      "familyIndex": 9,
+      "selector": 6,
+      "sourceFrameIndices": [
+        12,
+        13,
+        44,
+        45,
+        76,
+        77
+      ],
+      "fileName": "fog9_selector06.png",
+      "sha256": "ebb5191c609e6bea6e80a0760f04931d1519e08045a7898b02b8b410ed2e6c55"
+    },
+    {
+      "familyIndex": 9,
+      "selector": 7,
+      "sourceFrameIndices": [
+        14,
+        15,
+        46,
+        47,
+        78,
+        79
+      ],
+      "fileName": "fog9_selector07.png",
+      "sha256": "7b8e322b565df58e73335c885fed22f1b92dc46710b9da6afe387af30bae99cb"
+    },
+    {
+      "familyIndex": 9,
+      "selector": 8,
+      "sourceFrameIndices": [
+        16,
+        17,
+        48,
+        49,
+        80,
+        81
+      ],
+      "fileName": "fog9_selector08.png",
+      "sha256": "e1ed305836d42ad3e813cb24da430840527be14840516fb50c2304b4ef40efae"
+    },
+    {
+      "familyIndex": 9,
+      "selector": 9,
+      "sourceFrameIndices": [
+        18,
+        19,
+        50,
+        51,
+        82,
+        83
+      ],
+      "fileName": "fog9_selector09.png",
+      "sha256": "9742f80d0fee877d5daa15de6ba7c3c4e9f2aad2fd61e703f13532166c1aa299"
+    },
+    {
+      "familyIndex": 9,
+      "selector": 10,
+      "sourceFrameIndices": [
+        20,
+        21,
+        52,
+        53,
+        84,
+        85
+      ],
+      "fileName": "fog9_selector10.png",
+      "sha256": "a0e38214d6d9a696cea9ef20444fec332f7231200eeeca6a2597e4056a226d71"
+    },
+    {
+      "familyIndex": 9,
+      "selector": 11,
+      "sourceFrameIndices": [
+        22,
+        23,
+        54,
+        55,
+        86,
+        87
+      ],
+      "fileName": "fog9_selector11.png",
+      "sha256": "151e79eb1501573d5f22c49a19394b186a478f6f9e4dc8e0a57f275a55a2b1c6"
+    },
+    {
+      "familyIndex": 9,
+      "selector": 12,
+      "sourceFrameIndices": [
+        24,
+        25,
+        56,
+        57,
+        88,
+        89
+      ],
+      "fileName": "fog9_selector12.png",
+      "sha256": "a648cfcc7e6e177ea1bbde5e4119373bf28a08b63114b246cdefd146a665c1f5"
+    },
+    {
+      "familyIndex": 9,
+      "selector": 13,
+      "sourceFrameIndices": [
+        26,
+        27,
+        58,
+        59,
+        90,
+        91
+      ],
+      "fileName": "fog9_selector13.png",
+      "sha256": "b639af3f189da3c3e6792915d00b50e53506d996991a3d77be5d5a712ea2f3e8"
+    },
+    {
+      "familyIndex": 10,
+      "selector": 0,
+      "sourceFrameIndices": [
+        0,
+        1,
+        32,
+        33,
+        64,
+        65
+      ],
+      "fileName": "fog10_selector00.png",
+      "sha256": "af40abf42358f3fd8055e0d4c2568d5feb58e8311884fc345dbfab585e9fe336"
+    },
+    {
+      "familyIndex": 10,
+      "selector": 1,
+      "sourceFrameIndices": [
+        2,
+        3,
+        34,
+        35,
+        66,
+        67
+      ],
+      "fileName": "fog10_selector01.png",
+      "sha256": "ce6d457b8fe53b6fa73682b9ad8fa3329fbcf30a34872fab9eef541f50102570"
+    },
+    {
+      "familyIndex": 10,
+      "selector": 2,
+      "sourceFrameIndices": [
+        4,
+        5,
+        36,
+        37,
+        68,
+        69
+      ],
+      "fileName": "fog10_selector02.png",
+      "sha256": "ef5c9804a6c99bdba4a40ffb1e962e6629c0500bb8793c99cffd50ff960d330f"
+    },
+    {
+      "familyIndex": 10,
+      "selector": 3,
+      "sourceFrameIndices": [
+        6,
+        7,
+        38,
+        39,
+        70,
+        71
+      ],
+      "fileName": "fog10_selector03.png",
+      "sha256": "eaef3357bf3d486e6f33675b5921059d8a6a0be27ee29efbef130476a382aaed"
+    },
+    {
+      "familyIndex": 10,
+      "selector": 4,
+      "sourceFrameIndices": [
+        8,
+        9,
+        40,
+        41,
+        72,
+        73
+      ],
+      "fileName": "fog10_selector04.png",
+      "sha256": "442a3ae8472f0a2625176eefdf583029b5bcfba43a7a0de351afdeea6513a6fc"
+    },
+    {
+      "familyIndex": 10,
+      "selector": 5,
+      "sourceFrameIndices": [
+        10,
+        11,
+        42,
+        43,
+        74,
+        75
+      ],
+      "fileName": "fog10_selector05.png",
+      "sha256": "1bc89316c1cea5b31869a224901c14f3dce950de55dfa1ddd66cb1f40f9e13e9"
+    },
+    {
+      "familyIndex": 10,
+      "selector": 6,
+      "sourceFrameIndices": [
+        12,
+        13,
+        44,
+        45,
+        76,
+        77
+      ],
+      "fileName": "fog10_selector06.png",
+      "sha256": "1ab284354638b0c395319e11b837cebc0be8822dcbd106f9cd0704732cc0eb9f"
+    },
+    {
+      "familyIndex": 10,
+      "selector": 7,
+      "sourceFrameIndices": [
+        14,
+        15,
+        46,
+        47,
+        78,
+        79
+      ],
+      "fileName": "fog10_selector07.png",
+      "sha256": "675c18ba5112409941ef4631c94fac4270b5b1d6b4ebd84a90a3c45d38d813f4"
+    },
+    {
+      "familyIndex": 10,
+      "selector": 8,
+      "sourceFrameIndices": [
+        16,
+        17,
+        48,
+        49,
+        80,
+        81
+      ],
+      "fileName": "fog10_selector08.png",
+      "sha256": "96f649c44b586d389c6a446f1b8fce1deb2ea7909dd8d2a97f5f5417d0d19cd2"
+    },
+    {
+      "familyIndex": 10,
+      "selector": 9,
+      "sourceFrameIndices": [
+        18,
+        19,
+        50,
+        51,
+        82,
+        83
+      ],
+      "fileName": "fog10_selector09.png",
+      "sha256": "2b98f7a55c0e97d4919b58bf4e25f382f39d69bbd39647ecea61bec0c526d680"
+    },
+    {
+      "familyIndex": 10,
+      "selector": 10,
+      "sourceFrameIndices": [
+        20,
+        21,
+        52,
+        53,
+        84,
+        85
+      ],
+      "fileName": "fog10_selector10.png",
+      "sha256": "4674f74bb29d0fc153a43adbfa2a84faabb18d222b3c4a0d9f800f9d8388c988"
+    },
+    {
+      "familyIndex": 10,
+      "selector": 11,
+      "sourceFrameIndices": [
+        22,
+        23,
+        54,
+        55,
+        86,
+        87
+      ],
+      "fileName": "fog10_selector11.png",
+      "sha256": "4e6c95b8b2e342075ff4c96ee4ea3df70fb2d958dc1e7a82573a3a5effbb8ae4"
+    },
+    {
+      "familyIndex": 10,
+      "selector": 12,
+      "sourceFrameIndices": [
+        24,
+        25,
+        56,
+        57,
+        88,
+        89
+      ],
+      "fileName": "fog10_selector12.png",
+      "sha256": "47cbc3e094c256d39b7cc87486e8a7b6940a463854ce45876004a0c137d45f79"
+    },
+    {
+      "familyIndex": 10,
+      "selector": 13,
+      "sourceFrameIndices": [
+        26,
+        27,
+        58,
+        59,
+        90,
+        91
+      ],
+      "fileName": "fog10_selector13.png",
+      "sha256": "0c47f83212e5cbb39461da03d4fdf56754fe035c9a22ac0da1ded891434e2fa7"
+    },
+    {
+      "familyIndex": 11,
+      "selector": 0,
+      "sourceFrameIndices": [
+        0,
+        1,
+        32,
+        33,
+        64,
+        65
+      ],
+      "fileName": "fog11_selector00.png",
+      "sha256": "17c0dea86054513b51ade53cf4153332aa9260a92396dbb4c6f5659360657569"
+    },
+    {
+      "familyIndex": 11,
+      "selector": 1,
+      "sourceFrameIndices": [
+        2,
+        3,
+        34,
+        35,
+        66,
+        67
+      ],
+      "fileName": "fog11_selector01.png",
+      "sha256": "113462e8b5b9b7b39ff0533860d483fc476d5e202ea1806700967aa9db7b32ea"
+    },
+    {
+      "familyIndex": 11,
+      "selector": 2,
+      "sourceFrameIndices": [
+        4,
+        5,
+        36,
+        37,
+        68,
+        69
+      ],
+      "fileName": "fog11_selector02.png",
+      "sha256": "193125909db8769c25003c1184b493a5f397a32070d22f364de150c8e42ba550"
+    },
+    {
+      "familyIndex": 11,
+      "selector": 3,
+      "sourceFrameIndices": [
+        6,
+        7,
+        38,
+        39,
+        70,
+        71
+      ],
+      "fileName": "fog11_selector03.png",
+      "sha256": "bddf2eae20ca5ddfa804f8d291e57a210c8160eaff19bf8c2a4e8bbede94ee76"
+    },
+    {
+      "familyIndex": 11,
+      "selector": 4,
+      "sourceFrameIndices": [
+        8,
+        9,
+        40,
+        41,
+        72,
+        73
+      ],
+      "fileName": "fog11_selector04.png",
+      "sha256": "beea91e628f08e7111ef069cdee19f3d5174a36174def50134f26bfaf256018c"
+    },
+    {
+      "familyIndex": 11,
+      "selector": 5,
+      "sourceFrameIndices": [
+        10,
+        11,
+        42,
+        43,
+        74,
+        75
+      ],
+      "fileName": "fog11_selector05.png",
+      "sha256": "76473ef73c6ec9ea2d69524a70f18d38f38ac91c6990275d337e31ed0a2bb709"
+    },
+    {
+      "familyIndex": 11,
+      "selector": 6,
+      "sourceFrameIndices": [
+        12,
+        13,
+        44,
+        45,
+        76,
+        77
+      ],
+      "fileName": "fog11_selector06.png",
+      "sha256": "cb321653ec6af0e8b99ddc589750516ba2ed865debdbdb4971882de0406e31c4"
+    },
+    {
+      "familyIndex": 11,
+      "selector": 7,
+      "sourceFrameIndices": [
+        14,
+        15,
+        46,
+        47,
+        78,
+        79
+      ],
+      "fileName": "fog11_selector07.png",
+      "sha256": "ba528b426765ea5753ddb90d6d49f9285fa6536eb6a6eb2bb55b33866b578a2e"
+    },
+    {
+      "familyIndex": 11,
+      "selector": 8,
+      "sourceFrameIndices": [
+        16,
+        17,
+        48,
+        49,
+        80,
+        81
+      ],
+      "fileName": "fog11_selector08.png",
+      "sha256": "cd81abcbb3a7a97a2d9140734ad55f1d64ba41a59dbc073ee3c5f7e4cdee8770"
+    },
+    {
+      "familyIndex": 11,
+      "selector": 9,
+      "sourceFrameIndices": [
+        18,
+        19,
+        50,
+        51,
+        82,
+        83
+      ],
+      "fileName": "fog11_selector09.png",
+      "sha256": "3530ebdd977e4a0909dc8ed39498fe9143dfb84f573521e43438bc42d8260e13"
+    },
+    {
+      "familyIndex": 11,
+      "selector": 10,
+      "sourceFrameIndices": [
+        20,
+        21,
+        52,
+        53,
+        84,
+        85
+      ],
+      "fileName": "fog11_selector10.png",
+      "sha256": "7bdcae3bc3ac239103f4d73d3be673190f119434d84e4117488832619b057f5d"
+    },
+    {
+      "familyIndex": 11,
+      "selector": 11,
+      "sourceFrameIndices": [
+        22,
+        23,
+        54,
+        55,
+        86,
+        87
+      ],
+      "fileName": "fog11_selector11.png",
+      "sha256": "8a280cd85ce5d3ce3dc916d992735645e08f0d33a4de6fd616275c1b60095440"
+    },
+    {
+      "familyIndex": 11,
+      "selector": 12,
+      "sourceFrameIndices": [
+        24,
+        25,
+        56,
+        57,
+        88,
+        89
+      ],
+      "fileName": "fog11_selector12.png",
+      "sha256": "1969ae0196ce287e5aaeaa9cbb343552fa71624328d0c6750e448912ede2862b"
+    },
+    {
+      "familyIndex": 11,
+      "selector": 13,
+      "sourceFrameIndices": [
+        26,
+        27,
+        58,
+        59,
+        90,
+        91
+      ],
+      "fileName": "fog11_selector13.png",
+      "sha256": "296785afdfd62f7b7598eafc0ba82631e3fc000daa9147981dae699fe5bcbe74"
+    },
+    {
+      "familyIndex": 12,
+      "selector": 0,
+      "sourceFrameIndices": [
+        0,
+        1,
+        32,
+        33,
+        64,
+        65
+      ],
+      "fileName": "fog12_selector00.png",
+      "sha256": "d45d12ba6620cc5faacb63a77254ca24694e4a48ae141f6b12551cba3ba44c8c"
+    },
+    {
+      "familyIndex": 12,
+      "selector": 1,
+      "sourceFrameIndices": [
+        2,
+        3,
+        34,
+        35,
+        66,
+        67
+      ],
+      "fileName": "fog12_selector01.png",
+      "sha256": "90e3b950b9fec59df1d862d5b703860f02e9437e1eab2201f1461f6a6688dff0"
+    },
+    {
+      "familyIndex": 12,
+      "selector": 2,
+      "sourceFrameIndices": [
+        4,
+        5,
+        36,
+        37,
+        68,
+        69
+      ],
+      "fileName": "fog12_selector02.png",
+      "sha256": "ac5944085db26535e579828391f4bbb1a4ce85c02f053d9c05b391c572ca736a"
+    },
+    {
+      "familyIndex": 12,
+      "selector": 3,
+      "sourceFrameIndices": [
+        6,
+        7,
+        38,
+        39,
+        70,
+        71
+      ],
+      "fileName": "fog12_selector03.png",
+      "sha256": "2afe71e3d9353fc85a8882932bb6c22d390a29bcdef51fdb9cfd377a41d24a36"
+    },
+    {
+      "familyIndex": 12,
+      "selector": 4,
+      "sourceFrameIndices": [
+        8,
+        9,
+        40,
+        41,
+        72,
+        73
+      ],
+      "fileName": "fog12_selector04.png",
+      "sha256": "ac906de9fb2e579585494fdfbdade72847c27ea798728fadfdb9e71103a61ee5"
+    },
+    {
+      "familyIndex": 12,
+      "selector": 5,
+      "sourceFrameIndices": [
+        10,
+        11,
+        42,
+        43,
+        74,
+        75
+      ],
+      "fileName": "fog12_selector05.png",
+      "sha256": "7f6b42d924231c87a09ff2973bc1e04e1ae0e3e5cb63e209f943785dbedbcd28"
+    },
+    {
+      "familyIndex": 12,
+      "selector": 6,
+      "sourceFrameIndices": [
+        12,
+        13,
+        44,
+        45,
+        76,
+        77
+      ],
+      "fileName": "fog12_selector06.png",
+      "sha256": "b49e0a37bbbc4f39090262a83d282ce45157e629d07043689630b222fccf47a3"
+    },
+    {
+      "familyIndex": 12,
+      "selector": 7,
+      "sourceFrameIndices": [
+        14,
+        15,
+        46,
+        47,
+        78,
+        79
+      ],
+      "fileName": "fog12_selector07.png",
+      "sha256": "9c18e182c0207a4bc1d276e02ff85547132b3bb388aa36e54466d1d2a1c8c2e9"
+    },
+    {
+      "familyIndex": 12,
+      "selector": 8,
+      "sourceFrameIndices": [
+        16,
+        17,
+        48,
+        49,
+        80,
+        81
+      ],
+      "fileName": "fog12_selector08.png",
+      "sha256": "05137a3848e61c7c3edce93115ebab8aac42da9a6aebf356165ee05f2a3dd385"
+    },
+    {
+      "familyIndex": 12,
+      "selector": 9,
+      "sourceFrameIndices": [
+        18,
+        19,
+        50,
+        51,
+        82,
+        83
+      ],
+      "fileName": "fog12_selector09.png",
+      "sha256": "403feb31bdefc7a6a3b7ae284db0086f0a2a638aaa4777e90d1684b2501b668d"
+    },
+    {
+      "familyIndex": 12,
+      "selector": 10,
+      "sourceFrameIndices": [
+        20,
+        21,
+        52,
+        53,
+        84,
+        85
+      ],
+      "fileName": "fog12_selector10.png",
+      "sha256": "ad360600fce19861ebbacf878cfe9f327a376404777d6cdd01fe4bb763dbd32b"
+    },
+    {
+      "familyIndex": 12,
+      "selector": 11,
+      "sourceFrameIndices": [
+        22,
+        23,
+        54,
+        55,
+        86,
+        87
+      ],
+      "fileName": "fog12_selector11.png",
+      "sha256": "5d3e46824a58b1bbb0af337e9a3bb2c7f5f057097d55aadabad37cee716cc0b8"
+    },
+    {
+      "familyIndex": 12,
+      "selector": 12,
+      "sourceFrameIndices": [
+        24,
+        25,
+        56,
+        57,
+        88,
+        89
+      ],
+      "fileName": "fog12_selector12.png",
+      "sha256": "2c5dd5fe9a75bf8d9478b5765a2b9e951f0ac30e8ed2ce9eebb4937daaae3253"
+    },
+    {
+      "familyIndex": 12,
+      "selector": 13,
+      "sourceFrameIndices": [
+        26,
+        27,
+        58,
+        59,
+        90,
+        91
+      ],
+      "fileName": "fog12_selector13.png",
+      "sha256": "42441348aa483156a7f39e82e7c50cc47136ccbd8343410db0f0355dfe838a8d"
+    },
+    {
+      "familyIndex": 13,
+      "selector": 0,
+      "sourceFrameIndices": [
+        0,
+        1,
+        32,
+        33,
+        64,
+        65
+      ],
+      "fileName": "fog13_selector00.png",
+      "sha256": "15adca592a1fad7490a0ab296bacc92f8e171890023cdee864304d103276fdb8"
+    },
+    {
+      "familyIndex": 13,
+      "selector": 1,
+      "sourceFrameIndices": [
+        2,
+        3,
+        34,
+        35,
+        66,
+        67
+      ],
+      "fileName": "fog13_selector01.png",
+      "sha256": "81fa31f8155e69420279e59eaeda2c46dcc53fba43c736964f56a0c698e498b4"
+    },
+    {
+      "familyIndex": 13,
+      "selector": 2,
+      "sourceFrameIndices": [
+        4,
+        5,
+        36,
+        37,
+        68,
+        69
+      ],
+      "fileName": "fog13_selector02.png",
+      "sha256": "7a301182696cd9057da81b9f70391f7cb656c6663c98013718a864e1a86db3f4"
+    },
+    {
+      "familyIndex": 13,
+      "selector": 3,
+      "sourceFrameIndices": [
+        6,
+        7,
+        38,
+        39,
+        70,
+        71
+      ],
+      "fileName": "fog13_selector03.png",
+      "sha256": "e3559af7462915afdc04735d4a424955b518ff87dc8f1e615b0b36ae10df51b2"
+    },
+    {
+      "familyIndex": 13,
+      "selector": 4,
+      "sourceFrameIndices": [
+        8,
+        9,
+        40,
+        41,
+        72,
+        73
+      ],
+      "fileName": "fog13_selector04.png",
+      "sha256": "b00e4bf600e6af74a02290b905e16697cacc1c902579c543908334078413fd9a"
+    },
+    {
+      "familyIndex": 13,
+      "selector": 5,
+      "sourceFrameIndices": [
+        10,
+        11,
+        42,
+        43,
+        74,
+        75
+      ],
+      "fileName": "fog13_selector05.png",
+      "sha256": "02a2b51d3ded23a088c92e0d1e18af67a444d4e95064e37b6d32d9ce7bb755ad"
+    },
+    {
+      "familyIndex": 13,
+      "selector": 6,
+      "sourceFrameIndices": [
+        12,
+        13,
+        44,
+        45,
+        76,
+        77
+      ],
+      "fileName": "fog13_selector06.png",
+      "sha256": "4f89029f04af6697077690c172430f1ee41567b3287a42bab69d29566db049fd"
+    },
+    {
+      "familyIndex": 13,
+      "selector": 7,
+      "sourceFrameIndices": [
+        14,
+        15,
+        46,
+        47,
+        78,
+        79
+      ],
+      "fileName": "fog13_selector07.png",
+      "sha256": "c3cf804e5d7548b2ae502ffadf40b52c7928017f997a3275621e52c8d7e3f178"
+    },
+    {
+      "familyIndex": 13,
+      "selector": 8,
+      "sourceFrameIndices": [
+        16,
+        17,
+        48,
+        49,
+        80,
+        81
+      ],
+      "fileName": "fog13_selector08.png",
+      "sha256": "1210af2042ca5fbc005cdcae27e7b8e5f0f44329ecf8ece13ebca54326076864"
+    },
+    {
+      "familyIndex": 13,
+      "selector": 9,
+      "sourceFrameIndices": [
+        18,
+        19,
+        50,
+        51,
+        82,
+        83
+      ],
+      "fileName": "fog13_selector09.png",
+      "sha256": "41a9f5263d3a435b74f08c52a10eaf5ba65338d2c7dd10e53119bd942b973dda"
+    },
+    {
+      "familyIndex": 13,
+      "selector": 10,
+      "sourceFrameIndices": [
+        20,
+        21,
+        52,
+        53,
+        84,
+        85
+      ],
+      "fileName": "fog13_selector10.png",
+      "sha256": "71dc0c8da38430803150648a7f34b3fd1bba9eaf5ea7deb5cb4610ce7d7f02e1"
+    },
+    {
+      "familyIndex": 13,
+      "selector": 11,
+      "sourceFrameIndices": [
+        22,
+        23,
+        54,
+        55,
+        86,
+        87
+      ],
+      "fileName": "fog13_selector11.png",
+      "sha256": "a0c650bda832c4de18c77aafe11fdf1c06953d8a343a3355267b6de2f450f98b"
+    },
+    {
+      "familyIndex": 13,
+      "selector": 12,
+      "sourceFrameIndices": [
+        24,
+        25,
+        56,
+        57,
+        88,
+        89
+      ],
+      "fileName": "fog13_selector12.png",
+      "sha256": "dbc5c96c3110e457a25a61e32a192d823296916cf9a4c666984931599b5fbfb6"
+    },
+    {
+      "familyIndex": 13,
+      "selector": 13,
+      "sourceFrameIndices": [
+        26,
+        27,
+        58,
+        59,
+        90,
+        91
+      ],
+      "fileName": "fog13_selector13.png",
+      "sha256": "ab337365c0f3dd3729143ab37528d1816d2c6b44e4bdd04a7b484740b1c1cc50"
+    },
+    {
+      "familyIndex": 14,
+      "selector": 0,
+      "sourceFrameIndices": [
+        0,
+        1,
+        32,
+        33,
+        64,
+        65
+      ],
+      "fileName": "fog14_selector00.png",
+      "sha256": "9991d8e240b69cd0ccf51034be8ab43288a73d9c49b8132d6febc61e3cb3f83c"
+    },
+    {
+      "familyIndex": 14,
+      "selector": 1,
+      "sourceFrameIndices": [
+        2,
+        3,
+        34,
+        35,
+        66,
+        67
+      ],
+      "fileName": "fog14_selector01.png",
+      "sha256": "ae6499fa3696973e6970e42f24fcb485209b603c194b674908209b3b71b0f889"
+    },
+    {
+      "familyIndex": 14,
+      "selector": 2,
+      "sourceFrameIndices": [
+        4,
+        5,
+        36,
+        37,
+        68,
+        69
+      ],
+      "fileName": "fog14_selector02.png",
+      "sha256": "7057eb527bb288cefe8e6cc94edec5666b5c8fad4b14cfa57a3ac04e00f03931"
+    },
+    {
+      "familyIndex": 14,
+      "selector": 3,
+      "sourceFrameIndices": [
+        6,
+        7,
+        38,
+        39,
+        70,
+        71
+      ],
+      "fileName": "fog14_selector03.png",
+      "sha256": "9885b8a953bb1e938a1ec42d34b35f4062ca51469b216ea6a2565db4c2d4c5fd"
+    },
+    {
+      "familyIndex": 14,
+      "selector": 4,
+      "sourceFrameIndices": [
+        8,
+        9,
+        40,
+        41,
+        72,
+        73
+      ],
+      "fileName": "fog14_selector04.png",
+      "sha256": "0fde2535235698ff94a18bc3b93ac8035d1ec8d75bdd8c3e13bd428e6694f00b"
+    },
+    {
+      "familyIndex": 14,
+      "selector": 5,
+      "sourceFrameIndices": [
+        10,
+        11,
+        42,
+        43,
+        74,
+        75
+      ],
+      "fileName": "fog14_selector05.png",
+      "sha256": "c67d78a8897b2ed9c9922fcf939600f7d0c105f28e23712683462313725530ed"
+    },
+    {
+      "familyIndex": 14,
+      "selector": 6,
+      "sourceFrameIndices": [
+        12,
+        13,
+        44,
+        45,
+        76,
+        77
+      ],
+      "fileName": "fog14_selector06.png",
+      "sha256": "d4e20e6e75af332912dd6d8439f2110d09efbed1e8ec67af3261416ef72bd513"
+    },
+    {
+      "familyIndex": 14,
+      "selector": 7,
+      "sourceFrameIndices": [
+        14,
+        15,
+        46,
+        47,
+        78,
+        79
+      ],
+      "fileName": "fog14_selector07.png",
+      "sha256": "c0ccd486b8d3b90e3e806bc0e742892ca8995c84213785c1f03c070b55af05c0"
+    },
+    {
+      "familyIndex": 14,
+      "selector": 8,
+      "sourceFrameIndices": [
+        16,
+        17,
+        48,
+        49,
+        80,
+        81
+      ],
+      "fileName": "fog14_selector08.png",
+      "sha256": "629f76dd28e8481660317663019d61cb13443a124fc19a712d6de6de272d982a"
+    },
+    {
+      "familyIndex": 14,
+      "selector": 9,
+      "sourceFrameIndices": [
+        18,
+        19,
+        50,
+        51,
+        82,
+        83
+      ],
+      "fileName": "fog14_selector09.png",
+      "sha256": "ded8bcc4f37e7b68115041ef7261bda2783d35045f5ab762f17996d71bd85fa0"
+    },
+    {
+      "familyIndex": 14,
+      "selector": 10,
+      "sourceFrameIndices": [
+        20,
+        21,
+        52,
+        53,
+        84,
+        85
+      ],
+      "fileName": "fog14_selector10.png",
+      "sha256": "473b169c973295a0ad5ba04b700ecfa1db85f1ff24402250bfaeb7adbc1d9992"
+    },
+    {
+      "familyIndex": 14,
+      "selector": 11,
+      "sourceFrameIndices": [
+        22,
+        23,
+        54,
+        55,
+        86,
+        87
+      ],
+      "fileName": "fog14_selector11.png",
+      "sha256": "0a8a8343490243763259c9e0388fdd9c1c55f37d870d68aa35ea885ffa377039"
+    },
+    {
+      "familyIndex": 14,
+      "selector": 12,
+      "sourceFrameIndices": [
+        24,
+        25,
+        56,
+        57,
+        88,
+        89
+      ],
+      "fileName": "fog14_selector12.png",
+      "sha256": "f7cf3b285e67d8ecd6d6196ac71e9dba224a082ec345b6ec1acf8eee52492d56"
+    },
+    {
+      "familyIndex": 14,
+      "selector": 13,
+      "sourceFrameIndices": [
+        26,
+        27,
+        58,
+        59,
+        90,
+        91
+      ],
+      "fileName": "fog14_selector13.png",
+      "sha256": "21612aed8424c792d974df26cee42afd65aa88827000acc524266fa15d53ad54"
+    }
+  ]
+}

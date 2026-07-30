@@ -7,34 +7,69 @@ import {
   ORIGINAL_COMMAND_CONTROL_BINDINGS,
   ORIGINAL_COMMAND_ICON_ASSETS,
   IMJINROK_SOURCE_COMMAND_ICON_PROFILE,
+  IMJINROK_SOURCE_FOG_PROFILE_ID,
+  SOURCE_FOG_COMPOSITE_ASSETS,
   requireSourceTexture,
-  resolveCardinalVisibleNeighborMask,
+  assertSourceFogFamilyIndex,
+  assertSourceFogVisualProfile,
+  buildSourceFogCornerMask,
+  expandSourceFogDirtyChunkMask,
   resolveEnvironmentOverlayLightContract,
-  resolveNormalSourceFogTransition,
-  resolveSourceFogTileScale,
+  reproduceSourceFogFrameIndices,
   resolveSourceCommandIcon,
   resolveSourceCommandIconProfileForScenario,
-  resolveSourceFogTile,
+  resolveSourceFogComposite,
 } from "./sourceFogAndCommandAssets";
 
-test("fog resolver keeps source identity separate from the explicit project mask policy", () => {
-  assert.equal(resolveSourceFogTile("visible", 0), null);
-  assert.deepEqual(resolveSourceFogTile("unseen", 4), {
-    textureKey: "original-normal-fog-4-frame-0000",
-    assetPath: "assets/themes/default/fog/normal/fog4_0000.png",
-    sourceSpriteIndex: 4,
-    sourceFrameIndex: 0,
-    alpha: 1,
+test("source fog uses the exact corner bits, lookup, and six-frame algebra behind an explicit profile", () => {
+  const neighborVisibility = (neighbor: string) => neighbor === "top" || neighbor === "bottomRight" ? "unseen" as const : "visible" as const;
+  assert.equal(buildSourceFogCornerMask("unseen", neighborVisibility), 0xb);
+  assert.equal(buildSourceFogCornerMask("unseen", (neighbor) => neighbor === "bottom" ? "unseen" : "visible"), 0xc);
+  assert.equal(buildSourceFogCornerMask("unseen", (neighbor) => neighbor === "left" ? "unseen" : "visible"), 0x5);
+  const selectors = Array.from({ length: 16 }, (_value, mask) => {
+    const diagonal = new Set([
+      mask & 0x1 ? "topLeft" : "",
+      mask & 0x2 ? "topRight" : "",
+      mask & 0x4 ? "bottomLeft" : "",
+      mask & 0x8 ? "bottomRight" : "",
+    ]);
+    return resolveSourceFogComposite(IMJINROK_SOURCE_FOG_PROFILE_ID, 0, "unseen", (neighbor) => diagonal.has(neighbor) ? "unseen" : "visible")?.selector ?? null;
   });
-  assert.equal(resolveSourceFogTile("explored", 15)?.sourceSpriteIndex, 14);
-  assert.equal(resolveSourceFogTile("explored", 15)?.alpha, 0.58);
-  assert.throws(() => resolveSourceFogTile("unseen", 16), /0\.\.15/);
+  assert.deepEqual(selectors, [null, 9, 8, 2, 10, 1, 12, 5, 11, 13, 3, 6, 0, 4, 7, null]);
+  assert.deepEqual(reproduceSourceFogFrameIndices(9), [18, 19, 50, 51, 82, 83]);
+  assert.deepEqual(
+    resolveSourceFogComposite(IMJINROK_SOURCE_FOG_PROFILE_ID, 14, "unseen", neighborVisibility),
+    {
+      textureKey: "original-normal-fog-14-selector-06",
+      assetPath: "assets/themes/default/fog/normal/composites/fog14_selector06.png",
+      familyIndex: 14,
+      selector: 6,
+      sourceFrameIndices: [12, 13, 44, 45, 76, 77],
+      sourceStateValue: 4,
+      alpha: 1,
+    },
+  );
+  assert.equal(resolveSourceFogComposite(IMJINROK_SOURCE_FOG_PROFILE_ID, 0, "explored", () => "explored"), null);
+  assert.deepEqual(reproduceSourceFogFrameIndices(13), [26, 27, 58, 59, 90, 91]);
+  assert.throws(() => reproduceSourceFogFrameIndices(14), /0\.\.13/);
 });
 
-test("source fog scales its 32×16 source image to the active map diamond", () => {
-  assert.deepEqual(resolveSourceFogTileScale(64, 32), { x: 2, y: 2 });
-  assert.deepEqual(resolveSourceFogTileScale(96, 48), { x: 3, y: 3 });
-  assert.throws(() => resolveSourceFogTileScale(0, 32), /positive finite/);
+test("source fog keeps the generic fallback and malformed opt-ins fail loudly", () => {
+  assert.equal(resolveSourceFogComposite(undefined, undefined, "unseen", () => "unseen"), null);
+  assert.throws(() => assertSourceFogVisualProfile("missing-profile"), /Unknown source fog visual profile/);
+  assert.throws(() => assertSourceFogFamilyIndex(undefined), /family index/);
+  assert.throws(() => assertSourceFogFamilyIndex(15), /0\.\.14/);
+  assert.equal(SOURCE_FOG_COMPOSITE_ASSETS.length, 210);
+});
+
+test("source fog expands dirty chunks across the exact eight-neighbor boundary", () => {
+  const edge = new Uint8Array([1, 0, 0, 0, 0, 0]);
+  assert.equal(expandSourceFogDirtyChunkMask(edge, 3, 2), 4);
+  assert.deepEqual([...edge], [1, 1, 0, 1, 1, 0]);
+  const center = new Uint8Array(9);
+  center[4] = 1;
+  assert.equal(expandSourceFogDirtyChunkMask(center, 3, 3), 9);
+  assert.throws(() => expandSourceFogDirtyChunkMask(new Uint8Array(1), 0, 1), /positive integers/);
 });
 
 test("environment overlay contract preserves four-decimal light-curve redraw precision", () => {
@@ -56,25 +91,6 @@ test("SkirmishScene consumes the light contract in its environment overlay signa
   assert.match(sceneSource, /resolveEnvironmentOverlayLightContract\(getEnvironmentLightLevel\(environment\)\)/);
   assert.match(sceneSource, /environment\.dayPhase\}:\$\{visualState\.lightSignature\}:\$\{paletteAdapter\?\.paletteId \?\? "none"\}:\$\{rainFrame\}/);
   assert.match(sceneSource, /fillStyle\(0x071426, visualState\.nightAlpha\)/);
-});
-
-test("normal source fog uses a deterministic cardinal project policy only for an opted-in tileset", () => {
-  assert.equal(
-    resolveCardinalVisibleNeighborMask((direction) => direction === "west" || direction === "south" ? "visible" : "unseen"),
-    0x9,
-  );
-  assert.equal(resolveNormalSourceFogTransition("core-default", "unseen", () => "visible"), null);
-  assert.equal(resolveNormalSourceFogTransition("imjinrok-normal", "visible", () => "unseen"), null);
-  assert.deepEqual(
-    resolveNormalSourceFogTransition("imjinrok-normal", "explored", (direction) => direction === "east" ? "visible" : "unseen"),
-    {
-      textureKey: "original-normal-fog-4-frame-0000",
-      assetPath: "assets/themes/default/fog/normal/fog4_0000.png",
-      sourceSpriteIndex: 4,
-      sourceFrameIndex: 0,
-      alpha: 0.58,
-    },
-  );
 });
 
 test("keeps original control bindings separate from exported image identity and generic product fallback", () => {

@@ -9,7 +9,7 @@ subframe 합성에 대해 바이트로 확정하는 범위는 어디까지인가
 | --- | --- | --- |
 | 분석 | 정적 확정 | `fog0..14`/`black` loader record, 16-byte lookup, literal state `4`/`8`의 별도 mask 경로, `map+0x4a0c4+x*180+y` family byte→record, 3×2 six-subframe loop·frame algebra와 두 call path |
 | 재현 | 재현 완료 | EXE·SPR hash/header·atlas fields, K01 map hash·family-byte distribution, VA/raw offset/hash, 16 lookup vector, record address·frame vector와 loop bound의 결정론 추출 |
-| 구현 | 없음 | 제품 renderer, visibility 상태와 assets는 변경하지 않았다. |
+| 구현 | 부분 이식·의도적 적응 | 15×14 `64×48` six-subframe composite와 K01 x-major family stream은 재현했다. 제품 `unseen→4`/`explored→8`, alpha, scheduler, product-grid 방향과 world placement는 명시적 적응이다. |
 
 ## 고정 입력과 생성 산출물
 
@@ -94,6 +94,22 @@ inner + (outer + 3 * trunc(selector / halfColumns)) * atlasColumns
 frame vector는 각각 `[0,1,32,33,64,65]`, `[18,19,50,51,82,83]`, `[26,27,58,59,90,91]`이다. fixture
 test는 fog atlas header byte `+0x0bcc` 변조가 SHA-256 오류로 추출 전에 중단하는지도 확인한다.
 table-domain 밖의 mask와 caller-reachable `0..13` 밖의 selector는 helper에서 오류다.
+
+## 제품 통합 경계
+
+- [`export-source-fog-composites.mjs`](../../../tools/imjinrok/export-source-fog-composites.mjs)는 hash-bound
+  `fog0..14.spr`의 각 caller selector `0..13`에 대해 2×3, `64×48` 투명 composite을 만든다. 각 결과는
+  outer-major/inner-minor 순서로 `[2s, 2s+1, 32+2s, 33+2s, 64+2s, 65+2s]` 여섯 frame을 배치한다.
+- 같은 생성기는 K01 `map+0x4a0c4+x*180+y` family byte를 browser-safe artifact으로 내보낸다. map의
+  `fogVisualProfileId`와 tile의 `fogVisuals.familyIndex`는 일반 계약이며, K01 외 map은 profile을 생략해
+  기존 generic fog를 유지하거나 mod가 별도 profile/family를 제공할 수 있다. source profile을 선택한 map의
+  family 누락·범위 밖 값·unknown profile·누락 texture는 오류로 중단한다.
+- client는 byte-proven 8-neighbor corner-bit construction(상/하 `0x3`/`0xc`, 좌/우 `0x5`/`0xa`,
+  네 diagonal `0x1`/`0x2`/`0x4`/`0x8`)과 lookup table만 쓴다. product grid의 top/bottom/left/right 이름은
+  source bit의 사람용 방향 의미 주장이 아니다.
+- `unseen→literal state 4`, `explored→literal state 8`, explored alpha `0.58`, `64×48` image의
+  ground-contact placement와 visibility update scheduler는 **source-backed adaptation**이다. 원본이 두
+  literal state에 부여한 visibility 의미, pixel pivot/alpha와 wall-clock cadence는 여전히 미확인이다.
 
 ## 미확인과 이식 경계
 

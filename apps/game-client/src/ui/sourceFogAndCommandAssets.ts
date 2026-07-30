@@ -1,14 +1,17 @@
 import type { ActionDefinitionId } from "@shared";
 
 export type FogVisibility = "visible" | "explored" | "unseen";
-export type FogNeighborMask = number;
-export type CardinalDirection = "north" | "east" | "south" | "west";
+export type SourceFogNeighbor = "top" | "bottom" | "left" | "right" | "topLeft" | "topRight" | "bottomLeft" | "bottomRight";
 
-export interface SourceFogTile {
+export interface SourceFogComposite {
   readonly textureKey: string;
   readonly assetPath: string;
-  readonly sourceSpriteIndex: number;
-  readonly sourceFrameIndex: 0;
+  readonly familyIndex: number;
+  readonly selector: number;
+  readonly sourceFrameIndices: readonly number[];
+  /** Product mapping to literal source state 4 or 8; source semantics remain unresolved. */
+  readonly sourceStateValue: 4 | 8;
+  /** Product alpha policy, not a source alpha claim. */
   readonly alpha: number;
 }
 
@@ -47,23 +50,29 @@ export interface EnvironmentOverlayLightContract {
   readonly nightAlpha: number;
 }
 
-const NORMAL_FOG_ASSET_PREFIX = "assets/themes/default/fog/normal";
-export const NORMAL_SOURCE_FOG_TILESET_ID = "imjinrok-normal";
-export const CARDINAL_FOG_NEIGHBOR_OFFSETS: Readonly<Record<CardinalDirection, Readonly<{ x: number; y: number }>>> = Object.freeze({
-  west: { x: -1, y: 0 },
-  north: { x: 0, y: -1 },
-  east: { x: 1, y: 0 },
-  south: { x: 0, y: 1 },
+const SOURCE_FOG_ASSET_PREFIX = "assets/themes/default/fog/normal/composites";
+export const IMJINROK_SOURCE_FOG_PROFILE_ID = "imjinrok-source-fog-composite";
+export const SOURCE_FOG_NEIGHBOR_OFFSETS: Readonly<Record<SourceFogNeighbor, Readonly<{ x: number; y: number }>>> = Object.freeze({
+  top: { x: 0, y: -1 },
+  bottom: { x: 0, y: 1 },
+  left: { x: -1, y: 0 },
+  right: { x: 1, y: 0 },
+  topLeft: { x: -1, y: -1 },
+  topRight: { x: 1, y: -1 },
+  bottomLeft: { x: -1, y: 1 },
+  bottomRight: { x: 1, y: 1 },
 });
 
-export const NORMAL_FOG_ASSETS: readonly SourceFogTile[] = Object.freeze(
-  Array.from({ length: 15 }, (_, sourceSpriteIndex) => ({
-    textureKey: `original-normal-fog-${sourceSpriteIndex}-frame-0000`,
-    assetPath: `${NORMAL_FOG_ASSET_PREFIX}/fog${sourceSpriteIndex}_0000.png`,
-    sourceSpriteIndex,
-    sourceFrameIndex: 0 as const,
-    alpha: 1,
-  })),
+const SOURCE_FOG_LOOKUP = [0, 9, 8, 2, 10, 1, 12, 5, 11, 13, 3, 6, 0, 4, 7, 0] as const;
+const SOURCE_FOG_SELECTOR_DOMAIN = new Set<number>(Array.from({ length: 14 }, (_value, index) => index));
+
+export const SOURCE_FOG_COMPOSITE_ASSETS = Object.freeze(
+  Array.from({ length: 15 }, (_family, familyIndex) =>
+    Array.from({ length: 14 }, (_selector, selector) => ({
+      textureKey: `original-normal-fog-${familyIndex}-selector-${String(selector).padStart(2, "0")}`,
+      assetPath: `${SOURCE_FOG_ASSET_PREFIX}/fog${familyIndex}_selector${String(selector).padStart(2, "0")}.png`,
+    })),
+  ).flat(),
 );
 
 export const ORIGINAL_COMMAND_ICON_ASSETS: readonly SourceCommandIcon[] = Object.freeze([
@@ -180,58 +189,104 @@ export function resolveSourceCommandIconProfileForScenario(
   return scenarioId === "imjinrok-k01-opening" ? IMJINROK_SOURCE_COMMAND_ICON_PROFILE : undefined;
 }
 
-const PROJECT_NEIGHBOR_MASK_TO_NORMAL_FOG_INDEX: Readonly<Record<number, number>> = Object.freeze({
-  0: 0, 1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7,
-  8: 8, 9: 9, 10: 10, 11: 11, 12: 12, 13: 13, 14: 14, 15: 14,
-});
-
-export function resolveSourceFogTile(
-  visibility: FogVisibility,
-  neighborMask: FogNeighborMask,
-): SourceFogTile | null {
-  assertNeighborMask(neighborMask);
-  if (visibility === "visible") return null;
-  const sourceSpriteIndex = PROJECT_NEIGHBOR_MASK_TO_NORMAL_FOG_INDEX[neighborMask];
-  if (sourceSpriteIndex === undefined) {
-    throw new Error(`No project fog mapping for neighbor mask ${neighborMask}`);
-  }
-  const asset = NORMAL_FOG_ASSETS[sourceSpriteIndex];
-  if (!asset) throw new Error(`Missing normal fog source asset ${sourceSpriteIndex}`);
-  return visibility === "explored" ? { ...asset, alpha: 0.58 } : asset;
-}
-
 /**
- * Product-only normal source-fog transition policy. The bit order and fogN mapping are
- * deliberately not an assertion about the original game's neighbor-mask rule.
+ * Returns a source composite only when a map explicitly selected the profile.
+ * The visibility-to-literal-state mapping (unseen→4, explored→8), alpha, and
+ * web-map coordinate interpretation are deliberately labelled adaptations.
  */
-export function resolveNormalSourceFogTransition(
-  tilesetId: string | undefined,
+export function resolveSourceFogComposite(
+  profileId: string | undefined,
+  familyIndex: number | undefined,
   visibility: FogVisibility,
-  neighborVisibility: (direction: CardinalDirection) => FogVisibility,
-): SourceFogTile | null {
-  if (tilesetId !== NORMAL_SOURCE_FOG_TILESET_ID || visibility === "visible") {
-    return null;
+  neighborVisibility: (neighbor: SourceFogNeighbor) => FogVisibility,
+): SourceFogComposite | null {
+  if (profileId === undefined || visibility === "visible") return null;
+  assertSourceFogVisualProfile(profileId);
+  assertFamilyIndex(familyIndex);
+  const sourceStateValue = visibility === "unseen" ? 4 : 8;
+  const mask = buildSourceFogCornerMask(visibility, neighborVisibility);
+  if (mask === 0 || mask === 15) return null;
+  const selector = SOURCE_FOG_LOOKUP[mask];
+  if (selector === undefined || !SOURCE_FOG_SELECTOR_DOMAIN.has(selector)) {
+    throw new Error(`Source fog lookup produced unsupported selector ${String(selector)} for mask ${mask}.`);
   }
-  const mask = resolveCardinalVisibleNeighborMask(neighborVisibility);
-  return mask === 0 ? null : resolveSourceFogTile(visibility, mask);
+  return {
+    textureKey: `original-normal-fog-${familyIndex}-selector-${String(selector).padStart(2, "0")}`,
+    assetPath: `${SOURCE_FOG_ASSET_PREFIX}/fog${familyIndex}_selector${String(selector).padStart(2, "0")}.png`,
+    familyIndex,
+    selector,
+    sourceFrameIndices: reproduceSourceFogFrameIndices(selector),
+    sourceStateValue,
+    alpha: visibility === "explored" ? 0.58 : 1,
+  };
 }
 
-export function resolveCardinalVisibleNeighborMask(
-  neighborVisibility: (direction: CardinalDirection) => FogVisibility,
-): FogNeighborMask {
+export function assertSourceFogVisualProfile(profileId: string): void {
+  if (profileId !== IMJINROK_SOURCE_FOG_PROFILE_ID) {
+    throw new Error(`Unknown source fog visual profile '${profileId}'.`);
+  }
+}
+
+export function assertSourceFogFamilyIndex(value: number | undefined): asserts value is number {
+  assertFamilyIndex(value);
+}
+
+/** Exact original corner-bit construction, with product-grid directions only. */
+export function buildSourceFogCornerMask(
+  targetVisibility: Exclude<FogVisibility, "visible">,
+  neighborVisibility: (neighbor: SourceFogNeighbor) => FogVisibility,
+): number {
   let mask = 0;
-  if (neighborVisibility("west") === "visible") mask |= 0x1;
-  if (neighborVisibility("north") === "visible") mask |= 0x2;
-  if (neighborVisibility("east") === "visible") mask |= 0x4;
-  if (neighborVisibility("south") === "visible") mask |= 0x8;
+  if (neighborVisibility("top") === targetVisibility) mask |= 0x3;
+  if (neighborVisibility("bottom") === targetVisibility) mask |= 0xc;
+  if (neighborVisibility("left") === targetVisibility) mask |= 0x5;
+  if (neighborVisibility("right") === targetVisibility) mask |= 0xa;
+  if (neighborVisibility("topLeft") === targetVisibility) mask |= 0x1;
+  if (neighborVisibility("topRight") === targetVisibility) mask |= 0x2;
+  if (neighborVisibility("bottomLeft") === targetVisibility) mask |= 0x4;
+  if (neighborVisibility("bottomRight") === targetVisibility) mask |= 0x8;
   return mask;
 }
 
-export function resolveSourceFogTileScale(mapTileWidth: number, mapTileHeight: number): Readonly<{ x: number; y: number }> {
-  if (!Number.isFinite(mapTileWidth) || mapTileWidth <= 0 || !Number.isFinite(mapTileHeight) || mapTileHeight <= 0) {
-    throw new RangeError(`source fog requires positive finite map tile dimensions; received ${mapTileWidth}x${mapTileHeight}`);
+export function reproduceSourceFogFrameIndices(selector: number): readonly number[] {
+  if (!Number.isInteger(selector) || !SOURCE_FOG_SELECTOR_DOMAIN.has(selector)) {
+    throw new RangeError(`source fog selector must be an integer in 0..13; received ${String(selector)}`);
   }
-  return { x: mapTileWidth / 32, y: mapTileHeight / 16 };
+  return [2 * selector, 2 * selector + 1, 32 + 2 * selector, 33 + 2 * selector, 64 + 2 * selector, 65 + 2 * selector];
+}
+
+/** Product placement adapter for 64x48 composites, not source pivot parity. */
+export function resolveSourceFogCompositeScale(mapTileWidth: number): number {
+  if (!Number.isFinite(mapTileWidth) || mapTileWidth <= 0) {
+    throw new RangeError(`source fog composite requires a positive finite map tile width; received ${String(mapTileWidth)}`);
+  }
+  return mapTileWidth / 64;
+}
+
+/** Marks the one-chunk halo required by the source renderer's eight-neighbor mask. */
+export function expandSourceFogDirtyChunkMask(dirtyMask: Uint8Array, chunksPerRow: number, chunksPerColumn: number): number {
+  if (!Number.isInteger(chunksPerRow) || chunksPerRow <= 0 || !Number.isInteger(chunksPerColumn) || chunksPerColumn <= 0) {
+    throw new RangeError(`source fog chunk grid must be positive integers; received ${chunksPerRow}x${chunksPerColumn}`);
+  }
+  if (dirtyMask.length !== chunksPerRow * chunksPerColumn) {
+    throw new Error(`source fog chunk mask requires ${chunksPerRow * chunksPerColumn} entries; received ${dirtyMask.length}`);
+  }
+  const originallyDirty = Array.from(dirtyMask.entries())
+    .filter(([, dirty]) => dirty === 1)
+    .map(([chunkIndex]) => chunkIndex);
+  for (const chunkIndex of originallyDirty) {
+    const chunkX = chunkIndex % chunksPerRow;
+    const chunkY = Math.floor(chunkIndex / chunksPerRow);
+    for (let offsetY = -1; offsetY <= 1; offsetY += 1) {
+      for (let offsetX = -1; offsetX <= 1; offsetX += 1) {
+        const neighborX = chunkX + offsetX;
+        const neighborY = chunkY + offsetY;
+        if (neighborX < 0 || neighborX >= chunksPerRow || neighborY < 0 || neighborY >= chunksPerColumn) continue;
+        dirtyMask[neighborY * chunksPerRow + neighborX] = 1;
+      }
+    }
+  }
+  return dirtyMask.reduce((count, dirty) => count + dirty, 0);
 }
 
 export function resolveEnvironmentOverlayLightContract(lightLevel: number): EnvironmentOverlayLightContract {
@@ -253,7 +308,7 @@ export function resolveSourceCommandIcon(
 }
 
 export function requireSourceTexture(
-  source: Pick<SourceFogTile | SourceCommandIcon, "textureKey">,
+  source: Pick<SourceFogComposite | SourceCommandIcon, "textureKey">,
   exists: (textureKey: string) => boolean,
 ): void {
   if (!exists(source.textureKey)) {
@@ -261,8 +316,8 @@ export function requireSourceTexture(
   }
 }
 
-function assertNeighborMask(value: FogNeighborMask): asserts value is number {
-  if (!Number.isInteger(value) || value < 0 || value > 15) {
-    throw new RangeError(`fog neighbor mask must be an integer in 0..15; received ${String(value)}`);
+function assertFamilyIndex(value: number | undefined): asserts value is number {
+  if (typeof value !== "number" || !Number.isInteger(value) || value < 0 || value > 14) {
+    throw new RangeError(`source fog family index must be an integer in 0..14; received ${String(value)}`);
   }
 }

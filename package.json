@@ -27,6 +27,7 @@
     "imjinrok:extract-day-night-schedule": "node tools/imjinrok/extract-imjinrok-day-night-schedule.mjs",
     "imjinrok:export-environment-assets": "node tools/imjinrok/export-imjinrok-environment-assets.mjs",
     "imjinrok:export-k01-source-tile-visuals": "node tools/imjinrok/export-k01-source-tile-visuals.mjs",
+    "imjinrok:export-source-fog-composites": "node tools/imjinrok/export-source-fog-composites.mjs",
     "imjinrok:extract-k01-global-mask-boundary": "node tools/imjinrok/extract-k01-global-mask-boundary.mjs",
     "imjinrok:extract-mission-portraits": "node tools/imjinrok/extract-mission-portrait-mapping.mjs --json",
     "imjinrok:extract-speech-layout": "node tools/imjinrok/extract-speech-layout-evidence.mjs --json",
