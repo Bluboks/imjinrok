@@ -20,10 +20,14 @@ test("statically recovers the country-selection mask, screens, and routing", () 
   assert.equal(report.analysisStatus, fixture.analysisStatus);
   assert.equal(report.reproductionStatus, fixture.reproductionStatus);
   assert.deepEqual(report.maskRegions, [
-    { id: "korea", sourceMaskIndex: 68, selectedScreen: "stage-korea", selectionIndex: 0, sourceNationValue: 1, pixelCount: 33492, bounds: { minX: 431, minY: 28, maxX: 612, maxY: 346 } },
-    { id: "japan", sourceMaskIndex: 70, selectedScreen: "stage-japan", selectionIndex: 1, sourceNationValue: 2, pixelCount: 19518, bounds: { minX: 517, minY: 72, maxX: 613, maxY: 342 } },
-    { id: "china", sourceMaskIndex: 69, selectedScreen: "stage-china", selectionIndex: 2, sourceNationValue: 3, pixelCount: 23891, bounds: { minX: 320, minY: 59, maxX: 445, maxY: 350 } },
+    { id: "korea", sourceMaskIndex: 68, selectedScreen: "stage-korea", selectionIndex: 0, sourceNationValue: 1, rgb: { red: 0, green: 202, blue: 0 }, pixelCount: 33492, bounds: { minX: 431, minY: 28, maxX: 612, maxY: 346 } },
+    { id: "japan", sourceMaskIndex: 70, selectedScreen: "stage-japan", selectionIndex: 1, sourceNationValue: 2, rgb: { red: 202, green: 202, blue: 0 }, pixelCount: 19518, bounds: { minX: 517, minY: 72, maxX: 613, maxY: 342 } },
+    { id: "china", sourceMaskIndex: 69, selectedScreen: "stage-china", selectionIndex: 2, sourceNationValue: 3, rgb: { red: 202, green: 0, blue: 0 }, pixelCount: 23891, bounds: { minX: 320, minY: 59, maxX: 445, maxY: 350 } },
   ]);
+  assert.deepEqual(report.sources.palette, {
+    path: "original/imjinrok2/pal/imjin2.pal",
+    sha256: "5ba2c020e9bd89210a10550fb4baaee8ab8bb316d4a2c7e66bdb24c6c8c4323b",
+  });
   assert.match(report.unresolved, /browser pointerup/u);
 
   for (const vector of fixture.vectors) {

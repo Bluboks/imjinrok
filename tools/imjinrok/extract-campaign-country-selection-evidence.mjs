@@ -4,7 +4,7 @@ import { readFileSync } from "node:fs";
 import { relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { decodeSpriteFrame, parseSpriteLikeHeader } from "./codec.mjs";
+import { decodeSpriteFrame, parseSpriteLikeHeader, readPalette } from "./codec.mjs";
 import { readPeImage } from "./pe-image.mjs";
 import {
   assertEqual,
@@ -16,6 +16,7 @@ import {
 const repositoryRoot = resolve(fileURLToPath(new URL("../..", import.meta.url)));
 const defaultOriginalRoot = resolve(repositoryRoot, "original/imjinrok2");
 const defaultExecutablePath = resolve(defaultOriginalRoot, "imjinrok2.exe");
+const defaultPalettePath = resolve(defaultOriginalRoot, "pal/imjin2.pal");
 
 export const EXPECTED_EXECUTABLE_SHA256 =
   "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e";
@@ -28,6 +29,8 @@ const SOURCE_ASSETS = [
   ["stage-to-select", "yfnt/titlestartstagetoselect.spr", "98f0b6f38e7fc341f7a869fb4488c852d394093a2bc455c11a74ce843fa404ca"],
   ["nation-buttons", "yfnt/NationButtons.spr", "98304a61e4d8bd4017e7da6763e4194c4d55422a4891c5cf534ab5dd6c362885"],
 ];
+const EXPECTED_STAGE_PALETTE_SHA256 =
+  "5ba2c020e9bd89210a10550fb4baaee8ab8bb316d4a2c7e66bdb24c6c8c4323b";
 
 const RAW_CODE_RANGES = [
   ["country-screen-asset-loader", 0x0043e920, 0x0043ec13, "591a912a53e155193bc38e2585ad3713ff6c2a790aa1b3bd94991d2d4ab5d5ea"],
@@ -65,6 +68,7 @@ export function resolveSourceCountryMaskIndex(index) {
 export function extractCampaignCountrySelectionEvidence({
   originalRoot = defaultOriginalRoot,
   executablePath = defaultExecutablePath,
+  palettePath = resolve(originalRoot, "pal/imjin2.pal"),
 } = {}) {
   const { buffer, image } = readPeImage(executablePath);
   assertEqual(sha256(buffer), EXPECTED_EXECUTABLE_SHA256, `${executablePath} SHA-256`);
@@ -79,12 +83,16 @@ export function extractCampaignCountrySelectionEvidence({
   );
   const mask = assets["stage-to-select"];
   const pixels = decodeSpriteFrame(mask.bytes, mask.header, 0);
+  const paletteBytes = readFileSync(palettePath);
+  assertEqual(sha256(paletteBytes), EXPECTED_STAGE_PALETTE_SHA256, `${palettePath} SHA-256`);
+  const palette = readPalette(paletteBytes, palettePath);
   assertEqual(mask.width, 640, "titlestartstagetoselect.spr width");
   assertEqual(mask.height, 480, "titlestartstagetoselect.spr height");
   assertEqual(mask.frameCount, 1, "titlestartstagetoselect.spr frame count");
 
   const maskRegions = NATIONS.map((nation) => ({
     ...nation,
+    rgb: getPaletteRgb(palette, nation.sourceMaskIndex),
     pixelCount: countMaskPixels(pixels, nation.sourceMaskIndex),
     bounds: getMaskBounds(pixels, mask.width, mask.height, nation.sourceMaskIndex),
   }));
@@ -96,6 +104,7 @@ export function extractCampaignCountrySelectionEvidence({
     implementationStatus: "classic-screen-art-and-mask-hit-testing-are-source-backed; browser-pointer-event-semantics-and-unimplemented-Japan-Ming-mission-lists-remain-product-adaptations",
     sources: {
       executable: { path: relative(repositoryRoot, executablePath), sha256: EXPECTED_EXECUTABLE_SHA256 },
+      palette: { path: relative(repositoryRoot, palettePath), sha256: EXPECTED_STAGE_PALETTE_SHA256 },
       assets: Object.fromEntries(Object.entries(assets).map(([id, asset]) => [id, { path: asset.path, sha256: asset.sha256, width: asset.width, height: asset.height, frameCount: asset.frameCount }])),
     },
     maskRegions,
@@ -140,6 +149,15 @@ function getMaskBounds(pixels, width, height, index) {
   }
   if (maxX < 0) throw new Error(`selection-mask color ${index} has no pixels`);
   return { minX, minY, maxX, maxY };
+}
+
+function getPaletteRgb(palette, index) {
+  const offset = index * 3;
+  return {
+    red: palette[offset],
+    green: palette[offset + 1],
+    blue: palette[offset + 2],
+  };
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
