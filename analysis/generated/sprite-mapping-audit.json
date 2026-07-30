@@ -8,11 +8,11 @@
   "sourceFiles": [
     {
       "path": "packages/shared/src/themes.ts",
-      "sha256": "57edd0ebff677b3c8c943dc51d1c5c88c6ea3f74ea18886012a6702c2c2003ac"
+      "sha256": "e5895f20706501737576a288170866036c7a7bab2234cd2144de2d9918f16902"
     },
     {
       "path": "packages/shared/src/visuals.ts",
-      "sha256": "1ef31510078495985a9ccf0c92f20e85e76ba65a3c8ef4daf9305d5169bfd8b1"
+      "sha256": "15b73d752f08837f28554d579e2239d3b617252bea176a424f2e5b4fa87a3739"
     },
     {
       "path": "packages/shared/src/content.ts",
@@ -24,7 +24,7 @@
     },
     {
       "path": "apps/game-client/src/scenes/SkirmishScene.ts",
-      "sha256": "6b93d58a9c52896dbb24ec520485304457a0c238e43a73d1d83e61ccdc48d369"
+      "sha256": "fe03d9bb0b6e4fa0ea718c64fda334669a0eeeaf02d80315541fa5e4b9d78389"
     },
     {
       "path": "apps/game-client/src/scenes/MissionBriefingScene.ts",
