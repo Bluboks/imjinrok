@@ -92,6 +92,23 @@ frameIndex  = uint8(map + 0x42234 + x*180 + y)
 검증된 normal-source header 범위 안임을 확인한다. downstream mode/clip call에 terrain 또는 web-renderer
 의미를 부여하지 않는다.
 
+## K01 full-map raster caller
+
+`FUN_00466f20`의 hash-bound complete body와 `0x00467160→FUN_00469510` call edge는 K01 main raster의
+제한된 caller 범위를 고정한다. surface buffer는 `map.width*64` by `map.height*32+200`이고, loop는 **y outer,
+x inner**다. 각 cell은 다음을 만들어 `FUN_00469510(argument1, argument2, x, y)`로 넘긴다.
+
+```text
+screenX = (x-y)*32 + map.width*32
+screenY = (x+y)*16 + 200
+drawLeft = screenX - 32
+drawTop  = screenY - verticalShift
+```
+
+K01에서는 `lowNibble==2`인 2,865 cell의 `verticalShift`가 0이고 나머지 735 cell은 16이다. 이 범위는
+selected frame의 full-raster order와 bounded draw rectangle만 확정한다. frame pivot의 일반 의미, callee의
+clip/mode 분기, palette와 source alpha gap의 원인·원본 base fill은 아직 미확정이다.
+
 ## K01 complete result
 
 compact fixture는 low nibble, helper selector/lookup/return, branch, shift, object, frame을 담은 cell당 8-byte

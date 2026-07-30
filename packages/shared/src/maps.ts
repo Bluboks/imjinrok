@@ -87,6 +87,8 @@ export interface MapDefinition {
   tilesetId?: string;
   /** Optional renderer fog profile; omitted maps keep the generic fog. */
   fogVisualProfileId?: string;
+  /** Explicit alpha-compositing policy for source tile imagery. */
+  terrainCompositionProfile?: "source-raster" | "source-raster-underlay";
   environmentVisualProfileId?: string;
   resourceVisualSetId?: string;
   /**
