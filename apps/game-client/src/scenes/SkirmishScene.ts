@@ -10,7 +10,6 @@ import {
   createMapDefinitionFromId,
   getGridFacing,
   getNextCampaignScenario,
-  getThemeAssetUrl,
   getThemeFrameRefs,
   getTerrainVisual,
   resolveEntityPortraitFrame,
@@ -217,6 +216,7 @@ import {
   type GameplayPreferences,
 } from "../gameplayPreferences.js";
 import { createGameplayRuntimeSpeed, stepGameplayRuntimeSpeed } from "../gameplayInputRuntime.js";
+import { getMissingThemeTextureLoadRequests, type ThemeTextureLoadRequest } from "./themeTexturePreloadPlan.js";
 import {
   decideMouseInputAction,
   type MouseHitKind,
@@ -654,6 +654,8 @@ export class SkirmishScene extends Phaser.Scene {
   }
 
   preload(): void {
+    this.queueActiveThemeTexturesForPreload();
+
     for (const cue of GAMEPLAY_AUDIO_CUES) {
       if (!this.cache.audio.exists(cue.key)) {
         this.load.audio(cue.key, cue.url);
@@ -7941,16 +7943,16 @@ export class SkirmishScene extends Phaser.Scene {
   }
 
   private ensureActiveThemeTexturesLoaded(onComplete: () => void): void {
-    const missingFrames = getThemeFrameRefs(this.activeTheme).filter(({ frame }) => !this.textures.exists(frame.textureKey));
+    const missingTextureRequests = this.getMissingActiveThemeTextureLoadRequests();
 
-    if (missingFrames.length === 0) {
+    if (missingTextureRequests.length === 0) {
       onComplete();
       return;
     }
 
     console.warn(
       "Missing theme textures detected; retrying load:",
-      missingFrames.map(({ frame }) => frame.fileName ?? frame.textureKey),
+      missingTextureRequests.map(({ frame }) => frame.fileName ?? frame.textureKey),
     );
 
     const handleLoadError = (file: { key?: string; src?: string }) => {
@@ -7963,11 +7965,43 @@ export class SkirmishScene extends Phaser.Scene {
       onComplete();
     });
 
-    for (const { visual, frame } of missingFrames) {
-      this.load.image(frame.textureKey, getThemeAssetUrl(this.activeTheme, visual, frame));
+    for (const request of missingTextureRequests) {
+      this.load.image(request.frame.textureKey, request.url);
     }
 
     this.load.start();
+  }
+
+  private queueActiveThemeTexturesForPreload(): void {
+    const textureRequests = this.getMissingActiveThemeTextureLoadRequests();
+
+    if (textureRequests.length === 0) {
+      return;
+    }
+
+    const textureKeys = new Set(textureRequests.map(({ frame }) => frame.textureKey));
+    const handleLoadError = (file: { key?: string; src?: string }) => {
+      if (file.key && textureKeys.has(file.key)) {
+        console.warn("Theme texture failed to load", { key: file.key, src: file.src });
+      }
+    };
+
+    this.load.on(Phaser.Loader.Events.FILE_LOAD_ERROR, handleLoadError);
+    this.load.once(Phaser.Loader.Events.COMPLETE, () => {
+      this.load.off(Phaser.Loader.Events.FILE_LOAD_ERROR, handleLoadError);
+    });
+
+    for (const request of textureRequests) {
+      this.load.image(request.frame.textureKey, request.url);
+    }
+  }
+
+  private getMissingActiveThemeTextureLoadRequests(): ThemeTextureLoadRequest[] {
+    return getMissingThemeTextureLoadRequests(
+      this.activeTheme,
+      getThemeFrameRefs(this.activeTheme),
+      (textureKey) => this.textures.exists(textureKey),
+    );
   }
 
   private getTileWorldDiamondBounds(x: number, y: number): Phaser.Geom.Rectangle {
