@@ -21,7 +21,8 @@
 15. [조선 봉화대 건설·체력 프레임 파일럿](mechanics/beacon-state-pilot.md)
 16. [K01 팬 리마스터 MVP 정적 분석 계획](mechanics/campaign/k01.md)
 17. [원본 command control의 `button.spr` pixel-frame 결합](mechanics/command-icon-frame-binding.md)
-18. 분석할 나머지 자료구조와 메커니즘 문서
+18. [K01 mission unit animation coverage guard](mechanics/k01-unit-animation-coverage.md)
+19. 분석할 나머지 자료구조와 메커니즘 문서
 
 ## 문서 역할
 
