@@ -16,14 +16,21 @@ test("K01 emitted source PNG alpha requires a footprint underlay and rejects the
   const artifact = readArtifact();
   const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
   const assetByPair = new Map(manifest.assets.map((asset) => [`${asset.stem}:${asset.frame}`, asset]));
+  const assetByKey = new Map(manifest.assets.map((asset) => [asset.assetKey, asset]));
   const alphaByPair = new Map();
 
   for (const asset of manifest.assets) {
     alphaByPair.set(`${asset.stem}:${asset.frame}`, readPngAlpha(resolve(assetDirectory, asset.fileName)));
   }
+  const underlayAssetKey = manifest.productRenderingAdapter?.webPlacement?.underlayAssetKey;
+  assert.equal(underlayAssetKey, "k01-source:grss1:0000", "K01 underlay must be an explicit source-art asset contract");
+  const underlayAsset = assetByKey.get(underlayAssetKey);
+  assert.ok(underlayAsset, "K01 source-art underlay must be part of the emitted K01 catalog");
+  const underlayAlpha = alphaByPair.get(`${underlayAsset.stem}:${underlayAsset.frame}`);
+  assert.ok(underlayAlpha, "K01 source-art underlay must have an emitted PNG alpha mask");
 
-  const legacy = measureCoverage(artifact, assetByPair, alphaByPair, (x, y) => rawDeltaY(artifact, x, y));
-  const product = measureCoverage(artifact, assetByPair, alphaByPair, () => 0);
+  const legacy = measureCoverage(artifact, assetByPair, alphaByPair, underlayAlpha, (x, y) => rawDeltaY(artifact, x, y));
+  const product = measureCoverage(artifact, assetByPair, alphaByPair, underlayAlpha, () => 0);
 
   // The exact raw stream has 735 delta-bearing cells. Treating those cells as
   // web-y translations introduces a discontinuity at every mixed low-nibble
@@ -48,7 +55,7 @@ function readArtifact() {
   return JSON.parse(match[1]);
 }
 
-function measureCoverage(artifact, assetByPair, alphaByPair, offsetYForCell) {
+function measureCoverage(artifact, assetByPair, alphaByPair, underlayAlpha, offsetYForCell) {
   const { width, height } = artifact.dimensions;
   const pairBytes = Buffer.from(artifact.pairBytesBase64, "base64");
   const canvas = createCanvas(width, height);
@@ -71,7 +78,7 @@ function measureCoverage(artifact, assetByPair, alphaByPair, offsetYForCell) {
       if (offsetY !== 0) rawDeltaCellCount += 1;
       compositeAlpha(sourceAlpha, canvas, alpha, cellCenter(canvas, x, y).x - 32, cellCenter(canvas, x, y).y - 16 + offsetY);
       fillDiamond(footprint, canvas, cellCenter(canvas, x, y));
-      fillDiamond(terrainUnderlay, canvas, cellCenter(canvas, x, y));
+      compositeAlpha(terrainUnderlay, canvas, underlayAlpha, cellCenter(canvas, x, y).x - 32, cellCenter(canvas, x, y).y - 16);
 
       for (const neighbor of [{ x: x + 1, y }, { x, y: y + 1 }]) {
         if (neighbor.x < width && neighbor.y < height && offsetY !== offsetYForCell(neighbor.x, neighbor.y)) {
