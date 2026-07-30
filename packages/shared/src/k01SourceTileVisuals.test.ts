@@ -92,8 +92,13 @@ test("only K01 applies source tile visuals after gameplay terrain mutations", ()
   assert.deepEqual(getTileAt(k01, 0, 1).tilesetVisuals?.sourcePixelOffset, { x: 0, y: 0 });
   assert.equal(getTileAt(k01, 45, 40).terrain, "shallowWater");
   assert.equal(getTileAt(k01, 45, 40).elevation, 0);
+  assert.equal(getTileAt(k01, 0, 0).elevation, 1);
   assert.equal(getTileAt(k01, 6, 6).terrain, "grass");
   assert.equal(getTileAt(k01, 6, 6).elevation, 0);
+  const elevations = k01.layers[0]?.tiles.map((tile) => tile.elevation) ?? [];
+  assert.equal(elevations.filter((level) => level === 0).length, 2865);
+  assert.equal(elevations.filter((level) => level === 1).length, 735);
+  assert.equal(k01.layers[0]?.tiles.every((tile) => tile.tilesetVisuals?.flatArtworkEmbedsRelief === true), true);
   assert.equal(k02.layers.every((layer) => layer.tiles.every((tile) => tile.tilesetVisuals === undefined)), true);
   assert.equal(k01.fogVisualProfileId, "imjinrok-source-fog-composite");
   assert.equal(k01.layers[0]?.tiles.every((tile) => tile.fogVisuals?.familyIndex !== undefined), true);

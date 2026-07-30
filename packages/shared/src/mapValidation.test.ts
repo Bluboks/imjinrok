@@ -180,6 +180,29 @@ test("explicit tile underlays require a terrain-collection asset and a selected 
   ]);
 });
 
+test("embedded flat-art relief requires an explicit flat selection", () => {
+  const map = createBlankMap();
+  const tile = map.layers[0]?.tiles[0];
+  assert.ok(tile);
+  tile.tilesetVisuals = { flatArtworkEmbedsRelief: true };
+
+  assert.deepEqual(validateMapDefinition(map, createContentRegistry()).issues, [
+    { path: "layers[0].tiles[0].tilesetVisuals.flatArtworkEmbedsRelief", message: "Embedded flat artwork relief requires a selected flat tile asset." },
+  ]);
+});
+
+test("embedded flat-art relief rejects non-boolean runtime map data", () => {
+  const map = createBlankMap();
+  const tile = map.layers[0]?.tiles[0];
+  assert.ok(tile);
+  tile.tilesetVisuals = { flatAssetKey: "grass", flatArtworkEmbedsRelief: "yes" as never };
+
+  assert.deepEqual(validateMapDefinition(map, createContentRegistry()).issues, [
+    { path: "layers[0].tiles[0].tilesetVisuals.flatArtworkEmbedsRelief", message: "Embedded flat artwork relief must be boolean." },
+    { path: "layers[0].tiles[0].tilesetVisuals.flatAssetKey", message: "Unknown flat asset 'grass'." },
+  ]);
+});
+
 test("map validation rejects invalid elevation and unknown resource identities", () => {
   const map = createBlankMap({ width: 2, height: 2 });
   const firstTile = map.layers[0]?.tiles[0];
@@ -193,6 +216,20 @@ test("map validation rejects invalid elevation and unknown resource identities",
   assert.deepEqual(result.issues.map((entry) => entry.path), [
     "layers[0].tiles[0].elevation",
     "layers[0].tiles[0].resource.kind",
+  ]);
+});
+
+test("map validation rejects fractional tile levels and invalid elevation profiles", () => {
+  const map = createBlankMap({ width: 2, height: 2 });
+  const firstTile = map.layers[0]?.tiles[0];
+  assert.ok(firstTile);
+  firstTile.elevation = 0.5;
+  map.elevationProfile = { stepHeight: 0, sampling: "unsupported" as never };
+
+  assert.deepEqual(validateMapDefinition(map, createContentRegistry()).issues, [
+    { path: "elevationProfile.stepHeight", message: "Elevation profile stepHeight must be finite and positive." },
+    { path: "elevationProfile.sampling", message: "Elevation profile sampling must be 'bilinear' or 'nearest'." },
+    { path: "layers[0].tiles[0].elevation", message: "Elevation must be a non-negative integer." },
   ]);
 });
 

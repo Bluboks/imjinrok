@@ -1,5 +1,6 @@
 import type { ContentRegistry } from "./contentPack.js";
 import { validateDayNightCycle } from "./environment.js";
+import { isSurfaceElevationSampling } from "./elevationProfile.js";
 import type { MapDefinition } from "./maps.js";
 import type { VisualAssetRef } from "./tilesets.js";
 
@@ -31,6 +32,7 @@ export function validateMapDefinition(map: MapDefinition, registry: ContentRegis
   if (!Number.isFinite(map.tileHeight) || map.tileHeight <= 0) {
     issues.push(issue("tileHeight", "Tile height must be positive."));
   }
+  validateElevationProfile(map, issues);
 
   validateReference(map.tilesetId, registry.tilesets, "tilesetId", "tileset", issues);
   validateReference(map.environmentVisualProfileId, registry.environmentVisualProfiles, "environmentVisualProfileId", "environment visual profile", issues);
@@ -64,6 +66,17 @@ export function validateMapDefinition(map: MapDefinition, registry: ContentRegis
   });
 
   return { ok: issues.length === 0, issues };
+}
+
+function validateElevationProfile(map: MapDefinition, issues: MapValidationIssue[]): void {
+  const profile = map.elevationProfile;
+  if (!profile) return;
+  if (profile.stepHeight !== undefined && (!Number.isFinite(profile.stepHeight) || profile.stepHeight <= 0)) {
+    issues.push(issue("elevationProfile.stepHeight", "Elevation profile stepHeight must be finite and positive."));
+  }
+  if (profile.sampling !== undefined && !isSurfaceElevationSampling(profile.sampling)) {
+    issues.push(issue("elevationProfile.sampling", "Elevation profile sampling must be 'bilinear' or 'nearest'."));
+  }
 }
 
 function validateDayNightVisualSteps(map: MapDefinition, registry: ContentRegistry, issues: MapValidationIssue[]): void {
@@ -165,6 +178,12 @@ function validateTileTilesetVisuals(
     if (!Number.isFinite(selection.sourcePixelOffset.y)) {
       issues.push(issue(`${tilePath}.tilesetVisuals.sourcePixelOffset.y`, "Tile placement offset y must be finite."));
     }
+  }
+  if (selection.flatArtworkEmbedsRelief !== undefined && typeof selection.flatArtworkEmbedsRelief !== "boolean") {
+    issues.push(issue(`${tilePath}.tilesetVisuals.flatArtworkEmbedsRelief`, "Embedded flat artwork relief must be boolean."));
+  }
+  if (selection.flatArtworkEmbedsRelief === true && selection.flatAssetKey === undefined) {
+    issues.push(issue(`${tilePath}.tilesetVisuals.flatArtworkEmbedsRelief`, "Embedded flat artwork relief requires a selected flat tile asset."));
   }
 
   const tilesetId = map.tilesetId;
