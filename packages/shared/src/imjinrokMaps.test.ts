@@ -77,6 +77,7 @@ test("imported K01 scaffold exposes source dimensions and playable spawns", () =
   });
   assert.ok(map);
   assert.equal(map.id, "imjinrok-k01");
+  assert.equal(map.pathfindingProfileId, "imjinrok:source-greedy-local-adapter");
   assert.equal(map.width, 60);
   assert.equal(map.height, 60);
   assert.deepEqual(map.sourceInitialView, { x: 13, y: 8 });

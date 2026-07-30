@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { createBlankMap, getTileIndex, type GridPoint, type ScenarioDefinition } from "../../shared/src/index.js";
+import { createBlankMap, createImjinrokMapScaffold, getTileIndex, type GridPoint, type ScenarioDefinition } from "../../shared/src/index.js";
 import {
   CORE_A_STAR_PATHFINDER_ID,
   SOURCE_GREEDY_CANDIDATE_OFFSETS,
@@ -51,6 +51,16 @@ test("map and scenario profile selection retain the selected id in snapshots", (
 
   assert.equal(scenarioState.pathfindingProfileId, "test:scenario-profile");
   assert.deepEqual(findPathForUnit(scenarioState, scenarioUnit, { x: 8, y: 2 }), [{ x: 7, y: 2 }]);
+});
+
+test("K01 metadata selects the source-greedy local adapter and retains it in snapshots", () => {
+  const map = createImjinrokMapScaffold("imjinrok-k01");
+  assert.ok(map);
+
+  const state = createInitialWorldState(map, ["p1"]);
+
+  assert.equal(state.pathfindingProfileId, SOURCE_GREEDY_LOCAL_ADAPTER_PATHFINDER_ID);
+  assert.equal(toWorldSnapshot(state).pathfindingProfileId, SOURCE_GREEDY_LOCAL_ADAPTER_PATHFINDER_ID);
 });
 
 test("custom providers plug in by stable id, while duplicate and unknown ids fail loudly", () => {

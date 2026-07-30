@@ -31,6 +31,14 @@ test("source catalog pack does not claim gameplay definition ownership", () => {
   assert.deepEqual(imjinrokSourceContentPack.units, {});
 });
 
+test("source catalog marks the K01 source-greedy navigation adapter as a source-backed adaptation", () => {
+  assert.deepEqual(imjinrokSourceContentPack.pathfindingProfiles["imjinrok:source-greedy-local-adapter"], {
+    id: "imjinrok:source-greedy-local-adapter",
+    displayName: "Imjinrok Source Greedy Local Adapter",
+    evidenceStatus: "source-backed-adaptation",
+  });
+});
+
 test("resource visual catalog maps only crop and tree project adaptations", () => {
   const resourceSet = imjinrokSourceContentPack.resourceVisualSets["imjinrok-source-resource-adaptation"];
 
