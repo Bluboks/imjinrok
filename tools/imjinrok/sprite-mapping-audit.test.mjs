@@ -146,8 +146,32 @@ test("frame mappings stay quarantined outside statically proven scopes while ide
     projectBindingConflictCount: 0,
     portraitCueCount: 17,
     unverifiedPortraitCueCount: 0,
-    findingCount: 50,
+    k01EntityVisualCount: 22,
+    k01RuntimeStateGapCount: 0,
+    k01SelectionPortraitCount: 22,
+    findingCount: 78,
   });
+  assert.equal(report.schemaVersion, 4);
+  assert.equal(report.k01EntityVisualCoverage.entries.length, 22);
+  assert.equal(report.k01EntityVisualCoverage.selectionPortraitRegistry.length, 22);
+  assert.ok(
+    report.k01EntityVisualCoverage.entries.every(
+      (entry) =>
+        entry.visualId !== null &&
+        entry.missingStates.length === 0 &&
+        entry.missingFrames.length === 0 &&
+        entry.missingSourceOrientationDirections.length === 0 &&
+        entry.missingDefaultFrame === false &&
+        entry.missingExplicitSelectionRepresentative === false,
+    ),
+  );
+  assert.ok(
+    report.k01EntityVisualCoverage.selectionPortraitRegistry.every(
+      (entry) =>
+        entry.semanticStatus === "source-frame-representative" &&
+        entry.frame.fileName === entry.sourceFrameFileName,
+    ),
+  );
   assert.equal(
     report.visuals.filter((visual) => visual.evidenceStatus === "unverified").length,
     1,

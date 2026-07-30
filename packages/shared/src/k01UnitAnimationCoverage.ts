@@ -2,7 +2,7 @@ import { unitDefinitions, type UnitDefinitionId } from "./content.js";
 import { resolveEntityPortraitFrame } from "./entityPortrait.js";
 import type { ScenarioDefinition } from "./scenarios.js";
 import type { ThemeDefinition } from "./themes.js";
-import type { EntityVisual } from "./visuals.js";
+import type { EntityVisual, FrameRef } from "./visuals.js";
 
 /**
  * K01 mobile-unit animation coverage is intentionally narrower than type identity.
@@ -44,6 +44,24 @@ export interface K01UnitAnimationCoverageResult extends K01UnitAnimationEvidence
   readonly missingSourceOrientationDirections: readonly number[];
   readonly missingDefaultFrame: boolean;
   readonly missingExplicitSelectionRepresentative: boolean;
+}
+
+/**
+ * A serializable selection-image registry entry for a K01 entity that can
+ * actually appear in the scenario. The frame is a source-backed
+ * representative, not a claim that the original selection panel used this
+ * frame as a portrait.
+ */
+export interface K01SelectionPortraitRegistryEntry {
+  readonly kind: UnitDefinitionId;
+  readonly visualId: string;
+  readonly frame: FrameRef;
+  readonly mirrorX: boolean;
+  readonly sourceFrameFileName: string;
+  readonly evidenceDocument: string;
+  readonly sourceStates: readonly string[];
+  readonly quarantines: readonly K01UnitAnimationQuarantine[];
+  readonly semanticStatus: "source-frame-representative";
 }
 
 const noRuntimeDeathLifecycle: K01UnitAnimationQuarantine = {
@@ -367,6 +385,49 @@ export function assessK01EntityVisualCoverage(
   theme: ThemeDefinition,
 ): readonly K01UnitAnimationCoverageResult[] {
   return assessK01VisualCoverage(theme, K01_ENTITY_VISUAL_EVIDENCE);
+}
+
+/**
+ * Produces selection-panel metadata only for K01 spawnable entities with an
+ * explicit source-frame representative. It deliberately omits a record when
+ * a theme binding or its validated representative drifts, rather than
+ * returning a plausible but unsupported fallback.
+ */
+export function getK01SelectionPortraitRegistry(
+  theme: ThemeDefinition,
+): readonly K01SelectionPortraitRegistryEntry[] {
+  return assessK01EntityVisualCoverage(theme).flatMap((coverage) => {
+    if (
+      coverage.visualId === null ||
+      coverage.missingDefaultFrame ||
+      coverage.missingExplicitSelectionRepresentative
+    ) {
+      return [];
+    }
+
+    const visual = theme.visuals[coverage.visualId];
+    const resolved = visual?.kind === "entity" ? resolveEntityPortraitFrame(visual) : null;
+
+    if (
+      resolved === null ||
+      coverage.defaultFrameFileName === undefined ||
+      resolved.frame.fileName !== coverage.defaultFrameFileName
+    ) {
+      return [];
+    }
+
+    return [{
+      kind: coverage.kind,
+      visualId: coverage.visualId,
+      frame: resolved.frame,
+      mirrorX: resolved.mirrorX,
+      sourceFrameFileName: coverage.defaultFrameFileName,
+      evidenceDocument: coverage.evidenceDocument,
+      sourceStates: coverage.sourceStates,
+      quarantines: coverage.quarantines,
+      semanticStatus: "source-frame-representative",
+    }];
+  });
 }
 
 function assessK01VisualCoverage(

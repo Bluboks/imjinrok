@@ -13,6 +13,10 @@ import { fileURLToPath } from "node:url";
 
 import { MISSION_PORTRAIT_IMAGE_CUES } from "../../apps/game-client/src/missionPortraits.ts";
 import { unitDefinitions } from "../../packages/shared/src/content.ts";
+import {
+  assessK01EntityVisualCoverage,
+  getK01SelectionPortraitRegistry,
+} from "../../packages/shared/src/k01UnitAnimationCoverage.ts";
 import { k01ReinforcementAdapter } from "../../packages/shared/src/scenarios.ts";
 import { defaultTheme } from "../../packages/shared/src/themes.ts";
 import { extractBeaconStatePilot } from "./extract-beacon-state-pilot.mjs";
@@ -42,6 +46,10 @@ const themesPath = join(repositoryRoot, "packages/shared/src/themes.ts");
 const visualsPath = join(repositoryRoot, "packages/shared/src/visuals.ts");
 const contentPath = join(repositoryRoot, "packages/shared/src/content.ts");
 const scenariosPath = join(repositoryRoot, "packages/shared/src/scenarios.ts");
+const k01EntityVisualCoveragePath = join(
+  repositoryRoot,
+  "packages/shared/src/k01UnitAnimationCoverage.ts",
+);
 const generatorPath = join(
   repositoryRoot,
   "tools/imjinrok/audit-sprite-mappings.mjs",
@@ -232,9 +240,12 @@ const projectBindings = buildProjectBindingAudit(visualRecords);
 findings.push(...projectBindings.findings);
 const portraitAudit = buildPortraitAudit();
 findings.push(...portraitAudit.findings);
+const k01EntityVisualCoverage = assessK01EntityVisualCoverage(defaultTheme);
+const k01SelectionPortraitRegistry = getK01SelectionPortraitRegistry(defaultTheme);
+appendK01EntityVisualCoverageFindings(k01EntityVisualCoverage, k01SelectionPortraitRegistry);
 
 const report = {
-  schemaVersion: 3,
+  schemaVersion: 4,
   policy: {
     semanticStatus: "mixed",
     acceptedEvidence:
@@ -247,6 +258,7 @@ const report = {
     sourceFileRecord(visualsPath),
     sourceFileRecord(contentPath),
     sourceFileRecord(scenariosPath),
+    sourceFileRecord(k01EntityVisualCoveragePath),
     sourceFileRecord(skirmishScenePath),
     sourceFileRecord(missionBriefingScenePath),
     sourceFileRecord(missionPortraitsPath),
@@ -309,6 +321,14 @@ const report = {
     unverifiedPortraitCueCount: portraitAudit.cues.filter(
       (cue) => cue.evidenceStatus === "unverified",
     ).length,
+    k01EntityVisualCount: k01EntityVisualCoverage.length,
+    k01RuntimeStateGapCount: k01EntityVisualCoverage.reduce(
+      (count, coverage) => count + coverage.runtimeStates.filter(
+        (state) => coverage.missingStates.includes(state),
+      ).length,
+      0,
+    ),
+    k01SelectionPortraitCount: k01SelectionPortraitRegistry.length,
     findingCount: findings.length,
   },
   visuals: visualRecords,
@@ -340,6 +360,11 @@ const report = {
     registeredSpeakerIds: portraitAudit.registeredSpeakerIds,
     originalScriptSpeakerTokens: portraitAudit.originalScriptSpeakerTokens,
     cues: portraitAudit.cues,
+  },
+  k01EntityVisualCoverage: {
+    policy: "K01 runtime coverage records exact source-backed states and explicitly retains every unsupported scope as a quarantine. Selection representatives are source frames for product UI, not a claim about an original selection-panel portrait resource.",
+    entries: k01EntityVisualCoverage,
+    selectionPortraitRegistry: k01SelectionPortraitRegistry,
   },
   findings: findings.sort(compareFindings),
 };
@@ -500,6 +525,60 @@ function appendPivotFindings(visual) {
       visualId: visual.id,
       detail: "Current source-pixel pivot anchors are project ground-contact adapters unless narrower static pivot evidence is recorded.",
     });
+  }
+}
+
+function appendK01EntityVisualCoverageFindings(coverageEntries, selectionRegistry) {
+  const selectionKinds = new Set(selectionRegistry.map(({ kind }) => kind));
+
+  for (const coverage of coverageEntries) {
+    const missingRuntimeStates = coverage.runtimeStates.filter(
+      (state) => coverage.missingStates.includes(state),
+    );
+
+    if (
+      coverage.visualId === null ||
+      missingRuntimeStates.length > 0 ||
+      coverage.missingFrames.length > 0 ||
+      coverage.missingSourceOrientationDirections.length > 0 ||
+      coverage.missingDefaultFrame ||
+      coverage.missingExplicitSelectionRepresentative
+    ) {
+      findings.push({
+        severity: "blocking",
+        code: "k01-runtime-visual-coverage-gap",
+        kind: coverage.kind,
+        evidenceDocument: coverage.evidenceDocument,
+        missingVisualBinding: coverage.visualId === null,
+        missingRuntimeStates,
+        missingFrames: coverage.missingFrames,
+        missingSourceOrientationDirections: coverage.missingSourceOrientationDirections,
+        missingDefaultFrame: coverage.missingDefaultFrame,
+        missingExplicitSelectionRepresentative: coverage.missingExplicitSelectionRepresentative,
+        detail: "A K01 spawnable entity is missing a statically bounded runtime visual or its explicit source-frame selection representative.",
+      });
+    }
+
+    if (!selectionKinds.has(coverage.kind)) {
+      findings.push({
+        severity: "blocking",
+        code: "k01-selection-portrait-coverage-gap",
+        kind: coverage.kind,
+        evidenceDocument: coverage.evidenceDocument,
+        detail: "A K01 spawnable entity has no validated source-frame selection representative.",
+      });
+    }
+
+    for (const quarantine of coverage.quarantines) {
+      findings.push({
+        severity: "info",
+        code: "k01-runtime-visual-quarantine",
+        kind: coverage.kind,
+        state: quarantine.state,
+        evidenceDocument: coverage.evidenceDocument,
+        detail: quarantine.reason,
+      });
+    }
   }
 }
 
