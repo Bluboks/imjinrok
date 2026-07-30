@@ -289,6 +289,38 @@ export function expandSourceFogDirtyChunkMask(dirtyMask: Uint8Array, chunksPerRo
   return dirtyMask.reduce((count, dirty) => count + dirty, 0);
 }
 
+/** Source masks omit out-of-bounds neighbors rather than treating them as unseen. */
+export function getSourceFogNeighborVisibility(
+  x: number,
+  y: number,
+  neighbor: SourceFogNeighbor,
+  width: number,
+  height: number,
+  getVisibility: (x: number, y: number) => FogVisibility,
+): FogVisibility {
+  const offset = SOURCE_FOG_NEIGHBOR_OFFSETS[neighbor];
+  const neighborX = x + offset.x;
+  const neighborY = y + offset.y;
+  if (neighborX < 0 || neighborX >= width || neighborY < 0 || neighborY >= height) {
+    return "visible";
+  }
+  return getVisibility(neighborX, neighborY);
+}
+
+export function requireSourceFogGroundLayer<T extends { readonly tiles: readonly unknown[] }>(layers: readonly T[]): T {
+  const groundLayer = layers[0];
+  if (!groundLayer) throw new Error("Source fog visual profile requires a ground layer at index 0.");
+  return groundLayer;
+}
+
+export function assertSourceFogGroundLayerFamilies(
+  layers: readonly { readonly tiles: readonly { readonly fogVisuals?: { readonly familyIndex?: number } }[] }[],
+): void {
+  for (const tile of requireSourceFogGroundLayer(layers).tiles) {
+    assertFamilyIndex(tile.fogVisuals?.familyIndex);
+  }
+}
+
 export function resolveEnvironmentOverlayLightContract(lightLevel: number): EnvironmentOverlayLightContract {
   if (!Number.isFinite(lightLevel)) {
     throw new RangeError(`environment light level must be finite; received ${String(lightLevel)}`);

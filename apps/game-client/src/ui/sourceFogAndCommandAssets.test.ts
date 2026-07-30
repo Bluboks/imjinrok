@@ -11,9 +11,12 @@ import {
   SOURCE_FOG_COMPOSITE_ASSETS,
   requireSourceTexture,
   assertSourceFogFamilyIndex,
+  assertSourceFogGroundLayerFamilies,
   assertSourceFogVisualProfile,
   buildSourceFogCornerMask,
   expandSourceFogDirtyChunkMask,
+  getSourceFogNeighborVisibility,
+  requireSourceFogGroundLayer,
   resolveEnvironmentOverlayLightContract,
   reproduceSourceFogFrameIndices,
   resolveSourceCommandIcon,
@@ -70,6 +73,17 @@ test("source fog expands dirty chunks across the exact eight-neighbor boundary",
   center[4] = 1;
   assert.equal(expandSourceFogDirtyChunkMask(center, 3, 3), 9);
   assert.throws(() => expandSourceFogDirtyChunkMask(new Uint8Array(1), 0, 1), /positive integers/);
+});
+
+test("source fog excludes out-of-bounds neighbors and validates only the rendered ground layer", () => {
+  assert.equal(getSourceFogNeighborVisibility(0, 0, "topLeft", 2, 2, () => "unseen"), "visible");
+  assert.equal(getSourceFogNeighborVisibility(1, 1, "topLeft", 2, 2, () => "unseen"), "unseen");
+  const ground = { tiles: [{ fogVisuals: { familyIndex: 0 } }] };
+  const overlay = { tiles: [{}] };
+  assert.equal(requireSourceFogGroundLayer([ground, overlay]), ground);
+  assert.doesNotThrow(() => assertSourceFogGroundLayerFamilies([ground, overlay]));
+  assert.throws(() => assertSourceFogGroundLayerFamilies([{ tiles: [{}] }]), /family index/);
+  assert.throws(() => requireSourceFogGroundLayer([]), /ground layer at index 0/);
 });
 
 test("environment overlay contract preserves four-decimal light-curve redraw precision", () => {

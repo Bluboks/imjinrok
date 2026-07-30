@@ -183,15 +183,15 @@ import {
 import { createFormationTargets } from "../formation.js";
 import { launchGameWithPreGameBriefing } from "../preGameBriefingLaunch.js";
 import {
-  assertSourceFogFamilyIndex,
+  assertSourceFogGroundLayerFamilies,
   assertSourceFogVisualProfile,
   expandSourceFogDirtyChunkMask,
+  getSourceFogNeighborVisibility,
   requireSourceTexture,
   resolveEnvironmentOverlayLightContract,
   resolveSourceFogComposite,
   resolveSourceFogCompositeScale,
   SOURCE_FOG_COMPOSITE_ASSETS,
-  SOURCE_FOG_NEIGHBOR_OFFSETS,
   type FogVisibility,
   type SourceFogComposite,
 } from "../ui/sourceFogAndCommandAssets.js";
@@ -7037,12 +7037,14 @@ export class SkirmishScene extends Phaser.Scene {
       this.map.fogVisualProfileId,
       getTileAt(this.map, x, y).fogVisuals?.familyIndex,
       this.toSourceFogVisibility(visibility),
-      (neighbor) => {
-        const offset = SOURCE_FOG_NEIGHBOR_OFFSETS[neighbor];
-        const neighborX = x + offset.x;
-        const neighborY = y + offset.y;
-        return this.toSourceFogVisibility(this.getFogVisibilityAt(neighborX, neighborY));
-      },
+      (neighbor) => getSourceFogNeighborVisibility(
+        x,
+        y,
+        neighbor,
+        this.map.width,
+        this.map.height,
+        (neighborX, neighborY) => this.toSourceFogVisibility(this.getFogVisibilityAt(neighborX, neighborY)),
+      ),
     );
 
     if (!source) return;
@@ -7230,11 +7232,7 @@ export class SkirmishScene extends Phaser.Scene {
   private ensureSourceFogCompositeTextures(): void {
     if (!this.map.fogVisualProfileId) return;
     assertSourceFogVisualProfile(this.map.fogVisualProfileId);
-    for (const layer of this.map.layers) {
-      for (const tile of layer.tiles) {
-        assertSourceFogFamilyIndex(tile.fogVisuals?.familyIndex);
-      }
-    }
+    assertSourceFogGroundLayerFamilies(this.map.layers);
     for (const asset of SOURCE_FOG_COMPOSITE_ASSETS) {
       requireSourceTexture(asset, (textureKey) => this.textures.exists(textureKey));
     }
