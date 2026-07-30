@@ -53,6 +53,9 @@ export function resolveTerrainElevationOverlayLiftPixels(
   slot: TerrainKindSlot,
   stepHeight: number,
 ): number {
+  if (!Number.isFinite(presentation.liftPixels) || presentation.liftPixels < 0) {
+    throw new RangeError(`Terrain elevation lift must be a non-negative finite pixel value; received ${presentation.liftPixels}.`);
+  }
   if (!Number.isFinite(stepHeight) || stepHeight <= 0) {
     throw new RangeError(`Terrain elevation step height must be finite and positive; received ${stepHeight}.`);
   }

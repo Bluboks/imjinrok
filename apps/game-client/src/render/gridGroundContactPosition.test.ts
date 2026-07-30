@@ -31,6 +31,38 @@ test("anchors integer objects and fractional motion to the sampled elevation sur
   );
 });
 
+test("moves continuously from a flat cell across a ramp onto an adjacent plateau", () => {
+  const rampMap = createBlankMap({ width: 3, height: 1, tileWidth: 64, tileHeight: 32 });
+  const tiles = rampMap.layers[0]?.tiles;
+  assert.ok(tiles);
+  tiles[1] = { ...tiles[1]!, elevation: 1 };
+  tiles[2] = { ...tiles[2]!, elevation: 1 };
+
+  const positions = [0, 0.25, 0.5, 0.75, 1, 1.25].map((x) => (
+    resolveGridGroundContactWorldPosition({ x, y: 0 }, mapOrigin, rampMap)
+  ));
+
+  assert.deepEqual(positions, [
+    { x: 320, y: 160 },
+    { x: 328, y: 160 },
+    { x: 336, y: 160 },
+    { x: 344, y: 160 },
+    { x: 352, y: 160 },
+    { x: 360, y: 164 },
+  ]);
+});
+
+test("rejects invalid grid and map-origin coordinates before producing a placement", () => {
+  assert.throws(
+    () => resolveGridGroundContactWorldPosition({ x: Number.NaN, y: 0 }, mapOrigin, mapGeometry),
+    /Surface elevation coordinates must be finite; received NaN,0/u,
+  );
+  assert.throws(
+    () => resolveGridGroundContactWorldPosition({ x: 0, y: 0 }, { x: Number.POSITIVE_INFINITY, y: 0 }, mapGeometry),
+    /Map ground-contact origin coordinates must be finite; received Infinity,0/u,
+  );
+});
+
 test("SkirmishScene uses the ground-contact helper without the legacy half-tile offset", () => {
   const scenePath = resolve(dirname(fileURLToPath(import.meta.url)), "../scenes/SkirmishScene.ts");
   const sceneSource = readFileSync(scenePath, "utf8");
@@ -49,6 +81,7 @@ test("SkirmishScene routes resource anchors through the same ground-contact cont
   assert.ok(resourceMethod, "SkirmishScene resource ground-contact method must exist");
   assert.match(resourceMethod, /resolveGridGroundContactWorldPosition\(point, this\.mapOrigin, this\.map\)/);
   assert.doesNotMatch(resourceMethod, /cartToIso/);
+  assert.match(sceneSource, /private getUnitWorldPosition\(unit: UnitState\): Phaser\.Math\.Vector2 \{\s+return this\.getGridPointWorldPosition\(unit\.position\);/);
   assert.match(sceneSource, /const unitPosition = this\.getUnitWorldPosition\(unit\);/);
   assert.match(sceneSource, /private getObjectiveAreaWorldPoints[\s\S]*?this\.getGridGroundContactWorldPoint\(/);
 });

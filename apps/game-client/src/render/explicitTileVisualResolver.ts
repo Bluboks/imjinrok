@@ -171,6 +171,7 @@ export function resolveTileImagePlacement(
   if (!Number.isFinite(elevationStepHeight) || elevationStepHeight <= 0) {
     throw new RangeError(`explicit tile placement requires a positive finite elevation step height; received ${elevationStepHeight}`);
   }
+  assertFiniteGroundContact(groundContact);
 
   const geometry = descriptor.imageGeometry;
   assertImageGeometry(geometry, "explicit", "asset");
@@ -273,6 +274,14 @@ function assertImageGeometry(
 function assertSourcePixelOffset(offset: { readonly x: number; readonly y: number }): void {
   if (!Number.isFinite(offset.x) || !Number.isFinite(offset.y)) {
     throw new Error("Explicit tile visual sourcePixelOffset must contain finite x and y values.");
+  }
+}
+
+function assertFiniteGroundContact(groundContact: { readonly x: number; readonly y: number }): void {
+  if (!Number.isFinite(groundContact.x) || !Number.isFinite(groundContact.y)) {
+    throw new RangeError(
+      `Explicit tile placement ground-contact coordinates must be finite; received ${groundContact.x},${groundContact.y}.`,
+    );
   }
 }
 
