@@ -13,7 +13,7 @@
 | K01 palette step identity | `원본 기반` | bounded 8,640 admitted-update schedule과 `night1`~`night4` identity; product tick calibration은 별도 적응 |
 | light curve와 dawn/day/dusk/night simulation output | `의도적 적응` | opt-in fixed-tick curve |
 | K01 원본 tile source object/frame selector | `원본 사실` | `FUN_00469330`의 K01 normal source object/frame 범위; pixel placement와 terrain 의미는 별도 |
-| K01 exact visual export·map assignment | `source-backed project adaptation` | 243 normal PNG와 K01-only explicit flat asset assignment; hash-bound raw `0/16` second-argument stream을 보존하되 emitted `grss1_0000` alpha/low-nibble coverage vector로 선택한 shared ground anchor와 source-art footprint underlay |
+| K01 exact visual export·map assignment | `source-backed project adaptation` | 243 normal PNG와 K01-only explicit flat asset assignment; hash-bound raw `0/16` second-argument stream을 `TileCell.elevation` base/one-raised product level로 적응하고 emitted `grss1_0000` alpha/low-nibble coverage vector로 선택한 shared ground anchor·source-art footprint underlay 및 embedded-relief marker를 사용 |
 
 ## 원본 source fact
 
@@ -42,8 +42,10 @@ object/frame의 제한된 경로를 정적 확정했다. `crop0` frame 0→`rice
 catalog pack이다. 이를 `isorts-core`와 조합해야 map reference가 resolve된다.
 
 K01/K02 scaffold는 `imjinrok-normal` tileset identity를 선택한다. K01은 source selector가 확정한 3,600개
-object/frame stream을 243개 exported normal PNG의 explicit **flat** selection으로 적용한다. 이것은 terrain
-type/passability/elevation을 바꾸지 않으며 `hill`/`diff` filename도 world meaning으로 승격하지 않는다. K02에는
+object/frame stream을 243개 exported normal PNG의 explicit **flat** selection으로 적용한다. K01은 별도 static
+placement boundary가 고정한 raw `0/16` stream만 `TileCell.elevation`의 `0/1` physical product level로 적응하며,
+`flatArtworkEmbedsRelief=true`로 source flat artwork 자체의 relief를 선언한다. 이것은 `hill`/`diff` filename이나
+unresolved helper/table을 world meaning으로 승격하지 않는다. K02에는
 이 K01-only selection을 적용하지 않는다. K01의 bounded palette schedule은 아래의 별도 visual-step contract만
 적용하며, K01에 자원 node를 새로 추가하지 않고 existing K01 resource tile가 없는 상태도 그대로다.
 
