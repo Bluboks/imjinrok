@@ -97,6 +97,9 @@ import {
   GAME_PLAYBACK_CHANGED_EVENT,
   GAME_PLAYBACK_CONTROL_EVENT,
   GAME_PLAYBACK_REGISTRY_KEY,
+  MAGIC_AUTO_USE_CHANGED_EVENT,
+  MAGIC_AUTO_USE_REGISTRY_KEY,
+  MAGIC_AUTO_USE_REQUESTED_EVENT,
   MINIMAP_ALERT_EVENT,
   MINIMAP_NAVIGATE_EVENT,
   MINIMAP_ENTITIES_CHANGED_EVENT,
@@ -124,6 +127,9 @@ import {
   type MinimapAlertView,
   type MinimapPoint,
   type MinimapResourcesView,
+  type MagicAutoUseRequestedView,
+  type MagicAutoUseView,
+  createMagicAutoUseView,
   type PlayerEconomyView,
   toSelectedEntityView,
 } from "../hud.js";
@@ -767,6 +773,7 @@ export class SkirmishScene extends Phaser.Scene {
     this.syncUnitRenderables();
     this.publishVirtualCursor();
     this.publishPlayerEconomy();
+    this.publishMagicAutoUse();
     this.publishBattlefieldSummary();
     this.publishGamePlayback();
     this.selectInitialUnit(this.localPlayerId);
@@ -819,6 +826,7 @@ export class SkirmishScene extends Phaser.Scene {
     this.syncProgressAudioState(true);
     this.playCombatEvents();
     this.publishPlayerEconomy();
+    this.publishMagicAutoUse();
     this.publishBattlefieldSummary();
     this.emitSelectionChanged();
     if (dirtyFogChunkCount > 0) {
@@ -1034,6 +1042,7 @@ export class SkirmishScene extends Phaser.Scene {
     this.game.events.on(ACTION_TRIGGERED_EVENT, this.handleActionTriggered, this);
     this.game.events.on(BATTLEFIELD_SUMMARY_ACTION_EVENT, this.handleBattlefieldSummaryAction, this);
     this.game.events.on(GAME_PLAYBACK_CONTROL_EVENT, this.handlePlaybackControl, this);
+    this.game.events.on(MAGIC_AUTO_USE_REQUESTED_EVENT, this.handleMagicAutoUseRequested, this);
     this.scale.on(Phaser.Scale.Events.RESIZE, this.handleResize, this);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, this.handleShutdown, this);
   }
@@ -1045,6 +1054,27 @@ export class SkirmishScene extends Phaser.Scene {
 
     this.centerCameraOnWorldPoint(target);
     this.publishMinimapViewport(true);
+  }
+
+  private handleMagicAutoUseRequested(request: MagicAutoUseRequestedView): void {
+    if (this.worldState.scenario.status !== "running" || this.isBlockingModalOpen()) {
+      return;
+    }
+
+    const envelope: CommandEnvelope = {
+      sessionId: this.launchContext?.session?.id ?? "offline-skirmish",
+      playerId: this.localPlayerId,
+      issuedAtTick: this.worldState.tick,
+      command: { type: "set-magic-auto-use", enabled: request.enabled },
+    };
+
+    void this.issueCommandEnvelope(envelope).then((result) => {
+      if (!result?.ok) {
+        return;
+      }
+      this.syncWorldFromTransport(true);
+      this.publishMagicAutoUse();
+    });
   }
 
   private handleActionTriggered(action: ActionTriggeredView): void {
@@ -1187,6 +1217,7 @@ export class SkirmishScene extends Phaser.Scene {
     this.game.events.off(ACTION_TRIGGERED_EVENT, this.handleActionTriggered, this);
     this.game.events.off(BATTLEFIELD_SUMMARY_ACTION_EVENT, this.handleBattlefieldSummaryAction, this);
     this.game.events.off(GAME_PLAYBACK_CONTROL_EVENT, this.handlePlaybackControl, this);
+    this.game.events.off(MAGIC_AUTO_USE_REQUESTED_EVENT, this.handleMagicAutoUseRequested, this);
     this.scale.off(Phaser.Scale.Events.RESIZE, this.handleResize, this);
     this.clearHudRegistryState();
     this.terrainChunks.forEach((chunk) => chunk.destroy());
@@ -1249,6 +1280,7 @@ export class SkirmishScene extends Phaser.Scene {
       PLAYER_ECONOMY_REGISTRY_KEY,
       BATTLEFIELD_SUMMARY_REGISTRY_KEY,
       GAME_PLAYBACK_REGISTRY_KEY,
+      MAGIC_AUTO_USE_REGISTRY_KEY,
     ]);
   }
 
@@ -5678,6 +5710,15 @@ export class SkirmishScene extends Phaser.Scene {
     this.game.events.emit(PLAYER_ECONOMY_CHANGED_EVENT, view);
   }
 
+  private publishMagicAutoUse(): void {
+    const view: MagicAutoUseView = createMagicAutoUseView(
+      this.localPlayerId,
+      this.worldState.players[this.localPlayerId]?.magicAutoUseEnabled,
+    );
+    this.registry.set(MAGIC_AUTO_USE_REGISTRY_KEY, view);
+    this.game.events.emit(MAGIC_AUTO_USE_CHANGED_EVENT, view);
+  }
+
   private createPlayerResearchView(playerId: string): PlayerEconomyView["research"] {
     const completed = Object.entries(this.worldState.playerResearch[playerId]?.completed ?? {})
       .filter(([, done]) => done)
@@ -6516,6 +6557,7 @@ export class SkirmishScene extends Phaser.Scene {
     this.syncProgressAudioState(true);
     this.playCombatEvents();
     this.publishPlayerEconomy();
+    this.publishMagicAutoUse();
     this.publishBattlefieldSummary();
     this.emitSelectionChanged();
     if (dirtyFogChunkCount > 0) {

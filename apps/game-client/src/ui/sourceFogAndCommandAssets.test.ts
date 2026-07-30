@@ -22,6 +22,7 @@ import {
   resolveEnvironmentOverlayLightContract,
   reproduceSourceFogFrameIndices,
   resolveSourceCommandIcon,
+  resolveMagicAutoUseSourceCommandIcon,
   resolveSourceCommandIconProfileForScenario,
   resolveSourceFogComposite,
   resolveSourceFogLayerPlan,
@@ -163,6 +164,17 @@ test("the opt-in Imjinrok profile binds exact controls and labels source-backed 
     ],
   );
   assert.equal(resolveSourceCommandIcon("move", IMJINROK_SOURCE_COMMAND_ICON_PROFILE)?.sourceFrameIndex, 6);
+  assert.deepEqual(
+    resolveMagicAutoUseSourceCommandIcon(false, IMJINROK_SOURCE_COMMAND_ICON_PROFILE),
+    {
+      ...ORIGINAL_COMMAND_ICON_ASSETS.find((asset) => asset.sourceFrameIndex === 27)!,
+      sourceActionWord: 61,
+      sourceLabel: "자동마법설정",
+      evidenceStatus: "exact-source-control-binding",
+    },
+  );
+  assert.equal(resolveMagicAutoUseSourceCommandIcon(true, IMJINROK_SOURCE_COMMAND_ICON_PROFILE)?.sourceFrameIndex, 26);
+  assert.equal(resolveMagicAutoUseSourceCommandIcon(false), undefined);
   assert.equal(resolveSourceCommandIconProfileForScenario("core-default"), undefined);
   assert.equal(resolveSourceCommandIconProfileForScenario("imjinrok-k01-opening"), IMJINROK_SOURCE_COMMAND_ICON_PROFILE);
 });

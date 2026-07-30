@@ -1,6 +1,6 @@
 import Phaser from "phaser";
 import { actionDefinitions, researchDefinitions, unitCanPerformAction, unitDefinitions, type ActionDefinitionId, type BankResourceKind, type ResearchDefinition, type ResearchDefinitionId, type UnitDefinition, type UnitDefinitionId } from "@shared";
-import type { ActionTriggerSource, PlayerEconomyView, SelectedEntitiesView } from "../hud.js";
+import type { ActionTriggerSource, MagicAutoUseView, PlayerEconomyView, SelectedEntitiesView } from "../hud.js";
 import { drawPanelFrame, HUD_TEXT_STYLE, type PanelBounds } from "./hudPanel.js";
 import {
   ADAPTIVE_ACTION_GRID_LAYOUT,
@@ -8,6 +8,7 @@ import {
 } from "./actionGridLayoutPolicy.js";
 import {
   requireSourceTexture,
+  resolveMagicAutoUseSourceCommandIcon,
   resolveSourceCommandIcon,
   type SourceCommandIcon,
   type SourceCommandIconBinding,
@@ -16,6 +17,7 @@ import {
 
 export interface HudActionSlot {
   actionId?: ActionDefinitionId;
+  globalAction?: { type: "toggle-magic-auto-use"; enabled: boolean };
   sourceIcon?: SourceCommandIconBinding;
   icon: string;
   hotkey: string;
@@ -25,6 +27,7 @@ export interface HudActionSlot {
 }
 
 export type HudActionHandler = (actionId: ActionDefinitionId, source: ActionTriggerSource) => void;
+export type HudGlobalActionHandler = (action: NonNullable<HudActionSlot["globalAction"]>, source: "button") => void;
 
 export interface ActionGridSlotRect {
   x: number;
@@ -85,11 +88,13 @@ export function drawActionGrid(
   onAction?: HudActionHandler,
   layout: ActionGridLayoutPolicy = ADAPTIVE_ACTION_GRID_LAYOUT,
   sourceIconProfile?: SourceCommandIconProfile,
+  magicAutoUse?: MagicAutoUseView | null,
+  onGlobalAction?: HudGlobalActionHandler,
 ): void {
   const { x, y, width, height } = bounds;
   drawPanelFrame(scene, container, graphics, bounds, "명령");
 
-  const actions = getActionSlots(selectedEntities, playerEconomy, sourceIconProfile);
+  const actions = getActionSlots(selectedEntities, playerEconomy, sourceIconProfile, magicAutoUse);
   const slotRects = resolveActionGridSlotRects(bounds, layout);
 
   for (const [index, slot] of slotRects.entries()) {
@@ -113,13 +118,21 @@ export function drawActionGrid(
       graphics.lineBetween(slotX + 8, slotY + renderedSlotHeight - 8, slotX + renderedSlotWidth - 8, slotY + 8);
     }
 
-    if (action.enabled && action.actionId && onAction) {
+    if (action.enabled && (action.actionId || action.globalAction) && (onAction || onGlobalAction)) {
       const hitZone = scene.add
         .zone(slotX, slotY, renderedSlotWidth, renderedSlotHeight)
         .setOrigin(0, 0)
         .setInteractive({ useHandCursor: true });
 
-      hitZone.on("pointerup", () => onAction(action.actionId as ActionDefinitionId, "button"));
+      hitZone.on("pointerup", () => {
+        if (action.actionId && onAction) {
+          onAction(action.actionId, "button");
+          return;
+        }
+        if (action.globalAction && onGlobalAction) {
+          onGlobalAction(action.globalAction, "button");
+        }
+      });
 
       container.add(hitZone);
     }
@@ -197,11 +210,15 @@ export function getActionSlots(
   selectedEntities: SelectedEntitiesView,
   playerEconomy: PlayerEconomyView | null,
   sourceIconProfile?: SourceCommandIconProfile,
+  magicAutoUse?: MagicAutoUseView | null,
 ): HudActionSlot[] {
   const emptySlot = (): HudActionSlot => ({ icon: "", hotkey: "", label: "", enabled: false });
   const slots = Array.from({ length: 12 }, emptySlot);
 
   if (selectedEntities.length === 0) {
+    if (magicAutoUse) {
+      slots[0] = toMagicAutoUseHudActionSlot(magicAutoUse, sourceIconProfile);
+    }
     return slots;
   }
 
@@ -213,6 +230,21 @@ export function getActionSlots(
   });
 
   return slots;
+}
+
+function toMagicAutoUseHudActionSlot(
+  magicAutoUse: MagicAutoUseView,
+  sourceIconProfile?: SourceCommandIconProfile,
+): HudActionSlot {
+  const sourceIcon = resolveMagicAutoUseSourceCommandIcon(magicAutoUse.enabled, sourceIconProfile);
+  return {
+    globalAction: { type: "toggle-magic-auto-use", enabled: !magicAutoUse.enabled },
+    ...(sourceIcon ? { sourceIcon } : {}),
+    icon: "✦",
+    hotkey: "",
+    label: magicAutoUse.enabled ? "자동마법해제" : "자동마법설정",
+    enabled: true,
+  };
 }
 
 export function getEnabledActionForHotkey(

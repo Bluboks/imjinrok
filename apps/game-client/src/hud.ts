@@ -30,6 +30,9 @@ export const BATTLEFIELD_SUMMARY_ACTION_EVENT = "battlefield-summary:action";
 export const GAME_PLAYBACK_CHANGED_EVENT = "game-playback:changed";
 export const GAME_PLAYBACK_REGISTRY_KEY = "game-playback";
 export const GAME_PLAYBACK_CONTROL_EVENT = "game-playback:control";
+export const MAGIC_AUTO_USE_CHANGED_EVENT = "magic-auto-use:changed";
+export const MAGIC_AUTO_USE_REGISTRY_KEY = "magic-auto-use";
+export const MAGIC_AUTO_USE_REQUESTED_EVENT = "magic-auto-use:requested";
 
 export interface SelectedEntityView {
   id: string;
@@ -136,6 +139,23 @@ export interface GamePlaybackView {
 
 export interface GamePlaybackControlView {
   type: "toggle-audio" | "toggle-pause" | "speed-down" | "speed-up";
+}
+
+/** Serializable player-global automation state carried through the HUD bridge. */
+export interface MagicAutoUseView {
+  playerId: string;
+  enabled: boolean;
+}
+
+/** Typed UI-to-game command request; it deliberately has no selected-unit id. */
+export interface MagicAutoUseRequestedView {
+  enabled: boolean;
+  source: "button";
+}
+
+/** Missing legacy snapshot state is the source-aligned disabled product default. */
+export function createMagicAutoUseView(playerId: string, enabled: boolean | undefined): MagicAutoUseView {
+  return { playerId, enabled: enabled === true };
 }
 
 export type ActionTriggerSource = "button" | "hotkey";

@@ -59,3 +59,48 @@ test("the Imjinrok profile supplies its source-backed bindings without changing 
     ],
   );
 });
+
+test("no-selection K01 grid exposes the source-bound magic auto-use toggle in slot zero", () => {
+  const disabled = getActionSlots([], null, IMJINROK_SOURCE_COMMAND_ICON_PROFILE, { playerId: "p1", enabled: false });
+  const enabled = getActionSlots([], null, IMJINROK_SOURCE_COMMAND_ICON_PROFILE, { playerId: "p1", enabled: true });
+
+  assert.equal(disabled.length, 12);
+  assert.deepEqual(disabled[0], {
+    globalAction: { type: "toggle-magic-auto-use", enabled: true },
+    sourceIcon: {
+      ...ORIGINAL_COMMAND_ICON_ASSETS.find((asset) => asset.sourceFrameIndex === 27)!,
+      sourceActionWord: 61,
+      sourceLabel: "자동마법설정",
+      evidenceStatus: "exact-source-control-binding",
+    },
+    icon: "✦",
+    hotkey: "",
+    label: "자동마법설정",
+    enabled: true,
+  });
+  assert.equal(enabled[0]?.label, "자동마법해제");
+  assert.equal(enabled[0]?.sourceIcon?.sourceActionWord, 62);
+  assert.equal(enabled[0]?.sourceIcon?.sourceFrameIndex, 26);
+  assert.equal(enabled[0]?.sourceIcon?.evidenceStatus, "exact-source-control-binding");
+  assert.deepEqual(disabled.slice(1), Array.from({ length: 11 }, () => ({ icon: "", hotkey: "", label: "", enabled: false })));
+});
+
+test("magic auto-use keeps glyph fallback outside the opted-in K01 source profile and never alters selected-unit slots", () => {
+  const generic = getActionSlots([], null, undefined, { playerId: "mod-player", enabled: false });
+  const selectedWithoutState = getActionSlots([{ id: "unit", kind: "villager", construction: false }], null);
+  const selectedWithState = getActionSlots(
+    [{ id: "unit", kind: "villager", construction: false }],
+    null,
+    IMJINROK_SOURCE_COMMAND_ICON_PROFILE,
+    { playerId: "p1", enabled: true },
+  );
+
+  assert.equal(generic[0]?.sourceIcon, undefined);
+  assert.deepEqual(resolveActionIconVisual(generic[0]!), { kind: "glyph", glyph: "✦" });
+  assert.deepEqual(
+    selectedWithState.map(({ actionId, label }) => [actionId, label]),
+    getActionSlots([{ id: "unit", kind: "villager", construction: false }], null, IMJINROK_SOURCE_COMMAND_ICON_PROFILE)
+      .map(({ actionId, label }) => [actionId, label]),
+  );
+  assert.equal(selectedWithoutState[0]?.globalAction, undefined);
+});

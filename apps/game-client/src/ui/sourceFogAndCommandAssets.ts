@@ -36,6 +36,11 @@ export interface SourceCommandIconBinding extends SourceCommandIcon {
 export interface SourceCommandIconProfile {
   readonly id: string;
   readonly actionBindings: Readonly<Partial<Record<ActionDefinitionId, SourceCommandIconBinding>>>;
+  /** Player-global controls are separate from ActionDefinitionId/unit capabilities. */
+  readonly magicAutoUseBindings?: Readonly<{
+    enable: SourceCommandIconBinding;
+    disable: SourceCommandIconBinding;
+  }>;
 }
 
 export interface OriginalCommandControlBinding {
@@ -168,6 +173,25 @@ function bindSourceCommandIcon(
   sourceFrameIndex: number,
   evidenceStatus: SourceCommandIconEvidenceStatus,
 ): SourceCommandIconBinding {
+  void actionId;
+  return bindSourceControlIcon(sourceActionWord, sourceLabel, sourceFrameIndex, evidenceStatus);
+}
+
+function bindSourceGlobalCommandIcon(
+  sourceActionWord: number,
+  sourceLabel: string,
+  sourceFrameIndex: number,
+  evidenceStatus: SourceCommandIconEvidenceStatus,
+): SourceCommandIconBinding {
+  return bindSourceControlIcon(sourceActionWord, sourceLabel, sourceFrameIndex, evidenceStatus);
+}
+
+function bindSourceControlIcon(
+  sourceActionWord: number,
+  sourceLabel: string,
+  sourceFrameIndex: number,
+  evidenceStatus: SourceCommandIconEvidenceStatus,
+): SourceCommandIconBinding {
   const asset = commandIconByFrame.get(sourceFrameIndex);
   if (!asset) {
     throw new Error(`Missing registered source command icon for button.spr frame ${sourceFrameIndex}`);
@@ -188,6 +212,10 @@ export const IMJINROK_SOURCE_COMMAND_ICON_PROFILE: SourceCommandIconProfile = Ob
     "cancel-construction": bindSourceCommandIcon("cancel-construction", 19, "취소", 45, "exact-source-control-binding"),
     "attack-move": bindSourceCommandIcon("attack-move", 5, "공격", 4, "source-backed-adaptation"),
     build: bindSourceCommandIcon("build", 11, "건설", 16, "source-backed-adaptation"),
+  }),
+  magicAutoUseBindings: Object.freeze({
+    enable: bindSourceGlobalCommandIcon(61, "자동마법설정", 27, "exact-source-control-binding"),
+    disable: bindSourceGlobalCommandIcon(62, "자동마법해제", 26, "exact-source-control-binding"),
   }),
 });
 
@@ -364,6 +392,13 @@ export function resolveSourceCommandIcon(
   profile?: SourceCommandIconProfile,
 ): SourceCommandIconBinding | undefined {
   return profile?.actionBindings[actionId];
+}
+
+export function resolveMagicAutoUseSourceCommandIcon(
+  enabled: boolean,
+  profile?: SourceCommandIconProfile,
+): SourceCommandIconBinding | undefined {
+  return enabled ? profile?.magicAutoUseBindings?.disable : profile?.magicAutoUseBindings?.enable;
 }
 
 export function requireSourceTexture(
