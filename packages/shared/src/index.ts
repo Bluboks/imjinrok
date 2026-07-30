@@ -5,6 +5,7 @@ export * from "./commands.js";
 export * from "./damage.js";
 export * from "./entityPortrait.js";
 export * from "./elevationAutotile.js";
+export * from "./elevationProfile.js";
 export * from "./environment.js";
 export * from "./imjinrokMaps.js";
 export * from "./k01SourceTileVisuals.js";

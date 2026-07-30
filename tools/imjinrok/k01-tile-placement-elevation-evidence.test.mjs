@@ -8,6 +8,7 @@ import test from "node:test";
 
 import {
   extractK01TilePlacementElevationEvidence,
+  reproduceFUN00464cc0Projection,
   reproduceFUN00469510Placement,
   reproduceK01PlacementHelper,
   reproducePlacementLevel,
@@ -29,8 +30,39 @@ test("hash-bound extractor reproduces all K01 placement/object/frame vectors", (
   assert.equal(report.cellStream.sha256, "78d0d96e0157e60cf9d2e2e4325941510f8911dbc9a57422ad00220874ad406c");
   assert.deepEqual(report.placement.helper.K01Distribution.placementLevel, { 0: 3600 });
   assert.deepEqual(report.placement.lowNibbleBranch.K01Distribution.verticalShift, { 0: 2865, 16: 735 });
+  assert.deepEqual(report.cellProjection.K01Distribution.helperLookup, { 0: 3600 });
+  assert.deepEqual(report.cellProjection.K01Distribution.helperReturn, { 0: 3600 });
+  assert.deepEqual(report.cellProjection.K01Distribution.sourceBackedRawRelativeComponent.values, { 0: 2865, 16: 735 });
+  assert.equal(report.cellProjection.K01Distribution.sourceBackedRawRelativeComponent.sha256, "76cc670258325ebc671d19b6f864768bf376328a7573ca7b29887c780e50b864");
   assert.equal(report.sources.sourceTileSelector.allK01ObjectFramesWithinValidatedSourceHeaders, true);
   assert.equal(report.sources.sourceTileSelector.pairStream.count, 3600);
+});
+
+test("FUN_00464cc0 reproducer fixes bounded base projection and separates the unresolved table input", () => {
+  const map = readFileSync(mapPath);
+  assert.deepEqual(reproduceFUN00464cc0Projection(map, { x: 0, y: 1, runtimeWord: 7 }), {
+    admitted: true,
+    x: 0,
+    y: 1,
+    fogFamily: 0,
+    lowNibble: 2,
+    placementLevel: 0,
+    outputX: -32,
+    outputY: 39,
+    relativeComponent: 16,
+  });
+  assert.deepEqual(reproduceFUN00464cc0Projection(map, { x: 0, y: 0, runtimeWord: -3 }), {
+    admitted: true,
+    x: 0,
+    y: 0,
+    fogFamily: 10,
+    lowNibble: 1,
+    placementLevel: 0,
+    outputX: 0,
+    outputY: -3,
+    relativeComponent: 0,
+  });
+  assert.deepEqual(reproduceFUN00464cc0Projection(map, { x: -1, y: 0 }), { admitted: false });
 });
 
 test("pure FUN_00469510 reproducer keeps the low-nibble-two and other branches separate at map corners", () => {
@@ -91,8 +123,10 @@ test("pure reference functions fail closed for malformed, out-of-range, and non-
   assert.throws(() => reproduceFUN00469510Placement(map, { argument1: 0, verticalArgument2: 0, x: 0.5, y: 0 }), /signed 16-bit/u);
   assert.throws(() => reproduceFUN00469510Placement(map, { argument1: 0x80000000, verticalArgument2: 0, x: 0, y: 0 }), /signed 32-bit/u);
   assert.throws(() => reproduceK01PlacementHelper(Buffer.alloc(1), 0, 0), /too short/u);
+  assert.throws(() => reproduceFUN00464cc0Projection(Buffer.alloc(0x4a0c4), { x: 0, y: 0 }), /too short/u);
   assert.throws(() => reproducePlacementLevel(256, 0), /unsigned byte/u);
   assert.throws(() => reproducePlacementLevel(0, -1), /unsigned byte/u);
+  assert.throws(() => reproduceFUN00464cc0Projection(map, { x: 0, y: 0, runtimeWord: 0x8000 }), /signed 16-bit/u);
 });
 
 test("extractor rejects single-byte tampering of every hash-bound primary input", (t) => {
