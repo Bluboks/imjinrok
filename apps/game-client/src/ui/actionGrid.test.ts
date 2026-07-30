@@ -60,13 +60,37 @@ test("the Imjinrok profile supplies its source-backed bindings without changing 
   );
 });
 
-test("the source profile makes actions without a recovered source frame explicit disabled placeholders", () => {
-  const slots = getActionSlots(
+test("the K01 source profile preserves supported unbound action availability and glyph behavior", () => {
+  const k01Slots = getActionSlots(
     [{ id: "unit", kind: "villager", construction: false }],
     null,
     IMJINROK_SOURCE_COMMAND_ICON_PROFILE,
   );
-  const gather = slots.find(({ actionId }) => actionId === "gather");
+  const gather = k01Slots.find(({ actionId }) => actionId === "gather");
+
+  assert.deepEqual(gather, {
+    actionId: "gather",
+    icon: "G",
+    hotkey: "G",
+    label: "채집",
+    enabled: true,
+  });
+  assert.deepEqual(resolveActionIconVisual(gather!), {
+    kind: "glyph",
+    glyph: "G",
+  });
+});
+
+test("placeholder packs alter only an unbound action's visual, never its availability", () => {
+  const strictPresentationProfile = {
+    ...IMJINROK_SOURCE_COMMAND_ICON_PROFILE,
+    unboundActionPolicy: "disabled-placeholder" as const,
+  };
+  const gather = getActionSlots(
+    [{ id: "unit", kind: "villager", construction: false }],
+    null,
+    strictPresentationProfile,
+  ).find(({ actionId }) => actionId === "gather");
 
   assert.deepEqual(gather, {
     actionId: "gather",
@@ -74,8 +98,7 @@ test("the source profile makes actions without a recovered source frame explicit
     icon: "?",
     hotkey: "G",
     label: "채집",
-    enabled: false,
-    disabledReason: "미확인",
+    enabled: true,
   });
   assert.deepEqual(resolveActionIconVisual(gather!), {
     kind: "placeholder",

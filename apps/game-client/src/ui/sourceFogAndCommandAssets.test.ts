@@ -144,7 +144,7 @@ test("keeps original control bindings separate from exported image identity and 
 });
 
 test("the opt-in Imjinrok profile binds exact controls and labels source-backed adaptations", () => {
-  assert.equal(IMJINROK_SOURCE_COMMAND_ICON_PROFILE.unboundActionPolicy, "disabled-placeholder");
+  assert.equal(IMJINROK_SOURCE_COMMAND_ICON_PROFILE.unboundActionPolicy, "glyph-fallback");
   assert.deepEqual(
     Object.entries(IMJINROK_SOURCE_COMMAND_ICON_PROFILE.actionBindings).map(([actionId, binding]) => [
       actionId,

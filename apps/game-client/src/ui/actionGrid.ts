@@ -301,8 +301,7 @@ function toHudActionSlot(
       icon: "?",
       hotkey: action.hotkey,
       label: action.label,
-      enabled: false,
-      disabledReason: "미확인",
+      ...availability,
     };
   }
 

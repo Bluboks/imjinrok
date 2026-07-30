@@ -39,7 +39,8 @@ export interface SourceCommandIconProfile {
   readonly actionBindings: Readonly<Partial<Record<ActionDefinitionId, SourceCommandIconBinding>>>;
   /**
    * Product policy for actions without a source control/frame binding. This
-   * deliberately does not infer a neighboring button.spr frame.
+   * deliberately does not infer a neighboring button.spr frame and does not
+   * change an action's gameplay availability.
    */
   readonly unboundActionPolicy?: UnboundSourceCommandIconPolicy;
   /** Player-global controls are separate from ActionDefinitionId/unit capabilities. */
@@ -239,7 +240,7 @@ function bindSourceControlIcon(
 
 export const IMJINROK_SOURCE_COMMAND_ICON_PROFILE: SourceCommandIconProfile = Object.freeze({
   id: "imjinrok-source-command-icons",
-  unboundActionPolicy: "disabled-placeholder",
+  unboundActionPolicy: "glyph-fallback",
   actionBindings: Object.freeze({
     move: bindSourceCommandIcon("move", 3, "이동", 6, "exact-source-control-binding"),
     stop: bindSourceCommandIcon("stop", 2, "정지", 43, "exact-source-control-binding"),
