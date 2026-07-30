@@ -16,7 +16,7 @@
     },
     {
       "path": "packages/shared/src/content.ts",
-      "sha256": "5d8bc8bdb338f28ab52a9c90a53866aa9b07aaa636181347d12f75d079cf604e"
+      "sha256": "4d800714d081dbc39e2e6786f7720830b1a42f6eca3d4555ae0eddf369af6181"
     },
     {
       "path": "packages/shared/src/scenarios.ts",
@@ -28,7 +28,7 @@
     },
     {
       "path": "apps/game-client/src/scenes/SkirmishScene.ts",
-      "sha256": "f6e17e672f6dd503b5a4e6cae77dd7f7b8e7a96a6ea1aef19e365cd6e9229a61"
+      "sha256": "a2e6831dbe008f9dc5af65da8a084926ebd6c52ff3d32298de99c646fda6896a"
     },
     {
       "path": "apps/game-client/src/scenes/MissionBriefingScene.ts",
@@ -23541,7 +23541,8 @@
             "damage": 10,
             "range": 1.5,
             "cooldownTicks": 18,
-            "aggroRange": 7
+            "aggroRange": 7,
+            "projectileProfileId": "k01-ryu-subtype-0c-static-port"
           },
           "renderRadius": 6,
           "selectionRadius": 6,
