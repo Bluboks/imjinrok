@@ -26,17 +26,25 @@ const X_STRIDE = 180;
 const LOW_NIBBLE_OFFSET = 0x32514;
 const OBJECT_OFFSET = 0x3a3a4;
 const FRAME_OFFSET = 0x42234;
+const FOG_FAMILY_OFFSET = 0x4a0c4;
 const PLACEMENT_SELECTOR_OFFSET = 0x79824;
 const PLACEMENT_LOOKUP_OFFSET = 0x147d5;
 const PLACEMENT_SELECTOR_STRIDE = 0x1fa4;
 
 const RAW_CODE_RANGES = [
+  ["FUN_00464cc0 complete body", 0x00464cc0, 0x00464dde, "40b41b7ce95c3e7516c0bf2f6d01f1e86bf2848ed0ec5256f63d7858f55a1d10"],
   ["FUN_00469330 complete body", 0x00469330, 0x0046950c, "f1a131328d7fe0c85e26b90d4c7d28371f6f9ae41bd56f03dab68c9ab8510ec7"],
   ["FUN_00469510 complete body", 0x00469510, 0x00469917, "1d05579e1c2179989bd1441cb54510de8df4ecb24157dac496fda7f3c6c8f9ce"],
   ["FUN_0046d650 complete body", 0x0046d650, 0x0046d6d8, "bb8e887ed7cd73e5f881f75c033532c60aa7a9f66c5dd755f9e1a05cc12b7e8a"],
 ].map(([id, start, endExclusive, digest]) => ({ id, start, endExclusive, sha256: digest }));
 
 const EVIDENCE_POINTS = [
+  [0x00464cc6, "8b 4c 24 14 66 85 c9 7c 23 8b 87 a0 2d 00 00 0f bf f1 3b f0 7d 16 8b 44 24 18 66 85 c0 7c 0d", "FUN_00464cc0 reads signed-word x/y stack arguments and rejects negative or map-boundary coordinates."],
+  [0x00464d00, "e8 4b 89 00 00 8d 84 b6 e9 20 00 00 8b 6c 24 24 33 d2 8d 04 c0 8d 0c 83 8b c6 2b c3 8a 14 39", "FUN_00464cc0 calls FUN_0046d650 and reads map +0x4a0c4+x*180+y as the runtime WORD-table index."],
+  [0x00464d27, "8d 14 33 c1 e0 05 c1 e2 04 89 01 89 55 00", "FUN_00464cc0 writes (x-y)<<5 and (x+y)<<4 before the relative component."],
+  [0x00464d52, "8a 14 39 80 e2 0f 66 0f be c2 66 3d 02 00", "FUN_00464cc0 reads map +0x32514+x*180+y low nibble and compares exactly 2."],
+  [0x00464d6a, "50 51 8b cf e8 dd 88 00 00 0f bf d0 8b 44 24 10 c1 e2 04 0f bf 0c c5 86 6e c0 00", "FUN_00464cc0 low-nibble-2 branch calls FUN_0046d650 and combines helper<<4 with a signed WORD table value."],
+  [0x00464da7, "52 50 8b cf e8 a0 88 00 00 8b 4c 24 10 0f bf c0 99 33 c2 2b c2 0f bf 14 cd 86 6e c0 00 c1 e0 04", "FUN_00464cc0 other branch calls FUN_0046d650 and combines abs(helper)<<4 with the same signed WORD table."],
   [0x00469351, "8b 8e a0 2d 00 00 0f bf c7 3b c1 7d 47 66 85 ed 7c 42 8b 96 a4 2d 00 00 0f bf cd 3b ca 7d 35", "FUN_00469330 signed x/y bounds against map +0x2da0/+0x2da4"],
   [0x00469370, "8d 84 80 5d 16 00 00 8d 14 c0 8d 04 91 8a 0c 30 80 e1 0f 66 0f be c1 66 3d 02 00", "FUN_00469330 reads low nibble at map +0x32514+x*180+y and compares exactly 2"],
   [0x0046938d, "55 57 8b ce e8 ba 42 00 00 8b 5c 24 28 c1 e0 04 2b d8", "FUN_00469330 true branch calls helper(map,x,y) then subtracts helper<<4 from argument 2"],
@@ -55,12 +63,14 @@ const EVIDENCE_POINTS = [
 ].map(([va, bytes, meaning]) => ({ va, bytes, meaning }));
 
 const FUNCTION_SPECS = [
+  { entry: "0x00464cc0", bodyRange: "0x00464cc0-0x00464ddd", bodySize: 286, instructionCount: 103, instructionSha256: "0df728460a1833f756c0164f3968eda5de7312a64e87c52edc98aa5a33566781", callees: ["0x0046d650"] },
   { entry: "0x00469330", bodyRange: "0x00469330-0x0046950b", bodySize: 476, instructionCount: 150, instructionSha256: "f94f79c8a00da772f524665f0df56ba09b9bea8a861bd67d99fec4c7b30ec099", callees: ["0x0044af50", "0x0044afa0", "0x00454390", "0x0046d650"] },
   { entry: "0x00469510", bodyRange: "0x00469510-0x00469916", bodySize: 1031, instructionCount: 341, instructionSha256: "28849833f557b0f4863c88318828d72b8039639450bd42b5623927dd8ef036e3", callees: ["0x0044af50", "0x0044afa0", "0x00454250", "0x004542e0", "0x004547c0", "0x00454960", "0x0046d650"] },
   { entry: "0x0046d650", bodyRange: "0x0046d650-0x0046d6d7", bodySize: 136, instructionCount: 50, instructionSha256: "c0ee5121eb2700198c121447334f0b7572d28dce08e9e971020293233036d385", callees: [] },
 ];
 
 const REQUIRED_CALL_EDGES = [
+  ["0x00464d00", "0x00464cc0"], ["0x00464d6e", "0x00464cc0"], ["0x00464dab", "0x00464cc0"],
   ["0x00469391", "0x00469330"], ["0x004693a9", "0x00469330"], ["0x00469575", "0x00469510"], ["0x0046958b", "0x00469510"],
 ];
 
@@ -92,10 +102,10 @@ export function extractK01TilePlacementElevationEvidence({
   const shiftCounts = countBy(cells, "verticalShift");
 
   return {
-    question: "For hash-bound K01 cells, how do FUN_00469330/FUN_00469510 and FUN_0046d650 derive the second placement coordinate and source object/frame bytes?",
-    analysisStatus: "static-confirmed-for-K01-cell-placement-offset-and-source-object-frame-boundary",
+    question: "For hash-bound K01 cells, how do FUN_00464cc0, FUN_00469330/FUN_00469510 and FUN_0046d650 derive bounded isometric base coordinates, relative placement components, and source object/frame bytes?",
+    analysisStatus: "static-confirmed-for-bounded-K01-cell-projection-relative-component-and-source-object-frame-boundary",
     reproductionStatus: "reproduction-complete-for-all-K01-cell-vectors-and-fail-closed-reference-inputs",
-    implementationStatus: "analysis-only-no-product-renderer-change",
+    implementationStatus: "source-backed-product-elevation-adaptation-is-separate-from-original-renderer-parity",
     sources: {
       executable: sourceDescriptor(executablePath, executable),
       map: sourceDescriptor(mapPath, map),
@@ -145,11 +155,28 @@ export function extractK01TilePlacementElevationEvidence({
         { selector: 4, lookup: null, result: -1, boundary: "out-of-bounds helper return" },
       ],
     },
+    cellProjection: {
+      function: "FUN_00464cc0",
+      admission: "signed x/y in bounds => 1 after writing output coordinates; negative or x >= map.width or y >= map.height => 0 without output writes.",
+      baseOutput: { x: "(int32(x) - int32(y)) << 5", y: "(int32(x) + int32(y)) << 4" },
+      mapByte: "uint8(map + 0x4a0c4 + x * 180 + y); this address is the fog-family byte in FUN_0046a530, but FUN_00464cc0's runtime WORD table values and human semantics are unresolved.",
+      runtimeWordTable: "int16(DAT_00c06e86 + mapByte * 8)",
+      lowNibbleRelativeComponent: {
+        lowNibbleEquals2: "16 - (int16(FUN_0046d650(map, x, y)) << 4)",
+        other: "-(abs(int16(FUN_0046d650(map, x, y))) << 4)",
+        boundary: "The table and raw-coordinate axis are not named as height/elevation. K01 helper lookup and return streams are all zero; the source-backed product adapter separately preserves FUN_00469510's raw 0/16 stream.",
+      },
+      K01Distribution: {
+        helperLookup: lookupCounts,
+        helperReturn: helperReturnCounts,
+        sourceBackedRawRelativeComponent: summarizeRawRelativeComponent(cells),
+      },
+    },
     cellStream: summarizeCells(cells, header),
     representativeCells: [[0, 0], [0, 1], [0, 59], [59, 0], [59, 59]].map(([x, y]) => cells.find((cell) => cell.x === x && cell.y === y)),
     rawCodeRanges: RAW_CODE_RANGES.map((range) => verifyRawCodeRange(executable, image, range)),
     evidencePoints: EVIDENCE_POINTS.map((point) => verifyEvidencePoint(executable, image, point)),
-    unresolvedBoundary: "K01's 3,600 helper lookups are all zero, so this evidence does not justify calling the helper terrain elevation or height. It does not establish screen/world axis semantics, pixel anchor/pivot, human terrain/passability/fog meaning, other map/theme behavior, or product renderer parity.",
+    unresolvedBoundary: "K01's 3,600 helper lookups and returns are all zero, so this evidence does not justify calling the helper terrain elevation or height. The runtime WORD table at 0x00c06e86 has unresolved values/lifetime/semantics. It does not establish screen/world axis semantics, pixel anchor/pivot, human terrain/passability/fog meaning, other map/theme behavior, or product renderer parity.",
   };
 }
 
@@ -206,6 +233,40 @@ export function reproduceFUN00469510Placement(mapBuffer, { argument1, verticalAr
   };
 }
 
+/**
+ * Independent bounded reference for FUN_00464cc0. The runtime table is an
+ * explicit signed-word input because its values and semantic owner are not
+ * statically established by this slice.
+ */
+export function reproduceFUN00464cc0Projection(mapBuffer, { x, y, runtimeWord = 0 } = {}) {
+  assertMapBuffer(mapBuffer);
+  assertSignedWord(x, "x");
+  assertSignedWord(y, "y");
+  assertSignedWord(runtimeWord, "runtimeWord");
+  const header = parseMapHeader(mapBuffer, "K01 map buffer");
+  if (!isInBounds(header, x, y)) return { admitted: false };
+
+  const storageOffset = x * X_STRIDE + y;
+  const fogFamily = mapBuffer[FOG_FAMILY_OFFSET + storageOffset];
+  const lowNibble = mapBuffer[LOW_NIBBLE_OFFSET + storageOffset] & 0x0f;
+  const placementLevel = reproduceK01PlacementHelper(mapBuffer, x, y);
+  const rawRelativeComponent = lowNibble === 2
+    ? 16 - (placementLevel << 4)
+    : -(Math.abs(placementLevel) << 4);
+  const relativeComponent = rawRelativeComponent === 0 ? 0 : rawRelativeComponent;
+  return {
+    admitted: true,
+    x,
+    y,
+    fogFamily,
+    lowNibble,
+    placementLevel,
+    outputX: (x - y) << 5,
+    outputY: ((x + y) << 4) + runtimeWord + relativeComponent,
+    relativeComponent,
+  };
+}
+
 function collectCells(map, header) {
   const cells = [];
   for (let x = 0; x < header.width; x += 1) {
@@ -236,6 +297,17 @@ function summarizeCells(cells, header) {
     sha256: sha256(bytes),
     fieldByteOrder: ["lowNibble", "placementSelector", "placementLookup", "placementLevelInt16LowByte", "lowNibbleEquals2", "verticalShift", "objectIndex", "frameIndex"],
     dimensions: { width: header.width, height: header.height },
+  };
+}
+
+function summarizeRawRelativeComponent(cells) {
+  const bytes = Buffer.from(cells.map((cell) => cell.verticalShift));
+  return {
+    coordinateOrder: "x-major: ordinal = x * height + y",
+    count: bytes.length,
+    values: { 0: bytes.filter((value) => value === 0).length, 16: bytes.filter((value) => value === 16).length },
+    sha256: sha256(bytes),
+    interpretation: "FUN_00469510 K01 raw relative component retained for source-backed product elevation adaptation; not a full original height claim.",
   };
 }
 
@@ -292,7 +364,8 @@ function countBy(cells, key) {
 
 function assertMapBuffer(mapBuffer) {
   if (!Buffer.isBuffer(mapBuffer)) throw new TypeError("mapBuffer must be a Buffer");
-  if (mapBuffer.length < FRAME_OFFSET + X_STRIDE * 60) throw new RangeError("mapBuffer is too short for K01 placement/object/frame fields");
+  const requiredLength = Math.max(FRAME_OFFSET, FOG_FAMILY_OFFSET) + X_STRIDE * 60;
+  if (mapBuffer.length < requiredLength) throw new RangeError("mapBuffer is too short for K01 placement, object/frame, and fog-family fields");
 }
 
 function assertSignedWord(value, label) {

@@ -1,6 +1,7 @@
 import type { GridPoint } from "./commands.js";
 import { resourceDefinitions, type BuiltInResourceDefinitionId, type FactionId, type ResourceDefinitionId, type TerrainType } from "./content.js";
 import type { EnvironmentPreset } from "./environment.js";
+import type { MapElevationProfile } from "./elevationProfile.js";
 
 export type ResourceNodeState = "active" | "depleted";
 
@@ -31,6 +32,12 @@ export interface TileTilesetVisualSelection {
    * not assign a terrain or world-coordinate meaning to the source data.
    */
   sourcePixelOffset?: { x: number; y: number };
+  /**
+   * The selected flat artwork already contains relief. Renderers must not add
+   * a generic elevation overlay for this tile unless an explicit overlay is
+   * also selected by the map author.
+   */
+  flatArtworkEmbedsRelief?: boolean;
 }
 
 /**
@@ -69,6 +76,8 @@ export interface MapDefinition {
   height: number;
   tileWidth: number;
   tileHeight: number;
+  /** Optional authored physical surface profile; absent maps use half tileHeight and bilinear sampling. */
+  elevationProfile?: MapElevationProfile;
   layers: TileLayer[];
   spawnPoints: SpawnPoint[];
   tags: string[];
