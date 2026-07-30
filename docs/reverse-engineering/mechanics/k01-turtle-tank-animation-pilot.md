@@ -6,9 +6,8 @@
 
 - 분석: `정적 확정`
 - 재현: `재현 완료`
-- 구현: `부분 이식` — grid 8방향은 default theme에 이식했고, intermediate 16-ring 이동은
-  profile-id/raw-direction theme contract와 순수 resolver까지 만들었다. `SkirmishScene`의 실제
-  presentation bridge는 병렬 작업 충돌을 피하기 위해 아직 연결하지 않았다.
+- 구현: `부분 이식` — grid 8방향과 intermediate 16-ring 이동의 profile-id/raw-direction
+  theme contract를 default theme에 이식했고, `SkirmishScene` presentation bridge가 이를 사용한다.
 
 확정 범위는 생성 기본 flags에서 선택되는 class 14 상태 8/1/4의 slot, phase→frame,
 grid 8방향과 mirror다. 이동·공격 special consumer가 받는 raw direction `1000..1007`도
@@ -148,10 +147,10 @@ theme은 `idle`, `move`, `walk`, `attack`을 제공한다. `walk`는 generic ali
 동일하고 idle/move는 loop, attack은 non-loop다. `move`/`walk`의 raw clip metadata는
 `k01-japanese-turtle-tank-raw16` profile에만 opt-in하며, resolver는 profile/raw가 맞을 때만
 사용한다. grid landing·unknown raw·unknown profile은 기존 directional clip으로 되돌아간다.
-idle/attack은 `+0x1e6`의 마지막 grid direction을 사용한다. 이 resolver는 아직 client render
-loop에 연결되지 않았으며, source update tick을 FPS로 바꾸는 정책도 여전히 프로젝트 적응이다.
-FPS 4/8, render size 70×60과 pivot `(35,52)` 역시 원본 확정값이 아니라 잠정 프로젝트 표시
-적응이다. death/destruction 상태는 만들지 않았다.
+idle/attack은 `+0x1e6`의 마지막 grid direction을 사용한다. `SkirmishScene`은 non-construction
+state에서 이 resolver가 반환한 clip/tracker key를 실제 base sprite에 적용한다. source update tick을
+FPS로 바꾸는 정책은 여전히 프로젝트 적응이며, FPS 4/8, render size 70×60과 pivot `(35,52)` 역시
+원본 확정값이 아닌 잠정 프로젝트 표시 적응이다. death/destruction 상태는 만들지 않았다.
 
 ## 미확정
 

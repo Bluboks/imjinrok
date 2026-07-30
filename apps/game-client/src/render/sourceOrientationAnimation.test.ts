@@ -2,7 +2,11 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { defaultTheme, type EntityVisual, type Facing } from "@shared";
 import { selectTurtleTankFrame, TURTLE_TANK_INTERMEDIATE_TURN_PROFILES } from "../../../../tools/imjinrok/extract-k01-turtle-tank-animation-pilot.mjs";
-import { resolveEntityAnimationClip, type SourceOrientationAnimationState } from "./sourceOrientationAnimation.js";
+import {
+  resolveEntityAnimationClip,
+  resolveEntityAnimationSelection,
+  type SourceOrientationAnimationState,
+} from "./sourceOrientationAnimation.js";
 
 const turtleVisual = defaultTheme.visuals[defaultTheme.entityBindings["japanese-turtle-tank"]] as EntityVisual;
 const turtleProfileId = "k01-japanese-turtle-tank-raw16";
@@ -108,4 +112,24 @@ test("a mod-defined profile can opt its own movement state into raw clips", () =
     clipKey: "mod-unit:move:source:mod-turn-ring:42",
     source: "source-orientation",
   });
+});
+
+test("scene selection bridge preserves ordinary output and changes its tracker key for a raw turn", () => {
+  const ordinary = resolveEntityAnimationSelection(turtleVisual, "move", "se");
+  assert.deepEqual(ordinary, {
+    key: "japanese-turtle-tank:move:se",
+    clip: turtleVisual.states.move?.clips.se,
+  });
+
+  const rawTurn = resolveEntityAnimationSelection(
+    turtleVisual,
+    "move",
+    "se",
+    sourceOrientation({ movementRaw16: 1003, attackGrid8: "w" }),
+  );
+  assert.equal(rawTurn?.key, `japanese-turtle-tank:move:source:${turtleProfileId}:1003`);
+  assert.equal(
+    rawTurn?.clip,
+    turtleVisual.states.move?.sourceOrientationClips?.[turtleProfileId]?.[1003],
+  );
 });
