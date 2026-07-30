@@ -1,0 +1,90 @@
+# Source pathfinding boundary
+
+## 질문과 상태
+
+질문: **`FUN_00425b20`의 `0x00425c59 → FUN_00445290` 호출에서 wrapper, search, candidate state machine,
+footprint predicate, fallback과 waypoint postprocess는 어떤 좁은 범위까지 정적으로 확인되는가?**
+
+| 구분 | 상태 | 범위 |
+| --- | --- | --- |
+| 분석 | `정적 확정` | 아래 함수의 전체 raw body, generated function/reference metadata, call edge와 명시한 control/data-flow 범위 |
+| 재현 | `재현 완료` | cap 경계, 정확한 candidate vector/strict tie, goal·partial fallback, footprint block/OOB, frontier-capacity와 wrapper failure synthetic vector |
+| 구현 | `없음` | product navigation, scheduler, entity adapter를 변경하지 않았다. |
+
+이는 전체 이동 시스템 또는 원작 일치 주장이 아니다. `0x00ae27e4` terrain producer/의미, global workspace lifecycle,
+scheduler serialization, product coordinate mapping과 caller 이후 이동 lifecycle은 미확인이다.
+
+## 고정 입력과 provenance
+
+| 입력 | SHA-256 |
+| --- | --- |
+| `original/imjinrok2/imjinrok2.exe` | `25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e` |
+| `analysis/generated/imjinrok2/functions.json` | `7e071fdfe425d22447780c265fe1d3fd271a1bedd1773682bebcb8ddc6d2e16e` |
+| `analysis/generated/imjinrok2/references.json` | `f64cfa6f04bc39573552f42a8b7bdd5b08fea1ba774d05865162d1d80daaf9a5` |
+
+생성기 [`extract-source-pathfinding-evidence.mjs`](../../../tools/imjinrok/extract-source-pathfinding-evidence.mjs)는 세 입력의
+전체 hash와 `sourceSha256`, 함수 metadata/instruction digest, 각 raw 함수 본문 SHA-256, 다음 direct call edge를 모두
+검사한다. 어느 하나라도 변조되거나 malformed이면 실패한다.
+
+| 함수 | body range (끝 제외) | 확인한 역할 범위 |
+| --- | --- | --- |
+| `FUN_00445290` | `0x00445290-0x0044532e` | accepted-node gate, Chebyshev→frontier capacity, core wrapper |
+| `FUN_00444770` | `0x00444770-0x00444ce5` | visit grid/frontier, strict score, candidate/search/fallback control flow |
+| `FUN_00444570` | `0x00444570-0x0044466b` | eight-call candidate coordinate state machine |
+| `FUN_004446a0` | `0x004446a0-0x00444764` | decreasing-depth backtrack and short next-waypoint postprocess boundary |
+| `FUN_0043ab70` | `0x0043ab70-0x0043ac4f` | entity footprint mask/OOB blocked predicate |
+| `FUN_00425b20` | `0x00425b20-0x004262e0` | `0x00425c59` caller edge only |
+
+## 확인된 제어 흐름
+
+`WORD 0x007c6624 > 6000`이면 wrapper는 `-1`을 즉시 반환한다. 그 외에는 start/goal Chebyshev distance가
+`0..2 → 26`, `3..4 → 40`, `5+ → 80`인 `WORD 0x0054a8a0` **open-frontier capacity**를 선택한다. 이는 expansion budget가 아니다.
+core는 candidate 삽입 뒤 open frontier count를 증가시키고 capacity와 비교하여 stop flag를 세운다.
+
+core는 `0x0054a8a4`에서 `0x1fa4` DWORD를 zero-fill한다. 이는 `180×180` byte visit/depth grid다. global array-backed
+frontier에서 requested goal까지의 squared Euclidean score가 가장 작은 항목을 꺼내며, 동점에서는 strict-less compare 때문에
+먼저 있던 entry가 유지된다. accumulated `g` cost는 이 범위에서 더하지 않는다. 후보는 start x/y 각각 `±25` inclusive 안에서만
+받고, parent depth에서 byte depth를 하나 증가시킨다. actual goal, frontier capacity 또는 frontier exhaustion에서 멈추며,
+strictly closest reachable score를 fallback으로 기억한다.
+
+candidate helper는 guessed compass order로 정규화하지 않는다. 시작 state 2에서 정확한 호출 순서는
+`2→4→8→1→3→6→12→9→2`이고, origin `(x,y)`에 대한 누적 좌표는 다음이다.
+
+| state | next | candidate coordinate |
+| ---: | ---: | --- |
+| 2 | 4 | `(x+1, y+1)` |
+| 4 | 8 | `(x, y+2)` |
+| 8 | 1 | `(x-1, y+1)` |
+| 1 | 3 | `(x-1, y)` |
+| 3 | 6 | `(x+1, y)` |
+| 6 | 12 | `(x+1, y+2)` |
+| 12 | 9 | `(x-1, y+2)` |
+| 9 | 2 | `(x, y)` |
+
+`FUN_004446a0`은 selected fallback/goal 쪽에서 decreasing visit-depth neighbor를 따라 short next waypoint를 output pointers에
+쓴다. 이 document/extractor는 해당 control-flow boundary와 call을 고정하지만, raw output coordinate를 product world/screen
+coordinate로 이름 붙이거나 full path product output으로 이식하지 않는다.
+
+## Footprint predicate
+
+`FUN_0043ab70`은 entity `+0x1e3/+0x1e4` signed byte dimensions로 candidate anchor에서 끝나는 rectangle을 순회한다.
+각 cell이 map bounds 밖이거나 `WORD 0x00ae27e4`와 entity `+0x1ee` mask가 overlap하면 `1`(blocked), 모두 clear면 `0`을 반환한다.
+mask table의 terrain/ownership/other human meaning은 아직 확정하지 않았다.
+
+## 재현과 실패 경계
+
+생성 fixture는 [`analysis/fixtures/source-pathfinding-evidence.json`](../../../analysis/fixtures/source-pathfinding-evidence.json)이다.
+pure reproducer는 wrapper capacity boundaries, exact state vector, strict-score tie, goal success, blocked goal closest fallback,
+mask/OOB, frontier-capacity and accepted-node failure를 검증한다. fixture/source EXE/functions/references 한 byte 변조와 malformed
+pure input도 fail closed한다.
+
+```sh
+pnpm imjinrok:extract-source-pathfinding-evidence
+node --test tools/imjinrok/source-pathfinding-evidence.test.mjs
+```
+
+## 다음 분석 작업
+
+- `0x00ae27e4` producer, terrain table semantics와 update lifetime을 독립적으로 닫는다.
+- global pathfinding workspace owner/reset and scheduler serialization을 좁은 static question으로 분석한다.
+- `FUN_004446a0` output coordinate와 product coordinate mapping을 독립 evidence로 검증한다.

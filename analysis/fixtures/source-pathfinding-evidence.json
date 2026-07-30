@@ -1,0 +1,609 @@
+{
+  "question": "Within FUN_00425b20's call to FUN_00445290, which bounded static rules govern the wrapper gate/cap, greedy candidate search, footprint blocking, fallback, and waypoint postprocess boundary?",
+  "analysisStatus": "static-confirmed-for-bounded-source-pathfinding-control-flow",
+  "reproductionStatus": "reproduction-complete-for-bounded-synthetic-vectors",
+  "implementationStatus": "analysis-only-no-product-navigation-change",
+  "sources": {
+    "executable": {
+      "path": "original/imjinrok2/imjinrok2.exe",
+      "size": 843833,
+      "sha256": "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e"
+    },
+    "functions": {
+      "path": "analysis/generated/imjinrok2/functions.json",
+      "size": 1468333,
+      "sha256": "7e071fdfe425d22447780c265fe1d3fd271a1bedd1773682bebcb8ddc6d2e16e",
+      "sourceSha256": "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e"
+    },
+    "references": {
+      "path": "analysis/generated/imjinrok2/references.json",
+      "size": 17206569,
+      "sha256": "f64cfa6f04bc39573552f42a8b7bdd5b08fea1ba774d05865162d1d80daaf9a5",
+      "sourceSha256": "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e"
+    }
+  },
+  "functionEvidence": [
+    {
+      "entry": "0x00445290",
+      "bodyRange": "0x00445290-0x0044532d",
+      "bodySize": 158,
+      "instructionCount": 58,
+      "instructionSha256": "02f38d2a527b4e57521e7872f0d0f8c6952b9cad70044dbe7a1dffa672fc3438",
+      "rawBodySha256": "b89a78740b6007a97dd3c687ca0e035ba74915250c1ea5d45dc0ae802c9a2b0f",
+      "callees": [
+        "0x00444770"
+      ]
+    },
+    {
+      "entry": "0x00444770",
+      "bodyRange": "0x00444770-0x00444ce4",
+      "bodySize": 1397,
+      "instructionCount": 383,
+      "instructionSha256": "44e5d64b8a8b01276423b15fdb68d7d8d4b3dd0ec5c73081810e7aef23b5011a",
+      "rawBodySha256": "3342eaab6b3289ac76bba21d795d71c692d1ac0a46ecbf2cb415e39803c247ea",
+      "callees": [
+        "0x0043ab70",
+        "0x00444570",
+        "0x004446a0",
+        "0x0044b040"
+      ]
+    },
+    {
+      "entry": "0x00444570",
+      "bodyRange": "0x00444570-0x0044466a",
+      "bodySize": 251,
+      "instructionCount": 58,
+      "instructionSha256": "ac0351e5b33f4f7418d7a381ece37ce8b9aa037f2bcfb956a9194194b471f47d",
+      "rawBodySha256": "0e26f93259a3b110ef020d0c91fade0679f112a4aed9518f1fbe496e6e88ecb0",
+      "callees": []
+    },
+    {
+      "entry": "0x004446a0",
+      "bodyRange": "0x004446a0-0x00444763",
+      "bodySize": 196,
+      "instructionCount": 66,
+      "instructionSha256": "f9f19244c7dbc7349fab455704299a04d73fa72be761df96ac3356acce3d1fac",
+      "rawBodySha256": "8276db9fd7f7e530607985c3aa97d7b254358bfdad9a6e1efea73485a3f4ec30",
+      "callees": []
+    },
+    {
+      "entry": "0x0043ab70",
+      "bodyRange": "0x0043ab70-0x0043ac4e",
+      "bodySize": 223,
+      "instructionCount": 75,
+      "instructionSha256": "e95b93ccd4bf91701b1272d599ef74819478bc0a1bf02e21b080bb2fc5fd013c",
+      "rawBodySha256": "1f6ecacdc308408fcfe5a848d5ead88f3a90bf307daa7c19d29119d7b8527648",
+      "callees": []
+    },
+    {
+      "entry": "0x00425b20",
+      "bodyRange": "0x00425b20-0x004262df",
+      "bodySize": 1984,
+      "instructionCount": 506,
+      "instructionSha256": "088a31ecaf83338b1823a4a21e14bb859690289d56f8bc53338145492a8e24c7",
+      "rawBodySha256": "a93987a8afa19da86d5c0fa478b0d902c2898970fda86a64229d2bca45e75d0f",
+      "callees": [
+        "0x00425a50",
+        "0x00426680",
+        "0x004266d0",
+        "0x00438310",
+        "0x00438460",
+        "0x0043ac50",
+        "0x0043d450",
+        "0x0043d540",
+        "0x00442770",
+        "0x00445290",
+        "0x00465010"
+      ]
+    }
+  ],
+  "callEdges": [
+    {
+      "caller": "0x00425b20",
+      "callSite": "0x00425c59",
+      "callee": "0x00445290"
+    },
+    {
+      "caller": "0x00445290",
+      "callSite": "0x00445321",
+      "callee": "0x00444770"
+    },
+    {
+      "caller": "0x00444770",
+      "callSite": "0x00444957",
+      "callee": "0x0043ab70"
+    },
+    {
+      "caller": "0x00444770",
+      "callSite": "0x00444a39",
+      "callee": "0x00444570"
+    },
+    {
+      "caller": "0x00444770",
+      "callSite": "0x00444bbf",
+      "callee": "0x0043ab70"
+    },
+    {
+      "caller": "0x00444770",
+      "callSite": "0x00444bf4",
+      "callee": "0x00444570"
+    },
+    {
+      "caller": "0x00444770",
+      "callSite": "0x00444c95",
+      "callee": "0x004446a0"
+    }
+  ],
+  "byteAnchors": [
+    {
+      "va": "0x00445290",
+      "rawOffset": "0x00045290",
+      "bytes": "66 81 3d 24 66 7c 00 70 17 7e 04 83 c8 ff c3",
+      "meaning": "wrapper rejects with -1 when WORD 0x007c6624 is greater than 6000"
+    },
+    {
+      "va": "0x004452e6",
+      "rawOffset": "0x000452e6",
+      "bytes": "66 3d 03 00 7d 0b 66 c7 05 a0 a8 54 00 1a 00",
+      "meaning": "Chebyshev distance below 3 selects frontier cap 26"
+    },
+    {
+      "va": "0x004452f7",
+      "rawOffset": "0x000452f7",
+      "bytes": "33 c9 66 3d 05 00 0f 9d c1 49 83 e1 d8 83 c1 50",
+      "meaning": "Chebyshev distance 3..4 selects 40 and 5+ selects 80"
+    },
+    {
+      "va": "0x004447b5",
+      "rawOffset": "0x000447b5",
+      "bytes": "b9 a4 1f 00 00 33 c0 bf a4 a8 54 00 0f bf f6 f3 ab",
+      "meaning": "core clears 0x1fa4 DWORDs at 0x0054a8a4"
+    },
+    {
+      "va": "0x0044484a",
+      "rawOffset": "0x0004484a",
+      "bytes": "8b 1c 95 c8 a4 54 00 3b 9f c8 a4 54 00 7d 09",
+      "meaning": "frontier selection retains the first entry on equal score and replaces only on strict smaller score"
+    },
+    {
+      "va": "0x004448fd",
+      "rawOffset": "0x000448fd",
+      "bytes": "8d 59 e7 3b c3 0f 8c 31 01 00 00 83 c1 19 3b c1 0f 8f 26 01 00 00",
+      "meaning": "candidate x is limited to selected x plus or minus 25 inclusively"
+    },
+    {
+      "va": "0x00444916",
+      "rawOffset": "0x00044916",
+      "bytes": "3b d1 0f 8c 1b 01 00 00 83 c6 19 3b d6 0f 8f 10 01 00 00",
+      "meaning": "candidate y is limited to selected y plus or minus 25 inclusively"
+    },
+    {
+      "va": "0x00444940",
+      "rawOffset": "0x00044940",
+      "bytes": "0f bf 05 68 27 55 00 8d 14 c0 8d 04 50 8d 04 c0 8d 0c c5 58 52 63 00 e8 14 62 ff ff",
+      "meaning": "candidate screening calls FUN_0043ab70 with the selected entity profile"
+    },
+    {
+      "va": "0x00444964",
+      "rawOffset": "0x00044964",
+      "bytes": "8b 44 24 3c 8b 74 24 10 66 ff 00",
+      "meaning": "accepted candidates increment the caller-provided accepted-node WORD"
+    },
+    {
+      "va": "0x004449be",
+      "rawOffset": "0x000449be",
+      "bytes": "2b cb 8b d9 0f af d9 8b c8 0f af c8 8d 04 0b",
+      "meaning": "candidate score is squared Euclidean distance to requested goal without an accumulated path cost"
+    },
+    {
+      "va": "0x004449d3",
+      "rawOffset": "0x000449d3",
+      "bytes": "8b 4c 24 28 3b c1 7d 10",
+      "meaning": "closest fallback updates only on strict smaller squared distance"
+    },
+    {
+      "va": "0x00444a39",
+      "rawOffset": "0x00044a39",
+      "bytes": "e8 32 fb ff ff",
+      "meaning": "candidate state machine is called once per iteration"
+    },
+    {
+      "va": "0x00444a42",
+      "rawOffset": "0x00044a42",
+      "bytes": "40 83 f8 08 89 44 24 24 0f 8c 96 fe ff ff",
+      "meaning": "the candidate loop makes exactly eight state-machine calls"
+    },
+    {
+      "va": "0x00444c95",
+      "rawOffset": "0x00044c95",
+      "bytes": "e8 06 fa ff ff",
+      "meaning": "non-goal fallback invokes FUN_004446a0 waypoint postprocess"
+    },
+    {
+      "va": "0x0043abf3",
+      "rawOffset": "0x0003abf3",
+      "bytes": "8d 04 80 8d 04 c0 8d 14 82 66 8b 04 55 e4 27 ae 00 66 85 85 ee 01 00 00",
+      "meaning": "footprint predicate loads a WORD from 0x00ae27e4 and tests it against entity +0x1ee mask"
+    }
+  ],
+  "workspace": {
+    "visitDepthGrid": {
+      "address": "0x0054a8a4",
+      "clearDwordCount": 8100,
+      "dimensions": "180x180",
+      "cell": "byte visit/depth"
+    },
+    "openFrontier": "global array-backed coordinate/score workspace",
+    "lifecycle": "global workspace reset/serialization ownership is unresolved outside the bounded call"
+  },
+  "wrapper": {
+    "acceptedNodeCounterAddress": "0x007c6624",
+    "rejectWhenGreaterThan": 6000,
+    "frontierCapacityByChebyshevDistance": [
+      {
+        "range": "0..2",
+        "frontierCapacity": 26
+      },
+      {
+        "range": "3..4",
+        "frontierCapacity": 40
+      },
+      {
+        "range": "5+",
+        "frontierCapacity": 80
+      }
+    ]
+  },
+  "candidateStateMachine": {
+    "initialState": 2,
+    "callsPerExpansion": 8,
+    "vectorOrigin": {
+      "x": 10,
+      "y": 10
+    },
+    "vector": [
+      {
+        "state": 2,
+        "nextState": 4,
+        "delta": {
+          "x": 1,
+          "y": 1
+        },
+        "coordinate": {
+          "x": 11,
+          "y": 11
+        }
+      },
+      {
+        "state": 4,
+        "nextState": 8,
+        "delta": {
+          "x": -1,
+          "y": 1
+        },
+        "coordinate": {
+          "x": 10,
+          "y": 12
+        }
+      },
+      {
+        "state": 8,
+        "nextState": 1,
+        "delta": {
+          "x": -1,
+          "y": -1
+        },
+        "coordinate": {
+          "x": 9,
+          "y": 11
+        }
+      },
+      {
+        "state": 1,
+        "nextState": 3,
+        "delta": {
+          "x": 0,
+          "y": -1
+        },
+        "coordinate": {
+          "x": 9,
+          "y": 10
+        }
+      },
+      {
+        "state": 3,
+        "nextState": 6,
+        "delta": {
+          "x": 2,
+          "y": 0
+        },
+        "coordinate": {
+          "x": 11,
+          "y": 10
+        }
+      },
+      {
+        "state": 6,
+        "nextState": 12,
+        "delta": {
+          "x": 0,
+          "y": 2
+        },
+        "coordinate": {
+          "x": 11,
+          "y": 12
+        }
+      },
+      {
+        "state": 12,
+        "nextState": 9,
+        "delta": {
+          "x": -2,
+          "y": 0
+        },
+        "coordinate": {
+          "x": 9,
+          "y": 12
+        }
+      },
+      {
+        "state": 9,
+        "nextState": 2,
+        "delta": {
+          "x": 1,
+          "y": -2
+        },
+        "coordinate": {
+          "x": 10,
+          "y": 10
+        }
+      }
+    ]
+  },
+  "search": {
+    "score": "strict smallest squared Euclidean distance to requested goal; no accumulated g cost",
+    "tie": "first frontier entry survives equal score",
+    "candidateWindow": "start x/y ±25 inclusive",
+    "completion": "actual goal, frontier-capacity, or exhausted frontier; closest strict-score fallback is retained",
+    "waypointPostprocess": "FUN_004446a0 backtracks through decreasing visit-depth neighbors and writes a short next waypoint; product coordinate mapping remains unresolved"
+  },
+  "footprintPredicate": {
+    "function": "FUN_0043ab70",
+    "blockedReturn": 1,
+    "clearReturn": 0,
+    "rectangle": "candidate anchor rectangle ending at x/y, dimensions entity +0x1e3/+0x1e4",
+    "mask": "entity +0x1ee against WORD 0x00ae27e4",
+    "outOfBounds": "blocked"
+  },
+  "testVectors": {
+    "capBoundaries": [
+      {
+        "distance": 0,
+        "frontierCapacity": 26
+      },
+      {
+        "distance": 2,
+        "frontierCapacity": 26
+      },
+      {
+        "distance": 3,
+        "frontierCapacity": 40
+      },
+      {
+        "distance": 4,
+        "frontierCapacity": 40
+      },
+      {
+        "distance": 5,
+        "frontierCapacity": 80
+      }
+    ],
+    "strictTie": {
+      "frontier": [
+        {
+          "score": 9
+        },
+        {
+          "score": 4
+        },
+        {
+          "score": 4
+        },
+        {
+          "score": 5
+        }
+      ],
+      "selectedIndex": 1
+    },
+    "goalSuccess": {
+      "returnValue": 0,
+      "reason": "goal",
+      "frontierCapacity": 26,
+      "maximumFrontierSize": 7,
+      "expanded": 1,
+      "acceptedNodeCounter": 7,
+      "endpoint": {
+        "x": 3,
+        "y": 3
+      },
+      "path": [
+        {
+          "x": 2,
+          "y": 2
+        },
+        {
+          "x": 3,
+          "y": 3
+        }
+      ]
+    },
+    "closestPartialFallback": {
+      "returnValue": 1,
+      "reason": "exhausted",
+      "frontierCapacity": 80,
+      "maximumFrontierSize": 15,
+      "expanded": 47,
+      "acceptedNodeCounter": 46,
+      "endpoint": {
+        "x": 6,
+        "y": 7
+      },
+      "path": [
+        {
+          "x": 2,
+          "y": 2
+        },
+        {
+          "x": 3,
+          "y": 4
+        },
+        {
+          "x": 4,
+          "y": 6
+        },
+        {
+          "x": 5,
+          "y": 7
+        },
+        {
+          "x": 6,
+          "y": 7
+        }
+      ]
+    },
+    "blockedAndOutOfBounds": {
+      "blocked": true,
+      "outOfBounds": true
+    },
+    "capAndFailure": {
+      "frontierCapacity": {
+        "returnValue": 1,
+        "reason": "frontier-capacity",
+        "frontierCapacity": 80,
+        "maximumFrontierSize": 80,
+        "expanded": 344,
+        "acceptedNodeCounter": 423,
+        "endpoint": {
+          "x": 5,
+          "y": 30
+        },
+        "path": [
+          {
+            "x": 30,
+            "y": 30
+          },
+          {
+            "x": 29,
+            "y": 30
+          },
+          {
+            "x": 28,
+            "y": 30
+          },
+          {
+            "x": 27,
+            "y": 30
+          },
+          {
+            "x": 26,
+            "y": 30
+          },
+          {
+            "x": 25,
+            "y": 30
+          },
+          {
+            "x": 24,
+            "y": 30
+          },
+          {
+            "x": 23,
+            "y": 30
+          },
+          {
+            "x": 22,
+            "y": 30
+          },
+          {
+            "x": 21,
+            "y": 30
+          },
+          {
+            "x": 20,
+            "y": 30
+          },
+          {
+            "x": 19,
+            "y": 30
+          },
+          {
+            "x": 18,
+            "y": 30
+          },
+          {
+            "x": 17,
+            "y": 30
+          },
+          {
+            "x": 16,
+            "y": 30
+          },
+          {
+            "x": 15,
+            "y": 30
+          },
+          {
+            "x": 14,
+            "y": 30
+          },
+          {
+            "x": 13,
+            "y": 30
+          },
+          {
+            "x": 12,
+            "y": 30
+          },
+          {
+            "x": 11,
+            "y": 30
+          },
+          {
+            "x": 10,
+            "y": 30
+          },
+          {
+            "x": 9,
+            "y": 30
+          },
+          {
+            "x": 8,
+            "y": 30
+          },
+          {
+            "x": 7,
+            "y": 30
+          },
+          {
+            "x": 6,
+            "y": 30
+          },
+          {
+            "x": 5,
+            "y": 30
+          }
+        ]
+      },
+      "acceptedNodeLimit": {
+        "returnValue": -1,
+        "reason": "accepted-node-limit"
+      }
+    }
+  },
+  "uncertainties": [
+    "0x00ae27e4 producer and terrain semantics are unresolved.",
+    "global workspace reset lifecycle and scheduler serialization are unresolved.",
+    "product coordinate mapping and the complete caller-side movement lifecycle are unresolved.",
+    "This evidence does not claim full original-game pathfinding parity and does not change product navigation."
+  ]
+}
