@@ -200,6 +200,8 @@ export interface ScenarioDefinition {
   mapId: string;
   /** Overrides the map's optional navigation profile for this scenario. */
   pathfindingProfileId?: string;
+  /** Optional explicit attack-order target authority policy selected by the simulation. */
+  attackTargetAuthorityPolicyId?: string;
   playerIds?: readonly string[];
   playerTeams?: Readonly<Record<string, string>>;
   completionMode?: "objectives" | "scripted";
@@ -511,6 +513,7 @@ export const defaultSkirmishScenario = {
   description: "강을 사이에 둔 전장에서 시작하는 기본 스커미시 조건.",
   scenarioType: "skirmish",
   mapId: "river-crossing",
+  attackTargetAuthorityPolicyId: "core:current-visibility-stop",
   startingResources: {
     food: 200,
     wood: 200,

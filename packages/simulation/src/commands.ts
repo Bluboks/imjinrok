@@ -19,6 +19,7 @@ import {
 import { getBuildTimeTicks, isUnitUnderConstruction, updateConstructionHealth } from "./construction.js";
 import { createUnitState } from "./entities.js";
 import { arePlayersAllied } from "./diplomacy.js";
+import { createCurrentVisibilityResolver, getAttackTargetAuthorityPolicy, isAttackTargetAuthorized } from "./attackTargetAuthorityPolicy.js";
 import { findPathForUnit } from "./navigation.js";
 import { getFootprintTiles, validateBuildingPlacement } from "./placement.js";
 import { canQueuePopulation } from "./population.js";
@@ -120,6 +121,11 @@ export function validateCommand(state: WorldState, envelope: CommandEnvelope): C
 
       if (arePlayersAllied(state, target.playerId, envelope.playerId)) {
         return { ok: false, reason: "cannot attack friendly unit" };
+      }
+
+      const authorityPolicy = getAttackTargetAuthorityPolicy(state.attackTargetAuthorityPolicyId);
+      if (!isAttackTargetAuthorized(authorityPolicy, state, actor.unit, target, createCurrentVisibilityResolver(state))) {
+        return { ok: false, reason: "attack target is not authorized by the current policy" };
       }
 
       if (!canReachCombatTarget(state, actor.unit, target, combat)) {

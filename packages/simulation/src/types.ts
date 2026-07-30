@@ -211,6 +211,8 @@ export interface ScenarioRuntimeState {
 export interface WorldState {
   tick: number;
   map: MapDefinition;
+  /** Stable, serializable authority policy; omitted only by legacy snapshots. */
+  attackTargetAuthorityPolicyId?: string;
   /** Stable profile id selected from scenario, map, or the built-in default. */
   pathfindingProfileId: string;
   /**
