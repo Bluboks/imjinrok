@@ -103,18 +103,19 @@ export const CLIENT_UI_LAYOUT_AUDIT_PROBES = [
     id: "pre-game-briefing-layout",
     sourcePath: "apps/game-client/src/scenes/MissionBriefingScene.ts",
     patterns: [
-      "const baseFrame = frames[0];",
-      "const completedFrame = frames.at(-1);",
-      "getMissionBriefingIntroFrameAlphas(",
+      "getMissionBriefingTitleFrameIndex(",
       "const targetScale = portrait.width / 130;",
-      ".setScale(animateIntroduction ? 0 : targetScale);",
-      "scaleX: targetScale,",
+      "const introductionScale = getMissionBriefingPortraitScale(introductionStartedAt, this.time.now);",
+      ".setScale(targetScale * introductionScale);",
+      "transition.image.setScale(transition.targetScale * getMissionBriefingPortraitScale(transition.startedAt, time));",
+      "const label = this.context?.scenario?.briefing?.portraitLabels?.[normalizeMissionPortraitId(participant.portraitId)];",
+      "layout.label.centerX, layout.label.y, label",
     ],
-    currentBasis: "project-pre-game-briefing-presentation-with-static-proven-SPEECH-slots-and-text",
-    originalEvidenceStatus: "static-proven-for-SPEECH-slots-and-text;project-adaptation-for-base-to-completed-frame-fade-and-portrait-scale-in",
+    currentBasis: "source-preserved-title-sequence-and-static-proven-SPEECH-slots-text-labels-with-project-portrait-cadence-and-final-click-adaptations",
+    originalEvidenceStatus: "source-preserved-title-sequence-boundaries;static-proven-for-SPEECH-slots-text-and-labels;project-adaptation-for-24Hz-wall-clock-portrait-cadence-and-final-click-dismiss",
     originalTraceTargets: ["FUN_0048311e", "FUN_004a7a50", "FUN_004a8410"],
     followUp:
-      "Keep the pre-game briefing base-to-completed fade and portrait scale-in as project presentation; recover original title, objective, button, font, and hit-test layout separately.",
+      "Keep the source-preserved title-frame boundaries and source-based SPEECH slots, text, and labels separate from the project 24Hz portrait wall-clock calibration and final-click dismiss; recover the original scheduler timing, objective, button, font, and hit-test layout separately.",
   },
 ];
 

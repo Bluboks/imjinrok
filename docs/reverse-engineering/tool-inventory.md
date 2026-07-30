@@ -98,7 +98,7 @@
 | --- | --- | --- |
 | `extract-animation-evidence.mjs`, `animation-evidence.test.mjs` | 재검증 | 작은 draw 레코드와 main entity 구조를 구분한 기존 주소 탐색점. 의미 확정에는 파일럿 추출기를 사용 |
 | `extract-ui-layout-evidence.mjs`, `ui-layout-evidence.test.mjs` | 재검증 | UI 관련 코드 범위와 문자열의 탐색점. 기존 objective 의미는 내부 내용 RECT를 전체 패널로 오인하고 닫기 hit test를 놓쳤다. [목표 모달 파일럿](mechanics/objective-panel-layout.md)이 전체 경계와 호출 흐름으로 교정했다 |
-| `extract-client-ui-layout-audit.mjs`, `client-ui-layout-audit.test.mjs` | 유지 | 정적 확정 `SPEECH` 슬롯·텍스트와 원작 3×3 research helper를, 의도적 웹 4×3/12-slot 명령 정책·초상화 scale-in·briefing base→frame fade 적응에서 분리해 감사 |
+| `extract-client-ui-layout-audit.mjs`, `client-ui-layout-audit.test.mjs` | 유지 | source script에서 보존한 briefing title frame 경계, 정적 확정 `SPEECH` 슬롯·텍스트·label, 원작 3×3 research helper를, 의도적 웹 4×3/12-slot 명령 정책·초상화의 24 Hz wall-clock cadence·마지막 클릭 dismiss 적응에서 분리해 감사 |
 | `extract-campaign-mvp-audit.mjs`, `campaign-mvp-audit.test.mjs` | 보관 | 구현·문자열 존재 중심의 과거 MVP 판정. 현행 원작 일치 상태에 반영하지 않음 |
 
 고정 주소의 바이트가 남아 있는지만 검사하는 테스트는 코드 변조 탐지에는 유용하지만, 사람이 붙인
