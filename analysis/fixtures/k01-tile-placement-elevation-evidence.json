@@ -1,8 +1,8 @@
 {
-  "question": "For hash-bound K01 cells, how do FUN_00469330/FUN_00469510 and FUN_0046d650 derive the second placement coordinate and source object/frame bytes?",
-  "analysisStatus": "static-confirmed-for-K01-cell-placement-offset-and-source-object-frame-boundary",
+  "question": "For hash-bound K01 cells, how do FUN_00464cc0, FUN_00469330/FUN_00469510 and FUN_0046d650 derive bounded isometric base coordinates, relative placement components, and source object/frame bytes?",
+  "analysisStatus": "static-confirmed-for-bounded-K01-cell-projection-relative-component-and-source-object-frame-boundary",
   "reproductionStatus": "reproduction-complete-for-all-K01-cell-vectors-and-fail-closed-reference-inputs",
-  "implementationStatus": "analysis-only-no-product-renderer-change",
+  "implementationStatus": "source-backed-product-elevation-adaptation-is-separate-from-original-renderer-parity",
   "sources": {
     "executable": {
       "path": "original/imjinrok2/imjinrok2.exe",
@@ -21,6 +21,16 @@
         "sha256": "7e071fdfe425d22447780c265fe1d3fd271a1bedd1773682bebcb8ddc6d2e16e",
         "sourceSha256": "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e",
         "functionProvenance": [
+          {
+            "entry": "0x00464cc0",
+            "bodyRange": "0x00464cc0-0x00464ddd",
+            "instructionCount": 103,
+            "instructionSha256": "0df728460a1833f756c0164f3968eda5de7312a64e87c52edc98aa5a33566781",
+            "rawBodySha256": "40b41b7ce95c3e7516c0bf2f6d01f1e86bf2848ed0ec5256f63d7858f55a1d10",
+            "callees": [
+              "0x0046d650"
+            ]
+          },
           {
             "entry": "0x00469330",
             "bodyRange": "0x00469330-0x0046950b",
@@ -66,6 +76,24 @@
         "sha256": "f64cfa6f04bc39573552f42a8b7bdd5b08fea1ba774d05865162d1d80daaf9a5",
         "sourceSha256": "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e",
         "requiredCallEdges": [
+          {
+            "from": "0x00464d00",
+            "fromFunctionEntry": "0x00464cc0",
+            "to": "0x0046d650",
+            "type": "UNCONDITIONAL_CALL"
+          },
+          {
+            "from": "0x00464d6e",
+            "fromFunctionEntry": "0x00464cc0",
+            "to": "0x0046d650",
+            "type": "UNCONDITIONAL_CALL"
+          },
+          {
+            "from": "0x00464dab",
+            "fromFunctionEntry": "0x00464cc0",
+            "to": "0x0046d650",
+            "type": "UNCONDITIONAL_CALL"
+          },
           {
             "from": "0x00469391",
             "fromFunctionEntry": "0x00469330",
@@ -199,6 +227,39 @@
       }
     ]
   },
+  "cellProjection": {
+    "function": "FUN_00464cc0",
+    "admission": "signed x/y in bounds => 1 after writing output coordinates; negative or x >= map.width or y >= map.height => 0 without output writes.",
+    "baseOutput": {
+      "x": "(int32(x) - int32(y)) << 5",
+      "y": "(int32(x) + int32(y)) << 4"
+    },
+    "mapByte": "uint8(map + 0x4a0c4 + x * 180 + y); this address is the fog-family byte in FUN_0046a530, but FUN_00464cc0's runtime WORD table values and human semantics are unresolved.",
+    "runtimeWordTable": "int16(DAT_00c06e86 + mapByte * 8)",
+    "lowNibbleRelativeComponent": {
+      "lowNibbleEquals2": "16 - (int16(FUN_0046d650(map, x, y)) << 4)",
+      "other": "-(abs(int16(FUN_0046d650(map, x, y))) << 4)",
+      "boundary": "The table and raw-coordinate axis are not named as height/elevation. K01 helper lookup and return streams are all zero; the source-backed product adapter separately preserves FUN_00469510's raw 0/16 stream."
+    },
+    "K01Distribution": {
+      "helperLookup": {
+        "0": 3600
+      },
+      "helperReturn": {
+        "0": 3600
+      },
+      "sourceBackedRawRelativeComponent": {
+        "coordinateOrder": "x-major: ordinal = x * height + y",
+        "count": 3600,
+        "values": {
+          "0": 2865,
+          "16": 735
+        },
+        "sha256": "76cc670258325ebc671d19b6f864768bf376328a7573ca7b29887c780e50b864",
+        "interpretation": "FUN_00469510 K01 raw relative component retained for source-backed product elevation adaptation; not a full original height claim."
+      }
+    }
+  },
   "cellStream": {
     "coordinateOrder": "x-major: ordinal = x * height + y",
     "count": 3600,
@@ -288,6 +349,11 @@
   ],
   "rawCodeRanges": [
     {
+      "id": "FUN_00464cc0 complete body",
+      "byteRange": "0x00464cc0-0x00464dde (end exclusive)",
+      "bodySha256": "40b41b7ce95c3e7516c0bf2f6d01f1e86bf2848ed0ec5256f63d7858f55a1d10"
+    },
+    {
       "id": "FUN_00469330 complete body",
       "byteRange": "0x00469330-0x0046950c (end exclusive)",
       "bodySha256": "f1a131328d7fe0c85e26b90d4c7d28371f6f9ae41bd56f03dab68c9ab8510ec7"
@@ -304,6 +370,42 @@
     }
   ],
   "evidencePoints": [
+    {
+      "va": "0x00464cc6",
+      "rawOffset": "0x00064cc6",
+      "bytes": "8b 4c 24 14 66 85 c9 7c 23 8b 87 a0 2d 00 00 0f bf f1 3b f0 7d 16 8b 44 24 18 66 85 c0 7c 0d",
+      "meaning": "FUN_00464cc0 reads signed-word x/y stack arguments and rejects negative or map-boundary coordinates."
+    },
+    {
+      "va": "0x00464d00",
+      "rawOffset": "0x00064d00",
+      "bytes": "e8 4b 89 00 00 8d 84 b6 e9 20 00 00 8b 6c 24 24 33 d2 8d 04 c0 8d 0c 83 8b c6 2b c3 8a 14 39",
+      "meaning": "FUN_00464cc0 calls FUN_0046d650 and reads map +0x4a0c4+x*180+y as the runtime WORD-table index."
+    },
+    {
+      "va": "0x00464d27",
+      "rawOffset": "0x00064d27",
+      "bytes": "8d 14 33 c1 e0 05 c1 e2 04 89 01 89 55 00",
+      "meaning": "FUN_00464cc0 writes (x-y)<<5 and (x+y)<<4 before the relative component."
+    },
+    {
+      "va": "0x00464d52",
+      "rawOffset": "0x00064d52",
+      "bytes": "8a 14 39 80 e2 0f 66 0f be c2 66 3d 02 00",
+      "meaning": "FUN_00464cc0 reads map +0x32514+x*180+y low nibble and compares exactly 2."
+    },
+    {
+      "va": "0x00464d6a",
+      "rawOffset": "0x00064d6a",
+      "bytes": "50 51 8b cf e8 dd 88 00 00 0f bf d0 8b 44 24 10 c1 e2 04 0f bf 0c c5 86 6e c0 00",
+      "meaning": "FUN_00464cc0 low-nibble-2 branch calls FUN_0046d650 and combines helper<<4 with a signed WORD table value."
+    },
+    {
+      "va": "0x00464da7",
+      "rawOffset": "0x00064da7",
+      "bytes": "52 50 8b cf e8 a0 88 00 00 8b 4c 24 10 0f bf c0 99 33 c2 2b c2 0f bf 14 cd 86 6e c0 00 c1 e0 04",
+      "meaning": "FUN_00464cc0 other branch calls FUN_0046d650 and combines abs(helper)<<4 with the same signed WORD table."
+    },
     {
       "va": "0x00469351",
       "rawOffset": "0x00069351",
@@ -395,5 +497,5 @@
       "meaning": "FUN_0046d650 returns selector for lookup 15, selector-1 for other nonzero lookup, otherwise 0"
     }
   ],
-  "unresolvedBoundary": "K01's 3,600 helper lookups are all zero, so this evidence does not justify calling the helper terrain elevation or height. It does not establish screen/world axis semantics, pixel anchor/pivot, human terrain/passability/fog meaning, other map/theme behavior, or product renderer parity."
+  "unresolvedBoundary": "K01's 3,600 helper lookups and returns are all zero, so this evidence does not justify calling the helper terrain elevation or height. The runtime WORD table at 0x00c06e86 has unresolved values/lifetime/semantics. It does not establish screen/world axis semantics, pixel anchor/pivot, human terrain/passability/fog meaning, other map/theme behavior, or product renderer parity."
 }

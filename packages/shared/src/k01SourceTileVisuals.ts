@@ -113,7 +113,11 @@ export function applyK01SourceTileVisuals(tiles: TileCell[], width: number, heig
         flatAssetKey: getK01SourceTileFlatAssetKey(x, y),
         underlayAssetKey: getK01SourceTileUnderlayAssetKey(x, y),
         sourcePixelOffset: getK01SourceTilePlacementOffset(x, y),
+        flatArtworkEmbedsRelief: true,
       };
+      // Product adaptation, not a claim that the source helper's human meaning
+      // is fully recovered: the hash-bound 0/16 stream becomes base/raised.
+      tile.elevation = getK01SourceTileRawPlacementArgumentDelta(x, y) === 16 ? 1 : 0;
     }
   }
 }
