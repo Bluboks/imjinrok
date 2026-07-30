@@ -12,6 +12,7 @@ import {
 import { createUnitState } from "./entities.js";
 import { createInitialEnvironmentState } from "./environment.js";
 import { getFootprintTiles } from "./placement.js";
+import { resolveMovementCollisionProfileId } from "./movementCollisionPolicy.js";
 import { resolvePathfindingProfileId } from "./navigation.js";
 import { createPlayerResearchState } from "./research.js";
 import { resourceBlocksBuilding, resourceBlocksMovement } from "./resources.js";
@@ -60,6 +61,19 @@ export {
 } from "./navigation.js";
 export { defaultPathfinderRegistry, PathfinderRegistry, registerPathfinder, requirePathfinder, type RegisterPathfinderOptions } from "./pathfinderRegistry.js";
 export type { Pathfinder } from "./pathfinder.js";
+export {
+  CORE_STRICT_FOOTPRINT_RESERVATION_POLICY_ID,
+  coreStrictFootprintReservationPolicy,
+  defaultMovementCollisionPolicyRegistry,
+  getMovementCollisionPolicy,
+  registerMovementCollisionPolicy,
+  requireMovementCollisionPolicy,
+  resolveMovementCollisionProfileId,
+  MovementCollisionPolicyRegistry,
+  type MovementCollisionPolicy,
+  type MovementReservation,
+  type RegisterMovementCollisionPolicyOptions,
+} from "./movementCollisionPolicy.js";
 export { getFootprintTiles, validateBuildingPlacement, type BuildingPlacementValidationResult } from "./placement.js";
 export { canQueuePopulation, DEFAULT_POPULATION_LIMIT, getPlayerPopulationState, getPopulationCost, getPopulationProvided, type PlayerPopulationState } from "./population.js";
 export { applyCompletedResearchToUnit, completeResearch, createPlayerResearchState, isResearchCompleted, isResearchPending } from "./research.js";
@@ -130,6 +144,7 @@ export function createInitialWorldState(
     tick: 0,
     map: worldMap,
     pathfindingProfileId: resolvePathfindingProfileId(worldMap, scenario),
+    movementCollisionProfileId: resolveMovementCollisionProfileId(worldMap.movementCollisionProfileId),
     environment: createInitialEnvironmentState(worldMap),
     scenario: createScenarioRuntimeState(scenario),
     players,

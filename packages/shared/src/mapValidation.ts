@@ -36,6 +36,7 @@ export function validateMapDefinition(map: MapDefinition, registry: ContentRegis
   validateReference(map.environmentVisualProfileId, registry.environmentVisualProfiles, "environmentVisualProfileId", "environment visual profile", issues);
   validateReference(map.resourceVisualSetId, registry.resourceVisualSets, "resourceVisualSetId", "resource visual set", issues);
   validatePathfindingProfileReference(map.pathfindingProfileId, registry.pathfindingProfiles, issues);
+  validateMovementCollisionProfileReference(map.movementCollisionProfileId, registry.movementCollisionProfiles, issues);
 
   for (const environmentIssue of map.environment?.dayNight ? validateDayNightCycle(map.environment.dayNight) : []) {
     issues.push(issue(`environment.dayNight.${environmentIssue.path}`, environmentIssue.message));
@@ -121,6 +122,23 @@ function validatePathfindingProfileReference(
   }
   if (!profiles[profileId]) {
     issues.push(issue("pathfindingProfileId", `Unknown pathfinding profile '${profileId}'.`));
+  }
+}
+
+function validateMovementCollisionProfileReference(
+  profileId: string | undefined,
+  profiles: Readonly<Record<string, unknown>>,
+  issues: MapValidationIssue[],
+): void {
+  if (profileId === undefined) {
+    return;
+  }
+  if (!profileId.trim()) {
+    issues.push(issue("movementCollisionProfileId", "Movement collision profile id must not be empty."));
+    return;
+  }
+  if (!profiles[profileId]) {
+    issues.push(issue("movementCollisionProfileId", `Unknown movement collision profile '${profileId}'.`));
   }
 }
 
