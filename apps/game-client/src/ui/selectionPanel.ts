@@ -3,6 +3,7 @@ import { researchDefinitions, unitDefinitions, type BankResourceKind } from "@sh
 import { SIM_TICKS_PER_SECOND } from "@simulation";
 import type { SelectedEntitiesView, SelectedEntityView } from "../hud.js";
 import { drawPanelFrame, HUD_TEXT_STYLE, type PanelBounds } from "./hudPanel.js";
+import { getSelectionPortraitFit } from "./selectionPortrait.js";
 
 export function drawSelectionPanel(
   scene: Phaser.Scene,
@@ -74,19 +75,9 @@ export function drawSelectionPanel(
   graphics.fillRoundedRect(portraitX, portraitY, portraitSize, portraitSize, 10);
   graphics.lineStyle(2, 0xd0b46a, 0.85);
   graphics.strokeRoundedRect(portraitX, portraitY, portraitSize, portraitSize, 10);
-  graphics.fillStyle(unitDefinitions[selectedEntity.kind].portraitColor, 0.28);
-  graphics.fillCircle(portraitX + portraitSize / 2, portraitY + portraitSize / 2, portraitSize * 0.35);
-
-  container.add(
-    scene.add
-      .text(portraitX + portraitSize / 2, portraitY + portraitSize / 2, getPortraitGlyph(selectedEntity), {
-        fontFamily: "Georgia, Times New Roman, serif",
-        fontSize: `${Math.floor(portraitSize * 0.28)}px`,
-        color: "#f4ead1",
-        fontStyle: "bold",
-      })
-      .setOrigin(0.5),
-  );
+  if (!drawSelectionPortrait(scene, container, selectedEntity, portraitX, portraitY, portraitSize, 10)) {
+    drawPortraitGlyph(scene, container, graphics, selectedEntity, portraitX, portraitY, portraitSize);
+  }
 
   container.add(scene.add.text(textX, portraitY, selectedEntity.label, {
     fontFamily: "Noto Sans KR, Malgun Gothic, Apple SD Gothic Neo, Georgia, serif",
@@ -306,14 +297,16 @@ function drawGroupSelectionInfo(
     graphics.lineStyle(1, unitDefinitions[selection.kind].groupBorderColor, 0.9);
     graphics.strokeRoundedRect(chipX, chipY, chipSize, chipSize, 8);
 
-    container.add(scene.add
-      .text(chipX + chipSize / 2, chipY + chipSize / 2, getPortraitGlyph(selection), {
-        fontFamily: "Georgia, Times New Roman, serif",
-        fontSize: "13px",
-        color: "#f4ead1",
-        fontStyle: "bold",
-      })
-      .setOrigin(0.5));
+    if (!drawSelectionPortrait(scene, container, selection, chipX, chipY, chipSize, 8)) {
+      container.add(scene.add
+        .text(chipX + chipSize / 2, chipY + chipSize / 2, getPortraitGlyph(selection), {
+          fontFamily: "Georgia, Times New Roman, serif",
+          fontSize: "13px",
+          color: "#f4ead1",
+          fontStyle: "bold",
+        })
+        .setOrigin(0.5));
+    }
   });
 
   container.add(scene.add.text(x + 24, y + height - 28, `총 체력 ${Math.round(totalHp)} / ${totalMaxHp} · 마나 ${Math.round(totalMana)} / ${totalMaxMana}`, {
@@ -387,6 +380,68 @@ function getGroupActivityKind(selection: SelectedEntityView): "moving" | "attack
 
 function getPortraitGlyph(selection: SelectedEntityView): string {
   return unitDefinitions[selection.kind].portraitGlyph;
+}
+
+function drawSelectionPortrait(
+  scene: Phaser.Scene,
+  container: Phaser.GameObjects.Container,
+  selectedEntity: SelectedEntityView,
+  x: number,
+  y: number,
+  size: number,
+  inset: number,
+): boolean {
+  const portrait = selectedEntity.portrait;
+
+  if (!portrait || !scene.textures.exists(portrait.textureKey)) {
+    return false;
+  }
+
+  const texture = scene.textures.get(portrait.textureKey);
+
+  if (portrait.frameName !== undefined && !texture.has(portrait.frameName)) {
+    return false;
+  }
+
+  const frame = texture.get(portrait.frameName);
+  const fit = getSelectionPortraitFit(frame.width, frame.height, size - inset);
+
+  if (!fit) {
+    return false;
+  }
+
+  const image = portrait.frameName === undefined
+    ? scene.add.image(x + size / 2, y + size / 2, portrait.textureKey)
+    : scene.add.image(x + size / 2, y + size / 2, portrait.textureKey, portrait.frameName);
+
+  image.setDisplaySize(fit.width, fit.height);
+  image.setFlipX(portrait.mirrorX);
+  container.add(image);
+  return true;
+}
+
+function drawPortraitGlyph(
+  scene: Phaser.Scene,
+  container: Phaser.GameObjects.Container,
+  graphics: Phaser.GameObjects.Graphics,
+  selectedEntity: SelectedEntityView,
+  x: number,
+  y: number,
+  size: number,
+): void {
+  graphics.fillStyle(unitDefinitions[selectedEntity.kind].portraitColor, 0.28);
+  graphics.fillCircle(x + size / 2, y + size / 2, size * 0.35);
+
+  container.add(
+    scene.add
+      .text(x + size / 2, y + size / 2, getPortraitGlyph(selectedEntity), {
+        fontFamily: "Georgia, Times New Roman, serif",
+        fontSize: `${Math.floor(size * 0.28)}px`,
+        color: "#f4ead1",
+        fontStyle: "bold",
+      })
+      .setOrigin(0.5),
+  );
 }
 
 function formatPlayerLabel(playerId: string): string {

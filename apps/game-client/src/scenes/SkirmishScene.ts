@@ -13,6 +13,7 @@ import {
   getThemeAssetUrl,
   getThemeFrameRefs,
   getTerrainVisual,
+  resolveEntityPortraitFrame,
   getTileAt,
   imjinrokCampaignScenarios,
   IMJINROK_CAMPAIGN_PROGRESS_STORAGE_KEY,
@@ -6466,7 +6467,21 @@ export class SkirmishScene extends Phaser.Scene {
   }
 
   private emitSelectionChanged(): void {
-    const selection = this.getSelectedUnits().map((unit) => toSelectedEntityView(unit));
+    const selection = this.getSelectedUnits().map((unit) => {
+      const visual = this.getEntityVisual(unit.kind);
+      const portrait = visual ? resolveEntityPortraitFrame(visual) : null;
+
+      return toSelectedEntityView(
+        unit,
+        portrait
+          ? {
+            textureKey: portrait.frame.textureKey,
+            ...(portrait.frame.frameName === undefined ? {} : { frameName: portrait.frame.frameName }),
+            mirrorX: portrait.mirrorX,
+          }
+          : undefined,
+      );
+    });
 
     this.registry.set(SELECTED_ENTITY_REGISTRY_KEY, selection);
     this.game.events.emit(SELECTED_ENTITY_CHANGED_EVENT, selection);

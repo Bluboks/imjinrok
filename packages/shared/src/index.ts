@@ -3,6 +3,7 @@ export * from "./campaignProgress.js";
 export * from "./contentPack.js";
 export * from "./commands.js";
 export * from "./damage.js";
+export * from "./entityPortrait.js";
 export * from "./elevationAutotile.js";
 export * from "./environment.js";
 export * from "./imjinrokMaps.js";

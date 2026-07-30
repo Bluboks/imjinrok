@@ -49,6 +49,14 @@ export interface SelectedEntityView {
   construction?: ConstructionView;
   carriedResource?: CarriedResourceView;
   rallyPoint?: RallyPointView;
+  portrait?: SelectedEntityPortraitView;
+}
+
+/** Serializable theme-selected image data for a selection-panel entity. */
+export interface SelectedEntityPortraitView {
+  textureKey: string;
+  frameName?: string;
+  mirrorX: boolean;
 }
 
 export interface ProductionQueueItemView {
@@ -213,7 +221,7 @@ function getUnitLabel(kind: UnitDefinitionId): string {
   return unitDefinitions[kind].displayName;
 }
 
-export function toSelectedEntityView(unit: UnitState): SelectedEntityView {
+export function toSelectedEntityView(unit: UnitState, portrait?: SelectedEntityPortraitView): SelectedEntityView {
   const view: SelectedEntityView = {
     id: unit.id,
     playerId: unit.playerId,
@@ -225,6 +233,15 @@ export function toSelectedEntityView(unit: UnitState): SelectedEntityView {
     mana: unit.mana.current,
     maxMana: unit.mana.max,
     movementSpeed: unit.movementSpeed,
+    ...(portrait
+      ? {
+        portrait: {
+          textureKey: portrait.textureKey,
+          ...(portrait.frameName === undefined ? {} : { frameName: portrait.frameName }),
+          mirrorX: portrait.mirrorX,
+        },
+      }
+      : {}),
   };
 
   if (unit.movementTarget) {
