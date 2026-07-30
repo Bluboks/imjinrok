@@ -157,6 +157,9 @@ function validateTileTilesetVisuals(
     if (selection.elevationAssetKey !== undefined) {
       issues.push(issue(`${tilePath}.tilesetVisuals.elevationAssetKey`, "Explicit elevation asset selection requires map.tilesetId."));
     }
+    if (selection.underlayAssetKey !== undefined) {
+      issues.push(issue(`${tilePath}.tilesetVisuals.underlayAssetKey`, "Explicit tile underlay selection requires map.tilesetId."));
+    }
     return;
   }
 
@@ -181,13 +184,21 @@ function validateTileTilesetVisuals(
     `${tilePath}.tilesetVisuals.elevationAssetKey`,
     issues,
   );
+  validateSelectedTileAsset(
+    selection.underlayAssetKey,
+    tileset.terrainAssets,
+    tileset.elevationAssets,
+    "underlay",
+    `${tilePath}.tilesetVisuals.underlayAssetKey`,
+    issues,
+  );
 }
 
 function validateSelectedTileAsset(
   assetKey: string | undefined,
   expectedAssets: Readonly<Record<string, VisualAssetRef>>,
   otherAssets: Readonly<Record<string, VisualAssetRef>> | undefined,
-  collection: "flat" | "elevation",
+  collection: "flat" | "elevation" | "underlay",
   path: string,
   issues: MapValidationIssue[],
 ): void {
@@ -197,7 +208,7 @@ function validateSelectedTileAsset(
 
   const asset = expectedAssets[assetKey];
   if (!asset) {
-    const otherCollection = collection === "flat" ? "elevationAssets" : "terrainAssets";
+    const otherCollection = collection === "elevation" ? "terrainAssets" : "elevationAssets";
     const message = otherAssets?.[assetKey]
       ? `Asset '${assetKey}' belongs to ${otherCollection}, not the ${collection} collection.`
       : `Unknown ${collection} asset '${assetKey}'.`;

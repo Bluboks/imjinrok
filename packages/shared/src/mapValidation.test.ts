@@ -136,6 +136,22 @@ test("explicit tile placement offsets require a selected asset and finite source
   ]);
 });
 
+test("explicit tile underlays require a terrain-collection asset and a selected tileset", () => {
+  const map = createBlankMap();
+  const tile = map.layers[0]?.tiles[0];
+  assert.ok(tile);
+  tile.tilesetVisuals = { underlayAssetKey: "missing" };
+
+  assert.deepEqual(validateMapDefinition(map, createContentRegistry()).issues, [
+    { path: "layers[0].tiles[0].tilesetVisuals.underlayAssetKey", message: "Unknown underlay asset 'missing'." },
+  ]);
+
+  delete map.tilesetId;
+  assert.deepEqual(validateMapDefinition(map, createContentRegistry()).issues, [
+    { path: "layers[0].tiles[0].tilesetVisuals.underlayAssetKey", message: "Explicit tile underlay selection requires map.tilesetId." },
+  ]);
+});
+
 test("map validation rejects invalid elevation and unknown resource identities", () => {
   const map = createBlankMap({ width: 2, height: 2 });
   const firstTile = map.layers[0]?.tiles[0];

@@ -7,6 +7,7 @@ import {
   requireExplicitTileVisualTexture,
   resolveTileImagePlacement,
   resolveExplicitTileVisual,
+  resolveExplicitTileUnderlayVisual,
   resolveExplicitTileVisualPlacement,
   resolveExplicitTileVisualWorldBounds,
 } from "./explicitTileVisualResolver";
@@ -42,6 +43,19 @@ test("uses the theme renderer unless a tile explicitly selects a tileset asset",
 
   assert.equal(resolveExplicitTileVisual(createContentRegistry(), map, tile, "flat"), null);
   assert.equal(resolveExplicitTileVisual(createContentRegistry(), map, tile, "elevation"), null);
+  assert.equal(resolveExplicitTileUnderlayVisual(createContentRegistry(), map, tile), null);
+});
+
+test("resolves a source-art underlay at shared ground contact without the flat artwork offset", () => {
+  const map = createBlankMap();
+  const tile = map.layers[0]?.tiles[0];
+  assert.ok(tile);
+  map.tilesetId = "imjinrok-normal";
+  tile.tilesetVisuals = { flatAssetKey: "grass", underlayAssetKey: "grass", sourcePixelOffset: { x: 8, y: -16 } };
+
+  const underlay = resolveExplicitTileUnderlayVisual(createContentRegistry(), map, tile);
+  assert.equal(underlay?.textureKey, "tileset-visual:imjinrok-normal:flat:grass:frame-0");
+  assert.deepEqual(underlay?.sourcePixelOffset, { x: 0, y: 0 });
 });
 
 test("preload descriptors are deterministic, namespaced, and deduplicated for map selections", () => {
