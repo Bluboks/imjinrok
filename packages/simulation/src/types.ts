@@ -125,6 +125,11 @@ export interface UnitState {
   idleCombatPolicyId?: string;
   /** Optional mod/legacy override; unknown ids safely disable auto abilities. */
   autoAbilityProfileId?: string;
+  /**
+   * Optional product/mod attack-delivery override. The id is resolved only at
+   * the simulation execution boundary against its caller-owned registry.
+   */
+  projectileProfileId?: string;
   health: AttributePool;
   mana: AttributePool;
 }

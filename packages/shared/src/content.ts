@@ -244,6 +244,11 @@ export interface UnitDefinition {
     range: number;
     cooldownTicks: number;
     aggroRange: number;
+    /**
+     * Optional product/mod delivery selection. This stays a stable data id so
+     * shared content never imports executable simulation policies.
+     */
+    projectileProfileId?: string;
   };
   renderRadius: number;
   selectionRadius: number;
