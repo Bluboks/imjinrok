@@ -29,13 +29,42 @@ const MAX_GOAL_CANDIDATES = 64;
 export type { FindPathOptions } from "./pathfinder.js";
 
 export const CORE_A_STAR_PATHFINDER_ID = "core:a-star";
+/**
+ * A source-backed local greedy search adapted to the product's full-path
+ * navigation contract. It is not a claim of full original-game parity.
+ */
+export const SOURCE_GREEDY_LOCAL_ADAPTER_PATHFINDER_ID = "imjinrok:source-greedy-local-adapter";
+
+const SOURCE_GREEDY_SEARCH_RADIUS = 25;
+const SOURCE_GREEDY_ACCEPTED_NODE_LIMIT = 6_000;
+// A local call can admit up to the largest source frontier capacity. Limiting
+// calls to floor(6000 / 80) leaves the product adapter inside that gate.
+const SOURCE_GREEDY_QUERY_LIMIT = Math.floor(SOURCE_GREEDY_ACCEPTED_NODE_LIMIT / 80);
+
+/** Actual core-search order, not the helper-only y-biased vector. */
+export const SOURCE_GREEDY_CANDIDATE_OFFSETS: readonly GridPoint[] = [
+  { x: 1, y: 0 },
+  { x: 0, y: 1 },
+  { x: -1, y: 0 },
+  { x: -1, y: -1 },
+  { x: 1, y: -1 },
+  { x: 1, y: 1 },
+  { x: -1, y: 1 },
+  { x: 0, y: -1 },
+];
 
 export const coreAStarPathfinder: Pathfinder = {
   id: CORE_A_STAR_PATHFINDER_ID,
   findPath: findPathWithCoreAStar,
 };
 
+export const sourceGreedyLocalAdapterPathfinder: Pathfinder = {
+  id: SOURCE_GREEDY_LOCAL_ADAPTER_PATHFINDER_ID,
+  findPath: findPathWithSourceGreedyLocalAdapter,
+};
+
 defaultPathfinderRegistry.register(coreAStarPathfinder);
+defaultPathfinderRegistry.register(sourceGreedyLocalAdapterPathfinder);
 
 /** Scenario selection takes precedence over the optional map selection. */
 export function resolvePathfindingProfileId(map: MapDefinition, scenario: ScenarioDefinition): string {
@@ -73,6 +102,215 @@ function findPathWithCoreAStar(
   }
 
   return findPathToAnyGoal(state, unit, start, goals, blockedTiles, requestedGoal, options);
+}
+
+/**
+ * Product adapter around the bounded source kernel. Each call retains the
+ * source search's score/order/window/cap rules, then this adapter chains its
+ * insertion-parent traces into the product's complete path contract.
+ *
+ * Goal adaptation, product passability/collision callbacks, query budgeting,
+ * and chaining are product policy. In particular this intentionally does not
+ * reproduce the source waypoint postprocess, workspace lifecycle, terrain
+ * mask producer, or caller-side movement lifecycle.
+ */
+function findPathWithSourceGreedyLocalAdapter(
+  state: WorldState,
+  unit: UnitState,
+  target: GridPoint,
+  options: FindPathOptions = {},
+): GridPoint[] | null {
+  const start = toTilePoint(unit.position);
+  const requestedGoal = toTilePoint(target);
+  const blockedTiles = getEntityBlockingTiles(state, unit.id, options.ignoreMobileBlockers !== true);
+  const startKey = toTileKey(start);
+
+  blockedTiles.delete(startKey);
+
+  // Reusing the existing product resolution keeps blocked-goal behavior
+  // consistent with core:a-star; the source kernel still scores against the
+  // user's requested tile, rather than an arbitrary resolved neighbor.
+  const goals = resolveWalkableGoals(state, unit, requestedGoal, blockedTiles);
+
+  if (goals.length === 0) {
+    return null;
+  }
+
+  const goalKeys = new Set(goals.map(toTileKey));
+  let current = start;
+  let acceptedNodes = 0;
+  const path: GridPoint[] = [];
+  const chainedEndpoints = new Set([startKey]);
+
+  if (goalKeys.has(startKey)) {
+    return [];
+  }
+
+  for (let query = 0; query < SOURCE_GREEDY_QUERY_LIMIT && acceptedNodes < SOURCE_GREEDY_ACCEPTED_NODE_LIMIT; query += 1) {
+    const local = runSourceGreedyLocalSearch(
+      state,
+      unit,
+      current,
+      requestedGoal,
+      goalKeys,
+      blockedTiles,
+      SOURCE_GREEDY_ACCEPTED_NODE_LIMIT - acceptedNodes,
+    );
+    acceptedNodes += local.acceptedNodes;
+
+    const trace = local.insertionParentTrace.slice(1);
+
+    if (trace.length === 0 || trace.some((point) => chainedEndpoints.has(toTileKey(point)))) {
+      break;
+    }
+
+    path.push(...trace);
+    for (const point of trace) {
+      chainedEndpoints.add(toTileKey(point));
+    }
+    current = trace[trace.length - 1] ?? current;
+
+    if (local.reachedGoal) {
+      return path;
+    }
+  }
+
+  return options.allowPartial === true && path.length > 0 ? path : null;
+}
+
+/** Product-callback adapter for one bounded source-greedy local search. */
+export interface SourceGreedyLocalSearchResult {
+  readonly acceptedNodes: number;
+  readonly frontierCapacity: number;
+  readonly insertionParentTrace: GridPoint[];
+  readonly maximumFrontierSize: number;
+  readonly reachedGoal: boolean;
+}
+
+interface SourceGreedyVisit {
+  readonly coordinate: GridPoint;
+  readonly parentKey: string | null;
+}
+
+interface SourceGreedyFrontierEntry {
+  readonly coordinate: GridPoint;
+  readonly score: number;
+}
+
+export function runSourceGreedyLocalSearch(
+  state: WorldState,
+  unit: UnitState,
+  start: GridPoint,
+  requestedGoal: GridPoint,
+  goalKeys: ReadonlySet<string>,
+  blockedTiles: ReadonlySet<string>,
+  acceptedNodeBudget: number,
+): SourceGreedyLocalSearchResult {
+  const startKey = toTileKey(start);
+  const frontierCapacity = sourceGreedyFrontierCapacity(start, requestedGoal);
+  const visits = new Map<string, SourceGreedyVisit>([[startKey, { coordinate: start, parentKey: null }]]);
+  const initialEntry: SourceGreedyFrontierEntry = { coordinate: start, score: squaredDistance(start, requestedGoal) };
+  const frontier: SourceGreedyFrontierEntry[] = [initialEntry];
+  let closest = initialEntry;
+  let acceptedNodes = 0;
+  let maximumFrontierSize = frontier.length;
+
+  while (frontier.length > 0 && acceptedNodes < acceptedNodeBudget) {
+    const currentIndex = selectStrictClosestFrontierIndex(frontier);
+    const current = frontier.splice(currentIndex, 1)[0];
+
+    if (!current) {
+      break;
+    }
+
+    if (goalKeys.has(toTileKey(current.coordinate))) {
+      return finishSourceGreedyLocalSearch(current.coordinate, true, acceptedNodes, frontierCapacity, maximumFrontierSize, visits);
+    }
+
+    for (const offset of SOURCE_GREEDY_CANDIDATE_OFFSETS) {
+      if (acceptedNodes >= acceptedNodeBudget) {
+        break;
+      }
+
+      const candidate = { x: current.coordinate.x + offset.x, y: current.coordinate.y + offset.y };
+      const candidateKey = toTileKey(candidate);
+
+      if (
+        Math.abs(candidate.x - start.x) > SOURCE_GREEDY_SEARCH_RADIUS ||
+        Math.abs(candidate.y - start.y) > SOURCE_GREEDY_SEARCH_RADIUS ||
+        visits.has(candidateKey) ||
+        !isWalkable(state, unit, candidate, blockedTiles)
+      ) {
+        continue;
+      }
+
+      const entry = { coordinate: candidate, score: squaredDistance(candidate, requestedGoal) };
+      visits.set(candidateKey, { coordinate: candidate, parentKey: toTileKey(current.coordinate) });
+      frontier.push(entry);
+      acceptedNodes += 1;
+      maximumFrontierSize = Math.max(maximumFrontierSize, frontier.length);
+
+      if (entry.score < closest.score) {
+        closest = entry;
+      }
+
+      if (goalKeys.has(candidateKey)) {
+        return finishSourceGreedyLocalSearch(candidate, true, acceptedNodes, frontierCapacity, maximumFrontierSize, visits);
+      }
+
+      if (frontier.length >= frontierCapacity) {
+        return finishSourceGreedyLocalSearch(closest.coordinate, false, acceptedNodes, frontierCapacity, maximumFrontierSize, visits);
+      }
+    }
+  }
+
+  return finishSourceGreedyLocalSearch(closest.coordinate, false, acceptedNodes, frontierCapacity, maximumFrontierSize, visits);
+}
+
+function sourceGreedyFrontierCapacity(start: GridPoint, target: GridPoint): number {
+  const chebyshevDistance = Math.max(Math.abs(target.x - start.x), Math.abs(target.y - start.y));
+
+  if (chebyshevDistance <= 2) {
+    return 26;
+  }
+
+  return chebyshevDistance <= 4 ? 40 : 80;
+}
+
+function selectStrictClosestFrontierIndex(frontier: readonly SourceGreedyFrontierEntry[]): number {
+  let selectedIndex = 0;
+  let selectedScore = frontier[0]?.score ?? Number.POSITIVE_INFINITY;
+
+  for (let index = 1; index < frontier.length; index += 1) {
+    const score = frontier[index]?.score ?? Number.POSITIVE_INFINITY;
+
+    if (score < selectedScore) {
+      selectedIndex = index;
+      selectedScore = score;
+    }
+  }
+
+  return selectedIndex;
+}
+
+function finishSourceGreedyLocalSearch(
+  endpoint: GridPoint,
+  reachedGoal: boolean,
+  acceptedNodes: number,
+  frontierCapacity: number,
+  maximumFrontierSize: number,
+  visits: ReadonlyMap<string, SourceGreedyVisit>,
+): SourceGreedyLocalSearchResult {
+  const trace: GridPoint[] = [];
+  let visit = visits.get(toTileKey(endpoint));
+
+  while (visit) {
+    trace.push(visit.coordinate);
+    visit = visit.parentKey ? visits.get(visit.parentKey) : undefined;
+  }
+
+  trace.reverse();
+  return { acceptedNodes, frontierCapacity, insertionParentTrace: trace, maximumFrontierSize, reachedGoal };
 }
 
 function findPathToAnyGoal(
@@ -315,6 +553,12 @@ function isPointInMap(map: MapDefinition, point: GridPoint): boolean {
 
 function heuristic(from: GridPoint, to: GridPoint): number {
   return Math.hypot(to.x - from.x, to.y - from.y);
+}
+
+function squaredDistance(from: GridPoint, to: GridPoint): number {
+  const dx = to.x - from.x;
+  const dy = to.y - from.y;
+  return dx * dx + dy * dy;
 }
 
 function goalHeuristic(from: GridPoint, goals: readonly GridPoint[], fallback: GridPoint): number {
