@@ -3,6 +3,7 @@ import type { TileCell } from "./maps.js";
 
 export const K01_SOURCE_TILE_VISUAL_DIMENSIONS = K01_SOURCE_TILE_VISUAL_ARTIFACT.dimensions;
 export const K01_SOURCE_TILE_VISUAL_PAIR_DIGEST = K01_SOURCE_TILE_VISUAL_ARTIFACT.pairStreamSha256;
+export const K01_SOURCE_TILE_VISUAL_PLACEMENT_OFFSET_DIGEST = K01_SOURCE_TILE_VISUAL_ARTIFACT.placementOffsetYStreamSha256;
 export const K01_SOURCE_TILE_IMAGE_GEOMETRY = {
   width: 64,
   height: 48,
@@ -19,6 +20,7 @@ export interface K01SourceTileVisualAsset {
 }
 
 const pairBytes = decodeBase64(K01_SOURCE_TILE_VISUAL_ARTIFACT.pairBytesBase64);
+const placementOffsetYBytes = decodeBase64(K01_SOURCE_TILE_VISUAL_ARTIFACT.placementOffsetYBytesBase64);
 const assets = K01_SOURCE_TILE_VISUAL_ARTIFACT.assets;
 const assetKeyBySourcePair = new Map<string, string>(assets.map((asset) => [`${asset.stem}:${asset.frame}`, asset.assetKey]));
 const stemByObjectIndex = new Map<number, string>(
@@ -47,6 +49,27 @@ export function getK01SourceTileFlatAssetKey(x: number, y: number): string {
   return assetKey;
 }
 
+/**
+ * Source-backed product placement adaptation for the K01 second raw placement
+ * argument. The original screen axis/pivot remains unresolved; the adapter
+ * applies this asset-native y translation consistently to terrain and fog.
+ */
+export function getK01SourceTilePlacementOffset(x: number, y: number): { readonly x: 0; readonly y: 0 | -16 } {
+  const { width, height } = K01_SOURCE_TILE_VISUAL_DIMENSIONS;
+  if (!Number.isInteger(x) || !Number.isInteger(y) || x < 0 || x >= width || y < 0 || y >= height) {
+    throw new RangeError(`K01 source tile coordinates outside 0..${width - 1},0..${height - 1}: ${x},${y}`);
+  }
+  const encodedY = placementOffsetYBytes[x * height + y];
+  if (encodedY === undefined) {
+    throw new Error(`K01 source tile (${x},${y}) is outside the generated placement-offset stream.`);
+  }
+  const yOffset = encodedY > 0x7f ? encodedY - 0x100 : encodedY;
+  if (yOffset !== 0 && yOffset !== -16) {
+    throw new Error(`K01 source tile (${x},${y}) has unsupported placement offset ${yOffset}.`);
+  }
+  return { x: 0, y: yOffset };
+}
+
 export function getK01SourceTileVisualAssets(): readonly K01SourceTileVisualAsset[] {
   return assets;
 }
@@ -63,7 +86,11 @@ export function applyK01SourceTileVisuals(tiles: TileCell[], width: number, heig
       const tileIndex = y * width + x;
       const tile = tiles[tileIndex];
       if (!tile) throw new Error(`K01 source tile visual is missing product tile ${x},${y}.`);
-      tile.tilesetVisuals = { ...tile.tilesetVisuals, flatAssetKey: getK01SourceTileFlatAssetKey(x, y) };
+      tile.tilesetVisuals = {
+        ...tile.tilesetVisuals,
+        flatAssetKey: getK01SourceTileFlatAssetKey(x, y),
+        sourcePixelOffset: getK01SourceTilePlacementOffset(x, y),
+      };
     }
   }
 }
@@ -76,8 +103,22 @@ export function assertK01SourceTileVisualArtifact(): void {
   if (K01_SOURCE_TILE_VISUAL_ARTIFACT.pairCount !== width * height || pairBytes.length !== K01_SOURCE_TILE_VISUAL_ARTIFACT.pairCount * 2) {
     throw new Error("K01 source tile visual artifact pair count does not match its dimensions.");
   }
+  if (placementOffsetYBytes.length !== K01_SOURCE_TILE_VISUAL_ARTIFACT.pairCount) {
+    throw new Error("K01 source tile visual artifact placement-offset count does not match its dimensions.");
+  }
   if (!/^[a-f0-9]{64}$/u.test(K01_SOURCE_TILE_VISUAL_PAIR_DIGEST)) {
     throw new Error("K01 source tile visual artifact has an invalid pair-stream SHA-256 digest.");
+  }
+  if (!/^[a-f0-9]{64}$/u.test(K01_SOURCE_TILE_VISUAL_PLACEMENT_OFFSET_DIGEST)) {
+    throw new Error("K01 source tile visual artifact has an invalid placement-offset SHA-256 digest.");
+  }
+  const offsetDistribution = K01_SOURCE_TILE_VISUAL_ARTIFACT.placementOffsetYDistribution;
+  if (offsetDistribution.zero !== 2865 || offsetDistribution.negative16 !== 735) {
+    throw new Error("K01 source tile visual artifact has an invalid placement-offset distribution.");
+  }
+  if (placementOffsetYBytes.filter((value) => value === 0).length !== offsetDistribution.zero
+    || placementOffsetYBytes.filter((value) => value === 0xf0).length !== offsetDistribution.negative16) {
+    throw new Error("K01 source tile visual artifact placement-offset bytes do not match their distribution.");
   }
   const uniqueAssetKeys = new Set(assets.map((asset) => asset.assetKey));
   if (assets.length !== uniqueAssetKeys.size || assets.length !== 243) {

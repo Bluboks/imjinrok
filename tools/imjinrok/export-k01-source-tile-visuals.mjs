@@ -5,6 +5,7 @@ import { dirname, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { decodeSpriteFrame, encodeRgbaPng, indexedToRgba, parseSpriteLikeHeader, readPalette } from "./codec.mjs";
+import { extractK01TilePlacementElevationEvidence } from "./extract-k01-tile-placement-elevation-evidence.mjs";
 import { extractK01SourceTileSelector } from "./extract-k01-source-tile-selector.mjs";
 
 const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
@@ -12,6 +13,7 @@ const defaultOriginalRoot = resolve(repositoryRoot, "original/imjinrok2");
 const defaultAssetDirectory = resolve(repositoryRoot, "apps/game-client/public/assets/themes/default/terrain/imjinrok-normal");
 const defaultArtifactPath = resolve(repositoryRoot, "packages/shared/src/generated/k01SourceTileVisualArtifact.ts");
 const defaultSelectorFixturePath = resolve(repositoryRoot, "analysis/fixtures/k01-source-tile-selector.json");
+const defaultPlacementEvidenceFixturePath = resolve(repositoryRoot, "analysis/fixtures/k01-tile-placement-elevation-evidence.json");
 const defaultManifestPath = resolve(defaultAssetDirectory, "k01-source-tiles.manifest.json");
 
 /**
@@ -25,14 +27,18 @@ export function exportK01SourceTileVisuals(options = {}) {
   const assetDirectory = options.assetDirectory ?? defaultAssetDirectory;
   const artifactPath = options.artifactPath ?? defaultArtifactPath;
   const selectorFixturePath = options.selectorFixturePath ?? defaultSelectorFixturePath;
+  const placementEvidenceFixturePath = options.placementEvidenceFixturePath ?? defaultPlacementEvidenceFixturePath;
   const manifestPath = options.manifestPath ?? resolve(assetDirectory, "k01-source-tiles.manifest.json");
   const selector = extractK01SourceTileSelector({ originalRoot });
   assertSelectorFixture(selectorFixturePath, selector);
+  const placementEvidence = extractK01TilePlacementElevationEvidence({ originalRoot });
+  assertPlacementEvidenceFixture(placementEvidenceFixturePath, placementEvidence);
 
   const pairBytes = Buffer.from(selector.pairStream.bytesBase64 ?? "", "base64");
   // The canonical selector fixture deliberately does not duplicate the stream;
   // recover it from its validated map bytes through the canonical extractor.
   const pairs = collectPairs(selector, originalRoot);
+  const placementOffsetYBytes = collectPlacementOffsetYBytes(selector, originalRoot, placementEvidence);
   const actualBytes = Buffer.from(pairs.flatMap((pair) => [pair.objectIndex, pair.frameIndex]));
   assertEqual(actualBytes.length, selector.pairStream.byteCount, "K01 selector pair byte count");
   assertEqual(sha256(actualBytes), selector.pairStream.sha256, "K01 selector pair digest");
@@ -95,13 +101,17 @@ export function exportK01SourceTileVisuals(options = {}) {
     },
     productRenderingAdapter: {
       imageGeometry: { width: 64, height: 48, footprintAnchor: { x: 32, y: 16 } },
-      note: "Map ground-contact placement is a product/mod rendering adapter, not proven original pixel pivot parity.",
+      placementOffsetY: {
+        source: "FUN_00469330/FUN_00469510 K01 second raw placement argument adjustment, emitted as an asset-native product offset.",
+        values: { zero: 2865, negative16: 735 },
+      },
+      note: "Map ground-contact placement and y-axis adaptation are product/mod renderer contracts, not proven original pixel pivot or screen-axis parity.",
     },
     assets: emittedAssets,
   };
   writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
   mkdirSync(dirname(artifactPath), { recursive: true });
-  writeFileSync(artifactPath, renderArtifact(selector, actualBytes, emittedAssets));
+  writeFileSync(artifactPath, renderArtifact(selector, actualBytes, placementOffsetYBytes, emittedAssets));
 
   return { assetDirectory, artifactPath, manifestPath, assetCount: emittedAssets.length, assetBytes: emittedAssets.reduce((total, asset) => total + readFileSync(resolve(assetDirectory, asset.fileName)).length, 0), manifest };
 }
@@ -118,13 +128,37 @@ function collectPairs(selector, originalRoot) {
   return pairs;
 }
 
-function renderArtifact(selector, pairBytes, assets) {
+function collectPlacementOffsetYBytes(selector, originalRoot, placementEvidence) {
+  const map = readFileSync(resolve(originalRoot, selector.sources.map.path.replace(/^original\/imjinrok2\//u, "")));
+  const offsets = [];
+  for (let x = 0; x < selector.map.width; x += 1) {
+    for (let y = 0; y < selector.map.height; y += 1) {
+      const lowNibble = map[0x32514 + x * 180 + y] & 0x0f;
+      offsets.push(lowNibble === 2 ? 0 : 0xf0);
+    }
+  }
+  const bytes = Buffer.from(offsets);
+  const zero = bytes.filter((value) => value === 0).length;
+  const negative16 = bytes.filter((value) => value === 0xf0).length;
+  assertEqual(zero, placementEvidence.placement.lowNibbleBranch.K01Distribution.verticalShift[0], "K01 placement zero-offset count");
+  assertEqual(negative16, placementEvidence.placement.lowNibbleBranch.K01Distribution.verticalShift[16], "K01 placement negative-16-offset count");
+  if (zero + negative16 !== bytes.length) throw new Error("K01 placement offset stream contains an unsupported value.");
+  return bytes;
+}
+
+function renderArtifact(selector, pairBytes, placementOffsetYBytes, assets) {
   const objectStems = Object.fromEntries(selector.objects.map((source) => [source.objectIndex, source.fileName.replace(/\.ytl$/u, "")]));
   return `// Generated by tools/imjinrok/export-k01-source-tile-visuals.mjs. Do not edit by hand.\n// Runtime data only; original files are never read by the web client.\nexport const K01_SOURCE_TILE_VISUAL_ARTIFACT = ${JSON.stringify({
     dimensions: selector.pairStream.dimensions,
     pairCount: selector.pairStream.count,
     pairStreamSha256: selector.pairStream.sha256,
     pairBytesBase64: pairBytes.toString("base64"),
+    placementOffsetYStreamSha256: sha256(placementOffsetYBytes),
+    placementOffsetYBytesBase64: placementOffsetYBytes.toString("base64"),
+    placementOffsetYDistribution: {
+      zero: placementOffsetYBytes.filter((value) => value === 0).length,
+      negative16: placementOffsetYBytes.filter((value) => value === 0xf0).length,
+    },
     objectStems,
     assets: assets.map(({ assetKey, stem, frame, fileName, sourcePath, sourceSha256 }) => ({ assetKey, stem, frame, fileName, sourcePath, sourceSha256 })),
   }, null, 2)} as const;\n`;
@@ -134,6 +168,13 @@ function assertSelectorFixture(path, selector) {
   const expected = JSON.parse(readFileSync(path, "utf8"));
   if (JSON.stringify(expected) !== JSON.stringify(selector)) {
     throw new Error(`K01 selector fixture does not match canonical hash-bound extractor output: ${path}`);
+  }
+}
+
+function assertPlacementEvidenceFixture(path, evidence) {
+  const expected = JSON.parse(readFileSync(path, "utf8"));
+  if (JSON.stringify(expected) !== JSON.stringify(evidence)) {
+    throw new Error(`K01 placement evidence fixture does not match canonical hash-bound extractor output: ${path}`);
   }
 }
 

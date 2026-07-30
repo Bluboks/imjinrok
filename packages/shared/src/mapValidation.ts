@@ -137,6 +137,18 @@ function validateTileTilesetVisuals(
     return;
   }
 
+  if (selection.sourcePixelOffset !== undefined) {
+    if (selection.flatAssetKey === undefined && selection.elevationAssetKey === undefined) {
+      issues.push(issue(`${tilePath}.tilesetVisuals.sourcePixelOffset`, "Explicit tile placement offset requires a selected tile asset."));
+    }
+    if (!Number.isFinite(selection.sourcePixelOffset.x)) {
+      issues.push(issue(`${tilePath}.tilesetVisuals.sourcePixelOffset.x`, "Tile placement offset x must be finite."));
+    }
+    if (!Number.isFinite(selection.sourcePixelOffset.y)) {
+      issues.push(issue(`${tilePath}.tilesetVisuals.sourcePixelOffset.y`, "Tile placement offset y must be finite."));
+    }
+  }
+
   const tilesetId = map.tilesetId;
   if (!tilesetId) {
     if (selection.flatAssetKey !== undefined) {

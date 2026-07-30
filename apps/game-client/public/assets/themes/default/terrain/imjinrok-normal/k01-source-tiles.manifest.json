@@ -22,7 +22,14 @@
         "y": 16
       }
     },
-    "note": "Map ground-contact placement is a product/mod rendering adapter, not proven original pixel pivot parity."
+    "placementOffsetY": {
+      "source": "FUN_00469330/FUN_00469510 K01 second raw placement argument adjustment, emitted as an asset-native product offset.",
+      "values": {
+        "zero": 2865,
+        "negative16": 735
+      }
+    },
+    "note": "Map ground-contact placement and y-axis adaptation are product/mod renderer contracts, not proven original pixel pivot or screen-axis parity."
   },
   "assets": [
     {

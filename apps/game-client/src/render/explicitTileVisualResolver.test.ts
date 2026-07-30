@@ -5,6 +5,7 @@ import {
   getMapExplicitTileVisualPreloadDescriptors,
   getRegisteredExplicitTileVisualPreloadDescriptors,
   requireExplicitTileVisualTexture,
+  resolveTileImagePlacement,
   resolveExplicitTileVisual,
   resolveExplicitTileVisualPlacement,
   resolveExplicitTileVisualWorldBounds,
@@ -90,6 +91,29 @@ test("places source geometry by its footprint anchor and map elevation step", ()
   assert.deepEqual(
     resolveExplicitTileVisualWorldBounds(descriptor, { x: 120, y: 80 }, 96, 48, 2),
     { left: 72, top: 8, right: 168, bottom: 80 },
+  );
+});
+
+test("applies finite asset-native offsets consistently to placement and world bounds", () => {
+  const map = createBlankMap();
+  const tile = map.layers[0]?.tiles[0];
+  assert.ok(tile);
+  map.tilesetId = "imjinrok-normal";
+  tile.tilesetVisuals = { flatAssetKey: "grass", sourcePixelOffset: { x: 8, y: -16 } };
+  const descriptor = resolveExplicitTileVisual(createContentRegistry(), map, tile, "flat");
+  assert.ok(descriptor);
+
+  assert.deepEqual(
+    resolveExplicitTileVisualPlacement(descriptor, { x: 120, y: 80 }, 96, 48),
+    { origin: { x: 0.5, y: 16 / 48 }, position: { x: 132, y: 56 }, scale: 1.5 },
+  );
+  assert.deepEqual(
+    resolveExplicitTileVisualWorldBounds(descriptor, { x: 120, y: 80 }, 96, 48),
+    { left: 84, top: 32, right: 180, bottom: 104 },
+  );
+  assert.throws(
+    () => resolveTileImagePlacement({ imageGeometry: descriptor.imageGeometry, sourcePixelOffset: { x: Number.NaN, y: 0 } }, { x: 0, y: 0 }, 64, 32),
+    /sourcePixelOffset/,
   );
 });
 

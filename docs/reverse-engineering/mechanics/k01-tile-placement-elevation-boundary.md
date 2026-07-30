@@ -8,7 +8,7 @@
 | --- | --- | --- |
 | 분석 | `정적 확정` | 두 caller의 signed-word x/y guard, `lowNibble == 2`/other 수식, direct helper의 전체 return 분기, K01 `60×60` cell의 selector/lookup·object/frame fields |
 | 재현 | `재현 완료` | 3,600-cell x-major stream/digest·분포, low-nibble two/other, 네 map corner, helper의 synthetic positive/negative branch와 malformed/tampered input 거부 |
-| 구현 | `없음` | product/client/shared/simulation renderer를 바꾸지 않았다. |
+| 구현 | `부분 이식·source-backed product adaptation` | hash-bound K01의 `0/-16` second-argument 결과를 셀별 asset-native `sourcePixelOffset.y`로 내보내고, terrain·explicit fog base·source fog composite가 같은 web ground-contact helper로 소비한다. raw argument 축·pivot은 여전히 미확정이다. |
 
 이것은 기존 [K01 source tile object·frame selector](k01-source-tile-selector.md)의 **다음 placement 경계**다.
 기존 문서의 object/frame source identity와 3,600 pair frame-bound proof를 그대로 hash-bound로 재검증하지만,
@@ -92,6 +92,19 @@ cell에는 나타나지 않는다**. K01 결과를 elevation, height, terrain �
 
 fixture의 map-corner vector도 source value를 고정한다. `(0,0)`은 low nibble 1/object 0/frame 39/shift 16,
 `(0,1)`은 low nibble 2/object 0/frame 4/shift 0, `(59,59)`은 low nibble 2/object 31/frame 18/shift 0이다.
+
+## 제품 adapter 경계
+
+`export-k01-source-tile-visuals.mjs`는 canonical placement-evidence fixture를 다시 검증한 뒤, 각 cell의
+`verticalShift`를 `0` 또는 asset-native `-16` pixel `sourcePixelOffset.y` stream으로 생성한다. `0`은 2,865,
+`-16`은 735개이며, 이 부호와 web y축 해석은 **source-backed product adaptation**이다. 이 선택은 source의
+두 번째 raw argument에 실제로 뺀 값을 web renderer의 y translation으로 소비하기 위한 일관된 제품 계약일
+뿐, raw argument가 screen-y/world-y이거나 source pivot이 `(32,16)`이라는 원작 일치 주장이 아니다.
+
+explicit terrain placement와 world/chunk bounds, explicit fog base, source fog composite는 이 offset을 같은
+ground-contact helper로 적용한다. source fog의 64×48 composite는 frame family/selector identity를 유지하되,
+흰색·회색 원본 팔레트가 fog gap처럼 보이지 않도록 product fog tint `0x020608`을 적용한다. tint, alpha,
+visibility semantics와 pixel pivot은 원작에서 확정된 범위가 아니다.
 
 ## Reproduction and failure boundary
 

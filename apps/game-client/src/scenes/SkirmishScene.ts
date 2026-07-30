@@ -145,6 +145,7 @@ import {
   resolveExplicitTileVisual,
   resolveExplicitTileVisualPlacement,
   resolveExplicitTileVisualWorldBounds,
+  resolveTileImagePlacement,
   type ExplicitTileVisualDescriptor,
 } from "../render/explicitTileVisualResolver.js";
 import {
@@ -190,8 +191,9 @@ import {
   getSourceFogNeighborVisibility,
   requireSourceTexture,
   resolveEnvironmentOverlayLightContract,
-  resolveSourceFogComposite,
-  resolveSourceFogCompositeScale,
+  resolveSourceFogLayerPlan,
+  SOURCE_FOG_COMPOSITE_IMAGE_GEOMETRY,
+  SOURCE_FOG_OVERLAY_TINT,
   SOURCE_FOG_COMPOSITE_ASSETS,
   type FogVisibility,
   type SourceFogComposite,
@@ -7033,10 +7035,11 @@ export class SkirmishScene extends Phaser.Scene {
     worldX: number,
     worldY: number,
   ): void {
-    if (getTileAt(this.map, x, y).elevation > 0) return;
-    const source = resolveSourceFogComposite(
+    const tile = getTileAt(this.map, x, y);
+    if (tile.elevation > 0) return;
+    const sourcePlan = resolveSourceFogLayerPlan(
       this.map.fogVisualProfileId,
-      getTileAt(this.map, x, y).fogVisuals?.familyIndex,
+      tile.fogVisuals?.familyIndex,
       this.toSourceFogVisibility(visibility),
       (neighbor) => getSourceFogNeighborVisibility(
         x,
@@ -7048,9 +7051,23 @@ export class SkirmishScene extends Phaser.Scene {
       ),
     );
 
-    if (!source) return;
+    // redrawFogChunk always draws the base fog first. The source plan only
+    // supplies a boundary composite, including when mask 0/15 omits one.
+    if (!sourcePlan.drawBaseFog || !sourcePlan.composite) return;
+    const source = sourcePlan.composite;
     requireSourceTexture(source, (textureKey) => this.textures.exists(textureKey));
-    renderTexture.draw(this.getSourceFogStamp(source), worldX - bounds.minX, worldY - bounds.minY);
+    const placement = resolveTileImagePlacement(
+      {
+        imageGeometry: SOURCE_FOG_COMPOSITE_IMAGE_GEOMETRY,
+        ...(tile.tilesetVisuals?.sourcePixelOffset
+          ? { sourcePixelOffset: tile.tilesetVisuals.sourcePixelOffset }
+          : {}),
+      },
+      { x: worldX, y: worldY },
+      this.map.tileWidth,
+      this.map.tileHeight,
+    );
+    renderTexture.draw(this.getSourceFogStamp(source), placement.position.x - bounds.minX, placement.position.y - bounds.minY);
   }
 
   private getFogVisibilityAt(x: number, y: number): TileVisibility {
@@ -7071,13 +7088,19 @@ export class SkirmishScene extends Phaser.Scene {
     if (existing) return existing;
 
     const stamp = this.make.image({ x: 0, y: 0, key: source.textureKey, add: false });
-    const scale = resolveSourceFogCompositeScale(this.map.tileWidth);
+    const placement = resolveTileImagePlacement(
+      { imageGeometry: SOURCE_FOG_COMPOSITE_IMAGE_GEOMETRY },
+      { x: 0, y: 0 },
+      this.map.tileWidth,
+      this.map.tileHeight,
+    );
     stamp
       // This 64x48 image ground-contact placement and alpha are web-product
       // adaptations; original fog pivot/alpha are not statically resolved.
-      .setOrigin(0.5, 1 / 3)
-      .setScale(scale)
-      .setAlpha(source.alpha);
+      .setOrigin(placement.origin.x, placement.origin.y)
+      .setScale(placement.scale)
+      .setAlpha(source.alpha)
+      .setTint(SOURCE_FOG_OVERLAY_TINT);
     this.sourceFogStamps.set(stampKey, stamp);
     return stamp;
   }
