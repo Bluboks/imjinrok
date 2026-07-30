@@ -62,7 +62,10 @@ import {
   type MinimapGeometry,
 } from "../ui/minimap.js";
 import { drawActionGrid, getEnabledActionForHotkey } from "../ui/actionGrid.js";
-import { ORIGINAL_COMMAND_ICON_ASSETS } from "../ui/sourceFogAndCommandAssets.js";
+import {
+  ORIGINAL_COMMAND_ICON_ASSETS,
+  resolveSourceCommandIconProfileForScenario,
+} from "../ui/sourceFogAndCommandAssets.js";
 import { resolveProductActionGridLayoutForScenario } from "../ui/actionGridLayoutPolicy.js";
 import { drawPanelFrame, HUD_TEXT_STYLE, type PanelBounds } from "../ui/hudPanel.js";
 import {
@@ -603,6 +606,7 @@ export class UIScene extends Phaser.Scene {
         this.emitActionTriggered(actionId, "button");
       },
       layout,
+      resolveSourceCommandIconProfileForScenario(this.launchContext?.scenario?.id),
     );
 
     return true;

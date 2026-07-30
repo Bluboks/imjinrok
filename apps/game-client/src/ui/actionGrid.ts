@@ -10,11 +10,13 @@ import {
   requireSourceTexture,
   resolveSourceCommandIcon,
   type SourceCommandIcon,
+  type SourceCommandIconBinding,
+  type SourceCommandIconProfile,
 } from "./sourceFogAndCommandAssets.js";
 
 export interface HudActionSlot {
   actionId?: ActionDefinitionId;
-  sourceIcon?: SourceCommandIcon;
+  sourceIcon?: SourceCommandIconBinding;
   icon: string;
   hotkey: string;
   label: string;
@@ -82,11 +84,12 @@ export function drawActionGrid(
   playerEconomy: PlayerEconomyView | null,
   onAction?: HudActionHandler,
   layout: ActionGridLayoutPolicy = ADAPTIVE_ACTION_GRID_LAYOUT,
+  sourceIconProfile?: SourceCommandIconProfile,
 ): void {
   const { x, y, width, height } = bounds;
   drawPanelFrame(scene, container, graphics, bounds, "명령");
 
-  const actions = getActionSlots(selectedEntities, playerEconomy);
+  const actions = getActionSlots(selectedEntities, playerEconomy, sourceIconProfile);
   const slotRects = resolveActionGridSlotRects(bounds, layout);
 
   for (const [index, slot] of slotRects.entries()) {
@@ -190,7 +193,11 @@ export function resolveActionGridSlotRects(
   });
 }
 
-export function getActionSlots(selectedEntities: SelectedEntitiesView, playerEconomy: PlayerEconomyView | null): HudActionSlot[] {
+export function getActionSlots(
+  selectedEntities: SelectedEntitiesView,
+  playerEconomy: PlayerEconomyView | null,
+  sourceIconProfile?: SourceCommandIconProfile,
+): HudActionSlot[] {
   const emptySlot = (): HudActionSlot => ({ icon: "", hotkey: "", label: "", enabled: false });
   const slots = Array.from({ length: 12 }, emptySlot);
 
@@ -199,7 +206,7 @@ export function getActionSlots(selectedEntities: SelectedEntitiesView, playerEco
   }
 
   const actionIds = getSelectionActionIds(selectedEntities);
-  const actions = actionIds.map((actionId) => toHudActionSlot(actionId, selectedEntities, playerEconomy));
+  const actions = actionIds.map((actionId) => toHudActionSlot(actionId, selectedEntities, playerEconomy, sourceIconProfile));
 
   actions.forEach((action, index) => {
     slots[index] = action;
@@ -242,9 +249,10 @@ function toHudActionSlot(
   actionId: ActionDefinitionId,
   selectedEntities: SelectedEntitiesView,
   playerEconomy: PlayerEconomyView | null,
+  sourceIconProfile?: SourceCommandIconProfile,
 ): HudActionSlot {
   const action = actionDefinitions[actionId];
-  const sourceIcon = resolveSourceCommandIcon(actionId);
+  const sourceIcon = resolveSourceCommandIcon(actionId, sourceIconProfile);
 
   return {
     actionId,

@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { getActionSlots, resolveActionGridSlotRects, resolveActionIconVisual } from "./actionGrid";
-import { ORIGINAL_COMMAND_ICON_ASSETS } from "./sourceFogAndCommandAssets";
+import { IMJINROK_SOURCE_COMMAND_ICON_PROFILE, ORIGINAL_COMMAND_ICON_ASSETS } from "./sourceFogAndCommandAssets";
 
 test("keeps the generic command grid's twelve-slot default", () => {
   assert.equal(getActionSlots([], null).length, 12);
@@ -29,9 +29,33 @@ test("uses a loaded source icon record when supplied and otherwise retains glyph
   assert.deepEqual(resolveActionIconVisual({ icon: "M" }), { kind: "glyph", glyph: "M" });
 });
 
-test("current product actions have no unproven original icon mapping", () => {
+test("generic action grids retain glyph fallback without an opted-in source profile", () => {
   const slots = getActionSlots([{ id: "unit", kind: "villager", construction: false }], null);
   const move = slots.find(({ actionId }) => actionId === "move");
   assert.equal(move?.sourceIcon, undefined);
   assert.deepEqual(resolveActionIconVisual(move!), { kind: "glyph", glyph: "M" });
+});
+
+test("the Imjinrok profile supplies its source-backed bindings without changing the 4×3 grid", () => {
+  const slots = getActionSlots(
+    [{ id: "unit", kind: "villager", construction: false }],
+    null,
+    IMJINROK_SOURCE_COMMAND_ICON_PROFILE,
+  );
+
+  assert.equal(slots.length, 12);
+  assert.deepEqual(
+    slots
+      .filter(({ sourceIcon }) => sourceIcon)
+      .map(({ actionId, sourceIcon }) => [actionId, sourceIcon?.sourceFrameIndex, sourceIcon?.evidenceStatus]),
+    [
+      ["move", 6, "exact-source-control-binding"],
+      ["build", 16, "source-backed-adaptation"],
+      ["stop", 43, "exact-source-control-binding"],
+      ["attack-move", 4, "source-backed-adaptation"],
+      ["patrol", 10, "exact-source-control-binding"],
+      ["repair", 12, "exact-source-control-binding"],
+      ["hold", 39, "exact-source-control-binding"],
+    ],
+  );
 });

@@ -10,7 +10,7 @@
 | --- | --- | --- |
 | 분석 | 정적 확정 | action 2/3/5/11/16/19/21/35/39의 CP949 source label→runtime pointer→frame, action 61..64의 frame, `button.spr` payload→`34×34` draw의 닫힌 경로 |
 | 재현 | 재현 완료 | 열세 action/frame vector, label copy metadata, disabled slot·loader 실패·out-of-range no-draw 경계 |
-| 구현 | 없음 | product action semantic mapping과 제품의 4×3 grid는 변경하지 않음 |
+| 구현 | 원본 기반 source binding + 의도적 적응 | K01 opt-in profile이 bounded pixel frame을 사용한다. responsive 4×3 grid는 유지하며 `attack-move`/`build`는 semantic adaptation으로 기록한다. |
 
 기준 입력은 `original/imjinrok2/imjinrok2.exe` SHA-256
 `25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e`,
@@ -89,8 +89,11 @@ direct-reference projection도 함께 고정한다.
   이 분석은 loader 내부 성공 결과를 재현하거나 보충하지 않는다.
 - selected action이 이 bounded binding 밖이거나 frame index가 supplied frame-count 범위를 벗어나면 이
   bounded reproducer는 successful draw를 만들지 않는다.
-- 이 열세 action의 원본 control label/record와 현재 제품 `ActionDefinitionId`의 source-complete semantic
-  mapping은 별개다. 현재 대응은 없으며 제품 responsive 4 columns × 3 rows command grid는 그대로다.
+- K01 opt-in profile은 product `move`, `stop`, `patrol`, `repair`, `hold`, `rally-point`,
+  `cancel-production`, `cancel-construction`에 각각 action 3/2/35/16/39/21/19의 bounded source
+  record와 frame을 사용한다. `attack-move`→action 5 `공격` frame 4 및 `build`→action 11 `건설`
+  frame 16은 source-backed adaptation이며 original semantic parity를 주장하지 않는다.
+- 제품 responsive 4 columns × 3 rows command grid는 그대로이며 original 3×3 layout을 이식하지 않는다.
 
 ## 재현 도구
 

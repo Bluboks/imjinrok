@@ -6,12 +6,14 @@ import { fileURLToPath } from "node:url";
 import {
   ORIGINAL_COMMAND_CONTROL_BINDINGS,
   ORIGINAL_COMMAND_ICON_ASSETS,
+  IMJINROK_SOURCE_COMMAND_ICON_PROFILE,
   requireSourceTexture,
   resolveCardinalVisibleNeighborMask,
   resolveEnvironmentOverlayLightContract,
   resolveNormalSourceFogTransition,
   resolveSourceFogTileScale,
   resolveSourceCommandIcon,
+  resolveSourceCommandIconProfileForScenario,
   resolveSourceFogTile,
 } from "./sourceFogAndCommandAssets";
 
@@ -75,18 +77,45 @@ test("normal source fog uses a deterministic cardinal project policy only for an
   );
 });
 
-test("keeps original control bindings separate from exported image identity and product fallback", () => {
+test("keeps original control bindings separate from exported image identity and generic product fallback", () => {
   assert.deepEqual(
     ORIGINAL_COMMAND_CONTROL_BINDINGS.map(({ sourceActionWord, frameOrResourceIndex, sourceLabel }) => [sourceActionWord, frameOrResourceIndex, sourceLabel]),
     [[61, 27, "자동마법설정"], [62, 26, "자동마법해제"], [63, 28, null], [64, 29, null]],
   );
-  assert.deepEqual(ORIGINAL_COMMAND_ICON_ASSETS.map(({ sourceFrameIndex }) => sourceFrameIndex), [26, 27, 28, 29]);
+  assert.deepEqual(ORIGINAL_COMMAND_ICON_ASSETS.map(({ sourceFrameIndex }) => sourceFrameIndex), [4, 6, 10, 11, 12, 16, 26, 27, 28, 29, 39, 43, 45]);
   assert.equal(resolveSourceCommandIcon("move"), undefined);
+});
+
+test("the opt-in Imjinrok profile binds exact controls and labels source-backed adaptations", () => {
+  assert.deepEqual(
+    Object.entries(IMJINROK_SOURCE_COMMAND_ICON_PROFILE.actionBindings).map(([actionId, binding]) => [
+      actionId,
+      binding?.sourceFrameIndex,
+      binding?.sourceActionWord,
+      binding?.sourceLabel,
+      binding?.evidenceStatus,
+    ]),
+    [
+      ["move", 6, 3, "이동", "exact-source-control-binding"],
+      ["stop", 43, 2, "정지", "exact-source-control-binding"],
+      ["patrol", 10, 35, "순찰", "exact-source-control-binding"],
+      ["repair", 12, 16, "수리", "exact-source-control-binding"],
+      ["hold", 39, 39, "사수", "exact-source-control-binding"],
+      ["rally-point", 11, 21, "집결지설정", "exact-source-control-binding"],
+      ["cancel-production", 45, 19, "취소", "exact-source-control-binding"],
+      ["cancel-construction", 45, 19, "취소", "exact-source-control-binding"],
+      ["attack-move", 4, 5, "공격", "source-backed-adaptation"],
+      ["build", 16, 11, "건설", "source-backed-adaptation"],
+    ],
+  );
+  assert.equal(resolveSourceCommandIcon("move", IMJINROK_SOURCE_COMMAND_ICON_PROFILE)?.sourceFrameIndex, 6);
+  assert.equal(resolveSourceCommandIconProfileForScenario("core-default"), undefined);
+  assert.equal(resolveSourceCommandIconProfileForScenario("imjinrok-k01-opening"), IMJINROK_SOURCE_COMMAND_ICON_PROFILE);
 });
 
 test("missing source textures fail loudly", () => {
   assert.throws(
-    () => requireSourceTexture(ORIGINAL_COMMAND_ICON_ASSETS[0]!, () => false),
+    () => requireSourceTexture(resolveSourceCommandIcon("move", IMJINROK_SOURCE_COMMAND_ICON_PROFILE)!, () => false),
     /Required source-backed texture is not loaded/,
   );
 });

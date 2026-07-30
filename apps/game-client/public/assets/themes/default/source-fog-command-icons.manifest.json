@@ -14,6 +14,36 @@
     },
     "frames": [
       {
+        "index": 4,
+        "path": "ui/command-icons/button_0004.png",
+        "sha256": "cc1507f141219177dfa8106cf9258a8781b02c1fe17439ea35668c1a61029006"
+      },
+      {
+        "index": 6,
+        "path": "ui/command-icons/button_0006.png",
+        "sha256": "ddda2de9cab848e65c3ab0763a7212d4afdad8bb48e8293cff8b5700fae7d10f"
+      },
+      {
+        "index": 10,
+        "path": "ui/command-icons/button_0010.png",
+        "sha256": "389863d4a1c7c4cd324e001304a4ed87673563818d7bb827f021883b8bcba1de"
+      },
+      {
+        "index": 11,
+        "path": "ui/command-icons/button_0011.png",
+        "sha256": "bc139075d9d75287e781209f54a1a6453fd1a842ba549d0349390d9e190a14ff"
+      },
+      {
+        "index": 12,
+        "path": "ui/command-icons/button_0012.png",
+        "sha256": "2c6bf32c5526d4ff68e5139cd4764af8a4f8059b056c7cd6afdd0fc87ba59b2d"
+      },
+      {
+        "index": 16,
+        "path": "ui/command-icons/button_0016.png",
+        "sha256": "3c71fa3d8adbc2b2430afee12645055abf7cb9116c3a0d6ce9d354f595616692"
+      },
+      {
         "index": 26,
         "path": "ui/command-icons/button_0026.png",
         "sha256": "b9998588616d174137e86a44678512df01e3a848232c719fc4b4d9d575072893"
@@ -32,6 +62,21 @@
         "index": 29,
         "path": "ui/command-icons/button_0029.png",
         "sha256": "1f4000d6b9e1c4abbb92e1ea64ff1f0535535243ff4bd2ea4f0db3434fd41c00"
+      },
+      {
+        "index": 39,
+        "path": "ui/command-icons/button_0039.png",
+        "sha256": "c82b617930b8fb3e79620be4717893ab4db94ced75b598a0d0ddf00b64b77420"
+      },
+      {
+        "index": 43,
+        "path": "ui/command-icons/button_0043.png",
+        "sha256": "4fff8cd2968c85dce35808ff35473723eb51c10af83e63d9e30c1b0d66d7fa70"
+      },
+      {
+        "index": 45,
+        "path": "ui/command-icons/button_0045.png",
+        "sha256": "f280c390418f1b19059f81c5f73e123f1c7904c7e0cb4c534e1d35b9eed910f3"
       }
     ]
   },
