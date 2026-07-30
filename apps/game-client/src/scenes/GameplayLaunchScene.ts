@@ -58,7 +58,9 @@ export class GameplayLaunchScene extends Phaser.Scene {
       skirmishScene.events.once(Phaser.Scenes.Events.CREATE, this.handleSkirmishReady, this);
       this.events.once(Phaser.Scenes.Events.SHUTDOWN, this.handleShutdown, this);
       this.scene.launch(SKIRMISH_SCENE_KEY, context);
-      this.scene.bringToTop(GAMEPLAY_LAUNCH_SCENE_KEY);
+      if (this.scene.isActive(GAMEPLAY_LAUNCH_SCENE_KEY)) {
+        this.scene.bringToTop(GAMEPLAY_LAUNCH_SCENE_KEY);
+      }
     } catch (error) {
       this.showLoadFailure(error);
     }
