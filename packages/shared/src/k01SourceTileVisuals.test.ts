@@ -15,6 +15,7 @@ import {
   createContentRegistry,
   createImjinrokMapScaffold,
   getK01SourceTileFlatAssetKey,
+  getK01SourceTileRawPlacementArgumentDelta,
   getK01SourceTilePlacementOffset,
   getK01SourceTileVisualAssets,
   getK01SourceFogFamilyIndex,
@@ -55,10 +56,13 @@ test("K01 source tile artifact preserves every hash-bound x-major source pair", 
   assert.equal(placementOffsetBytes.filter((value) => value === 0xf0).length, 735);
   assert.equal(getK01SourceTileFlatAssetKey(0, 0), "k01-source:hill0:0039");
   assert.equal(getK01SourceTileFlatAssetKey(59, 59), "k01-source:grss1:0018");
-  assert.deepEqual(getK01SourceTilePlacementOffset(0, 0), { x: 0, y: -16 });
+  assert.equal(getK01SourceTileRawPlacementArgumentDelta(0, 0), 16);
+  assert.equal(getK01SourceTileRawPlacementArgumentDelta(0, 1), 0);
+  assert.deepEqual(getK01SourceTilePlacementOffset(0, 0), { x: 0, y: 0 });
   assert.deepEqual(getK01SourceTilePlacementOffset(0, 1), { x: 0, y: 0 });
   assert.deepEqual(getK01SourceTilePlacementOffset(59, 59), { x: 0, y: 0 });
   assert.throws(() => getK01SourceTileFlatAssetKey(60, 0), /outside/u);
+  assert.throws(() => getK01SourceTilePlacementOffset(60, 0), /outside/u);
   const registry = createContentRegistry();
   const key = getK01SourceTileFlatAssetKey(45, 40);
   const asset = registry.tilesets["imjinrok-normal"]?.terrainAssets[key];
@@ -78,7 +82,7 @@ test("only K01 applies source tile visuals after gameplay terrain mutations", ()
 
   assert.equal(sourceKeys?.length, 3600);
   assert.equal(new Set(sourceKeys).size, 243);
-  assert.deepEqual(getTileAt(k01, 0, 0).tilesetVisuals?.sourcePixelOffset, { x: 0, y: -16 });
+  assert.deepEqual(getTileAt(k01, 0, 0).tilesetVisuals?.sourcePixelOffset, { x: 0, y: 0 });
   assert.deepEqual(getTileAt(k01, 0, 1).tilesetVisuals?.sourcePixelOffset, { x: 0, y: 0 });
   assert.equal(getTileAt(k01, 45, 40).terrain, "shallowWater");
   assert.equal(getTileAt(k01, 45, 40).elevation, 0);

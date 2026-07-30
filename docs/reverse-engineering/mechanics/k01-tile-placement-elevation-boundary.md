@@ -8,7 +8,7 @@
 | --- | --- | --- |
 | 분석 | `정적 확정` | 두 caller의 signed-word x/y guard, `lowNibble == 2`/other 수식, direct helper의 전체 return 분기, K01 `60×60` cell의 selector/lookup·object/frame fields |
 | 재현 | `재현 완료` | 3,600-cell x-major stream/digest·분포, low-nibble two/other, 네 map corner, helper의 synthetic positive/negative branch와 malformed/tampered input 거부 |
-| 구현 | `부분 이식·source-backed product adaptation` | hash-bound K01의 `0/-16` second-argument 결과를 셀별 asset-native `sourcePixelOffset.y`로 내보내고, terrain·explicit fog base·source fog composite가 같은 web ground-contact helper로 소비한다. raw argument 축·pivot은 여전히 미확정이다. |
+| 구현 | `부분 이식·source-backed adaptation` | hash-bound K01의 raw second-argument delta stream은 보존한다. emitted PNG alpha coverage와 low-nibble boundary vector를 근거로 모든 web tile은 shared ground contact에 두고 deterministic terrain-footprint underlay 위에 source artwork를 합성한다. raw argument 축·pivot은 여전히 미확정이다. |
 
 이것은 기존 [K01 source tile object·frame selector](k01-source-tile-selector.md)의 **다음 placement 경계**다.
 기존 문서의 object/frame source identity와 3,600 pair frame-bound proof를 그대로 hash-bound로 재검증하지만,
@@ -95,22 +95,26 @@ fixture의 map-corner vector도 source value를 고정한다. `(0,0)`은 low nib
 
 ## 제품 adapter 경계
 
-`export-k01-source-tile-visuals.mjs`는 canonical placement-evidence fixture를 다시 검증한 뒤, 각 cell의
-`verticalShift`를 `0` 또는 asset-native `-16` pixel `sourcePixelOffset.y` stream으로 생성한다. `0`은 2,865,
-`-16`은 735개이며, 이 부호와 web y축 해석은 **source-backed product adaptation**이다. 이 선택은 source의
-두 번째 raw argument에 실제로 뺀 값을 web renderer의 y translation으로 소비하기 위한 일관된 제품 계약일
-뿐, raw argument가 screen-y/world-y이거나 source pivot이 `(32,16)`이라는 원작 일치 주장이 아니다.
+`export-k01-source-tile-visuals.mjs`는 canonical placement-evidence fixture를 다시 검증한 뒤 raw second-argument
+delta를 `0` 또는 `16`의 stream으로 보존한다. `0`은 2,865, `16`은 735개다. 그러나
+`k01-terrain-composition-coverage.test.mjs`는 실제 emitted 64×48 PNG alpha mask와 3,600-cell map placement를
+합성해, 이전처럼 `16`을 web `y=-16`으로 해석하면 low-nibble가 다른 이웃 경계가 798개 생김을 재현한다.
+source PNG만으로는 logical diamond 내부를 완전히 덮지 못한다(legacy mapping 153,600 pixel, shared-anchor mapping
+161,043 pixel). 따라서 product는 이 비교를 **원작 pixel parity 증거가 아닌 반증된 web-axis 가정**으로 사용한다:
+모든 cell은 shared ground contact에서 source artwork를 그리고, deterministic terrain-footprint underlay가 logical
+coverage를 0 uncovered pixel로 만든다. 이 underlay와 shared anchor는 `source-backed-adaptation`이다.
 
-explicit terrain placement와 world/chunk bounds, explicit fog base, source fog composite는 이 offset을 같은
-ground-contact helper로 적용한다. source fog의 64×48 composite는 frame family/selector identity를 유지하되,
-흰색·회색 원본 팔레트가 fog gap처럼 보이지 않도록 product fog tint `0x020608`을 적용한다. tint, alpha,
-visibility semantics와 pixel pivot은 원작에서 확정된 범위가 아니다.
+explicit terrain placement와 world/chunk bounds, explicit fog base, source fog composite는 같은 shared ground-contact
+contract를 소비한다. explicit fog base도 opaque tinted diamond를 먼저 그려 source alpha hole을 막고, source fog의
+64×48 composite는 family/selector identity를 유지하며 `0x020608` tint를 적용한다. tint, alpha, visibility semantics와
+pixel pivot은 원작에서 확정된 범위가 아니다.
 
 ## Reproduction and failure boundary
 
 ```sh
 pnpm imjinrok:extract-k01-tile-placement-elevation-evidence
 node --test tools/imjinrok/k01-tile-placement-elevation-evidence.test.mjs
+node --test tools/imjinrok/k01-terrain-composition-coverage.test.mjs
 ```
 
 pure reference reproducer는 signed 16-bit x/y와 signed 32-bit raw argument만 받는다. out-of-bounds direct-helper

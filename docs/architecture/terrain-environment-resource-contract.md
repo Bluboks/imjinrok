@@ -13,7 +13,7 @@
 | K01 palette step identity | `원본 기반` | bounded 8,640 admitted-update schedule과 `night1`~`night4` identity; product tick calibration은 별도 적응 |
 | light curve와 dawn/day/dusk/night simulation output | `의도적 적응` | opt-in fixed-tick curve |
 | K01 원본 tile source object/frame selector | `원본 사실` | `FUN_00469330`의 K01 normal source object/frame 범위; pixel placement와 terrain 의미는 별도 |
-| K01 exact visual export·map assignment | `source-backed project adaptation` | 243 normal PNG와 K01-only explicit flat asset assignment; hash-bound `0/-16` cell stream을 asset-native web placement offset으로 소비하는 anchor/chunk adapter |
+| K01 exact visual export·map assignment | `source-backed project adaptation` | 243 normal PNG와 K01-only explicit flat asset assignment; hash-bound raw `0/16` second-argument stream을 보존하되 emitted-PNG alpha/low-nibble coverage vector로 선택한 shared ground anchor와 terrain-footprint underlay |
 
 ## 원본 source fact
 
@@ -72,10 +72,11 @@ K01은 `imjinrok-source-day-night-palette` profile과 generic `visualSteps` cont
    `flatAssetKey`에 명시적으로 연결한다. catalog의 `grss1`/`hill0` frame 0을 전 tile에 반복 선택하지 않는다.
    K02와 모드 map은 `TileCell.tilesetVisuals`의 `flatAssetKey`/`elevationAssetKey`로 선택한 `tilesetId`
    collection key만 명시적으로 사용할 수 있고, 선택하지 않은 surface는 기존 theme fallback을 유지한다. tile
-   image geometry `(64×48, anchor 32,16)`, hash-bound K01 second-placement-argument에서 생성한 셀별
-   asset-native `sourcePixelOffset`, source-canvas overhang chunk bounds는 product/mod renderer 계약이며
-   original tile canvas/pivot/placement parity 주장이 아니다. 같은 offset은 explicit terrain/world bounds와
-   fog base/source composite의 ground-contact adapter가 함께 소비한다.
+   image geometry `(64×48, anchor 32,16)`, raw K01 second-placement-argument stream, source-canvas overhang chunk
+   bounds는 product/mod renderer 계약이며 original tile canvas/pivot/placement parity 주장이 아니다. emitted-PNG
+   alpha coverage fixture는 per-cell web `y=-16` 해석의 low-nibble boundary seam을 반증하므로, K01 source art는
+   shared ground contact에 놓고 deterministic terrain-footprint underlay 위에 합성한다. 같은 shared contract는
+   explicit terrain/world bounds와 fog base/source composite가 함께 소비한다.
 2. resource: generic `resolveMapResourceVisual(registry, map, kind, state)`가 map-selected set의
    `resourceVisualSet.resources[kind]?.states[state]`를 반환한다. visual set ID가 없는 legacy map과
    매핑되지 않은 kind/state는 `null`이고 preload는 빈 배열이다. scene preload는 launch map 확정 전이므로
@@ -101,6 +102,7 @@ node tools/imjinrok/export-imjinrok-environment-assets.mjs
 node --test tools/imjinrok/imjinrok-environment-assets.test.mjs
 node tools/imjinrok/export-k01-source-tile-visuals.mjs
 node --test tools/imjinrok/export-k01-source-tile-visuals.test.mjs
+node --test tools/imjinrok/k01-terrain-composition-coverage.test.mjs
 ```
 
 다음 원본 분석은 K01 source frame의 pixel placement/pivot과 다른 map/theme selector, night palette/YAV

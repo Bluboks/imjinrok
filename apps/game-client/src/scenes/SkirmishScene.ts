@@ -6998,6 +6998,10 @@ export class SkirmishScene extends Phaser.Scene {
     const explicitVisual = resolveExplicitTileVisual(CONTENT_REGISTRY, this.map, tile, "flat");
 
     if (explicitVisual) {
+      // A source tile can have transparent pixels inside its logical diamond.
+      // Keep an opaque product terrain footprint below the source artwork so
+      // neither the camera background nor the fog base leaks through.
+      this.drawFallbackFogTile(renderTexture, bounds, fallbackTextureKey, worldX, worldY);
       this.drawExplicitTileFog(renderTexture, bounds, explicitVisual, visibility, worldX, worldY, 0);
       return;
     }
@@ -7308,6 +7312,10 @@ export class SkirmishScene extends Phaser.Scene {
             const flatFrame = flatVisual ? this.pickTerrainFrame(flatVisual, "base", x, y) : null;
 
             if (explicitVisual) {
+              // Source frames are alpha-bearing artwork, not guaranteed opaque
+              // terrain diamonds. The deterministic footprint underlay keeps
+              // logical map coverage continuous before compositing the frame.
+              renderTexture.draw(this.terrainTextureKeys.get(tile.terrain)!, worldX - minX - halfWidth - 1, worldY - minY - halfHeight - 1);
               this.drawExplicitTileVisual(renderTexture, { minX, minY }, explicitVisual, worldX, worldY, 0);
             } else if (flatVisual && flatFrame && this.textures.exists(flatFrame.textureKey)) {
               renderTexture.draw(this.getTerrainRenderStamp(flatVisual, flatFrame), worldX - minX, worldY - minY);
