@@ -101,11 +101,16 @@ export function exportK01SourceTileVisuals(options = {}) {
     },
     productRenderingAdapter: {
       imageGeometry: { width: 64, height: 48, footprintAnchor: { x: 32, y: 16 } },
-      placementOffsetY: {
-        source: "FUN_00469330/FUN_00469510 K01 second raw placement argument adjustment, emitted as an asset-native product offset.",
-        values: { zero: 2865, negative16: 735 },
+      rawPlacementArgumentDelta: {
+        source: "FUN_00469330/FUN_00469510 K01 second raw placement argument adjustment. Its screen/world axis and pixel pivot are unresolved.",
+        values: { zero: 2865, positive16: 735 },
       },
-      note: "Map ground-contact placement and y-axis adaptation are product/mod renderer contracts, not proven original pixel pivot or screen-axis parity.",
+      webPlacement: {
+        choice: "all cells use the shared ground-contact anchor; the raw delta is retained as evidence but is not interpreted as web y.",
+        basis: "tools/imjinrok/k01-terrain-composition-coverage.test.mjs measures emitted PNG alpha masks and finds 798 mixed-delta map neighbors; a deterministic terrain-footprint underlay supplies complete logical-map coverage.",
+        evidenceStatus: "source-backed-adaptation",
+      },
+      note: "Map ground-contact placement, footprint underlay, and y-axis choice are product/mod renderer contracts, not proven original pixel pivot or screen-axis parity.",
     },
     assets: emittedAssets,
   };

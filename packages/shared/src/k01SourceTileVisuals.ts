@@ -50,11 +50,10 @@ export function getK01SourceTileFlatAssetKey(x: number, y: number): string {
 }
 
 /**
- * Source-backed product placement adaptation for the K01 second raw placement
- * argument. The original screen axis/pivot remains unresolved; the adapter
- * applies this asset-native y translation consistently to terrain and fog.
+ * The hash-bound second raw placement-argument delta. This is retained as
+ * source evidence, rather than being named as a web screen-axis adjustment.
  */
-export function getK01SourceTilePlacementOffset(x: number, y: number): { readonly x: 0; readonly y: 0 | -16 } {
+export function getK01SourceTileRawPlacementArgumentDelta(x: number, y: number): 0 | 16 {
   const { width, height } = K01_SOURCE_TILE_VISUAL_DIMENSIONS;
   if (!Number.isInteger(x) || !Number.isInteger(y) || x < 0 || x >= width || y < 0 || y >= height) {
     throw new RangeError(`K01 source tile coordinates outside 0..${width - 1},0..${height - 1}: ${x},${y}`);
@@ -63,11 +62,22 @@ export function getK01SourceTilePlacementOffset(x: number, y: number): { readonl
   if (encodedY === undefined) {
     throw new Error(`K01 source tile (${x},${y}) is outside the generated placement-offset stream.`);
   }
-  const yOffset = encodedY > 0x7f ? encodedY - 0x100 : encodedY;
-  if (yOffset !== 0 && yOffset !== -16) {
-    throw new Error(`K01 source tile (${x},${y}) has unsupported placement offset ${yOffset}.`);
+  const rawDelta = encodedY > 0x7f ? -(encodedY - 0x100) : encodedY;
+  if (rawDelta !== 0 && rawDelta !== 16) {
+    throw new Error(`K01 source tile (${x},${y}) has unsupported raw placement delta ${rawDelta}.`);
   }
-  return { x: 0, y: yOffset };
+  return rawDelta;
+}
+
+/**
+ * Source-backed product adaptation: emitted tiles share the map ground
+ * contact. The original raw argument axis/pivot is unresolved, and the
+ * real-map alpha coverage fixture rejects interpreting its 16-pixel delta as
+ * a per-cell web y translation.
+ */
+export function getK01SourceTilePlacementOffset(x: number, y: number): { readonly x: 0; readonly y: 0 } {
+  getK01SourceTileRawPlacementArgumentDelta(x, y);
+  return { x: 0, y: 0 };
 }
 
 export function getK01SourceTileVisualAssets(): readonly K01SourceTileVisualAsset[] {
