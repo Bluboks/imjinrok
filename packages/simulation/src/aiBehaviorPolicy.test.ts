@@ -117,43 +117,42 @@ test("magic automation command defaults off, persists, and is selection independ
 });
 
 test("K01 Ryu action-40 adapter observes off/on cadence mana threshold target and normal-attack gates", () => {
-  const state = createCombatFixture();
-  const ryu = createUnitState("ryu", "p1", "ryu-seong-ryong", { x: 2, y: 2 });
-  const target = createUnitState("target", "p2", "villager", { x: 3, y: 2 });
-  target.health = { current: 59, max: 90 };
-  target.currentOrder = { type: "move", target: { x: 8, y: 8 } };
-  target.movementTarget = { x: 4, y: 2 };
-  ryu.currentOrder = { type: "attack-unit", targetUnitId: target.id };
-  state.units = { [ryu.id]: ryu, [target.id]: target };
+  const autoUseOff = createRyuAction40Fixture();
+  autoUseOff.state.tick = 1;
+  advanceWorldTick(autoUseOff.state);
+  assert.equal(autoUseOff.target.playerId, "p2");
+  assert.equal(autoUseOff.state.combatEvents.length, 0);
+  assert.equal(autoUseOff.state.projectileSystem.projectiles.length, 1);
+  advanceWorldTick(autoUseOff.state);
+  assert.equal(autoUseOff.state.combatEvents.length, 1, "normal attack resolves only after projectile impact");
 
-  state.tick = 1;
-  advanceWorldTick(state);
-  assert.equal(target.playerId, "p2");
-  assert.equal(state.combatEvents.length, 1);
+  const cadenceMiss = createRyuAction40Fixture();
+  cadenceMiss.ryu.mana.current = K01_RYU_ACTION_40_MANA_COST;
+  cadenceMiss.state.players.p1!.magicAutoUseEnabled = true;
+  cadenceMiss.state.tick = 1;
+  advanceWorldTick(cadenceMiss.state);
+  assert.equal(cadenceMiss.target.playerId, "p2", "cadence miss leaves normal combat unchanged");
+  assert.equal(cadenceMiss.state.combatEvents.length, 0);
+  assert.equal(cadenceMiss.state.projectileSystem.projectiles.length, 1);
+  advanceWorldTick(cadenceMiss.state);
+  assert.equal(cadenceMiss.state.combatEvents.length, 1, "cadence-miss normal attack resolves on impact");
 
-  target.health.current = 59;
-  target.playerId = "p2";
-  ryu.currentOrder = { type: "attack-unit", targetUnitId: target.id };
-  ryu.mana.current = K01_RYU_ACTION_40_MANA_COST;
-  state.players.p1!.magicAutoUseEnabled = true;
-  state.tick = 1;
-  advanceWorldTick(state);
-  assert.equal(target.playerId, "p2", "cadence miss leaves normal combat unchanged");
-
-  target.health.current = 59;
-  ryu.currentOrder = { type: "attack-unit", targetUnitId: target.id };
-  state.tick = 2;
-  const eventsBeforeConversion = state.combatEvents.length;
-  advanceWorldTick(state);
-  assert.equal(target.playerId, "p1");
-  assert.equal(ryu.mana.current, 0);
-  assert.equal(ryu.currentOrder, undefined);
-  assert.equal(ryu.movementTarget, undefined);
-  assert.equal(ryu.movementPath, undefined);
-  assert.equal(target.currentOrder, undefined);
-  assert.equal(target.movementTarget, undefined);
-  assert.equal(target.movementPath, undefined);
-  assert.equal(state.combatEvents.length, eventsBeforeConversion, "successful conversion skips normal attack");
+  const conversion = createRyuAction40Fixture();
+  conversion.ryu.mana.current = K01_RYU_ACTION_40_MANA_COST;
+  conversion.state.players.p1!.magicAutoUseEnabled = true;
+  conversion.state.tick = 2;
+  const eventsBeforeConversion = conversion.state.combatEvents.length;
+  advanceWorldTick(conversion.state);
+  assert.equal(conversion.target.playerId, "p1");
+  assert.equal(conversion.ryu.mana.current, 0);
+  assert.equal(conversion.ryu.currentOrder, undefined);
+  assert.equal(conversion.ryu.movementTarget, undefined);
+  assert.equal(conversion.ryu.movementPath, undefined);
+  assert.equal(conversion.target.currentOrder, undefined);
+  assert.equal(conversion.target.movementTarget, undefined);
+  assert.equal(conversion.target.movementPath, undefined);
+  assert.equal(conversion.state.projectileSystem.projectiles.length, 0, "successful conversion spawns no normal-attack projectile");
+  assert.equal(conversion.state.combatEvents.length, eventsBeforeConversion, "successful conversion skips normal attack");
 });
 
 test("K01 Ryu action-40 adapter rejects threshold-equal and building targets", () => {
@@ -177,6 +176,18 @@ test("K01 Ryu action-40 adapter rejects threshold-equal and building targets", (
   advanceWorldTick(state);
   assert.equal(building.playerId, "p2");
 });
+
+function createRyuAction40Fixture() {
+  const state = createCombatFixture();
+  const ryu = createUnitState("ryu", "p1", "ryu-seong-ryong", { x: 2, y: 2 });
+  const target = createUnitState("target", "p2", "villager", { x: 3, y: 2 });
+  target.health = { current: 59, max: 90 };
+  target.currentOrder = { type: "move", target: { x: 8, y: 8 } };
+  target.movementTarget = { x: 4, y: 2 };
+  ryu.currentOrder = { type: "attack-unit", targetUnitId: target.id };
+  state.units = { [ryu.id]: ryu, [target.id]: target };
+  return { state, ryu, target };
+}
 
 test("mod auto ability policies bind by unit kind and unregister cleanly", () => {
   const unregister = registerAutoAbilityPolicy("gwon-yul", {
