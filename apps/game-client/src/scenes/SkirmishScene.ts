@@ -183,15 +183,17 @@ import {
 import { createFormationTargets } from "../formation.js";
 import { launchGameWithPreGameBriefing } from "../preGameBriefingLaunch.js";
 import {
-  CARDINAL_FOG_NEIGHBOR_OFFSETS,
-  NORMAL_FOG_ASSETS,
-  NORMAL_SOURCE_FOG_TILESET_ID,
+  assertSourceFogGroundLayerFamilies,
+  assertSourceFogVisualProfile,
+  expandSourceFogDirtyChunkMask,
+  getSourceFogNeighborVisibility,
   requireSourceTexture,
   resolveEnvironmentOverlayLightContract,
-  resolveNormalSourceFogTransition,
-  resolveSourceFogTileScale,
+  resolveSourceFogComposite,
+  resolveSourceFogCompositeScale,
+  SOURCE_FOG_COMPOSITE_ASSETS,
   type FogVisibility,
-  type SourceFogTile,
+  type SourceFogComposite,
 } from "../ui/sourceFogAndCommandAssets.js";
 import {
   BUILD_DONE_AUDIO_CUE_KEY,
@@ -633,7 +635,7 @@ export class SkirmishScene extends Phaser.Scene {
       this.load.image(MISSION_RESULT_BACKDROP_IMAGE_KEY, MISSION_RESULT_BACKDROP_URL);
     }
 
-    for (const asset of NORMAL_FOG_ASSETS) {
+    for (const asset of SOURCE_FOG_COMPOSITE_ASSETS) {
       if (!this.textures.exists(asset.textureKey)) {
         this.load.image(asset.textureKey, asset.assetPath);
       }
@@ -6811,7 +6813,7 @@ export class SkirmishScene extends Phaser.Scene {
       this.lastVisibilityDeltaMs = performance.now() - startedAt;
     }
 
-    return this.expandDirtyFogChunksForNormalSourceFogTransitions(update.dirtyChunkCount);
+    return this.expandDirtyFogChunksForSourceFogComposites(update.dirtyChunkCount);
   }
 
   private revealAllLocalVisibility(): number {
@@ -6878,7 +6880,7 @@ export class SkirmishScene extends Phaser.Scene {
 
     if (this.perfEnabled) console.time("fog full bake");
     this.ensureFogTextures();
-    this.ensureNormalSourceFogTextures();
+    this.ensureSourceFogCompositeTextures();
 
     let tileDrawCount = 0;
 
@@ -6908,7 +6910,7 @@ export class SkirmishScene extends Phaser.Scene {
 
     if (this.perfEnabled) console.time("fog dirty bake");
     this.ensureFogTextures();
-    this.ensureNormalSourceFogTextures();
+    this.ensureSourceFogCompositeTextures();
 
     let redrawnChunkCount = 0;
     let tileDrawCount = 0;
@@ -6968,7 +6970,7 @@ export class SkirmishScene extends Phaser.Scene {
           }
         }
 
-        this.drawNormalSourceFogTransition(renderTexture, bounds, visibility, x, y, worldX, worldY);
+        this.drawSourceFogComposite(renderTexture, bounds, visibility, x, y, worldX, worldY);
 
         hasFog = true;
         tileDrawCount += 1;
@@ -7021,7 +7023,7 @@ export class SkirmishScene extends Phaser.Scene {
     renderTexture.draw(textureKey, worldX - bounds.minX - halfWidth - 1, worldY - bounds.minY - halfHeight - 1);
   }
 
-  private drawNormalSourceFogTransition(
+  private drawSourceFogComposite(
     renderTexture: Phaser.GameObjects.RenderTexture,
     bounds: FogChunkBounds,
     visibility: TileVisibility,
@@ -7031,15 +7033,18 @@ export class SkirmishScene extends Phaser.Scene {
     worldY: number,
   ): void {
     if (getTileAt(this.map, x, y).elevation > 0) return;
-    const source = resolveNormalSourceFogTransition(
-      this.map.tilesetId,
+    const source = resolveSourceFogComposite(
+      this.map.fogVisualProfileId,
+      getTileAt(this.map, x, y).fogVisuals?.familyIndex,
       this.toSourceFogVisibility(visibility),
-      (direction) => {
-        const offset = CARDINAL_FOG_NEIGHBOR_OFFSETS[direction];
-        const neighborX = x + offset.x;
-        const neighborY = y + offset.y;
-        return this.toSourceFogVisibility(this.getFogVisibilityAt(neighborX, neighborY));
-      },
+      (neighbor) => getSourceFogNeighborVisibility(
+        x,
+        y,
+        neighbor,
+        this.map.width,
+        this.map.height,
+        (neighborX, neighborY) => this.toSourceFogVisibility(this.getFogVisibilityAt(neighborX, neighborY)),
+      ),
     );
 
     if (!source) return;
@@ -7059,16 +7064,18 @@ export class SkirmishScene extends Phaser.Scene {
     return visibility === TileVisibility.Explored ? "explored" : "unseen";
   }
 
-  private getSourceFogStamp(source: SourceFogTile): Phaser.GameObjects.Image {
+  private getSourceFogStamp(source: SourceFogComposite): Phaser.GameObjects.Image {
     const stampKey = `${source.textureKey}:${source.alpha}`;
     const existing = this.sourceFogStamps.get(stampKey);
     if (existing) return existing;
 
     const stamp = this.make.image({ x: 0, y: 0, key: source.textureKey, add: false });
-    const scale = resolveSourceFogTileScale(this.map.tileWidth, this.map.tileHeight);
+    const scale = resolveSourceFogCompositeScale(this.map.tileWidth);
     stamp
-      .setOrigin(0.5, 0.5)
-      .setScale(scale.x, scale.y)
+      // This 64x48 image ground-contact placement and alpha are web-product
+      // adaptations; original fog pivot/alpha are not statically resolved.
+      .setOrigin(0.5, 1 / 3)
+      .setScale(scale)
       .setAlpha(source.alpha);
     this.sourceFogStamps.set(stampKey, stamp);
     return stamp;
@@ -7222,39 +7229,21 @@ export class SkirmishScene extends Phaser.Scene {
     }
   }
 
-  private ensureNormalSourceFogTextures(): void {
-    if (this.map.tilesetId !== NORMAL_SOURCE_FOG_TILESET_ID) return;
-    for (const asset of NORMAL_FOG_ASSETS) {
+  private ensureSourceFogCompositeTextures(): void {
+    if (!this.map.fogVisualProfileId) return;
+    assertSourceFogVisualProfile(this.map.fogVisualProfileId);
+    assertSourceFogGroundLayerFamilies(this.map.layers);
+    for (const asset of SOURCE_FOG_COMPOSITE_ASSETS) {
       requireSourceTexture(asset, (textureKey) => this.textures.exists(textureKey));
     }
   }
 
-  private expandDirtyFogChunksForNormalSourceFogTransitions(dirtyChunkCount: number): number {
-    if (dirtyChunkCount === 0 || this.map.tilesetId !== NORMAL_SOURCE_FOG_TILESET_ID) {
+  private expandDirtyFogChunksForSourceFogComposites(dirtyChunkCount: number): number {
+    if (dirtyChunkCount === 0 || !this.map.fogVisualProfileId) {
       return dirtyChunkCount;
     }
 
-    const originallyDirty = Array.from(this.fogChunkDirtyMask.entries())
-      .filter(([, dirty]) => dirty === 1)
-      .map(([chunkIndex]) => chunkIndex);
-    for (const chunkIndex of originallyDirty) {
-      const chunkX = chunkIndex % this.fogChunksPerRow;
-      const chunkY = Math.floor(chunkIndex / this.fogChunksPerRow);
-      for (let offsetY = -1; offsetY <= 1; offsetY += 1) {
-        for (let offsetX = -1; offsetX <= 1; offsetX += 1) {
-          const neighborX = chunkX + offsetX;
-          const neighborY = chunkY + offsetY;
-          if (neighborX < 0 || neighborX >= this.fogChunksPerRow || neighborY < 0 || neighborY >= this.fogChunksPerColumn) continue;
-          this.fogChunkDirtyMask[neighborY * this.fogChunksPerRow + neighborX] = 1;
-        }
-      }
-    }
-
-    let expandedCount = 0;
-    for (const dirty of this.fogChunkDirtyMask) {
-      expandedCount += dirty;
-    }
-    return expandedCount;
+    return expandSourceFogDirtyChunkMask(this.fogChunkDirtyMask, this.fogChunksPerRow, this.fogChunksPerColumn);
   }
 
   private redrawTerrain(): void {

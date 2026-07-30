@@ -4,6 +4,10 @@ import test from "node:test";
 import {
   K01_SOURCE_TILE_VISUAL_DIMENSIONS,
   K01_SOURCE_TILE_VISUAL_PAIR_DIGEST,
+  K01_SOURCE_FOG_DIMENSIONS,
+  K01_SOURCE_FOG_FAMILY_DIGEST,
+  applyK01SourceFogVisuals,
+  assertK01SourceFogArtifact,
   applyK01SourceTileVisuals,
   assertK01SourceTileVisualArtifact,
   createBlankMap,
@@ -11,10 +15,28 @@ import {
   createImjinrokMapScaffold,
   getK01SourceTileFlatAssetKey,
   getK01SourceTileVisualAssets,
+  getK01SourceFogFamilyIndex,
   getTileAt,
   validateMapDefinition,
 } from "./index.js";
 import { K01_SOURCE_TILE_VISUAL_ARTIFACT } from "./generated/k01SourceTileVisualArtifact.js";
+import { K01_SOURCE_FOG_ARTIFACT } from "./generated/k01SourceFogArtifact.js";
+
+test("K01 source fog artifact preserves the exact x-major family stream and distribution", () => {
+  assertK01SourceFogArtifact();
+  assert.deepEqual(K01_SOURCE_FOG_DIMENSIONS, { width: 60, height: 60 });
+  assert.equal(K01_SOURCE_FOG_ARTIFACT.cellCount, 3600);
+  assert.equal(createHash("sha256").update(Buffer.from(K01_SOURCE_FOG_ARTIFACT.familyBytesBase64, "base64")).digest("hex"), K01_SOURCE_FOG_FAMILY_DIGEST);
+  assert.deepEqual(K01_SOURCE_FOG_ARTIFACT.distribution, [
+    { value: 0, count: 2865 }, { value: 1, count: 95 }, { value: 2, count: 95 }, { value: 3, count: 101 },
+    { value: 4, count: 79 }, { value: 5, count: 38 }, { value: 6, count: 36 }, { value: 7, count: 54 },
+    { value: 8, count: 61 }, { value: 9, count: 52 }, { value: 10, count: 33 }, { value: 11, count: 35 },
+    { value: 12, count: 55 }, { value: 14, count: 1 },
+  ]);
+  assert.equal(getK01SourceFogFamilyIndex(0, 0), 10);
+  assert.equal(getK01SourceFogFamilyIndex(59, 59), 0);
+  assert.throws(() => getK01SourceFogFamilyIndex(60, 0), /outside/u);
+});
 
 test("K01 source tile artifact preserves every hash-bound x-major source pair", () => {
   assertK01SourceTileVisualArtifact();
@@ -51,6 +73,9 @@ test("only K01 applies source tile visuals after gameplay terrain mutations", ()
   assert.equal(getTileAt(k01, 6, 6).terrain, "grass");
   assert.equal(getTileAt(k01, 6, 6).elevation, 0);
   assert.equal(k02.layers.every((layer) => layer.tiles.every((tile) => tile.tilesetVisuals === undefined)), true);
+  assert.equal(k01.fogVisualProfileId, "imjinrok-source-fog-composite");
+  assert.equal(k01.layers[0]?.tiles.every((tile) => tile.fogVisuals?.familyIndex !== undefined), true);
+  assert.equal(k02.layers.every((layer) => layer.tiles.every((tile) => tile.fogVisuals === undefined)), true);
   assert.equal(validateMapDefinition(k01, createContentRegistry()).ok, true);
 });
 
@@ -59,4 +84,5 @@ test("K01 source visual assignment rejects incompatible product grids", () => {
   const tiles = map.layers[0]?.tiles;
   assert.ok(tiles);
   assert.throws(() => applyK01SourceTileVisuals(tiles, 2, 2), /require 60x60/u);
+  assert.throws(() => applyK01SourceFogVisuals(tiles, 2, 2), /require 60x60/u);
 });
