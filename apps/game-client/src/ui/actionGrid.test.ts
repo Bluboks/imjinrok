@@ -60,6 +60,52 @@ test("the Imjinrok profile supplies its source-backed bindings without changing 
   );
 });
 
+test("the K01 source profile preserves supported unbound action availability and glyph behavior", () => {
+  const k01Slots = getActionSlots(
+    [{ id: "unit", kind: "villager", construction: false }],
+    null,
+    IMJINROK_SOURCE_COMMAND_ICON_PROFILE,
+  );
+  const gather = k01Slots.find(({ actionId }) => actionId === "gather");
+
+  assert.deepEqual(gather, {
+    actionId: "gather",
+    icon: "G",
+    hotkey: "G",
+    label: "채집",
+    enabled: true,
+  });
+  assert.deepEqual(resolveActionIconVisual(gather!), {
+    kind: "glyph",
+    glyph: "G",
+  });
+});
+
+test("placeholder packs alter only an unbound action's visual, never its availability", () => {
+  const strictPresentationProfile = {
+    ...IMJINROK_SOURCE_COMMAND_ICON_PROFILE,
+    unboundActionPolicy: "disabled-placeholder" as const,
+  };
+  const gather = getActionSlots(
+    [{ id: "unit", kind: "villager", construction: false }],
+    null,
+    strictPresentationProfile,
+  ).find(({ actionId }) => actionId === "gather");
+
+  assert.deepEqual(gather, {
+    actionId: "gather",
+    sourceIconPlaceholder: "unconfirmed-source-frame",
+    icon: "?",
+    hotkey: "G",
+    label: "채집",
+    enabled: true,
+  });
+  assert.deepEqual(resolveActionIconVisual(gather!), {
+    kind: "placeholder",
+    glyph: "?",
+  });
+});
+
 test("no-selection K01 grid exposes the source-bound magic auto-use toggle in slot zero", () => {
   const disabled = getActionSlots([], null, IMJINROK_SOURCE_COMMAND_ICON_PROFILE, { playerId: "p1", enabled: false });
   const enabled = getActionSlots([], null, IMJINROK_SOURCE_COMMAND_ICON_PROFILE, { playerId: "p1", enabled: true });
