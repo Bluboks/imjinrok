@@ -112,6 +112,11 @@ contract를 소비한다. chunk bounds는 flat artwork와 underlay의 source-can
 family/selector identity를 유지하며 `0x020608` tint를 적용한다. tint, alpha, visibility semantics와 pixel pivot은 원작에서
 확정된 범위가 아니다.
 
+높이가 있는 제품 타일도 지상 레이어를 생략하지 않는다. 지형은 shared ground-contact의 flat/underlay를 먼저
+bake하고 elevation/ramp/corner를 별도 overlay로 합성한다. fog도 같은 순서로 base fog를 먼저 그리고 optional
+elevation fog를 그린다. 이것은 source ramp/corner PNG의 투명 영역이 지상 또는 안개 coverage를 대체하지 못하게 하는
+**제품 합성 계약**이며, 원본의 elevation 의미·pixel pivot·draw order가 정적 확정됐다는 주장이 아니다.
+
 ## Reproduction and failure boundary
 
 ```sh

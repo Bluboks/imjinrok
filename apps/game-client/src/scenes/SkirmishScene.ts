@@ -7109,16 +7109,11 @@ export class SkirmishScene extends Phaser.Scene {
           const iso = cartToIso({ x, y }, this.map.tileWidth, this.map.tileHeight);
           const worldX = this.mapOrigin.x + iso.x;
           const worldY = this.mapOrigin.y + iso.y;
-          const tile = getTileAt(this.map, x, y);
-          const drewElevationFog = this.drawElevationFogTile(renderTexture, bounds, visibility, x, y, worldX, worldY);
-
-          if (!drewElevationFog) {
-            if (tile.elevation <= 0) {
-              this.drawBaseFogTile(renderTexture, bounds, textureKey, visibility, x, y, worldX, worldY);
-            } else {
-              this.drawFallbackFogTile(renderTexture, bounds, textureKey, worldX, worldY);
-            }
-          }
+          // Every tile first receives its shared-ground-contact coverage. An
+          // elevation frame is an additional, potentially transparent layer;
+          // it must not replace the base footprint below ramps or corners.
+          this.drawBaseFogTile(renderTexture, bounds, textureKey, visibility, x, y, worldX, worldY);
+          this.drawElevationFogTile(renderTexture, bounds, visibility, x, y, worldX, worldY);
 
           this.drawSourceFogComposite(renderTexture, bounds, visibility, x, y, worldX, worldY);
 
@@ -7267,20 +7262,20 @@ export class SkirmishScene extends Phaser.Scene {
     y: number,
     worldX: number,
     worldY: number,
-  ): boolean {
+  ): void {
     const tile = getTileAt(this.map, x, y);
     const explicitVisual = resolveExplicitTileVisual(CONTENT_REGISTRY, this.map, tile, "elevation");
 
     if (explicitVisual && tile.elevation > 0) {
       this.drawExplicitTileFog(renderTexture, bounds, explicitVisual, visibility, worldX, worldY, tile.elevation);
-      return true;
+      return;
     }
 
     const neighbors = this.getElevationNeighbors(x, y);
     const slot = resolveElevationTerrainSlot(tile.elevation, neighbors);
 
     if (!slot) {
-      return false;
+      return;
     }
 
     const visualTerrain = this.resolveElevationVisualTerrain(tile.terrain, tile.elevation, neighbors);
@@ -7288,17 +7283,14 @@ export class SkirmishScene extends Phaser.Scene {
     const frame = terrainVisual ? this.pickTerrainFrame(terrainVisual, slot, x, y) : null;
 
     if (!terrainVisual || !frame || !this.textures.exists(frame.textureKey)) {
-      return false;
+      return;
     }
-
-    let drewFog = false;
 
     if (tile.elevation > 0 && slot !== "plateauTop") {
       const lowerFrame = this.pickTerrainFrame(terrainVisual, "plateauTop", x, y);
 
       if (lowerFrame && this.textures.exists(lowerFrame.textureKey)) {
         this.drawVisualFogFrame(renderTexture, bounds, terrainVisual, lowerFrame, visibility, worldX, worldY, tile.elevation);
-        drewFog = true;
       }
     }
 
@@ -7312,9 +7304,6 @@ export class SkirmishScene extends Phaser.Scene {
       worldY,
       slot === "plateauTop" ? tile.elevation : tile.elevation + 1,
     );
-    drewFog = true;
-
-    return drewFog;
   }
 
   private drawVisualFogFrame(
@@ -7451,9 +7440,6 @@ export class SkirmishScene extends Phaser.Scene {
           for (let y = chunkY; y <= maxY; y += 1) {
             for (let x = chunkX; x <= maxX; x += 1) {
               const tile = getTileAt(this.map, x, y);
-              if (tile.elevation > 0) {
-                continue;
-              }
 
               const iso = cartToIso({ x, y }, this.map.tileWidth, this.map.tileHeight);
               const worldX = this.mapOrigin.x + iso.x;

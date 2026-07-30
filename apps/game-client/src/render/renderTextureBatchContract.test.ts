@@ -22,6 +22,18 @@ test("fog chunk clears before its one guarded batch and uses no per-tile RenderT
   assert.doesNotMatch(method, /renderTexture\.draw\(/u);
 });
 
+test("terrain and fog retain the shared ground layer beneath every elevated surface", () => {
+  const terrain = getMethod("redrawTerrain", "redrawElevationOverlay");
+  const fog = getMethod("redrawFogChunk", "drawBaseFogTile");
+
+  assert.doesNotMatch(terrain, /if \(tile\.elevation > 0\) \{\s*continue;/u);
+  assert.ok(
+    fog.indexOf("this.drawBaseFogTile(renderTexture, bounds, textureKey, visibility, x, y, worldX, worldY);")
+      < fog.indexOf("this.drawElevationFogTile(renderTexture, bounds, visibility, x, y, worldX, worldY);"),
+    "fog must draw the shared ground footprint before its optional elevation layer",
+  );
+});
+
 test("terrain bake, explicit tiles, and fog helpers use the guarded batch contract", () => {
   const terrain = getMethod("redrawTerrain", "redrawElevationOverlay");
   const explicitTerrain = getMethod("drawExplicitTileVisual", "createExplicitElevationOverlay");
