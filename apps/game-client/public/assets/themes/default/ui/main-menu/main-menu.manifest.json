@@ -1,0 +1,458 @@
+{
+  "generatedBy": "tools/imjinrok/export-main-menu-assets.mjs",
+  "palette": {
+    "sourcePath": "original/imjinrok2/pal/initmenu.pal",
+    "sha256": "c41e62408a8275e7a0c3e5402974beda50382ffcc382db94056db9e18291370d",
+    "byteLength": 768
+  },
+  "resources": [
+    {
+      "id": "landing-title",
+      "sourcePath": "original/imjinrok2/yfnt/title.spr",
+      "sourceSha256": "9cacc8892982dbe02047898530c5f44c5fba4b6115f9774fb690c9a0a763d03f",
+      "layout": "spr",
+      "dimensions": {
+        "width": 640,
+        "height": 480
+      },
+      "frameCount": 1,
+      "exportedFrames": [
+        {
+          "index": 0,
+          "fileName": "title/title_0000.png",
+          "sha256": "4cb5f3055296a412376fd5f8ed39e283f2a72db7ba207059ea62dd66a264ec13"
+        }
+      ]
+    },
+    {
+      "id": "menu-border",
+      "sourcePath": "original/imjinrok2/yfnt/gamemenuborder.spr",
+      "sourceSha256": "48f60d170a8305fbfc2a08d41b3de96bf19dfe99d9d3460996037df41ed6a8ed",
+      "layout": "spr",
+      "dimensions": {
+        "width": 172,
+        "height": 310
+      },
+      "frameCount": 1,
+      "exportedFrames": [
+        {
+          "index": 0,
+          "fileName": "game-menu-border/gamemenuborder_0000.png",
+          "sha256": "d52c1e711c3b7bc4653aadf571bd69f94e5fabe0856bb89248d17af4ab39b35c"
+        }
+      ]
+    },
+    {
+      "id": "menu-button",
+      "sourcePath": "original/imjinrok2/yfnt/gamemenubutton.spr",
+      "sourceSha256": "ec73af9d1d5c739a8fd40fa9436a77fc92eb13f5ebb99a745d1279244129c387",
+      "layout": "spr",
+      "dimensions": {
+        "width": 144,
+        "height": 38
+      },
+      "frameCount": 24,
+      "exportedFrames": [
+        {
+          "index": 0,
+          "fileName": "game-menu-buttons/gamemenubutton_0000.png",
+          "sha256": "557cfe510ab8ebecb48943b1d8bbefbca54a34f4d9c002a0f5c66e04c8094eaa"
+        },
+        {
+          "index": 1,
+          "fileName": "game-menu-buttons/gamemenubutton_0001.png",
+          "sha256": "60c42ba4d50dcc1e26310731532d03134cafe1c8d893659c1ff472ad2501dc0b"
+        },
+        {
+          "index": 2,
+          "fileName": "game-menu-buttons/gamemenubutton_0002.png",
+          "sha256": "3d1c121360d2f6f98abbf7823f0930d18dde70632870faccd4e98cd602e5836b"
+        },
+        {
+          "index": 3,
+          "fileName": "game-menu-buttons/gamemenubutton_0003.png",
+          "sha256": "355cb78b8450c7a0763bdab65665f37633f6b109de0dda34e9b98082aadcc4ed"
+        },
+        {
+          "index": 4,
+          "fileName": "game-menu-buttons/gamemenubutton_0004.png",
+          "sha256": "3a9f9d16b44edfc16f85d0b6172b07aaaf5df70a68711eea946f970997e3298e"
+        },
+        {
+          "index": 5,
+          "fileName": "game-menu-buttons/gamemenubutton_0005.png",
+          "sha256": "46fdf33686c961929b6f00d8652d9f3c1d7a4d31e3bb3ec5df1ca4fae692ddff"
+        },
+        {
+          "index": 6,
+          "fileName": "game-menu-buttons/gamemenubutton_0006.png",
+          "sha256": "1028d6338ca9e6a86de653291425e97254a625d838cac5dcb84c7ceae5f0f343"
+        },
+        {
+          "index": 7,
+          "fileName": "game-menu-buttons/gamemenubutton_0007.png",
+          "sha256": "3cd5ecaac7d086d7a15ccc5d90aecda9d1e497f66a1352162933dde76afb8592"
+        },
+        {
+          "index": 8,
+          "fileName": "game-menu-buttons/gamemenubutton_0008.png",
+          "sha256": "0751898aff4a13a31444e4c342789f43c1a6b701808146166aa11c72a11ecdaf"
+        },
+        {
+          "index": 9,
+          "fileName": "game-menu-buttons/gamemenubutton_0009.png",
+          "sha256": "bb29bcd59c5ca9efcde5711c768e70709e50ef71cf0e1402250d9e0934d5e0dc"
+        },
+        {
+          "index": 10,
+          "fileName": "game-menu-buttons/gamemenubutton_0010.png",
+          "sha256": "d0639e2b42c5ae5ba800256d35960d0ab659123d7238e362d1b25ab6e37939b8"
+        },
+        {
+          "index": 11,
+          "fileName": "game-menu-buttons/gamemenubutton_0011.png",
+          "sha256": "43fbb41d125a037d1fbf7bf4e004d2af1e980f77029aab9881c16756e3135c4c"
+        },
+        {
+          "index": 12,
+          "fileName": "game-menu-buttons/gamemenubutton_0012.png",
+          "sha256": "b88b8b4be13adb10b960a5f3648c51fbc3e3ec36caef73240ba55fb82c2141e9"
+        },
+        {
+          "index": 13,
+          "fileName": "game-menu-buttons/gamemenubutton_0013.png",
+          "sha256": "588d8f30d569666ae73185618ee49ba72f728eb022d3358a1f7e7782af45a57c"
+        },
+        {
+          "index": 14,
+          "fileName": "game-menu-buttons/gamemenubutton_0014.png",
+          "sha256": "af1d2a7e11fb5b7d2ec5ca30414de66abd93b601dd5f6a01dfa62ab9edac7a81"
+        },
+        {
+          "index": 15,
+          "fileName": "game-menu-buttons/gamemenubutton_0015.png",
+          "sha256": "4c85583b34cc4e5f04cea68b5e4ad0470104b1fda8e8c1788a205a2cdbabee92"
+        },
+        {
+          "index": 16,
+          "fileName": "game-menu-buttons/gamemenubutton_0016.png",
+          "sha256": "f21b946b00c756ea30775c995fe12594fe617a8b5375617ea2d1c3e0c12a2f04"
+        },
+        {
+          "index": 17,
+          "fileName": "game-menu-buttons/gamemenubutton_0017.png",
+          "sha256": "8aa8891b2140a36551d14852a27e054383833f29da4d713e33e61514f23ac5a7"
+        },
+        {
+          "index": 18,
+          "fileName": "game-menu-buttons/gamemenubutton_0018.png",
+          "sha256": "a11a34c6ad162412515a8138cd2b3d98f45ff0aaba2e140820af76c9a321a528"
+        },
+        {
+          "index": 19,
+          "fileName": "game-menu-buttons/gamemenubutton_0019.png",
+          "sha256": "f665091668e850d49fd5a71872ec140803475f2e3b7d102a497f44961f31b412"
+        },
+        {
+          "index": 20,
+          "fileName": "game-menu-buttons/gamemenubutton_0020.png",
+          "sha256": "7f30069d9a23d163de57eb1b7bf3b2e5283b5fe1fe0c336d0b863b67a1c90a13"
+        },
+        {
+          "index": 21,
+          "fileName": "game-menu-buttons/gamemenubutton_0021.png",
+          "sha256": "cc15dcae5ae1688bc0dbeff8a42fc60325dd4c2b05309b8de0cdeaf52bf4e296"
+        },
+        {
+          "index": 22,
+          "fileName": "game-menu-buttons/gamemenubutton_0022.png",
+          "sha256": "cc15dcae5ae1688bc0dbeff8a42fc60325dd4c2b05309b8de0cdeaf52bf4e296"
+        },
+        {
+          "index": 23,
+          "fileName": "game-menu-buttons/gamemenubutton_0023.png",
+          "sha256": "cc15dcae5ae1688bc0dbeff8a42fc60325dd4c2b05309b8de0cdeaf52bf4e296"
+        }
+      ]
+    },
+    {
+      "id": "nation-button",
+      "sourcePath": "original/imjinrok2/yfnt/NationButtons.spr",
+      "sourceSha256": "98304a61e4d8bd4017e7da6763e4194c4d55422a4891c5cf534ab5dd6c362885",
+      "layout": "spr",
+      "dimensions": {
+        "width": 58,
+        "height": 30
+      },
+      "frameCount": 9,
+      "exportedFrames": [
+        {
+          "index": 0,
+          "fileName": "nation-buttons/NationButtons_0000.png",
+          "sha256": "0652a91425ee8e01dc711a63fd631fce4b0b21716fde51e064b6a7ee6d3d287b"
+        },
+        {
+          "index": 1,
+          "fileName": "nation-buttons/NationButtons_0001.png",
+          "sha256": "ab0dc1346fba4ca3c0627b9b9a8fa517a10c48a84a1c3d34d761008e83994af7"
+        },
+        {
+          "index": 2,
+          "fileName": "nation-buttons/NationButtons_0002.png",
+          "sha256": "a5c09e819d04190e0be4e24d2e2235758815889ec06ae4ae1f28bc3539271eb2"
+        },
+        {
+          "index": 3,
+          "fileName": "nation-buttons/NationButtons_0003.png",
+          "sha256": "49d303389a8954c23c20aab8e5247aba693842069813096d64916e5aa67beaa9"
+        },
+        {
+          "index": 4,
+          "fileName": "nation-buttons/NationButtons_0004.png",
+          "sha256": "3ae3858db024a25c5c44170e780d9a41b42d284e492ef01b4f208e78b69c275d"
+        },
+        {
+          "index": 5,
+          "fileName": "nation-buttons/NationButtons_0005.png",
+          "sha256": "dd6bb031aa03fe6e2f3f0d6f986a5942e9e552f04509ba07d14aa033651b633b"
+        },
+        {
+          "index": 6,
+          "fileName": "nation-buttons/NationButtons_0006.png",
+          "sha256": "b170b75419852bb8360ca2bf47514dccfc42d7325f566414f458e1a7dd1c00b9"
+        },
+        {
+          "index": 7,
+          "fileName": "nation-buttons/NationButtons_0007.png",
+          "sha256": "e3a76c3820561ae35f3b6279538f10775e99a275dd6153349198b0b07a5dc975"
+        },
+        {
+          "index": 8,
+          "fileName": "nation-buttons/NationButtons_0008.png",
+          "sha256": "43aec81115da9363fe6f74e06ddb7ca974d499090a0703e784fbd57e021cabba"
+        }
+      ]
+    },
+    {
+      "id": "stage-border",
+      "sourcePath": "original/imjinrok2/yfnt/selectstageborder.spr",
+      "sourceSha256": "d3776a9766b8cc437c261c488adbd09f968be4502f3074c7cd8cf4c0363ebad9",
+      "layout": "spr",
+      "dimensions": {
+        "width": 320,
+        "height": 350
+      },
+      "frameCount": 1,
+      "exportedFrames": [
+        {
+          "index": 0,
+          "fileName": "stage-border/selectstageborder_0000.png",
+          "sha256": "be123fe6524e4c702cc705df0a989dad34cdb66b0896c5efbcfb3ceb0b72c654"
+        }
+      ]
+    },
+    {
+      "id": "stage-default",
+      "sourcePath": "original/imjinrok2/yfnt/titlestartstage.spr",
+      "sourceSha256": "d457f6409dab0697b5434f49315a3bed3b552278b42619fc3719ed355e1ed1ba",
+      "layout": "spr",
+      "dimensions": {
+        "width": 640,
+        "height": 480
+      },
+      "frameCount": 1,
+      "exportedFrames": [
+        {
+          "index": 0,
+          "fileName": "stage/title/titlestartstage_0000.png",
+          "sha256": "06c35c6c3c169225da517c7130c67ca791c781fa228aeb5fc0b86d0cc9bdb09d"
+        }
+      ]
+    },
+    {
+      "id": "stage-korea",
+      "sourcePath": "original/imjinrok2/yfnt/titlestartstagekorea.spr",
+      "sourceSha256": "65e6758ccf575925b9b20b346a786eeeae39fcc9bd8a96d2ec4c6c0916909c53",
+      "layout": "spr",
+      "dimensions": {
+        "width": 640,
+        "height": 480
+      },
+      "frameCount": 1,
+      "exportedFrames": [
+        {
+          "index": 0,
+          "fileName": "stage/korea/titlestartstagekorea_0000.png",
+          "sha256": "b907551650e0a77b8631ee8d8f2da1637f6b0a451b7a34bcda964feb904ccae5"
+        }
+      ]
+    },
+    {
+      "id": "stage-japan",
+      "sourcePath": "original/imjinrok2/yfnt/titlestartstagejapan.spr",
+      "sourceSha256": "29f202d78c67df2515643c38fc2608a27b5530ec4611380127acac456540bd45",
+      "layout": "spr",
+      "dimensions": {
+        "width": 640,
+        "height": 480
+      },
+      "frameCount": 1,
+      "exportedFrames": [
+        {
+          "index": 0,
+          "fileName": "stage/japan/titlestartstagejapan_0000.png",
+          "sha256": "6531aef2b738bb2c6ade0562fcd1f69042aba6ff51f1ab609bbee4b5a957345f"
+        }
+      ]
+    },
+    {
+      "id": "stage-china",
+      "sourcePath": "original/imjinrok2/yfnt/titlestartstagechina.spr",
+      "sourceSha256": "f570f95741097955a1fbdc7cff48682588043d00aa18d816cb82b0cc7e96311c",
+      "layout": "spr",
+      "dimensions": {
+        "width": 640,
+        "height": 480
+      },
+      "frameCount": 1,
+      "exportedFrames": [
+        {
+          "index": 0,
+          "fileName": "stage/china/titlestartstagechina_0000.png",
+          "sha256": "58614105ff5874b9c4c621b5db1cf330368df7ba92277a0cd4e52768b8061e11"
+        }
+      ]
+    },
+    {
+      "id": "stage-to-select",
+      "sourcePath": "original/imjinrok2/yfnt/titlestartstagetoselect.spr",
+      "sourceSha256": "98f0b6f38e7fc341f7a869fb4488c852d394093a2bc455c11a74ce843fa404ca",
+      "layout": "spr",
+      "dimensions": {
+        "width": 640,
+        "height": 480
+      },
+      "frameCount": 1,
+      "exportedFrames": [
+        {
+          "index": 0,
+          "fileName": "stage/to-select/titlestartstagetoselect_0000.png",
+          "sha256": "134e7643b23c2e64a3bb58a519a1d02bbe0ed74dd97ecef9fd52688b37289c91"
+        }
+      ]
+    },
+    {
+      "id": "select-box",
+      "sourcePath": "original/imjinrok2/fnt/selectbox.spr",
+      "sourceSha256": "fe066fb527354f848876507d9da36cae1769f3676fe4554328b705a47c5ef0cd",
+      "layout": "spr",
+      "dimensions": {
+        "width": 32,
+        "height": 32
+      },
+      "frameCount": 20,
+      "exportedFrames": [
+        {
+          "index": 0,
+          "fileName": "stage/select-box/selectbox_0000.png",
+          "sha256": "db5fb0695c6d3a269fad12fd3848f227242961af2d85a1e8a90050e4adbcc830"
+        },
+        {
+          "index": 1,
+          "fileName": "stage/select-box/selectbox_0001.png",
+          "sha256": "0d2ffffc1e4bab5a19367fc4ef6b6585743ce00cd23c60f05629d4055c56d096"
+        },
+        {
+          "index": 2,
+          "fileName": "stage/select-box/selectbox_0002.png",
+          "sha256": "6d9d23ce4865400791b6344050ed15034cf70805c7c8731d2c44bee6d834abbf"
+        },
+        {
+          "index": 3,
+          "fileName": "stage/select-box/selectbox_0003.png",
+          "sha256": "cdf64c7f9570ec9aedd2d4a377385033aed86614197108558fd16d4218219d9d"
+        },
+        {
+          "index": 4,
+          "fileName": "stage/select-box/selectbox_0004.png",
+          "sha256": "399d20caf8b8c1f752875baafc8611b871c5955dc3594e360b1c1eee800e06b3"
+        },
+        {
+          "index": 5,
+          "fileName": "stage/select-box/selectbox_0005.png",
+          "sha256": "947e0c603f9e855fa33e0b8d09e48923ffc7407c259c1364b69dec34c16d69bd"
+        },
+        {
+          "index": 6,
+          "fileName": "stage/select-box/selectbox_0006.png",
+          "sha256": "855ccc917e1b257adf9b201de24ff818de4a6fc4feb96f697c1d5b592325e914"
+        },
+        {
+          "index": 7,
+          "fileName": "stage/select-box/selectbox_0007.png",
+          "sha256": "883cb39477bd018e20fd0b54eb264786fb8c7e2fed479fc1f31ada350f70c3fe"
+        },
+        {
+          "index": 8,
+          "fileName": "stage/select-box/selectbox_0008.png",
+          "sha256": "ea86b8c91989150158c1d932bfa5722e8f56fbc8ca6d985fe7e56748901a6fcb"
+        },
+        {
+          "index": 9,
+          "fileName": "stage/select-box/selectbox_0009.png",
+          "sha256": "8024f59a0bbd739559b55eb4ad57244a7d1a069d90722fe75305760486c45f98"
+        },
+        {
+          "index": 10,
+          "fileName": "stage/select-box/selectbox_0010.png",
+          "sha256": "750fe7007dda23125e9620fea4cfd546acaa766a012deb7d4c6de2edf9f661d6"
+        },
+        {
+          "index": 11,
+          "fileName": "stage/select-box/selectbox_0011.png",
+          "sha256": "5bcb6ac7b3cac29763aca09d781231c26e513751cf6e4e88ec9afd3b88862133"
+        },
+        {
+          "index": 12,
+          "fileName": "stage/select-box/selectbox_0012.png",
+          "sha256": "0d9a0aa1161cbb7d26c9e79230b77ad3fb410ab291130eb4f835f08a391d3552"
+        },
+        {
+          "index": 13,
+          "fileName": "stage/select-box/selectbox_0013.png",
+          "sha256": "0d9a0aa1161cbb7d26c9e79230b77ad3fb410ab291130eb4f835f08a391d3552"
+        },
+        {
+          "index": 14,
+          "fileName": "stage/select-box/selectbox_0014.png",
+          "sha256": "0d9a0aa1161cbb7d26c9e79230b77ad3fb410ab291130eb4f835f08a391d3552"
+        },
+        {
+          "index": 15,
+          "fileName": "stage/select-box/selectbox_0015.png",
+          "sha256": "0d9a0aa1161cbb7d26c9e79230b77ad3fb410ab291130eb4f835f08a391d3552"
+        },
+        {
+          "index": 16,
+          "fileName": "stage/select-box/selectbox_0016.png",
+          "sha256": "0d9a0aa1161cbb7d26c9e79230b77ad3fb410ab291130eb4f835f08a391d3552"
+        },
+        {
+          "index": 17,
+          "fileName": "stage/select-box/selectbox_0017.png",
+          "sha256": "0d9a0aa1161cbb7d26c9e79230b77ad3fb410ab291130eb4f835f08a391d3552"
+        },
+        {
+          "index": 18,
+          "fileName": "stage/select-box/selectbox_0018.png",
+          "sha256": "0d9a0aa1161cbb7d26c9e79230b77ad3fb410ab291130eb4f835f08a391d3552"
+        },
+        {
+          "index": 19,
+          "fileName": "stage/select-box/selectbox_0019.png",
+          "sha256": "0d9a0aa1161cbb7d26c9e79230b77ad3fb410ab291130eb4f835f08a391d3552"
+        }
+      ]
+    }
+  ]
+}

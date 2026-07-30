@@ -6,3 +6,4 @@ Drop your production game assets here.
 - `portraits/`: civilization, hero, campaign portraits
 - `themes/default/ui/mission-portraits/`: statically mapped `SPEECH` portraits exported from `yfnt/hero.spr`
 - `themes/default/ui/portraits/`: retained provisional `fnt/portrait.spr` exports; not used by `SPEECH`
+- `themes/default/ui/main-menu/`: hash-bound original title, menu, nation, and stage-selection sprites converted with `pal/initmenu.pal`; frame indices remain source indices until a separately evidenced UI binding consumes them.
