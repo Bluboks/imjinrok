@@ -10,9 +10,11 @@ import {
   advanceWorldTick,
   createInitialWorldState,
   issueCommand as issueWorldCommand,
+  PRODUCT_PROJECTILE_REGISTRY,
   SIM_TICK_SECONDS,
   SIM_TICKS_PER_SECOND,
   toWorldSnapshot,
+  type ProjectileRegistry,
   type WorldSnapshot,
   type WorldState,
 } from "../simulation.js";
@@ -32,6 +34,11 @@ interface ActiveSession {
   loop: ReturnType<typeof setInterval>;
 }
 
+/** Executable policies belong to the authoritative host, never to session data. */
+export interface GameSessionServiceOptions {
+  projectileRegistry?: ProjectileRegistry;
+}
+
 export type GameSessionIssueCommandResult =
   | { status: "accepted"; command: CommandEnvelope }
   | { status: "not-found" }
@@ -39,8 +46,14 @@ export type GameSessionIssueCommandResult =
 
 export class GameSessionService {
   private readonly sessions = new Map<string, ActiveSession>();
+  private readonly projectileRegistry: ProjectileRegistry;
 
-  constructor(private readonly tickRate: number) {}
+  constructor(
+    private readonly tickRate: number,
+    options: GameSessionServiceOptions = {},
+  ) {
+    this.projectileRegistry = options.projectileRegistry ?? PRODUCT_PROJECTILE_REGISTRY;
+  }
 
   createSession(options: CreateSessionOptions): SessionSummary {
     if (options.map.id !== options.scenario.mapId) {
@@ -59,7 +72,7 @@ export class GameSessionService {
 
     const worldState = createInitialWorldState(options.map, options.playerIds, options.scenario);
     const loop = setInterval(() => {
-      advanceWorldTick(worldState);
+      advanceWorldTick(worldState, { projectileRegistry: this.projectileRegistry });
     }, SIM_TICK_SECONDS * 1000);
 
     this.sessions.set(summary.id, {

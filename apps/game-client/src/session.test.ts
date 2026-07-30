@@ -1,7 +1,14 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { defaultMap, defaultSkirmishScenario, imjinrokK02Scenario, type ScenarioDefinition } from "@shared";
-import { createInitialWorldState, type WorldSnapshot } from "@simulation";
+import {
+  createInitialWorldState,
+  PRODUCT_IMMEDIATE_PROJECTILE_PROFILE,
+  PRODUCT_PROJECTILE_REGISTRY,
+  spawnProjectile,
+  type ProjectileRegistry,
+  type WorldSnapshot,
+} from "@simulation";
 import {
   createCampaignMissionLaunchContext,
   createFreshLaunchContext,
@@ -12,6 +19,7 @@ import {
   normalizeSerializedKnownResources,
   type GameLaunchContext,
 } from "./session.js";
+import { NetworkClient } from "./net/NetworkClient.js";
 import { createSessionTransport, LocalSessionTransport } from "./net/SessionTransport.js";
 
 test("control group quick-save data is normalized", () => {
@@ -406,6 +414,89 @@ test("local session transport defaults legacy missing projectile lifecycle state
   assert.deepEqual(transport.getSnapshot().projectileImpactEvents, []);
 });
 
+test("local transport factory advances with its caller-owned projectile registry without serializing it", () => {
+  const state = createInitialWorldState(defaultMap, ["p1", "p2"]);
+  state.projectileSystem = spawnProjectile(state.projectileSystem, PRODUCT_PROJECTILE_REGISTRY, {
+    profileId: PRODUCT_IMMEDIATE_PROJECTILE_PROFILE.id,
+    start: { x: 1, y: 1 },
+    destination: { x: 2, y: 2 },
+    targetId: "p2-target",
+  }).state;
+  const { registry, profileReads } = createSpyProjectileRegistry();
+  const context = createAiLaunchContext("campaign");
+  context.resumeSnapshot = structuredClone(state);
+
+  const transport = createSessionTransport(context, defaultMap, ["p1", "p2"], {} as NetworkClient, {
+    projectileRegistry: registry,
+  });
+  transport.update(50, 50);
+
+  assert.equal(transport.isRemote, false);
+  assert.ok(profileReads.count > 0);
+  assert.equal(transport.getSnapshot().projectileImpactEvents.length, 1);
+  assert.equal(JSON.stringify(transport.getSnapshot()).includes("getProfile"), false);
+});
+
+test("local transport preserves the product projectile registry default", () => {
+  const state = createInitialWorldState(defaultMap, ["p1", "p2"]);
+  state.projectileSystem = spawnProjectile(state.projectileSystem, PRODUCT_PROJECTILE_REGISTRY, {
+    profileId: PRODUCT_IMMEDIATE_PROJECTILE_PROFILE.id,
+    start: { x: 1, y: 1 },
+    destination: { x: 2, y: 2 },
+    targetId: "p2-target",
+  }).state;
+  const transport = new LocalSessionTransport(state);
+
+  transport.update(50, 50);
+
+  assert.equal(transport.getSnapshot().projectileImpactEvents[0]?.profileId, PRODUCT_IMMEDIATE_PROJECTILE_PROFILE.id);
+});
+
+test("remote transport retains unknown projectile data without executing a caller-owned registry", async () => {
+  const state = createInitialWorldState(defaultMap, ["p1", "p2"]);
+  state.projectileSystem = {
+    nextProjectileSequence: 2,
+    projectiles: [{
+      id: "projectile-000000000001",
+      profileId: "mod:unavailable-profile",
+      payload: {},
+      start: { x: 0, y: 0 },
+      destination: { x: 1, y: 1 },
+      position: { x: 0, y: 0 },
+      motion: { policyId: "mod:unavailable-motion", data: {} },
+    }],
+  };
+  const { registry, profileReads } = createSpyProjectileRegistry();
+  const context: GameLaunchContext = {
+    ...createAiLaunchContext("skirmish"),
+    connectionMode: "hosted",
+    session: {
+      id: "remote-projectile-session",
+      entryMode: "custom-lobby",
+      connectionMode: "hosted",
+      scenarioType: "skirmish",
+      mapId: defaultMap.id,
+      playerIds: ["p1", "p2"],
+      tickRate: 24,
+    },
+    resumeSnapshot: structuredClone(state),
+  };
+  const transport = createSessionTransport(
+    context,
+    defaultMap,
+    ["p1", "p2"],
+    new SnapshotNetworkClient(structuredClone(state)),
+    { projectileRegistry: registry },
+  );
+
+  transport.update(200);
+  await new Promise<void>((resolve) => setImmediate(resolve));
+
+  assert.equal(transport.isRemote, true);
+  assert.equal(profileReads.count, 0);
+  assert.equal(transport.getSnapshot().projectileSystem.projectiles[0]?.profileId, "mod:unavailable-profile");
+});
+
 test("local session transport preserves timed weather overrides on quick-load", () => {
   const state = createInitialWorldState(defaultMap, ["p1", "p2"], defaultSkirmishScenario, { p1: "local", p2: "cpu" });
   const snapshot = structuredClone(state) as WorldSnapshot;
@@ -489,4 +580,31 @@ function createAiLaunchContext(scenarioType: GameLaunchContext["scenarioType"]):
     aiPlayerIds: ["p2"],
     aiDifficulty: "hard",
   };
+}
+
+function createSpyProjectileRegistry(): { registry: ProjectileRegistry; profileReads: { count: number } } {
+  const profileReads = { count: 0 };
+
+  return {
+    registry: {
+      getProfile(id) {
+        profileReads.count += 1;
+        return PRODUCT_PROJECTILE_REGISTRY.getProfile(id);
+      },
+      getMotionPolicy: (id) => PRODUCT_PROJECTILE_REGISTRY.getMotionPolicy(id),
+      getCollisionPolicy: (id) => PRODUCT_PROJECTILE_REGISTRY.getCollisionPolicy(id),
+      getImpactPolicy: (id) => PRODUCT_PROJECTILE_REGISTRY.getImpactPolicy(id),
+    },
+    profileReads,
+  };
+}
+
+class SnapshotNetworkClient extends NetworkClient {
+  constructor(private readonly snapshot: WorldSnapshot) {
+    super("http://example.invalid");
+  }
+
+  override async getSessionSnapshot(_sessionId: string): Promise<WorldSnapshot> {
+    return this.snapshot;
+  }
 }
