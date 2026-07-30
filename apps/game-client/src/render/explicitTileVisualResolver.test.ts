@@ -108,6 +108,29 @@ test("places source geometry by its footprint anchor and map elevation step", ()
   );
 });
 
+test("uses the map elevation profile step height for source-art placement and bounds", () => {
+  const map = createBlankMap();
+  const tile = map.layers[0]?.tiles[0];
+  assert.ok(tile);
+  map.tilesetId = "imjinrok-normal";
+  tile.tilesetVisuals = { elevationAssetKey: "1" };
+  const descriptor = resolveExplicitTileVisual(createContentRegistry(), map, tile, "elevation");
+  assert.ok(descriptor);
+
+  assert.deepEqual(
+    resolveExplicitTileVisualPlacement(descriptor, { x: 120, y: 80 }, 96, 48, 2, 18),
+    { origin: { x: 0.5, y: 16 / 48 }, position: { x: 120, y: 44 }, scale: 1.5 },
+  );
+  assert.deepEqual(
+    resolveExplicitTileVisualWorldBounds(descriptor, { x: 120, y: 80 }, 96, 48, 2, 18),
+    { left: 72, top: 20, right: 168, bottom: 92 },
+  );
+  assert.throws(
+    () => resolveExplicitTileVisualPlacement(descriptor, { x: 0, y: 0 }, 96, 48, 1, 0),
+    /elevation step height/u,
+  );
+});
+
 test("applies finite asset-native offsets consistently to placement and world bounds", () => {
   const map = createBlankMap();
   const tile = map.layers[0]?.tiles[0];

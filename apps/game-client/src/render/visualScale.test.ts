@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import type { FrameRef, VisualBase } from "@shared";
-import { getGroundContactPlacement } from "./visualScale.js";
+import { getGroundContactPlacement, getGroundContactPlacementAtLiftPixels } from "./visualScale.js";
 
 const visual: VisualBase = {
   id: "test-entity",
@@ -67,4 +67,19 @@ test("base and visual layers share the local ground-contact adapter across frame
   assert.equal(base.scale, 1);
   assert.equal(layer.scale, 2);
   assert.notDeepEqual(base.origin, layer.origin);
+});
+
+test("uses caller-resolved terrain lift pixels independently of source frame pivots", () => {
+  const placement = getGroundContactPlacementAtLiftPixels(
+    visual,
+    { textureKey: "terrain", pivot: { anchor: { x: 20, y: 50 }, liftPx: 16 } },
+    { x: 120, y: 80 },
+    21,
+  );
+
+  assert.deepEqual(placement.position, { x: 120, y: 59 });
+  assert.throws(
+    () => getGroundContactPlacementAtLiftPixels(visual, { textureKey: "terrain" }, { x: 0, y: 0 }, -1),
+    /non-negative finite pixel value/u,
+  );
 });

@@ -176,7 +176,13 @@ import {
   resolveSelectedEnvironmentPalette,
 } from "../render/environmentPaletteVisualResolver.js";
 import { resolveGridGroundContactWorldPosition } from "../render/gridGroundContactPosition.js";
-import { getAssetScale, getFrameOrigin, getFramePivot, getGroundContactPlacement, REFERENCE_PX_PER_WU, RENDER_DEPTH_BIAS } from "../render/visualScale.js";
+import { getAssetScale, getFrameOrigin, getGroundContactPlacement, REFERENCE_PX_PER_WU, RENDER_DEPTH_BIAS } from "../render/visualScale.js";
+import {
+  resolveTerrainElevationOverlayLiftPixels,
+  resolveTerrainElevationPresentation,
+  resolveTerrainElevationStepHeight,
+  shouldRenderSourceFogComposite,
+} from "../render/terrainElevationPresentation.js";
 import {
   filterVisibleProjectiles,
   PRODUCT_PROJECTILE_VISUAL_REGISTRY,
@@ -5943,7 +5949,7 @@ export class SkirmishScene extends Phaser.Scene {
 
     const iso = cartToIso(point, this.map.tileWidth, this.map.tileHeight);
     const worldX = this.mapOrigin.x + iso.x;
-    const worldY = this.mapOrigin.y + iso.y;
+    const worldY = this.mapOrigin.y + iso.y - this.getTerrainElevationPresentation(point.x, point.y).liftPixels;
     const halfWidth = this.map.tileWidth / 2;
     const halfHeight = this.map.tileHeight / 2;
     const diamond = [
@@ -5980,6 +5986,15 @@ export class SkirmishScene extends Phaser.Scene {
     const explicitElevationVisual = resolveExplicitTileVisual(CONTENT_REGISTRY, this.map, tile, "elevation");
     if (explicitElevationVisual && tile.elevation > 0) {
       assets.push(this.createExplicitTerrainDebugAssetInfo(`explicit elevation L${tile.elevation}`, explicitElevationVisual));
+    } else if (!this.getTerrainElevationPresentation(point.x, point.y).rendersGenericElevation) {
+      assets.push({
+        label: `source flat relief L${tile.elevation}`,
+        visualId: explicitFlatVisual?.assetKey ?? null,
+        slot: null,
+        fileName: explicitFlatVisual ? `frame-${explicitFlatVisual.frame}` : null,
+        textureKey: explicitFlatVisual?.textureKey ?? null,
+        loaded: explicitFlatVisual ? this.textures.exists(explicitFlatVisual.textureKey) : false,
+      });
     } else if (transitionSlot) {
       const visualTerrain = this.resolveElevationVisualTerrain(tile.terrain, tile.elevation, neighbors);
       const terrainVisual = this.getTerrainVisualForTerrain(visualTerrain);
@@ -7204,7 +7219,8 @@ export class SkirmishScene extends Phaser.Scene {
     worldY: number,
   ): void {
     const tile = getTileAt(this.map, x, y);
-    if (tile.elevation > 0) return;
+    const elevation = this.getTerrainElevationPresentation(x, y);
+    if (!shouldRenderSourceFogComposite(elevation)) return;
     const sourcePlan = resolveSourceFogLayerPlan(
       this.map.fogVisualProfileId,
       tile.fogVisuals?.familyIndex,
@@ -7283,10 +7299,24 @@ export class SkirmishScene extends Phaser.Scene {
     worldY: number,
   ): void {
     const tile = getTileAt(this.map, x, y);
+    const elevation = this.getTerrainElevationPresentation(x, y);
     const explicitVisual = resolveExplicitTileVisual(CONTENT_REGISTRY, this.map, tile, "elevation");
 
-    if (explicitVisual && tile.elevation > 0) {
-      this.drawExplicitTileFog(renderTexture, bounds, explicitVisual, visibility, worldX, worldY, tile.elevation);
+    if (explicitVisual && elevation.level > 0) {
+      this.drawExplicitTileFog(
+        renderTexture,
+        bounds,
+        explicitVisual,
+        visibility,
+        worldX,
+        worldY,
+        elevation.level,
+        this.getTerrainElevationStepHeight(),
+      );
+      return;
+    }
+
+    if (!elevation.rendersGenericElevation) {
       return;
     }
 
@@ -7309,7 +7339,7 @@ export class SkirmishScene extends Phaser.Scene {
       const lowerFrame = this.pickTerrainFrame(terrainVisual, "plateauTop", x, y);
 
       if (lowerFrame && this.textures.exists(lowerFrame.textureKey)) {
-        this.drawVisualFogFrame(renderTexture, bounds, terrainVisual, lowerFrame, visibility, worldX, worldY, tile.elevation);
+        this.drawVisualFogFrame(renderTexture, bounds, terrainVisual, lowerFrame, visibility, worldX, worldY, elevation.liftPixels);
       }
     }
 
@@ -7321,7 +7351,7 @@ export class SkirmishScene extends Phaser.Scene {
       visibility,
       worldX,
       worldY,
-      slot === "plateauTop" ? tile.elevation : tile.elevation + 1,
+      resolveTerrainElevationOverlayLiftPixels(elevation, slot, this.getTerrainElevationStepHeight()),
     );
   }
 
@@ -7333,14 +7363,10 @@ export class SkirmishScene extends Phaser.Scene {
     visibility: TileVisibility,
     worldX: number,
     worldY: number,
-    liftSteps: number,
+    liftPixels: number,
   ): void {
     const stamp = this.getElevationFogStamp(visual, frame, visibility);
-    const scale = getAssetScale(visual, this.activeTheme.display.defaultPxPerWu ?? REFERENCE_PX_PER_WU);
-    const pivot = getFramePivot(visual, frame);
-    const liftPx = (pivot.liftPx ?? 0) * scale * liftSteps;
-
-    renderTexture.batchDraw(stamp, worldX - bounds.minX, worldY - bounds.minY - liftPx);
+    renderTexture.batchDraw(stamp, worldX - bounds.minX, worldY - bounds.minY - liftPixels);
   }
 
   private ensureFogChunkRenderTexture(chunkIndex: number, bounds: FogChunkBounds): Phaser.GameObjects.RenderTexture {
@@ -7496,16 +7522,31 @@ export class SkirmishScene extends Phaser.Scene {
     for (let y = 0; y < this.map.height; y += 1) {
       for (let x = 0; x < this.map.width; x += 1) {
         const tile = getTileAt(this.map, x, y);
+        const elevation = this.getTerrainElevationPresentation(x, y);
         const explicitVisual = resolveExplicitTileVisual(CONTENT_REGISTRY, this.map, tile, "elevation");
 
         if (explicitVisual) {
-          if (tile.elevation <= 0) {
+          if (elevation.level <= 0) {
             continue;
           }
           const iso = cartToIso({ x, y }, this.map.tileWidth, this.map.tileHeight);
           const worldX = this.mapOrigin.x + iso.x;
           const worldY = this.mapOrigin.y + iso.y;
-          this.elevationOverlays.push(this.createExplicitElevationOverlay(explicitVisual, worldX, worldY, tile.elevation, x, y));
+          this.elevationOverlays.push(
+            this.createExplicitElevationOverlay(
+              explicitVisual,
+              worldX,
+              worldY,
+              elevation.level,
+              this.getTerrainElevationStepHeight(),
+              x,
+              y,
+            ),
+          );
+          continue;
+        }
+
+        if (!elevation.rendersGenericElevation) {
           continue;
         }
 
@@ -7539,7 +7580,7 @@ export class SkirmishScene extends Phaser.Scene {
               {
                 depth: this.getTerrainChunkDepthForTile(x, y),
                 depthBias: RENDER_DEPTH_BIAS.elevation,
-                liftSteps: tile.elevation,
+                liftPixels: elevation.liftPixels,
                 pxPerWu: this.activeTheme.display.defaultPxPerWu ?? REFERENCE_PX_PER_WU,
               },
             );
@@ -7556,7 +7597,7 @@ export class SkirmishScene extends Phaser.Scene {
           {
             depth: this.getTerrainChunkDepthForTile(x, y),
             depthBias: RENDER_DEPTH_BIAS.elevation,
-            liftSteps: slot === "plateauTop" ? tile.elevation : tile.elevation + 1,
+            liftPixels: resolveTerrainElevationOverlayLiftPixels(elevation, slot, this.getTerrainElevationStepHeight()),
             pxPerWu: this.activeTheme.display.defaultPxPerWu ?? REFERENCE_PX_PER_WU,
           },
         );
@@ -7626,6 +7667,7 @@ export class SkirmishScene extends Phaser.Scene {
     worldX: number,
     worldY: number,
     elevationSteps: number,
+    elevationStepHeight = this.getTerrainElevationStepHeight(),
   ): void {
     requireExplicitTileVisualTexture(descriptor.textureKey, (key) => this.textures.exists(key));
     const placement = resolveExplicitTileVisualPlacement(
@@ -7634,6 +7676,7 @@ export class SkirmishScene extends Phaser.Scene {
       this.map.tileWidth,
       this.map.tileHeight,
       elevationSteps,
+      elevationStepHeight,
     );
     renderTexture.batchDraw(
       this.getExplicitTileRenderStamp(descriptor),
@@ -7647,6 +7690,7 @@ export class SkirmishScene extends Phaser.Scene {
     worldX: number,
     worldY: number,
     elevationSteps: number,
+    elevationStepHeight: number,
     tileX: number,
     tileY: number,
   ): Phaser.GameObjects.Image {
@@ -7657,6 +7701,7 @@ export class SkirmishScene extends Phaser.Scene {
       this.map.tileWidth,
       this.map.tileHeight,
       elevationSteps,
+      elevationStepHeight,
     );
 
     return this.add
@@ -7690,6 +7735,7 @@ export class SkirmishScene extends Phaser.Scene {
     worldX: number,
     worldY: number,
     elevationSteps: number,
+    elevationStepHeight = this.getTerrainElevationStepHeight(),
   ): void {
     requireExplicitTileVisualTexture(descriptor.textureKey, (key) => this.textures.exists(key));
     const placement = resolveExplicitTileVisualPlacement(
@@ -7698,6 +7744,7 @@ export class SkirmishScene extends Phaser.Scene {
       this.map.tileWidth,
       this.map.tileHeight,
       elevationSteps,
+      elevationStepHeight,
     );
     renderTexture.batchDraw(
       this.getExplicitTileFogStamp(descriptor, visibility),
@@ -7789,9 +7836,15 @@ export class SkirmishScene extends Phaser.Scene {
     }
 
     const maxElevation = layer.tiles.reduce((max, tile) => Math.max(max, tile.elevation), 0);
-    const elevationStepPx = this.map.tileHeight / 2;
+    return maxElevation * this.getTerrainElevationStepHeight() + 2;
+  }
 
-    return maxElevation * elevationStepPx + 2;
+  private getTerrainElevationStepHeight(): number {
+    return resolveTerrainElevationStepHeight(this.map);
+  }
+
+  private getTerrainElevationPresentation(x: number, y: number) {
+    return resolveTerrainElevationPresentation(this.map, { x, y });
   }
 
   private getElevationNeighbors(x: number, y: number): Array<ElevationNeighbor & { terrain: TerrainType }> {
@@ -7956,6 +8009,7 @@ export class SkirmishScene extends Phaser.Scene {
             this.map.tileWidth,
             this.map.tileHeight,
             descriptor.collection === "elevation" ? tile.elevation : 0,
+            this.getTerrainElevationStepHeight(),
           );
           left = Math.min(left, visualBounds.left);
           top = Math.min(top, visualBounds.top);

@@ -144,8 +144,9 @@ export function resolveExplicitTileVisualPlacement(
   mapTileWidth: number,
   mapTileHeight: number,
   elevationSteps = 0,
+  elevationStepHeight = mapTileHeight / 2,
 ): ExplicitTileVisualPlacement {
-  return resolveTileImagePlacement(descriptor, groundContact, mapTileWidth, mapTileHeight, elevationSteps);
+  return resolveTileImagePlacement(descriptor, groundContact, mapTileWidth, mapTileHeight, elevationSteps, elevationStepHeight);
 }
 
 /**
@@ -159,12 +160,16 @@ export function resolveTileImagePlacement(
   mapTileWidth: number,
   mapTileHeight: number,
   elevationSteps = 0,
+  elevationStepHeight = mapTileHeight / 2,
 ): ExplicitTileVisualPlacement {
   if (!Number.isFinite(mapTileWidth) || mapTileWidth <= 0 || !Number.isFinite(mapTileHeight) || mapTileHeight <= 0) {
     throw new RangeError(`explicit tile placement requires positive finite map tile dimensions; received ${mapTileWidth}x${mapTileHeight}`);
   }
   if (!Number.isInteger(elevationSteps) || elevationSteps < 0) {
     throw new RangeError(`explicit tile placement requires a non-negative integer elevation step; received ${elevationSteps}`);
+  }
+  if (!Number.isFinite(elevationStepHeight) || elevationStepHeight <= 0) {
+    throw new RangeError(`explicit tile placement requires a positive finite elevation step height; received ${elevationStepHeight}`);
   }
 
   const geometry = descriptor.imageGeometry;
@@ -180,7 +185,7 @@ export function resolveTileImagePlacement(
     },
     position: {
       x: groundContact.x + sourcePixelOffset.x * scale,
-      y: groundContact.y - mapTileHeight / 2 * elevationSteps + sourcePixelOffset.y * scale,
+      y: groundContact.y - elevationStepHeight * elevationSteps + sourcePixelOffset.y * scale,
     },
     scale,
   };
@@ -193,8 +198,16 @@ export function resolveExplicitTileVisualWorldBounds(
   mapTileWidth: number,
   mapTileHeight: number,
   elevationSteps = 0,
+  elevationStepHeight = mapTileHeight / 2,
 ): ExplicitTileVisualWorldBounds {
-  const placement = resolveExplicitTileVisualPlacement(descriptor, groundContact, mapTileWidth, mapTileHeight, elevationSteps);
+  const placement = resolveExplicitTileVisualPlacement(
+    descriptor,
+    groundContact,
+    mapTileWidth,
+    mapTileHeight,
+    elevationSteps,
+    elevationStepHeight,
+  );
   const geometry = descriptor.imageGeometry;
   const width = geometry.width * placement.scale;
   const height = geometry.height * placement.scale;

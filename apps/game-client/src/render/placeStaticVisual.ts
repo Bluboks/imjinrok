@@ -1,6 +1,10 @@
 import Phaser from "phaser";
 import type { FrameRef, VisualBase } from "@shared";
-import { getGroundContactPlacement, REFERENCE_PX_PER_WU } from "./visualScale.js";
+import {
+  getGroundContactPlacement,
+  getGroundContactPlacementAtLiftPixels,
+  REFERENCE_PX_PER_WU,
+} from "./visualScale.js";
 
 export interface StaticVisualPosition {
   x: number;
@@ -11,6 +15,8 @@ export interface PlaceStaticVisualOptions {
   depth: number;
   depthBias?: number;
   liftSteps?: number;
+  /** Caller-resolved terrain lift. Takes precedence over frame pivot steps. */
+  liftPixels?: number;
   pxPerWu?: number;
 }
 
@@ -25,13 +31,21 @@ export function placeStaticVisual(
     ? scene.add.image(position.x, position.y, frame.textureKey, frame.frameName)
     : scene.add.image(position.x, position.y, frame.textureKey);
   const pxPerWu = options.pxPerWu ?? REFERENCE_PX_PER_WU;
-  const placement = getGroundContactPlacement(
-    visual,
-    frame,
-    position,
-    options.liftSteps ?? 1,
-    pxPerWu,
-  );
+  const placement = options.liftPixels === undefined
+    ? getGroundContactPlacement(
+      visual,
+      frame,
+      position,
+      options.liftSteps ?? 1,
+      pxPerWu,
+    )
+    : getGroundContactPlacementAtLiftPixels(
+      visual,
+      frame,
+      position,
+      options.liftPixels,
+      pxPerWu,
+    );
 
   applyTextureFilter(scene, visual, frame);
 
