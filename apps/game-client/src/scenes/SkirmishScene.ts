@@ -178,6 +178,13 @@ import {
 import { resolveGridGroundContactWorldPosition } from "../render/gridGroundContactPosition.js";
 import { getAssetScale, getFrameOrigin, getFramePivot, getGroundContactPlacement, REFERENCE_PX_PER_WU, RENDER_DEPTH_BIAS } from "../render/visualScale.js";
 import {
+  filterVisibleProjectiles,
+  PRODUCT_PROJECTILE_VISUAL_REGISTRY,
+  ProjectilePresentationReconciler,
+  type ProjectilePresentationHandle,
+  type ProjectileVisualPlacement,
+} from "../render/projectilePresentation.js";
+import {
   createCampaignMissionLaunchContext,
   deserializePlayerVisibilityState,
   createFreshLaunchContext,
@@ -530,6 +537,9 @@ export class SkirmishScene extends Phaser.Scene {
   private readonly knownResourceViews = new Map<string, KnownResourceView>();
   private readonly resourceRenderables = new Map<string, ResourceRenderable>();
   private readonly unitRenderables = new Map<string, UnitRenderable>();
+  private readonly projectilePresentation = new ProjectilePresentationReconciler({
+    create: (placement) => this.createProjectilePresentationHandle(placement),
+  });
   private readonly processedCombatEventIds = new Set<string>();
   private readonly combatEffectGraphics = new Set<Phaser.GameObjects.Graphics>();
   private readonly terrainTextureKeys = new Map<TerrainType, string>();
@@ -781,6 +791,7 @@ export class SkirmishScene extends Phaser.Scene {
     this.redrawAllFogOverlay();
     this.syncResourceRenderables();
     this.syncUnitRenderables();
+    this.syncProjectilePresentation();
     this.publishVirtualCursor();
     this.publishPlayerEconomy();
     this.publishMagicAutoUse();
@@ -832,6 +843,7 @@ export class SkirmishScene extends Phaser.Scene {
     this.pruneMissingSelections();
     this.syncResourceRenderables();
     this.syncUnitRenderables(animationDelta);
+    this.syncProjectilePresentation();
     this.syncConstructionAudioState(true);
     this.syncProgressAudioState(true);
     this.playCombatEvents();
@@ -1247,6 +1259,7 @@ export class SkirmishScene extends Phaser.Scene {
     this.knownResourceViews.clear();
     this.unitRenderables.forEach((renderable) => renderable.container.destroy(true));
     this.unitRenderables.clear();
+    this.projectilePresentation.destroy();
     this.combatEffectGraphics.forEach((graphics) => graphics.destroy());
     this.combatEffectGraphics.clear();
     this.processedCombatEventIds.clear();
@@ -8283,6 +8296,52 @@ export class SkirmishScene extends Phaser.Scene {
       x: worldX,
       y,
       depth: worldY + 8,
+    };
+  }
+
+  /** Product-only adapter: simulation state stays authoritative and read-only. */
+  private syncProjectilePresentation(): void {
+    this.projectilePresentation.reconcile(
+      filterVisibleProjectiles(this.worldState.projectileSystem.projectiles, this.playerVisibility),
+      PRODUCT_PROJECTILE_VISUAL_REGISTRY,
+      this.mapOrigin,
+      this.map,
+    );
+  }
+
+  private createProjectilePresentationHandle(initial: ProjectileVisualPlacement): ProjectilePresentationHandle {
+    const graphics = this.add.graphics();
+    const update = (placement: ProjectileVisualPlacement): void => {
+      const { visual } = placement;
+      graphics
+        .clear()
+        .setPosition(placement.position.x, placement.position.y)
+        .setDepth(placement.depth)
+        .setAlpha(visual.alpha);
+
+      if (visual.trailLengthPx > 0 && (placement.travelDirection.x !== 0 || placement.travelDirection.y !== 0)) {
+        graphics
+          .lineStyle(Math.max(1, visual.radiusPx * 0.8), visual.color, 0.58)
+          .lineBetween(
+            -placement.travelDirection.x * visual.trailLengthPx,
+            -placement.travelDirection.y * visual.trailLengthPx,
+            0,
+            0,
+          );
+      }
+
+      graphics
+        .fillStyle(visual.color, 1)
+        .fillCircle(0, 0, visual.radiusPx)
+        .lineStyle(1, 0x33200f, 0.76)
+        .strokeCircle(0, 0, visual.radiusPx);
+    };
+
+    update(initial);
+
+    return {
+      update,
+      destroy: () => graphics.destroy(),
     };
   }
 
