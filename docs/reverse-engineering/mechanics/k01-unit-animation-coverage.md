@@ -9,7 +9,14 @@
 - 분석 상태: 기존 개별 focused analysis의 상태를 재사용한다. coverage guard 자체는 증거 등급을 올리지 않는다.
 - 재현 상태: `packages/shared/src/k01UnitAnimationCoverage.test.ts`와
   `apps/game-client/src/render/k01UnitAnimationCoverage.test.ts`가 scenario-derived inventory, theme clip 존재와
-  normal runtime idle/move/attack 선택을 확인한다.
+  normal runtime idle/move/attack 선택을 확인한다. 후자는 모든 guarded runtime state×8방향을 실제
+  `resolveEntityAnimationSelection`까지 통과시켜 다른 facing/default clip으로 fallback하지 않는지,
+  class 14의 eight raw-16 intermediate turn clip이 ordinary grid clip으로 fallback하지 않는지 함께 검사한다.
+- 표시 경계: source export manifest에는 frame index·width·height만 있고 original pivot metadata는 없다. 같은
+  runtime audit는 guarded frame에 per-frame pivot 또는 visual lift가 없고, frame 교체 뒤에도
+  `UnitState.position`에서 온 ground-contact 위치가 변하지 않는지를 결정론적으로 검사한다. 이는 source
+  pivot 또는 original update→FPS 환산을 복원한 것이 아니라, 그 미확정값이 simulation position을 덮지
+  않도록 하는 project adapter guard다.
 - 구현 상태: source-proven state clip의 drift를 막는 project guard. 원본 tick, pivot, collision 또는 death
   lifecycle를 새로 이식하지 않는다.
 
