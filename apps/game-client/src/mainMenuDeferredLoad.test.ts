@@ -1,33 +1,74 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  INITIAL_LANDING_RESOURCE_POLICY,
+  MAIN_MENU_ASSETS,
   MAIN_MENU_RESOURCE_PLAN,
   MainMenuDeferredActionQueue,
   requiresDeferredMainMenuResources,
 } from "./mainMenuDeferredLoad.js";
 
-test("main menu resource plan keeps landing paint critical and defers follow-up resources", () => {
+test("initial landing resource policy keeps boot empty and defers all non-landing menu resources", () => {
+  assert.deepEqual(INITIAL_LANDING_RESOURCE_POLICY.boot, {
+    images: [],
+    audioCueKeys: [],
+  });
+  assert.equal(INITIAL_LANDING_RESOURCE_POLICY.mainMenu, MAIN_MENU_RESOURCE_PLAN);
   assert.deepEqual(
-    MAIN_MENU_RESOURCE_PLAN.critical.images.map(({ key }) => key),
-    ["main-menu:landing"],
+    MAIN_MENU_RESOURCE_PLAN.critical,
+    {
+      images: [
+        {
+          key: "main-menu:landing",
+          url: "/assets/themes/default/ui/main-menu/title/title_0000.png",
+        },
+      ],
+      audioCueKeys: [],
+    },
   );
-  assert.deepEqual(MAIN_MENU_RESOURCE_PLAN.critical.audioCueKeys, []);
   assert.deepEqual(
-    MAIN_MENU_RESOURCE_PLAN.deferred.images.map(({ key }) => key),
-    [
-      "main-menu:menu-border",
-      "main-menu:menu-button",
-      "main-menu:nation-button",
-      "main-menu:stage-border",
-      "main-menu:stage",
-      "main-menu:stage-korea",
-      "main-menu:select-box",
-    ],
+    MAIN_MENU_RESOURCE_PLAN.deferred,
+    {
+      images: [
+        {
+          key: "main-menu:menu-border",
+          url: "/assets/themes/default/ui/main-menu/game-menu-border/gamemenuborder_0000.png",
+        },
+        {
+          key: "main-menu:menu-button",
+          url: "/assets/themes/default/ui/main-menu/game-menu-buttons/gamemenubutton_0000.png",
+        },
+        {
+          key: "main-menu:nation-button",
+          url: "/assets/themes/default/ui/main-menu/nation-buttons/NationButtons_0000.png",
+        },
+        {
+          key: "main-menu:stage-border",
+          url: "/assets/themes/default/ui/main-menu/stage-border/selectstageborder_0000.png",
+        },
+        {
+          key: "main-menu:stage",
+          url: "/assets/themes/default/ui/main-menu/stage/title/titlestartstage_0000.png",
+        },
+        {
+          key: "main-menu:stage-korea",
+          url: "/assets/themes/default/ui/main-menu/stage/korea/titlestartstagekorea_0000.png",
+        },
+        {
+          key: "main-menu:select-box",
+          url: "/assets/themes/default/ui/main-menu/stage/select-box/selectbox_0000.png",
+        },
+      ],
+      audioCueKeys: [
+        "audio:menu:background-music",
+        "audio:menu:button",
+        "audio:menu:country-select",
+      ],
+    },
   );
-  assert.deepEqual(MAIN_MENU_RESOURCE_PLAN.deferred.audioCueKeys, [
-    "audio:menu:background-music",
-    "audio:menu:button",
-    "audio:menu:country-select",
+  assert.deepEqual(Object.values(MAIN_MENU_ASSETS), [
+    ...MAIN_MENU_RESOURCE_PLAN.critical.images,
+    ...MAIN_MENU_RESOURCE_PLAN.deferred.images,
   ]);
 });
 
