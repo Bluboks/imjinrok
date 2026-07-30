@@ -6,13 +6,16 @@
 
 - 분석: `정적 확정`
 - 재현: `재현 완료`
-- 구현: `이식 완료` — generic superset의 default theme `japanese-turtle-tank` visual에만 반영했다.
+- 구현: `부분 이식` — grid 8방향은 default theme에 이식했고, intermediate 16-ring 이동은
+  profile-id/raw-direction theme contract와 순수 resolver까지 만들었다. `SkirmishScene`의 실제
+  presentation bridge는 병렬 작업 충돌을 피하기 위해 아직 연결하지 않았다.
 
 확정 범위는 생성 기본 flags에서 선택되는 class 14 상태 8/1/4의 slot, phase→frame,
 grid 8방향과 mirror다. 이동·공격 special consumer가 받는 raw direction `1000..1007`도
 수치 계약으로 재현한다. `1000..1007`은 더 이상 불명 raw 값이 아니라 인접 grid 방향 사이의
-**intermediate 16-ring turn direction**으로 정적 확정했지만, generic 8-way `Facing`으로
-손실 없이 표현되지 않아 theme에는 넣지 않았다. creation-default 사망은 `ghosttankj` state 7이
+**intermediate 16-ring turn direction**으로 정적 확정했다. generic 8-way `Facing`으로
+손실 없이 표현하지 않도록 `move`/`walk`에 `profileId → raw WORD → clip` theme metadata를
+별도로 둔다. creation-default 사망은 `ghosttankj` state 7이
 아니라 transient effect pool의 `exp1`/`exp2` 한 번 재생이며, runtime/theme에는 이식하지 않았다.
 
 ## 입력과 provenance
@@ -141,10 +144,14 @@ jump-table·seed-instruction evidence 변조를 거부한다. class-14 initializ
 `0x0042bae1-0x0042bb8c`이며 byte/word/dword와 width가 생략된 모든 first-operand ESI memory
 destination을 보수적으로 열거한다.
 
-theme은 `idle`, `move`, `walk`, `attack`만 제공한다. `walk`는 generic alias로 `move`와
-동일하고 idle/move는 loop, attack은 non-loop다. FPS 4/8, render size 70×60과 pivot
-`(35,52)`는 원본 확정값이 아니라 잠정 프로젝트 표시 적응이다. intermediate turn direction은
-theme에 넣지 않았고 death/destruction 상태도 만들지 않았다.
+theme은 `idle`, `move`, `walk`, `attack`을 제공한다. `walk`는 generic alias로 `move`와
+동일하고 idle/move는 loop, attack은 non-loop다. `move`/`walk`의 raw clip metadata는
+`k01-japanese-turtle-tank-raw16` profile에만 opt-in하며, resolver는 profile/raw가 맞을 때만
+사용한다. grid landing·unknown raw·unknown profile은 기존 directional clip으로 되돌아간다.
+idle/attack은 `+0x1e6`의 마지막 grid direction을 사용한다. 이 resolver는 아직 client render
+loop에 연결되지 않았으며, source update tick을 FPS로 바꾸는 정책도 여전히 프로젝트 적응이다.
+FPS 4/8, render size 70×60과 pivot `(35,52)` 역시 원본 확정값이 아니라 잠정 프로젝트 표시
+적응이다. death/destruction 상태는 만들지 않았다.
 
 ## 미확정
 
