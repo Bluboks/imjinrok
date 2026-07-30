@@ -68,6 +68,13 @@ const entityFrame = (
 };
 
 /**
+ * Selection-panel representative only. This reuses an evidenced entity frame;
+ * it does not assign an original portrait resource or speaker identity.
+ */
+const entitySelectionRepresentative = (visualId: string, stem: string, index: number): FrameRef =>
+  entityFrame(visualId, stem, index);
+
+/**
  * PROVISIONAL BY DEFAULT: direction order, state blocks, mirroring, and building health semantics are unverified
  * unless a visual has narrower static evidence recorded in analysis/generated/sprite-mapping-audit.json.
  */
@@ -362,6 +369,8 @@ interface SourceBuildingVisualOptions {
   idleOverlayFrameStart?: number;
   idleOverlayFrameCount?: number;
   idleOverlayFps?: number;
+  /** Selection representative frame with an evidenced source index, if one is in scope. */
+  selectionRepresentativeFrameIndex?: number;
 }
 
 const sourceBuildingEntityVisual = ({
@@ -378,6 +387,7 @@ const sourceBuildingEntityVisual = ({
   idleOverlayFrameStart,
   idleOverlayFrameCount = 0,
   idleOverlayFps = 8,
+  selectionRepresentativeFrameIndex,
 }: SourceBuildingVisualOptions): EntityVisual => ({
   id,
   kind: "entity",
@@ -390,6 +400,9 @@ const sourceBuildingEntityVisual = ({
     size,
     pivot: { anchor: pivot },
   },
+  ...(selectionRepresentativeFrameIndex === undefined
+    ? {}
+    : { portrait: entitySelectionRepresentative(visualId, stem, selectionRepresentativeFrameIndex) }),
   states: {
     idle: {
       clips: {
@@ -427,6 +440,8 @@ interface SourceBaseBuildingVisualOptions {
   stem: string;
   size: { w: number; h: number };
   pivot: { x: number; y: number };
+  /** K01 catalog evidence fixes this source base frame, not a portrait meaning. */
+  selectionRepresentativeFrameIndex?: number;
 }
 
 // This deliberately exposes only the catalog-proven base frame. Size comes directly from the
@@ -438,6 +453,7 @@ const sourceBaseBuildingEntityVisual = ({
   stem,
   size,
   pivot,
+  selectionRepresentativeFrameIndex = 7,
 }: SourceBaseBuildingVisualOptions): EntityVisual => ({
   id,
   kind: "entity",
@@ -450,6 +466,7 @@ const sourceBaseBuildingEntityVisual = ({
     size,
     pivot: { anchor: pivot },
   },
+  portrait: entitySelectionRepresentative(visualId, stem, selectionRepresentativeFrameIndex),
   states: {
     idle: {
       clips: {
@@ -504,6 +521,7 @@ export const villagerEntityVisual = {
     size: { w: 60, h: 60 },
     pivot: { anchor: { x: 30, y: 52 } },
   },
+  portrait: entitySelectionRepresentative("villager", "farmerk", 0),
   states: {
     idle: {
       facings: ENTITY_FACING_ORDER,
@@ -591,6 +609,7 @@ export const swordsmanEntityVisual = {
     size: { w: 60, h: 60 },
     pivot: { anchor: { x: 30, y: 52 } },
   },
+  portrait: entitySelectionRepresentative("swordsman", "swordk", 128),
   states: {
     idle: {
       facings: ENTITY_FACING_ORDER,
@@ -651,6 +670,7 @@ export const japaneseSwordsmanEntityVisual = {
     size: { w: 60, h: 50 },
     pivot: { anchor: { x: 30, y: 44 } },
   },
+  portrait: entitySelectionRepresentative("japanese_swordsman", "swordj", 0),
   states: {
     idle: {
       facings: ENTITY_FACING_ORDER,
@@ -719,6 +739,7 @@ export const koreanMonkEntityVisual = {
     size: { w: 65, h: 50 },
     pivot: { anchor: { x: 32, y: 44 } },
   },
+  portrait: entitySelectionRepresentative("korean_monk", "budak", 100),
   states: {
     idle: { facings: ENTITY_FACING_ORDER, clips: staticallyRecoveredDirectionalClips({ visualId: "korean_monk", stem: "budak", frameStart: 100, frameStride: 8, phaseCount: 8, fps: PROVISIONAL_RECOVERED_ANIMATION_IDLE_FPS, loop: true }) },
     move: { facings: ENTITY_FACING_ORDER, clips: staticallyRecoveredNormalMovementClips("korean_monk", "budak", 0, PROVISIONAL_RECOVERED_ANIMATION_ACTIVE_FPS) },
@@ -740,6 +761,7 @@ export const archerEntityVisual = {
     size: { w: 60, h: 60 },
     pivot: { anchor: { x: 30, y: 52 } },
   },
+  portrait: entitySelectionRepresentative("archer", "archerk", 0),
   states: {
     idle: {
       facings: ENTITY_FACING_ORDER,
@@ -811,6 +833,7 @@ export const japaneseGunnerEntityVisual = {
     size: { w: 60, h: 60 },
     pivot: { anchor: { x: 30, y: 52 } },
   },
+  portrait: entitySelectionRepresentative("japanese_gunner", "gunj1", 0),
   states: {
     idle: {
       facings: ENTITY_FACING_ORDER,
@@ -888,6 +911,7 @@ export const japaneseFarmerEntityVisual = {
     size: { w: 66, h: 56 },
     pivot: { anchor: { x: 33, y: 50 } },
   },
+  portrait: entitySelectionRepresentative("japanese_farmer", "Farmerj", 0),
   states: {
     idle: {
       facings: ENTITY_FACING_ORDER,
@@ -979,6 +1003,7 @@ export const japaneseShrineMaidenEntityVisual = {
     size: { w: 50, h: 50 },
     pivot: { anchor: { x: 25, y: 44 } },
   },
+  portrait: entitySelectionRepresentative("japanese_shrine_maiden", "advbudaj", 120),
   states: {
     idle: { facings: ENTITY_FACING_ORDER, clips: staticallyRecoveredDirectionalClips({ visualId: "japanese_shrine_maiden", stem: "advbudaj", frameStart: 120, frameStride: 8, phaseCount: 8, fps: PROVISIONAL_RECOVERED_ANIMATION_IDLE_FPS, loop: true }) },
     move: { facings: ENTITY_FACING_ORDER, clips: staticallyRecoveredNormalMovementClips("japanese_shrine_maiden", "advbudaj", 0, PROVISIONAL_RECOVERED_ANIMATION_ACTIVE_FPS) },
@@ -1001,6 +1026,7 @@ export const japaneseSamuraiEntityVisual = {
     size: { w: 80, h: 80 },
     pivot: { anchor: { x: 40, y: 72 } },
   },
+  portrait: entitySelectionRepresentative("japanese_samurai", "horseswordj2", 0),
   states: {
     idle: {
       facings: ENTITY_FACING_ORDER,
@@ -1072,6 +1098,7 @@ export const japaneseTurtleTankEntityVisual = {
     size: { w: 70, h: 60 },
     pivot: { anchor: { x: 35, y: 52 } },
   },
+  portrait: entitySelectionRepresentative("japanese_turtle_tank", "ghosttankj", 16),
   states: {
     idle: {
       facings: ENTITY_FACING_ORDER,
@@ -1147,6 +1174,7 @@ export const japaneseKonishiEntityVisual = {
     size: { w: 140, h: 108 },
     pivot: { anchor: { x: 70, y: 100 } },
   },
+  portrait: entitySelectionRepresentative("japanese_konishi", "generalj12", 0),
   states: {
     idle: {
       facings: ENTITY_FACING_ORDER,
@@ -1255,6 +1283,7 @@ export const gwonYulEntityVisual = {
     size: { w: 128, h: 108 },
     pivot: { anchor: { x: 64, y: 98 } },
   },
+  portrait: entitySelectionRepresentative("gwon_yul", "generalk13", 0),
   states: {
     idle: {
       facings: ENTITY_FACING_ORDER,
@@ -1325,6 +1354,7 @@ export const ryuSeongRyongEntityVisual = {
     size: { w: 88, h: 76 },
     pivot: { anchor: { x: 44, y: 66 } },
   },
+  portrait: entitySelectionRepresentative("ryu_seong_ryong", "generalk31", 0),
   states: {
     idle: {
       facings: ENTITY_FACING_ORDER,
@@ -1395,6 +1425,7 @@ export const townCenterEntityVisual = {
     size: { w: 131, h: 131 },
     pivot: { anchor: { x: 66, y: 101 } },
   },
+  portrait: entitySelectionRepresentative("town_center", "hqk", 7),
   states: {
     idle: {
       clips: {
@@ -1426,6 +1457,7 @@ export const houseEntityVisual = {
     size: { w: 114, h: 107 },
     pivot: { anchor: { x: 57, y: 84 } },
   },
+  portrait: entitySelectionRepresentative("house", "millk", 7),
   states: {
     idle: {
       clips: {
@@ -1452,6 +1484,7 @@ export const barracksEntityVisual = {
     size: { w: 128, h: 117 },
     pivot: { anchor: { x: 64, y: 91 } },
   },
+  portrait: entitySelectionRepresentative("barracks", "barrackk", 7),
   states: {
     idle: {
       clips: {
@@ -1464,18 +1497,6 @@ export const barracksEntityVisual = {
       },
     },
   },
-  layers: [
-    {
-      id: "flag",
-      states: {
-        idle: {
-          clips: {
-            default: buildingOverlayClip("barracks", "barrackk", 9, 7, 8),
-          },
-        },
-      },
-    },
-  ],
 } as const satisfies EntityVisual;
 
 export const beaconEntityVisual = {
@@ -1516,8 +1537,11 @@ export const japaneseCampHouseEntityVisual = sourceBuildingEntityVisual({
   stem: "millj",
   size: { w: 109, h: 117 },
   pivot: { x: 55, y: 92 },
-  idleOverlayFrameStart: 9,
-  idleOverlayFrameCount: 10,
+  // K01 class-57 catalog/base-frame evidence selects 7. Other building states remain unbound.
+  idleFrameStart: 7,
+  idleFrameCount: 1,
+  idleFps: 1,
+  selectionRepresentativeFrameIndex: 7,
 });
 
 export const japaneseCampBarracksEntityVisual = sourceBaseBuildingEntityVisual({
@@ -1545,9 +1569,11 @@ export const japaneseCampFirehouseEntityVisual = sourceBuildingEntityVisual({
   stem: "firehousej",
   size: { w: 113, h: 123 },
   pivot: { x: 57, y: 96 },
-  idleFrameStart: 9,
-  idleFrameCount: 11,
-  idleFps: 8,
+  // K01 class-62 catalog/base-frame evidence selects 7. Other building states remain unbound.
+  idleFrameStart: 7,
+  idleFrameCount: 1,
+  idleFps: 1,
+  selectionRepresentativeFrameIndex: 7,
 });
 
 export const japaneseCampAdvancedTowerEntityVisual = sourceBuildingEntityVisual({

@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   defaultTheme,
+  K01_BUILDING_VISUAL_EVIDENCE,
   K01_UNIT_ANIMATION_EVIDENCE,
   type EntityVisual,
   type Facing,
@@ -109,6 +110,28 @@ test("K01 runtime routing resolves every guarded clip without fallback or frame-
           `${evidence.kind}/raw-${rawDirection} frame placement must preserve UnitState.position ground contact`,
         );
       }
+    }
+  }
+});
+
+test("K01 opening buildings select their evidenced base frame without moving ground contact", () => {
+  for (const evidence of K01_BUILDING_VISUAL_EVIDENCE) {
+    const visual = defaultTheme.visuals[defaultTheme.entityBindings[evidence.kind]] as EntityVisual;
+    const resolvedState = getEntityAnimationStateKey(unit(), visual);
+    const clip = resolvedState ? resolveEntityAnimationSelection(visual, resolvedState, "s")?.clip : null;
+
+    assert.equal(resolvedState, "idle", `${evidence.kind} must select the K01 base-frame adapter`);
+    assert.equal(clip, visual.states.idle?.clips.default, `${evidence.kind} must not fall back to another building clip`);
+    assert.equal(clip?.frames[0]?.fileName, evidence.defaultFrameFileName);
+    assert.equal(visual.defaults.pivot.liftPx, undefined, `${evidence.kind} has no source-backed visual lift`);
+
+    for (const frame of clip?.frames ?? []) {
+      assert.equal(frame.pivot, undefined, `${evidence.kind} has no recovered per-frame pivot`);
+      assert.deepEqual(
+        getGroundContactPlacement(visual, frame, GROUND_CONTACT).position,
+        GROUND_CONTACT,
+        `${evidence.kind} base frame must preserve UnitState.position ground contact`,
+      );
     }
   }
 });
