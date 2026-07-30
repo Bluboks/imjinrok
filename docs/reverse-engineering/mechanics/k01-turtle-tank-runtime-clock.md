@@ -10,7 +10,10 @@ class 14 일본 귀갑차의 raw 16-ring 방향은 원본 scheduler가 승인한
   도달 가능한 call path, 16-ring mutation 및 두 consumer의 읽기 필드에 한정한다.
 - 재현 상태: `재현 완료` — 승인·거부, equality/no-step, grid→intermediate→grid, opposite tie,
   BYTE/DWORD wrap을 독립 vector로 재현한다.
-- 구현 상태: `없음` — runtime/UI와 `Facing`은 수정하지 않았다. 아래 project 계약은 설계 note다.
+- 구현 상태: `source-backed adaptation` — runtime은 raw16과 마지막 grid-facing을 별도 직렬화하고,
+  등록된 profile의 project movement/attack target에 한 tick당 한 번 적용한다. 이는 원본 scheduler의
+  accepted update·time gate·모든 action reachability를 project 24 Hz tick 또는 spawn 기본값에
+  동일시하지 않는 명시적 port policy다.
 
 ## 입력 고정과 검증 도구
 
@@ -123,9 +126,9 @@ cadence step은 다음 순서로 관찰된다.
 accepted update로 반복 보충하지 않는다. 따라서 transient effect의 raw global-tick delta threshold
 2를 초로 환산할 수 없으며 24 Hz를 근거로 그것을 보완해서도 안 된다.
 
-## 최소 lossless project contract (설계 note)
+## 최소 lossless project contract
 
-runtime/UI 구현 전 root review가 필요한 최소 상태는 다음과 같다.
+runtime이 보존하는 최소 상태는 다음과 같다.
 
 ```ts
 type TurtleTankRaw16 = 1 | 5 | 4 | 20 | 16 | 80 | 64 | 65
@@ -138,7 +141,7 @@ interface TurtleTankTurnState {
   cadenceCounter: number;         // unsigned BYTE
   cadenceLimit: number;           // unsigned BYTE
   turnPending: number;            // raw BYTE
-  dirty: boolean;
+  dirty: number;                 // raw BYTE
 }
 ```
 
@@ -147,6 +150,15 @@ attack의 이전-grid 유지라는 두 소비자 계약이 사라진다. move는
 `attackGrid8`을 사용해야 한다. `originalAcceptedUpdate` 생산과 `timeGetTime` gate를 project 24 Hz
 loop에 연결하는 accumulator/resampling은 원작에서 복원된 사실이 아니라 명시적인 port policy로
 분리해야 한다.
+
+현재 runtime은 `SourceOrientationProfile`의 raw ring·grid raw→`Facing` table·BYTE cadence default를
+data-driven registry로 보관한다. K01 class 14 binding의 ring, grid table와 default limit 2는 위 정적
+근거를 그대로 사용한다. project unit의 movement waypoint 또는 current attack target을 raw grid target으로
+변환해 한 product tick에 helper를 한 번 호출하는 것은 **source-backed adaptation**이다. 원본에서
+해당 target, tick, spawn default가 action 5 selector/reaching guard를 통과하거나 global accepted update와
+일대일 대응한다는 주장은 하지 않는다. 따라서 `originalAcceptedUpdate`라는 직렬화 ordinal도 이 adapter
+안에서는 unsigned-DWORD wrap을 보존하는 project-side ordinal이며 원본 global `0x007c5f80` 값은 아니다.
+기존 snapshot의 missing orientation field는 등록된 profile 단위로 lazy initialization한다.
 
 ## 재현 vector
 
@@ -166,7 +178,8 @@ focused test는 다음 관찰값을 고정한다.
 
 - K01 실행별 selector/feedback/message 분포와 실제 accepted-update wall-clock 빈도
 - 모든 class-14 action path가 wrapper에 도달하는 완전한 gameplay 조건
-- raw accepted update/time gate를 24 Hz generic runtime에 연결할 의도적 project policy
+- raw accepted update/time gate를 24 Hz generic runtime에 연결할 exact policy (현 adapter는
+  source-backed adaptation이며 원본 clock mapping이 아님)
 - renderer 호출 순서와 실제 화면 표시 시점
 
 다음 정적 질문은 runtime port가 아니라, class-14의 각 action state가 위 wrapper로 들어가는 정확한

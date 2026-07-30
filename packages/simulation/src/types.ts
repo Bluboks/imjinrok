@@ -15,6 +15,7 @@ import type {
   UnitDefinitionId,
 } from "../../shared/src/index.js";
 import type { EnvironmentState } from "./environment.js";
+import type { SourceOrientationState } from "./orientation.js";
 
 export type ResourceBank = ResourceAmountSet;
 
@@ -117,6 +118,8 @@ export interface UnitState {
   scriptedBehavior?: UnitScriptedBehaviorState;
   carriedResource?: CarriedResourceState;
   rallyPoint?: RallyPointState;
+  /** Optional to preserve old snapshots and all units without a registered source orientation profile. */
+  sourceOrientation?: SourceOrientationState;
   health: AttributePool;
   mana: AttributePool;
 }
