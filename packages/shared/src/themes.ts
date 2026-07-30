@@ -108,6 +108,30 @@ const TURTLE_TANK_RECOVERED_DIRECTION_SOURCES = {
   e: { frameBaseIndex: 2, mirrorX: true },
   se: { frameBaseIndex: 0, mirrorX: false },
 } as const satisfies Record<Facing, { frameBaseIndex: number; mirrorX: boolean }>;
+
+const TURTLE_TANK_INTERMEDIATE_TURN_SOURCES = {
+  1000: { frameStart: 24, mirrorX: false },
+  1001: { frameStart: 40, mirrorX: false },
+  1002: { frameStart: 56, mirrorX: false },
+  1003: { frameStart: 56, mirrorX: true },
+  1004: { frameStart: 40, mirrorX: true },
+  1005: { frameStart: 24, mirrorX: true },
+  1006: { frameStart: 8, mirrorX: true },
+  1007: { frameStart: 8, mirrorX: false },
+} as const;
+
+const turtleTankIntermediateTurnClips = (): Record<number, AnimationClip> =>
+  Object.fromEntries(
+    Object.entries(TURTLE_TANK_INTERMEDIATE_TURN_SOURCES).map(([rawDirection, source]) => [
+      Number(rawDirection),
+      {
+        frames: entityFrameRange("japanese_turtle_tank", "ghosttankj", source.frameStart, 8),
+        fps: PROVISIONAL_RECOVERED_ANIMATION_ACTIVE_FPS,
+        loop: true,
+        ...(source.mirrorX ? { mirrorX: true } : {}),
+      },
+    ]),
+  );
 const SOURCE_FRAMES_PER_FACING = 8;
 const ROYAL_CART_FRAMES_PER_FACING = 10;
 const PROVISIONAL_RECOVERED_ANIMATION_IDLE_FPS = 4;
@@ -1074,6 +1098,9 @@ export const japaneseTurtleTankEntityVisual = {
         loop: true,
         directionSources: TURTLE_TANK_RECOVERED_DIRECTION_SOURCES,
       }),
+      sourceOrientationClips: {
+        "k01-japanese-turtle-tank-raw16": turtleTankIntermediateTurnClips(),
+      },
     },
     walk: {
       facings: ENTITY_FACING_ORDER,
@@ -1087,6 +1114,9 @@ export const japaneseTurtleTankEntityVisual = {
         loop: true,
         directionSources: TURTLE_TANK_RECOVERED_DIRECTION_SOURCES,
       }),
+      sourceOrientationClips: {
+        "k01-japanese-turtle-tank-raw16": turtleTankIntermediateTurnClips(),
+      },
     },
     attack: {
       facings: ENTITY_FACING_ORDER,
@@ -1670,6 +1700,11 @@ export function getVisualFrameRefs(visual: VisualDefinition): readonly FrameRef[
       return [
         ...(visual.portrait ? [visual.portrait] : []),
         ...Object.values(visual.states).flatMap((state) => Object.values(state.clips).flatMap((clip) => clip?.frames ?? [])),
+        ...Object.values(visual.states).flatMap((state) =>
+          Object.values(state.sourceOrientationClips ?? {}).flatMap((clips) =>
+            Object.values(clips).flatMap((clip) => clip.frames),
+          ),
+        ),
         ...(visual.layers ?? []).flatMap((layer) =>
           Object.values(layer.states).flatMap((state) => Object.values(state.clips).flatMap((clip) => clip?.frames ?? [])),
         ),
