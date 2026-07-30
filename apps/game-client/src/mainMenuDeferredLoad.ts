@@ -59,6 +59,18 @@ export const MAIN_MENU_RESOURCE_PLAN = {
   },
 } as const;
 
+/**
+ * Product performance policy for the first paint after a cold launch. Boot
+ * owns no resources; the main-menu landing image is the only critical asset.
+ */
+export const INITIAL_LANDING_RESOURCE_POLICY = {
+  boot: {
+    images: [] as readonly MainMenuImageAssetDefinition[],
+    audioCueKeys: [] as readonly string[],
+  },
+  mainMenu: MAIN_MENU_RESOURCE_PLAN,
+} as const;
+
 export const MAIN_MENU_ASSETS = {
   landing: LANDING_IMAGE,
   menuBorder: MAIN_MENU_RESOURCE_PLAN.deferred.images[0],
