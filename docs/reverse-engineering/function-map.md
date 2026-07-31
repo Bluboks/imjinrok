@@ -81,6 +81,7 @@
 | `0x00439770` | `FUN_00439770`, `0x00439770-0x00439d62` | 63 / 425 | raw gate 뒤 occupancy/list 자동 대상 후보 scan | Y-major/X-minor 순서·제외·첫 command 성공 정적 확정 |
 | `0x00439d70` | `FUN_00439d70`, `0x00439d70-0x00439f40` | 24 / 153 | 후보 재검사와 command 5 queue | 현재 action 1/5 조건과 raw 선호 검사 정적 확정 |
 | `0x0043e1e0` | `FUN_0043e1e0`, `0x0043e1e0-0x0043e3e2` | 37 / 179 | raw command WORD switch | input 302가 health-application mode WORD를 toggle하는 범위 정적 확정 |
+| `0x0043f4f0`, `0x0043f6e0`, `0x0045f190` | `FUN_0043f4f0`, `FUN_0043f6e0`, `FUN_0045f190` | 37; 38; 42 | global settings cold-start config load/default branch | `config.hq` open failure→`+0x14` DWORD 2; successful 0x1d4-byte transfer may retain `+0x14`, but later option mutation and session reachability remain separate |
 | `0x0043f560` | `FUN_0043f560`, `0x0043f560-0x0043f573` | 1 / 5 | raw simulation interval selector 기록 | 호출 규약과 interval 재계산 순서 정적 확정 |
 | `0x0043f580` | `FUN_0043f580`, `0x0043f580-0x0043f5c6` | 8 / 20 | mode·selector별 millisecond base interval 선택 | 64/60/50/40/30 DWORD 산술 정적 확정 |
 | `0x00443090` | `FUN_00443090`, `0x00443090-0x004430a6` | 3 / 8 | timestamp/feedback record 표 reset | raw zero-write 범위 정적 확정 |
