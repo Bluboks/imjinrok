@@ -2,12 +2,12 @@
 
 ## 질문과 상태
 
-질문: **해시를 고정한 K01 map cell에서 `FUN_00464cc0`은 어떤 isometric base 좌표와 relative component를 만들고, `FUN_00469330`·`FUN_00469510`은 어떤 byte와 `FUN_0046d650` 반환으로 두 번째 raw placement argument를 보정하며 object/frame byte를 loader payload 경계까지 전달하는가?**
+질문: **해시를 고정한 K01 map cell에서 `FUN_00464cc0`·`FUN_00464ea0`은 runtime WORD adjustment table과 `FUN_0046d650` 반환으로 output Y를 어떻게 보정하고, `FUN_00469330`·`FUN_00469510`은 어떤 byte로 두 번째 raw placement argument와 object/frame payload를 만드는가?**
 
 | 구분 | 상태 | 범위 |
 | --- | --- | --- |
-| 분석 | `정적 확정` | `FUN_00464cc0` signed-word x/y guard와 `(x-y)<<5`/`(x+y)<<4`, raw relative branch, 두 caller의 low-nibble branch, direct helper의 전체 return 분기, K01 `60×60` cell의 selector/lookup·object/frame fields |
-| 재현 | `재현 완료` | 3,600-cell x-major stream/digest·분포, base projection, low-nibble two/other, 네 map corner, helper의 synthetic positive/negative branch와 malformed/tampered input 거부 |
+| 분석 | `정적 확정` | `FUN_00462b80` 8-byte-stride WORD initializer, `FUN_00464cc0`/`FUN_00464ea0` table reader의 두 branch, signed-word x/y guard와 `(x-y)<<5`/`(x+y)<<4`, 두 caller의 low-nibble branch, direct helper의 전체 return 분기, K01 `60×60` cell의 selector/lookup·object/frame fields |
+| 재현 | `재현 완료` | 3,600-cell x-major stream/digest·분포, 15-entry table-init byte replay와 reader vectors, base projection, low-nibble two/other, 네 map corner, helper의 synthetic positive/negative branch와 malformed/tampered input 거부 |
 | 구현 | `source-backed-adaptation` | hash-bound K01의 raw second-argument `0/16` delta stream을 `TileCell.elevation`의 base/one-raised discrete product level로 적응한다. bounded source raster는 `(32,0)` top-edge anchor와 `16→sourcePixelOffset.y=-16`을 소비하고 selected frame을 global y→x order로 replay한다. `grss1_0000` coverage pass는 measured alpha gap을 메우는 명시적 제품 적응이며 원본 layer 주장이 아니다. broader pivot/clip/palette와 원본 height 의미는 미확정이다. |
 
 이것은 기존 [K01 source tile object·frame selector](k01-source-tile-selector.md)의 **다음 placement 경계**다.
@@ -29,6 +29,8 @@
 | 함수 | raw byte range (끝 제외) | 역할을 확정한 범위 |
 | --- | --- | --- |
 | `FUN_00464cc0` | `0x00464cc0-0x00464dde` | signed x/y admission, `(x-y)<<5`/`(x+y)<<4` base output, `+0x4a0c4` byte-indexed runtime WORD-table addition과 low-nibble/helper relative branch |
+| `FUN_00462b80` | `0x00462b80-0x00462bab` | `DAT_00c06e86`에서 시작하는 8-byte-stride runtime WORD adjustment table의 15-entry init loop와 adjacent zero-WORD write |
+| `FUN_00464ea0` | `0x00464ea0-0x00465002` | 같은 family-indexed table WORD와 low-nibble/helper branch를 output WORD에 더하는 second reader |
 | `FUN_00466f20` | `0x00466f20-0x004676e0` | full-map surface dimensions, y-outer/x-inner raster order, screen point formation과 `FUN_00469510` dispatch |
 | `FUN_00469330` | `0x00469330-0x0046950c` | `argument1 - 0x1f`, low-nibble branch, argument 2 vertical adjustment, object/frame loader path |
 | `FUN_00469510` | `0x00469510-0x00469917` | `argument1 - 0x20`, 같은 low-nibble/helper adjustment, object/frame loader path와 local mode/clip gate |
@@ -52,9 +54,50 @@ else:
   outputY += tableWord - (abs(helperReturn) << 4)
 ```
 
-`map+0x4a0c4`는 별도 `FUN_0046a530` 범위에서 fog-family byte로 정적 확정됐지만, 여기서 참조하는
-`DAT_00c06e86` WORD table의 값·writer·lifetime·사람용 의미는 미확정이다. 따라서 이 식만으로 original terrain
+`map+0x4a0c4`는 별도 `FUN_0046a530` 범위에서 fog-family byte로 정적 확정됐다. 이 문서는 table을 사람용
+height/elevation이 아닌 중립어 **runtime WORD adjustment table**로 부른다. 따라서 이 식만으로 original terrain
 height 또는 web pixel pivot을 주장하지 않는다.
+
+## runtime WORD adjustment table의 initializer·reader 계약
+
+`FUN_00462b80`의 hash-bound byte range SHA-256은
+`16eccbef8061d2dee5635288d64af3c85535cfb5d96c67347ae1d59ad4b0dc1c`다. `EAX=0x00c06e86`,
+`ECX=EDX=0`에서 시작해 각 loop가 `WORD [EAX-2]=0`, `EAX+=8`, `EDX+=9` 뒤 `WORD [EAX-8]=DX`를 수행한다.
+`CMP EAX,0x00c06efe`는 table write **전에** 실행되지만, 그 write 뒤의 `JL`만 다음 iteration을 결정한다.
+따라서 exact byte replay 결과 indexed family `0..14`의 15 entries가 쓰인다.
+
+byte anchor `0x00462b80`은 base/zero/first-family decision을, `0x00462b92`는 adjacent write·`+8`·`+9`·terminal compare·indexed write를 고정한다. reader body hash는 `FUN_00464cc0`이 `40b41b7ce95c3e7516c0bf2f6d01f1e86bf2848ed0ec5256f63d7858f55a1d10`, `FUN_00464ea0`이 `c80b1952885965178d3093b88d8963de89f43c2c49a6ba414d46847d9e1fba0d`다. `0x00464d6a`/`0x00464da7`와 `0x00464f99`/`0x00464fcb` byte anchor는 각각 두 reader의 low-nibble-two/other formula를 고정한다.
+
+| family | indexed WORD offset from `DAT_00c06e86` | written value |
+| --- | --- | --- |
+| `0` | `0` | `0` |
+| `1..14` | `family * 8` (`8..112`) | `9` |
+
+인접 zero-WORD write도 15회이며 offset `-2..110` (8-byte stride), 값은 모두 `0`이다. 이는 indexed table entry와
+혼동하지 않는다. 해당 15-entry initializer replayer는 이 exact count·offset·value를 fixture와 test vector로 고정한다.
+
+`references.json`에서 `DAT_00c06e86`의 hash-bound **direct** reference는 정확히 여섯 개다.
+
+| function | VA | type |
+| --- | --- | --- |
+| `FUN_00462b80` | `0x00462b80` | `DATA` |
+| `FUN_00462b80` | `0x00462ba4` | `WRITE` |
+| `FUN_00464cc0` | `0x00464d7d`, `0x00464dbc` | `DATA` |
+| `FUN_00464ea0` | `0x00464fae`, `0x00464fe6` | `DATA` |
+
+두 reader는 family byte를 `family*8` stride로 signed WORD로 읽고 같은 output-Y contract를 적용한다.
+
+```text
+tableWord = int16(DAT_00c06e86 + family * 8)
+if lowNibble == 2:
+  outputY += tableWord + 16 - (int16(helperReturn) << 4)
+else:
+  outputY += tableWord - (abs(int16(helperReturn)) << 4)
+```
+
+K01의 family byte는 `0:2865, 1:95, 2:95, 3:101, 4:79, 5:38, 6:36, 7:54, 8:61, 9:52, 10:33, 11:35, 12:55, 14:1`이며,
+initializer의 `0..14` domain 안에 있다. 이 direct-reference inventory는 alias/computed writer가 없다는 주장도,
+table의 lifetime·ordering 또는 사람용 의미를 확정하는 주장도 아니다.
 
 ## field layout과 정확한 수식
 
@@ -174,7 +217,8 @@ node --test tools/imjinrok/k01-terrain-composition-coverage.test.mjs
 ```
 
 pure reference reproducer는 signed 16-bit x/y와 signed 32-bit raw argument를 받으며, `FUN_00464cc0` projection은
-미확정 runtime table을 explicit signed WORD input으로 받는다. out-of-bounds direct-helper query에는 `-1`을 반환하지만,
+table WORD를 explicit signed WORD input으로 받는다. 별도 initializer replayer와 shared reader vector는 exact 15-entry
+domain과 low-nibble two/other formula를 재현하고 malformed table/domain을 fail closed 한다. out-of-bounds direct-helper query에는 `-1`을 반환하지만,
 `FUN_00469510`의 뒤쪽 object/frame memory access를 map bounds 밖에서 재현하려 하기 전 fail closed 한다. test는
 fog-family offset까지 닿지 못하는 malformed buffer, fraction/out-of-range argument와 EXE/map/functions JSON/references JSON의
 한 byte 변조를 report 발행 전에 거부한다.
@@ -182,7 +226,7 @@ fog-family offset까지 닿지 못하는 malformed buffer, fraction/out-of-range
 ## 미확정 경계
 
 - `FUN_0046d650` result의 사람용 height/elevation/terrain 의미와 writer/lifecycle은 미확정이다.
-- `DAT_00c06e86` table의 실제 values, writer/lifetime와 human semantics은 미확정이다.
+- `DAT_00c06e86`의 `FUN_00462b80` direct init values는 복원했지만, alias/computed writer, complete lifetime/order와 human semantics은 미확정이다.
 - raw argument 1/2의 screen/world axis, exact pixel anchor/pivot, clipping/mode callee semantics은 미확정이다.
 - 다른 map/theme의 table contents와 original renderer 전체, product renderer parity는 이 범위 밖이다.
 - `field_0x00032514`의 direct writer set과 alias/computed writer boundary는

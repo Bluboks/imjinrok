@@ -1,5 +1,5 @@
 {
-  "question": "For hash-bound K01 cells, how do FUN_00464cc0, FUN_00469330/FUN_00469510 and FUN_0046d650 derive bounded isometric base coordinates, relative placement components, and source object/frame bytes?",
+  "question": "For hash-bound K01 cells, how do FUN_00462b80, FUN_00464cc0/FUN_00464ea0, FUN_00469330/FUN_00469510, and FUN_0046d650 derive bounded runtime WORD adjustments, isometric components, and source object/frame bytes?",
   "analysisStatus": "static-confirmed-for-bounded-K01-cell-projection-relative-component-and-source-object-frame-boundary",
   "reproductionStatus": "reproduction-complete-for-all-K01-cell-vectors-and-fail-closed-reference-inputs",
   "implementationStatus": "source-backed-product-elevation-adaptation-is-separate-from-original-renderer-parity",
@@ -21,6 +21,14 @@
         "sha256": "7e071fdfe425d22447780c265fe1d3fd271a1bedd1773682bebcb8ddc6d2e16e",
         "sourceSha256": "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e",
         "functionProvenance": [
+          {
+            "entry": "0x00462b80",
+            "bodyRange": "0x00462b80-0x00462baa",
+            "instructionCount": 14,
+            "instructionSha256": "9253551c353dca1e9d1c02a0c3e876ead38d1e7546150087e9062f832e914b1f",
+            "rawBodySha256": "16eccbef8061d2dee5635288d64af3c85535cfb5d96c67347ae1d59ad4b0dc1c",
+            "callees": []
+          },
           {
             "entry": "0x00466f20",
             "bodyRange": "0x00466f20-0x004676df",
@@ -52,6 +60,16 @@
             "instructionCount": 103,
             "instructionSha256": "0df728460a1833f756c0164f3968eda5de7312a64e87c52edc98aa5a33566781",
             "rawBodySha256": "40b41b7ce95c3e7516c0bf2f6d01f1e86bf2848ed0ec5256f63d7858f55a1d10",
+            "callees": [
+              "0x0046d650"
+            ]
+          },
+          {
+            "entry": "0x00464ea0",
+            "bodyRange": "0x00464ea0-0x00465001",
+            "instructionCount": 119,
+            "instructionSha256": "994b5e5c35e8ed66626f303d725cdf69847adbedd526e645ce2c0c086ea3b946",
+            "rawBodySha256": "c80b1952885965178d3093b88d8963de89f43c2c49a6ba414d46847d9e1fba0d",
             "callees": [
               "0x0046d650"
             ]
@@ -148,6 +166,74 @@
             "fromFunctionEntry": "0x00466f20",
             "to": "0x00469510",
             "type": "UNCONDITIONAL_CALL"
+          }
+        ],
+        "runtimeWordTableDirectReferenceInventory": [
+          {
+            "from": "0x00462b80",
+            "fromFunctionEntry": "0x00462b80",
+            "type": "DATA",
+            "source": "ANALYSIS",
+            "operandIndex": 1,
+            "primary": true,
+            "fromBlock": ".text",
+            "toBlock": ".data",
+            "toSymbol": "DAT_00c06e86"
+          },
+          {
+            "from": "0x00462ba4",
+            "fromFunctionEntry": "0x00462b80",
+            "type": "WRITE",
+            "source": "ANALYSIS",
+            "operandIndex": 0,
+            "primary": true,
+            "fromBlock": ".text",
+            "toBlock": ".data",
+            "toSymbol": "DAT_00c06e86"
+          },
+          {
+            "from": "0x00464d7d",
+            "fromFunctionEntry": "0x00464cc0",
+            "type": "DATA",
+            "source": "ANALYSIS",
+            "operandIndex": 1,
+            "primary": true,
+            "fromBlock": ".text",
+            "toBlock": ".data",
+            "toSymbol": "DAT_00c06e86"
+          },
+          {
+            "from": "0x00464dbc",
+            "fromFunctionEntry": "0x00464cc0",
+            "type": "DATA",
+            "source": "ANALYSIS",
+            "operandIndex": 1,
+            "primary": true,
+            "fromBlock": ".text",
+            "toBlock": ".data",
+            "toSymbol": "DAT_00c06e86"
+          },
+          {
+            "from": "0x00464fae",
+            "fromFunctionEntry": "0x00464ea0",
+            "type": "DATA",
+            "source": "ANALYSIS",
+            "operandIndex": 1,
+            "primary": true,
+            "fromBlock": ".text",
+            "toBlock": ".data",
+            "toSymbol": "DAT_00c06e86"
+          },
+          {
+            "from": "0x00464fe6",
+            "fromFunctionEntry": "0x00464ea0",
+            "type": "DATA",
+            "source": "ANALYSIS",
+            "operandIndex": 1,
+            "primary": true,
+            "fromBlock": ".text",
+            "toBlock": ".data",
+            "toSymbol": "DAT_00c06e86"
           }
         ]
       }
@@ -258,6 +344,131 @@
       }
     ]
   },
+  "runtimeWordAdjustmentTable": {
+    "neutralName": "runtime WORD adjustment table",
+    "address": "0x00c06e86",
+    "wordStrideBytes": 8,
+    "initialization": {
+      "function": "FUN_00462b80",
+      "loop": "EAX starts at DAT_00c06e86; each iteration writes zero at EAX-2, advances EAX by 8, writes DX at EAX-8, and continues while post-increment EAX < 0x00c06efe.",
+      "indexedFamilyDomain": {
+        "first": 0,
+        "last": 14,
+        "count": 15
+      },
+      "indexedWordWrites": [
+        {
+          "family": 0,
+          "wordOffset": 0,
+          "value": 0
+        },
+        {
+          "family": 1,
+          "wordOffset": 8,
+          "value": 9
+        },
+        {
+          "family": 2,
+          "wordOffset": 16,
+          "value": 9
+        },
+        {
+          "family": 3,
+          "wordOffset": 24,
+          "value": 9
+        },
+        {
+          "family": 4,
+          "wordOffset": 32,
+          "value": 9
+        },
+        {
+          "family": 5,
+          "wordOffset": 40,
+          "value": 9
+        },
+        {
+          "family": 6,
+          "wordOffset": 48,
+          "value": 9
+        },
+        {
+          "family": 7,
+          "wordOffset": 56,
+          "value": 9
+        },
+        {
+          "family": 8,
+          "wordOffset": 64,
+          "value": 9
+        },
+        {
+          "family": 9,
+          "wordOffset": 72,
+          "value": 9
+        },
+        {
+          "family": 10,
+          "wordOffset": 80,
+          "value": 9
+        },
+        {
+          "family": 11,
+          "wordOffset": 88,
+          "value": 9
+        },
+        {
+          "family": 12,
+          "wordOffset": 96,
+          "value": 9
+        },
+        {
+          "family": 13,
+          "wordOffset": 104,
+          "value": 9
+        },
+        {
+          "family": 14,
+          "wordOffset": 112,
+          "value": 9
+        }
+      ],
+      "adjacentZeroWordWrites": {
+        "count": 15,
+        "firstWordOffset": -2,
+        "lastWordOffset": 110,
+        "strideBytes": 8,
+        "value": 0
+      }
+    },
+    "readerContract": {
+      "directReaders": [
+        "FUN_00464cc0",
+        "FUN_00464ea0"
+      ],
+      "familyIndex": "uint8(map + 0x4a0c4 + x * 180 + y)",
+      "tableRead": "int16(DAT_00c06e86 + family * 8)",
+      "lowNibbleEquals2": "outputY += tableWord + 16 - (int16(helperReturn) << 4)",
+      "otherLowNibble": "outputY += tableWord - (abs(int16(helperReturn)) << 4)",
+      "K01FogFamilyDistribution": {
+        "0": 2865,
+        "1": 95,
+        "2": 95,
+        "3": 101,
+        "4": 79,
+        "5": 38,
+        "6": 36,
+        "7": 54,
+        "8": 61,
+        "9": 52,
+        "10": 33,
+        "11": 35,
+        "12": 55,
+        "14": 1
+      },
+      "boundary": "The initializer writes families 0..14. This direct-reference slice does not establish another writer, runtime ordering, alias/computed writers, or the table's human meaning."
+    }
+  },
   "sourceRaster": {
     "function": "FUN_00466f20",
     "dimensions": "surfaceWidth = map.width * 64; surfaceHeight = map.height * 32 + 200",
@@ -274,11 +485,11 @@
       "x": "(int32(x) - int32(y)) << 5",
       "y": "(int32(x) + int32(y)) << 4"
     },
-    "mapByte": "uint8(map + 0x4a0c4 + x * 180 + y); this address is the fog-family byte in FUN_0046a530, but FUN_00464cc0's runtime WORD table values and human semantics are unresolved.",
+    "mapByte": "uint8(map + 0x4a0c4 + x * 180 + y); this address is the fog-family byte in FUN_0046a530 and indexes the neutral runtime WORD adjustment table.",
     "runtimeWordTable": "int16(DAT_00c06e86 + mapByte * 8)",
     "lowNibbleRelativeComponent": {
-      "lowNibbleEquals2": "16 - (int16(FUN_0046d650(map, x, y)) << 4)",
-      "other": "-(abs(int16(FUN_0046d650(map, x, y))) << 4)",
+      "lowNibbleEquals2": "tableWord + 16 - (int16(FUN_0046d650(map, x, y)) << 4)",
+      "other": "tableWord - (abs(int16(FUN_0046d650(map, x, y))) << 4)",
       "boundary": "The table and raw-coordinate axis are not named as height/elevation. K01 helper lookup and return streams are all zero; the source-backed product adapter separately preserves FUN_00469510's raw 0/16 stream."
     },
     "K01Distribution": {
@@ -389,6 +600,11 @@
   ],
   "rawCodeRanges": [
     {
+      "id": "FUN_00462b80 runtime WORD-table initializer",
+      "byteRange": "0x00462b80-0x00462bab (end exclusive)",
+      "bodySha256": "16eccbef8061d2dee5635288d64af3c85535cfb5d96c67347ae1d59ad4b0dc1c"
+    },
+    {
       "id": "FUN_00466f20 source full-map raster loop",
       "byteRange": "0x00466f20-0x004676e0 (end exclusive)",
       "bodySha256": "bafebb7ea1dd47236aaac78fdb969ea463fbf667224fa49e4fdb88dad27c8dfc"
@@ -397,6 +613,11 @@
       "id": "FUN_00464cc0 complete body",
       "byteRange": "0x00464cc0-0x00464dde (end exclusive)",
       "bodySha256": "40b41b7ce95c3e7516c0bf2f6d01f1e86bf2848ed0ec5256f63d7858f55a1d10"
+    },
+    {
+      "id": "FUN_00464ea0 complete body",
+      "byteRange": "0x00464ea0-0x00465002 (end exclusive)",
+      "bodySha256": "c80b1952885965178d3093b88d8963de89f43c2c49a6ba414d46847d9e1fba0d"
     },
     {
       "id": "FUN_00469330 complete body",
@@ -415,6 +636,18 @@
     }
   ],
   "evidencePoints": [
+    {
+      "va": "0x00462b80",
+      "rawOffset": "0x00062b80",
+      "bytes": "b8 86 6e c0 00 33 c9 33 d2 3d 8e 6e c0 00 0f 9d c2 4a",
+      "meaning": "FUN_00462b80 starts EAX at DAT_00c06e86, clears ECX/EDX, and makes the first-family versus subsequent-family value decision."
+    },
+    {
+      "va": "0x00462b92",
+      "rawOffset": "0x00062b92",
+      "bytes": "66 89 48 fe 83 e2 f7 83 c0 08 83 c2 09 3d fe 6e c0 00 66 89 50 f8 7c dd c3",
+      "meaning": "FUN_00462b80 writes a zero WORD at EAX-2, advances by the exact 8-byte stride, writes DX at EAX-8, and loops while post-increment EAX is below 0x00c06efe."
+    },
     {
       "va": "0x00466f20",
       "rawOffset": "0x00066f20",
@@ -468,6 +701,18 @@
       "rawOffset": "0x00064da7",
       "bytes": "52 50 8b cf e8 a0 88 00 00 8b 4c 24 10 0f bf c0 99 33 c2 2b c2 0f bf 14 cd 86 6e c0 00 c1 e0 04",
       "meaning": "FUN_00464cc0 other branch calls FUN_0046d650 and combines abs(helper)<<4 with the same signed WORD table."
+    },
+    {
+      "va": "0x00464f99",
+      "rawOffset": "0x00064f99",
+      "bytes": "8b 54 24 14 53 52 8b ce e8 aa 86 00 00 8b 4c 24 18 5f c1 e0 04 66 8b 14 cd 86 6e c0 00 5e 66 2b d0 b8 01 00 00 00 83 c2 10 66 01 55 00",
+      "meaning": "FUN_00464ea0 low-nibble-2 branch reads int16(DAT_00c06e86 + family*8), subtracts helper<<4, adds 16, and adds the result to its output WORD."
+    },
+    {
+      "va": "0x00464fcb",
+      "rawOffset": "0x00064fcb",
+      "bytes": "8b 44 24 14 53 50 8b ce e8 78 86 00 00 0f bf c0 8b 4c 24 18 5f 99 33 c2 5e 2b c2 66 8b 14 cd 86 6e c0 00 c1 e0 04 66 2b d0 b8 01 00 00 00 66 01 55 00",
+      "meaning": "FUN_00464ea0 other branch reads the same table WORD, subtracts abs(helper)<<4, and adds the result to its output WORD."
     },
     {
       "va": "0x00469351",
@@ -560,5 +805,5 @@
       "meaning": "FUN_0046d650 returns selector for lookup 15, selector-1 for other nonzero lookup, otherwise 0"
     }
   ],
-  "unresolvedBoundary": "K01's 3,600 helper lookups and returns are all zero, so this evidence does not justify calling the helper terrain elevation or height. The runtime WORD table at 0x00c06e86 has unresolved values/lifetime/semantics. It does not establish screen/world axis semantics, pixel anchor/pivot, human terrain/passability/fog meaning, other map/theme behavior, or product renderer parity."
+  "unresolvedBoundary": "K01's 3,600 helper lookups and returns are all zero, so this evidence does not justify calling the helper terrain elevation or height. FUN_00462b80's direct initialization writes recovered values for K01's observed families 0..14, but direct references alone do not exclude alias/computed writers or establish lifetime/order/semantics. It does not establish screen/world axis semantics, pixel anchor/pivot, human terrain/passability/fog meaning, other map/theme behavior, or product renderer parity."
 }

@@ -30,16 +30,23 @@ const FOG_FAMILY_OFFSET = 0x4a0c4;
 const PLACEMENT_SELECTOR_OFFSET = 0x79824;
 const PLACEMENT_LOOKUP_OFFSET = 0x147d5;
 const PLACEMENT_SELECTOR_STRIDE = 0x1fa4;
+const RUNTIME_WORD_TABLE_ADDRESS = 0x00c06e86;
+const RUNTIME_WORD_TABLE_STRIDE = 8;
+const RUNTIME_WORD_TABLE_INITIALIZATION_END = 0x00c06efe;
 
 const RAW_CODE_RANGES = [
+  ["FUN_00462b80 runtime WORD-table initializer", 0x00462b80, 0x00462bab, "16eccbef8061d2dee5635288d64af3c85535cfb5d96c67347ae1d59ad4b0dc1c"],
   ["FUN_00466f20 source full-map raster loop", 0x00466f20, 0x004676e0, "bafebb7ea1dd47236aaac78fdb969ea463fbf667224fa49e4fdb88dad27c8dfc"],
   ["FUN_00464cc0 complete body", 0x00464cc0, 0x00464dde, "40b41b7ce95c3e7516c0bf2f6d01f1e86bf2848ed0ec5256f63d7858f55a1d10"],
+  ["FUN_00464ea0 complete body", 0x00464ea0, 0x00465002, "c80b1952885965178d3093b88d8963de89f43c2c49a6ba414d46847d9e1fba0d"],
   ["FUN_00469330 complete body", 0x00469330, 0x0046950c, "f1a131328d7fe0c85e26b90d4c7d28371f6f9ae41bd56f03dab68c9ab8510ec7"],
   ["FUN_00469510 complete body", 0x00469510, 0x00469917, "1d05579e1c2179989bd1441cb54510de8df4ecb24157dac496fda7f3c6c8f9ce"],
   ["FUN_0046d650 complete body", 0x0046d650, 0x0046d6d8, "bb8e887ed7cd73e5f881f75c033532c60aa7a9f66c5dd755f9e1a05cc12b7e8a"],
 ].map(([id, start, endExclusive, digest]) => ({ id, start, endExclusive, sha256: digest }));
 
 const EVIDENCE_POINTS = [
+  [0x00462b80, "b8 86 6e c0 00 33 c9 33 d2 3d 8e 6e c0 00 0f 9d c2 4a", "FUN_00462b80 starts EAX at DAT_00c06e86, clears ECX/EDX, and makes the first-family versus subsequent-family value decision."],
+  [0x00462b92, "66 89 48 fe 83 e2 f7 83 c0 08 83 c2 09 3d fe 6e c0 00 66 89 50 f8 7c dd c3", "FUN_00462b80 writes a zero WORD at EAX-2, advances by the exact 8-byte stride, writes DX at EAX-8, and loops while post-increment EAX is below 0x00c06efe."],
   [0x00466f20, "83 ec 30 53 55 56 8b f1 57 8b 9e a4 2d 00 00 8b ae a0 2d 00 00 c1 e3 05 81 c3 c8 00 00 00 c1 e5", "FUN_00466f20 derives width*32+200 source-raster dimensions from map width/height."],
   [0x0046703f, "8b c5 99 2b c2 8b d0 d1 fa 89 54 24 1c 33 c0 eb 04 8b 54 24 1c 0f bf 4c 24 10 8b f8 2b f9 8d 2c 08 c1 e7 05 c1 e5 04 03 fa 81 c5 c8 00 00 00", "FUN_00466f20 inner body forms x/y isometric screen coordinates and the +200 vertical origin before its draw dispatch."],
   [0x00467160, "e8 ab 23 00 00", "FUN_00466f20 calls FUN_00469510 after pushing its bounded screen and cell arguments."],
@@ -49,6 +56,8 @@ const EVIDENCE_POINTS = [
   [0x00464d52, "8a 14 39 80 e2 0f 66 0f be c2 66 3d 02 00", "FUN_00464cc0 reads map +0x32514+x*180+y low nibble and compares exactly 2."],
   [0x00464d6a, "50 51 8b cf e8 dd 88 00 00 0f bf d0 8b 44 24 10 c1 e2 04 0f bf 0c c5 86 6e c0 00", "FUN_00464cc0 low-nibble-2 branch calls FUN_0046d650 and combines helper<<4 with a signed WORD table value."],
   [0x00464da7, "52 50 8b cf e8 a0 88 00 00 8b 4c 24 10 0f bf c0 99 33 c2 2b c2 0f bf 14 cd 86 6e c0 00 c1 e0 04", "FUN_00464cc0 other branch calls FUN_0046d650 and combines abs(helper)<<4 with the same signed WORD table."],
+  [0x00464f99, "8b 54 24 14 53 52 8b ce e8 aa 86 00 00 8b 4c 24 18 5f c1 e0 04 66 8b 14 cd 86 6e c0 00 5e 66 2b d0 b8 01 00 00 00 83 c2 10 66 01 55 00", "FUN_00464ea0 low-nibble-2 branch reads int16(DAT_00c06e86 + family*8), subtracts helper<<4, adds 16, and adds the result to its output WORD."],
+  [0x00464fcb, "8b 44 24 14 53 50 8b ce e8 78 86 00 00 0f bf c0 8b 4c 24 18 5f 99 33 c2 5e 2b c2 66 8b 14 cd 86 6e c0 00 c1 e0 04 66 2b d0 b8 01 00 00 00 66 01 55 00", "FUN_00464ea0 other branch reads the same table WORD, subtracts abs(helper)<<4, and adds the result to its output WORD."],
   [0x00469351, "8b 8e a0 2d 00 00 0f bf c7 3b c1 7d 47 66 85 ed 7c 42 8b 96 a4 2d 00 00 0f bf cd 3b ca 7d 35", "FUN_00469330 signed x/y bounds against map +0x2da0/+0x2da4"],
   [0x00469370, "8d 84 80 5d 16 00 00 8d 14 c0 8d 04 91 8a 0c 30 80 e1 0f 66 0f be c1 66 3d 02 00", "FUN_00469330 reads low nibble at map +0x32514+x*180+y and compares exactly 2"],
   [0x0046938d, "55 57 8b ce e8 ba 42 00 00 8b 5c 24 28 c1 e0 04 2b d8", "FUN_00469330 true branch calls helper(map,x,y) then subtracts helper<<4 from argument 2"],
@@ -67,8 +76,10 @@ const EVIDENCE_POINTS = [
 ].map(([va, bytes, meaning]) => ({ va, bytes, meaning }));
 
 const FUNCTION_SPECS = [
+  { entry: "0x00462b80", bodyRange: "0x00462b80-0x00462baa", bodySize: 43, instructionCount: 14, instructionSha256: "9253551c353dca1e9d1c02a0c3e876ead38d1e7546150087e9062f832e914b1f", callees: [] },
   { entry: "0x00466f20", bodyRange: "0x00466f20-0x004676df", bodySize: 1984, instructionCount: 574, instructionSha256: "b37afc8a5141d906b4b83b08c76ecdc87bdfe43a8f1b9a9a17c4fe095d434e75", callees: ["0x00413fb0", "0x0041d420", "0x0041fdb0", "0x00438aa0", "0x0044aaf0", "0x0044ae80", "0x0044aef0", "0x00469000", "0x00469180", "0x00469510", "0x00469920", "0x00469a50", "0x00469df0", "0x0046a190", "0x004ad7e0", "0x004adcb6"] },
   { entry: "0x00464cc0", bodyRange: "0x00464cc0-0x00464ddd", bodySize: 286, instructionCount: 103, instructionSha256: "0df728460a1833f756c0164f3968eda5de7312a64e87c52edc98aa5a33566781", callees: ["0x0046d650"] },
+  { entry: "0x00464ea0", bodyRange: "0x00464ea0-0x00465001", bodySize: 354, instructionCount: 119, instructionSha256: "994b5e5c35e8ed66626f303d725cdf69847adbedd526e645ce2c0c086ea3b946", callees: ["0x0046d650"] },
   { entry: "0x00469330", bodyRange: "0x00469330-0x0046950b", bodySize: 476, instructionCount: 150, instructionSha256: "f94f79c8a00da772f524665f0df56ba09b9bea8a861bd67d99fec4c7b30ec099", callees: ["0x0044af50", "0x0044afa0", "0x00454390", "0x0046d650"] },
   { entry: "0x00469510", bodyRange: "0x00469510-0x00469916", bodySize: 1031, instructionCount: 341, instructionSha256: "28849833f557b0f4863c88318828d72b8039639450bd42b5623927dd8ef036e3", callees: ["0x0044af50", "0x0044afa0", "0x00454250", "0x004542e0", "0x004547c0", "0x00454960", "0x0046d650"] },
   { entry: "0x0046d650", bodyRange: "0x0046d650-0x0046d6d7", bodySize: 136, instructionCount: 50, instructionSha256: "c0ee5121eb2700198c121447334f0b7572d28dce08e9e971020293233036d385", callees: [] },
@@ -78,6 +89,15 @@ const REQUIRED_CALL_EDGES = [
   ["0x00464d00", "0x00464cc0"], ["0x00464d6e", "0x00464cc0"], ["0x00464dab", "0x00464cc0"],
   ["0x00469391", "0x00469330", "0x0046d650"], ["0x004693a9", "0x00469330", "0x0046d650"], ["0x00469575", "0x00469510", "0x0046d650"], ["0x0046958b", "0x00469510", "0x0046d650"],
   ["0x00467160", "0x00466f20", "0x00469510"],
+];
+
+const RUNTIME_WORD_TABLE_DIRECT_REFERENCES = [
+  ["0x00462b80", "0x00462b80", "DATA", "ANALYSIS", 1],
+  ["0x00462ba4", "0x00462b80", "WRITE", "ANALYSIS", 0],
+  ["0x00464d7d", "0x00464cc0", "DATA", "ANALYSIS", 1],
+  ["0x00464dbc", "0x00464cc0", "DATA", "ANALYSIS", 1],
+  ["0x00464fae", "0x00464ea0", "DATA", "ANALYSIS", 1],
+  ["0x00464fe6", "0x00464ea0", "DATA", "ANALYSIS", 1],
 ];
 
 export function extractK01TilePlacementElevationEvidence({
@@ -106,9 +126,11 @@ export function extractK01TilePlacementElevationEvidence({
   const helperReturnCounts = countBy(cells, "placementLevel");
   const branchCounts = countBy(cells, "placementBranch");
   const shiftCounts = countBy(cells, "verticalShift");
+  const fogFamilyCounts = countBy(cells.map((cell) => ({ fogFamily: map[FOG_FAMILY_OFFSET + cell.storageOffset] })), "fogFamily");
+  const runtimeWordTableInitialization = replayFUN00462b80RuntimeWordTableInitialization();
 
   return {
-    question: "For hash-bound K01 cells, how do FUN_00464cc0, FUN_00469330/FUN_00469510 and FUN_0046d650 derive bounded isometric base coordinates, relative placement components, and source object/frame bytes?",
+    question: "For hash-bound K01 cells, how do FUN_00462b80, FUN_00464cc0/FUN_00464ea0, FUN_00469330/FUN_00469510, and FUN_0046d650 derive bounded runtime WORD adjustments, isometric components, and source object/frame bytes?",
     analysisStatus: "static-confirmed-for-bounded-K01-cell-projection-relative-component-and-source-object-frame-boundary",
     reproductionStatus: "reproduction-complete-for-all-K01-cell-vectors-and-fail-closed-reference-inputs",
     implementationStatus: "source-backed-product-elevation-adaptation-is-separate-from-original-renderer-parity",
@@ -161,6 +183,21 @@ export function extractK01TilePlacementElevationEvidence({
         { selector: 4, lookup: null, result: -1, boundary: "out-of-bounds helper return" },
       ],
     },
+    runtimeWordAdjustmentTable: {
+      neutralName: "runtime WORD adjustment table",
+      address: toHex(RUNTIME_WORD_TABLE_ADDRESS),
+      wordStrideBytes: RUNTIME_WORD_TABLE_STRIDE,
+      initialization: runtimeWordTableInitialization,
+      readerContract: {
+        directReaders: ["FUN_00464cc0", "FUN_00464ea0"],
+        familyIndex: "uint8(map + 0x4a0c4 + x * 180 + y)",
+        tableRead: "int16(DAT_00c06e86 + family * 8)",
+        lowNibbleEquals2: "outputY += tableWord + 16 - (int16(helperReturn) << 4)",
+        otherLowNibble: "outputY += tableWord - (abs(int16(helperReturn)) << 4)",
+        K01FogFamilyDistribution: fogFamilyCounts,
+        boundary: "The initializer writes families 0..14. This direct-reference slice does not establish another writer, runtime ordering, alias/computed writers, or the table's human meaning.",
+      },
+    },
     sourceRaster: {
       function: "FUN_00466f20",
       dimensions: "surfaceWidth = map.width * 64; surfaceHeight = map.height * 32 + 200",
@@ -174,11 +211,11 @@ export function extractK01TilePlacementElevationEvidence({
       function: "FUN_00464cc0",
       admission: "signed x/y in bounds => 1 after writing output coordinates; negative or x >= map.width or y >= map.height => 0 without output writes.",
       baseOutput: { x: "(int32(x) - int32(y)) << 5", y: "(int32(x) + int32(y)) << 4" },
-      mapByte: "uint8(map + 0x4a0c4 + x * 180 + y); this address is the fog-family byte in FUN_0046a530, but FUN_00464cc0's runtime WORD table values and human semantics are unresolved.",
+      mapByte: "uint8(map + 0x4a0c4 + x * 180 + y); this address is the fog-family byte in FUN_0046a530 and indexes the neutral runtime WORD adjustment table.",
       runtimeWordTable: "int16(DAT_00c06e86 + mapByte * 8)",
       lowNibbleRelativeComponent: {
-        lowNibbleEquals2: "16 - (int16(FUN_0046d650(map, x, y)) << 4)",
-        other: "-(abs(int16(FUN_0046d650(map, x, y))) << 4)",
+        lowNibbleEquals2: "tableWord + 16 - (int16(FUN_0046d650(map, x, y)) << 4)",
+        other: "tableWord - (abs(int16(FUN_0046d650(map, x, y))) << 4)",
         boundary: "The table and raw-coordinate axis are not named as height/elevation. K01 helper lookup and return streams are all zero; the source-backed product adapter separately preserves FUN_00469510's raw 0/16 stream.",
       },
       K01Distribution: {
@@ -191,7 +228,7 @@ export function extractK01TilePlacementElevationEvidence({
     representativeCells: [[0, 0], [0, 1], [0, 59], [59, 0], [59, 59]].map(([x, y]) => cells.find((cell) => cell.x === x && cell.y === y)),
     rawCodeRanges: RAW_CODE_RANGES.map((range) => verifyRawCodeRange(executable, image, range)),
     evidencePoints: EVIDENCE_POINTS.map((point) => verifyEvidencePoint(executable, image, point)),
-    unresolvedBoundary: "K01's 3,600 helper lookups and returns are all zero, so this evidence does not justify calling the helper terrain elevation or height. The runtime WORD table at 0x00c06e86 has unresolved values/lifetime/semantics. It does not establish screen/world axis semantics, pixel anchor/pivot, human terrain/passability/fog meaning, other map/theme behavior, or product renderer parity.",
+    unresolvedBoundary: "K01's 3,600 helper lookups and returns are all zero, so this evidence does not justify calling the helper terrain elevation or height. FUN_00462b80's direct initialization writes recovered values for K01's observed families 0..14, but direct references alone do not exclude alias/computed writers or establish lifetime/order/semantics. It does not establish screen/world axis semantics, pixel anchor/pivot, human terrain/passability/fog meaning, other map/theme behavior, or product renderer parity.",
   };
 }
 
@@ -205,6 +242,53 @@ export function reproduceK01PlacementHelper(mapBuffer, x, y) {
   const selector = mapBuffer[PLACEMENT_SELECTOR_OFFSET + storageOffset];
   const lookup = mapBuffer[PLACEMENT_LOOKUP_OFFSET + selector * PLACEMENT_SELECTOR_STRIDE + storageOffset];
   return reproducePlacementLevel(selector, lookup);
+}
+
+/**
+ * Replays only the integer/register arithmetic in the hash-bound
+ * FUN_00462b80 byte range. The EAX-2 writes are retained because they are
+ * observable WORD writes adjacent to the indexed table, not silently folded
+ * into its entries.
+ */
+export function replayFUN00462b80RuntimeWordTableInitialization() {
+  let eax = RUNTIME_WORD_TABLE_ADDRESS;
+  let edx = 0;
+  const adjacentZeroWordOffsets = [];
+  const entries = [];
+  do {
+    edx = (edx & ~0xff) | (eax >= RUNTIME_WORD_TABLE_ADDRESS + RUNTIME_WORD_TABLE_STRIDE ? 1 : 0);
+    edx = (edx - 1) | 0;
+    adjacentZeroWordOffsets.push(eax - RUNTIME_WORD_TABLE_ADDRESS - 2);
+    edx &= ~0x8;
+    eax += RUNTIME_WORD_TABLE_STRIDE;
+    edx = (edx + 9) | 0;
+    entries.push({ family: (eax - RUNTIME_WORD_TABLE_ADDRESS) / RUNTIME_WORD_TABLE_STRIDE - 1, wordOffset: eax - RUNTIME_WORD_TABLE_ADDRESS - RUNTIME_WORD_TABLE_STRIDE, value: edx & 0xffff });
+  } while (eax < RUNTIME_WORD_TABLE_INITIALIZATION_END);
+  return {
+    function: "FUN_00462b80",
+    loop: "EAX starts at DAT_00c06e86; each iteration writes zero at EAX-2, advances EAX by 8, writes DX at EAX-8, and continues while post-increment EAX < 0x00c06efe.",
+    indexedFamilyDomain: { first: entries[0].family, last: entries.at(-1).family, count: entries.length },
+    indexedWordWrites: entries,
+    adjacentZeroWordWrites: { count: adjacentZeroWordOffsets.length, firstWordOffset: adjacentZeroWordOffsets[0], lastWordOffset: adjacentZeroWordOffsets.at(-1), strideBytes: RUNTIME_WORD_TABLE_STRIDE, value: 0 },
+  };
+}
+
+/**
+ * Bounded reference for the shared reader arithmetic. It intentionally accepts
+ * only the table domain initialized by FUN_00462b80; the raw readers have no
+ * equivalent byte-domain proof in this evidence slice.
+ */
+export function reproduceRuntimeWordTableOutputYAdjustment(wordValues, { family, lowNibble, helperReturn } = {}) {
+  assertInitializedRuntimeWordValues(wordValues);
+  assertUint8(family, "family");
+  if (family >= wordValues.length) throw new RangeError(`family ${family} is outside the FUN_00462b80 initialized table domain`);
+  if (!Number.isInteger(lowNibble) || lowNibble < 0 || lowNibble > 0x0f) throw new TypeError("lowNibble must be a nibble");
+  assertSignedWord(helperReturn, "helperReturn");
+  const tableWord = wordValues[family];
+  const relativeComponent = lowNibble === 2
+    ? 16 - (helperReturn << 4)
+    : -(Math.abs(helperReturn) << 4);
+  return { family, lowNibble, helperReturn, tableWord, relativeComponent, outputYAdjustment: tableWord + relativeComponent };
 }
 
 export function reproducePlacementLevel(selector, lookup) {
@@ -348,9 +432,23 @@ function verifyStaticAnalysis({ executable, image, functionsPath, referencesPath
     if (reference.source !== "DEFAULT" || reference.operandIndex !== 0 || reference.primary !== true || reference.fromBlock !== ".text" || reference.toBlock !== ".text") throw new Error(`Static call provenance mismatch at ${from}`);
     return { from, fromFunctionEntry, to, type: "UNCONDITIONAL_CALL" };
   });
+  const directRuntimeWordTableReferences = references.filter((reference) => reference.to === "0x00c06e86");
+  if (directRuntimeWordTableReferences.length !== RUNTIME_WORD_TABLE_DIRECT_REFERENCES.length) {
+    throw new Error(`Expected exactly ${RUNTIME_WORD_TABLE_DIRECT_REFERENCES.length} direct DAT_00c06e86 references, got ${directRuntimeWordTableReferences.length}`);
+  }
+  const runtimeWordTableDirectReferenceInventory = RUNTIME_WORD_TABLE_DIRECT_REFERENCES.map(([from, fromFunctionEntry, type, source, operandIndex]) => {
+    const matches = directRuntimeWordTableReferences.filter((reference) => reference.from === from && reference.fromFunctionEntry === fromFunctionEntry && reference.type === type && reference.source === source && reference.operandIndex === operandIndex && reference.primary === true && reference.fromBlock === ".text" && reference.toBlock === ".data" && reference.toSymbol === "DAT_00c06e86");
+    if (matches.length !== 1) throw new Error(`Static DAT_00c06e86 direct-reference provenance mismatch at ${from}`);
+    return { from, fromFunctionEntry, type, source, operandIndex, primary: true, fromBlock: ".text", toBlock: ".data", toSymbol: "DAT_00c06e86" };
+  });
   return {
     functions: { ...sourceDescriptor(functionsPath, functionsSource.buffer), sourceSha256: functionsSource.parsed.sourceSha256, functionProvenance },
-    references: { ...sourceDescriptor(referencesPath, referencesSource.buffer), sourceSha256: referencesSource.parsed.sourceSha256, requiredCallEdges },
+    references: {
+      ...sourceDescriptor(referencesPath, referencesSource.buffer),
+      sourceSha256: referencesSource.parsed.sourceSha256,
+      requiredCallEdges,
+      runtimeWordTableDirectReferenceInventory,
+    },
   };
 }
 
@@ -389,6 +487,13 @@ function assertSignedWord(value, label) {
 
 function assertSignedInt32(value, label) {
   if (!Number.isInteger(value) || value < -0x80000000 || value > 0x7fffffff) throw new TypeError(`${label} must be a signed 32-bit integer`);
+}
+
+function assertInitializedRuntimeWordValues(wordValues) {
+  if (!Array.isArray(wordValues)) throw new TypeError("wordValues must be an array");
+  const expectedCount = replayFUN00462b80RuntimeWordTableInitialization().indexedFamilyDomain.count;
+  if (wordValues.length !== expectedCount) throw new RangeError(`wordValues must contain exactly ${expectedCount} initialized runtime table entries`);
+  wordValues.forEach((word, index) => assertSignedWord(word, `wordValues[${index}]`));
 }
 
 function assertUint8(value, label) {
