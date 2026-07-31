@@ -50,7 +50,7 @@ export interface BankResourceDefinition {
   displayName: string;
   /** Compact deterministic HUD/display label. */
   shortLabel: string;
-  /** Non-negative, unique display ordering key within the registry. */
+  /** Non-negative display ordering key; stable ids break equal-order ties. */
   order: number;
 }
 

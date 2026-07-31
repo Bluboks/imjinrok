@@ -226,6 +226,19 @@ export function createContentRegistry(packs: readonly ContentPackDefinition[] = 
   };
 }
 
+/**
+ * Returns a presentation-safe order without mutating registry ownership.
+ * Equal display orders intentionally compose across independent content packs;
+ * their stable ids provide the deterministic tie-break.
+ */
+export function listBankResourcesInDisplayOrder(
+  bankResources: Readonly<Record<string, BankResourceDefinition>>,
+): readonly BankResourceDefinition[] {
+  return Object.values(bankResources).sort((left, right) =>
+    left.order - right.order || (left.id < right.id ? -1 : left.id > right.id ? 1 : 0),
+  );
+}
+
 function createImjinrokTileset(theme: "normal" | "snow" | "brown"): TilesetDefinition {
   const root = `/assets/themes/default/terrain/imjinrok-${theme}`;
   const imageGeometry = {
@@ -431,8 +444,6 @@ function validateBankResourceDefinitions(
   definitions: Record<string, BankResourceDefinition>,
   issues: ContentValidationIssue[],
 ): void {
-  const resourceIdsByOrder = new Map<number, string>();
-
   for (const [resourceId, definition] of Object.entries(definitions)) {
     if (!definition.displayName.trim()) {
       issues.push(createIssue(`bankResources.${resourceId}.displayName`, "Bank resource display name is required."));
@@ -444,19 +455,7 @@ function validateBankResourceDefinitions(
 
     if (!Number.isSafeInteger(definition.order) || definition.order < 0) {
       issues.push(createIssue(`bankResources.${resourceId}.order`, "Bank resource order must be a non-negative safe integer."));
-      continue;
     }
-
-    const resourceIdAtOrder = resourceIdsByOrder.get(definition.order);
-    if (resourceIdAtOrder) {
-      issues.push(createIssue(
-        `bankResources.${resourceId}.order`,
-        `Bank resource order '${definition.order}' is already used by '${resourceIdAtOrder}'.`,
-      ));
-      continue;
-    }
-
-    resourceIdsByOrder.set(definition.order, resourceId);
   }
 }
 

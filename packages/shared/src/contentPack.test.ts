@@ -5,6 +5,7 @@ import {
   coreContentPack,
   createContentRegistry,
   imjinrokSourceContentPack,
+  listBankResourcesInDisplayOrder,
   validateContentRegistry,
   type ContentPackDefinition,
 } from "./contentPack.js";
@@ -123,14 +124,27 @@ test("bank resource definitions reject id mismatch and invalid display metadata"
   );
 });
 
-test("bank resource definitions require a unique deterministic display order", () => {
-  const registry = createContentRegistry();
-  registry.bankResources["mana-crystal"] = { id: "mana-crystal", displayName: "마나 수정", shortLabel: "마나", order: 3 };
+test("bank resource display order uses stable ids to break same-order custom resource ties", () => {
+  const sameOrderPack = {
+    id: "same-order-bank-resources",
+    displayName: "Same Order Bank Resources",
+    version: "0.1.0",
+    bankResources: {
+      "mana-crystal": { id: "mana-crystal", displayName: "마나 수정", shortLabel: "마나", order: 4 },
+      "arcane-dust": { id: "arcane-dust", displayName: "비전 가루", shortLabel: "비전", order: 4 },
+    },
+  } satisfies ContentPackDefinition;
+  const registry = createContentRegistry([coreContentPack, sameOrderPack]);
 
-  assert.deepEqual(
-    validateContentRegistry(registry).issues.filter((issue) => issue.path.startsWith("bankResources.mana-crystal")).map((issue) => issue.path),
-    ["bankResources.mana-crystal.order"],
-  );
+  assert.equal(validateContentRegistry(registry).ok, true);
+  assert.deepEqual(listBankResourcesInDisplayOrder(registry.bankResources).map((resource) => resource.id), [
+    "food",
+    "wood",
+    "gold",
+    "stone",
+    "arcane-dust",
+    "mana-crystal",
+  ]);
 });
 
 test("source catalog pack does not claim gameplay definition ownership", () => {
