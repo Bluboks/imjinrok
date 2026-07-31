@@ -1,11 +1,12 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "evidenceStatus": "static-proven-type-identities",
-  "analysisScope": "Internal class, original CP949 name, sprite slot, base frame, raw flags, and source path only. Animation and gameplay meanings are not inferred.",
+  "analysisScope": "Internal class, original CP949 name, sprite slot, base frame, raw flags, source path, and three signed-WORD economy fields written by the canonical type writer only. Grain/wood names are cross-bound by the separately hash-bound production/refund control-flow and shortage-message evidence; animation and other gameplay meanings are not inferred.",
   "source": {
     "executablePath": "original/imjinrok2/imjinrok2.exe",
     "executableSha256": "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e",
     "seedsPath": "analysis/generated/imjinrok2/seeds.json",
+    "seedsSha256": "8e7c8821e9c84c5d0877bb977b119b3b878271502b36bf75e7426b570507bfb7",
     "seedsSourceSha256": "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e",
     "ghidraSchemaVersion": 2
   },
@@ -20,8 +21,27 @@
     "fields": {
       "spriteSlot": "+0x04",
       "baseFrame": "+0x06",
+      "warExpense": {
+        "offset": "+0x0e",
+        "width": "signed WORD",
+        "writerArgumentIndex": 5
+      },
+      "grainCost": {
+        "offset": "+0x10",
+        "width": "signed WORD",
+        "writerArgumentIndex": 6
+      },
+      "woodCost": {
+        "offset": "+0x12",
+        "width": "signed WORD",
+        "writerArgumentIndex": 7
+      },
       "flags": "+0x4c",
       "namePointer": "+0x6c"
+    },
+    "economySemanticProvenance": {
+      "grainCost": "type +0x10 is passed as FUN_0047e330 caller argument 1, compared with player +0x08, deducted by FUN_0047e260, and bound to the CP949 곡물이 부족합니다. source message",
+      "woodCost": "type +0x12 is passed as FUN_0047e330 caller argument 2, compared with player +0x0c, deducted by FUN_0047e2b0, and bound to the CP949 목재가 부족합니다. source message"
     }
   },
   "analyzedFunctions": [
@@ -80,6 +100,76 @@
       "rawOffset": "0x0005bd13",
       "expectedBytes": "66 89 51 06",
       "actualBytes": "66 89 51 06",
+      "matched": true
+    },
+    {
+      "id": "type-definition-war-expense-argument-load-and-write",
+      "va": "0x0045bd29",
+      "bytes": "66 8b 54 24 18 66 89 41 0c 66 8b 44 24 1c 66 89 51 0e",
+      "meaning": "argument 5 low WORD is loaded from stack +0x18 and written to signed type record war-expense field +0x0e",
+      "rawOffset": "0x0005bd29",
+      "expectedBytes": "66 8b 54 24 18 66 89 41 0c 66 8b 44 24 1c 66 89 51 0e",
+      "actualBytes": "66 8b 54 24 18 66 89 41 0c 66 8b 44 24 1c 66 89 51 0e",
+      "matched": true
+    },
+    {
+      "id": "type-definition-grain-cost-argument-load-and-write",
+      "va": "0x0045bd32",
+      "bytes": "66 8b 44 24 1c 66 89 51 0e 66 8b 54 24 20 66 89 41 10",
+      "meaning": "argument 6 low WORD is loaded from stack +0x1c and written to signed type record grain-cost field +0x10",
+      "rawOffset": "0x0005bd32",
+      "expectedBytes": "66 8b 44 24 1c 66 89 51 0e 66 8b 54 24 20 66 89 41 10",
+      "actualBytes": "66 8b 44 24 1c 66 89 51 0e 66 8b 54 24 20 66 89 41 10",
+      "matched": true
+    },
+    {
+      "id": "type-definition-wood-cost-argument-load-and-write",
+      "va": "0x0045bd3b",
+      "bytes": "66 8b 54 24 20 66 89 41 10 66 8b 44 24 24 66 89 51 12",
+      "meaning": "argument 7 low WORD is loaded from stack +0x20 and written to signed type record wood-cost field +0x12",
+      "rawOffset": "0x0005bd3b",
+      "expectedBytes": "66 8b 54 24 20 66 89 41 10 66 8b 44 24 24 66 89 51 12",
+      "actualBytes": "66 8b 54 24 20 66 89 41 10 66 8b 44 24 24 66 89 51 12",
+      "matched": true
+    },
+    {
+      "id": "reservation-resource-argument-to-player-field-order",
+      "va": "0x0047e339",
+      "bytes": "39 5e 0c 72 53 8b 44 24 10 8b 4e 08 3b c8 72 48",
+      "meaning": "FUN_0047e330 compares caller argument 2 with player +0x0c before caller argument 1 with player +0x08",
+      "rawOffset": "0x0007e339",
+      "expectedBytes": "39 5e 0c 72 53 8b 44 24 10 8b 4e 08 3b c8 72 48",
+      "actualBytes": "39 5e 0c 72 53 8b 44 24 10 8b 4e 08 3b c8 72 48",
+      "matched": true
+    },
+    {
+      "id": "reservation-resource-deduct-call-order",
+      "va": "0x0047e366",
+      "bytes": "50 8b ce e8 f2 fe ff ff 85 c0 74 1f 53 8b ce e8 36 ff ff ff",
+      "meaning": "after admission FUN_0047e330 passes caller argument 1 to FUN_0047e260, then argument 2 to FUN_0047e2b0",
+      "rawOffset": "0x0007e366",
+      "expectedBytes": "50 8b ce e8 f2 fe ff ff 85 c0 74 1f 53 8b ce e8 36 ff ff ff",
+      "actualBytes": "50 8b ce e8 f2 fe ff ff 85 c0 74 1f 53 8b ce e8 36 ff ff ff",
+      "matched": true
+    },
+    {
+      "id": "grain-shortage-cp949-source",
+      "va": "0x004c7a70",
+      "bytes": "b0 ee b9 b0 c0 cc 20 ba ce c1 b7 c7 d5 b4 cf b4 d9 2e",
+      "meaning": "CP949 source string is 곡물이 부족합니다.",
+      "rawOffset": "0x000c7a70",
+      "expectedBytes": "b0 ee b9 b0 c0 cc 20 ba ce c1 b7 c7 d5 b4 cf b4 d9 2e",
+      "actualBytes": "b0 ee b9 b0 c0 cc 20 ba ce c1 b7 c7 d5 b4 cf b4 d9 2e",
+      "matched": true
+    },
+    {
+      "id": "wood-shortage-cp949-source",
+      "va": "0x004c7a5c",
+      "bytes": "b8 f1 c0 e7 b0 a1 20 ba ce c1 b7 c7 d5 b4 cf b4 d9 2e",
+      "meaning": "CP949 source string is 목재가 부족합니다.",
+      "rawOffset": "0x000c7a5c",
+      "expectedBytes": "b8 f1 c0 e7 b0 a1 20 ba ce c1 b7 c7 d5 b4 cf b4 d9 2e",
+      "actualBytes": "b8 f1 c0 e7 b0 a1 20 ba ce c1 b7 c7 d5 b4 cf b4 d9 2e",
       "matched": true
     },
     {
@@ -150,7 +240,12 @@
       "definition": {
         "recordAddress": "0x00882f5c",
         "initializerCallAddress": "0x0045bfbf",
-        "flags": "0x00000000"
+        "flags": "0x00000000",
+        "economy": {
+          "warExpense": 0,
+          "grainCost": 0,
+          "woodCost": 0
+        }
       },
       "name": {
         "runtimePointer": "0x00aa4758",
@@ -173,7 +268,12 @@
       "definition": {
         "recordAddress": "0x008830a8",
         "initializerCallAddress": "0x0045c03f",
-        "flags": "0x04080805"
+        "flags": "0x04080805",
+        "economy": {
+          "warExpense": 13,
+          "grainCost": 400,
+          "woodCost": 0
+        }
       },
       "name": {
         "runtimePointer": "0x00aa5028",
@@ -196,7 +296,12 @@
       "definition": {
         "recordAddress": "0x008831f4",
         "initializerCallAddress": "0x0045c0bb",
-        "flags": "0x04080805"
+        "flags": "0x04080805",
+        "economy": {
+          "warExpense": 13,
+          "grainCost": 500,
+          "woodCost": 0
+        }
       },
       "name": {
         "runtimePointer": "0x00aa5048",
@@ -219,7 +324,12 @@
       "definition": {
         "recordAddress": "0x00883340",
         "initializerCallAddress": "0x0045c33e",
-        "flags": "0x04082805"
+        "flags": "0x04082805",
+        "economy": {
+          "warExpense": 15,
+          "grainCost": 400,
+          "woodCost": 160
+        }
       },
       "name": {
         "runtimePointer": "0x00aa50e8",
@@ -242,7 +352,12 @@
       "definition": {
         "recordAddress": "0x0088348c",
         "initializerCallAddress": "0x0045c643",
-        "flags": "0x81143001"
+        "flags": "0x81143001",
+        "economy": {
+          "warExpense": 25,
+          "grainCost": 1000,
+          "woodCost": 1100
+        }
       },
       "name": {
         "runtimePointer": "0x00aa51a8",
@@ -265,7 +380,12 @@
       "definition": {
         "recordAddress": "0x008835d8",
         "initializerCallAddress": "0x0045c9be",
-        "flags": "0x2210200d"
+        "flags": "0x2210200d",
+        "economy": {
+          "warExpense": 35,
+          "grainCost": 1800,
+          "woodCost": 900
+        }
       },
       "name": {
         "runtimePointer": "0x00aa5288",
@@ -288,7 +408,12 @@
       "definition": {
         "recordAddress": "0x00883724",
         "initializerCallAddress": "0x0045cd2d",
-        "flags": "0x000a0801"
+        "flags": "0x000a0801",
+        "economy": {
+          "warExpense": 10,
+          "grainCost": 800,
+          "woodCost": 0
+        }
       },
       "name": {
         "runtimePointer": "0x00aa5368",
@@ -311,7 +436,12 @@
       "definition": {
         "recordAddress": "0x00883870",
         "initializerCallAddress": "0x0045cb37",
-        "flags": "0x22100009"
+        "flags": "0x22100009",
+        "economy": {
+          "warExpense": 10,
+          "grainCost": 500,
+          "woodCost": 560
+        }
       },
       "name": {
         "runtimePointer": "0x00aa52e8",
@@ -334,7 +464,12 @@
       "definition": {
         "recordAddress": "0x008839bc",
         "initializerCallAddress": "0x0045c6c0",
-        "flags": "0x80141005"
+        "flags": "0x80141005",
+        "economy": {
+          "warExpense": 25,
+          "grainCost": 700,
+          "woodCost": 640
+        }
       },
       "name": {
         "runtimePointer": "0x00aa51c8",
@@ -357,7 +492,12 @@
       "definition": {
         "recordAddress": "0x00883b08",
         "initializerCallAddress": "0x0045c4c4",
-        "flags": "0x0008b005"
+        "flags": "0x0008b005",
+        "economy": {
+          "warExpense": 20,
+          "grainCost": 900,
+          "woodCost": 300
+        }
       },
       "name": {
         "runtimePointer": "0x00aa5148",
@@ -380,7 +520,12 @@
       "definition": {
         "recordAddress": "0x00883c54",
         "initializerCallAddress": "0x0045c1b7",
-        "flags": "0x00080805"
+        "flags": "0x00080805",
+        "economy": {
+          "warExpense": 15,
+          "grainCost": 700,
+          "woodCost": 0
+        }
       },
       "name": {
         "runtimePointer": "0x00aa5088",
@@ -403,7 +548,12 @@
       "definition": {
         "recordAddress": "0x00883da0",
         "initializerCallAddress": "0x0045c3be",
-        "flags": "0x0c082805"
+        "flags": "0x0c082805",
+        "economy": {
+          "warExpense": 17,
+          "grainCost": 600,
+          "woodCost": 80
+        }
       },
       "name": {
         "runtimePointer": "0x00aa5108",
@@ -426,7 +576,12 @@
       "definition": {
         "recordAddress": "0x00883eec",
         "initializerCallAddress": "0x0045c541",
-        "flags": "0x00089005"
+        "flags": "0x00089005",
+        "economy": {
+          "warExpense": 18,
+          "grainCost": 900,
+          "woodCost": 0
+        }
       },
       "name": {
         "runtimePointer": "0x00aa5168",
@@ -449,7 +604,12 @@
       "definition": {
         "recordAddress": "0x00884038",
         "initializerCallAddress": "0x0045c843",
-        "flags": "0x80143205"
+        "flags": "0x80143205",
+        "economy": {
+          "warExpense": 30,
+          "grainCost": 750,
+          "woodCost": 800
+        }
       },
       "name": {
         "runtimePointer": "0x00aa5228",
@@ -472,7 +632,12 @@
       "definition": {
         "recordAddress": "0x00884184",
         "initializerCallAddress": "0x0045c944",
-        "flags": "0x91101005"
+        "flags": "0x91101005",
+        "economy": {
+          "warExpense": 30,
+          "grainCost": 1000,
+          "woodCost": 1200
+        }
       },
       "name": {
         "runtimePointer": "0x00aa5268",
@@ -495,7 +660,12 @@
       "definition": {
         "recordAddress": "0x008842d0",
         "initializerCallAddress": "0x0045c2bb",
-        "flags": "0x00080805"
+        "flags": "0x00080805",
+        "economy": {
+          "warExpense": 15,
+          "grainCost": 700,
+          "woodCost": 0
+        }
       },
       "name": {
         "runtimePointer": "0x00aa50c8",
@@ -518,7 +688,12 @@
       "definition": {
         "recordAddress": "0x0088441c",
         "initializerCallAddress": "0x0045ca37",
-        "flags": "0x2210200d"
+        "flags": "0x2210200d",
+        "economy": {
+          "warExpense": 35,
+          "grainCost": 2000,
+          "woodCost": 1000
+        }
       },
       "name": {
         "runtimePointer": "0x00aa52a8",
@@ -541,7 +716,12 @@
       "definition": {
         "recordAddress": "0x00884568",
         "initializerCallAddress": "0x0045d1c2",
-        "flags": "0x80142415"
+        "flags": "0x80142415",
+        "economy": {
+          "warExpense": 30,
+          "grainCost": 1100,
+          "woodCost": 1200
+        }
       },
       "name": {
         "runtimePointer": "0x00aa5468",
@@ -564,7 +744,12 @@
       "definition": {
         "recordAddress": "0x008846b4",
         "initializerCallAddress": "0x0045d245",
-        "flags": "0x80142015"
+        "flags": "0x80142015",
+        "economy": {
+          "warExpense": 40,
+          "grainCost": 1400,
+          "woodCost": 1460
+        }
       },
       "name": {
         "runtimePointer": "0x00aa5488",
@@ -587,7 +772,12 @@
       "definition": {
         "recordAddress": "0x00884800",
         "initializerCallAddress": "0x0045c5c2",
-        "flags": "0x00080805"
+        "flags": "0x00080805",
+        "economy": {
+          "warExpense": 15,
+          "grainCost": 500,
+          "woodCost": 0
+        }
       },
       "name": {
         "runtimePointer": "0x00aa5188",
@@ -610,7 +800,12 @@
       "definition": {
         "recordAddress": "0x0088494c",
         "initializerCallAddress": "0x0045ceaf",
-        "flags": "0x000a0801"
+        "flags": "0x000a0801",
+        "economy": {
+          "warExpense": 10,
+          "grainCost": 800,
+          "woodCost": 0
+        }
       },
       "name": {
         "runtimePointer": "0x00aa53c8",
@@ -633,7 +828,12 @@
       "definition": {
         "recordAddress": "0x00884a98",
         "initializerCallAddress": "0x0045c13a",
-        "flags": "0x04080805"
+        "flags": "0x04080805",
+        "economy": {
+          "warExpense": 15,
+          "grainCost": 600,
+          "woodCost": 100
+        }
       },
       "name": {
         "runtimePointer": "0x00aa5068",
@@ -656,7 +856,12 @@
       "definition": {
         "recordAddress": "0x00884be4",
         "initializerCallAddress": "0x0045ce2e",
-        "flags": "0x00081001"
+        "flags": "0x00081001",
+        "economy": {
+          "warExpense": 10,
+          "grainCost": 1200,
+          "woodCost": 600
+        }
       },
       "name": {
         "runtimePointer": "0x00aa53a8",
@@ -679,7 +884,12 @@
       "definition": {
         "recordAddress": "0x00884d30",
         "initializerCallAddress": "0x0045c741",
-        "flags": "0x80141005"
+        "flags": "0x80141005",
+        "economy": {
+          "warExpense": 30,
+          "grainCost": 800,
+          "woodCost": 900
+        }
       },
       "name": {
         "runtimePointer": "0x00aa51e8",
@@ -702,7 +912,12 @@
       "definition": {
         "recordAddress": "0x00884e7c",
         "initializerCallAddress": "0x0045c7c5",
-        "flags": "0x90101005"
+        "flags": "0x90101005",
+        "economy": {
+          "warExpense": 40,
+          "grainCost": 1500,
+          "woodCost": 1800
+        }
       },
       "name": {
         "runtimePointer": "0x00aa5208",
@@ -725,7 +940,12 @@
       "definition": {
         "recordAddress": "0x00884fc8",
         "initializerCallAddress": "0x0045cfba",
-        "flags": "0x80140015"
+        "flags": "0x80140015",
+        "economy": {
+          "warExpense": 60,
+          "grainCost": 1800,
+          "woodCost": 2500
+        }
       },
       "name": {
         "runtimePointer": "0x00aa53e8",
@@ -748,7 +968,12 @@
       "definition": {
         "recordAddress": "0x00885114",
         "initializerCallAddress": "0x0045d03c",
-        "flags": "0x80140015"
+        "flags": "0x80140015",
+        "economy": {
+          "warExpense": 30,
+          "grainCost": 1200,
+          "woodCost": 1600
+        }
       },
       "name": {
         "runtimePointer": "0x00aa5408",
@@ -771,7 +996,12 @@
       "definition": {
         "recordAddress": "0x00885260",
         "initializerCallAddress": "0x0045cabb",
-        "flags": "0x2208200d"
+        "flags": "0x2208200d",
+        "economy": {
+          "warExpense": 40,
+          "grainCost": 3500,
+          "woodCost": 3000
+        }
       },
       "name": {
         "runtimePointer": "0x00aa52c8",
@@ -794,7 +1024,12 @@
       "definition": {
         "recordAddress": "0x008853ac",
         "initializerCallAddress": "0x0045d0bf",
-        "flags": "0x80140015"
+        "flags": "0x80140015",
+        "economy": {
+          "warExpense": 50,
+          "grainCost": 1000,
+          "woodCost": 1700
+        }
       },
       "name": {
         "runtimePointer": "0x00aa5428",
@@ -817,7 +1052,12 @@
       "definition": {
         "recordAddress": "0x008854f8",
         "initializerCallAddress": "0x0045d142",
-        "flags": "0x80142015"
+        "flags": "0x80142015",
+        "economy": {
+          "warExpense": 30,
+          "grainCost": 800,
+          "woodCost": 1600
+        }
       },
       "name": {
         "runtimePointer": "0x00aa5448",
@@ -840,7 +1080,12 @@
       "definition": {
         "recordAddress": "0x00885644",
         "initializerCallAddress": "0x0045cdae",
-        "flags": "0x00081001"
+        "flags": "0x00081001",
+        "economy": {
+          "warExpense": 10,
+          "grainCost": 800,
+          "woodCost": 300
+        }
       },
       "name": {
         "runtimePointer": "0x00aa5388",
@@ -863,7 +1108,12 @@
       "definition": {
         "recordAddress": "0x00885790",
         "initializerCallAddress": "0x0045cbb4",
-        "flags": "0x22100409"
+        "flags": "0x22100409",
+        "economy": {
+          "warExpense": 15,
+          "grainCost": 1000,
+          "woodCost": 1200
+        }
       },
       "name": {
         "runtimePointer": "0x00aa5308",
@@ -886,7 +1136,12 @@
       "definition": {
         "recordAddress": "0x008858dc",
         "initializerCallAddress": "0x0045cc33",
-        "flags": "0x2210040d"
+        "flags": "0x2210040d",
+        "economy": {
+          "warExpense": 15,
+          "grainCost": 1000,
+          "woodCost": 1200
+        }
       },
       "name": {
         "runtimePointer": "0x00aa5328",
@@ -909,7 +1164,12 @@
       "definition": {
         "recordAddress": "0x00885a28",
         "initializerCallAddress": "0x0045ccb0",
-        "flags": "0x22080409"
+        "flags": "0x22080409",
+        "economy": {
+          "warExpense": 15,
+          "grainCost": 800,
+          "woodCost": 1300
+        }
       },
       "name": {
         "runtimePointer": "0x00aa5348",
@@ -932,7 +1192,12 @@
       "definition": {
         "recordAddress": "0x00885b74",
         "initializerCallAddress": "0x0045c444",
-        "flags": "0x0c082805"
+        "flags": "0x0c082805",
+        "economy": {
+          "warExpense": 15,
+          "grainCost": 600,
+          "woodCost": 200
+        }
       },
       "name": {
         "runtimePointer": "0x00aa5128",
@@ -955,7 +1220,12 @@
       "definition": {
         "recordAddress": "0x00885cc0",
         "initializerCallAddress": "0x0045c23a",
-        "flags": "0x00080805"
+        "flags": "0x00080805",
+        "economy": {
+          "warExpense": 15,
+          "grainCost": 800,
+          "woodCost": 200
+        }
       },
       "name": {
         "runtimePointer": "0x00aa50a8",
@@ -978,7 +1248,12 @@
       "definition": {
         "recordAddress": "0x00885e0c",
         "initializerCallAddress": "0x0045c8c3",
-        "flags": "0x80141005"
+        "flags": "0x80141005",
+        "economy": {
+          "warExpense": 25,
+          "grainCost": 700,
+          "woodCost": 560
+        }
       },
       "name": {
         "runtimePointer": "0x00aa5248",
@@ -1001,7 +1276,12 @@
       "definition": {
         "recordAddress": "0x00885f58",
         "initializerCallAddress": "0x0045d2c5",
-        "flags": "0x80142411"
+        "flags": "0x80142411",
+        "economy": {
+          "warExpense": 20,
+          "grainCost": 1000,
+          "woodCost": 1400
+        }
       },
       "name": {
         "runtimePointer": "0x00aa54a8",
@@ -1024,7 +1304,12 @@
       "definition": {
         "recordAddress": "0x008860a4",
         "initializerCallAddress": "0x0045cf38",
-        "flags": "0x00081005"
+        "flags": "0x00081005",
+        "economy": {
+          "warExpense": 30,
+          "grainCost": 300,
+          "woodCost": 300
+        }
       },
       "name": {
         "runtimePointer": "0x00aa5b28",
@@ -1047,7 +1332,12 @@
       "definition": {
         "recordAddress": "0x008861f0",
         "initializerCallAddress": "0x0045ecbc",
-        "flags": "0x00710002"
+        "flags": "0x00710002",
+        "economy": {
+          "warExpense": 15,
+          "grainCost": 3500,
+          "woodCost": 3500
+        }
       },
       "name": {
         "runtimePointer": "0x00aa5ac8",
@@ -1070,7 +1360,12 @@
       "definition": {
         "recordAddress": "0x0088633c",
         "initializerCallAddress": "0x0045ed43",
-        "flags": "0x00710002"
+        "flags": "0x00710002",
+        "economy": {
+          "warExpense": 15,
+          "grainCost": 1500,
+          "woodCost": 1500
+        }
       },
       "name": {
         "runtimePointer": "0x00aa5a48",
@@ -1093,7 +1388,12 @@
       "definition": {
         "recordAddress": "0x00886488",
         "initializerCallAddress": "0x0045eab6",
-        "flags": "0x00110006"
+        "flags": "0x00110006",
+        "economy": {
+          "warExpense": 10,
+          "grainCost": 900,
+          "woodCost": 900
+        }
       },
       "name": {
         "runtimePointer": "0x00aa59a8",
@@ -1116,7 +1416,12 @@
       "definition": {
         "recordAddress": "0x008865d4",
         "initializerCallAddress": "0x0045eb35",
-        "flags": "0x00112002"
+        "flags": "0x00112002",
+        "economy": {
+          "warExpense": 10,
+          "grainCost": 900,
+          "woodCost": 900
+        }
       },
       "name": {
         "runtimePointer": "0x00aa59c8",
@@ -1139,7 +1444,12 @@
       "definition": {
         "recordAddress": "0x00886720",
         "initializerCallAddress": "0x0045ec2f",
-        "flags": "0x00710002"
+        "flags": "0x00710002",
+        "economy": {
+          "warExpense": 15,
+          "grainCost": 3000,
+          "woodCost": 3000
+        }
       },
       "name": {
         "runtimePointer": "0x00aa5a28",
@@ -1162,7 +1472,12 @@
       "definition": {
         "recordAddress": "0x0088686c",
         "initializerCallAddress": "0x0045e921",
-        "flags": "0x00710002"
+        "flags": "0x00710002",
+        "economy": {
+          "warExpense": 15,
+          "grainCost": 3000,
+          "woodCost": 3000
+        }
       },
       "name": {
         "runtimePointer": "0x00aa5948",
@@ -1185,7 +1500,12 @@
       "definition": {
         "recordAddress": "0x008869b8",
         "initializerCallAddress": "0x0045ea32",
-        "flags": "0x00710002"
+        "flags": "0x00710002",
+        "economy": {
+          "warExpense": 20,
+          "grainCost": 3500,
+          "woodCost": 3500
+        }
       },
       "name": {
         "runtimePointer": "0x00aa5988",
@@ -1208,7 +1528,12 @@
       "definition": {
         "recordAddress": "0x00886b04",
         "initializerCallAddress": "0x0045e7a2",
-        "flags": "0x00710002"
+        "flags": "0x00710002",
+        "economy": {
+          "warExpense": 15,
+          "grainCost": 2500,
+          "woodCost": 2500
+        }
       },
       "name": {
         "runtimePointer": "0x00aa58e8",
@@ -1231,7 +1556,12 @@
       "definition": {
         "recordAddress": "0x00886c50",
         "initializerCallAddress": "0x0045e354",
-        "flags": "0x00310182"
+        "flags": "0x00310182",
+        "economy": {
+          "warExpense": 10,
+          "grainCost": 800,
+          "woodCost": 800
+        }
       },
       "name": {
         "runtimePointer": "0x00aa5848",
@@ -1254,7 +1584,12 @@
       "definition": {
         "recordAddress": "0x00886d9c",
         "initializerCallAddress": "0x0045e24a",
-        "flags": "0x00710082"
+        "flags": "0x00710082",
+        "economy": {
+          "warExpense": 10,
+          "grainCost": 1500,
+          "woodCost": 1500
+        }
       },
       "name": {
         "runtimePointer": "0x00aa5808",
@@ -1277,7 +1612,12 @@
       "definition": {
         "recordAddress": "0x00886ee8",
         "initializerCallAddress": "0x0045e461",
-        "flags": "0x00710002"
+        "flags": "0x00710002",
+        "economy": {
+          "warExpense": 15,
+          "grainCost": 1500,
+          "woodCost": 1500
+        }
       },
       "name": {
         "runtimePointer": "0x00aa5888",
@@ -1300,7 +1640,12 @@
       "definition": {
         "recordAddress": "0x00887034",
         "initializerCallAddress": "0x0045e4e8",
-        "flags": "0x00710002"
+        "flags": "0x00710002",
+        "economy": {
+          "warExpense": 15,
+          "grainCost": 2000,
+          "woodCost": 2000
+        }
       },
       "name": {
         "runtimePointer": "0x00aa58a8",
@@ -1323,7 +1668,12 @@
       "definition": {
         "recordAddress": "0x00887180",
         "initializerCallAddress": "0x0045e826",
-        "flags": "0x00310002"
+        "flags": "0x00310002",
+        "economy": {
+          "warExpense": 10,
+          "grainCost": 1000,
+          "woodCost": 1000
+        }
       },
       "name": {
         "runtimePointer": "0x00aa5908",
@@ -1346,7 +1696,12 @@
       "definition": {
         "recordAddress": "0x008872cc",
         "initializerCallAddress": "0x0045d6f2",
-        "flags": "0x00510042"
+        "flags": "0x00510042",
+        "economy": {
+          "warExpense": 15,
+          "grainCost": 1500,
+          "woodCost": 1000
+        }
       },
       "name": {
         "runtimePointer": "0x00aa5568",
@@ -1369,7 +1724,12 @@
       "definition": {
         "recordAddress": "0x00887418",
         "initializerCallAddress": "0x0045d659",
-        "flags": "0x00510002"
+        "flags": "0x00510002",
+        "economy": {
+          "warExpense": 15,
+          "grainCost": 1200,
+          "woodCost": 900
+        }
       },
       "name": {
         "runtimePointer": "0x00aa5548",
@@ -1392,7 +1752,12 @@
       "definition": {
         "recordAddress": "0x00887564",
         "initializerCallAddress": "0x0045d5ca",
-        "flags": "0x00510042"
+        "flags": "0x00510042",
+        "economy": {
+          "warExpense": 15,
+          "grainCost": 1000,
+          "woodCost": 800
+        }
       },
       "name": {
         "runtimePointer": "0x00aa5528",
@@ -1415,7 +1780,12 @@
       "definition": {
         "recordAddress": "0x008876b0",
         "initializerCallAddress": "0x0045d811",
-        "flags": "0x00510042"
+        "flags": "0x00510042",
+        "economy": {
+          "warExpense": 15,
+          "grainCost": 1000,
+          "woodCost": 500
+        }
       },
       "name": {
         "runtimePointer": "0x00aa55a8",
@@ -1438,7 +1808,12 @@
       "definition": {
         "recordAddress": "0x008877fc",
         "initializerCallAddress": "0x0045d88b",
-        "flags": "0x00110182"
+        "flags": "0x00110182",
+        "economy": {
+          "warExpense": 10,
+          "grainCost": 600,
+          "woodCost": 400
+        }
       },
       "name": {
         "runtimePointer": "0x00aa55c8",
@@ -1461,7 +1836,12 @@
       "definition": {
         "recordAddress": "0x00887948",
         "initializerCallAddress": "0x0045d3bc",
-        "flags": "0x00510082"
+        "flags": "0x00510082",
+        "economy": {
+          "warExpense": 10,
+          "grainCost": 1000,
+          "woodCost": 800
+        }
       },
       "name": {
         "runtimePointer": "0x00aa54c8",
@@ -1484,7 +1864,12 @@
       "definition": {
         "recordAddress": "0x00887a94",
         "initializerCallAddress": "0x0045d547",
-        "flags": "0x00510042"
+        "flags": "0x00510042",
+        "economy": {
+          "warExpense": 15,
+          "grainCost": 1000,
+          "woodCost": 800
+        }
       },
       "name": {
         "runtimePointer": "0x00aa5508",
@@ -1507,7 +1892,12 @@
       "definition": {
         "recordAddress": "0x00887be0",
         "initializerCallAddress": "0x0045d4b5",
-        "flags": "0x00510042"
+        "flags": "0x00510042",
+        "economy": {
+          "warExpense": 15,
+          "grainCost": 800,
+          "woodCost": 500
+        }
       },
       "name": {
         "runtimePointer": "0x00aa54e8",
@@ -1530,7 +1920,12 @@
       "definition": {
         "recordAddress": "0x00887d2c",
         "initializerCallAddress": "0x0045d782",
-        "flags": "0x00510042"
+        "flags": "0x00510042",
+        "economy": {
+          "warExpense": 20,
+          "grainCost": 2000,
+          "woodCost": 1200
+        }
       },
       "name": {
         "runtimePointer": "0x00aa5588",
@@ -1553,7 +1948,12 @@
       "definition": {
         "recordAddress": "0x00887e78",
         "initializerCallAddress": "0x0045d43a",
-        "flags": "0x00110042"
+        "flags": "0x00110042",
+        "economy": {
+          "warExpense": 10,
+          "grainCost": 500,
+          "woodCost": 400
+        }
       },
       "name": {
         "runtimePointer": "0x00aa5b08",
@@ -1576,7 +1976,12 @@
       "definition": {
         "recordAddress": "0x00887fc4",
         "initializerCallAddress": "0x0045d916",
-        "flags": "0x00112006"
+        "flags": "0x00112006",
+        "economy": {
+          "warExpense": 10,
+          "grainCost": 630,
+          "woodCost": 450
+        }
       },
       "name": {
         "runtimePointer": "0x00aa59e8",
@@ -1599,7 +2004,12 @@
       "definition": {
         "recordAddress": "0x00888110",
         "initializerCallAddress": "0x0045e9a8",
-        "flags": "0x00710002"
+        "flags": "0x00710002",
+        "economy": {
+          "warExpense": 20,
+          "grainCost": 2500,
+          "woodCost": 2000
+        }
       },
       "name": {
         "runtimePointer": "0x00aa5968",
@@ -1622,7 +2032,12 @@
       "definition": {
         "recordAddress": "0x0088825c",
         "initializerCallAddress": "0x0045e582",
-        "flags": "0x00710002"
+        "flags": "0x00710002",
+        "economy": {
+          "warExpense": 15,
+          "grainCost": 1500,
+          "woodCost": 1300
+        }
       },
       "name": {
         "runtimePointer": "0x00aa58c8",
@@ -1645,7 +2060,12 @@
       "definition": {
         "recordAddress": "0x008883a8",
         "initializerCallAddress": "0x0045e8a8",
-        "flags": "0x00310002"
+        "flags": "0x00310002",
+        "economy": {
+          "warExpense": 10,
+          "grainCost": 800,
+          "woodCost": 1000
+        }
       },
       "name": {
         "runtimePointer": "0x00aa5928",
@@ -1668,7 +2088,12 @@
       "definition": {
         "recordAddress": "0x008884f4",
         "initializerCallAddress": "0x0045ee46",
-        "flags": "0x00710002"
+        "flags": "0x00710002",
+        "economy": {
+          "warExpense": 20,
+          "grainCost": 2600,
+          "woodCost": 2400
+        }
       },
       "name": {
         "runtimePointer": "0x00aa5a88",
@@ -1691,7 +2116,12 @@
       "definition": {
         "recordAddress": "0x00888640",
         "initializerCallAddress": "0x0045edc5",
-        "flags": "0x00710002"
+        "flags": "0x00710002",
+        "economy": {
+          "warExpense": 15,
+          "grainCost": 1500,
+          "woodCost": 1400
+        }
       },
       "name": {
         "runtimePointer": "0x00aa5a68",
@@ -1714,7 +2144,12 @@
       "definition": {
         "recordAddress": "0x0088878c",
         "initializerCallAddress": "0x0045ebb4",
-        "flags": "0x00112006"
+        "flags": "0x00112006",
+        "economy": {
+          "warExpense": 10,
+          "grainCost": 900,
+          "woodCost": 1100
+        }
       },
       "name": {
         "runtimePointer": "0x00aa5a08",
@@ -1737,7 +2172,12 @@
       "definition": {
         "recordAddress": "0x008888d8",
         "initializerCallAddress": "0x0045e2d9",
-        "flags": "0x00510082"
+        "flags": "0x00510082",
+        "economy": {
+          "warExpense": 10,
+          "grainCost": 1000,
+          "woodCost": 1000
+        }
       },
       "name": {
         "runtimePointer": "0x00aa5828",
@@ -1760,7 +2200,12 @@
       "definition": {
         "recordAddress": "0x00888a24",
         "initializerCallAddress": "0x0045e712",
-        "flags": "0x00710002"
+        "flags": "0x00710002",
+        "economy": {
+          "warExpense": 15,
+          "grainCost": 2000,
+          "woodCost": 1500
+        }
       },
       "name": {
         "runtimePointer": "0x00aa5aa8",
@@ -1783,7 +2228,12 @@
       "definition": {
         "recordAddress": "0x00888b70",
         "initializerCallAddress": "0x0045e68b",
-        "flags": "0x00710002"
+        "flags": "0x00710002",
+        "economy": {
+          "warExpense": 10,
+          "grainCost": 2000,
+          "woodCost": 1500
+        }
       },
       "name": {
         "runtimePointer": "0x00aa5ae8",
@@ -1806,7 +2256,12 @@
       "definition": {
         "recordAddress": "0x00888cbc",
         "initializerCallAddress": "0x0045e3dc",
-        "flags": "0x00310182"
+        "flags": "0x00310182",
+        "economy": {
+          "warExpense": 10,
+          "grainCost": 800,
+          "woodCost": 1200
+        }
       },
       "name": {
         "runtimePointer": "0x00aa5868",
@@ -1829,7 +2284,12 @@
       "definition": {
         "recordAddress": "0x00888e08",
         "initializerCallAddress": "0x0045e610",
-        "flags": "0x00710002"
+        "flags": "0x00710002",
+        "economy": {
+          "warExpense": 15,
+          "grainCost": 2000,
+          "woodCost": 1500
+        }
       },
       "name": {
         "runtimePointer": "0x00aa5b48",
@@ -1852,7 +2312,12 @@
       "definition": {
         "recordAddress": "0x00888f54",
         "initializerCallAddress": "0x0045d341",
-        "flags": "0x80161001"
+        "flags": "0x80161001",
+        "economy": {
+          "warExpense": 10,
+          "grainCost": 500,
+          "woodCost": 500
+        }
       },
       "name": {
         "runtimePointer": "0x00aa5bc8",
@@ -1875,7 +2340,12 @@
       "definition": {
         "recordAddress": "0x008890a0",
         "initializerCallAddress": "0x0045d998",
-        "flags": "0x00880805"
+        "flags": "0x00880805",
+        "economy": {
+          "warExpense": 0,
+          "grainCost": 400,
+          "woodCost": 0
+        }
       },
       "name": {
         "runtimePointer": "0x00aa55e8",
@@ -1898,7 +2368,12 @@
       "definition": {
         "recordAddress": "0x008891ec",
         "initializerCallAddress": "0x0045da1b",
-        "flags": "0x00882805"
+        "flags": "0x00882805",
+        "economy": {
+          "warExpense": 0,
+          "grainCost": 400,
+          "woodCost": 100
+        }
       },
       "name": {
         "runtimePointer": "0x00aa5608",
@@ -1921,7 +2396,12 @@
       "definition": {
         "recordAddress": "0x00889338",
         "initializerCallAddress": "0x0045daa1",
-        "flags": "0x00882805"
+        "flags": "0x00882805",
+        "economy": {
+          "warExpense": 0,
+          "grainCost": 400,
+          "woodCost": 0
+        }
       },
       "name": {
         "runtimePointer": "0x00aa5628",
@@ -1944,7 +2424,12 @@
       "definition": {
         "recordAddress": "0x00889484",
         "initializerCallAddress": "0x0045db27",
-        "flags": "0x00882805"
+        "flags": "0x00882805",
+        "economy": {
+          "warExpense": 0,
+          "grainCost": 400,
+          "woodCost": 0
+        }
       },
       "name": {
         "runtimePointer": "0x00aa5648",
@@ -1967,7 +2452,12 @@
       "definition": {
         "recordAddress": "0x008895d0",
         "initializerCallAddress": "0x0045dbac",
-        "flags": "0x00881005"
+        "flags": "0x00881005",
+        "economy": {
+          "warExpense": 0,
+          "grainCost": 400,
+          "woodCost": 0
+        }
       },
       "name": {
         "runtimePointer": "0x00aa5668",
@@ -1990,7 +2480,12 @@
       "definition": {
         "recordAddress": "0x0088971c",
         "initializerCallAddress": "0x0045dc22",
-        "flags": "0x00004005"
+        "flags": "0x00004005",
+        "economy": {
+          "warExpense": 0,
+          "grainCost": 400,
+          "woodCost": 0
+        }
       },
       "name": {
         "runtimePointer": "0x00aa5688",
@@ -2013,7 +2508,12 @@
       "definition": {
         "recordAddress": "0x00889868",
         "initializerCallAddress": "0x0045dd2a",
-        "flags": "0x00880805"
+        "flags": "0x00880805",
+        "economy": {
+          "warExpense": 0,
+          "grainCost": 400,
+          "woodCost": 0
+        }
       },
       "name": {
         "runtimePointer": "0x00aa56c8",
@@ -2036,7 +2536,12 @@
       "definition": {
         "recordAddress": "0x008899b4",
         "initializerCallAddress": "0x0045ddac",
-        "flags": "0x00880805"
+        "flags": "0x00880805",
+        "economy": {
+          "warExpense": 0,
+          "grainCost": 400,
+          "woodCost": 0
+        }
       },
       "name": {
         "runtimePointer": "0x00aa56e8",
@@ -2059,7 +2564,12 @@
       "definition": {
         "recordAddress": "0x00889b00",
         "initializerCallAddress": "0x0045de30",
-        "flags": "0x00882805"
+        "flags": "0x00882805",
+        "economy": {
+          "warExpense": 0,
+          "grainCost": 400,
+          "woodCost": 100
+        }
       },
       "name": {
         "runtimePointer": "0x00aa5708",
@@ -2082,7 +2592,12 @@
       "definition": {
         "recordAddress": "0x00889c4c",
         "initializerCallAddress": "0x0045deb7",
-        "flags": "0x00882805"
+        "flags": "0x00882805",
+        "economy": {
+          "warExpense": 0,
+          "grainCost": 400,
+          "woodCost": 0
+        }
       },
       "name": {
         "runtimePointer": "0x00aa5728",
@@ -2105,7 +2620,12 @@
       "definition": {
         "recordAddress": "0x00889d98",
         "initializerCallAddress": "0x0045df3a",
-        "flags": "0x00881005"
+        "flags": "0x00881005",
+        "economy": {
+          "warExpense": 0,
+          "grainCost": 400,
+          "woodCost": 0
+        }
       },
       "name": {
         "runtimePointer": "0x00aa5748",
@@ -2128,7 +2648,12 @@
       "definition": {
         "recordAddress": "0x00889ee4",
         "initializerCallAddress": "0x0045dfbd",
-        "flags": "0x00889005"
+        "flags": "0x00889005",
+        "economy": {
+          "warExpense": 0,
+          "grainCost": 400,
+          "woodCost": 0
+        }
       },
       "name": {
         "runtimePointer": "0x00aa5768",
@@ -2151,7 +2676,12 @@
       "definition": {
         "recordAddress": "0x0088a030",
         "initializerCallAddress": "0x0045e040",
-        "flags": "0x00880805"
+        "flags": "0x00880805",
+        "economy": {
+          "warExpense": 0,
+          "grainCost": 400,
+          "woodCost": 0
+        }
       },
       "name": {
         "runtimePointer": "0x00aa5788",
@@ -2174,7 +2704,12 @@
       "definition": {
         "recordAddress": "0x0088a17c",
         "initializerCallAddress": "0x0045e0c7",
-        "flags": "0x00882805"
+        "flags": "0x00882805",
+        "economy": {
+          "warExpense": 0,
+          "grainCost": 400,
+          "woodCost": 0
+        }
       },
       "name": {
         "runtimePointer": "0x00aa57a8",
@@ -2197,7 +2732,12 @@
       "definition": {
         "recordAddress": "0x0088a2c8",
         "initializerCallAddress": "0x0045e14b",
-        "flags": "0x00882805"
+        "flags": "0x00882805",
+        "economy": {
+          "warExpense": 0,
+          "grainCost": 400,
+          "woodCost": 100
+        }
       },
       "name": {
         "runtimePointer": "0x00aa57c8",
@@ -2220,7 +2760,12 @@
       "definition": {
         "recordAddress": "0x0088a414",
         "initializerCallAddress": "0x0045e1cf",
-        "flags": "0x00880805"
+        "flags": "0x00880805",
+        "economy": {
+          "warExpense": 0,
+          "grainCost": 400,
+          "woodCost": 0
+        }
       },
       "name": {
         "runtimePointer": "0x00aa57e8",
@@ -2243,7 +2788,12 @@
       "definition": {
         "recordAddress": "0x0088a560",
         "initializerCallAddress": "0x0045eec6",
-        "flags": "0x00080801"
+        "flags": "0x00080801",
+        "economy": {
+          "warExpense": 0,
+          "grainCost": 300,
+          "woodCost": 300
+        }
       },
       "name": {
         "runtimePointer": "0x00aa5b68",
@@ -2266,7 +2816,12 @@
       "definition": {
         "recordAddress": "0x0088a6ac",
         "initializerCallAddress": "0x0045efb3",
-        "flags": "0x00080801"
+        "flags": "0x00080801",
+        "economy": {
+          "warExpense": 0,
+          "grainCost": 300,
+          "woodCost": 300
+        }
       },
       "name": {
         "runtimePointer": "0x00aa5ba8",
@@ -2289,7 +2844,12 @@
       "definition": {
         "recordAddress": "0x0088a7f8",
         "initializerCallAddress": "0x0045dca7",
-        "flags": "0x00882805"
+        "flags": "0x00882805",
+        "economy": {
+          "warExpense": 0,
+          "grainCost": 400,
+          "woodCost": 0
+        }
       },
       "name": {
         "runtimePointer": "0x00aa56a8",
@@ -2312,7 +2872,12 @@
       "definition": {
         "recordAddress": "0x0088a944",
         "initializerCallAddress": "0x0045ef3c",
-        "flags": "0x00000001"
+        "flags": "0x00000001",
+        "economy": {
+          "warExpense": 0,
+          "grainCost": 300,
+          "woodCost": 300
+        }
       },
       "name": {
         "runtimePointer": "0x00aa5b88",
