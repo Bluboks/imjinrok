@@ -1,5 +1,6 @@
 import { unitDefinitions, type DamageType, type GridPoint, type UnitDefinition, type UnitDefinitionId } from "../../shared/src/index.js";
 import { resolveDamageAmount } from "./damage.js";
+import { applyAuraAttackDamage } from "./aura.js";
 import { arePlayersEnemies } from "./diplomacy.js";
 import { spawnProjectile, type ProjectileImpactEvent, type ProjectilePolicyData, type ProjectileRegistry } from "./projectiles.js";
 import type { UnitState, WorldState } from "./types.js";
@@ -122,7 +123,7 @@ function createCombatProjectilePayload(
     targetUnitId: target.id,
     targetPlayerId: target.playerId,
     targetKind: target.kind,
-    damageAmount: combat.damage,
+    damageAmount: applyAuraAttackDamage(source, combat.damage),
     damageType: combat.damageType ?? "physical",
   };
 }

@@ -1,4 +1,5 @@
 export * from "./content.js";
+export * from "./aura.js";
 export * from "./campaignProgress.js";
 export * from "./contentPack.js";
 export * from "./commands.js";

@@ -3,6 +3,7 @@ import { applyScenarioScriptedEvents, evaluateScenarioRuntime } from "./scenario
 import { SIM_TICK_SECONDS } from "./constants.js";
 import { advanceConstructionHealth, isUnitUnderConstruction, updateConstructionHealth } from "./construction.js";
 import { resolveDamageAmount } from "./damage.js";
+import { applyAuraAttackDamage, defaultAuraProfileRegistry, refreshAuraEffects, type AuraProfileRegistry } from "./aura.js";
 import { arePlayersAllied, arePlayersEnemies } from "./diplomacy.js";
 import { createUnitState } from "./entities.js";
 import { getEnvironmentSightMultiplier, updateEnvironment } from "./environment.js";
@@ -43,6 +44,8 @@ const FAST_PRODUCTION_WORK_TICK_AMOUNT = 4;
 export interface AdvanceWorldTickOptions {
   /** Product default; executable registries are caller-owned and never serialized. */
   projectileRegistry?: ProjectileRegistry;
+  /** Optional caller-owned aura registry for a mod or isolated simulation. */
+  auraProfileRegistry?: AuraProfileRegistry;
 }
 
 export function advanceWorldTick(state: WorldState, options: AdvanceWorldTickOptions = {}): void {
@@ -79,6 +82,10 @@ export function advanceWorldTick(state: WorldState, options: AdvanceWorldTickOpt
       advanceUnitRepair(state, unit);
     }
   }
+
+  // Aura effects are a live, derived snapshot: movement, owner teams, and
+  // source removal from a preceding tick are all resolved before damage.
+  refreshAuraEffects(state, options.auraProfileRegistry ?? defaultAuraProfileRegistry);
 
   const projectileRegistry = options.projectileRegistry ?? PRODUCT_PROJECTILE_REGISTRY;
   const projectileImpacts = advanceProjectileLifecycle(state, projectileRegistry);
@@ -1139,7 +1146,7 @@ function advanceUnitCombat(state: WorldState, projectileRegistry: ProjectileRegi
 
     const damage = state.playerCheats[target.playerId]?.invincible
       ? 0
-      : resolveDamageAmount({ amount: combat.damage, type: combat.damageType ?? "physical" }, state);
+      : resolveDamageAmount({ amount: applyAuraAttackDamage(unit, combat.damage), type: combat.damageType ?? "physical" }, state);
 
     target.health.current = Math.max(0, target.health.current - damage);
     pushCombatEvent(state, unit, target, damage);
