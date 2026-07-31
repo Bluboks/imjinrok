@@ -16,6 +16,7 @@ import { resolveMovementCollisionProfileId } from "./movementCollisionPolicy.js"
 import { resolvePathfindingProfileId } from "./navigation.js";
 import { createProjectileSystemState } from "./projectiles.js";
 import { resolveAttackTargetAuthorityPolicyId } from "./attackTargetAuthorityPolicy.js";
+import { resolveCapacityPolicyId } from "./capacity.js";
 import { createPlayerResearchState } from "./research.js";
 import { resourceBlocksBuilding, resourceBlocksMovement } from "./resources.js";
 import { applyScenarioScriptedEvents, createScenarioRuntimeState } from "./scenario.js";
@@ -100,6 +101,7 @@ export {
 export { getFootprintTiles, validateBuildingPlacement, type BuildingPlacementValidationResult } from "./placement.js";
 export {
   canAdmitPlayerCapacity,
+  canCompleteQueuedPlayerCapacity,
   coreProviderSupplyCapacityPolicy,
   coreUncappedCapacityPolicy,
   createCapacityPolicy,
@@ -114,6 +116,7 @@ export {
   getProviderSupplyCapacityState,
   registerCapacityPolicy,
   requireCapacityPolicy,
+  resolveCapacityPolicyId,
   CapacityPolicyRegistry,
   CORE_PROVIDER_SUPPLY_CAPACITY_POLICY_ID,
   CORE_UNCAPPED_CAPACITY_POLICY_ID,
@@ -127,6 +130,7 @@ export {
   type CapacityEvaluation,
   type CapacityPolicy,
   type CapacityPolicyContext,
+  type CapacityRequestPhase,
   type CapacityRejection,
   type CapacityRejectionReason,
   type CapacityUnitCategory,
@@ -204,6 +208,7 @@ export function createInitialWorldState(
     attackTargetAuthorityPolicyId: resolveAttackTargetAuthorityPolicyId(scenario.attackTargetAuthorityPolicyId),
     ...(scenario.auraProfileId !== undefined ? { auraProfileId: scenario.auraProfileId } : {}),
     pathfindingProfileId: resolvePathfindingProfileId(worldMap, scenario),
+    capacityPolicyId: resolveCapacityPolicyId(scenario.capacityPolicyId),
     movementCollisionProfileId: resolveMovementCollisionProfileId(worldMap.movementCollisionProfileId),
     environment: createInitialEnvironmentState(worldMap),
     scenario: createScenarioRuntimeState(scenario),

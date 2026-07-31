@@ -221,6 +221,8 @@ export interface WorldState {
   auraProfileId?: AuraProfileId;
   /** Stable profile id selected from scenario, map, or the built-in default. */
   pathfindingProfileId: string;
+  /** Stable, serializable capacity-policy selector resolved by the simulation registry. */
+  capacityPolicyId: string;
   /**
    * Stable map-selected movement-admission profile. Optional only so legacy
    * snapshots retain the established strict footprint behavior.
