@@ -9,7 +9,7 @@ export interface SourceFogComposite {
   readonly familyIndex: number;
   readonly selector: number;
   readonly sourceFrameIndices: readonly number[];
-  /** Product mapping to literal source state 4 or 8; source semantics remain unresolved. */
+  /** Source-backed literal state: 4 is explored and 8 is unseen. */
   readonly sourceStateValue: 4 | 8;
   /** Product alpha policy, not a source alpha claim. */
   readonly alpha: number;
@@ -278,8 +278,9 @@ export function resolveSourceCommandIconProfileForScenario(
 
 /**
  * Returns a source composite only when a map explicitly selected the profile.
- * The visibility-to-literal-state mapping (unseen→4, explored→8), alpha, and
- * web-map coordinate interpretation are deliberately labelled adaptations.
+ * Source lifecycle evidence identifies literal 4 as explored and 8 as unseen.
+ * This adapter converts product-grid visibility to those source literals; alpha
+ * and web-map coordinate interpretation remain deliberate adaptations.
  */
 export function resolveSourceFogComposite(
   profileId: string | undefined,
@@ -290,7 +291,7 @@ export function resolveSourceFogComposite(
   if (profileId === undefined || visibility === "visible") return null;
   assertSourceFogVisualProfile(profileId);
   assertFamilyIndex(familyIndex);
-  const sourceStateValue = visibility === "unseen" ? 4 : 8;
+  const sourceStateValue = visibility === "explored" ? 4 : 8;
   const mask = buildSourceFogCornerMask(visibility, neighborVisibility);
   if (mask === 0 || mask === 15) return null;
   const selector = SOURCE_FOG_LOOKUP[mask];
