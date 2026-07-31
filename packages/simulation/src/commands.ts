@@ -444,8 +444,19 @@ export function applyCommand(state: WorldState, envelope: CommandEnvelope): void
         return;
       }
 
+      const nextTarget = path[0];
+
+      if (!nextTarget) {
+        // A zero-length route is complete immediately; retaining its
+        // destination would falsely advertise an active movement between ticks.
+        delete unit.movementTarget;
+        delete unit.movementPath;
+        delete unit.currentOrder;
+        return;
+      }
+
       unit.movementPath = path;
-      unit.movementTarget = path[0] ?? target;
+      unit.movementTarget = nextTarget;
       // An attack-move's target is its strategic destination. The path may
       // temporarily end beside an occupied mobile footprint, but that routing
       // fallback must not replace the destination used for later re-planning.
