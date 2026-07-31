@@ -20,6 +20,7 @@
 - [원본과 포팅 구현의 경계](architecture/original-vs-port.md): 무엇이 원본 사실이고 무엇이 프로젝트 설계인지 구분
 - [지형·환경·자원 시각 계약](architecture/terrain-environment-resource-contract.md): 모딩 registry와 원본 source catalog의 경계
 - [K01 게임플레이 음성 source adapter](development/k01-gameplay-audio-adapter.md): source-backed 제품 cue와 미확정 identity의 coverage 경계
+- [유닛 생산 완료 음성 자원 경계](reverse-engineering/mechanics/unit-production-audio-policy.md): common/train 리소스와 미확정 장수 완료 음성의 분리
 
 ### 역공학
 

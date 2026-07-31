@@ -64,6 +64,7 @@
     "imjinrok:extract-k01-cell-projection-evidence": "node tools/imjinrok/extract-k01-cell-projection-evidence.mjs --output analysis/fixtures/k01-cell-projection-evidence.json",
     "imjinrok:extract-source-pathfinding-evidence": "node tools/imjinrok/extract-source-pathfinding-evidence.mjs --output analysis/fixtures/source-pathfinding-evidence.json",
     "imjinrok:extract-building-state-pilot": "node tools/imjinrok/extract-building-state-pilot.mjs --json",
+    "imjinrok:extract-unit-production-audio-policy": "node tools/imjinrok/extract-unit-production-audio-policy.mjs",
     "imjinrok:extract-beacon-state-pilot": "node tools/imjinrok/extract-beacon-state-pilot.mjs --json",
     "imjinrok:extract-k01-map-low-nibble-writers": "node tools/imjinrok/extract-k01-map-low-nibble-writers.mjs",
     "imjinrok:extract-source-fog-render-evidence": "node tools/imjinrok/extract-source-fog-render-evidence.mjs --output analysis/fixtures/source-fog-render-evidence.json",
