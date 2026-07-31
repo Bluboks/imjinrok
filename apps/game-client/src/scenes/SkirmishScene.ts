@@ -90,6 +90,13 @@ import {
 import { selectConstructionFrameIndex } from "../originalBuildingVisualState";
 import { clampCameraCenterToWorldField } from "../cameraFieldClamp.js";
 import {
+  decideControlGroupAssignmentOutcome,
+  decideControlGroupKeyIntent,
+  decideControlGroupRecallOutcome,
+  shouldCenterControlGroupOnRecall,
+  type ControlGroupRecallState,
+} from "../controlGroups.js";
+import {
   ACTION_TRIGGERED_EVENT,
   BATTLEFIELD_SUMMARY_ACTION_EVENT,
   BATTLEFIELD_SUMMARY_CHANGED_EVENT,
@@ -577,11 +584,6 @@ interface MissionDialogueParticipant {
 interface PendingBuildPlacement {
   builderUnitIds: string[];
   building: BuildingDefinitionId;
-}
-
-interface ControlGroupRecallState {
-  group: number;
-  time: number;
 }
 
 interface UnitSelectionClickState {
@@ -4532,59 +4534,50 @@ export class SkirmishScene extends Phaser.Scene {
   }
 
   private handleControlGroupKeyDown(event: KeyboardEvent): void {
-    if (event.repeat || event.altKey || this.cheatInputElement || this.isBlockingModalOpen()) {
+    const intent = decideControlGroupKeyIntent({
+      code: event.code,
+      key: event.key,
+      repeat: event.repeat,
+      altKey: event.altKey,
+      ctrlKey: event.ctrlKey,
+      metaKey: event.metaKey,
+      shiftKey: event.shiftKey,
+      isCheatInputOpen: Boolean(this.cheatInputElement),
+      isBlockingModalOpen: this.isBlockingModalOpen(),
+    });
+
+    if (!intent) {
       return;
     }
 
-    const group = this.getControlGroupNumber(event);
-
-    if (group === null) {
-      return;
+    switch (intent.kind) {
+      case "assign":
+        this.assignControlGroup(intent.group);
+        break;
+      case "add":
+        this.addSelectionToControlGroup(intent.group);
+        break;
+      case "recall":
+        this.recallControlGroup(intent.group);
+        break;
     }
 
-    if (event.ctrlKey || event.metaKey) {
-      this.assignControlGroup(group);
-      event.preventDefault();
-      return;
-    }
-
-    if (event.shiftKey) {
-      this.addSelectionToControlGroup(group);
-      event.preventDefault();
-      return;
-    }
-
-    this.recallControlGroup(group);
     event.preventDefault();
-  }
-
-  private getControlGroupNumber(event: KeyboardEvent): number | null {
-    if (/^Digit\d$/.test(event.code)) {
-      return Number(event.code.slice("Digit".length));
-    }
-
-    if (/^Numpad\d$/.test(event.code)) {
-      return Number(event.code.slice("Numpad".length));
-    }
-
-    if (/^\d$/.test(event.key)) {
-      return Number(event.key);
-    }
-
-    return null;
   }
 
   private assignControlGroup(group: number): void {
     const unitIds = this.getSelectedUnits().map((unit) => unit.id);
 
-    if (unitIds.length === 0) {
+    if (decideControlGroupAssignmentOutcome(unitIds.length) === "clear") {
       this.controlGroups.delete(group);
       this.lastControlGroupRecall = null;
+      this.showTransientFeedback(`부대 ${group} 해제`);
       return;
     }
 
     this.controlGroups.set(group, unitIds);
     this.lastControlGroupRecall = null;
+    this.showTransientFeedback(`부대 ${group} 지정 (${unitIds.length}기)`);
   }
 
   private addSelectionToControlGroup(group: number): void {
@@ -4602,23 +4595,29 @@ export class SkirmishScene extends Phaser.Scene {
 
     this.controlGroups.set(group, [...mergedUnitIds]);
     this.lastControlGroupRecall = null;
+    this.showTransientFeedback(`부대 ${group} 추가 (${mergedUnitIds.size}기)`);
   }
 
   private recallControlGroup(group: number): void {
     const units = this.getLiveControlGroupUnits(group);
 
-    if (units.length === 0) {
+    if (decideControlGroupRecallOutcome(units.length) === "empty") {
       this.controlGroups.delete(group);
       this.lastControlGroupRecall = null;
+      this.showTransientFeedback(`부대 ${group}이 비어 있습니다.`);
       return;
     }
 
     const now = this.time.now;
-    const shouldCenterCamera =
-      this.lastControlGroupRecall?.group === group &&
-      now - this.lastControlGroupRecall.time <= CONTROL_GROUP_DOUBLE_TAP_MS;
+    const shouldCenterCamera = shouldCenterControlGroupOnRecall(
+      this.lastControlGroupRecall,
+      group,
+      now,
+      CONTROL_GROUP_DOUBLE_TAP_MS,
+    );
 
     this.selectUnits(units);
+    this.showTransientFeedback(`부대 ${group} 호출 (${units.length}기)`);
 
     if (shouldCenterCamera) {
       this.centerCameraOnUnits(units);
