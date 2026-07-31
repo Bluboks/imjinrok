@@ -1,5 +1,11 @@
 import assert from "node:assert/strict";
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import {
+  copyFileSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import test from "node:test";
@@ -8,6 +14,7 @@ import {
   EXPECTED_EXECUTABLE_SHA256,
   extractEntityTypeCatalog,
 } from "./extract-entity-type-catalog.mjs";
+import { extractPersistentSelectionActionBoundary } from "./extract-persistent-selection-action-boundary.mjs";
 
 const repositoryRoot = resolve(import.meta.dirname, "../..");
 const executablePath = join(
@@ -39,6 +46,21 @@ test("extracts every original entity type identity from static data flow", () =>
   });
   assert.equal(report.source.executableSha256, EXPECTED_EXECUTABLE_SHA256);
   assert.ok(report.codeAnchors.every((anchor) => anchor.matched));
+  assert.deepEqual(report.layout.fields.warExpense, {
+    offset: "+0x0e",
+    width: "signed WORD",
+    writerArgumentIndex: 5,
+  });
+  assert.deepEqual(report.layout.fields.grainCost, {
+    offset: "+0x10",
+    width: "signed WORD",
+    writerArgumentIndex: 6,
+  });
+  assert.deepEqual(report.layout.fields.woodCost, {
+    offset: "+0x12",
+    width: "signed WORD",
+    writerArgumentIndex: 7,
+  });
   assert.deepEqual(
     report.types.map((type) => type.internalClass),
     Array.from({ length: 95 }, (_value, index) => index + 1),
@@ -91,6 +113,48 @@ test("extracts every original entity type identity from static data flow", () =>
     slot: 160,
     baseFrame: 0,
     sourcePath: "char\\generalk4.spr",
+  });
+  assertTypeEconomy(report, 2, {
+    warExpense: 13,
+    grainCost: 400,
+    woodCost: 0,
+  });
+  assertTypeEconomy(report, 49, {
+    warExpense: 10,
+    grainCost: 1500,
+    woodCost: 1500,
+  });
+  assertTypeEconomy(report, 76, {
+    warExpense: 0,
+    grainCost: 400,
+    woodCost: 0,
+  });
+});
+
+test("cross-binds action 115 to class 76 zero war expense without assigning production meaning to other classes", () => {
+  const catalog = extractEntityTypeCatalog({ executablePath, seedsPath });
+  const action = extractPersistentSelectionActionBoundary({
+    executablePath,
+    functionsPath: join(
+      repositoryRoot,
+      "analysis/generated/imjinrok2/functions.json",
+    ),
+    referencesPath: join(
+      repositoryRoot,
+      "analysis/generated/imjinrok2/references.json",
+    ),
+  }).productionAction;
+  const producedType = catalog.types.find(
+    ({ internalClass }) => internalClass === action.producedInternalClass,
+  );
+
+  assert.equal(action.actionId, 115);
+  assert.equal(action.producedInternalClass, 76);
+  assert.equal(producedType?.originalGameplayName, "조선 권율");
+  assert.deepEqual(producedType?.definition.economy, {
+    warExpense: 0,
+    grainCost: 400,
+    woodCost: 0,
   });
 });
 
@@ -154,6 +218,30 @@ test("rejects static analysis produced from another executable", (t) => {
   );
 });
 
+test("rejects an executable mutation before accepting catalog fields", (t) => {
+  const temporaryDirectory = mkdtempSync(
+    join(tmpdir(), "entity-type-catalog-executable-"),
+  );
+  t.after(() =>
+    rmSync(temporaryDirectory, { recursive: true, force: true }),
+  );
+
+  const alteredExecutablePath = join(temporaryDirectory, "imjinrok2.exe");
+  copyFileSync(executablePath, alteredExecutablePath);
+  const bytes = readFileSync(alteredExecutablePath);
+  bytes[bytes.length - 1] ^= 0xff;
+  writeFileSync(alteredExecutablePath, bytes);
+
+  assert.throws(
+    () =>
+      extractEntityTypeCatalog({
+        executablePath: alteredExecutablePath,
+        seedsPath,
+      }),
+    /SHA-256 mismatch/,
+  );
+});
+
 function assertTypeIdentity(report, internalClass, expected) {
   const type = report.types.find(
     (candidate) => candidate.internalClass === internalClass,
@@ -163,6 +251,14 @@ function assertTypeIdentity(report, internalClass, expected) {
   assert.equal(type.sprite.slot, expected.slot);
   assert.equal(type.sprite.baseFrame, expected.baseFrame);
   assert.equal(type.sprite.sourcePath, expected.sourcePath);
+}
+
+function assertTypeEconomy(report, internalClass, expected) {
+  const type = report.types.find(
+    (candidate) => candidate.internalClass === internalClass,
+  );
+  assert.ok(type, `missing internal class ${internalClass}`);
+  assert.deepEqual(type.definition.economy, expected);
 }
 
 function groupBy(values, selectKey) {

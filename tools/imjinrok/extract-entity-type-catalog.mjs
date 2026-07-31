@@ -25,6 +25,9 @@ const RESOURCE_POINTER_TABLE = 0x004bc094;
 const ARGUMENT_INDEX = {
   spriteSlot: 0,
   baseFrame: 1,
+  warExpense: 5,
+  grainCost: 6,
+  woodCost: 7,
   flags: 37,
   namePointer: 49,
 };
@@ -44,6 +47,27 @@ const CODE_ANCHORS = [
     va: 0x0045bd13,
     bytes: "66 89 51 06",
     meaning: "argument 1 is written to type record base frame +0x06",
+  },
+  {
+    id: "type-definition-war-expense-write",
+    va: 0x0045bd37,
+    bytes: "66 89 51 0e",
+    meaning:
+      "argument 5 low WORD is written to signed type record war-expense field +0x0e",
+  },
+  {
+    id: "type-definition-grain-cost-write",
+    va: 0x0045bd40,
+    bytes: "66 89 41 10",
+    meaning:
+      "argument 6 low WORD is written to signed type record grain-cost field +0x10",
+  },
+  {
+    id: "type-definition-wood-cost-write",
+    va: 0x0045bd49,
+    bytes: "66 89 51 12",
+    meaning:
+      "argument 7 low WORD is written to signed type record wood-cost field +0x12",
   },
   {
     id: "type-definition-flags-write",
@@ -148,10 +172,10 @@ export function extractEntityTypeCatalog({
   );
 
   return {
-    schemaVersion: 1,
+    schemaVersion: 2,
     evidenceStatus: "static-proven-type-identities",
     analysisScope:
-      "Internal class, original CP949 name, sprite slot, base frame, raw flags, and source path only. Animation and gameplay meanings are not inferred.",
+      "Internal class, original CP949 name, sprite slot, base frame, raw flags, source path, and three signed-WORD economy fields written by the canonical type writer only. Grain/wood names are cross-bound by the separately hash-bound production/refund control-flow and shortage-message evidence; animation and other gameplay meanings are not inferred.",
     source: {
       executablePath,
       executableSha256,
@@ -170,6 +194,21 @@ export function extractEntityTypeCatalog({
       fields: {
         spriteSlot: "+0x04",
         baseFrame: "+0x06",
+        warExpense: {
+          offset: "+0x0e",
+          width: "signed WORD",
+          writerArgumentIndex: ARGUMENT_INDEX.warExpense,
+        },
+        grainCost: {
+          offset: "+0x10",
+          width: "signed WORD",
+          writerArgumentIndex: ARGUMENT_INDEX.grainCost,
+        },
+        woodCost: {
+          offset: "+0x12",
+          width: "signed WORD",
+          writerArgumentIndex: ARGUMENT_INDEX.woodCost,
+        },
         flags: "+0x4c",
         namePointer: "+0x6c",
       },
@@ -236,6 +275,20 @@ function buildTypeRecord({ buffer, image, nameCopies, typeCall }) {
       recordAddress: toHex(typeCall.recordAddress),
       initializerCallAddress: toHex(typeCall.callAddress),
       flags: toHex(requireArgument(typeCall, ARGUMENT_INDEX.flags)),
+      economy: {
+        warExpense: requireSignedWordArgument(
+          typeCall,
+          ARGUMENT_INDEX.warExpense,
+        ),
+        grainCost: requireSignedWordArgument(
+          typeCall,
+          ARGUMENT_INDEX.grainCost,
+        ),
+        woodCost: requireSignedWordArgument(
+          typeCall,
+          ARGUMENT_INDEX.woodCost,
+        ),
+      },
     },
     name: {
       runtimePointer: toHex(namePointer),
@@ -394,6 +447,17 @@ function requireArgument(typeCall, argumentIndex) {
     );
   }
   return argument.value;
+}
+
+function requireSignedWordArgument(typeCall, argumentIndex) {
+  const value = requireArgument(typeCall, argumentIndex);
+  if (!Number.isInteger(value)) {
+    throw new Error(
+      `Type ${typeCall.internalClass} argument ${argumentIndex} is not an integer WORD`,
+    );
+  }
+  const rawWord = value & 0xffff;
+  return rawWord >= 0x8000 ? rawWord - 0x10000 : rawWord;
 }
 
 function readResourcePath(buffer, image, spriteSlot) {
