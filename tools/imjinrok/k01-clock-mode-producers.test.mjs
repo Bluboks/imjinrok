@@ -9,6 +9,7 @@ import {
   deriveFeedback,
   extractK01ClockModeProducers,
   forwardOptionWordToSelector,
+  replayRecordToModeFlow,
   replayModeWriter,
   selectOriginalBaseInterval,
 } from "./extract-k01-clock-mode-producers.mjs";
@@ -36,9 +37,13 @@ test("binds K01 clock-mode, selector forwarder, and feedback evidence to the ori
     references: { path: paths.referencesPath, byteLength: 17206569, sha256: "f64cfa6f04bc39573552f42a8b7bdd5b08fea1ba774d05865162d1d80daaf9a5" },
     jumpTables: { path: paths.jumpTablesPath, byteLength: 607724, sha256: "0ae517eb172f61b974ca7a4411e64c1cc42065c462ed53b3065ab2da633dfe2f" },
   });
-  assert.equal(report.functionEvidence.length, 11);
-  assert.equal(report.callEdges.length, 7);
+  assert.equal(report.functionEvidence.length, 17);
+  assert.equal(report.callEdges.length, 10);
   assert.ok(report.codeAnchors.every(({ matched }) => matched));
+  assert.deepEqual(report.modeRoutineDirectCallers.entries, [{ site: "0x0046005c", caller: "0x0045f9c0", target: "0x00484130", type: "UNCONDITIONAL_CALL" }]);
+  assert.deepEqual(report.guardBoundary.directWrites.entries.map(({ site }) => site), ["0x0045fbfc", "0x00474845", "0x00474929", "0x00486585", "0x004865ca"]);
+  assert.deepEqual(report.guardBoundary.serializationAddressReferences.entries.map(({ site }) => site), ["0x00481aec", "0x00481caf"]);
+  assert.match(report.guardBoundary.indirectWriterBoundary, /alias-free/);
   assert.match(report.k01ModeContract.result, /does not establish an edge/);
   assert.match(report.k01ModeContract.conditionalModeOne, /50 ms/);
   assert.match(report.feedbackContract.result, /49, 50, or 51 ms/);
@@ -48,6 +53,7 @@ test("binds K01 clock-mode, selector forwarder, and feedback evidence to the ori
     "non-one-selector-table",
     "signed-word-forwarder",
     "mode-writer-branches",
+    "record-local-ebx-and-mode-flow",
     "message-feedback-prevents-fixed-50ms",
   ]);
 });
@@ -70,12 +76,20 @@ test("replays mode equality, signed selector forwarding, and all feedback outcom
   assert.deepEqual(feedback, [0xffffffff, 0, 1]);
   assert.deepEqual(feedback.map((value) => applyFeedbackToBase({ baseInterval: 50, feedback: value })), [49, 50, 51]);
   assert.equal(deriveFeedback({ historyReady: 0, comparisonInput: 100, recordFound: true, selectedTimestamp: 101, previousFeedback: 7 }), 7);
+  assert.deepEqual(replayRecordToModeFlow({ previousModeWord: 0, guardWord: 0, recordField8Dword: 0xffffffff, tailResult: 0, timeoutReached: false, alternateReached: false }), { ebx: 0xffffffff, argumentWord: 0xffff, invoked: false, modeWord: 0, write: null });
+  assert.deepEqual(replayRecordToModeFlow({ previousModeWord: 0, guardWord: 0, recordField8Dword: 0x12340001, tailResult: 0, timeoutReached: false, alternateReached: false }), { ebx: 0x12340001, argumentWord: 1, invoked: true, modeWord: 1, write: 1 });
+  assert.deepEqual(replayRecordToModeFlow({ previousModeWord: 1, guardWord: 7, recordField8Dword: 2, tailResult: 0, timeoutReached: true, alternateReached: false }), { ebx: 1, argumentWord: 1, invoked: true, modeWord: 0, write: 0 });
+  assert.deepEqual(replayRecordToModeFlow({ previousModeWord: 1, guardWord: 0, recordField8Dword: 1, tailResult: 0, timeoutReached: true, alternateReached: true }), { ebx: 2, argumentWord: 2, invoked: true, modeWord: 1, write: null });
 });
 
 test("rejects malformed widths plus independently tampered and stale generated artifacts", () => {
   assert.throws(() => selectOriginalBaseInterval({ modeWord: 0x10000, selector: 0 }), /modeWord/);
   assert.throws(() => forwardOptionWordToSelector(-1), /optionWord/);
   assert.throws(() => applyFeedbackToBase({ baseInterval: 50, feedback: -1 }), /feedback/);
+  assert.throws(() => replayRecordToModeFlow({ previousModeWord: 0, guardWord: 0, recordField8Dword: 1, tailResult: 0, timeoutReached: 0, alternateReached: false }), /timeoutReached/);
+
+  const executablePath = copyTamperedSource(paths.executablePath);
+  assert.throws(() => extractK01ClockModeProducers({ ...paths, executablePath }), /original EXE SHA-256/);
 
   const functionsPath = copyWithReplacement(
     paths.functionsPath,
@@ -86,6 +100,9 @@ test("rejects malformed widths plus independently tampered and stale generated a
 
   const referencesPath = copyWithReplacement(paths.referencesPath, '"to": "0x004430f0"', '"to": "0x004430f1"');
   assert.throws(() => extractK01ClockModeProducers({ ...paths, referencesPath }), /references artifact SHA-256/);
+
+  const missingRecordCallPath = copyWithReplacement(paths.referencesPath, '"from": "0x004844ed"', '"from": "0x004844ee"');
+  assert.throws(() => extractK01ClockModeProducers({ ...paths, referencesPath: missingRecordCallPath }), /references artifact SHA-256/);
 
   const jumpTablesPath = copyWithReplacement(paths.jumpTablesPath, '"destination": "0x004600cb"', '"destination": "0x004600cc"');
   assert.throws(() => extractK01ClockModeProducers({ ...paths, jumpTablesPath }), /jump tables artifact SHA-256/);
@@ -114,5 +131,15 @@ function copyWithReplacement(source, expected, replacement) {
   const sourceText = readFileSync(source, "utf8");
   assert.ok(sourceText.includes(expected), `missing fixture text ${expected}`);
   writeFileSync(destination, sourceText.replace(expected, replacement));
+  return destination;
+}
+
+function copyTamperedSource(source) {
+  const directory = mkdtempSync(join(tmpdir(), "k01-clock-mode-"));
+  temporaryDirectories.add(directory);
+  const destination = join(directory, "imjinrok2.exe");
+  const bytes = readFileSync(source);
+  bytes[bytes.length - 1] ^= 1;
+  writeFileSync(destination, bytes);
   return destination;
 }
