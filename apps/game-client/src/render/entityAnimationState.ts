@@ -7,6 +7,7 @@ export type EntityAnimationStateUnit = Pick<
   | "attackCooldownTicks"
   | "carriedResource"
   | "construction"
+  | "demolition"
   | "currentOrder"
   | "health"
   | "movementPath"
@@ -19,7 +20,7 @@ export function getEntityAnimationStateKey(
 ): string | null {
   const candidates: string[] = [];
 
-  if (unit.construction) {
+  if (unit.demolition || unit.construction) {
     candidates.push("construction");
   }
 

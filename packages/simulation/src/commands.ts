@@ -384,6 +384,10 @@ export function validateCommand(state: WorldState, envelope: CommandEnvelope): C
         return { ok: false, reason: "unit is not a building" };
       }
 
+      if (unit.health.current <= 0) {
+        return { ok: false, reason: "building is destroyed" };
+      }
+
       if (isUnitUnderConstruction(unit)) {
         return { ok: false, reason: "unit is under construction" };
       }

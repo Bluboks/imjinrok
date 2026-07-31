@@ -75,6 +75,7 @@ const SUPPORTED_ACTION_IDS = new Set<ActionDefinitionId>([
   "train-archer",
   "cancel-production",
   "cancel-construction",
+  "demolish",
   "rally-point",
   "research-loom",
   "set-gather",
@@ -274,6 +275,10 @@ function getSelectionActionIds(selectedEntities: SelectedEntitiesView): readonly
     return ["cancel-construction", "stop"];
   }
 
+  if (selectedEntities.length > 0 && selectedEntities.every((selection) => selection.demolition)) {
+    return ["demolish"];
+  }
+
   const actionSource =
     selectedEntities.find((selection) => unitCanPerformAction(selection.kind, "build")) ??
     selectedEntities.find((selection) => unitCanPerformAction(selection.kind, "gather")) ??
@@ -350,6 +355,28 @@ function getActionAvailability(
     const hasConstruction = selectedEntities.some((selection) => selection.construction);
 
     return hasConstruction ? { enabled: true } : { enabled: false, disabledReason: "없음" };
+  }
+
+  if (actionId === "demolish") {
+    const availableBuilding = selectedEntities.some((selection) => (
+      unitDefinitions[selection.kind].category === "building" &&
+      (selection.hp === undefined || selection.hp > 0) &&
+      !selection.construction &&
+      !selection.demolition &&
+      (selection.productionQueue?.length ?? 0) === 0 &&
+      (selection.researchQueue?.length ?? 0) === 0
+    ));
+
+    if (availableBuilding) {
+      return { enabled: true };
+    }
+
+    const isDemolishing = selectedEntities.some((selection) => selection.demolition);
+    const isBusy = selectedEntities.some((selection) =>
+      (selection.productionQueue?.length ?? 0) > 0 || (selection.researchQueue?.length ?? 0) > 0,
+    );
+    const isDestroyed = selectedEntities.some((selection) => selection.hp !== undefined && selection.hp <= 0);
+    return { enabled: false, disabledReason: isDemolishing ? "해체중" : isBusy ? "진행중" : isDestroyed ? "파괴됨" : "불가" };
   }
 
   const trainUnit = TRAIN_ACTION_UNITS[actionId];
@@ -446,6 +473,7 @@ function getActiveActionSources(
 ): SelectedEntitiesView {
   return selectedEntities.filter((selection) =>
     (options?.includeConstruction || !selection.construction) &&
+    !selection.demolition &&
     unitCanPerformAction(selection.kind, actionId),
   );
 }
@@ -459,7 +487,11 @@ function getNoActiveSourceAvailability(
     unitCanPerformAction(selection.kind, actionId),
   );
 
-  return { enabled: false, disabledReason: hasConstructingSource ? "건설중" : "불가" };
+  const hasDemolishingSource = selectedEntities.some((selection) =>
+    selection.demolition && unitCanPerformAction(selection.kind, actionId),
+  );
+
+  return { enabled: false, disabledReason: hasDemolishingSource ? "해체중" : hasConstructingSource ? "건설중" : "불가" };
 }
 
 function canAffordResearch(playerEconomy: PlayerEconomyView, research: ResearchDefinitionId): boolean {

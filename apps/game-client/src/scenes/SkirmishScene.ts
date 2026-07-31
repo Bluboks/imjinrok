@@ -1262,6 +1262,11 @@ export class SkirmishScene extends Phaser.Scene {
       return;
     }
 
+    if (action.actionId === "demolish") {
+      this.issueDemolishBuildings(action.selectedEntityIds);
+      return;
+    }
+
     if (action.actionId === "build") {
       this.beginBuildPlacement(action.selectedEntityIds, "house");
       return;
@@ -2071,6 +2076,13 @@ export class SkirmishScene extends Phaser.Scene {
         return "더 이상 자원을 실을 수 없습니다.";
       case "unit is under construction":
         return "아직 완성되지 않은 건물입니다.";
+      case "building is busy":
+        return "생산·연구 중인 건물은 해체할 수 없습니다.";
+      case "building is destroyed":
+        return "이미 파괴된 건물은 해체할 수 없습니다.";
+      case "building is already being demolished":
+      case "building is being demolished":
+        return "이미 해체 중인 건물입니다.";
       case "unit is not a building":
         return "건물이 아닙니다.";
       case "unit is not under construction":
@@ -5341,6 +5353,41 @@ export class SkirmishScene extends Phaser.Scene {
 
       return this.issueCommandEnvelope(envelope);
     });
+
+    void Promise.all(commandPromises).then(() => {
+      this.syncWorldFromTransport(true);
+      this.emitSelectionChanged();
+      this.syncUnitRenderables();
+      this.publishPlayerEconomy();
+      this.publishMinimapEntities();
+    });
+  }
+
+  private issueDemolishBuildings(unitIds: readonly string[]): void {
+    const buildings = unitIds
+      .map((unitId) => this.worldState.units[unitId])
+      .filter((unit): unit is UnitState => (
+        unit !== undefined &&
+        unit.playerId === this.localPlayerId &&
+        unitDefinitions[unit.kind].category === "building" &&
+        unit.health.current > 0 &&
+        !unit.construction &&
+        !unit.demolition &&
+        (unit.productionQueue?.length ?? 0) === 0 &&
+        (unit.researchQueue?.length ?? 0) === 0
+      ));
+
+    if (buildings.length === 0) {
+      this.showCommandFeedback("building is busy");
+      return;
+    }
+
+    const commandPromises = buildings.map((building) => this.issueCommandEnvelope({
+      sessionId: this.launchContext?.session?.id ?? "offline-skirmish",
+      playerId: this.localPlayerId,
+      issuedAtTick: this.worldState.tick,
+      command: { type: "demolish-building", unitId: building.id },
+    }));
 
     void Promise.all(commandPromises).then(() => {
       this.syncWorldFromTransport(true);
@@ -9069,7 +9116,7 @@ export class SkirmishScene extends Phaser.Scene {
       const visual = this.getEntityVisual(unit.kind);
       const hasConstructionVisual = visual?.states.construction !== undefined;
       renderable.container.setPosition(unitPosition.x, unitPosition.y).setDepth(unitPosition.y + 20);
-      renderable.container.setAlpha(unit.construction && !hasConstructionVisual ? 0.68 : 1);
+      renderable.container.setAlpha((unit.construction || unit.demolition) && !hasConstructionVisual ? 0.68 : 1);
       renderable.selectionRing.setVisible(this.selectedUnitIds.has(unit.id));
       renderable.terminalKind = unit.kind;
       renderable.terminalSourceOrientation = unit.sourceOrientation ? { ...unit.sourceOrientation } : undefined;
@@ -9614,12 +9661,13 @@ export class SkirmishScene extends Phaser.Scene {
     clipKey: string,
     clip: AnimationClip,
   ): EntityAnimationSelection | null {
-    if (stateKey !== "construction" || !unit.construction || clip.frames.length === 0) {
+    if (stateKey !== "construction" || (!unit.construction && !unit.demolition) || clip.frames.length === 0) {
       return null;
     }
 
-    const progress = getConstructionProgress(unit);
-    const frameIndex = selectConstructionFrameIndex(progress, clip);
+    const frameIndex = unit.demolition
+      ? Math.max(0, Math.min(clip.frames.length - 1, unit.demolition.phase))
+      : selectConstructionFrameIndex(getConstructionProgress(unit), clip);
     const frame = clip.frames[frameIndex];
 
     if (!frame) {

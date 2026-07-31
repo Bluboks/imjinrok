@@ -98,6 +98,10 @@ test("demolition command rejects non-buildings, enemy buildings, busy buildings,
   assert.deepEqual(issueCommand(state, demolishEnvelope(worker.id)), { ok: false, reason: "unit is not a building" });
   assert.deepEqual(issueCommand(state, demolishEnvelope(enemyBuilding.id)), { ok: false, reason: "unit is not owned by player" });
 
+  building.health.current = 0;
+  assert.deepEqual(issueCommand(state, demolishEnvelope(building.id)), { ok: false, reason: "building is destroyed" });
+  building.health.current = building.health.max;
+
   building.construction = { remainingTicks: 1, totalTicks: 10 };
   assert.deepEqual(issueCommand(state, demolishEnvelope(building.id)), { ok: false, reason: "unit is under construction" });
   delete building.construction;
