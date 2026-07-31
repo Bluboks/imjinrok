@@ -9,6 +9,7 @@ export const CORE_UNCAPPED_CAPACITY_POLICY_ID = "core:uncapped";
 
 export type CapacityRejectionReason = "capacity-exceeded" | "constraint-rejected";
 export type CapacityEntryLocation = "live" | "pending";
+export type CapacityRequestPhase = "queue" | "completion";
 export type CapacityUnitCategory = UnitDefinition["category"];
 
 export interface CapacityEntry {
@@ -21,6 +22,12 @@ export interface CapacityEntry {
 
 export interface CapacityAdmissionRequest {
   readonly kind: UnitDefinitionId;
+  /** Queue admission adds a reservation; completion transfers one named reservation to live state. */
+  readonly phase: CapacityRequestPhase;
+  /** Required only for completion so the transfer never relies on queue ordering. */
+  readonly sourceUnitId?: string;
+  /** Required only for completion and matched with sourceUnitId. */
+  readonly queueItemId?: string;
 }
 
 export interface CapacityPolicyContext {
@@ -189,6 +196,12 @@ export function requireCapacityPolicy(id: string): CapacityPolicy {
   return defaultCapacityPolicyRegistry.require(id);
 }
 
+export function resolveCapacityPolicyId(id: string | undefined): string {
+  const resolved = id ?? CORE_PROVIDER_SUPPLY_CAPACITY_POLICY_ID;
+  requireCapacityPolicy(resolved);
+  return resolved;
+}
+
 export function createProviderSupplyCapacityPolicy(
   options: CreateProviderSupplyCapacityPolicyOptions = {},
 ): CapacityPolicy {
@@ -281,7 +294,33 @@ export function canAdmitPlayerCapacity(
   kind: UnitDefinitionId,
   policyReference: string | CapacityPolicy = CORE_PROVIDER_SUPPLY_CAPACITY_POLICY_ID,
 ): CapacityAdmissionResult {
-  const evaluation = evaluateCapacity(state, playerId, resolvePolicy(policyReference), Object.freeze({ kind }));
+  const evaluation = evaluateCapacity(
+    state,
+    playerId,
+    resolvePolicy(policyReference),
+    Object.freeze({ kind, phase: "queue" }),
+  );
+  return toAdmissionResult(evaluation);
+}
+
+export function canCompleteQueuedPlayerCapacity(
+  state: WorldState,
+  playerId: string,
+  sourceUnitId: string,
+  queueItemId: string,
+  kind: UnitDefinitionId,
+  policyReference: string | CapacityPolicy = CORE_PROVIDER_SUPPLY_CAPACITY_POLICY_ID,
+): CapacityAdmissionResult {
+  const evaluation = evaluateCapacity(
+    state,
+    playerId,
+    resolvePolicy(policyReference),
+    Object.freeze({ kind, phase: "completion", sourceUnitId, queueItemId }),
+  );
+  return toAdmissionResult(evaluation);
+}
+
+function toAdmissionResult(evaluation: CapacityEvaluation): CapacityAdmissionResult {
   const rejectedConstraint = evaluation.constraints.find((constraint) => !constraint.admitted);
   const rejection = rejectedConstraint
     ? Object.freeze({
@@ -362,12 +401,49 @@ function createCapacityContext(
     }
   }
 
+  const effectiveEntries = request?.phase === "completion"
+    ? transferPendingEntryToLive(entries, request)
+    : entries;
+
   return Object.freeze({
     state,
     playerId,
-    entries: Object.freeze(entries),
+    entries: Object.freeze(effectiveEntries),
     ...(request ? { request } : {}),
   });
+}
+
+function transferPendingEntryToLive(
+  entries: readonly CapacityEntry[],
+  request: CapacityAdmissionRequest,
+): CapacityEntry[] {
+  if (!request.sourceUnitId || !request.queueItemId) {
+    throw new Error("Capacity completion request requires sourceUnitId and queueItemId.");
+  }
+
+  const entryIndex = entries.findIndex((entry) =>
+    entry.location === "pending" &&
+    entry.sourceUnitId === request.sourceUnitId &&
+    entry.queueItemId === request.queueItemId,
+  );
+  const pendingEntry = entries[entryIndex];
+
+  if (!pendingEntry) {
+    throw new Error(`Capacity completion request references unknown queue item '${request.queueItemId}'.`);
+  }
+  if (pendingEntry.kind !== request.kind) {
+    throw new Error(`Capacity completion request kind '${request.kind}' does not match queue item '${request.queueItemId}'.`);
+  }
+
+  return entries.map((entry, index) => index === entryIndex
+    ? Object.freeze({
+        kind: pendingEntry.kind,
+        category: pendingEntry.category,
+        location: "live" as const,
+        sourceUnitId: pendingEntry.sourceUnitId,
+      })
+    : entry,
+  );
 }
 
 function createProviderSupplyCapacityConstraint(limit: number): CapacityConstraint {
@@ -375,6 +451,9 @@ function createProviderSupplyCapacityConstraint(limit: number): CapacityConstrai
     id: "provider-supply",
     evaluate(context: CapacityPolicyContext) {
       const summary = summarizeProviderSupply(context, limit);
+      if (context.request?.phase === "completion") {
+        return buildCompletionOutcome(summary.used, summary.pending, summary.cap);
+      }
       const requested = context.request ? getPopulationCost(context.request.kind) : 0;
       return buildBudgetOutcome(summary.used, summary.pending, requested, summary.cap);
     },
@@ -408,7 +487,7 @@ function createCostBudgetCapacityConstraint(
     evaluate(context: CapacityPolicyContext) {
       const used = sumEntryCost(context.entries, "live", costForKind);
       const pending = sumEntryCost(context.entries, "pending", costForKind);
-      const requested = context.request ? normalizeCost(costForKind(context.request.kind)) : 0;
+      const requested = context.request?.phase === "queue" ? normalizeCost(costForKind(context.request.kind)) : 0;
       return buildBudgetOutcome(used, pending, requested, cap);
     },
   });
@@ -428,7 +507,7 @@ function createCountCapacityConstraint(
       const pending = includePending
         ? context.entries.filter((entry) => entry.location === "pending" && matchesEntry(entry)).length
         : 0;
-      const requested = context.request && matchesRequest(context.request.kind) ? 1 : 0;
+      const requested = context.request?.phase === "queue" && matchesRequest(context.request.kind) ? 1 : 0;
       return buildBudgetOutcome(used, pending, requested, cap);
     },
   });
@@ -444,14 +523,16 @@ function summarizeProviderSupply(context: CapacityPolicyContext, limit: number):
       continue;
     }
 
-    used += getPopulationCost(unit.kind);
-
     if (!isUnitUnderConstruction(unit)) {
       provided += getPopulationProvided(unit.kind);
     }
+  }
 
-    for (const queueItem of unit.productionQueue ?? []) {
-      pending += getPopulationCost(queueItem.unit);
+  for (const entry of context.entries) {
+    if (entry.location === "live") {
+      used += getPopulationCost(entry.kind);
+    } else {
+      pending += getPopulationCost(entry.kind);
     }
   }
 
@@ -474,6 +555,26 @@ function buildBudgetOutcome(used: number, pending: number, requested: number, ca
     used,
     pending,
     requested,
+    cap,
+    unlimited: false,
+    available,
+    admitted,
+    ...(admitted ? {} : { rejectionReason: "capacity-exceeded" as const }),
+  });
+}
+
+function buildCompletionOutcome(
+  used: number,
+  pending: number,
+  cap: number,
+): CapacityConstraintOutcome {
+  const available = Math.max(0, cap - used);
+  const admitted = used <= cap;
+
+  return Object.freeze({
+    used,
+    pending,
+    requested: 0,
     cap,
     unlimited: false,
     available,
