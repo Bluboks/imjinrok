@@ -1,0 +1,425 @@
+{
+  "schemaVersion": 1,
+  "question": "Do FUN_004648e0 and FUN_00481c50 precompute K01 per-cell projection outputs through FUN_00464cc0, and what exact K01 low-nibble/family/table/outputY joint vector results?",
+  "analysisStatus": "static-confirmed-for-FUN_004648e0-per-cell-output-writes-FUN_00481c50-row-overwrite-loop-and-bounded-K01-outputY-joint-vector",
+  "reproductionStatus": "reproduction-complete-for-hash-bound-K01-joint-distribution-output-digest-and-fail-closed-inputs",
+  "implementationStatus": "no-product-port-in-this-extractor",
+  "sources": {
+    "executable": {
+      "path": "original/imjinrok2/imjinrok2.exe",
+      "size": 843833,
+      "sha256": "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e"
+    },
+    "map": {
+      "path": "original/imjinrok2/stagemap/k01.map",
+      "size": 1097100,
+      "sha256": "43ec3a173032f74c12d3cce1db1078b076b651ed79070a0914673a5b65da99cb"
+    },
+    "staticAnalysis": {
+      "functions": {
+        "path": "analysis/generated/imjinrok2/functions.json",
+        "size": 1468333,
+        "sha256": "7e071fdfe425d22447780c265fe1d3fd271a1bedd1773682bebcb8ddc6d2e16e",
+        "sourceSha256": "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e",
+        "functionProvenance": [
+          {
+            "entry": "0x004648e0",
+            "bodyRange": "0x004648e0-0x00464cb2",
+            "bodySize": 979,
+            "instructionCount": 315,
+            "instructionSha256": "e6f8db32835296fb67b09de507b8aef2ddd6dbe6ce359922ed1abf159fb35c5b",
+            "rawBodySha256": "e8bba48e9c6925826914eab6f55a038ee275500831e70ec496b1bcc7dfd63112"
+          },
+          {
+            "entry": "0x00464cc0",
+            "bodyRange": "0x00464cc0-0x00464ddd",
+            "bodySize": 286,
+            "instructionCount": 103,
+            "instructionSha256": "0df728460a1833f756c0164f3968eda5de7312a64e87c52edc98aa5a33566781",
+            "rawBodySha256": "40b41b7ce95c3e7516c0bf2f6d01f1e86bf2848ed0ec5256f63d7858f55a1d10"
+          },
+          {
+            "entry": "0x004653d0",
+            "bodyRange": "0x004653d0-0x00465502",
+            "bodySize": 307,
+            "instructionCount": 108,
+            "instructionSha256": "43d9b8a99218f2e33f0763cc5e2cf2d7a1a50f0904d02c0939d8d928b4bb9885",
+            "rawBodySha256": "be8ebc57dd7773790c1ad63902b5e3e7fe734c5add75ceefe70095f3e75e82d1"
+          },
+          {
+            "entry": "0x00481c50",
+            "bodyRange": "0x00481c50-0x00481ed1",
+            "bodySize": 642,
+            "instructionCount": 199,
+            "instructionSha256": "823cf8ad9d1b831c9183293c68646fa1e1641b0f8074fc3559a4f8d2feade5d8",
+            "rawBodySha256": "d7c601f3aa90d2154224add77351929121efc63c778b21474478dc26589a46a9"
+          }
+        ]
+      },
+      "references": {
+        "path": "analysis/generated/imjinrok2/references.json",
+        "size": 17206569,
+        "sha256": "f64cfa6f04bc39573552f42a8b7bdd5b08fea1ba774d05865162d1d80daaf9a5",
+        "sourceSha256": "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e",
+        "callEdges": [
+          {
+            "from": "0x00410f7e",
+            "fromFunctionEntry": "0x00410cc0",
+            "to": "0x00464cc0",
+            "type": "UNCONDITIONAL_CALL"
+          },
+          {
+            "from": "0x00416749",
+            "fromFunctionEntry": "0x00416600",
+            "to": "0x00464cc0",
+            "type": "UNCONDITIONAL_CALL"
+          },
+          {
+            "from": "0x0046491a",
+            "fromFunctionEntry": "0x004648e0",
+            "to": "0x00464cc0",
+            "type": "UNCONDITIONAL_CALL"
+          },
+          {
+            "from": "0x0046547b",
+            "fromFunctionEntry": "0x004653d0",
+            "to": "0x00464cc0",
+            "type": "UNCONDITIONAL_CALL"
+          },
+          {
+            "from": "0x0047301c",
+            "fromFunctionEntry": "0x00472f90",
+            "to": "0x00464cc0",
+            "type": "UNCONDITIONAL_CALL"
+          },
+          {
+            "from": "0x00481e27",
+            "fromFunctionEntry": "0x00481c50",
+            "to": "0x00464cc0",
+            "type": "UNCONDITIONAL_CALL"
+          }
+        ]
+      }
+    },
+    "importedCrossCheck": {
+      "extractor": "extract-k01-tile-placement-elevation-evidence.mjs",
+      "runtimeWordTableAddress": "0x00c06e86",
+      "runtimeWordTableValues": [
+        0,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9
+      ],
+      "priorCellStreamSha256": "78d0d96e0157e60cf9d2e2e4325941510f8911dbc9a57422ad00220874ad406c",
+      "priorRawRasterVerticalStreamSha256": "76cc670258325ebc671d19b6f864768bf376328a7573ca7b29887c780e50b864"
+    }
+  },
+  "functionRanges": [
+    {
+      "entry": "0x004648e0",
+      "bodyRange": "0x004648e0-0x00464cb2",
+      "bodySize": 979,
+      "instructionCount": 315,
+      "instructionSha256": "e6f8db32835296fb67b09de507b8aef2ddd6dbe6ce359922ed1abf159fb35c5b",
+      "rawBodySha256": "e8bba48e9c6925826914eab6f55a038ee275500831e70ec496b1bcc7dfd63112"
+    },
+    {
+      "entry": "0x00464cc0",
+      "bodyRange": "0x00464cc0-0x00464ddd",
+      "bodySize": 286,
+      "instructionCount": 103,
+      "instructionSha256": "0df728460a1833f756c0164f3968eda5de7312a64e87c52edc98aa5a33566781",
+      "rawBodySha256": "40b41b7ce95c3e7516c0bf2f6d01f1e86bf2848ed0ec5256f63d7858f55a1d10"
+    },
+    {
+      "entry": "0x004653d0",
+      "bodyRange": "0x004653d0-0x00465502",
+      "bodySize": 307,
+      "instructionCount": 108,
+      "instructionSha256": "43d9b8a99218f2e33f0763cc5e2cf2d7a1a50f0904d02c0939d8d928b4bb9885",
+      "rawBodySha256": "be8ebc57dd7773790c1ad63902b5e3e7fe734c5add75ceefe70095f3e75e82d1"
+    },
+    {
+      "entry": "0x00481c50",
+      "bodyRange": "0x00481c50-0x00481ed1",
+      "bodySize": 642,
+      "instructionCount": 199,
+      "instructionSha256": "823cf8ad9d1b831c9183293c68646fa1e1641b0f8074fc3559a4f8d2feade5d8",
+      "rawBodySha256": "d7c601f3aa90d2154224add77351929121efc63c778b21474478dc26589a46a9"
+    }
+  ],
+  "outputWriterContracts": {
+    "FUN_00464cc0": {
+      "callingConventionEvidence": "ECX is map; four callee-cleaned stack arguments are x, y, outputX pointer, outputY pointer. The callee returns with RET 0x10.",
+      "outputOrder": [
+        "argument3 -> outputX",
+        "argument4 -> outputY"
+      ],
+      "baseOutput": {
+        "outputX": "(int32(x) - int32(y)) << 5",
+        "outputY": "(int32(x) + int32(y)) << 4"
+      }
+    },
+    "FUN_004648e0": {
+      "mapInput": "ECX",
+      "loopOrder": "y outer (EBP), x inner (EDI)",
+      "callSite": "0x0046491a",
+      "outputPointers": {
+        "outputX": "0x00843984 + 4*(x*180+y)",
+        "outputY": "0x008633c4 + 4*(x*180+y)"
+      },
+      "conclusion": "For every looped cell, this caller writes distinct x-major per-cell outputX/outputY slots through FUN_00464cc0."
+    },
+    "FUN_00481c50": {
+      "mapInput": "ECX = 0x00abfff0",
+      "loopOrder": "y outer (EDI), x inner (ESI)",
+      "callSite": "0x00481e27",
+      "outputPointers": {
+        "outputX": "0x00843984 + 4*y",
+        "outputY": "0x008633c4 + 4*y"
+      },
+      "conclusion": "It calls FUN_00464cc0 over the nested cell loop, but its output pointers omit x. Each inner iteration overwrites the same row-indexed pair; this is not a per-cell output table write in the proven code range."
+    }
+  },
+  "consumers": {
+    "FUN_004653d0": {
+      "bodyRange": "0x004653d0-0x00465502",
+      "callSite": "0x0046547b",
+      "boundedUse": "A bounded nearby-cell loop passes local outputX/outputY pointers to FUN_00464cc0, subtracts both returned coordinates from its input pair, squares both differences, and keeps the least distance candidate.",
+      "boundary": "This establishes returned projected-coordinate use for the bounded nearest-cell selection path, not a human meaning for the coordinate axes or terrain."
+    }
+  },
+  "outputYJointVector": {
+    "coordinateOrder": "x-major: ordinal = x * height + y",
+    "dimensions": {
+      "width": 60,
+      "height": 60
+    },
+    "count": 3600,
+    "runtimeWords": [
+      0,
+      9,
+      9,
+      9,
+      9,
+      9,
+      9,
+      9,
+      9,
+      9,
+      9,
+      9,
+      9,
+      9,
+      9
+    ],
+    "stream": {
+      "bytesPerCell": 8,
+      "fieldByteOrder": [
+        "lowNibble",
+        "family",
+        "runtimeWordInt16LE",
+        "helperReturnInt16LE",
+        "outputYAdjustmentInt16LE"
+      ],
+      "sha256": "0e2123b96bf4aad8e09db38d60245abf655171198171c034734bbd59cee46bb6"
+    },
+    "joints": [
+      {
+        "lowNibble": 1,
+        "family": 1,
+        "runtimeWord": 9,
+        "helperReturn": 0,
+        "outputYBranch": "other-low-nibble",
+        "outputYAdjustment": 9,
+        "rawRasterVerticalBranch": 16,
+        "count": 95
+      },
+      {
+        "lowNibble": 1,
+        "family": 2,
+        "runtimeWord": 9,
+        "helperReturn": 0,
+        "outputYBranch": "other-low-nibble",
+        "outputYAdjustment": 9,
+        "rawRasterVerticalBranch": 16,
+        "count": 95
+      },
+      {
+        "lowNibble": 1,
+        "family": 3,
+        "runtimeWord": 9,
+        "helperReturn": 0,
+        "outputYBranch": "other-low-nibble",
+        "outputYAdjustment": 9,
+        "rawRasterVerticalBranch": 16,
+        "count": 101
+      },
+      {
+        "lowNibble": 1,
+        "family": 4,
+        "runtimeWord": 9,
+        "helperReturn": 0,
+        "outputYBranch": "other-low-nibble",
+        "outputYAdjustment": 9,
+        "rawRasterVerticalBranch": 16,
+        "count": 79
+      },
+      {
+        "lowNibble": 1,
+        "family": 5,
+        "runtimeWord": 9,
+        "helperReturn": 0,
+        "outputYBranch": "other-low-nibble",
+        "outputYAdjustment": 9,
+        "rawRasterVerticalBranch": 16,
+        "count": 38
+      },
+      {
+        "lowNibble": 1,
+        "family": 6,
+        "runtimeWord": 9,
+        "helperReturn": 0,
+        "outputYBranch": "other-low-nibble",
+        "outputYAdjustment": 9,
+        "rawRasterVerticalBranch": 16,
+        "count": 36
+      },
+      {
+        "lowNibble": 1,
+        "family": 7,
+        "runtimeWord": 9,
+        "helperReturn": 0,
+        "outputYBranch": "other-low-nibble",
+        "outputYAdjustment": 9,
+        "rawRasterVerticalBranch": 16,
+        "count": 54
+      },
+      {
+        "lowNibble": 1,
+        "family": 8,
+        "runtimeWord": 9,
+        "helperReturn": 0,
+        "outputYBranch": "other-low-nibble",
+        "outputYAdjustment": 9,
+        "rawRasterVerticalBranch": 16,
+        "count": 61
+      },
+      {
+        "lowNibble": 1,
+        "family": 9,
+        "runtimeWord": 9,
+        "helperReturn": 0,
+        "outputYBranch": "other-low-nibble",
+        "outputYAdjustment": 9,
+        "rawRasterVerticalBranch": 16,
+        "count": 52
+      },
+      {
+        "lowNibble": 1,
+        "family": 10,
+        "runtimeWord": 9,
+        "helperReturn": 0,
+        "outputYBranch": "other-low-nibble",
+        "outputYAdjustment": 9,
+        "rawRasterVerticalBranch": 16,
+        "count": 33
+      },
+      {
+        "lowNibble": 1,
+        "family": 11,
+        "runtimeWord": 9,
+        "helperReturn": 0,
+        "outputYBranch": "other-low-nibble",
+        "outputYAdjustment": 9,
+        "rawRasterVerticalBranch": 16,
+        "count": 35
+      },
+      {
+        "lowNibble": 1,
+        "family": 12,
+        "runtimeWord": 9,
+        "helperReturn": 0,
+        "outputYBranch": "other-low-nibble",
+        "outputYAdjustment": 9,
+        "rawRasterVerticalBranch": 16,
+        "count": 55
+      },
+      {
+        "lowNibble": 1,
+        "family": 14,
+        "runtimeWord": 9,
+        "helperReturn": 0,
+        "outputYBranch": "other-low-nibble",
+        "outputYAdjustment": 9,
+        "rawRasterVerticalBranch": 16,
+        "count": 1
+      },
+      {
+        "lowNibble": 2,
+        "family": 0,
+        "runtimeWord": 0,
+        "helperReturn": 0,
+        "outputYBranch": "low-nibble-equals-2",
+        "outputYAdjustment": 16,
+        "rawRasterVerticalBranch": 0,
+        "count": 2865
+      }
+    ],
+    "lowNibbleFamilyCounts": {
+      "1/1": 95,
+      "1/2": 95,
+      "1/3": 101,
+      "1/4": 79,
+      "1/5": 38,
+      "1/6": 36,
+      "1/7": 54,
+      "1/8": 61,
+      "1/9": 52,
+      "1/10": 33,
+      "1/11": 35,
+      "1/12": 55,
+      "1/14": 1,
+      "2/0": 2865
+    },
+    "interpretation": "K01 has helperReturn 0 for every cell. Thus low-nibble 2/family 0 yields outputY base + 16, while low-nibble 1/family 1..14 yields outputY base + 9. Their precomputed outputY additions differ by 7; this remains distinct from the raw raster vertical branch 0/16."
+  },
+  "rawCodeAnchors": [
+    {
+      "label": "FUN_004648e0 per-cell pointer/call loop",
+      "va": "0x00464901",
+      "bytes": "8d 1c ad 00 00 00 00 8d 83 c4 33 86 00 8d 8b 84 39 84 00 50 51 55 57 8b ce e8 a1 03 00 00 8b 86 a0 2d 00 00 47 81 c3 d0 02 00 00",
+      "meaning": "The first pushed pointer is 0x008633c4 + 4*(x*180+y), then 0x00843984 + 4*(x*180+y); FUN_00464cc0 consumes them as outputY then outputX."
+    },
+    {
+      "label": "FUN_00464cc0 output parameter stores",
+      "va": "0x00464d1f",
+      "bytes": "8b 4c 24 20 89 54 24 10 8d 14 33 c1 e0 05 c1 e2 04 89 01 89 55 00",
+      "meaning": "argument 3 receives outputX and argument 4 receives outputY after the base projection writes."
+    },
+    {
+      "label": "FUN_00481c50 row-pointer/call loop",
+      "va": "0x00481e01",
+      "bytes": "33 c0 0f bf df 8d 04 80 8d 04 c0 8d 04 83 c1 e0 02 8d 88 c4 33 86 00 8d 90 84 39 84 00 51 52 57 56 b9 f0 ff ab 00 e8 94 2e fe ff",
+      "meaning": "The pointer offset is 4*y because EAX begins at zero; inner x is passed to FUN_00464cc0 but does not index either output pointer."
+    },
+    {
+      "label": "FUN_004653d0 projected-coordinate distance comparison",
+      "va": "0x0046546f",
+      "bytes": "8d 44 24 20 8d 54 24 1c 50 52 57 56 e8 40 f8 ff ff 0f bf 4c 24 30 8b 54 24 1c 8b 5c 24 20 0f bf 44 24 34 2b ca 2b c3 8b e9 0f af c0 0f af e9 8b 4c 24 10 03 c5 3b c1",
+      "meaning": "It passes local outputX/outputY storage to FUN_00464cc0, then compares the squared distance using both returned coordinates."
+    }
+  ],
+  "residualBoundary": "The outputY additions are precomputed cell projection/outputY adjustments. The raw raster branch is separately 0 for low-nibble 2 and 16 otherwise; neither value alone proves gameplay terrain height, elevation, world-axis, or renderer-pivot semantics. Runtime table lifetime/order and alias/computed writers remain outside this unit."
+}
