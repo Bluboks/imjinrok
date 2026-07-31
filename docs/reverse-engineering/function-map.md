@@ -114,11 +114,13 @@
 | `0x004481d0` | `FUN_004481d0`, `0x004481d0-0x00448225` | 6 / 21 | raw global tick cache→mission dispatcher→AX별 result code/call | same-tick skip와 cache 선행 write 정적 확정 |
 | `0x004492f0` | `FUN_004492f0`, `0x004492f0-0x004492fa` | 1 / 2 | `DWORD 0x0055299c=1` raw writer | dispatcher의 matured timer result에서만 호출 정적 확정 |
 | `0x00442ca0` | `FUN_00442ca0`, `0x00442ca0-0x00442d95` | 25 / 82 | selector별 raw byte-grid 변경 | K01 selector 5 table·경계·두 grid write 정적 확정; 사람용 의미 미확정 |
+| `0x00439260` | `FUN_00439260`, `0x00439260-0x004392eb` | ? / 42 | entity coordinate·owner/faction gate 뒤 selector reveal 호출 | `+0x1bc/+0x1be`, local-player record `+0x5`, `+0x1a8` selector와 one-shot `+0x1aa`→selector 2/latch clear 정적 확정 |
 | `0x004517a0` | `FUN_004517a0`, `0x004517a0-0x00451905` | 10 / 104 | 스프라이트 프레임 blit | 호출 규약과 좌표계 |
 | `0x0045bd00` | `FUN_0045bd00`, `0x0045bd00-0x0045bef8` | 1 / 103 | stride `0x14c` 타입 정의 레코드 writer | slot·base frame·이름·footprint `+0x14/+0x16` 필드 정적 확정 |
 | `0x0045bf50` | `FUN_0045bf50`, `0x0045bf50-0x0045efb9` | 1 / 5,100 | 전체 엔티티 타입 정의 초기화 | class 1~95 슬롯·기본 프레임·flags·이름 포인터와 K01 class 12/13/14/82 1×1·bit `0x08` clear 정적 확정 |
 | `0x0045f9c0` | `FUN_0045f9c0`, `0x0045f9c0-0x004607ac` | 209 / 801 | main Windows message loop와 state switch | scheduler와 result `0x18..0x1d`, `0x8c/0x96` relay·final route 범위 정적 확정 |
 | `0x00460ba0` | `FUN_00460ba0`, `0x00460ba0-0x00460e20` | 17 / 144 | ECX base에서 `0x1f6aa` DWORD zero fill 후 후속 raw 초기화 | 표준 mission entry의 `[0x007c5ed8,0x00843980)` prefix 범위 정적 확정 |
+| `0x004610e0` | `FUN_004610e0`, `0x004610e0-0x004611fd` | ? / 91 | fog dirty clear·state age 후 active entity sight recomputation | mode WORD 1 및 raw `+0x1ec`의 `4→0`/`0→4` branches와 `FUN_00439260` iteration 정적 확정; `+0x1ec` 사람용 의미 미확정 |
 | `0x00461570` | `FUN_00461570`, `0x00461570-0x00461590` | 1 / 6 | raw enable·좌표 DWORD writer | K01 call의 `0x00843674/78/7c = 1/55/53` 정적 확정; consumer 의미 미확정 |
 | `0x004648d0` | `FUN_004648d0`, `0x004648d0-0x004648d9` | 1 / 3 | stack BYTE→`ECX+2` writer | K01 call의 `BYTE 0x00abfff2=1` 정적 확정; consumer 의미 미확정 |
 | `0x00482180` | `FUN_00482180`, `0x00482180-0x004822f4` | 16 / 114 | `0/1` 반환 script loader 계약 정적 확정 | 반환값의 내부 의미·오류 원인은 미확정 |

@@ -71,7 +71,7 @@ runtime record payload의 사람용 자료구조 이름을 확정하는 주장�
    `FUN_00452b30` call path를 사용한다. 각 path의 loop bound는 outer `< 3`, inner `< 2`이므로
    full tile은 6 subframe의 3×2 composite이다.
 
-이 문서는 bit의 방향 이름, mask의 사람용 뜻, 또는 두 state의 visibility 뜻을 지정하지 않는다.
+이 문서는 bit의 방향 이름, mask의 사람용 뜻, 또는 두 state의 visibility 뜻을 지정하지 않는다. state `4`와 `8`의 renderer-side literal distinction은 여기서 유지하되, state `8` initialization·state `4` age·state `0` local-sight recomputation의 bounded producer lifecycle은 [별도 source fog visibility lifecycle evidence](source-fog-visibility-lifecycle.md)에 기록한다.
 
 K01 hash-bound map의 해당 60×60 x-major byte stream은 SHA-256
 `7a9fcc150cf0128af19d57f742a6c160c6b5b8b003a81c069fb3167427208f88`이고, observed domain은
