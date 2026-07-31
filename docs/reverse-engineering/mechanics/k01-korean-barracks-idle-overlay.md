@@ -8,8 +8,9 @@
 별도 오버레이로 그리는지, 그 경우 슬롯·순서·cadence·loop·배치·state gate가 무엇인지 확인한다.
 
 이 문서는 class 50의 타입 정의→일반 건물 초기화→state `8/9`의 primary frame selector→entity
-renderer까지의 정적 경로만 다룬다. 이 범위 바깥의 독립 effect/compositor producer까지 부재를
-증명하지 않으므로, `9..15` 오버레이의 원작 규칙은 아직 `미확인`이다.
+renderer까지의 정적 경로만 다룬다. 이 범위는 primary `currentPhase`의 writer·cadence·loop와 이
+범위 바깥의 독립 effect/compositor producer를 확정하지 않는다. 따라서 `9..15`의 원작 규칙은
+아직 `미확인`이다.
 
 ## 원본과 상태
 
@@ -57,6 +58,8 @@ frame 의미나 독립 애니메이션의 부재로 일반화하지 않는다.
 다음 주장은 이 정적 범위에서 지지되지 않는다.
 
 - frame `9..15`가 class 50 completed-idle flag overlay라는 주장
+- state `8/9` primary path의 `currentPhase` writer·값 범위·cadence·loop가 slot `108`에서 frame
+  `9..15`를 선택한다는 주장
 - 그 frame의 `9→15` 순서, cadence, loop 또는 restart 규칙
 - 본체 전/후 compositor order와 source pivot·placement
 - overlay의 health, production queue, selection 또는 completed gate
@@ -64,9 +67,11 @@ frame 의미나 독립 애니메이션의 부재로 일반화하지 않는다.
 frame들이 SPR 파일에 있다는 사실은 source mapping·의미·draw call의 증거가 아니다. 따라서 과거의
 `9..15` 웹 flag layer는 시각적 유사성만으로 복원할 수 없다.
 
-정확한 제품 매핑을 열려면 class 50 또는 generic world draw caller가 second slot/frame을 쓰거나
-독립 blit을 호출하는 source producer를 찾아야 한다. 그 producer의 입력 gate, counter writer와
-wrap, source coordinate/pivot 및 first primary blit과의 순서를 같은 EXE hash에서 끝까지 연결해야 한다.
+정확한 제품 매핑을 열려면 두 후보 중 하나를 source provenance로 고정해야 한다. 첫째는 state
+`8/9` primary path의 `currentPhase` writer·cadence·loop가 slot `108`에서 frame `9..15`를
+선택한다는 경로다. 둘째는 class 50 또는 generic world draw caller가 second slot/frame을 쓰거나
+독립 blit을 호출하는 경로다. 후자의 경우 입력 gate, counter writer와 cadence, loop, pivot,
+placement, compositor order도 함께 고정해야 한다.
 
 ## 재현
 

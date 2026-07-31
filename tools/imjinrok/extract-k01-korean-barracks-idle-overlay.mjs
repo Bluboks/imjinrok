@@ -173,7 +173,7 @@ export function extractKoreanBarracksIdleOverlay({
   return {
     schemaVersion: 1,
     analysisStatus: "partially-static-confirmed",
-    analysisScope: "Class 50 source identity and its generic primary body configuration through the state-8/9 selector and entity renderer. This does not prove an absent independent effect/compositor path outside that data flow.",
+    analysisScope: "Class 50 source identity and its generic primary body configuration through the state-8/9 selector and entity renderer. This does not establish the primary currentPhase producer/cadence or prove an absent independent effect/compositor path outside that data flow.",
     sources: {
       executable: { path: executablePath, sha256: executableSha256 },
       sprite: {
@@ -211,8 +211,8 @@ export function extractKoreanBarracksIdleOverlay({
       placement: null,
       compositorOrder: null,
       stateGates: null,
-      reason: "The verified class-50 initializer and primary idle selector configure slot 108 with the type base frame 7 (or 8 when WORD +0x250 is nonzero). They provide no class-50-specific source for frames 9..15. The remaining question is an independent effect/compositor producer outside this primary entity-record data flow.",
-      productIntegration: "Do not restore a 9..15 overlay from visual similarity. A product mapping needs a source-side producer that writes or calls a second slot/frame draw with its gate, cadence, placement, and order.",
+      reason: "The verified class-50 initializer configures slot 108 with offset 7 (or 8 when WORD +0x250 is nonzero), while the state-8/9 selector computes renderFrame = currentPhase + configuredFrameOffset. Frames 9..15 could therefore require either an unresolved primary currentPhase producer/cadence on the same slot or an independent second draw; neither route is established.",
+      productIntegration: "Do not restore a 9..15 overlay from visual similarity. A product mapping needs either the primary currentPhase writer/cadence/loop that selects those frames on slot 108, or a source-side second-draw producer with its gate, cadence, placement, and order.",
     },
     reproductionVectors: [selectPrimaryBodyConfiguration(0), selectPrimaryBodyConfiguration(1)],
     evidence: { seededFunctions, rawRanges, evidencePoints },
@@ -279,7 +279,7 @@ function parseArgs(argv) {
 
 function printSummary(report) {
   return [
-    `Korean barracks class ${report.identity.internalClass}: slot ${report.identity.spriteSlot}, frame ${report.primaryBody.healthy.frameIndex}`,
+    `Korean barracks class ${report.identity.internalClass}: slot ${report.identity.spriteSlot}, configured offset ${report.primaryBody.healthy.configuredFrameOffset}`,
     `overlay 9..15: ${report.overlayConclusion.status}`,
   ].join("\n");
 }

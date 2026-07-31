@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { spawnSync } from "node:child_process";
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
@@ -12,6 +13,7 @@ import {
 
 const repositoryRoot = resolve(import.meta.dirname, "../..");
 const fixturePath = resolve(repositoryRoot, "analysis/fixtures/k01-korean-barracks-idle-overlay-vectors.json");
+const extractorPath = resolve(import.meta.dirname, "extract-k01-korean-barracks-idle-overlay.mjs");
 
 test("binds class 50's generic primary body path without inventing an overlay", () => {
   const report = extractKoreanBarracksIdleOverlay();
@@ -65,4 +67,16 @@ test("rejects a barrackk sprite whose bytes do not match the bound original asse
     () => extractKoreanBarracksIdleOverlay({ spritePath }),
     /SHA-256 mismatch/,
   );
+});
+
+test("prints concrete primary-body values outside JSON mode", () => {
+  const result = spawnSync(process.execPath, [extractorPath], {
+    cwd: repositoryRoot,
+    encoding: "utf8",
+  });
+
+  assert.equal(result.status, 0, result.stderr);
+  assert.match(result.stdout, /class 50: slot 108, configured offset 7/);
+  assert.match(result.stdout, /overlay 9\.\.15: not-established/);
+  assert.doesNotMatch(result.stdout, /undefined/);
 });
