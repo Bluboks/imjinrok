@@ -62,6 +62,9 @@ import {
   getEnvironmentLightLevel,
   getPlayerPopulationState,
   getResourceNodeState,
+  resourceBlocksBuilding,
+  resourceBlocksMovement,
+  getFootprintTiles,
   getTileVisibility,
   isoToCart,
   SIM_TICKS_PER_SECOND,
@@ -291,6 +294,18 @@ import {
   type GameplayAudioCueKey,
   type UnitAudioAction,
 } from "../gameplayAudio.js";
+import {
+  derivePaddedGridViewportBounds,
+  mergeDebugPresentationRecords,
+  readDebugPresentationState,
+  resolveDebugPresentationVisibility,
+  setDebugPresentationCollapsed,
+  shouldRevealDebugPresentationFog,
+  toggleDebugPresentation,
+  writeDebugPresentationState,
+  type DebugPresentationState,
+  type DebugPresentationToggle,
+} from "../debugPresentation.js";
 
 const DRAG_THRESHOLD_SQ = 36;
 const EDGE_PAN_SIZE = 28;
@@ -300,7 +315,6 @@ const SCREEN_OVERLAY_DEPTH = 1_000_000;
 const GAME_AUDIO_MUTED_STORAGE_KEY = "isorts.audio.muted";
 const FOG_UNEXPLORED_ALPHA = 0.9;
 const FOG_EXPLORED_ALPHA = 0.48;
-const TERRAIN_DEBUG_DETAILS_STORAGE_KEY = "isorts.debug.terrainDetails";
 const RESOURCE_DEFINITIONS = resourceDefinitions as Readonly<Record<string, ResourceDefinition>>;
 const CONTENT_REGISTRY = createContentRegistry();
 const MISSION_DIALOGUE_LINE_DURATION_MS = 5_500;
@@ -314,6 +328,15 @@ const MAX_CAMERA_ZOOM = MINIMAP_ZOOM_MAX;
 const MAX_CLIENT_PRODUCTION_QUEUE_SIZE = 5;
 const CHEAT_INPUT_MAX_LENGTH = 32;
 const UNIT_SPRITE_GROUND_CONTACT = { x: 0, y: 0 } as const;
+
+function getDebugPresentationStorage(): Storage | undefined {
+  try {
+    return globalThis.localStorage;
+  } catch {
+    console.warn("Debug presentation preferences are unavailable in this browser context.");
+    return undefined;
+  }
+}
 
 type ClientCheatAction =
   | { type: "simulation"; code: CheatCodeId; label: string }
@@ -515,6 +538,12 @@ interface TerrainDebugTileInfo {
   terrain: TerrainType;
   elevation: number;
   transitionSlot: TerrainKindSlot | null;
+  tileIndex: number;
+  tilesetId: string | null;
+  sourcePixelOffset: { x: number; y: number } | null;
+  fogFamily: number | null;
+  visibility: TileVisibility;
+  collision: string;
   assets: TerrainDebugAssetInfo[];
 }
 
@@ -678,12 +707,14 @@ export class SkirmishScene extends Phaser.Scene {
   private lastControlGroupRecall: ControlGroupRecallState | null = null;
   private lastUnitSelectionClick: UnitSelectionClickState | null = null;
   private lastIdleWorkerUnitId: string | null = null;
-  private terrainDebugEnabled = false;
-  private terrainDebugPanel: HTMLDivElement | null = null;
-  private terrainDebugCheckbox: HTMLInputElement | null = null;
+  private debugPresentationState: DebugPresentationState = readDebugPresentationState(getDebugPresentationStorage());
+  private debugPresentationPanel: HTMLDivElement | null = null;
+  private readonly debugPresentationInputs = new Map<DebugPresentationToggle, HTMLInputElement>();
+  private debugPresentationAbort: AbortController | null = null;
   private terrainDebugTooltip: HTMLDivElement | null = null;
-  private terrainDebugHighlight: Phaser.GameObjects.Graphics | null = null;
+  private debugPresentationGraphics: Phaser.GameObjects.Graphics | null = null;
   private hoveredTerrainDebugTile: GridPoint | null = null;
+  private debugPresentationOverlaySignature = "";
   private readonly handleCheatInputKeyDown = (event: KeyboardEvent): void => {
     event.stopPropagation();
 
@@ -870,6 +901,7 @@ export class SkirmishScene extends Phaser.Scene {
     this.redrawObjectiveAreaOverlay();
     this.updateObjectiveTrackerOverlay();
     this.updateMissionResultOverlay();
+    this.updateDebugPresentationOverlay(true);
     this.beginDeferredThemeTextureLoading();
   }
 
@@ -879,6 +911,7 @@ export class SkirmishScene extends Phaser.Scene {
     }
 
     this.updateTerrainDebugHover();
+    this.updateDebugPresentationOverlay();
     this.updatePerfOverlay(delta);
     this.updateCommandFeedbackOverlay(time);
     this.updateUnderAttackAlertOverlay(time);
@@ -1309,6 +1342,7 @@ export class SkirmishScene extends Phaser.Scene {
     this.publishMinimapVisibility();
     this.publishMinimapEntities();
     this.publishMinimapViewport(true);
+    this.updateDebugPresentationOverlay(true);
   }
 
   private handleShutdown(): void {
@@ -3940,35 +3974,46 @@ export class SkirmishScene extends Phaser.Scene {
   }
 
   private setupTerrainDebugOverlay(): void {
-    if (!this.shouldShowTerrainDebugPanel()) {
-      this.terrainDebugEnabled = false;
-      return;
-    }
-
-    this.terrainDebugEnabled = true;
-    this.terrainDebugHighlight = this.add.graphics().setDepth(SCREEN_OVERLAY_DEPTH - 50).setVisible(false);
+    this.debugPresentationGraphics = this.add.graphics().setDepth(SCREEN_OVERLAY_DEPTH - 50).setVisible(false);
+    this.debugPresentationAbort = new AbortController();
+    const signal = this.debugPresentationAbort.signal;
 
     const panel = document.createElement("div");
-    panel.className = "terrain-debug-panel";
-    panel.setAttribute("data-debug-panel", "terrain");
+    panel.className = "debug-presentation-panel";
+    panel.setAttribute("data-debug-panel", "presentation");
+    panel.addEventListener("pointerdown", (event) => event.stopPropagation(), { signal });
+    panel.addEventListener("pointerup", (event) => event.stopPropagation(), { signal });
 
     const title = document.createElement("div");
-    title.className = "terrain-debug-panel__title";
-    title.textContent = "DEBUG TERRAIN";
-
-    const row = document.createElement("label");
-    row.className = "terrain-debug-panel__row";
-
-    const checkbox = document.createElement("input");
-    checkbox.type = "checkbox";
-    checkbox.checked = this.terrainDebugEnabled;
-    checkbox.addEventListener("change", () => this.setTerrainDebugEnabled(checkbox.checked));
-
-    const label = document.createElement("span");
-    label.textContent = "지형 세부사안 tooltip 표시";
-
-    row.append(checkbox, label);
-    panel.append(title, row);
+    title.className = "debug-presentation-panel__title";
+    title.textContent = "FIELD INSTRUMENTS";
+    const collapse = document.createElement("button");
+    collapse.type = "button";
+    collapse.className = "debug-presentation-panel__collapse";
+    collapse.addEventListener("click", () => this.setDebugPresentationCollapsed(!this.debugPresentationState.collapsed), { signal });
+    title.append(collapse);
+    const controls = document.createElement("div");
+    controls.className = "debug-presentation-panel__controls";
+    const labels: Record<DebugPresentationToggle, string> = {
+      entityBounds: "ENTITY PROFILES",
+      terrainWireframe: "TERRAIN WIREFRAME",
+      tileMetadata: "CURSOR TILE DATA",
+      fogEnabled: "BATTLEFIELD FOG",
+    };
+    (Object.keys(labels) as DebugPresentationToggle[]).forEach((key) => {
+      const row = document.createElement("label");
+      row.className = "debug-presentation-panel__row";
+      const input = document.createElement("input");
+      input.type = "checkbox";
+      input.checked = this.debugPresentationState[key];
+      input.addEventListener("change", () => this.setDebugPresentationToggle(key, input.checked), { signal });
+      this.debugPresentationInputs.set(key, input);
+      const label = document.createElement("span");
+      label.textContent = labels[key];
+      row.append(input, label);
+      controls.append(row);
+    });
+    panel.append(title, controls);
 
     const tooltip = document.createElement("div");
     tooltip.className = "terrain-debug-tooltip";
@@ -3976,59 +4021,56 @@ export class SkirmishScene extends Phaser.Scene {
 
     document.body.append(panel, tooltip);
 
-    this.terrainDebugPanel = panel;
-    this.terrainDebugCheckbox = checkbox;
+    this.debugPresentationPanel = panel;
     this.terrainDebugTooltip = tooltip;
+    this.refreshDebugPresentationPanel();
   }
 
-  private setTerrainDebugEnabled(enabled: boolean): void {
-    this.terrainDebugEnabled = enabled;
-    this.writeTerrainDebugEnabled(enabled);
-
-    if (this.terrainDebugCheckbox && this.terrainDebugCheckbox.checked !== enabled) {
-      this.terrainDebugCheckbox.checked = enabled;
-    }
-
-    if (!enabled) {
+  private setDebugPresentationToggle(key: DebugPresentationToggle, enabled: boolean): void {
+    const next = this.debugPresentationState[key] === enabled ? this.debugPresentationState : toggleDebugPresentation(this.debugPresentationState, key);
+    this.debugPresentationState = next;
+    writeDebugPresentationState(getDebugPresentationStorage(), next);
+    this.refreshDebugPresentationPanel();
+    if (key === "tileMetadata" && !enabled) {
       this.hideTerrainDebugHover();
-      return;
     }
+    if (key === "fogEnabled") {
+      this.redrawAllFogOverlay();
+      this.syncResourceRenderables();
+      this.syncUnitRenderables();
+      this.publishMinimapVisibility();
+      this.publishMinimapEntities();
+    }
+    this.updateDebugPresentationOverlay(true);
+  }
 
-    this.hoveredTerrainDebugTile = null;
-    this.updateTerrainDebugHover();
+  private setDebugPresentationCollapsed(collapsed: boolean): void {
+    this.debugPresentationState = setDebugPresentationCollapsed(this.debugPresentationState, collapsed);
+    writeDebugPresentationState(getDebugPresentationStorage(), this.debugPresentationState);
+    this.refreshDebugPresentationPanel();
+  }
+
+  private refreshDebugPresentationPanel(): void {
+    const panel = this.debugPresentationPanel;
+    if (!panel) return;
+    panel.classList.toggle("debug-presentation-panel--collapsed", this.debugPresentationState.collapsed);
+    const collapse = panel.querySelector<HTMLButtonElement>(".debug-presentation-panel__collapse");
+    if (collapse) collapse.textContent = this.debugPresentationState.collapsed ? "+ OPEN" : "− STOW";
+    this.debugPresentationInputs.forEach((input, key) => { input.checked = this.debugPresentationState[key]; });
   }
 
   private disposeTerrainDebugOverlay(): void {
-    this.terrainDebugPanel?.remove();
+    this.debugPresentationAbort?.abort();
+    this.debugPresentationAbort = null;
+    this.debugPresentationPanel?.remove();
     this.terrainDebugTooltip?.remove();
-    this.terrainDebugHighlight?.destroy();
-    this.terrainDebugPanel = null;
-    this.terrainDebugCheckbox = null;
+    this.debugPresentationGraphics?.destroy();
+    this.debugPresentationPanel = null;
+    this.debugPresentationInputs.clear();
     this.terrainDebugTooltip = null;
-    this.terrainDebugHighlight = null;
+    this.debugPresentationGraphics = null;
     this.hoveredTerrainDebugTile = null;
-  }
-
-  private readTerrainDebugEnabled(): boolean {
-    try {
-      return globalThis.localStorage?.getItem(TERRAIN_DEBUG_DETAILS_STORAGE_KEY) === "1";
-    } catch {
-      return false;
-    }
-  }
-
-  private shouldShowTerrainDebugPanel(): boolean {
-    const params = new URLSearchParams(globalThis.location?.search ?? "");
-
-    return params.get("debugTerrain") === "1";
-  }
-
-  private writeTerrainDebugEnabled(enabled: boolean): void {
-    try {
-      globalThis.localStorage?.setItem(TERRAIN_DEBUG_DETAILS_STORAGE_KEY, enabled ? "1" : "0");
-    } catch {
-      // Local storage may be unavailable in privacy-restricted browser modes.
-    }
+    this.debugPresentationOverlaySignature = "";
   }
 
   private requestPointerLock(): void {
@@ -5949,7 +5991,7 @@ export class SkirmishScene extends Phaser.Scene {
   private publishMinimapEntities(): void {
     const view = {
       entities: Object.values(this.worldState.units)
-        .filter((unit) => this.isUnitVisibleToLocalPlayer(unit))
+        .filter((unit) => this.isUnitPresentedToLocalPlayer(unit))
         .map((unit) => ({
           id: unit.id,
           playerId: unit.playerId,
@@ -5965,8 +6007,9 @@ export class SkirmishScene extends Phaser.Scene {
   }
 
   private publishMinimapVisibility(): void {
-    this.registry.set(MINIMAP_VISIBILITY_REGISTRY_KEY, this.playerVisibility);
-    this.game.events.emit(MINIMAP_VISIBILITY_CHANGED_EVENT, this.playerVisibility);
+    const presentationVisibility = this.getPresentationVisibility();
+    this.registry.set(MINIMAP_VISIBILITY_REGISTRY_KEY, presentationVisibility);
+    this.game.events.emit(MINIMAP_VISIBILITY_CHANGED_EVENT, presentationVisibility);
   }
 
   private publishMinimapViewport(force = false): void {
@@ -6023,7 +6066,7 @@ export class SkirmishScene extends Phaser.Scene {
   }
 
   private updateTerrainDebugHover(): void {
-    if (!this.terrainDebugEnabled || !this.isScreenPointInWorldField(this.virtualCursorScreen) || this.isPointerOverTerrainDebugPanel()) {
+    if (!this.debugPresentationState.tileMetadata || !this.isScreenPointInWorldField(this.virtualCursorScreen) || this.isPointerOverTerrainDebugPanel()) {
       this.hideTerrainDebugHover();
       return;
     }
@@ -6042,7 +6085,6 @@ export class SkirmishScene extends Phaser.Scene {
 
   private hideTerrainDebugHover(): void {
     this.hoveredTerrainDebugTile = null;
-    this.terrainDebugHighlight?.clear().setVisible(false);
 
     if (this.terrainDebugTooltip) {
       this.terrainDebugTooltip.hidden = true;
@@ -6050,17 +6092,17 @@ export class SkirmishScene extends Phaser.Scene {
   }
 
   private isPointerOverTerrainDebugPanel(): boolean {
-    if (!this.terrainDebugPanel) {
+    if (!this.debugPresentationPanel) {
       return false;
     }
 
     const hoveredElement = document.elementFromPoint(this.virtualCursorScreen.x, this.virtualCursorScreen.y);
 
-    return hoveredElement ? this.terrainDebugPanel.contains(hoveredElement) : false;
+    return hoveredElement ? this.debugPresentationPanel.contains(hoveredElement) : false;
   }
 
   private drawTerrainDebugHighlight(point: GridPoint): void {
-    if (!this.terrainDebugHighlight) {
+    if (!this.debugPresentationGraphics) {
       return;
     }
 
@@ -6076,13 +6118,116 @@ export class SkirmishScene extends Phaser.Scene {
       new Phaser.Geom.Point(worldX - halfWidth, worldY),
     ];
 
-    this.terrainDebugHighlight
-      .clear()
-      .setVisible(true)
+    this.debugPresentationGraphics
       .fillStyle(0x9fffa2, 0.12)
       .fillPoints(diamond, true)
       .lineStyle(2, 0xcfff7a, 0.95)
       .strokePoints(diamond, true);
+  }
+
+  /** One shared world-space Graphics object keeps inspector drawing allocation-free per entity. */
+  private updateDebugPresentationOverlay(force = false): void {
+    const graphics = this.debugPresentationGraphics;
+    if (!graphics) return;
+    const camera = this.cameras.main;
+    const signature = [
+      this.debugPresentationState.entityBounds,
+      this.debugPresentationState.terrainWireframe,
+      this.debugPresentationState.tileMetadata,
+      camera.scrollX.toFixed(0), camera.scrollY.toFixed(0), camera.zoom.toFixed(3),
+      this.debugPresentationState.entityBounds ? this.worldState.tick : "",
+      this.hoveredTerrainDebugTile ? `${this.hoveredTerrainDebugTile.x},${this.hoveredTerrainDebugTile.y}` : "",
+    ].join("|");
+    if (!force && signature === this.debugPresentationOverlaySignature) return;
+    this.debugPresentationOverlaySignature = signature;
+    graphics.clear().setVisible(
+      this.debugPresentationState.entityBounds || this.debugPresentationState.terrainWireframe ||
+      (this.debugPresentationState.tileMetadata && this.hoveredTerrainDebugTile !== null),
+    );
+    if (this.debugPresentationState.terrainWireframe) this.drawDebugTerrainWireframe(graphics);
+    if (this.debugPresentationState.entityBounds) this.drawDebugEntityProfiles(graphics);
+    if (this.debugPresentationState.tileMetadata && this.hoveredTerrainDebugTile) this.drawTerrainDebugHighlight(this.hoveredTerrainDebugTile);
+  }
+
+  private drawDebugTerrainWireframe(graphics: Phaser.GameObjects.Graphics): void {
+    const fieldBottom = this.getHudTop();
+    const bounds = derivePaddedGridViewportBounds([
+      this.getGridPointFromScreenPoint(new Phaser.Math.Vector2(0, 0)),
+      this.getGridPointFromScreenPoint(new Phaser.Math.Vector2(this.scale.width, 0)),
+      this.getGridPointFromScreenPoint(new Phaser.Math.Vector2(this.scale.width, fieldBottom)),
+      this.getGridPointFromScreenPoint(new Phaser.Math.Vector2(0, fieldBottom)),
+    ], 3, this.map.width, this.map.height);
+    if (!bounds) return;
+    for (let y = bounds.minY; y <= bounds.maxY; y += 1) {
+      for (let x = bounds.minX; x <= bounds.maxX; x += 1) {
+        const tile = getTileAt(this.map, x, y);
+        const iso = cartToIso({ x, y }, this.map.tileWidth, this.map.tileHeight);
+        const baseX = this.mapOrigin.x + iso.x;
+        const baseY = this.mapOrigin.y + iso.y;
+        const lift = this.getTerrainElevationPresentation(x, y).liftPixels;
+        const topY = baseY - lift;
+        const halfWidth = this.map.tileWidth / 2;
+        const halfHeight = this.map.tileHeight / 2;
+        const top = new Phaser.Geom.Point(baseX, topY - halfHeight);
+        const right = new Phaser.Geom.Point(baseX + halfWidth, topY);
+        const bottom = new Phaser.Geom.Point(baseX, topY + halfHeight);
+        const left = new Phaser.Geom.Point(baseX - halfWidth, topY);
+        const transition = resolveElevationTerrainSlot(tile.elevation, this.getElevationNeighbors(x, y));
+        const wireColor = transition && transition !== "plateauTop" ? 0xffcf79 : tile.elevation > 0 ? 0x8ed2ff : 0x6d988b;
+        graphics.lineStyle(1, wireColor, 0.6).strokePoints([top, right, bottom, left], true);
+        if (lift > 0) {
+          graphics.lineStyle(1, 0x527c92, 0.65)
+            .lineBetween(left.x, left.y, left.x, baseY)
+            .lineBetween(right.x, right.y, right.x, baseY)
+            .lineBetween(bottom.x, bottom.y, bottom.x, baseY + halfHeight);
+        }
+      }
+    }
+  }
+
+  private drawDebugEntityProfiles(graphics: Phaser.GameObjects.Graphics): void {
+    const viewport = this.cameras.main.worldView;
+    for (const unit of Object.values(this.worldState.units)) {
+      const definition = unitDefinitions[unit.kind];
+      const tiles = getFootprintTiles(unit.position, definition.footprint);
+      const polygon = tiles.map((tile) => this.getGridGroundContactWorldPoint(tile));
+      if (polygon.length === 0 || !polygon.some((point) => viewport.contains(point.x, point.y))) continue;
+      const footprintPoints = this.getFootprintOutlinePoints(tiles);
+      graphics.lineStyle(2, definition.category === "building" ? 0xffbc69 : 0x61e7c5, 0.92).strokePoints(footprintPoints, true);
+      const renderable = this.unitRenderables.get(unit.id);
+      if (renderable) {
+        const bounds = renderable.container.getBounds();
+        graphics.lineStyle(1, 0xf4a4ff, 0.8).strokeRect(bounds.x, bounds.y, bounds.width, bounds.height);
+      }
+    }
+    for (const layer of this.map.layers) {
+      layer.tiles.forEach((tile, index) => {
+        if (!tile.resource) return;
+        const point = { x: index % this.map.width, y: Math.floor(index / this.map.width) };
+        const world = this.getGridGroundContactWorldPoint(point);
+        if (!viewport.contains(world.x, world.y)) return;
+        const outline = this.getFootprintOutlinePoints([point]);
+        graphics.lineStyle(1, 0xf0d36c, 0.82).strokePoints(outline, true);
+        const renderable = this.resourceRenderables.get(tile.resource.id);
+        if (renderable) {
+          const bounds = renderable.container.getBounds();
+          graphics.lineStyle(1, 0xf4a4ff, 0.8).strokeRect(bounds.x, bounds.y, bounds.width, bounds.height);
+        }
+      });
+    }
+  }
+
+  private getFootprintOutlinePoints(tiles: readonly GridPoint[]): Phaser.Geom.Point[] {
+    const minX = Math.min(...tiles.map((tile) => tile.x));
+    const maxX = Math.max(...tiles.map((tile) => tile.x));
+    const minY = Math.min(...tiles.map((tile) => tile.y));
+    const maxY = Math.max(...tiles.map((tile) => tile.y));
+    return [
+      this.getGridGroundContactWorldPoint({ x: minX - 0.5, y: minY - 0.5 }),
+      this.getGridGroundContactWorldPoint({ x: maxX + 0.5, y: minY - 0.5 }),
+      this.getGridGroundContactWorldPoint({ x: maxX + 0.5, y: maxY + 0.5 }),
+      this.getGridGroundContactWorldPoint({ x: minX - 0.5, y: maxY + 0.5 }),
+    ];
   }
 
   private getTerrainDebugTileInfo(point: GridPoint): TerrainDebugTileInfo {
@@ -6131,8 +6276,19 @@ export class SkirmishScene extends Phaser.Scene {
       terrain: tile.terrain,
       elevation: tile.elevation,
       transitionSlot,
+      tileIndex: point.y * this.map.width + point.x,
+      tilesetId: this.map.tilesetId ?? null,
+      sourcePixelOffset: tile.tilesetVisuals?.sourcePixelOffset ?? null,
+      fogFamily: tile.fogVisuals?.familyIndex ?? null,
+      visibility: getTileVisibility(this.playerVisibility, point),
+      collision: `terrain blocksMovement=${terrainDefinitions[tile.terrain].blocksMovement}; ${this.getTerrainDebugResourceOccupancy(tile.resource)}; profile ${this.map.movementCollisionProfileId ?? "default"}`,
       assets,
     };
+  }
+
+  private getTerrainDebugResourceOccupancy(resource: ResourceNode | undefined): string {
+    if (!resource) return "resource none";
+    return `resource ${getResourceNodeState(resource)} blocksMovement=${resourceBlocksMovement(resource)} blocksBuilding=${resourceBlocksBuilding(resource)}`;
   }
 
   private createTerrainDebugAssetInfo(
@@ -6179,6 +6335,13 @@ export class SkirmishScene extends Phaser.Scene {
     this.appendTerrainDebugRow(rows, "terrain", info.terrain);
     this.appendTerrainDebugRow(rows, "elevation", String(info.elevation));
     this.appendTerrainDebugRow(rows, "slot", info.transitionSlot ?? "flat");
+    this.appendTerrainDebugRow(rows, "grid / index", `${info.point.x}, ${info.point.y} / ${info.tileIndex}`);
+    const world = this.getGridGroundContactWorldPoint(info.point);
+    const screen = this.worldToScreenPoint(new Phaser.Math.Vector2(world.x, world.y));
+    this.appendTerrainDebugRow(rows, "world / screen", `${world.x.toFixed(1)}, ${world.y.toFixed(1)} / ${screen.x.toFixed(1)}, ${screen.y.toFixed(1)}`);
+    this.appendTerrainDebugRow(rows, "tileset / frame", `${info.tilesetId ?? "none"} / ${info.sourcePixelOffset ? `${info.sourcePixelOffset.x},${info.sourcePixelOffset.y}` : "none"}`);
+    this.appendTerrainDebugRow(rows, "fog / visibility", `${info.fogFamily ?? "none"} / ${TileVisibility[info.visibility] ?? info.visibility}`);
+    this.appendTerrainDebugRow(rows, "movement", info.collision);
     this.appendTerrainDebugRow(rows, "theme", this.activeTheme.id);
 
     const assets = document.createElement("div");
@@ -7173,6 +7336,26 @@ export class SkirmishScene extends Phaser.Scene {
     return getTileVisibility(this.playerVisibility, unit.position) === TileVisibility.Visible;
   }
 
+  /** Rendering-only visibility. Targeting and command admission use the authoritative method above. */
+  private isUnitPresentedToLocalPlayer(unit: UnitState): boolean {
+    return shouldRevealDebugPresentationFog(this.debugPresentationState) || this.isUnitVisibleToLocalPlayer(unit);
+  }
+
+  private getPresentationVisibility(): PlayerVisibilityState {
+    if (!shouldRevealDebugPresentationFog(this.debugPresentationState)) return this.playerVisibility;
+    const tiles = new Uint8Array(this.map.width * this.map.height);
+    tiles.fill(TileVisibility.Visible);
+    return { width: this.map.width, height: this.map.height, tiles };
+  }
+
+  private getPresentationTileVisibility(point: GridPoint): TileVisibility {
+    return resolveDebugPresentationVisibility(
+      this.debugPresentationState,
+      getTileVisibility(this.playerVisibility, point),
+      TileVisibility.Visible,
+    );
+  }
+
   private isUnitSelectable(unit: UnitState): boolean {
     return unit.playerId === this.localPlayerId && this.isUnitVisibleToLocalPlayer(unit);
   }
@@ -7262,7 +7445,7 @@ export class SkirmishScene extends Phaser.Scene {
     runRenderTextureBatch(renderTexture, () => {
       for (let y = bounds.chunkY; y <= bounds.maxY; y += 1) {
         for (let x = bounds.chunkX; x <= bounds.maxX; x += 1) {
-          const visibility = (this.playerVisibility.tiles[y * this.playerVisibility.width + x] ?? TileVisibility.Unexplored) as TileVisibility;
+          const visibility = this.getFogVisibilityAt(x, y);
 
           if (visibility === TileVisibility.Visible) {
             continue;
@@ -7395,6 +7578,7 @@ export class SkirmishScene extends Phaser.Scene {
     if (x < 0 || x >= this.map.width || y < 0 || y >= this.map.height) {
       return TileVisibility.Unexplored;
     }
+    if (shouldRevealDebugPresentationFog(this.debugPresentationState)) return TileVisibility.Visible;
     return (this.playerVisibility.tiles[y * this.playerVisibility.width + x] ?? TileVisibility.Unexplored) as TileVisibility;
   }
 
@@ -8422,8 +8606,8 @@ export class SkirmishScene extends Phaser.Scene {
     point: GridPoint;
     visibility: TileVisibility;
   }> {
-    for (const resourceView of this.knownResourceViews.values()) {
-      const visibility = getTileVisibility(this.playerVisibility, resourceView.point);
+    for (const resourceView of this.getResourcePresentationViews()) {
+      const visibility = this.getPresentationTileVisibility(resourceView.point);
 
       if (visibility === TileVisibility.Unexplored) {
         continue;
@@ -8460,6 +8644,23 @@ export class SkirmishScene extends Phaser.Scene {
         });
       }
     }
+  }
+
+  /** Debug reveal reads map records transiently; it never inserts them into discovery memory. */
+  private getResourcePresentationViews(): KnownResourceView[] {
+    const remembered = Array.from(this.knownResourceViews.values());
+    if (!shouldRevealDebugPresentationFog(this.debugPresentationState)) return remembered;
+    const transient: KnownResourceView[] = [];
+    for (const layer of this.worldState.map.layers) {
+      layer.tiles.forEach((tile, tileIndex) => {
+        if (!tile.resource || !RESOURCE_DEFINITIONS[tile.resource.kind]) return;
+        transient.push({
+          point: { x: tileIndex % this.map.width, y: Math.floor(tileIndex / this.map.width) },
+          resource: { ...tile.resource },
+        });
+      });
+    }
+    return mergeDebugPresentationRecords(true, remembered, transient, (view) => this.getResourceMemoryKey(view.point));
   }
 
   private serializeKnownResourceViews(): SerializedKnownResourceView[] {
@@ -8503,9 +8704,9 @@ export class SkirmishScene extends Phaser.Scene {
 
   private publishMinimapResources(): void {
     const resources: MinimapResourcesView = {
-      resources: Array.from(this.knownResourceViews.values())
+      resources: this.getResourcePresentationViews()
         .map((view) => {
-          const visibility = getTileVisibility(this.playerVisibility, view.point);
+          const visibility = this.getPresentationTileVisibility(view.point);
 
           if (visibility === TileVisibility.Unexplored) {
             return null;
@@ -8836,7 +9037,7 @@ export class SkirmishScene extends Phaser.Scene {
 
   private syncUnitRenderables(deltaMs = 0): void {
     const units = Object.values(this.worldState.units);
-    const visibleUnits = units.filter((unit) => this.isUnitVisibleToLocalPlayer(unit));
+    const visibleUnits = units.filter((unit) => this.isUnitPresentedToLocalPlayer(unit));
     const reconciliation = reconcileEntityRenderableIds(
       this.unitRenderables.keys(),
       new Set(units.map((unit) => unit.id)),
@@ -8882,7 +9083,7 @@ export class SkirmishScene extends Phaser.Scene {
 
   private updateVisibleUnitAnimationFrames(deltaMs: number): void {
     Object.values(this.worldState.units)
-      .filter((unit) => this.isUnitVisibleToLocalPlayer(unit))
+      .filter((unit) => this.isUnitPresentedToLocalPlayer(unit))
       .forEach((unit) => {
         const renderable = this.unitRenderables.get(unit.id);
 
