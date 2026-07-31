@@ -1,0 +1,150 @@
+{
+  "generatedBy": "tools/imjinrok/export-source-clock-assets.mjs",
+  "sourceClockEvidenceFixture": "analysis/fixtures/source-clock-asset.json",
+  "source": {
+    "executable": {
+      "path": "original/imjinrok2/imjinrok2.exe",
+      "sha256": "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e"
+    },
+    "references": {
+      "path": "analysis/generated/imjinrok2/references.json",
+      "sha256": "f64cfa6f04bc39573552f42a8b7bdd5b08fea1ba774d05865162d1d80daaf9a5"
+    },
+    "resourceTableEntry": "0x004bc200",
+    "resourcePathAddress": "0x004bd2ec",
+    "resourcePath": "fnt\\clock.spr",
+    "clockSprite": {
+      "path": "original/imjinrok2/fnt/clock.spr",
+      "sha256": "c142349b5aa68f3659a99b42fc9aff8ca541758f0504549b24f27a928e1a08e6",
+      "width": 32,
+      "height": 36,
+      "frameCount": 20,
+      "frameByteSizes": [
+        900,
+        900,
+        900,
+        900,
+        900,
+        900,
+        900,
+        900,
+        900,
+        900,
+        900,
+        900,
+        900,
+        900,
+        900,
+        900,
+        72,
+        72,
+        72,
+        72
+      ]
+    }
+  },
+  "assetMappingStatus": "unverified-no-runtime-frame-binding",
+  "productBoundary": "These exports are intentionally not loaded by the web HUD clock until a complete original draw/frame mapping is statically confirmed and reproduced.",
+  "assets": [
+    {
+      "frameIndex": 0,
+      "fileName": "clock_0000.png",
+      "sha256": "40039d7d21617c2ea1242a605579e8641b0ffc854f8247488af81fd20984fdcb"
+    },
+    {
+      "frameIndex": 1,
+      "fileName": "clock_0001.png",
+      "sha256": "ce5ffdedf15270ea2b4558b70f9d095b0f0c2d266d39363182d89f6940ad0507"
+    },
+    {
+      "frameIndex": 2,
+      "fileName": "clock_0002.png",
+      "sha256": "73497f89933a2c1925b1562f4fca484ccbbb0e48e00b8573fe914a75e36b13ed"
+    },
+    {
+      "frameIndex": 3,
+      "fileName": "clock_0003.png",
+      "sha256": "80152506c2f12bf47c9144cc852bb79136286942c619c5a08055dd7d42b603c1"
+    },
+    {
+      "frameIndex": 4,
+      "fileName": "clock_0004.png",
+      "sha256": "e4b89ea9b026eeb176081102653e836b38cb578dde2fd2cb4d3771aa0b58c281"
+    },
+    {
+      "frameIndex": 5,
+      "fileName": "clock_0005.png",
+      "sha256": "7d3ad13ca88caad43a06323a8c55e502488a84156429d7664a52b89defadc1a3"
+    },
+    {
+      "frameIndex": 6,
+      "fileName": "clock_0006.png",
+      "sha256": "486026632d96666bec315fcddb40aaa4612c53dc21d07fd1cc9a7127f99465ee"
+    },
+    {
+      "frameIndex": 7,
+      "fileName": "clock_0007.png",
+      "sha256": "be52a89369387c03102ac43b092ded96236a3fd538cfd765e466accada2b7a62"
+    },
+    {
+      "frameIndex": 8,
+      "fileName": "clock_0008.png",
+      "sha256": "14a4f614599b32575f4f57ed8c459964295e845de29f4baa68a46651e24165ce"
+    },
+    {
+      "frameIndex": 9,
+      "fileName": "clock_0009.png",
+      "sha256": "78fb1947fd114eca83782ab745155b0a6652f54c00ef6135ba54b56baeb614f3"
+    },
+    {
+      "frameIndex": 10,
+      "fileName": "clock_0010.png",
+      "sha256": "3c9ff12ab39a6be8555edc0f7391c2ee0bad711dd8db1b57a079910e6d536de5"
+    },
+    {
+      "frameIndex": 11,
+      "fileName": "clock_0011.png",
+      "sha256": "f718de5be3ae27495dd485e06b7377f50a8d44018dea2180b1c0dad693db9b20"
+    },
+    {
+      "frameIndex": 12,
+      "fileName": "clock_0012.png",
+      "sha256": "528b13e62a43e0535bf4ccd8f93992b28e74680abc0ec56c010e48c36904e40e"
+    },
+    {
+      "frameIndex": 13,
+      "fileName": "clock_0013.png",
+      "sha256": "ce54265c5d9ef1340eb4071fb6893164441fe5566e32a4393be99ebb26fcc6fe"
+    },
+    {
+      "frameIndex": 14,
+      "fileName": "clock_0014.png",
+      "sha256": "913f7b38dd024ce0cd341f09cf24c1e353bdf021f8058744882de177a9ab429b"
+    },
+    {
+      "frameIndex": 15,
+      "fileName": "clock_0015.png",
+      "sha256": "569bc30f8bbba0baaec6a87f710378afe427ada6c4120febf564f534aab24f67"
+    },
+    {
+      "frameIndex": 16,
+      "fileName": "clock_0016.png",
+      "sha256": "0c293cc79dff2ea0e8b8fe2de9a71acee46a8e320ec5ccdf3f3adbf8b68e6e54"
+    },
+    {
+      "frameIndex": 17,
+      "fileName": "clock_0017.png",
+      "sha256": "0c293cc79dff2ea0e8b8fe2de9a71acee46a8e320ec5ccdf3f3adbf8b68e6e54"
+    },
+    {
+      "frameIndex": 18,
+      "fileName": "clock_0018.png",
+      "sha256": "0c293cc79dff2ea0e8b8fe2de9a71acee46a8e320ec5ccdf3f3adbf8b68e6e54"
+    },
+    {
+      "frameIndex": 19,
+      "fileName": "clock_0019.png",
+      "sha256": "0c293cc79dff2ea0e8b8fe2de9a71acee46a8e320ec5ccdf3f3adbf8b68e6e54"
+    }
+  ]
+}
