@@ -283,11 +283,11 @@ import {
   GAMEPLAY_AUDIO_CUE_BY_KEY,
   MISSION_DEFEAT_AUDIO_CUE_KEY,
   MISSION_VICTORY_AUDIO_CUE_KEY,
-  TRAINING_DONE_AUDIO_CUE_KEY,
   UNDER_ATTACK_ALERT_COOLDOWN_MS,
   UNDER_ATTACK_AUDIO_CUE_KEY,
   UNIT_AUDIO_CUES,
   UPGRADE_DONE_AUDIO_CUE_KEY,
+  selectProductionCompleteAudioCue,
   type GameplayAudioCueKey,
   type UnitAudioAction,
 } from "../gameplayAudio.js";
@@ -6595,20 +6595,19 @@ export class SkirmishScene extends Phaser.Scene {
   private syncProgressAudioState(playCompletedAudio: boolean): void {
     const currentUnitIds = new Set<string>();
     const currentCompletedResearchKeys = new Set<string>();
-    let localUnitCreated = false;
+    const units = Object.values(this.worldState.units);
+    const localUnitCreatedCue = playCompletedAudio
+      ? selectProductionCompleteAudioCue(
+        units,
+        this.trackedUnitIds,
+        this.localPlayerId,
+        this.arePlayersAllied.bind(this),
+      )
+      : undefined;
     let localResearchCompleted = false;
 
-    for (const unit of Object.values(this.worldState.units)) {
+    for (const unit of units) {
       currentUnitIds.add(unit.id);
-
-      if (
-        playCompletedAudio &&
-        !this.trackedUnitIds.has(unit.id) &&
-        this.arePlayersAllied(this.localPlayerId, unit.playerId) &&
-        !unit.construction
-      ) {
-        localUnitCreated = true;
-      }
     }
 
     for (const [playerId, researchState] of Object.entries(this.worldState.playerResearch)) {
@@ -6635,8 +6634,8 @@ export class SkirmishScene extends Phaser.Scene {
     this.trackedCompletedResearchKeys.clear();
     currentCompletedResearchKeys.forEach((researchKey) => this.trackedCompletedResearchKeys.add(researchKey));
 
-    if (localUnitCreated) {
-      this.playGameplayAudio(TRAINING_DONE_AUDIO_CUE_KEY);
+    if (localUnitCreatedCue) {
+      this.playGameplayAudio(localUnitCreatedCue);
     }
 
     if (localResearchCompleted) {

@@ -10,7 +10,7 @@ export const TRAINING_DONE_AUDIO_CUE_KEY = "audio:ui:training-done";
 export const UNDER_ATTACK_AUDIO_CUE_KEY = "audio:ui:be-attacked";
 export const UPGRADE_DONE_AUDIO_CUE_KEY = "audio:ui:upgrade-done";
 
-export type UnitAudioAction = "attack" | "die" | "move" | "select";
+export type UnitAudioAction = "attack" | "die" | "move" | "productionComplete" | "select";
 
 export interface GameplayAudioCueDefinition {
   key: string;
@@ -124,3 +124,35 @@ export const UNIT_AUDIO_CUES: Partial<Record<UnitDefinitionId, Partial<Record<Un
     select: "audio:voice:select-general-k42",
   },
 };
+
+export interface ProductionCompleteAudioUnit {
+  readonly id: string;
+  readonly playerId: string;
+  readonly kind: UnitDefinitionId;
+  readonly construction?: object;
+}
+
+/**
+ * Product policy: production completion is silent unless the completed unit's
+ * audio profile explicitly opts into a registered cue. The sorted ID scan
+ * keeps the one-cue-per-sync selection stable when several units appear.
+ */
+export function selectProductionCompleteAudioCue(
+  units: readonly ProductionCompleteAudioUnit[],
+  trackedUnitIds: ReadonlySet<string>,
+  localPlayerId: string,
+  arePlayersAllied: (leftPlayerId: string, rightPlayerId: string) => boolean,
+  unitAudioCues: Readonly<Partial<Record<UnitDefinitionId, Partial<Record<UnitAudioAction, GameplayAudioCueKey>>>>> = UNIT_AUDIO_CUES,
+): GameplayAudioCueKey | undefined {
+  const candidates = units
+    .filter((unit) =>
+      !trackedUnitIds.has(unit.id) &&
+      arePlayersAllied(localPlayerId, unit.playerId) &&
+      !unit.construction,
+    )
+    .sort((left, right) => (left.id < right.id ? -1 : left.id > right.id ? 1 : 0));
+
+  return candidates
+    .map((unit) => unitAudioCues[unit.kind]?.productionComplete)
+    .find((cueKey): cueKey is GameplayAudioCueKey => cueKey !== undefined);
+}

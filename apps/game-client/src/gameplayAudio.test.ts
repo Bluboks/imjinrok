@@ -10,6 +10,7 @@ import {
   MISSION_BRIEFING_MUSIC_AUDIO_CUE_BY_SOURCE,
   MISSION_BRIEFING_MUSIC_AUDIO_CUE_KEY,
   UNIT_AUDIO_CUES,
+  selectProductionCompleteAudioCue,
   type GameplayAudioCueKey,
   type UnitAudioAction,
 } from "./gameplayAudio.js";
@@ -174,6 +175,55 @@ test("Japanese K01/K02 enemy units and camp structures use source-backed audio c
     assert.ok(wavFormat.dataSize > 0, cue.url);
     assertConvertedYavPcmPayload(sourcePath, resolve(publicDirectory, cue.url));
   }
+});
+
+test("production completion is silent for normal units unless an audio profile opts in", () => {
+  const createdUnits = [
+    { id: "sword-1", playerId: "local", kind: "swordsman" },
+    { id: "villager-1", playerId: "local", kind: "villager" },
+  ] as const;
+  const areAllied = (left: string, right: string) => left === right;
+
+  assert.equal(selectProductionCompleteAudioCue(createdUnits, new Set(), "local", areAllied), undefined);
+
+  const modAudioProfiles: typeof UNIT_AUDIO_CUES = {
+    ...UNIT_AUDIO_CUES,
+    villager: {
+      ...UNIT_AUDIO_CUES.villager,
+      productionComplete: "audio:ui:training-done",
+    },
+  };
+
+  assert.equal(
+    selectProductionCompleteAudioCue(createdUnits, new Set(), "local", areAllied, modAudioProfiles),
+    "audio:ui:training-done",
+  );
+});
+
+test("production completion policy initializes silently and chooses one deterministic opt-in cue per sync", () => {
+  const units = [
+    { id: "hero-b", playerId: "local", kind: "gwon-yul" },
+    { id: "hero-a", playerId: "local", kind: "ryu-seong-ryong" },
+    { id: "under-construction", playerId: "local", kind: "gwon-yul", construction: {} },
+    { id: "enemy", playerId: "enemy", kind: "gwon-yul" },
+  ] as const;
+  const areAllied = (left: string, right: string) => left === right;
+  const modAudioProfiles: typeof UNIT_AUDIO_CUES = {
+    ...UNIT_AUDIO_CUES,
+    "gwon-yul": { productionComplete: "audio:voice:select-general-k42" },
+    "ryu-seong-ryong": { productionComplete: "audio:ui:training-done" },
+  };
+
+  assert.equal(
+    selectProductionCompleteAudioCue(units, new Set(units.map(({ id }) => id)), "local", areAllied, modAudioProfiles),
+    undefined,
+    "initial and resumed snapshots mark their units tracked before audio-enabled syncs",
+  );
+  assert.equal(
+    selectProductionCompleteAudioCue(units, new Set(), "local", areAllied, modAudioProfiles),
+    "audio:ui:training-done",
+    "hero-a wins the stable ID order; only one cue is selected for this sync",
+  );
 });
 
 function assertConvertedYavPcmPayload(sourcePath: string, wavPath: string): void {

@@ -12,6 +12,11 @@ K01 source opening 및 K0120 reinforcement에서 spawn 가능한 project kind의
 새 adapter이고, `already-covered`는 이 변경 전부터 존재한 제품 cue를 inventory에 명시한 것이다.
 `unresolved`는 `UNIT_AUDIO_CUES`에 cue를 두지 않아 추측성 기본값을 받지 않는다.
 
+생산 완료는 일반 유닛도 기본 무음이다. `productionComplete`는 콘텐츠가 명시적으로 opt-in한
+제품 policy이며, K01 장수의 exact class/event binding은
+[유닛 생산 완료 음성 자원 경계](../reverse-engineering/mechanics/unit-production-audio-policy.md)가
+해결될 때까지 등록하지 않는다.
+
 ## 일본 농부 adapter
 
 class 31은 catalog record `0x00885644`, sprite pointer cell `0x004bc2d8`,
