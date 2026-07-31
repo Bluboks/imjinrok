@@ -12,7 +12,7 @@ import {
 import { MAP_FILE_SIZE, parseMapHeader } from "./map-codec.mjs";
 
 export const EXPECTED_ENTITY_CATALOG_SHA256 =
-  "572044d9eec6162689154f3625c7572f27d7ee9030d4e4f9f51151b6a88f8745";
+  "485344664b278c97a4ceed0756832abadbf2a71bd4a997b117b85c336d620708";
 export const EXPECTED_K01_MAP_SHA256 =
   "43ec3a173032f74c12d3cce1db1078b076b651ed79070a0914673a5b65da99cb";
 

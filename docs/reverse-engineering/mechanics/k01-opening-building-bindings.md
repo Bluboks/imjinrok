@@ -22,7 +22,7 @@ base frame에 결합하는지만 확인한다. frame 7의 건설 완료·정상�
 ## 데이터 주소와 catalog contract
 
 `analysis/generated/entity-type-catalog.json`은 canonical SHA-256
-`572044d9eec6162689154f3625c7572f27d7ee9030d4e4f9f51151b6a88f8745` 및
+`485344664b278c97a4ceed0756832abadbf2a71bd4a997b117b85c336d620708` 및
 `static-proven-type-identities` status를 만족해야 한다. extractor는 이 catalog를 신뢰하는 데 그치지
 않고 EXE sprite pointer table, 각 SPR hash와 header를 다시 교차 검사한다.
 

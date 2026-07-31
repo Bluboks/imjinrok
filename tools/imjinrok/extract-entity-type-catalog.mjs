@@ -25,12 +25,17 @@ const RESOURCE_POINTER_TABLE = 0x004bc094;
 const ARGUMENT_INDEX = {
   spriteSlot: 0,
   baseFrame: 1,
+  warExpense: 5,
+  grainCost: 6,
+  woodCost: 7,
   flags: 37,
   namePointer: 49,
 };
 
 export const EXPECTED_EXECUTABLE_SHA256 =
   "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e";
+export const EXPECTED_SEEDS_SHA256 =
+  "8e7c8821e9c84c5d0877bb977b119b3b878271502b36bf75e7426b570507bfb7";
 
 const CODE_ANCHORS = [
   {
@@ -44,6 +49,53 @@ const CODE_ANCHORS = [
     va: 0x0045bd13,
     bytes: "66 89 51 06",
     meaning: "argument 1 is written to type record base frame +0x06",
+  },
+  {
+    id: "type-definition-war-expense-argument-load-and-write",
+    va: 0x0045bd29,
+    bytes: "66 8b 54 24 18 66 89 41 0c 66 8b 44 24 1c 66 89 51 0e",
+    meaning:
+      "argument 5 low WORD is loaded from stack +0x18 and written to signed type record war-expense field +0x0e",
+  },
+  {
+    id: "type-definition-grain-cost-argument-load-and-write",
+    va: 0x0045bd32,
+    bytes: "66 8b 44 24 1c 66 89 51 0e 66 8b 54 24 20 66 89 41 10",
+    meaning:
+      "argument 6 low WORD is loaded from stack +0x1c and written to signed type record grain-cost field +0x10",
+  },
+  {
+    id: "type-definition-wood-cost-argument-load-and-write",
+    va: 0x0045bd3b,
+    bytes: "66 8b 54 24 20 66 89 41 10 66 8b 44 24 24 66 89 51 12",
+    meaning:
+      "argument 7 low WORD is loaded from stack +0x20 and written to signed type record wood-cost field +0x12",
+  },
+  {
+    id: "reservation-resource-argument-to-player-field-order",
+    va: 0x0047e339,
+    bytes: "39 5e 0c 72 53 8b 44 24 10 8b 4e 08 3b c8 72 48",
+    meaning:
+      "FUN_0047e330 compares caller argument 2 with player +0x0c before caller argument 1 with player +0x08",
+  },
+  {
+    id: "reservation-resource-deduct-call-order",
+    va: 0x0047e366,
+    bytes: "50 8b ce e8 f2 fe ff ff 85 c0 74 1f 53 8b ce e8 36 ff ff ff",
+    meaning:
+      "after admission FUN_0047e330 passes caller argument 1 to FUN_0047e260, then argument 2 to FUN_0047e2b0",
+  },
+  {
+    id: "grain-shortage-cp949-source",
+    va: 0x004c7a70,
+    bytes: "b0 ee b9 b0 c0 cc 20 ba ce c1 b7 c7 d5 b4 cf b4 d9 2e",
+    meaning: "CP949 source string is 곡물이 부족합니다.",
+  },
+  {
+    id: "wood-shortage-cp949-source",
+    va: 0x004c7a5c,
+    bytes: "b8 f1 c0 e7 b0 a1 20 ba ce c1 b7 c7 d5 b4 cf b4 d9 2e",
+    meaning: "CP949 source string is 목재가 부족합니다.",
   },
   {
     id: "type-definition-flags-write",
@@ -115,7 +167,8 @@ export function extractEntityTypeCatalog({
     `${executablePath} SHA-256`,
   );
 
-  const seeds = readSeeds(seedsPath);
+  const { document: seeds, sha256: seedsSha256 } = readSeeds(seedsPath);
+  assertEqual(seedsSha256, EXPECTED_SEEDS_SHA256, `${seedsPath} SHA-256`);
   assertEqual(
     seeds.sourceSha256,
     executableSha256,
@@ -148,14 +201,15 @@ export function extractEntityTypeCatalog({
   );
 
   return {
-    schemaVersion: 1,
+    schemaVersion: 2,
     evidenceStatus: "static-proven-type-identities",
     analysisScope:
-      "Internal class, original CP949 name, sprite slot, base frame, raw flags, and source path only. Animation and gameplay meanings are not inferred.",
+      "Internal class, original CP949 name, sprite slot, base frame, raw flags, source path, and three signed-WORD economy fields written by the canonical type writer only. Grain/wood names are cross-bound by the separately hash-bound production/refund control-flow and shortage-message evidence; animation and other gameplay meanings are not inferred.",
     source: {
       executablePath,
       executableSha256,
       seedsPath,
+      seedsSha256,
       seedsSourceSha256: seeds.sourceSha256,
       ghidraSchemaVersion: seeds.schemaVersion,
     },
@@ -170,8 +224,29 @@ export function extractEntityTypeCatalog({
       fields: {
         spriteSlot: "+0x04",
         baseFrame: "+0x06",
+        warExpense: {
+          offset: "+0x0e",
+          width: "signed WORD",
+          writerArgumentIndex: ARGUMENT_INDEX.warExpense,
+        },
+        grainCost: {
+          offset: "+0x10",
+          width: "signed WORD",
+          writerArgumentIndex: ARGUMENT_INDEX.grainCost,
+        },
+        woodCost: {
+          offset: "+0x12",
+          width: "signed WORD",
+          writerArgumentIndex: ARGUMENT_INDEX.woodCost,
+        },
         flags: "+0x4c",
         namePointer: "+0x6c",
+      },
+      economySemanticProvenance: {
+        grainCost:
+          "type +0x10 is passed as FUN_0047e330 caller argument 1, compared with player +0x08, deducted by FUN_0047e260, and bound to the CP949 곡물이 부족합니다. source message",
+        woodCost:
+          "type +0x12 is passed as FUN_0047e330 caller argument 2, compared with player +0x0c, deducted by FUN_0047e2b0, and bound to the CP949 목재가 부족합니다. source message",
       },
     },
     analyzedFunctions: [
@@ -236,6 +311,20 @@ function buildTypeRecord({ buffer, image, nameCopies, typeCall }) {
       recordAddress: toHex(typeCall.recordAddress),
       initializerCallAddress: toHex(typeCall.callAddress),
       flags: toHex(requireArgument(typeCall, ARGUMENT_INDEX.flags)),
+      economy: {
+        warExpense: requireSignedWordArgument(
+          typeCall,
+          ARGUMENT_INDEX.warExpense,
+        ),
+        grainCost: requireSignedWordArgument(
+          typeCall,
+          ARGUMENT_INDEX.grainCost,
+        ),
+        woodCost: requireSignedWordArgument(
+          typeCall,
+          ARGUMENT_INDEX.woodCost,
+        ),
+      },
     },
     name: {
       runtimePointer: toHex(namePointer),
@@ -396,6 +485,17 @@ function requireArgument(typeCall, argumentIndex) {
   return argument.value;
 }
 
+function requireSignedWordArgument(typeCall, argumentIndex) {
+  const value = requireArgument(typeCall, argumentIndex);
+  if (!Number.isInteger(value)) {
+    throw new Error(
+      `Type ${typeCall.internalClass} argument ${argumentIndex} is not an integer WORD`,
+    );
+  }
+  const rawWord = value & 0xffff;
+  return rawWord >= 0x8000 ? rawWord - 0x10000 : rawWord;
+}
+
 function readResourcePath(buffer, image, spriteSlot) {
   const pointerCell = RESOURCE_POINTER_TABLE + spriteSlot * 4;
   const pointerCellOffset = requireRawOffset(image, pointerCell);
@@ -429,9 +529,11 @@ function validateCompleteClassRange(types) {
 }
 
 function readSeeds(path) {
+  let bytes;
   let parsed;
   try {
-    parsed = JSON.parse(readFileSync(path, "utf8"));
+    bytes = readFileSync(path);
+    parsed = JSON.parse(bytes.toString("utf8"));
   } catch (error) {
     throw new Error(`Cannot read Ghidra seed analysis from ${path}: ${error.message}`, {
       cause: error,
@@ -444,7 +546,7 @@ function readSeeds(path) {
   ) {
     throw new Error(`${path} is not a supported Ghidra seed analysis document`);
   }
-  return parsed;
+  return { document: parsed, sha256: sha256(bytes) };
 }
 
 function requireFunction(seeds, entry) {

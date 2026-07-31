@@ -205,6 +205,11 @@ export interface ScenarioDefinition {
   attackTargetAuthorityPolicyId?: string;
   /** Optional opt-in aura profile. Generic scenarios intentionally omit this. */
   auraProfileId?: AuraProfileId;
+  /**
+   * Stable capacity-policy selector. The executable policy remains in the
+   * simulation registry, so scenarios and snapshots are serializable.
+   */
+  capacityPolicyId?: string;
   playerIds?: readonly string[];
   playerTeams?: Readonly<Record<string, string>>;
   completionMode?: "objectives" | "scripted";

@@ -17,7 +17,7 @@
 | 입력 | SHA-256 | 확인 범위 |
 | --- | --- | --- |
 | `original/imjinrok2/imjinrok2.exe` | `25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e` | type writer·name copy·sprite pointer table의 canonical source |
-| `analysis/generated/entity-type-catalog.json` | `572044d9eec6162689154f3625c7572f27d7ee9030d4e4f9f51151b6a88f8745` | class 12·13 원본 이름·primary SPR |
+| `analysis/generated/entity-type-catalog.json` | `485344664b278c97a4ceed0756832abadbf2a71bd4a997b117b85c336d620708` | class 12·13 원본 이름·primary SPR |
 | `original/imjinrok2/stagemap/k01.map` | `43ec3a173032f74c12d3cce1db1078b076b651ed79070a0914673a5b65da99cb` | 60×60 K01 map과 source entity arrays |
 
 map header의 source entity 배열은 type/x/y/owner signed-WORD 배열이며 각각 `+0xa4`,

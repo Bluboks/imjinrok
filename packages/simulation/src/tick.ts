@@ -15,7 +15,7 @@ import {
   type MovementReservation,
 } from "./collision.js";
 import { getFootprintTiles } from "./placement.js";
-import { getPlayerPopulationState, getPopulationCost } from "./population.js";
+import { canCompleteQueuedPlayerCapacity } from "./capacity.js";
 import { applyCompletedResearchToUnit, completeResearch } from "./research.js";
 import { findHarvestableResourceTile, findResourceNode, findResourceTile, getResourceDefinition, harvestResource, isResourceHarvestable, updateResourceRegrowth } from "./resources.js";
 import { isTilePassableForUnit, resolveFloodDrowning } from "./terrain.js";
@@ -232,7 +232,7 @@ function advanceProductionQueues(state: WorldState): void {
       continue;
     }
 
-    if (!canCompleteQueuedUnit(state, unit.playerId, queueItem.unit)) {
+    if (!canCompleteQueuedUnit(state, unit.playerId, unit.id, queueItem.id, queueItem.unit)) {
       queueItem.remainingTicks = 1;
       continue;
     }
@@ -257,16 +257,21 @@ function advanceProductionQueues(state: WorldState): void {
   }
 }
 
-function canCompleteQueuedUnit(state: WorldState, playerId: string, unitKind: UnitState["kind"]): boolean {
-  const populationCost = getPopulationCost(unitKind);
-
-  if (populationCost <= 0) {
-    return true;
-  }
-
-  const population = getPlayerPopulationState(state, playerId);
-
-  return population.used + populationCost <= population.cap;
+function canCompleteQueuedUnit(
+  state: WorldState,
+  playerId: string,
+  sourceUnitId: string,
+  queueItemId: string,
+  unitKind: UnitState["kind"],
+): boolean {
+  return canCompleteQueuedPlayerCapacity(
+    state,
+    playerId,
+    sourceUnitId,
+    queueItemId,
+    unitKind,
+    state.capacityPolicyId,
+  ).admitted;
 }
 
 function getPlayerWorkTickAmount(state: WorldState, playerId: string): number {
