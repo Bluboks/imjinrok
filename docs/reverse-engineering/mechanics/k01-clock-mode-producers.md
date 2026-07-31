@@ -28,7 +28,9 @@
 
 `tools/imjinrok/extract-k01-clock-mode-producers.mjs`는 위 세 generated artifact의 exact byte
 length와 SHA-256을 JSON parse 전에 확인한다. 이어 embedded EXE source hash, 함수 instruction
-hash, 7개 call edge, K01 stage case와 15개 byte anchor를 함께 확인한다. 다음은 재현 명령이다.
+hash, 10개 call edge, K01 stage case와 29개 byte anchor를 함께 확인한다. record→local→`EBX`
+flow, guard direct-write/serialization-address set도 entry와 normalized SHA-256까지 fail-closed로
+확인한다. 다음은 재현 명령이다.
 
 ```bash
 node --test tools/imjinrok/k01-clock-mode-producers.test.mjs
@@ -45,19 +47,27 @@ node tools/imjinrok/extract-k01-clock-mode-producers.mjs
 | `0x00447bc0-0x00447cfa` | 75 / `c5166177633b255028ae02aa6f7a60350f7e93f09ce5fcf101ac92ba066eefde` | scheduler가 wall-clock gate를 호출 |
 | `0x00447e10-0x00447ec8` | 66 / `75860fcb9a74162cab2cbe0b72b7d0238d774205c7f63f118dd6c5da6af2e4f5` | base+feedback 및 elapsed-time gate |
 | `0x00473b50-0x00473dd6` | 498 / `9ceb40f3a8548d1bed0ea93548b724a1054edb5339b28dc3f05700e85a54135f` | 두 message-record feedback caller |
-| `0x00484130-0x0048459a` | 1131 / `d44b4995e2906aa527ee362b7f6aee774bef7cd3fdf966aabc09a5fefdd13b73` | mode writer 인수 EBX를 조립하는 UI/runtime 경로 |
-| `0x00485890-0x00485966` | 44 / `fb53dab9a92b41ace1d6e8c44d158a836f1e3bffdee6301f38361a08a1dbcde1` | 조건부 mode WORD writer |
+| `0x00474770-0x00474856` | 58 / `fd1d176b03376f5c5dac2db2cec22ead092d5d17aa788ffad4e5e0b0206cc699` | reached guard-0 direct store |
+| `0x004748f0-0x00474934` | 16 / `7acacb5b16d0a2eca9305635f69c0063ad1cdc7acb03fc9cf0c5bda4eb2d4c06` | reached guard-0 direct store |
+| `0x00481a80-0x00481bbd` | 102 / `168d30d13877ffeb8fab35e1a213f4bdb5a6f67a941a3af8454ee8dade140db1` | guard address를 serialization helper에 전달 |
+| `0x00481c50-0x00481ed1` | 199 / `823cf8ad9d1b831c9183293c68646fa1e1641b0f8074fc3559a4f8d2feade5d8` | guard address를 다른 serialization helper에 전달 |
+| `0x00484130-0x004851da` | 1131 / `d44b4995e2906aa527ee362b7f6aee774bef7cd3fdf966aabc09a5fefdd13b73` | mode writer 인수 EBX를 조립하는 UI/runtime 경로 |
+| `0x00485890-0x0048594b` | 44 / `fb53dab9a92b41ace1d6e8c44d158a836f1e3bffdee6301f38361a08a1dbcde1` | 조건부 mode WORD writer |
+| `0x00486430-0x00486608` | 138 / `8806df0ba708941c3e177a88ca85e189b4c827dc1aee59876da948c50e8a0845` | reached guard 0/1 direct store branch |
 | `0x0045f9c0-0x0046014d` | 801 / `b694ee213a1b5f189ed7455e00690dcb29d970eca6ea87ef1f59c42c611cfb24` | main-state dispatch |
 | `0x0048dbe0-0x0048dda9` | 147 / `f38e4577cf36c44f26097d94e200321d2a9bc6b0aa1696d572e40a600e7f7217` | standard mission entry에서 stage dispatch |
 | `0x0048d410-0x0048d594` | 110 / `55e9e403f208ea2de9f779cb5176d11db85b33758a30d2310d14504dabd0c13d` | signed stage switch; case 1의 K01 map copier |
+| `0x004a3d10-0x004a3e3c` | 105 / `a51d355c64fa30cf35c7ecc8d8a1b661330866f13da1779e0a9f26d0af451f93` | `0x004844ed` caller가 받는 record result |
 
 직접 확인한 edge는 다음과 같다.
 
 ```text
 main state 5 0x0046005c -> 0x00484130 -> 0x00485890 -> mode WORD
+0x004844ed: 0x00484130 -> 0x004a3d10; result+8 -> local -> EBX -> 0x004851a5 -> 0x00485890
 main state 1 0x004600d0 -> 0x0048dbe0 -> 0x0048d410 -> K01 stage-1 case
 0x00447bc0:0x00447c65 -> 0x00447e10
 0x00473b50:0x00473c7a/0x00473d1b -> 0x004430f0 -> feedback DWORD
+0x00481af1: 0x00481a80 -> 0x004ade3a; 0x00481cb4: 0x00481c50 -> 0x004adf44
 ```
 
 main jump table `0x0045fd56`은 normalized label `0`을 `0x004600cb`(raw state 1),
@@ -70,7 +80,8 @@ copier다. 이로써 K01 표준 stage와 mode writer의 main-state 경로는 같
 
 | 대상 | 정적 흐름 | 폭·비교 |
 | --- | --- | --- |
-| mode | `0x00485890`은 `WORD [0x004bdfF4]`와 stack `WORD` argument를 검사한다. argument가 `1`일 때 guard가 0이면 `WORD [0x00c06e20]=1`, guard가 nonzero이면 같은 주소에 `0`을 쓴다. argument가 `1`이 아니면 이 writer는 mode를 쓰지 않는다. | unsigned raw WORD store; consumer는 `CMP WORD ...,1` equality |
+| state-5 record→EBX | `0x00484157`은 local DWORD를 `-1`로 초기화한다. `0x004844ed`의 `FUN_004a3d10` result에서 `0x00484501`이 `record+8`을 읽고 `0x0048450b`이 local에 저장한다. 함수 초기에 `ESI`/`EDI` push가 남아 있으므로 `0x00484f45 [ESP+0x24]`는 그 local이다. `0x00411cb0` result가 exact `1`이면 `EBX=2`, 아니면 local을 복원한다. 이후 reached `0x004850bc` timeout은 `EBX=1`, `0x00485176`은 `ESI(=1)`를 `EBX`로, `0x0048517f`는 `EBX=2`로 쓴다. | local/`EBX`는 raw DWORD; writer dispatch는 low unsigned `WORD BX` |
+| mode | `0x00485197`의 `BX==0xffff`만 call을 생략한다. 그 외 `0x004851a5`가 `EBX`를 push한다. `0x00485890`은 stack `WORD` argument와 `WORD [0x004bdfF4]`를 검사한다. argument가 `1`일 때 guard가 0이면 `WORD [0x00c06e20]=1`, guard가 nonzero이면 같은 주소에 `0`을 쓴다. argument `2`는 separate tail이고 mode store가 없으며, 다른 argument도 store가 없다. | unsigned raw WORD store; consumer는 `CMP WORD ...,1` equality |
 | selector | option object setter `0x004ac480`가 `WORD [ECX+0x10]`을 쓴다. vtable `0x004b813c`의 sixth slot `0x004b8150`은 `0x004ac490`; 그 forwarder는 `MOVSX EAX,WORD [ECX+0x10]`, `ECX=0x00634ab8`, `CALL 0x0043f560`을 수행한다. setter는 `DWORD [ECX+0x14]`, 즉 `DWORD [0x00634acc]`에 EAX를 저장한다. | input WORD는 signed sign-extension된 DWORD; consumer table index는 unsigned DWORD |
 | base | `0x0043f580`은 mode가 정확히 1이면 selector를 읽지 않고 `DWORD [0x004bdfbc]`를 반환한다. 이 base는 `50 ms`다. 그 밖에는 selector `0/1/2/3/>3`에 각각 `64/60/50/40/30 ms`를 고른다. | mode WORD equality; selector `JA` unsigned default |
 | feedback | message case 두 개가 `0x004430f0`으로 record fields와 derived index를 넘긴다. history/입력/record/selected 값의 guard 뒤 selected timestamp가 input보다 unsigned로 크면 `DWORD [0x0054a4a8]=0xffffffff`, 작으면 `1`, 같으면 기존 값을 보존한다. | raw DWORD, unsigned `JA/JB`; `0xffffffff`는 이 산술 위치에서 -1 |
@@ -80,6 +91,21 @@ copier다. 이로써 K01 표준 stage와 mode writer의 main-state 경로는 같
 elapsed-time acceptance를 검사한다. 따라서 feedback은 다음 gate에 전달되는 one-shot raw 보정이다.
 이 gate와 message queue의 더 큰 흐름은 기존 [K01 투사체 풀 갱신 cadence](k01-projectile-pool-cadence.md)의
 source-bound 계약을 따른다.
+
+### guard direct/indirect 경계
+
+`0x004bdfF4`의 canonical direct `WRITE` subset은 exact count `5`, normalized SHA-256
+`9a90b182cdbdf55dbeea5a41ec612115912c210a4daa0c8ddece3a647f0d520d`이다: main init은
+`0x0045fa40`에서 `EBP`를 zero로 만들고 `0x0045fbfc`에 저장한다. `0x00474845`/`0x00474929`은 0을, `0x00486585`은 0을,
+`0x004865ca`은 1을 WORD store한다. `FUN_00484130`의 complete direct-caller subset도 exact
+one entry `0x0046005c`이고 SHA-256은
+`384cd7bdb004d0920217171e39922de2ea316325a2ad05947920524b14c1e201`이다.
+
+그러나 `0x00481aec` 및 `0x00481caf`는 guard address 자체를 각각 serialization function에 push한다.
+이 two-entry `DATA` subset의 normalized SHA-256은
+`fee3fa62b2e6bca56bee04fa4078ae40d73222a5d45bac9daab2e8a5f8cc7040`이다. 따라서 위 다섯 direct
+store는 direct-reference inventory에 대해 **정적 확정**이지만, pointer alias 또는 serialization
+side effect까지 배제한 complete writer claim은 아니다.
 
 ## K01에 대해 닫힌 것과 닫히지 않은 것
 
@@ -113,17 +139,18 @@ extractor test가 아래 raw vector를 직접 replay한다.
 | non-mode table | mode `0`, selector `0,1,2,3,4` | `64,60,50,40,30 ms` |
 | signed forwarder | object WORD `0x0002,0xffff,0x8000` | selector DWORD `2,0xffffffff,0xffff8000` |
 | mode writer | `(previous, guard, argument)=(0,0,1),(1,1,1),(1,0,2)` | result mode `1,0,1` |
+| record→local→EBX | record `+8=-1`/tail non-one, `+8=0x12340001`/tail non-one, tail `1`, timeout, then alternate | respectively call skip; low-WORD `1` guard-zero write `1`; `EBX=2` no write; timeout `EBX=1` guard-nonzero write `0`; later alternate `EBX=2` no write |
 | feedback | base `50`, input `100`, selected `101,100,99` | effective interval `49,50,51 ms` |
 
 또한 test는 functions/references/jump-tables generated artifact 각각의 같은-size 독립 변조를
 exact file SHA-256 단계에서, source hash를 바꾼 stale functions artifact를 exact byte-length
 단계에서 거부한다. canonical file을 통과한 뒤에는 EXE hash, embedded source hash,
-함수 instruction hash, feedback call edge와 main/stage jump-table 목적지를 계속 확인한다. 따라서
+함수 instruction hash, record/serialization/feedback call edge와 main/stage jump-table 목적지를 계속 확인한다. 따라서
 상수만 읽어 만든 table이 아니라 해당 CFG/data-flow의 재현 가능성을 검증한다.
 
 ## 다음 정적 질문
 
-범위를 넓히지 않는 다음 질문은 `0x00484130`이 만든 EBX와 `0x004bdfF4` guard의 concrete
-producer가 K01 standard-session path에 도달하는지, 그리고 K01이 option object `+0x10`을
-설정하는지를 각각 source-bound call/data-flow로 닫는 것이다. 그 전에는 이 문서의 조건부 범위를
-K01의 확정 cadence로 사용할 수 없다.
+범위를 넓히지 않는 다음 질문은 K01 standard-session이 state `5` record/overrides와
+`0x004bdfF4` guard의 concrete producer에 도달하는지, serialization alias가 guard를 쓰는지,
+그리고 K01이 option object `+0x10`을 설정하는지를 각각 source-bound call/data-flow로 닫는 것이다.
+그 전에는 이 문서의 조건부 범위를 K01의 exact mode, selector 또는 tick frequency로 사용할 수 없다.
