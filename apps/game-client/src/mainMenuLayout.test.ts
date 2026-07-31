@@ -4,8 +4,10 @@ import test from "node:test";
 import {
   IMJINROK_CLASSIC_MAIN_MENU_GEOMETRY,
   getMainMenuSourcePoint,
+  projectMainMenuSourcePoint,
   projectMainMenuSourceRect,
   resolveMainMenuCanvasLayout,
+  scaleMainMenuSourceMetric,
 } from "./mainMenuLayout.js";
 
 test("main menu keeps the 640 by 480 source canvas uniform and letterboxed", () => {
@@ -67,6 +69,30 @@ test("main menu preserves pointer source coordinates through a letterboxed non-i
   assert.ok(restored);
   assert.ok(Math.abs(restored.x - 537) < Number.EPSILON * 1024);
   assert.ok(Math.abs(restored.y - 79) < Number.EPSILON * 1024);
+});
+
+test("screen-space companions use the source-art projection without inheriting container scaling", () => {
+  const hdLayout = resolveMainMenuCanvasLayout(
+    1280,
+    720,
+    IMJINROK_CLASSIC_MAIN_MENU_GEOMETRY,
+  );
+  assert.deepEqual(projectMainMenuSourcePoint(hdLayout, { x: 305, y: 380 }), {
+    x: 617.5,
+    y: 570,
+  });
+  assert.equal(scaleMainMenuSourceMetric(hdLayout, 12), 18);
+
+  const ultrawideLayout = resolveMainMenuCanvasLayout(
+    3440,
+    1440,
+    IMJINROK_CLASSIC_MAIN_MENU_GEOMETRY,
+  );
+  assert.deepEqual(
+    projectMainMenuSourcePoint(ultrawideLayout, { x: 305, y: 380 }),
+    { x: 1675, y: 1140 },
+  );
+  assert.equal(scaleMainMenuSourceMetric(ultrawideLayout, 12), 36);
 });
 
 test("main menu rejects invalid viewport dimensions", () => {

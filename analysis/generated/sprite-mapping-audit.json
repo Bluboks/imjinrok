@@ -36,7 +36,7 @@
     },
     {
       "path": "apps/game-client/src/scenes/MissionBriefingScene.ts",
-      "sha256": "46b4d360443925aea5eefbd5ef3fb981f4e74564de4a928667ddd5e230554d3c"
+      "sha256": "1c45f0d2caa92f2f781b9585d6b16f5d76b76b50718d36068a0f71af29fd5bd4"
     },
     {
       "path": "apps/game-client/src/missionPortraits.ts",

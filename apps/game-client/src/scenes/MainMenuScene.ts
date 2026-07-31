@@ -49,9 +49,17 @@ import {
 } from "../mainMenuCountrySelection.js";
 import {
   IMJINROK_CLASSIC_MAIN_MENU_GEOMETRY,
+  projectMainMenuSourcePoint,
   resolveMainMenuCanvasLayout,
+  scaleMainMenuSourceMetric,
+  type MainMenuCanvasLayout,
   type MainMenuSourceRect,
 } from "../mainMenuLayout.js";
+import {
+  PRE_GAME_KOREAN_FONT_FAMILY,
+  resolvePreGameTextResolution,
+  whenPreGameTypographyReady,
+} from "../ui/preGameTypography.js";
 import {
   MAIN_MENU_BUTTON_AUDIO_CUE_KEY,
   MAIN_MENU_COUNTRY_SELECT_AUDIO_CUE_KEY,
@@ -96,6 +104,68 @@ interface SourceMenuEntry {
   enabled?: boolean;
 }
 
+function scaleCssPixelValue(
+  value: number | string | undefined,
+  scale: number,
+): number | string | undefined {
+  if (typeof value === "number") {
+    return value * scale;
+  }
+  if (typeof value !== "string") {
+    return value;
+  }
+
+  const pixelValue = /^(-?(?:\d+\.?\d*|\.\d+))px$/u.exec(value);
+  if (!pixelValue) {
+    return value;
+  }
+  return `${Number(pixelValue[1]) * scale}px`;
+}
+
+function scaleTextPadding(
+  padding: Phaser.Types.GameObjects.Text.TextPadding | undefined,
+  scale: number,
+): Phaser.Types.GameObjects.Text.TextPadding | undefined {
+  if (!padding) {
+    return undefined;
+  }
+  const scaled: Phaser.Types.GameObjects.Text.TextPadding = {};
+  if (padding.x !== undefined) scaled.x = padding.x * scale;
+  if (padding.y !== undefined) scaled.y = padding.y * scale;
+  if (padding.left !== undefined) scaled.left = padding.left * scale;
+  if (padding.right !== undefined) scaled.right = padding.right * scale;
+  if (padding.top !== undefined) scaled.top = padding.top * scale;
+  if (padding.bottom !== undefined) scaled.bottom = padding.bottom * scale;
+  return scaled;
+}
+
+function scaleTextShadow(
+  shadow: Phaser.Types.GameObjects.Text.TextShadow | undefined,
+  scale: number,
+): Phaser.Types.GameObjects.Text.TextShadow | undefined {
+  if (!shadow) {
+    return undefined;
+  }
+  const scaled: Phaser.Types.GameObjects.Text.TextShadow = { ...shadow };
+  if (shadow.offsetX !== undefined) scaled.offsetX = shadow.offsetX * scale;
+  if (shadow.offsetY !== undefined) scaled.offsetY = shadow.offsetY * scale;
+  if (shadow.blur !== undefined) scaled.blur = shadow.blur * scale;
+  return scaled;
+}
+
+function scaleTextStrokeThickness(
+  sourceThickness: number | undefined,
+  layout: MainMenuCanvasLayout,
+): number {
+  if (sourceThickness === undefined || sourceThickness <= 0) {
+    return 0;
+  }
+  return Math.max(
+    1,
+    Math.round(scaleMainMenuSourceMetric(layout, sourceThickness)),
+  );
+}
+
 function createVsCpuTeams(
   playerIds: readonly string[],
 ): Record<string, string> {
@@ -118,6 +188,9 @@ export class MainMenuScene extends Phaser.Scene {
   private gameplayPreferences: GameplayPreferences = readGameplayPreferences();
   private keyboardHandlers = new Map<string, () => void>();
   private menuContainer: Phaser.GameObjects.Container | null = null;
+  private menuTextContainer: Phaser.GameObjects.Container | null = null;
+  private menuLayout: MainMenuCanvasLayout | null = null;
+  private unsubscribeTypographyReady: (() => void) | null = null;
   private menuMode: MainMenuScreen = "main";
   private campaignNationHover: CampaignNation | null = null;
   private deferredLoadStarted = false;
@@ -160,6 +233,11 @@ export class MainMenuScene extends Phaser.Scene {
     this.bindKeyboard("M", () => this.cycleMouseControlModePreference());
     this.scale.on(Phaser.Scale.Events.RESIZE, this.handleResize, this);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, this.handleShutdown, this);
+    this.unsubscribeTypographyReady = whenPreGameTypographyReady(() => {
+      if (this.sys.isActive()) {
+        this.drawMenu();
+      }
+    });
     this.beginDeferredMenuLoad();
   }
 
@@ -241,10 +319,13 @@ export class MainMenuScene extends Phaser.Scene {
       this.scale.height,
       this.presentationGeometry,
     );
+    this.menuTextContainer?.destroy(true);
     this.menuContainer?.destroy(true);
+    this.menuLayout = layout;
     this.menuContainer = this.add
       .container(layout.offsetX, layout.offsetY)
       .setScale(layout.scale);
+    this.menuTextContainer = this.add.container(0, 0);
 
     switch (this.menuMode) {
       case "campaign-country":
@@ -624,14 +705,65 @@ export class MainMenuScene extends Phaser.Scene {
     text: string,
     style: Phaser.Types.GameObjects.Text.TextStyle,
   ): Phaser.GameObjects.Text {
-    const label = this.add.text(x, y, text, {
-      fontFamily: "Batang, AppleMyungjo, Nanum Myeongjo, serif",
-      stroke: "#e5dcbf",
-      strokeThickness: 0.4,
-      ...style,
-    });
-    this.menuContainer?.add(label);
+    const layout = this.menuLayout;
+    if (!layout) {
+      throw new Error("Main menu text requires an active presentation layout");
+    }
+    const position = projectMainMenuSourcePoint(layout, { x, y });
+    const textStyle = this.projectTextStyle(style, layout);
+    const label = this.add
+      .text(position.x, position.y, text, textStyle)
+      .setResolution(textStyle.resolution ?? 1);
+    this.menuTextContainer?.add(label);
     return label;
+  }
+
+  private projectTextStyle(
+    style: Phaser.Types.GameObjects.Text.TextStyle,
+    layout: MainMenuCanvasLayout,
+  ): Phaser.Types.GameObjects.Text.TextStyle {
+    const sourceStyle: Phaser.Types.GameObjects.Text.TextStyle = {
+      fontFamily: PRE_GAME_KOREAN_FONT_FAMILY,
+      strokeThickness: 0,
+      ...style,
+    };
+    const scaleMetric = (value: number | undefined): number | undefined =>
+      value === undefined
+        ? undefined
+        : scaleMainMenuSourceMetric(layout, value);
+    const padding = scaleTextPadding(sourceStyle.padding, layout.scale);
+    const shadow = scaleTextShadow(sourceStyle.shadow, layout.scale);
+    const wordWrap = sourceStyle.wordWrap
+      ? { ...sourceStyle.wordWrap }
+      : undefined;
+    if (wordWrap && wordWrap.width !== undefined) {
+      wordWrap.width = scaleMainMenuSourceMetric(layout, wordWrap.width);
+    }
+    const fontSize = scaleCssPixelValue(sourceStyle.fontSize, layout.scale);
+    const lineSpacing = scaleMetric(sourceStyle.lineSpacing);
+    const letterSpacing = scaleMetric(sourceStyle.letterSpacing);
+    const fixedWidth = scaleMetric(sourceStyle.fixedWidth);
+    const fixedHeight = scaleMetric(sourceStyle.fixedHeight);
+
+    return {
+      ...sourceStyle,
+      strokeThickness: scaleTextStrokeThickness(
+        sourceStyle.strokeThickness,
+        layout,
+      ),
+      resolution: resolvePreGameTextResolution(
+        globalThis.devicePixelRatio,
+        layout.scale,
+      ),
+      ...(fontSize === undefined ? {} : { fontSize }),
+      ...(lineSpacing === undefined ? {} : { lineSpacing }),
+      ...(letterSpacing === undefined ? {} : { letterSpacing }),
+      ...(fixedWidth === undefined ? {} : { fixedWidth }),
+      ...(fixedHeight === undefined ? {} : { fixedHeight }),
+      ...(padding ? { padding } : {}),
+      ...(shadow ? { shadow } : {}),
+      ...(wordWrap ? { wordWrap } : {}),
+    };
   }
 
   private addSourceAction(
@@ -768,13 +900,18 @@ export class MainMenuScene extends Phaser.Scene {
     }
     this.keyboardHandlers.clear();
     this.scale.off(Phaser.Scale.Events.RESIZE, this.handleResize, this);
+    this.unsubscribeTypographyReady?.();
+    this.unsubscribeTypographyReady = null;
     this.removeDeferredLoadListeners();
     this.deferredActions.reset();
     this.deferredLoadStarted = false;
     this.deferredLoadComplete = false;
     stopMainMenuBackgroundMusic(this);
+    this.menuTextContainer?.destroy(true);
+    this.menuTextContainer = null;
     this.menuContainer?.destroy(true);
     this.menuContainer = null;
+    this.menuLayout = null;
   }
 
   private getStageSlotRect(index: number): MainMenuSourceRect {
