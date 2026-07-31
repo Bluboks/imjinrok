@@ -11,6 +11,7 @@ export const VIRTUAL_CURSOR_REGISTRY_KEY = "virtual-cursor";
 export const ACTION_TRIGGERED_EVENT = "action:triggered";
 export const UI_DOMAIN_ACTION_REQUESTED_EVENT = "ui-domain-action:requested";
 export const MINIMAP_NAVIGATE_EVENT = "minimap:navigate";
+export const MINIMAP_ZOOM_REQUESTED_EVENT = "minimap:zoom-requested";
 export const MINIMAP_MAP_CHANGED_EVENT = "minimap:map-changed";
 export const MINIMAP_MAP_REGISTRY_KEY = "minimap-map";
 export const MINIMAP_VIEWPORT_CHANGED_EVENT = "minimap:viewport-changed";
@@ -220,6 +221,12 @@ export interface MinimapViewportView {
   viewportWorldCorners: MinimapPoint[];
   worldBounds: MinimapBounds;
   zoom: number;
+}
+
+/** Typed UI request; the game scene remains the sole camera owner. */
+export interface MinimapZoomRequestedView {
+  direction: -1 | 1;
+  source: "rail-button";
 }
 
 export interface MinimapEntitiesView {

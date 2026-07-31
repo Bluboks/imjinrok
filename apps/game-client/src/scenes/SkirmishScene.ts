@@ -105,6 +105,7 @@ import {
   MINIMAP_AVAILABILITY_CHANGED_EVENT,
   MINIMAP_AVAILABILITY_REGISTRY_KEY,
   MINIMAP_NAVIGATE_EVENT,
+  MINIMAP_ZOOM_REQUESTED_EVENT,
   MINIMAP_ENTITIES_CHANGED_EVENT,
   MINIMAP_ENTITIES_REGISTRY_KEY,
   MINIMAP_MAP_CHANGED_EVENT,
@@ -130,6 +131,7 @@ import {
   type MinimapAlertView,
   type MinimapAvailabilityView,
   type MinimapPoint,
+  type MinimapZoomRequestedView,
   type MinimapResourcesView,
   type MagicAutoUseRequestedView,
   type MagicAutoUseView,
@@ -273,6 +275,11 @@ import {
 } from "../ui/sourceFogAndCommandAssets.js";
 import { shouldPublishSerializableView } from "../ui/serializableViewPublication.js";
 import {
+  MINIMAP_ZOOM_MAX,
+  MINIMAP_ZOOM_MIN,
+  resolveAdjacentMinimapZoomPreset,
+} from "../ui/minimapZoom.js";
+import {
   BUILD_DONE_AUDIO_CUE_KEY,
   COMMAND_REJECTED_AUDIO_CUE_KEY,
   GAMEPLAY_AUDIO_CUES,
@@ -315,8 +322,8 @@ const UNDER_ATTACK_ALERT_DURATION_MS = 2_800;
 const CONTROL_GROUP_DOUBLE_TAP_MS = 450;
 const UNIT_DOUBLE_CLICK_SELECT_MS = 420;
 const ENVIRONMENT_OVERLAY_DEPTH = SCREEN_OVERLAY_DEPTH - 140;
-const MIN_CAMERA_ZOOM = 0.55;
-const MAX_CAMERA_ZOOM = 1.8;
+const MIN_CAMERA_ZOOM = MINIMAP_ZOOM_MIN;
+const MAX_CAMERA_ZOOM = MINIMAP_ZOOM_MAX;
 const MAX_CLIENT_PRODUCTION_QUEUE_SIZE = 5;
 const CHEAT_INPUT_MAX_LENGTH = 32;
 const UNIT_SPRITE_GROUND_CONTACT = { x: 0, y: 0 } as const;
@@ -1155,6 +1162,7 @@ export class SkirmishScene extends Phaser.Scene {
   private setupPointerLockLifecycle(): void {
     this.input.manager.events.on(Phaser.Input.Events.POINTERLOCK_CHANGE, this.handlePointerLockChanged, this);
     this.game.events.on(MINIMAP_NAVIGATE_EVENT, this.handleMinimapNavigate, this);
+    this.game.events.on(MINIMAP_ZOOM_REQUESTED_EVENT, this.handleMinimapZoomRequested, this);
     this.game.events.on(ACTION_TRIGGERED_EVENT, this.handleActionTriggered, this);
     this.game.events.on(BATTLEFIELD_SUMMARY_ACTION_EVENT, this.handleBattlefieldSummaryAction, this);
     this.game.events.on(GAME_PLAYBACK_CONTROL_EVENT, this.handlePlaybackControl, this);
@@ -1170,6 +1178,19 @@ export class SkirmishScene extends Phaser.Scene {
 
     this.centerCameraOnWorldPoint(target);
     this.publishMinimapViewport(true);
+  }
+
+  private handleMinimapZoomRequested(request: MinimapZoomRequestedView): void {
+    if (this.isBlockingModalOpen() || !this.isMinimapAvailable()) {
+      return;
+    }
+
+    const nextZoom = resolveAdjacentMinimapZoomPreset(this.cameras.main.zoom, request.direction);
+    if (nextZoom === null) {
+      return;
+    }
+
+    this.setCameraZoomAtScreenPoint(this.getBattlefieldZoomAnchor(), nextZoom);
   }
 
   private handleMagicAutoUseRequested(request: MagicAutoUseRequestedView): void {
@@ -1333,6 +1354,7 @@ export class SkirmishScene extends Phaser.Scene {
     this.events.off(Phaser.Scenes.Events.ADDED_TO_SCENE, this.handleGameObjectAddedToScene, this);
     this.events.off(Phaser.Scenes.Events.REMOVED_FROM_SCENE, this.handleGameObjectRemovedFromScene, this);
     this.game.events.off(MINIMAP_NAVIGATE_EVENT, this.handleMinimapNavigate, this);
+    this.game.events.off(MINIMAP_ZOOM_REQUESTED_EVENT, this.handleMinimapZoomRequested, this);
     this.game.events.off(ACTION_TRIGGERED_EVENT, this.handleActionTriggered, this);
     this.game.events.off(BATTLEFIELD_SUMMARY_ACTION_EVENT, this.handleBattlefieldSummaryAction, this);
     this.game.events.off(GAME_PLAYBACK_CONTROL_EVENT, this.handlePlaybackControl, this);
@@ -4125,6 +4147,16 @@ export class SkirmishScene extends Phaser.Scene {
   private zoomCameraAtScreenPoint(screenPoint: Phaser.Math.Vector2, zoomDelta: number): void {
     const camera = this.cameras.main;
     const nextZoom = Phaser.Math.Clamp(camera.zoom + zoomDelta, MIN_CAMERA_ZOOM, MAX_CAMERA_ZOOM);
+
+    this.setCameraZoomAtScreenPoint(screenPoint, nextZoom);
+  }
+
+  private getBattlefieldZoomAnchor(): Phaser.Math.Vector2 {
+    return new Phaser.Math.Vector2(this.scale.width / 2, this.getHudTop() / 2);
+  }
+
+  private setCameraZoomAtScreenPoint(screenPoint: Phaser.Math.Vector2, nextZoom: number): void {
+    const camera = this.cameras.main;
 
     if (Math.abs(nextZoom - camera.zoom) < 0.001) {
       return;
