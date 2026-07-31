@@ -67,6 +67,7 @@
 - [고정 선택 패널 후보를 반증한 transient formatted overlay](reverse-engineering/mechanics/transient-formatted-overlay.md)
 - [selection action·생산 queue dispatch·조건부 seven-slot owner 경계](reverse-engineering/mechanics/persistent-selection-action-boundary.md)
 - [player-scoped 영웅 생산 queue 우선순위 toggle](reverse-engineering/mechanics/hero-priority-queue-gate.md)
+- [전비 capacity·reservation·completion transfer](reverse-engineering/mechanics/war-expense-capacity.md)
 - [player-scoped 마법 자동사용 toggle](reverse-engineering/mechanics/magic-auto-use-gate.md)
 - [K01 유성룡 class 78 자동 마법 경로](reverse-engineering/mechanics/k01-ryu-auto-magic-path.md)
 - [K01 action 59 subtype 0x10 고정 레코드·후속 효과](reverse-engineering/mechanics/k01-subtype-16-path.md)

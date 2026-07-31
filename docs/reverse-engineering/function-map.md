@@ -141,7 +141,7 @@
 | `0x00441e40` | `FUN_00441e40`, `0x00441e40-0x00441e7a` | 5 / 19 | 인덱스로 활성 레코드 선택 | 반환 포인터와 비활성 조건 |
 | `0x00445730` | `FUN_00445730`, `0x00445730-0x00445760` | 5 / 15 | 선택 stage·mode flag에서 공통 UI mode 반환 | K01 index 1→mode 1 정적 확정 |
 | `0x00445770` | `FUN_00445770`, `0x00445770-0x004457c4` | 1 / 17 | gameplay UI 사각형 필드 초기화 호출 | `0x0088bd60`→`FUN_00481ee0` 경로 정적 확정 |
-| `0x004457d0` | `FUN_004457d0`, `0x004457d0-0x0044598d` | 23 / 135 | gameplay UI 객체 초기화와 open request reset | gameplay-panel 좌표·초기 request 경로 정적 확정 |
+| `0x004457d0` | `FUN_004457d0`, `0x004457d0-0x0044598d` | 23 / 135 | entry에서 8개 `0x2c10` player record의 `+0x1b50=250`, `+0x1b52=2500` 초기화 후 gameplay UI 객체 초기화와 open request reset | [전비 capacity](mechanics/war-expense-capacity.md)의 초기값과 gameplay-panel 좌표·초기 request 경로 정적 확정 |
 | `0x004464c0` | `FUN_004464c0`, `0x004464c0-0x0044735e` | 224 / 988 | gameplay UI 입력 상위 갱신 | open request producer 호출 흐름 정적 확정 |
 | `0x00447bc0` | `FUN_00447bc0`, `0x00447bc0-0x00447cfa` | 21 / 75 | open request 1과 application state 3을 state `0x16`으로 전환 | complete structured direct-reference 범위의 유일한 immediate `0x16` write 정적 확정 |
 | `0x004481d0` | `FUN_004481d0`, `0x004481d0-0x00448225` | 6 / 21 | application 전환 선행 갱신 | `FUN_00447bc0` 호출 순서 정적 확정 |
