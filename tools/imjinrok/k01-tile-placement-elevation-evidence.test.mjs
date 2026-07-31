@@ -8,10 +8,12 @@ import test from "node:test";
 
 import {
   extractK01TilePlacementElevationEvidence,
+  replayFUN00462b80RuntimeWordTableInitialization,
   reproduceFUN00464cc0Projection,
   reproduceFUN00469510Placement,
   reproduceK01PlacementHelper,
   reproducePlacementLevel,
+  reproduceRuntimeWordTableOutputYAdjustment,
 } from "./extract-k01-tile-placement-elevation-evidence.mjs";
 
 const repositoryRoot = join(dirname(fileURLToPath(import.meta.url)), "../..");
@@ -46,6 +48,41 @@ test("hash-bound extractor reproduces all K01 placement/object/frame vectors", (
     boundary: "This bounded full-map raster establishes draw order and rectangle arithmetic, not broader pivot, clip/mode, palette, or renderer parity semantics.",
   });
   assert.equal(report.sources.staticAnalysis.references.requiredCallEdges.some((edge) => edge.from === "0x00467160" && edge.to === "0x00469510"), true);
+  assert.equal(report.sources.staticAnalysis.references.runtimeWordTableDirectReferenceInventory.length, 6);
+  assert.deepEqual(report.runtimeWordAdjustmentTable.initialization.indexedFamilyDomain, { first: 0, last: 14, count: 15 });
+  assert.equal(report.runtimeWordAdjustmentTable.initialization.indexedWordWrites.at(0).value, 0);
+  assert.equal(report.runtimeWordAdjustmentTable.initialization.indexedWordWrites.at(-1).value, 9);
+  assert.deepEqual(report.runtimeWordAdjustmentTable.readerContract.K01FogFamilyDistribution, { 0: 2865, 1: 95, 2: 95, 3: 101, 4: 79, 5: 38, 6: 36, 7: 54, 8: 61, 9: 52, 10: 33, 11: 35, 12: 55, 14: 1 });
+});
+
+test("FUN_00462b80 byte replay fixes every indexed and adjacent WORD write", () => {
+  const initialization = replayFUN00462b80RuntimeWordTableInitialization();
+  assert.deepEqual(initialization.indexedFamilyDomain, { first: 0, last: 14, count: 15 });
+  assert.deepEqual(initialization.indexedWordWrites, [
+    { family: 0, wordOffset: 0, value: 0 },
+    ...Array.from({ length: 14 }, (_, index) => ({ family: index + 1, wordOffset: (index + 1) * 8, value: 9 })),
+  ]);
+  assert.deepEqual(initialization.adjacentZeroWordWrites, { count: 15, firstWordOffset: -2, lastWordOffset: 110, strideBytes: 8, value: 0 });
+});
+
+test("shared runtime WORD-table reader contract preserves both low-nibble formulas", () => {
+  const words = replayFUN00462b80RuntimeWordTableInitialization().indexedWordWrites.map(({ value }) => value);
+  assert.deepEqual(reproduceRuntimeWordTableOutputYAdjustment(words, { family: 0, lowNibble: 2, helperReturn: 3 }), {
+    family: 0,
+    lowNibble: 2,
+    helperReturn: 3,
+    tableWord: 0,
+    relativeComponent: -32,
+    outputYAdjustment: -32,
+  });
+  assert.deepEqual(reproduceRuntimeWordTableOutputYAdjustment(words, { family: 14, lowNibble: 1, helperReturn: -2 }), {
+    family: 14,
+    lowNibble: 1,
+    helperReturn: -2,
+    tableWord: 9,
+    relativeComponent: -32,
+    outputYAdjustment: -23,
+  });
 });
 
 test("FUN_00464cc0 reproducer fixes bounded base projection and separates the unresolved table input", () => {
@@ -137,6 +174,10 @@ test("pure reference functions fail closed for malformed, out-of-range, and non-
   assert.throws(() => reproducePlacementLevel(256, 0), /unsigned byte/u);
   assert.throws(() => reproducePlacementLevel(0, -1), /unsigned byte/u);
   assert.throws(() => reproduceFUN00464cc0Projection(map, { x: 0, y: 0, runtimeWord: 0x8000 }), /signed 16-bit/u);
+  const words = replayFUN00462b80RuntimeWordTableInitialization().indexedWordWrites.map(({ value }) => value);
+  assert.throws(() => reproduceRuntimeWordTableOutputYAdjustment(words.slice(0, -1), { family: 0, lowNibble: 2, helperReturn: 0 }), /exactly 15/u);
+  assert.throws(() => reproduceRuntimeWordTableOutputYAdjustment(words, { family: 15, lowNibble: 2, helperReturn: 0 }), /outside the FUN_00462b80 initialized table domain/u);
+  assert.throws(() => reproduceRuntimeWordTableOutputYAdjustment(words, { family: 0, lowNibble: 16, helperReturn: 0 }), /must be a nibble/u);
 });
 
 test("extractor rejects single-byte tampering of every hash-bound primary input", (t) => {
