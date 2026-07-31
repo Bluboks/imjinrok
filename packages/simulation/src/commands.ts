@@ -17,6 +17,7 @@ import {
   unitDefinitions,
 } from "../../shared/src/index.js";
 import { getBuildTimeTicks, isUnitUnderConstruction, updateConstructionHealth } from "./construction.js";
+import { createDemolitionState } from "./demolition.js";
 import { createUnitState } from "./entities.js";
 import { arePlayersAllied } from "./diplomacy.js";
 import { createCurrentVisibilityResolver, getAttackTargetAuthorityPolicy, isAttackTargetAuthorized } from "./attackTargetAuthorityPolicy.js";
@@ -358,8 +359,41 @@ export function validateCommand(state: WorldState, envelope: CommandEnvelope): C
         return { ok: false, reason: "unit is not a building" };
       }
 
+      if (unit.demolition) {
+        return { ok: false, reason: "building is being demolished" };
+      }
+
       if (!isUnitUnderConstruction(unit)) {
         return { ok: false, reason: "unit is not under construction" };
+      }
+
+      return { ok: true };
+    }
+    case "demolish-building": {
+      const unit = state.units[envelope.command.unitId];
+
+      if (!unit) {
+        return { ok: false, reason: "unit not found" };
+      }
+
+      if (unit.playerId !== envelope.playerId) {
+        return { ok: false, reason: "unit is not owned by player" };
+      }
+
+      if (unitDefinitions[unit.kind].category !== "building") {
+        return { ok: false, reason: "unit is not a building" };
+      }
+
+      if (isUnitUnderConstruction(unit)) {
+        return { ok: false, reason: "unit is under construction" };
+      }
+
+      if (unit.demolition) {
+        return { ok: false, reason: "building is already being demolished" };
+      }
+
+      if ((unit.productionQueue?.length ?? 0) > 0 || (unit.researchQueue?.length ?? 0) > 0) {
+        return { ok: false, reason: "building is busy" };
       }
 
       return { ok: true };
@@ -787,6 +821,19 @@ export function applyCommand(state: WorldState, envelope: CommandEnvelope): void
       removeUnitFromWorld(state, building.id);
       return;
     }
+    case "demolish-building": {
+      const building = state.units[envelope.command.unitId];
+
+      if (!building) {
+        return;
+      }
+
+      delete building.movementTarget;
+      delete building.movementPath;
+      delete building.currentOrder;
+      building.demolition = createDemolitionState();
+      return;
+    }
     case "set-rally-point": {
       const building = state.units[envelope.command.buildingUnitId];
 
@@ -874,12 +921,16 @@ function validateUnitActor(
     return { ok: false, reason: "unit is not owned by player" };
   }
 
-  if (!unitCanPerformAction(unit.kind, actionId)) {
-    return { ok: false, reason: "unit cannot perform action" };
-  }
-
   if (isUnitUnderConstruction(unit) && actionId !== "stop") {
     return { ok: false, reason: "unit is under construction" };
+  }
+
+  if (unit.demolition) {
+    return { ok: false, reason: "building is being demolished" };
+  }
+
+  if (!unitCanPerformAction(unit.kind, actionId)) {
+    return { ok: false, reason: "unit cannot perform action" };
   }
 
   return { ok: true, unit };
@@ -910,6 +961,10 @@ function validateRepairTarget(
 
   if (isUnitUnderConstruction(target)) {
     return { ok: true, unit: target };
+  }
+
+  if (target.demolition) {
+    return { ok: false, reason: "repair target is being demolished" };
   }
 
   if (target.health.current >= target.health.max) {

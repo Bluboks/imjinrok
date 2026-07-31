@@ -189,6 +189,7 @@ export const actionDefinitions = {
   "train-archer": { id: "train-archer", icon: "Ar", hotkey: "A", label: "조선 궁수 훈련" },
   "cancel-production": { id: "cancel-production", icon: "X", hotkey: "X", label: "대기열 취소" },
   "cancel-construction": { id: "cancel-construction", icon: "X", hotkey: "X", label: "건설 취소" },
+  demolish: { id: "demolish", icon: "D", hotkey: "D", label: "해체" },
   "rally-point": { id: "rally-point", icon: "R", hotkey: "R", label: "집결지" },
   "research-loom": { id: "research-loom", icon: "L", hotkey: "L", label: "방직 연구" },
   "town-bell": { id: "town-bell", icon: "B", hotkey: "B", label: "경보 소집" },
@@ -198,9 +199,9 @@ export const actionDefinitions = {
 export type ActionDefinitionId = keyof typeof actionDefinitions;
 
 const workerActionIds = ["move", "gather", "build", "build-town-center", "build-barracks", "build-beacon", "stop", "attack-move", "patrol", "repair", "hold"] as const satisfies readonly ActionDefinitionId[];
-const townCenterActionIds = ["train-villager", "cancel-production", "rally-point", "research-loom", "stop", "town-bell", "set-gather"] as const satisfies readonly ActionDefinitionId[];
-const barracksActionIds = ["train-swordsman", "train-archer", "cancel-production", "rally-point", "stop"] as const satisfies readonly ActionDefinitionId[];
-const passiveBuildingActionIds = ["stop"] as const satisfies readonly ActionDefinitionId[];
+const townCenterActionIds = ["train-villager", "cancel-production", "rally-point", "research-loom", "stop", "town-bell", "set-gather", "demolish"] as const satisfies readonly ActionDefinitionId[];
+const barracksActionIds = ["train-swordsman", "train-archer", "cancel-production", "rally-point", "stop", "demolish"] as const satisfies readonly ActionDefinitionId[];
+const passiveBuildingActionIds = ["stop", "demolish"] as const satisfies readonly ActionDefinitionId[];
 const infantryActionIds = ["move", "stop", "attack-move", "patrol", "hold"] as const satisfies readonly ActionDefinitionId[];
 const evacuationActionIds = ["move", "stop", "hold"] as const satisfies readonly ActionDefinitionId[];
 

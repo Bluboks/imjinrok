@@ -81,6 +81,16 @@ export interface CancelConstructionCommand {
   unitId: string;
 }
 
+/**
+ * Product command boundary for the source-proven demolition progression.
+ * The original action-13 producer eligibility remains unresolved, so this is
+ * deliberately not named as an exact source command producer.
+ */
+export interface DemolishBuildingCommand {
+  type: "demolish-building";
+  unitId: string;
+}
+
 export interface SetRallyPointCommand {
   type: "set-rally-point";
   buildingUnitId: string;
@@ -125,6 +135,7 @@ export type UnitCommand =
   | ResearchCommand
   | CancelProductionCommand
   | CancelConstructionCommand
+  | DemolishBuildingCommand
   | SetRallyPointCommand
   | StopCommand
   | SetMagicAutoUseCommand
