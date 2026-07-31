@@ -30,6 +30,11 @@ import {
   MISSION_BRIEFING_MUSIC_AUDIO_CUE_KEY,
   type GameplayAudioCueKey,
 } from "../gameplayAudio.js";
+import {
+  PRE_GAME_KOREAN_FONT_FAMILY,
+  resolvePreGameTextResolution,
+  whenPreGameTypographyReady,
+} from "../ui/preGameTypography.js";
 
 const BRIEFING_DURATION_MS = 60_000;
 const BRIEFING_LINE_DURATION_MS = 5_500;
@@ -68,6 +73,7 @@ export class MissionBriefingScene extends Phaser.Scene {
   private lineScheduled = false;
   private dismissed = false;
   private musicPlaying = false;
+  private typographyReadyUnsubscribe: (() => void) | null = null;
   private readonly introducedPortraitAt = new Map<string, number>();
   private readonly portraitTransitionImages = new Map<string, {
     image: Phaser.GameObjects.Image;
@@ -123,6 +129,13 @@ export class MissionBriefingScene extends Phaser.Scene {
     this.drawPresentation();
     this.scale.on(Phaser.Scale.Events.RESIZE, this.handleResize, this);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, this.handleShutdown, this);
+    this.typographyReadyUnsubscribe = whenPreGameTypographyReady(() => {
+      if (!this.container || !this.scene.isActive(MISSION_BRIEFING_SCENE_KEY)) {
+        return;
+      }
+
+      this.redrawPresentation(false);
+    });
   }
 
   override update(time: number): void {
@@ -152,11 +165,13 @@ export class MissionBriefingScene extends Phaser.Scene {
   }
 
   private handleResize(): void {
-    this.redrawPresentation();
+    this.redrawPresentation(false);
   }
 
   private handleShutdown(): void {
     this.scale.off(Phaser.Scale.Events.RESIZE, this.handleResize, this);
+    this.typographyReadyUnsubscribe?.();
+    this.typographyReadyUnsubscribe = null;
     this.stopAudio();
     this.destroyPresentation();
     this.introducedPortraitAt.clear();
@@ -176,7 +191,7 @@ export class MissionBriefingScene extends Phaser.Scene {
     this.introducedPortraitAt.clear();
   }
 
-  private drawPresentation(): void {
+  private drawPresentation(replayLineVoice = true): void {
     const briefing = this.context?.scenario?.briefing;
     if (!briefing) {
       return;
@@ -211,18 +226,18 @@ export class MissionBriefingScene extends Phaser.Scene {
 
     this.container = container;
     this.playMusic();
-    if (line) {
+    if (line && replayLineVoice) {
       this.playVoice(line);
     }
   }
 
-  private redrawPresentation(): void {
+  private redrawPresentation(replayLineVoice = true): void {
     if (!this.container) {
       return;
     }
 
     this.destroyPresentation();
-    this.drawPresentation();
+    this.drawPresentation(replayLineVoice);
     this.updateBackdrop(this.time.now);
   }
 
@@ -278,9 +293,10 @@ export class MissionBriefingScene extends Phaser.Scene {
     const height = 32;
     graphics.fillStyle(0x102428, 0.94).fillRect(x, y, width, height).lineStyle(1, 0xd0b46a, 0.72).strokeRect(x, y, width, height);
     container.add(this.add.text(x + width / 2, y + 7, label, {
-      fontFamily: "Noto Sans KR, Malgun Gothic, Apple SD Gothic Neo, Trebuchet MS, sans-serif",
+      fontFamily: PRE_GAME_KOREAN_FONT_FAMILY,
       fontSize: "13px",
       color: "#f1dfaa",
+      resolution: resolvePreGameTextResolution(),
     }).setOrigin(0.5, 0));
     container.add(this.add.zone(x, y, width, height).setOrigin(0, 0).setInteractive({ useHandCursor: true })
       .on("pointerdown", (
@@ -424,13 +440,14 @@ export class MissionBriefingScene extends Phaser.Scene {
     }
     const layout = resolveOriginalSpeechLayout(viewportWidth, viewportHeight, activeSlot);
     container.add(this.add.text(layout.text.x, layout.text.centerY, activeLine.text, {
-      fontFamily: "Noto Sans KR, Malgun Gothic, Apple SD Gothic Neo, sans-serif",
+      fontFamily: PRE_GAME_KOREAN_FONT_FAMILY,
       fontSize: `${Math.max(1, Math.round(16 * layout.scale))}px`,
       color: "#ffffff",
       lineSpacing: Math.max(0, Math.round(4 * layout.scale)),
       stroke: "#000000",
       strokeThickness: Math.max(2, Math.round(2 * layout.scale)),
       wordWrap: { width: layout.text.maxWidth },
+      resolution: resolvePreGameTextResolution(undefined, layout.scale),
     }).setOrigin(0, 0.5));
   }
 
@@ -474,11 +491,12 @@ export class MissionBriefingScene extends Phaser.Scene {
     if (label) {
       const layout = resolveOriginalSpeechLayout(viewportWidth, viewportHeight, participant.speechSlot);
       container.add(this.add.text(layout.label.centerX, layout.label.y, label, {
-        fontFamily: "Noto Sans KR, Malgun Gothic, Apple SD Gothic Neo, sans-serif",
+        fontFamily: PRE_GAME_KOREAN_FONT_FAMILY,
         fontSize: `${Math.max(1, Math.round(12 * layout.scale))}px`,
         color: active ? "#f1dfaa" : "#9a8d9d",
         stroke: "#000000",
         strokeThickness: Math.max(1, Math.round(layout.scale)),
+        resolution: resolvePreGameTextResolution(undefined, layout.scale),
       }).setOrigin(0.5, 0));
     }
   }
