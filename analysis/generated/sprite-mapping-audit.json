@@ -20,7 +20,7 @@
     },
     {
       "path": "packages/shared/src/scenarios.ts",
-      "sha256": "7b846132241d27b2af26fd83b67d07b13ea791570917d35f23e8c5128e0ca0e0"
+      "sha256": "1004f192f18dc4353fdfd604300fc6bb3b4773199cd92d46e5bc110590985f7d"
     },
     {
       "path": "packages/shared/src/k01UnitAnimationCoverage.ts",
@@ -32,7 +32,7 @@
     },
     {
       "path": "apps/game-client/src/scenes/SkirmishScene.ts",
-      "sha256": "77f77b65e1ddabc574b1d596811ab802f70e539221eaccd081041e867e5b9fd2"
+      "sha256": "fb009a9b3f6502ef8ba1bd81e0981b659788a3d14688dfd18a2c417deb2fcbc7"
     },
     {
       "path": "apps/game-client/src/scenes/MissionBriefingScene.ts",
@@ -108,11 +108,11 @@
     },
     {
       "path": "tools/imjinrok/extract-entity-type-catalog.mjs",
-      "sha256": "3d78c2109c9a917a60e6b82f8228d60029af53306c3a4bc8a96e34f947cbb31c"
+      "sha256": "b1ea416055598b9ebfe84b2b7b1e48256b6215ba0feac9323441ee07d7e7a9af"
     },
     {
       "path": "analysis/generated/entity-type-catalog.json",
-      "sha256": "572044d9eec6162689154f3625c7572f27d7ee9030d4e4f9f51151b6a88f8745"
+      "sha256": "485344664b278c97a4ceed0756832abadbf2a71bd4a997b117b85c336d620708"
     },
     {
       "path": "tools/imjinrok/audit-sprite-mappings.mjs",
@@ -22676,7 +22676,7 @@
     "evidenceStatus": "static-proven-type-identities",
     "source": {
       "path": "analysis/generated/entity-type-catalog.json",
-      "sha256": "572044d9eec6162689154f3625c7572f27d7ee9030d4e4f9f51151b6a88f8745"
+      "sha256": "485344664b278c97a4ceed0756832abadbf2a71bd4a997b117b85c336d620708"
     },
     "summary": {
       "typeCount": 95,
