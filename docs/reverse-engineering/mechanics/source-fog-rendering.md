@@ -2,14 +2,14 @@
 
 ## 질문과 상태
 
-질문: `FUN_00467de0`와 `FUN_0046a530`이 원본 fog 자원, 인접 mask lookup, state별 호출과
-subframe 합성에 대해 바이트로 확정하는 범위는 어디까지인가?
+질문: `FUN_00467de0`와 `FUN_0046a530`이 원본 fog 자원, 인접 mask lookup, caller 투영 좌표·인수 순서,
+callee의 제한된 draw-rectangle 보정, state별 호출과 subframe 합성에 대해 바이트로 확정하는 범위는 어디까지인가?
 
 | 구분 | 상태 | 범위 |
 | --- | --- | --- |
-| 분석 | 정적 확정 | `fog0..14`/`black` loader record, 16-byte lookup, literal state `4`/`8`의 별도 mask 경로, `map+0x4a0c4+x*180+y` family byte→record, 3×2 six-subframe loop·frame algebra와 두 call path |
-| 재현 | 재현 완료 | EXE·SPR hash/header·atlas fields, K01 map hash·family-byte distribution, VA/raw offset/hash, 16 lookup vector, record address·frame vector와 loop bound의 결정론 추출 |
-| 구현 | 부분 이식·의도적 적응 | 15×14 `64×48` six-subframe composite와 K01 x-major family stream은 재현했다. 제품 `unseen→4`/`explored→8`, alpha, scheduler, product-grid 방향과 world placement는 명시적 적응이다. |
+| 분석 | 정적 확정 | `fog0..14`/`black` loader record, 16-byte lookup, literal state `4`/`8`의 별도 mask 경로, caller isometric projection·six stack argument order, `FUN_0046a530`의 `arg1-32`/low-nibble helper vertical adjustment, `map+0x4a0c4+x*180+y` family byte→record, 3×2 six-subframe loop·frame algebra와 두 call path |
+| 재현 | 재현 완료 | EXE·SPR hash/header·atlas fields, K01 map hash·family/low-nibble/helper stream, VA/raw offset/hash·direct call edge, 16 lookup vector, projection/draw synthetic·K01 vector, record address·frame vector와 loop bound의 결정론 추출 |
+| 구현 | 부분 이식·의도적 적응 | 15×14 `64×48` six-subframe composite와 K01 x-major family stream은 재현했다. 제품 state/visibility mapping, alpha/tint, web chunk scheduling과 broader product placement는 명시적 적응 또는 미확정이다. |
 
 ## 고정 입력과 생성 산출물
 
@@ -23,16 +23,19 @@ subframe 합성에 대해 바이트로 확정하는 범위는 어디까지인가
 
 `pnpm imjinrok:extract-source-fog-render-evidence`는 fixture를 다시 생성한다. 생성기는 EXE,
 각 `tile/normal/fog*.spr`, `black.spr`와 K01 map의 SHA-256과 header를 먼저 검사하고, 고정 VA를 PE raw
-offset으로 변환해 code/data range hash를 기록한다. test는 두 번의 JSON 생성이 committed fixture와
-byte-identical인지와 lookup의 16 입력·출력 및 six-subframe frame vector를 확인한다.
+offset으로 변환해 code/data range hash와 four direct call edge를 기록한다. test는 두 번의 JSON 생성이 committed
+fixture와 byte-identical인지, lookup의 16 입력·출력, projection/placement synthetic·K01 vector와 six-subframe
+frame vector를 확인한다. EXE·SPR·K01 map의 단일 byte 변조와 malformed/out-of-contract pure-reference input은 report
+발행 전에 거부한다.
 
 ## 함수·자료 주소
 
 | 항목 | 주소/범위 | 정적 사실 |
 | --- | --- | --- |
 | caller | `FUN_00467de0`, `0x00467de0-0x004689ce` (end exclusive) | 각 cell에서 literal state `4`, literal state `8`에 대해 별도의 8-neighbor mask build 경로를 둔다. nonzero·non-`0x0f` mask만 lookup/call에 도달한다. |
+| caller projection window | `FUN_00467de0` 안의 `FUN_00468600` caller range; `0x00468634-0x004686aa` (end exclusive), SHA-256 `5a88c41d80dfd2f871d90266fbf3e9a5c978a6cdaa7575d15b337c94bd0a7849` | stack cell `x/y`, `map+0x2d98/+0x2d9c` camera tile, `DAT_00aa4000/+4/+8/+c` viewport bounds로 projected `x/y`를 만든다. |
 | lookup | `0x004bf9c4-0x004bf9d4`, raw `0x000bf9c4` | bytes `[0,9,8,2,10,1,12,5,11,13,3,6,0,4,7,0]`; SHA-256 `9df1139c03ffc0cb749f8cc292d6a07825f95d7cb52fe62c746f7cb3bc747dae`. |
-| compositor | `FUN_0046a530`, `0x0046a530-0x0046a8e8` (end exclusive) | `map+0x4a0c4+x*180+y` family byte를 읽고 `0x3c`를 더해 common loader record를 고른 뒤 state별 3×2 path와 proven frame algebra로 합성한다. |
+| compositor | `FUN_0046a530`, `0x0046a530-0x0046a8e8` (end exclusive) | `map+0x4a0c4+x*180+y` family byte를 읽고 `0x3c`를 더해 common loader record를 고른다. entry range `0x0046a530-0x0046a5c8` SHA-256 `23bbcbfa9bc0ec79a979e3271a3251b8eab669d4a7767ae0de86054016284813`은 arg1 draw-left와 arg2 vertical adjustment를 먼저 만든다. |
 | loader records | base `0x00bcdff8`, stride `0x0bf8` | index `60..74`는 `fog0.spr..fog14.spr`, index `75`는 `black.spr`이다. |
 
 fixture에는 위 두 함수 전체의 byte range SHA-256, 의미 있는 instruction window의 VA/raw offset/bytes,
@@ -44,11 +47,27 @@ runtime record payload의 사람용 자료구조 이름을 확정하는 주장�
 
 1. `FUN_00467de0`은 state `4`와 state `8`을 같은 mask accumulator로 합치지 않는다. 각 경로는
    해당 literal과 같은 인접 cell만 검사해 byte mask를 만든다.
-2. 각 경로는 mask `0`과 `15`를 넘기지 않고, 나머지 `0..15` 값에서 `0x004bf9c4[mask]`를 읽어
-   `FUN_0046a530`의 마지막 stack argument로 전달한다. caller는 각각 literal `4`, `8`도 전달한다.
-3. `FUN_0046a530`은 검증한 byte address 식 `map + 0x4a0c4 + mapX * 180 + mapY`에서 family byte를
+2. caller projection window에서 `x=[esp+0x14]`, `y=[esp+0x18]`, `cameraX=map+0x2d98`,
+   `cameraY=map+0x2d9c`이며, viewport globals를 `left/top/right/bottom`으로 쓰면 다음과 같다.
+
+   ```text
+   projectedX = (x - y + cameraY - cameraX) * 32
+              + left + trunc((right - left + 1) / 2)
+   projectedY = (x + y - cameraX - cameraY) * 16
+              + top + trunc((bottom - top + 1) / 2)
+   ```
+
+3. 각 mask 경로는 mask `0`과 `15`를 넘기지 않고, 나머지 `0..15` 값에서 `0x004bf9c4[mask]`를 읽어
+   `FUN_0046a530(projectedX, projectedY, cellX, cellY, literalState, lookupSelector)`의 마지막 stack argument로
+   전달한다. `0x00468864→0x0046a530`은 literal `4`, `0x00468982→0x0046a530`은 literal `8`이며, 둘 다
+   selector/state/y/x/projectedY/projectedX 순서로 push한다.
+4. `FUN_0046a530`은 검증한 byte address 식 `map + 0x4a0c4 + mapX * 180 + mapY`에서 family byte를
    읽고 `0x3c`를 더한다. 결과는 `0x00bcdff8 + index * 0x0bf8` common record selection으로 이어진다.
-4. state `4`는 `FUN_0044e3c0` call path, caller가 전달한 state `8`은 distinct
+5. entry prologue는 `drawLeft = arg1 - 32`로 만든다. cell의 low nibble이 정확히 `2`인 in-bounds path는
+   `0x0046a591→0x0046d650` helper result를 써 `drawTop = arg2 - (int16(helper)<<4)`로 만든다. 나머지 path는
+   `0x0046a5a9→0x0046d650`을 거쳐 `drawTop = arg2 - ((abs(int16(helper))+1)<<4)`로 만든다. K01 hash-bound
+   3,600 cell의 helper return은 모두 `0`이므로 low-nibble `2`는 0 px, 그 외는 16 px subtract다.
+6. state `4`는 `FUN_0044e3c0` call path, caller가 전달한 state `8`은 distinct
    `FUN_00452b30` call path를 사용한다. 각 path의 loop bound는 outer `< 3`, inner `< 2`이므로
    full tile은 6 subframe의 3×2 composite이다.
 
@@ -59,6 +78,28 @@ K01 hash-bound map의 해당 60×60 x-major byte stream은 SHA-256
 `0..12,14`다. `0:2865`, `1:95`, `2:95`, `3:101`, `4:79`, `5:38`, `6:36`, `7:54`, `8:61`,
 `9:52`, `10:33`, `11:35`, `12:55`, `14:1` cell이다. 이는 K01 hash-bound map byte의 범위·분포만
 기록한다. runtime producer, lifetime, 다른 map의 file/runtime provenance 또는 사람용 뜻을 주장하지 않는다.
+
+## caller projection·placement 재현 vector
+
+pure reference는 signed 16-bit cell/camera, ordered signed 32-bit viewport와 signed 32-bit projected input만 받는다.
+fraction, 범위 밖 word/int32, reversed viewport bounds, `0..15` 밖 low nibble은 즉시 거부한다. helper result는 명시적
+signed 16-bit input이라 K01 밖의 positive/negative branch를 synthetic vector로 분리한다.
+
+| scope | input/result |
+| --- | --- |
+| synthetic projection | `(x,y,cameraX,cameraY)=(3,5,1,2)`, viewport `(10,20)-(109,79)` → `projected=(28,130)` |
+| synthetic low-nibble `2` | `projected=(200,100)`, helper `3` → `drawLeft=168`, `drawTop=52`, shift `48` |
+| synthetic other branch | `projected=(200,100)`, helper `-1` → `drawLeft=168`, `drawTop=68`, shift `32` |
+| K01 map vector | map camera `(13,8)`, explicit synthetic viewport `(0,0)-(639,479)`, cell `(0,0)` low nibble `1`/helper `0` → `projected=(160,-96)`, `draw=(128,-112)` |
+| K01 map vector | same camera/viewport, cell `(0,1)` low nibble `2`/helper `0` → `projected=(128,-80)`, `draw=(96,-80)` |
+
+명시적인 `640×480` K01 vector viewport는 산술을 재현 가능하게 만들기 위한 입력이며, 해당 viewport global이
+`k01.map`에 저장된다는 주장이 아니다. K01 full stream은 helper `0:3600`, low nibble `1:735/2:2865`, vertical shift
+`0:2865/16:735`, stream SHA-256 `2f631bc0209fe72db3c4310b7602fb3fc84e23e871561152d450acbfbd0d7864`를 고정한다.
+
+`64×48` six-subframe composite에 대해서 이 caller/callee 한정 placement는 **local image anchor**를 `(32,0)`으로 닫는다:
+`drawLeft=projectedX-32`, `drawTop=projectedY-rawVerticalShift`. 이는 renderer-wide pivot semantics, viewport ownership,
+clipping/mode 또는 web adapter policy의 주장이 아니다.
 
 ## six-subframe frame algebra
 
@@ -108,19 +149,18 @@ table-domain 밖의 mask와 caller-reachable `0..13` 밖의 selector는 helper�
   네 diagonal `0x1`/`0x2`/`0x4`/`0x8`)과 lookup table만 쓴다. product grid의 top/bottom/left/right 이름은
   source bit의 사람용 방향 의미 주장이 아니다.
 - `unseen→literal state 4`, `explored→literal state 8`, explored alpha `0.58`, `64×48` image의
-  ground-contact placement와 visibility update scheduler는 **source-backed adaptation**이다. K01에서 tile
-  placement evidence가 내보낸 cell별 asset-native y offset은 terrain·explicit base fog·source composite에
-  같은 helper로 적용하지만, raw source axis/pivot의 원작 일치는 주장하지 않는다. 원본이 두 literal state에
-  부여한 visibility 의미, pixel pivot/alpha와 wall-clock cadence는 여전히 미확인이다.
+  product ground-contact placement와 visibility update scheduler는 **source-backed adaptation**이다. 이번 caller/callee
+  slice의 projected argument와 local `(32,0)` anchor/`0|16` raw vertical shift는 정적 확정했지만, 그것만으로 full
+  original surface clip/mode, renderer-wide pivot, alpha/blend 또는 web placement policy를 일반화하지 않는다.
 - source composite의 family/selector/six-frame identity는 보존한다. 현재 web adapter의 dark tint는 밝은
   source palette가 fog gap처럼 보이는 것을 막기 위한 제품 overlay policy이며 original palette/blend parity가 아니다.
 
 ## 미확인과 이식 경계
 
-- state `4`/`8`의 visible, explored, unseen 등 사람용 semantics
+- state `4`/`8`의 visible, explored, unseen 등 사람용 semantics와 product visibility mapping
 - family byte의 runtime producer/lifetime 및 K01 밖 generic map-file provenance
-- scheduler/wall-clock behavior, pixel placement/pivot
-- 현재 제품 visibility/neighbor mask/alpha와 원본 state·bit ordering의 대응
+- alpha/tint, scheduler/wall-clock behavior, web chunk scheduling, full renderer clip/mode·pixel pivot
+- 현재 제품 neighbor mask/alpha와 원본 state·bit ordering의 대응
 
 frame algebra는 caller-reachable selector와 normal fog header contract의 정적 범위에만 확정됐다.
 제품 renderer parity 또는 asset bridge 변경의 근거는 아니다.

@@ -4,7 +4,13 @@ import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import test from "node:test";
 
-import { extractSourceFogRenderEvidence, lookupFogNeighborMask, reproduceFogSubframeIndices } from "./extract-source-fog-render-evidence.mjs";
+import {
+  extractSourceFogRenderEvidence,
+  lookupFogNeighborMask,
+  reproduceFogCallerProjection,
+  reproduceFogCompositorPlacement,
+  reproduceFogSubframeIndices,
+} from "./extract-source-fog-render-evidence.mjs";
 
 const fixturePath = resolve("analysis/fixtures/source-fog-render-evidence.json");
 const executablePath = resolve("original/imjinrok2/imjinrok2.exe");
@@ -29,6 +35,70 @@ test("extracts the hash-bound source fog render contract byte-identically", () =
   assert.deepEqual(report.resources.black, { resourceIndex: 75, recordAddress: "0x00c061a0", fileName: "black.spr", sourcePath: "original/imjinrok2/tile/normal/black.spr", sha256: "9ef53a565bfe804e8a272f73f9749c05681b6b9e3af4090f7e4eea61237292d0", header: { width: 64, height: 32, frameCount: 1 } });
   assert.deepEqual(report.composition.subframeGrid, { columns: 3, rows: 2, subframeCount: 6 });
   assert.deepEqual(report.callerContract.separateNeighborStateValues, [4, 8]);
+  assert.deepEqual(report.callerContract.argumentOrder, ["projectedX", "projectedY", "cellX", "cellY", "literalState", "lookupSelector"]);
+  assert.deepEqual(report.callerContract.projection.callerRange, { label: "FUN_00468600 caller range within FUN_00467de0", address: "0x00468600" });
+  assert.deepEqual(report.callerContract.projection.syntheticVectors, [
+    {
+      input: { x: 3, y: 5, cameraX: 1, cameraY: 2, viewportLeft: 10, viewportRight: 109, viewportTop: 20, viewportBottom: 79 },
+      output: { projectedX: 28, projectedY: 130 },
+    },
+    {
+      input: { x: -2, y: 4, cameraX: -3, cameraY: 5, viewportLeft: -100, viewportRight: 100, viewportTop: -50, viewportBottom: 50 },
+      output: { projectedX: 64, projectedY: 0 },
+    },
+  ]);
+  assert.deepEqual(report.placement.syntheticVectors, [
+    {
+      input: { projectedX: 200, projectedY: 100, x: 2, y: 3, lowNibble: 2, helperReturn: 3 },
+      output: { x: 2, y: 3, lowNibble: 2, helperReturn: 3, placementBranch: "low-nibble-equals-2", verticalShift: 48, drawLeft: 168, drawTop: 52 },
+    },
+    {
+      input: { projectedX: 200, projectedY: 100, x: 2, y: 3, lowNibble: 1, helperReturn: -1 },
+      output: { x: 2, y: 3, lowNibble: 1, helperReturn: -1, placementBranch: "other-low-nibble", verticalShift: 32, drawLeft: 168, drawTop: 68 },
+    },
+  ]);
+  assert.deepEqual(report.placement.k01.allCellDistribution, {
+    cellCount: 3600,
+    helperReturn: { 0: 3600 },
+    lowNibble: { 1: 735, 2: 2865 },
+    verticalShift: { 0: 2865, 16: 735 },
+    streamSha256: "2f631bc0209fe72db3c4310b7602fb3fc84e23e871561152d450acbfbd0d7864",
+  });
+  assert.deepEqual(report.placement.localCompositePlacement, {
+    compositeSize: { width: 64, height: 48 },
+    imageAnchor: { x: 32, y: 0 },
+    formula: "drawLeft = projectedX - 32; drawTop = projectedY - rawVerticalShift",
+    K01RawVerticalShift: { lowNibbleEquals2: 0, other: 16 },
+    boundary: "This caller/callee-local image anchor does not assign renderer-wide pivot semantics, viewport ownership, clip/mode, alpha/blend, or web placement policy.",
+  });
+  assert.deepEqual(report.placement.k01.vectors.map(({ input, projection, draw }) => ({ input, projection, draw })), [
+    {
+      input: { x: 0, y: 0, cameraX: 13, cameraY: 8, viewportLeft: 0, viewportRight: 639, viewportTop: 0, viewportBottom: 479 },
+      projection: { projectedX: 160, projectedY: -96 },
+      draw: { x: 0, y: 0, lowNibble: 1, helperReturn: 0, placementBranch: "other-low-nibble", verticalShift: 16, drawLeft: 128, drawTop: -112 },
+    },
+    {
+      input: { x: 0, y: 1, cameraX: 13, cameraY: 8, viewportLeft: 0, viewportRight: 639, viewportTop: 0, viewportBottom: 479 },
+      projection: { projectedX: 128, projectedY: -80 },
+      draw: { x: 0, y: 1, lowNibble: 2, helperReturn: 0, placementBranch: "low-nibble-equals-2", verticalShift: 0, drawLeft: 96, drawTop: -80 },
+    },
+    {
+      input: { x: 6, y: 6, cameraX: 13, cameraY: 8, viewportLeft: 0, viewportRight: 639, viewportTop: 0, viewportBottom: 479 },
+      projection: { projectedX: 160, projectedY: 96 },
+      draw: { x: 6, y: 6, lowNibble: 2, helperReturn: 0, placementBranch: "low-nibble-equals-2", verticalShift: 0, drawLeft: 128, drawTop: 96 },
+    },
+    {
+      input: { x: 59, y: 59, cameraX: 13, cameraY: 8, viewportLeft: 0, viewportRight: 639, viewportTop: 0, viewportBottom: 479 },
+      projection: { projectedX: 160, projectedY: 1792 },
+      draw: { x: 59, y: 59, lowNibble: 2, helperReturn: 0, placementBranch: "low-nibble-equals-2", verticalShift: 0, drawLeft: 128, drawTop: 1792 },
+    },
+  ]);
+  assert.deepEqual(report.callEdges, [
+    { from: "0x00468864", to: "0x0046a530", bytes: "e8 c7 1c 00 00", label: "state-4 caller dispatch" },
+    { from: "0x00468982", to: "0x0046a530", bytes: "e8 a9 1b 00 00", label: "state-8 caller dispatch" },
+    { from: "0x0046a591", to: "0x0046d650", bytes: "e8 ba 30 00 00", label: "low-nibble-equals-2 placement helper" },
+    { from: "0x0046a5a9", to: "0x0046d650", bytes: "e8 a2 30 00 00", label: "other-low-nibble placement helper" },
+  ]);
   assert.deepEqual(report.frameSelection.vectors, [
     { selector: 0, frames: [0, 1, 32, 33, 64, 65] },
     { selector: 9, frames: [18, 19, 50, 51, 82, 83] },
@@ -68,6 +138,33 @@ test("lookup helper accepts only the byte-proven table domain", () => {
   assert.throws(() => lookupFogNeighborMask(-1), /0\.\.15/u);
   assert.throws(() => lookupFogNeighborMask(16), /0\.\.15/u);
   assert.throws(() => lookupFogNeighborMask(1.5), /0\.\.15/u);
+});
+
+test("reproduces caller projection and compositor placement for synthetic and K01-reachable branches", () => {
+  assert.deepEqual(
+    reproduceFogCallerProjection({ x: 3, y: 5, cameraX: 1, cameraY: 2, viewportLeft: 10, viewportRight: 109, viewportTop: 20, viewportBottom: 79 }),
+    { projectedX: 28, projectedY: 130 },
+  );
+  assert.deepEqual(
+    reproduceFogCompositorPlacement({ projectedX: 200, projectedY: 100, x: 2, y: 3, lowNibble: 2, helperReturn: 3 }),
+    { x: 2, y: 3, lowNibble: 2, helperReturn: 3, placementBranch: "low-nibble-equals-2", verticalShift: 48, drawLeft: 168, drawTop: 52 },
+  );
+  assert.deepEqual(
+    reproduceFogCompositorPlacement({ projectedX: 200, projectedY: 100, x: 2, y: 3, lowNibble: 1, helperReturn: -1 }),
+    { x: 2, y: 3, lowNibble: 1, helperReturn: -1, placementBranch: "other-low-nibble", verticalShift: 32, drawLeft: 168, drawTop: 68 },
+  );
+  assert.deepEqual(
+    reproduceFogCompositorPlacement({ projectedX: 160, projectedY: -96, x: 0, y: 0, lowNibble: 1, helperReturn: 0 }),
+    { x: 0, y: 0, lowNibble: 1, helperReturn: 0, placementBranch: "other-low-nibble", verticalShift: 16, drawLeft: 128, drawTop: -112 },
+  );
+});
+
+test("caller and compositor reproducers fail closed for malformed or outside-contract inputs", () => {
+  assert.throws(() => reproduceFogCallerProjection({ x: 0.5, y: 0, cameraX: 0, cameraY: 0, viewportLeft: 0, viewportRight: 1, viewportTop: 0, viewportBottom: 1 }), /signed 16-bit/u);
+  assert.throws(() => reproduceFogCallerProjection({ x: 0, y: 0, cameraX: 0, cameraY: 0, viewportLeft: 2, viewportRight: 1, viewportTop: 0, viewportBottom: 1 }), /viewport bounds/u);
+  assert.throws(() => reproduceFogCallerProjection({ x: 0, y: 0, cameraX: 0, cameraY: 0, viewportLeft: 0, viewportRight: 0x80000000, viewportTop: 0, viewportBottom: 1 }), /signed 32-bit/u);
+  assert.throws(() => reproduceFogCompositorPlacement({ projectedX: 0, projectedY: 0, x: 0, y: 0, lowNibble: 16, helperReturn: 0 }), /0\.\.15/u);
+  assert.throws(() => reproduceFogCompositorPlacement({ projectedX: 0, projectedY: 0, x: 0, y: 0, lowNibble: 2, helperReturn: 0x8000 }), /signed 16-bit/u);
 });
 
 test("rejects a changed original executable before emitting evidence", (t) => {
