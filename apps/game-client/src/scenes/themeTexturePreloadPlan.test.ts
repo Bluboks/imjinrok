@@ -42,6 +42,23 @@ test("builds the deterministic Skirmish preload plan from missing unique texture
   );
 });
 
+test("preloads an explicit selection portrait from its frame-level asset path", () => {
+  const portrait = getThemeFrameRefs(defaultTheme).find(
+    ({ frame }) => frame.textureKey === "default_ui_selection_portrait_0033",
+  );
+  assert.ok(portrait);
+
+  const requests = getMissingThemeTextureLoadRequests(defaultTheme, [portrait], () => false);
+
+  assert.deepEqual(
+    requests.map(({ frame, url }) => ({ textureKey: frame.textureKey, url })),
+    [{
+      textureKey: "default_ui_selection_portrait_0033",
+      url: "/assets/themes/default/ui/portraits/portrait_0033.png",
+    }],
+  );
+});
+
 test("retains a failed preload texture in the create-time retry plan until Phaser reports it loaded", () => {
   const [retryable, alreadyLoaded] = getThemeFrameRefs(defaultTheme);
   assert.ok(retryable);

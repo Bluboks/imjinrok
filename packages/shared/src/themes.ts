@@ -74,6 +74,7 @@ const selectionPortrait = (index: number): FrameRef => {
   return {
     textureKey: `default_ui_selection_${sourceId}`,
     fileName: `${sourceId}.png`,
+    assetPath: "ui/portraits",
   };
 };
 
@@ -1728,7 +1729,7 @@ export function getThemeAssetUrl(theme: ThemeDefinition, visual: VisualBase, fra
   const fileName = frame.fileName ?? `${frame.textureKey}.png`;
   const assetRoot = theme.assetRoot.endsWith("/") ? theme.assetRoot.slice(0, -1) : theme.assetRoot;
 
-  return `${assetRoot}/${visual.assetPath}/${fileName}`;
+  return `${assetRoot}/${frame.assetPath ?? visual.assetPath}/${fileName}`;
 }
 
 export function getTerrainVisual(theme: ThemeDefinition, visualId: string): TerrainVisual | null {

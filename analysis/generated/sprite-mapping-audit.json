@@ -8,11 +8,11 @@
   "sourceFiles": [
     {
       "path": "packages/shared/src/themes.ts",
-      "sha256": "202bd74fe78fb4790fb37ab0a7171219ac7e42fb84fcd6530dd42dae562ae972"
+      "sha256": "f801ff93e75d5dcf154fb96ff719e223096ce8282aca71c8256d507d69c98a82"
     },
     {
       "path": "packages/shared/src/visuals.ts",
-      "sha256": "985a51996e613b6e7f4accc301e6f46f84ff0ff5a00b882555954e7771e0b995"
+      "sha256": "d0f6d0a097c52d657dff7d32c473b7808ea6c8aa2788f42cbb82eb192ebde3c5"
     },
     {
       "path": "packages/shared/src/content.ts",
@@ -25037,7 +25037,8 @@
         "visualId": "villager-korean-farmer",
         "frame": {
           "textureKey": "default_ui_selection_portrait_0033",
-          "fileName": "portrait_0033.png"
+          "fileName": "portrait_0033.png",
+          "assetPath": "ui/portraits"
         },
         "mirrorX": false,
         "sourcePortraitFrameFileName": "portrait_0033.png",
@@ -25064,7 +25065,8 @@
         "visualId": "korean-swordsman",
         "frame": {
           "textureKey": "default_ui_selection_portrait_0032",
-          "fileName": "portrait_0032.png"
+          "fileName": "portrait_0032.png",
+          "assetPath": "ui/portraits"
         },
         "mirrorX": false,
         "sourcePortraitFrameFileName": "portrait_0032.png",
@@ -25092,7 +25094,8 @@
         "visualId": "korean-archer",
         "frame": {
           "textureKey": "default_ui_selection_portrait_0031",
-          "fileName": "portrait_0031.png"
+          "fileName": "portrait_0031.png",
+          "assetPath": "ui/portraits"
         },
         "mirrorX": false,
         "sourcePortraitFrameFileName": "portrait_0031.png",
@@ -25120,7 +25123,8 @@
         "visualId": "korean-monk",
         "frame": {
           "textureKey": "default_ui_selection_portrait_0034",
-          "fileName": "portrait_0034.png"
+          "fileName": "portrait_0034.png",
+          "assetPath": "ui/portraits"
         },
         "mirrorX": false,
         "sourcePortraitFrameFileName": "portrait_0034.png",
@@ -25144,7 +25148,8 @@
         "visualId": "japanese-swordsman",
         "frame": {
           "textureKey": "default_ui_selection_portrait_0003",
-          "fileName": "portrait_0003.png"
+          "fileName": "portrait_0003.png",
+          "assetPath": "ui/portraits"
         },
         "mirrorX": false,
         "sourcePortraitFrameFileName": "portrait_0003.png",
@@ -25172,7 +25177,8 @@
         "visualId": "japanese-gunner",
         "frame": {
           "textureKey": "default_ui_selection_portrait_0002",
-          "fileName": "portrait_0002.png"
+          "fileName": "portrait_0002.png",
+          "assetPath": "ui/portraits"
         },
         "mirrorX": false,
         "sourcePortraitFrameFileName": "portrait_0002.png",
@@ -25200,7 +25206,8 @@
         "visualId": "japanese-samurai",
         "frame": {
           "textureKey": "default_ui_selection_portrait_0004",
-          "fileName": "portrait_0004.png"
+          "fileName": "portrait_0004.png",
+          "assetPath": "ui/portraits"
         },
         "mirrorX": false,
         "sourcePortraitFrameFileName": "portrait_0004.png",
@@ -25224,7 +25231,8 @@
         "visualId": "japanese-shrine-maiden",
         "frame": {
           "textureKey": "default_ui_selection_portrait_0005",
-          "fileName": "portrait_0005.png"
+          "fileName": "portrait_0005.png",
+          "assetPath": "ui/portraits"
         },
         "mirrorX": false,
         "sourcePortraitFrameFileName": "portrait_0005.png",
@@ -25248,7 +25256,8 @@
         "visualId": "japanese-farmer",
         "frame": {
           "textureKey": "default_ui_selection_portrait_0006",
-          "fileName": "portrait_0006.png"
+          "fileName": "portrait_0006.png",
+          "assetPath": "ui/portraits"
         },
         "mirrorX": false,
         "sourcePortraitFrameFileName": "portrait_0006.png",
@@ -25275,7 +25284,8 @@
         "visualId": "korean-gwon-yul",
         "frame": {
           "textureKey": "default_ui_selection_portrait_0046",
-          "fileName": "portrait_0046.png"
+          "fileName": "portrait_0046.png",
+          "assetPath": "ui/portraits"
         },
         "mirrorX": false,
         "sourcePortraitFrameFileName": "portrait_0046.png",
@@ -25299,7 +25309,8 @@
         "visualId": "korean-ryu-seong-ryong",
         "frame": {
           "textureKey": "default_ui_selection_portrait_0048",
-          "fileName": "portrait_0048.png"
+          "fileName": "portrait_0048.png",
+          "assetPath": "ui/portraits"
         },
         "mirrorX": false,
         "sourcePortraitFrameFileName": "portrait_0048.png",
@@ -25323,7 +25334,8 @@
         "visualId": "japanese-turtle-tank",
         "frame": {
           "textureKey": "default_ui_selection_portrait_0011",
-          "fileName": "portrait_0011.png"
+          "fileName": "portrait_0011.png",
+          "assetPath": "ui/portraits"
         },
         "mirrorX": false,
         "sourcePortraitFrameFileName": "portrait_0011.png",
@@ -25346,7 +25358,8 @@
         "visualId": "japanese-konishi",
         "frame": {
           "textureKey": "default_ui_selection_portrait_0015",
-          "fileName": "portrait_0015.png"
+          "fileName": "portrait_0015.png",
+          "assetPath": "ui/portraits"
         },
         "mirrorX": false,
         "sourcePortraitFrameFileName": "portrait_0015.png",
@@ -25370,7 +25383,8 @@
         "visualId": "korean-barracks",
         "frame": {
           "textureKey": "default_ui_selection_portrait_0054",
-          "fileName": "portrait_0054.png"
+          "fileName": "portrait_0054.png",
+          "assetPath": "ui/portraits"
         },
         "mirrorX": false,
         "sourcePortraitFrameFileName": "portrait_0054.png",
@@ -25391,7 +25405,8 @@
         "visualId": "korean-mill-house-proxy",
         "frame": {
           "textureKey": "default_ui_selection_portrait_0051",
-          "fileName": "portrait_0051.png"
+          "fileName": "portrait_0051.png",
+          "assetPath": "ui/portraits"
         },
         "mirrorX": false,
         "sourcePortraitFrameFileName": "portrait_0051.png",
@@ -25412,7 +25427,8 @@
         "visualId": "japanese-camp-barracks",
         "frame": {
           "textureKey": "default_ui_selection_portrait_0022",
-          "fileName": "portrait_0022.png"
+          "fileName": "portrait_0022.png",
+          "assetPath": "ui/portraits"
         },
         "mirrorX": false,
         "sourcePortraitFrameFileName": "portrait_0022.png",
@@ -25433,7 +25449,8 @@
         "visualId": "japanese-camp-firehouse",
         "frame": {
           "textureKey": "default_ui_selection_portrait_0024",
-          "fileName": "portrait_0024.png"
+          "fileName": "portrait_0024.png",
+          "assetPath": "ui/portraits"
         },
         "mirrorX": false,
         "sourcePortraitFrameFileName": "portrait_0024.png",
@@ -25454,7 +25471,8 @@
         "visualId": "japanese-camp-house",
         "frame": {
           "textureKey": "default_ui_selection_portrait_0028",
-          "fileName": "portrait_0028.png"
+          "fileName": "portrait_0028.png",
+          "assetPath": "ui/portraits"
         },
         "mirrorX": false,
         "sourcePortraitFrameFileName": "portrait_0028.png",
@@ -25475,7 +25493,8 @@
         "visualId": "japanese-camp-tower",
         "frame": {
           "textureKey": "default_ui_selection_portrait_0120",
-          "fileName": "portrait_0120.png"
+          "fileName": "portrait_0120.png",
+          "assetPath": "ui/portraits"
         },
         "mirrorX": false,
         "sourcePortraitFrameFileName": "portrait_0120.png",
@@ -25496,7 +25515,8 @@
         "visualId": "japanese-hq",
         "frame": {
           "textureKey": "default_ui_selection_portrait_0026",
-          "fileName": "portrait_0026.png"
+          "fileName": "portrait_0026.png",
+          "assetPath": "ui/portraits"
         },
         "mirrorX": false,
         "sourcePortraitFrameFileName": "portrait_0026.png",
@@ -25517,7 +25537,8 @@
         "visualId": "korean-training-command",
         "frame": {
           "textureKey": "default_ui_selection_portrait_0044",
-          "fileName": "portrait_0044.png"
+          "fileName": "portrait_0044.png",
+          "assetPath": "ui/portraits"
         },
         "mirrorX": false,
         "sourcePortraitFrameFileName": "portrait_0044.png",
@@ -25538,7 +25559,8 @@
         "visualId": "korean-hq",
         "frame": {
           "textureKey": "default_ui_selection_portrait_0052",
-          "fileName": "portrait_0052.png"
+          "fileName": "portrait_0052.png",
+          "assetPath": "ui/portraits"
         },
         "mirrorX": false,
         "sourcePortraitFrameFileName": "portrait_0052.png",

@@ -4,7 +4,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { extractOriginalSpriteTable } from "../../../tools/imjinrok/extract-sprite-table.mjs";
-import { defaultTheme, getGridFacing, getThemeFrameRefs, resolveEntityPortraitFrame } from "./index.js";
+import { defaultTheme, getGridFacing, getThemeAssetUrl, getThemeFrameRefs, resolveEntityPortraitFrame } from "./index.js";
 import type { EntityVisual, Facing } from "./visuals.js";
 import type { ThemeDefinition } from "./themes.js";
 
@@ -35,18 +35,39 @@ test("default theme entity bindings point to loadable source-converted assets", 
   assert.equal(defaultTheme.entityBindings["gwon-yul"], "korean-gwon-yul");
   assert.equal(defaultTheme.entityBindings["town-center"], "korean-hq");
 
+  const assetUrlPrefix = `${defaultTheme.assetRoot}/`;
   const missing = getThemeFrameRefs(defaultTheme)
     .map(({ visual, frame }) => {
-      const fileName = frame.fileName ?? `${frame.textureKey}.png`;
-      const assetPath = frame.textureKey.startsWith("default_ui_selection_")
-        ? join("ui", "portraits")
-        : visual.assetPath;
+      const assetUrl = getThemeAssetUrl(defaultTheme, visual, frame);
 
-      return join(defaultThemeAssetRoot, assetPath, fileName);
+      assert.ok(assetUrl.startsWith(assetUrlPrefix));
+      return join(defaultThemeAssetRoot, assetUrl.slice(assetUrlPrefix.length));
     })
     .filter((path) => !existsSync(path));
 
   assert.deepEqual(missing, []);
+});
+
+test("theme asset URLs honor a frame asset-path override without changing normal entity frames", () => {
+  const villager = defaultTheme.visuals[defaultTheme.entityBindings.villager];
+
+  assert.equal(villager?.kind, "entity");
+  if (villager?.kind !== "entity") {
+    return;
+  }
+
+  const portrait = resolveEntityPortraitFrame(villager);
+  const bodyFrame = villager.states.idle?.clips.default?.frames[0];
+  assert.ok(portrait);
+  assert.ok(bodyFrame);
+  assert.equal(
+    getThemeAssetUrl(defaultTheme, villager, portrait.frame),
+    "/assets/themes/default/ui/portraits/portrait_0033.png",
+  );
+  assert.equal(
+    getThemeAssetUrl(defaultTheme, villager, bodyFrame),
+    "/assets/themes/default/entities/villager/farmerk_0000.png",
+  );
 });
 
 test("theme frame enumeration includes explicit entity portraits", () => {
