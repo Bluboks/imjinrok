@@ -74,6 +74,7 @@
 | `extract-building-state-pilot.mjs`, `building-state-pilot.test.mjs` | 유지 | 조선 본영·클래스 49·슬롯 141의 건설 진행도와 정상·반파 본체 프레임 정적 파일럿 |
 | `extract-entity-type-catalog.mjs`, `entity-type-catalog.test.mjs` | 유지 | 클래스 1~95의 원본 이름·슬롯·기본 프레임·flags·SPR 경로 전수 추출과 결정론 검증 |
 | `extract-beacon-state-pilot.mjs`, `beacon-state-pilot.test.mjs` | 유지 | 조선 봉화대·클래스 52·`firehousek.spr` 정체와 건설·정상·반파 본체 프레임 정적 파일럿 |
+| `extract-k01-korean-barracks-idle-overlay.mjs`, `k01-korean-barracks-idle-overlay.test.mjs` | 유지 | class 50 조선 훈련소의 type→generic body configuration→state 8/9 primary selector→renderer slot/frame data flow와 `barrackk.spr` hash/header를 검증한다. zero/nonzero body gate의 `108/7`·`108/8` configured offsets만 재현하며, frame 9..15를 위한 primary `currentPhase` producer/cadence/loop 또는 독립 overlay binding·cadence·loop·placement·order는 미확인으로 유지한다. |
 | `audit-sprite-mappings.mjs`, `sprite-mapping-audit.test.mjs` | 유지 | 타입 정체, 확정된 본체·초상화 범위와 미검증 프레임 매핑을 분리해 감사 |
 
 ## 원본 데이터 파서와 변환기

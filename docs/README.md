@@ -96,6 +96,7 @@
 - [K01 표준 미션 진입 timer reset](reverse-engineering/mechanics/k01-mission-timer-reset.md)
 - [조선 본영 건설·체력 프레임 파일럿](reverse-engineering/mechanics/building-state-pilot.md)
 - [조선 봉화대 건설·체력 프레임 파일럿](reverse-engineering/mechanics/beacon-state-pilot.md)
+- [K01 조선 훈련소 completed-idle 오버레이 경계](reverse-engineering/mechanics/k01-korean-barracks-idle-overlay.md)
 - [엔티티 자료구조](reverse-engineering/data-structures/entity-record.md)
 - [K01 팬 리마스터 MVP 정적 분석 계획](reverse-engineering/mechanics/campaign/k01.md)
 - [캠페인 국가 선택 화면](reverse-engineering/mechanics/campaign/country-selection.md)
