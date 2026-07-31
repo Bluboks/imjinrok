@@ -7,7 +7,9 @@ import test from "node:test";
 
 import {
   EXPECTED_BARRACKS_SPRITE_SHA256,
+  buildKoreanBarracksPrimaryPhaseReport,
   extractKoreanBarracksIdleOverlay,
+  replayKoreanBarracksPrimaryPhase,
   selectPrimaryBodyConfiguration,
 } from "./extract-k01-korean-barracks-idle-overlay.mjs";
 
@@ -15,7 +17,7 @@ const repositoryRoot = resolve(import.meta.dirname, "../..");
 const fixturePath = resolve(repositoryRoot, "analysis/fixtures/k01-korean-barracks-idle-overlay-vectors.json");
 const extractorPath = resolve(import.meta.dirname, "extract-k01-korean-barracks-idle-overlay.mjs");
 
-test("binds class 50's generic primary body path without inventing an overlay", () => {
+test("proves class 50's singleton primary phase and leaves only second-draw provenance unresolved", () => {
   const report = extractKoreanBarracksIdleOverlay();
   const fixture = JSON.parse(readFileSync(fixturePath, "utf8"));
 
@@ -26,13 +28,19 @@ test("binds class 50's generic primary body path without inventing an overlay", 
       sourceShape: [report.sources.sprite.width, report.sources.sprite.height, report.sources.sprite.frameCount],
       identity: report.identity,
       primaryBody: report.primaryBody,
+      primaryPhase: report.primaryPhase,
       overlayConclusion: report.overlayConclusion,
       reproductionVectors: report.reproductionVectors,
     },
     fixture,
   );
   assert.equal(report.sources.sprite.sha256, EXPECTED_BARRACKS_SPRITE_SHA256);
-  assert.equal(report.evidence.evidencePoints.length, 9);
+  assert.equal(report.evidence.evidencePoints.length, 19);
+  assert.equal(report.analysisStatus, "static-confirmed");
+  assert.equal(report.primaryPhase.constructor.phaseDivisor, 1);
+  assert.equal(report.primaryPhase.damageInteraction.healthy.frameSequence[0], 7);
+  assert.equal(report.primaryPhase.damageInteraction.nonzero.frameSequence[0], 8);
+  assert.match(report.overlayConclusion.status, /primary-path-negative/);
 });
 
 test("reproduces the only class-50 primary-body frame configurations proved by the generic branch", () => {
@@ -53,6 +61,31 @@ test("reproduces the only class-50 primary-body frame configurations proved by t
   assert.equal(selectPrimaryBodyConfiguration(2).configuredFrameOffset, 8, "all nonzero WORD values take the damaged branch");
   assert.throws(() => selectPrimaryBodyConfiguration(-1), /must be an unsigned WORD/);
   assert.throws(() => selectPrimaryBodyConfiguration(65_536), /must be an unsigned WORD/);
+});
+
+test("replays normal, boundary, and signed-overflow primary-phase gates without inventing phase 9", () => {
+  assert.deepEqual(replayKoreanBarracksPrimaryPhase({ previousPhase: 0, elapsedTicks: 5 }), {
+    previousPhase: 0,
+    elapsedTicks: 5,
+    phaseDivisor: 1,
+    updated: true,
+    nextState: 8,
+    nextPhase: 0,
+    primaryFrameHealthy: 7,
+    primaryFrameNonzeroDamage: 8,
+  });
+  assert.equal(replayKoreanBarracksPrimaryPhase({ previousPhase: 0, elapsedTicks: 4 }).updated, false);
+  assert.equal(replayKoreanBarracksPrimaryPhase({ previousPhase: 0, elapsedTicks: -5 }).nextPhase, 0);
+  assert.equal(replayKoreanBarracksPrimaryPhase({ previousPhase: 0, elapsedTicks: -0x80000000 }).updated, false);
+  assert.throws(
+    () => replayKoreanBarracksPrimaryPhase({ previousPhase: 0x8000, elapsedTicks: 5 }),
+    /signed WORD/,
+  );
+  assert.throws(
+    () => replayKoreanBarracksPrimaryPhase({ previousPhase: 0, elapsedTicks: 0x80000000 }),
+    /signed DWORD/,
+  );
+  assert.equal(buildKoreanBarracksPrimaryPhaseReport().reachedUpdateCfg.highAction, 1);
 });
 
 test("rejects a barrackk sprite whose bytes do not match the bound original asset", (t) => {
@@ -77,6 +110,7 @@ test("prints concrete primary-body values outside JSON mode", () => {
 
   assert.equal(result.status, 0, result.stderr);
   assert.match(result.stdout, /class 50: slot 108, configured offset 7/);
-  assert.match(result.stdout, /overlay 9\.\.15: not-established/);
+  assert.match(result.stdout, /primary frames: healthy 7, nonzero damage 8/);
+  assert.match(result.stdout, /overlay 9\.\.15: primary-path-negative/);
   assert.doesNotMatch(result.stdout, /undefined/);
 });

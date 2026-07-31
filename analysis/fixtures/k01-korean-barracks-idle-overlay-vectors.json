@@ -1,5 +1,5 @@
 {
-  "analysisStatus": "partially-static-confirmed",
+  "analysisStatus": "static-confirmed",
   "sourceSha256": "076f727dd2d35125a0acbe7ce02d89440d93873e8fd83699bdd4813f7895bc48",
   "sourceShape": [128, 117, 32],
   "identity": {
@@ -36,8 +36,38 @@
     "renderFrameField": "+0x0c",
     "compositorOrder": "The verified primary path selects one slot/frame pair before the renderer's clipping/owner branches. No second class-50 slot/frame pair is configured in the generic class-50 branch."
   },
+  "primaryPhase": {
+    "constructor": {
+      "currentPhaseField": "+0x1b2",
+      "initialValue": 0,
+      "highActionField": "+0x1b0",
+      "initialHighAction": 1,
+      "flagsField": "+0x74",
+      "class50Flags": "0x00710002",
+      "phaseDivisorField": "+0x92",
+      "phaseDivisor": 1
+    },
+    "reachedUpdateCfg": {
+      "activeListCaller": "0x00447360",
+      "highActionDispatcher": "0x0043c9c0",
+      "highAction": 1,
+      "actionDestination": "0x0043cdaa",
+      "primaryProducer": "0x0043c300",
+      "phaseUpdateGate": "active entity and (flags & 0x01000040) == 0 and signedAbs(entity DWORD +0x228 - global DWORD 0x007c5f80) >= 5",
+      "cadence": "On each reached outer update satisfying the gate, store the current global tick in +0x228; this is an elapsed-tick threshold, not a fixed-FPS cadence.",
+      "update": "state = 8; currentPhase = signed remainder of (currentPhase + 1) / signed BYTE +0x92; +0x34 receives the same remainder; render-dirty +0x04 = 1",
+      "class50Result": "Because divisor is 1 and initial phase is 0, every reached phase update stores 0. The primary path loops only the singleton phase 0 and writes state 8, not state 9.",
+      "state9Alternative": "0x0043cd32-0x0043cd87 has a separate every-third-global-tick state-9 producer, but it requires flags bit 0x40. Class 50 flags 0x00710002 lack that bit, so it is not reached for this configured record."
+    },
+    "damageInteraction": {
+      "field": "+0x250",
+      "healthy": { "configuredFrameOffset": 7, "frameSequence": [7] },
+      "nonzero": { "configuredFrameOffset": 8, "frameSequence": [8] },
+      "conclusion": "The verified generic configuration changes only the primary offset from 7 to 8. It neither changes the class-50 divisor 1 nor opens the state-9 producer; completed primary phase remains 0."
+    }
+  },
   "overlayConclusion": {
-    "status": "not-established",
+    "status": "primary-path-negative; independent-second-draw-unresolved",
     "candidateSpriteFrames": [9, 10, 11, 12, 13, 14, 15],
     "confirmedBinding": null,
     "cadence": null,
@@ -45,8 +75,8 @@
     "placement": null,
     "compositorOrder": null,
     "stateGates": null,
-    "reason": "The verified class-50 initializer configures slot 108 with offset 7 (or 8 when WORD +0x250 is nonzero), while the state-8/9 selector computes renderFrame = currentPhase + configuredFrameOffset. Frames 9..15 could therefore require either an unresolved primary currentPhase producer/cadence on the same slot or an independent second draw; neither route is established.",
-    "productIntegration": "Do not restore a 9..15 overlay from visual similarity. A product mapping needs either the primary currentPhase writer/cadence/loop that selects those frames on slot 108, or a source-side second-draw producer with its gate, cadence, placement, and order."
+    "reason": "The exact class-50 constructor initializes currentPhase to 0; its generic configuration sets the signed-IDIV divisor BYTE +0x92 to 1 and copies flags 0x00710002. The reached action-1 producer either leaves phase unchanged before the elapsed-time gate or advances 0 to signed remainder 0, then selects state 8. The distinct state-9 producer requires flags bit 0x40, which class 50 lacks. Thus the only primary slot-108 frames are healthy 7 and nonzero-damage 8, never 9..15.",
+    "productIntegration": "Do not restore a 9..15 overlay from visual similarity or from the primary phase path. The next independent question is whether any world-draw/effect/compositor producer emits a second slot/frame draw for class 50; bind its gate, counter/cadence, frame sequence, placement, and order before product mapping."
   },
   "reproductionVectors": [
     {
@@ -62,6 +92,36 @@
       "configuredFrameOffset": 8,
       "primaryConfigurationMode": 1,
       "renderFrameFormula": "renderFrame = currentPhase + configuredFrameOffset"
+    },
+    {
+      "previousPhase": 0,
+      "elapsedTicks": 4,
+      "phaseDivisor": 1,
+      "updated": false,
+      "nextState": null,
+      "nextPhase": 0,
+      "primaryFrameHealthy": null,
+      "primaryFrameNonzeroDamage": null
+    },
+    {
+      "previousPhase": 0,
+      "elapsedTicks": 5,
+      "phaseDivisor": 1,
+      "updated": true,
+      "nextState": 8,
+      "nextPhase": 0,
+      "primaryFrameHealthy": 7,
+      "primaryFrameNonzeroDamage": 8
+    },
+    {
+      "previousPhase": 0,
+      "elapsedTicks": -5,
+      "phaseDivisor": 1,
+      "updated": true,
+      "nextState": 8,
+      "nextPhase": 0,
+      "primaryFrameHealthy": 7,
+      "primaryFrameNonzeroDamage": 8
     }
   ]
 }

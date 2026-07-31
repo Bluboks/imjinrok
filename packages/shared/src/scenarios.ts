@@ -1,4 +1,5 @@
 import type { GridPoint } from "./commands.js";
+import type { AuraProfileId } from "./aura.js";
 import type { UnitDefinitionId } from "./content.js";
 import type { WeatherKind } from "./environment.js";
 import type { ScenarioType } from "./network.js";
@@ -202,6 +203,8 @@ export interface ScenarioDefinition {
   pathfindingProfileId?: string;
   /** Optional explicit attack-order target authority policy selected by the simulation. */
   attackTargetAuthorityPolicyId?: string;
+  /** Optional opt-in aura profile. Generic scenarios intentionally omit this. */
+  auraProfileId?: AuraProfileId;
   playerIds?: readonly string[];
   playerTeams?: Readonly<Record<string, string>>;
   completionMode?: "objectives" | "scripted";
