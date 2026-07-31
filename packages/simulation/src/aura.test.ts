@@ -41,6 +41,29 @@ test("aura refresh is opt-in, inclusive at its Chebyshev boundary, and snapshot-
   assert.deepEqual(toWorldSnapshot(state).units[ally.id]?.auraEffects, ally.auraEffects);
 });
 
+test("aura-free refresh clears stale effects without sorting generic units", () => {
+  const { state, ally } = createAuraWorld();
+  ally.auraEffects = {
+    stale: {
+      auraDefinitionId: "test:stale",
+      providerUnitId: "hero",
+      attackDamageMultiplier: 1.5,
+    },
+  };
+  const originalSort = Array.prototype.sort;
+  Array.prototype.sort = function disallowGenericAuraSort() {
+    throw new Error("aura-free worlds must not sort units");
+  };
+
+  try {
+    refreshAuraEffects(state);
+  } finally {
+    Array.prototype.sort = originalSort;
+  }
+
+  assert.equal(ally.auraEffects, undefined);
+});
+
 test("aura rejects enemy, wrong-kind, and outside-boundary recipients", () => {
   const { state } = createAuraWorld();
   state.auraProfileId = "test:aura";

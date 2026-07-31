@@ -48,16 +48,20 @@ export function registerAuraProfile(profile: AuraProfile, options?: RegisterAura
 /** Rebuilds every derived effect from live units before combat in stable id order. */
 export function refreshAuraEffects(state: WorldState, registry = defaultAuraProfileRegistry): void {
   const profileId = state.auraProfileId;
-  const units = iterateUnitsOrdered(state);
 
   if (!profileId) {
-    for (const unit of units) {
-      delete unit.auraEffects;
+    // Generic worlds normally have no derived aura state. Do not pay the
+    // deterministic unit-ordering cost just to clear a stale legacy effect.
+    for (const unit of Object.values(state.units)) {
+      if (unit.auraEffects !== undefined) {
+        delete unit.auraEffects;
+      }
     }
     return;
   }
 
   const profile = registry.require(profileId);
+  const units = iterateUnitsOrdered(state);
   for (const recipient of units) {
     const selected = new Map<string, AppliedAuraEffectState>();
 

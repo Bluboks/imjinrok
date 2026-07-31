@@ -165,6 +165,7 @@ import {
   type SourceTerrainRasterRegion,
 } from "../render/k01TerrainRasterPlan.js";
 import { getEntityAnimationStateKey } from "../render/entityAnimationState.js";
+import { reconcileAuraIndicator } from "../render/auraIndicatorLifecycle.js";
 import { resolveAuraIndicatorPresentation } from "../render/auraIndicatorPresentation.js";
 import { resolveEntityAnimationSelection } from "../render/sourceOrientationAnimation.js";
 import {
@@ -435,7 +436,7 @@ interface UnitRenderable {
   damageFlash: Phaser.GameObjects.Graphics;
   healthBarBack: Phaser.GameObjects.Graphics;
   healthBarFill: Phaser.GameObjects.Graphics;
-  auraIndicator: Phaser.GameObjects.Graphics;
+  auraIndicator: Phaser.GameObjects.Graphics | undefined;
   lastFacing: Facing;
   terminalKind: UnitDefinitionId;
   terminalSourceOrientation?: UnitState["sourceOrientation"];
@@ -8881,7 +8882,6 @@ export class SkirmishScene extends Phaser.Scene {
     const damageFlash = this.add.graphics();
     const healthBarBack = this.add.graphics();
     const healthBarFill = this.add.graphics();
-    const auraIndicator = this.add.graphics();
     const visual = this.getEntityVisual(unit.kind);
     const initialFacing = this.getUnitFacing(unit);
     const selection = visual ? this.getEntityAnimationSelection(unit, visual, initialFacing) : null;
@@ -8934,7 +8934,7 @@ export class SkirmishScene extends Phaser.Scene {
       teamBadge.fillCircle(0, 7, Math.max(3, Math.min(radius * 0.55, 5)));
       teamBadge.lineStyle(1, 0x071112, 0.95);
       teamBadge.strokeCircle(0, 7, Math.max(3, Math.min(radius * 0.55, 5)));
-      container.add([selectionRing, ...spriteLayers.map((layer) => layer.sprite), teamBadge, auraIndicator, damageFlash, healthBarBack, healthBarFill]);
+      container.add([selectionRing, ...spriteLayers.map((layer) => layer.sprite), teamBadge, damageFlash, healthBarBack, healthBarFill]);
       return {
         container,
         selectionRing,
@@ -8944,7 +8944,7 @@ export class SkirmishScene extends Phaser.Scene {
         damageFlash,
         healthBarBack,
         healthBarFill,
-        auraIndicator,
+        auraIndicator: undefined,
         lastFacing: initialFacing,
         terminalKind: unit.kind,
         terminalSourceOrientation: unit.sourceOrientation ? { ...unit.sourceOrientation } : undefined,
@@ -8958,7 +8958,7 @@ export class SkirmishScene extends Phaser.Scene {
     body.fillCircle(0, 0, radius);
     body.lineStyle(2, 0x102125, 0.9);
     body.strokeCircle(0, 0, radius);
-    container.add([selectionRing, body, auraIndicator, damageFlash, healthBarBack, healthBarFill]);
+    container.add([selectionRing, body, damageFlash, healthBarBack, healthBarFill]);
     return {
       container,
       body,
@@ -8966,7 +8966,7 @@ export class SkirmishScene extends Phaser.Scene {
       damageFlash,
       healthBarBack,
       healthBarFill,
-      auraIndicator,
+      auraIndicator: undefined,
       lastFacing: initialFacing,
       terminalKind: unit.kind,
       terminalSourceOrientation: unit.sourceOrientation ? { ...unit.sourceOrientation } : undefined,
@@ -8988,18 +8988,25 @@ export class SkirmishScene extends Phaser.Scene {
   /** Project/mod indicator only; no original K01 sprite or compositor is asserted here. */
   private redrawUnitAuraIndicator(renderable: UnitRenderable, unit: UnitState): void {
     const presentation = resolveAuraIndicatorPresentation(unit.auraEffects);
-    renderable.auraIndicator.clear();
-    if (!presentation) {
-      return;
-    }
-
-    renderable.auraIndicator.lineStyle(2, presentation.color, 0.95);
-    renderable.auraIndicator.strokePoints([
-      new Phaser.Geom.Point(0, -14),
-      new Phaser.Geom.Point(10, -4),
-      new Phaser.Geom.Point(0, 6),
-      new Phaser.Geom.Point(-10, -4),
-    ], true);
+    renderable.auraIndicator = reconcileAuraIndicator(
+      renderable.auraIndicator,
+      presentation,
+      () => {
+        const indicator = this.add.graphics();
+        renderable.container.addAt(indicator, renderable.container.getIndex(renderable.damageFlash));
+        return indicator;
+      },
+      (indicator, activePresentation) => {
+        indicator.clear();
+        indicator.lineStyle(2, activePresentation.color, 0.95);
+        indicator.strokePoints([
+          new Phaser.Geom.Point(0, -14),
+          new Phaser.Geom.Point(10, -4),
+          new Phaser.Geom.Point(0, 6),
+          new Phaser.Geom.Point(-10, -4),
+        ], true);
+      },
+    );
   }
 
   private redrawUnitHealthBar(renderable: UnitRenderable, unit: UnitState): void {
