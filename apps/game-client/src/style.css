@@ -4,6 +4,14 @@
   font-family: "Trebuchet MS", Verdana, sans-serif;
 }
 
+@font-face {
+  font-family: "Noto Sans KR";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/assets/fonts/noto-sans-kr/NotoSansKR-Regular.woff2") format("woff2");
+}
+
 html,
 body,
 #app {
