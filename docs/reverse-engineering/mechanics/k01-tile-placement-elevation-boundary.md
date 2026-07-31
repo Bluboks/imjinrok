@@ -154,6 +154,13 @@ selected frame alpha만으로 `74,771` uncovered pixels가 남음을 고정한�
 같은 measured domain에서 underlay pass까지 포함하면 uncovered pixel은 `0`이다. `grss1_0000` 선택과 two-pass ordering은
 `source-backed-adaptation`이며 original renderer가 같은 base layer를 그렸다는 주장이 아니다.
 
+이 재현은 descriptor별 anchor 또는 alpha 총량만 보지 않고 최종 두-pass output mask를 직접 만든다. raw placement delta가
+다른 인접 edge는 `798`개이며, 그 양쪽 corrected diamond domain은 `965,632` pixels다. selected frame offset과 같은
+offset으로 underlay를 먼저 그리고 selected frame을 global y→x로 다시 그리면 이 boundary에서 uncovered pixel은 `0`이고,
+topmost-draw mask SHA-256은 `df44797cc4fa1786240f33fbb7ec79534033baa53bd1789ede4e8b751cb259cb`이다. 반대로 underlay를
+raw anchor에 남기는 이전 product composition은 전체 domain `5,139`, mixed boundary `4,430` uncovered pixels를 남긴다.
+이것은 web two-pass adapter의 seam regression이며 original renderer의 underlay 또는 terrain-height 의미를 새로 주장하지 않는다.
+
 explicit fog base도 `source-raster-underlay`일 때 selected frame의 corrected offset을 coverage frame에 복사한다. fog tint,
 alpha, visibility semantics와 source fog composite의 pivot은 원작에서 확정된 범위가 아니다. generic/mod map은 명시적
 profile이 없으면 기존 tile-chunk path를 유지한다.
