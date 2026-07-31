@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "acceptedReplayScope": "K01 class 2 normal-movement accumulator and field-level coordinate commit only. The replay models the 0x00425f03 selector byte path: selector 1 changes raw input to raw minus trunc(raw/3), while other selector values retain raw input. Inputs are raw unsigned WORDs interpreted by recovered signed-WORD arithmetic; this is not a coordinate-unit, scheduler, FPS, or project-tick conversion.",
+  "vectors": [
+    {
+      "id": "other-selector-keeps-raw-input-below-threshold",
+      "input": { "accumulatorWord": 0, "rawInputWord": 49, "selectorByte": 0, "currentXWord": 10, "currentYWord": 20, "nextXWord": 11, "nextYWord": 20 },
+      "expected": { "selectorByte": 0, "rawInputWord": 49, "appliedDeltaWord": 49, "accumulatorWord": 49, "committed": false, "currentXWord": 10, "currentYWord": 20, "snapshotXWord": null, "snapshotYWord": null, "interpolationNextXWord": null, "interpolationNextYWord": null }
+    },
+    {
+      "id": "selector-one-third-reduction-commits-next-pair",
+      "input": { "accumulatorWord": 0, "rawInputWord": 75, "selectorByte": 1, "currentXWord": 10, "currentYWord": 20, "nextXWord": 11, "nextYWord": 21 },
+      "expected": { "selectorByte": 1, "rawInputWord": 75, "appliedDeltaWord": 50, "accumulatorWord": 65486, "committed": true, "currentXWord": 11, "currentYWord": 21, "snapshotXWord": 10, "snapshotYWord": 20, "interpolationNextXWord": 11, "interpolationNextYWord": 21 }
+    },
+    {
+      "id": "negative-to-positive-accumulator-clamps-at-zero",
+      "input": { "accumulatorWord": 65526, "rawInputWord": 20, "selectorByte": 0, "currentXWord": 3, "currentYWord": 4, "nextXWord": 4, "nextYWord": 4 },
+      "expected": { "selectorByte": 0, "rawInputWord": 20, "appliedDeltaWord": 20, "accumulatorWord": 0, "committed": false, "currentXWord": 3, "currentYWord": 4, "snapshotXWord": null, "snapshotYWord": null, "interpolationNextXWord": null, "interpolationNextYWord": null }
+    },
+    {
+      "id": "selector-one-signed-negative-input-uses-truncation-toward-zero",
+      "input": { "accumulatorWord": 0, "rawInputWord": 65532, "selectorByte": 1, "currentXWord": 30, "currentYWord": 40, "nextXWord": 31, "nextYWord": 40 },
+      "expected": { "selectorByte": 1, "rawInputWord": 65532, "appliedDeltaWord": 65533, "accumulatorWord": 65533, "committed": false, "currentXWord": 30, "currentYWord": 40, "snapshotXWord": null, "snapshotYWord": null, "interpolationNextXWord": null, "interpolationNextYWord": null }
+    }
+  ]
+}
