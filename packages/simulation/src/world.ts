@@ -98,6 +98,41 @@ export {
   type RegisterMovementCollisionPolicyOptions,
 } from "./movementCollisionPolicy.js";
 export { getFootprintTiles, validateBuildingPlacement, type BuildingPlacementValidationResult } from "./placement.js";
+export {
+  canAdmitPlayerCapacity,
+  coreProviderSupplyCapacityPolicy,
+  coreUncappedCapacityPolicy,
+  createCapacityPolicy,
+  createCategoryCapacityConstraint,
+  createFixedBudgetCapacityPolicy,
+  createKindCapacityConstraint,
+  createProviderSupplyCapacityPolicy,
+  createTotalCountCapacityConstraint,
+  createUncappedCapacityPolicy,
+  defaultCapacityPolicyRegistry,
+  evaluatePlayerCapacity,
+  getProviderSupplyCapacityState,
+  registerCapacityPolicy,
+  requireCapacityPolicy,
+  CapacityPolicyRegistry,
+  CORE_PROVIDER_SUPPLY_CAPACITY_POLICY_ID,
+  CORE_UNCAPPED_CAPACITY_POLICY_ID,
+  type CapacityAdmissionRequest,
+  type CapacityAdmissionResult,
+  type CapacityConstraint,
+  type CapacityConstraintOutcome,
+  type CapacityConstraintResult,
+  type CapacityEntry,
+  type CapacityEntryLocation,
+  type CapacityEvaluation,
+  type CapacityPolicy,
+  type CapacityPolicyContext,
+  type CapacityRejection,
+  type CapacityRejectionReason,
+  type CapacityUnitCategory,
+  type CreateTotalCountCapacityConstraintOptions,
+  type ProviderSupplyCapacityState,
+} from "./capacity.js";
 export { canQueuePopulation, DEFAULT_POPULATION_LIMIT, getPlayerPopulationState, getPopulationCost, getPopulationProvided, type PlayerPopulationState } from "./population.js";
 export { applyCompletedResearchToUnit, completeResearch, createPlayerResearchState, isResearchCompleted, isResearchPending } from "./research.js";
 export { findHarvestableResourceTile, findNearestHarvestableResource, findResourceNode, findResourceTile, getResourceNodeState, harvestResource, isResourceHarvestable, resourceBlocksBuilding, resourceBlocksMovement, updateResourceRegrowth } from "./resources.js";
