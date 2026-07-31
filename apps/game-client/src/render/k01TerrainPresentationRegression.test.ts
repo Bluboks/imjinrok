@@ -17,6 +17,7 @@ import {
   resolveExplicitTileVisualPlacement,
   resolveExplicitTileVisualWorldBounds,
 } from "./explicitTileVisualResolver.js";
+import { alignSourceTerrainCoverageUnderlay } from "./k01TerrainRasterPlan.js";
 import { resolveGridGroundContactWorldPosition } from "./gridGroundContactPosition.js";
 import {
   resolveTerrainElevationOverlayLiftPixels,
@@ -25,16 +26,16 @@ import {
 
 const CLASSIC_SOURCE_PROFILE_ORIGIN = { x: 320, y: 160 };
 
-test("K01 source tiles retain recovered top-edge placement across the complete map footprint", () => {
+test("K01 source raster keeps coverage and selected frames on one recovered surface", () => {
   const vector = createK01TerrainRasterVector();
 
   assert.deepEqual(vector, {
     cellCount: 3_600,
     sharedGroundContactFlatCount: 2_865,
-    sharedGroundContactUnderlayCount: 3_600,
+    alignedCoverageUnderlayCount: 3_600,
     zeroSourceOffsetCount: 2_865,
     elevationCounts: { level0: 2_865, level1: 735 },
-    footprint: { left: -1_600, top: 160, right: 2_240, bottom: 2_096 },
+    footprint: { left: -1_600, top: 144, right: 2_240, bottom: 2_096 },
     flatCellEntity: {
       terrainSurface: { x: 288, y: 176 },
       entityGroundContact: { x: 288, y: 176 },
@@ -69,7 +70,7 @@ function createK01TerrainRasterVector() {
   assert.ok(map);
   const registry = createContentRegistry();
   let sharedGroundContactFlatCount = 0;
-  let sharedGroundContactUnderlayCount = 0;
+  let alignedCoverageUnderlayCount = 0;
   let zeroSourceOffsetCount = 0;
   let level0 = 0;
   let level1 = 0;
@@ -95,15 +96,16 @@ function createK01TerrainRasterVector() {
       const expectedOffsetY = tile.elevation === 1 ? -16 : 0;
       assert.deepEqual(flatPlacement.position, { x: terrainSurface.x, y: terrainSurface.y + expectedOffsetY }, `K01 flat ${x},${y} must use recovered top-edge placement`);
       if (flatPlacement.position.y === terrainSurface.y) sharedGroundContactFlatCount += 1;
-      const underlayPlacement = resolveExplicitTileVisualPlacement(underlay, terrainSurface, map.tileWidth, map.tileHeight);
-      assert.deepEqual(underlayPlacement.position, terrainSurface, `K01 coverage underlay ${x},${y} must stay at the raw tile anchor`);
-      sharedGroundContactUnderlayCount += 1;
+      const coverageUnderlay = alignSourceTerrainCoverageUnderlay(underlay, flat);
+      const underlayPlacement = resolveExplicitTileVisualPlacement(coverageUnderlay, terrainSurface, map.tileWidth, map.tileHeight);
+      assert.deepEqual(underlayPlacement.position, flatPlacement.position, `K01 final source-raster coverage ${x},${y} must meet its selected frame surface`);
+      alignedCoverageUnderlayCount += 1;
 
       if (flat.sourcePixelOffset.x === 0 && flat.sourcePixelOffset.y === 0) {
         zeroSourceOffsetCount += 1;
       }
 
-      const bounds = resolveExplicitTileVisualWorldBounds(underlay, terrainSurface, map.tileWidth, map.tileHeight);
+      const bounds = resolveExplicitTileVisualWorldBounds(coverageUnderlay, terrainSurface, map.tileWidth, map.tileHeight);
       left = Math.min(left, bounds.left);
       top = Math.min(top, bounds.top);
       right = Math.max(right, bounds.right);
@@ -118,7 +120,7 @@ function createK01TerrainRasterVector() {
   return {
     cellCount: map.width * map.height,
     sharedGroundContactFlatCount,
-    sharedGroundContactUnderlayCount,
+    alignedCoverageUnderlayCount,
     zeroSourceOffsetCount,
     elevationCounts: { level0, level1 },
     footprint: { left, top, right, bottom },
