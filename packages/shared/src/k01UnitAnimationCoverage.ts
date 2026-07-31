@@ -27,11 +27,10 @@ export interface K01UnitAnimationEvidence {
     readonly rawDirections: readonly number[];
   };
   readonly evidenceDocument: string;
-  /**
-   * Source frame selected by the K01 opening/runtime adapter. This is a frame
-   * identity check, not a claim about an original portrait or body-state name.
-   */
+  /** Source body-sprite frame selected by the K01 opening/runtime adapter. */
   readonly defaultFrameFileName?: string;
+  /** Exact fnt/portrait.spr file selected by the original single-selection helper. */
+  readonly selectionPortraitFrameFileName?: string;
 }
 
 export interface K01UnitAnimationQuarantine {
@@ -50,20 +49,19 @@ export interface K01UnitAnimationCoverageResult extends K01UnitAnimationEvidence
 
 /**
  * A serializable selection-image registry entry for a K01 entity that can
- * actually appear in the scenario. The frame is a source-backed
- * representative, not a claim that the original selection panel used this
- * frame as a portrait.
+ * actually appear in the scenario. The frame is the exact source-backed
+ * fnt/portrait.spr binding used by the original selected-entity helper.
  */
 export interface K01SelectionPortraitRegistryEntry {
   readonly kind: UnitDefinitionId;
   readonly visualId: string;
   readonly frame: FrameRef;
   readonly mirrorX: boolean;
-  readonly sourceFrameFileName: string;
+  readonly sourcePortraitFrameFileName: string;
   readonly evidenceDocument: string;
   readonly sourceStates: readonly string[];
   readonly quarantines: readonly K01UnitAnimationQuarantine[];
-  readonly semanticStatus: "source-frame-representative";
+  readonly semanticStatus: "source-selection-panel-portrait";
 }
 
 const provisionalTerminalTiming: K01UnitAnimationQuarantine = {
@@ -89,6 +87,7 @@ export const K01_UNIT_ANIMATION_EVIDENCE = [
     ],
     evidenceDocument: "docs/reverse-engineering/mechanics/k01-korean-farmer-core-frames.md",
     defaultFrameFileName: "farmerk_0000.png",
+    selectionPortraitFrameFileName: "portrait_0033.png",
   },
   {
     kind: "swordsman",
@@ -103,6 +102,7 @@ export const K01_UNIT_ANIMATION_EVIDENCE = [
     ],
     evidenceDocument: "docs/reverse-engineering/mechanics/k01-core-unit-animation-states.md",
     defaultFrameFileName: "swordk_0128.png",
+    selectionPortraitFrameFileName: "portrait_0032.png",
   },
   {
     kind: "archer",
@@ -117,6 +117,7 @@ export const K01_UNIT_ANIMATION_EVIDENCE = [
     ],
     evidenceDocument: "docs/reverse-engineering/mechanics/k01-core-unit-animation-states.md",
     defaultFrameFileName: "archerk_0000.png",
+    selectionPortraitFrameFileName: "portrait_0031.png",
   },
   {
     kind: "korean-monk",
@@ -128,6 +129,7 @@ export const K01_UNIT_ANIMATION_EVIDENCE = [
     quarantines: [provisionalTerminalTiming],
     evidenceDocument: "docs/reverse-engineering/mechanics/k01-opening-unit-bindings.md",
     defaultFrameFileName: "budak_0100.png",
+    selectionPortraitFrameFileName: "portrait_0034.png",
   },
   {
     kind: "japanese-swordsman",
@@ -142,6 +144,7 @@ export const K01_UNIT_ANIMATION_EVIDENCE = [
     ],
     evidenceDocument: "docs/reverse-engineering/mechanics/k01-core-unit-animation-states.md",
     defaultFrameFileName: "swordj_0000.png",
+    selectionPortraitFrameFileName: "portrait_0003.png",
   },
   {
     kind: "japanese-gunner",
@@ -156,6 +159,7 @@ export const K01_UNIT_ANIMATION_EVIDENCE = [
     ],
     evidenceDocument: "docs/reverse-engineering/mechanics/k01-normal-reinforcement-animation-batch.md",
     defaultFrameFileName: "gunj1_0000.png",
+    selectionPortraitFrameFileName: "portrait_0002.png",
   },
   {
     kind: "japanese-samurai",
@@ -167,6 +171,7 @@ export const K01_UNIT_ANIMATION_EVIDENCE = [
     quarantines: [provisionalTerminalTiming],
     evidenceDocument: "docs/reverse-engineering/mechanics/k01-samurai-animation-pilot.md",
     defaultFrameFileName: "horseswordj2_0000.png",
+    selectionPortraitFrameFileName: "portrait_0004.png",
   },
   {
     kind: "japanese-shrine-maiden",
@@ -178,6 +183,7 @@ export const K01_UNIT_ANIMATION_EVIDENCE = [
     quarantines: [provisionalTerminalTiming],
     evidenceDocument: "docs/reverse-engineering/mechanics/k01-opening-unit-bindings.md",
     defaultFrameFileName: "advbudaj_0120.png",
+    selectionPortraitFrameFileName: "portrait_0005.png",
   },
   {
     kind: "japanese-farmer",
@@ -192,6 +198,7 @@ export const K01_UNIT_ANIMATION_EVIDENCE = [
     ],
     evidenceDocument: "docs/reverse-engineering/mechanics/k01-japanese-farmer-frames.md",
     defaultFrameFileName: "Farmerj_0000.png",
+    selectionPortraitFrameFileName: "portrait_0006.png",
   },
   {
     kind: "gwon-yul",
@@ -203,6 +210,7 @@ export const K01_UNIT_ANIMATION_EVIDENCE = [
     quarantines: [provisionalTerminalTiming],
     evidenceDocument: "docs/reverse-engineering/mechanics/k01-hero-animation-pilot.md",
     defaultFrameFileName: "generalk13_0000.png",
+    selectionPortraitFrameFileName: "portrait_0046.png",
   },
   {
     kind: "ryu-seong-ryong",
@@ -214,6 +222,7 @@ export const K01_UNIT_ANIMATION_EVIDENCE = [
     quarantines: [provisionalTerminalTiming],
     evidenceDocument: "docs/reverse-engineering/mechanics/k01-hero-animation-pilot.md",
     defaultFrameFileName: "generalk31_0000.png",
+    selectionPortraitFrameFileName: "portrait_0048.png",
   },
   {
     kind: "japanese-turtle-tank",
@@ -231,6 +240,7 @@ export const K01_UNIT_ANIMATION_EVIDENCE = [
     },
     evidenceDocument: "docs/reverse-engineering/mechanics/k01-turtle-tank-animation-pilot.md",
     defaultFrameFileName: "ghosttankj_0016.png",
+    selectionPortraitFrameFileName: "portrait_0011.png",
   },
   {
     kind: "japanese-konishi",
@@ -242,6 +252,7 @@ export const K01_UNIT_ANIMATION_EVIDENCE = [
     quarantines: [provisionalTerminalTiming],
     evidenceDocument: "docs/reverse-engineering/mechanics/k01-konishi-animation-pilot.md",
     defaultFrameFileName: "generalj12_0000.png",
+    selectionPortraitFrameFileName: "portrait_0015.png",
   },
 ] as const satisfies readonly K01UnitAnimationEvidence[];
 
@@ -259,6 +270,7 @@ export const K01_BUILDING_VISUAL_EVIDENCE = [
     themeStates: ["idle"],
     runtimeStates: ["idle"],
     defaultFrameFileName: "barrackk_0007.png",
+    selectionPortraitFrameFileName: "portrait_0054.png",
     quarantines: [{ state: "building-states", reason: "K01 catalog evidence binds only class-50 base frame 7; construction, damage, overlays, timing, pivot, and lift remain unverified." }],
     evidenceDocument: "docs/reverse-engineering/data-structures/entity-type-catalog.md",
   },
@@ -270,6 +282,7 @@ export const K01_BUILDING_VISUAL_EVIDENCE = [
     themeStates: ["idle"],
     runtimeStates: ["idle"],
     defaultFrameFileName: "millk_0007.png",
+    selectionPortraitFrameFileName: "portrait_0051.png",
     quarantines: [{ state: "building-states", reason: "K01 class-48 evidence binds only base frame 7; construction, damage, overlays, timing, pivot, and lift remain unverified." }],
     evidenceDocument: "docs/reverse-engineering/mechanics/k01-opening-building-bindings.md",
   },
@@ -281,6 +294,7 @@ export const K01_BUILDING_VISUAL_EVIDENCE = [
     themeStates: ["idle"],
     runtimeStates: ["idle"],
     defaultFrameFileName: "barrackj_0007.png",
+    selectionPortraitFrameFileName: "portrait_0022.png",
     quarantines: [{ state: "building-states", reason: "K01 class-60 evidence binds only base frame 7; construction, damage, overlays, timing, pivot, and lift remain unverified." }],
     evidenceDocument: "docs/reverse-engineering/mechanics/k01-opening-building-bindings.md",
   },
@@ -292,6 +306,7 @@ export const K01_BUILDING_VISUAL_EVIDENCE = [
     themeStates: ["idle"],
     runtimeStates: ["idle"],
     defaultFrameFileName: "firehousej_0007.png",
+    selectionPortraitFrameFileName: "portrait_0024.png",
     quarantines: [{ state: "building-states", reason: "K01 catalog evidence binds only class-62 base frame 7; construction, damage, overlays, timing, pivot, and lift remain unverified." }],
     evidenceDocument: "docs/reverse-engineering/data-structures/entity-type-catalog.md",
   },
@@ -303,6 +318,7 @@ export const K01_BUILDING_VISUAL_EVIDENCE = [
     themeStates: ["idle"],
     runtimeStates: ["idle"],
     defaultFrameFileName: "millj_0007.png",
+    selectionPortraitFrameFileName: "portrait_0028.png",
     quarantines: [{ state: "building-states", reason: "K01 catalog evidence binds only class-57 base frame 7; construction, damage, overlays, timing, pivot, and lift remain unverified." }],
     evidenceDocument: "docs/reverse-engineering/data-structures/entity-type-catalog.md",
   },
@@ -314,6 +330,7 @@ export const K01_BUILDING_VISUAL_EVIDENCE = [
     themeStates: ["idle"],
     runtimeStates: ["idle"],
     defaultFrameFileName: "towerj_0007.png",
+    selectionPortraitFrameFileName: "portrait_0120.png",
     quarantines: [{ state: "building-states", reason: "K01 class-63 evidence binds only base frame 7; construction, damage, overlays, timing, pivot, and lift remain unverified." }],
     evidenceDocument: "docs/reverse-engineering/mechanics/k01-opening-building-bindings.md",
   },
@@ -325,6 +342,7 @@ export const K01_BUILDING_VISUAL_EVIDENCE = [
     themeStates: ["idle"],
     runtimeStates: ["idle"],
     defaultFrameFileName: "jhq_0007.png",
+    selectionPortraitFrameFileName: "portrait_0026.png",
     quarantines: [{ state: "building-states", reason: "K01 class-58 evidence binds only base frame 7; construction, damage, overlays, timing, pivot, and lift remain unverified." }],
     evidenceDocument: "docs/reverse-engineering/mechanics/k01-opening-building-bindings.md",
   },
@@ -336,6 +354,7 @@ export const K01_BUILDING_VISUAL_EVIDENCE = [
     themeStates: ["idle"],
     runtimeStates: ["idle"],
     defaultFrameFileName: "advbarrackk_0007.png",
+    selectionPortraitFrameFileName: "portrait_0044.png",
     quarantines: [{ state: "building-states", reason: "K01 class-51 evidence binds only base frame 7; construction, damage, overlays, timing, pivot, and lift remain unverified." }],
     evidenceDocument: "docs/reverse-engineering/mechanics/k01-opening-building-bindings.md",
   },
@@ -347,6 +366,7 @@ export const K01_BUILDING_VISUAL_EVIDENCE = [
     themeStates: ["idle"],
     runtimeStates: ["idle"],
     defaultFrameFileName: "hqk_0007.png",
+    selectionPortraitFrameFileName: "portrait_0052.png",
     quarantines: [{ state: "building-states", reason: "K01 class-49 base frame 7 is scoped; construction and damage have separate bounded evidence, while timing, pivot, and lift remain unverified." }],
     evidenceDocument: "docs/reverse-engineering/mechanics/k01-opening-building-bindings.md",
   },
@@ -403,8 +423,8 @@ export function assessK01EntityVisualCoverage(
 
 /**
  * Produces selection-panel metadata only for K01 spawnable entities with an
- * explicit source-frame representative. It deliberately omits a record when
- * a theme binding or its validated representative drifts, rather than
+ * exact source portrait. It deliberately omits a record when a theme binding
+ * or its validated portrait binding drifts, rather than
  * returning a plausible but unsupported fallback.
  */
 export function getK01SelectionPortraitRegistry(
@@ -424,8 +444,8 @@ export function getK01SelectionPortraitRegistry(
 
     if (
       resolved === null ||
-      coverage.defaultFrameFileName === undefined ||
-      resolved.frame.fileName !== coverage.defaultFrameFileName
+      coverage.selectionPortraitFrameFileName === undefined ||
+      resolved.frame.fileName !== coverage.selectionPortraitFrameFileName
     ) {
       return [];
     }
@@ -435,11 +455,11 @@ export function getK01SelectionPortraitRegistry(
       visualId: coverage.visualId,
       frame: resolved.frame,
       mirrorX: resolved.mirrorX,
-      sourceFrameFileName: coverage.defaultFrameFileName,
+      sourcePortraitFrameFileName: coverage.selectionPortraitFrameFileName,
       evidenceDocument: coverage.evidenceDocument,
       sourceStates: coverage.sourceStates,
       quarantines: coverage.quarantines,
-      semanticStatus: "source-frame-representative",
+      semanticStatus: "source-selection-panel-portrait",
     }];
   });
 }
@@ -463,8 +483,8 @@ function assessK01VisualCoverage(
       missingSourceOrientationDirections: findMissingSourceOrientationDirections(entityVisual, evidence),
       missingDefaultFrame: evidence.defaultFrameFileName !== undefined &&
         entityVisual?.states.idle?.clips.default?.frames[0]?.fileName !== evidence.defaultFrameFileName,
-      missingExplicitSelectionRepresentative: evidence.defaultFrameFileName !== undefined &&
-        (entityVisual?.portrait === undefined || selectionRepresentative?.frame.fileName !== evidence.defaultFrameFileName),
+      missingExplicitSelectionRepresentative: evidence.selectionPortraitFrameFileName !== undefined &&
+        (entityVisual?.portrait === undefined || selectionRepresentative?.frame.fileName !== evidence.selectionPortraitFrameFileName),
     };
   });
 }

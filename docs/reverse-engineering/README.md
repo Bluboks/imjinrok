@@ -23,7 +23,8 @@
 17. [K01 팬 리마스터 MVP 정적 분석 계획](mechanics/campaign/k01.md)
 18. [원본 command control의 `button.spr` pixel-frame 결합](mechanics/command-icon-frame-binding.md)
 19. [K01 mission unit animation coverage guard](mechanics/k01-unit-animation-coverage.md)
-20. 분석할 나머지 자료구조와 메커니즘 문서
+20. [K01 단일 선택 `portrait.spr` 결합](mechanics/k01-selection-portraits.md)
+21. 분석할 나머지 자료구조와 메커니즘 문서
 
 ## 문서 역할
 

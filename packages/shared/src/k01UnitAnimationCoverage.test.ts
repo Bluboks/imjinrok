@@ -68,7 +68,7 @@ test("K01 initial and scripted entity roster has exact source-backed default vis
     assert.equal(
       result.missingExplicitSelectionRepresentative,
       false,
-      `${result.kind} must use its explicit source-frame selection representative`,
+      `${result.kind} must use its exact source selection portrait`,
     );
     assert.ok(result.quarantines.length > 0, `${result.kind} must name unresolved visual scope`);
 
@@ -81,9 +81,9 @@ test("K01 initial and scripted entity roster has exact source-backed default vis
     const portrait = resolveEntityPortraitFrame(visual);
     assert.equal(portrait?.frame, visual.portrait, `${result.kind} must not select a runtime portrait fallback`);
     assert.equal(
-      existsSync(join(defaultThemeAssetRoot, visual.assetPath, portrait?.frame.fileName ?? "")),
+      existsSync(join(defaultThemeAssetRoot, "ui/portraits", portrait?.frame.fileName ?? "")),
       true,
-      `${result.kind} representative must resolve to a loadable converted source frame`,
+      `${result.kind} portrait must resolve to a loadable converted source frame`,
     );
   }
 });
@@ -106,7 +106,7 @@ test("K01 source-evidenced states have live source-backed clips and quarantines 
   }
 });
 
-test("K01 selection registry exposes every spawnable entity's validated source-frame representative", () => {
+test("K01 selection registry exposes every spawnable entity's exact source portrait", () => {
   const registry = getK01SelectionPortraitRegistry(defaultTheme);
 
   assert.deepEqual(
@@ -115,19 +115,19 @@ test("K01 selection registry exposes every spawnable entity's validated source-f
   );
 
   for (const entry of registry) {
-    assert.equal(entry.semanticStatus, "source-frame-representative");
-    assert.equal(entry.frame.fileName, entry.sourceFrameFileName);
+    assert.equal(entry.semanticStatus, "source-selection-panel-portrait");
+    assert.equal(entry.frame.fileName, entry.sourcePortraitFrameFileName);
     assert.ok(entry.evidenceDocument.startsWith("docs/reverse-engineering/"));
     assert.ok(entry.quarantines.length > 0, `${entry.kind} must retain unsupported visual scope`);
     assert.equal(
-      existsSync(join(defaultThemeAssetRoot, defaultTheme.visuals[entry.visualId]!.assetPath, entry.sourceFrameFileName)),
+      existsSync(join(defaultThemeAssetRoot, "ui/portraits", entry.sourcePortraitFrameFileName)),
       true,
-      `${entry.kind} representative must be a converted source frame`,
+      `${entry.kind} portrait must be a converted source frame`,
     );
   }
 });
 
-test("K01 selection registry omits a drifted representative instead of falling back", () => {
+test("K01 selection registry omits a drifted portrait instead of falling back", () => {
   const visualId = defaultTheme.entityBindings.villager;
   const visual = defaultTheme.visuals[visualId];
 

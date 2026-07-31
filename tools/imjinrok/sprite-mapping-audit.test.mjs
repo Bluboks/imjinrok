@@ -168,8 +168,8 @@ test("frame mappings stay quarantined outside statically proven scopes while ide
   assert.ok(
     report.k01EntityVisualCoverage.selectionPortraitRegistry.every(
       (entry) =>
-        entry.semanticStatus === "source-frame-representative" &&
-        entry.frame.fileName === entry.sourceFrameFileName,
+        entry.semanticStatus === "source-selection-panel-portrait" &&
+        entry.frame.fileName === entry.sourcePortraitFrameFileName,
     ),
   );
   assert.equal(

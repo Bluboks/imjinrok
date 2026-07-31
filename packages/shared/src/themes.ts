@@ -67,12 +67,16 @@ const entityFrame = (
   };
 };
 
-/**
- * Selection-panel representative only. This reuses an evidenced entity frame;
- * it does not assign an original portrait resource or speaker identity.
- */
-const entitySelectionRepresentative = (visualId: string, stem: string, index: number): FrameRef =>
-  entityFrame(visualId, stem, index);
+/** Exact fnt/portrait.spr frame recovered from the selected-entity helper. */
+const selectionPortrait = (index: number): FrameRef => {
+  const sourceId = `portrait_${String(index).padStart(4, "0")}`;
+
+  return {
+    textureKey: `default_ui_selection_${sourceId}`,
+    fileName: `${sourceId}.png`,
+    assetPath: "ui/portraits",
+  };
+};
 
 /**
  * PROVISIONAL BY DEFAULT: direction order, state blocks, mirroring, and building health semantics are unverified
@@ -369,8 +373,8 @@ interface SourceBuildingVisualOptions {
   idleOverlayFrameStart?: number;
   idleOverlayFrameCount?: number;
   idleOverlayFps?: number;
-  /** Selection representative frame with an evidenced source index, if one is in scope. */
-  selectionRepresentativeFrameIndex?: number;
+  /** Exact fnt/portrait.spr frame for this selected entity, if one is in scope. */
+  selectionPortraitFrameIndex?: number;
 }
 
 const sourceBuildingEntityVisual = ({
@@ -387,7 +391,7 @@ const sourceBuildingEntityVisual = ({
   idleOverlayFrameStart,
   idleOverlayFrameCount = 0,
   idleOverlayFps = 8,
-  selectionRepresentativeFrameIndex,
+  selectionPortraitFrameIndex,
 }: SourceBuildingVisualOptions): EntityVisual => ({
   id,
   kind: "entity",
@@ -400,9 +404,9 @@ const sourceBuildingEntityVisual = ({
     size,
     pivot: { anchor: pivot },
   },
-  ...(selectionRepresentativeFrameIndex === undefined
+  ...(selectionPortraitFrameIndex === undefined
     ? {}
-    : { portrait: entitySelectionRepresentative(visualId, stem, selectionRepresentativeFrameIndex) }),
+    : { portrait: selectionPortrait(selectionPortraitFrameIndex) }),
   states: {
     idle: {
       clips: {
@@ -440,8 +444,8 @@ interface SourceBaseBuildingVisualOptions {
   stem: string;
   size: { w: number; h: number };
   pivot: { x: number; y: number };
-  /** K01 catalog evidence fixes this source base frame, not a portrait meaning. */
-  selectionRepresentativeFrameIndex?: number;
+  /** Exact fnt/portrait.spr frame for this selected building. */
+  selectionPortraitFrameIndex: number;
 }
 
 // This deliberately exposes only the catalog-proven base frame. Size comes directly from the
@@ -453,7 +457,7 @@ const sourceBaseBuildingEntityVisual = ({
   stem,
   size,
   pivot,
-  selectionRepresentativeFrameIndex = 7,
+  selectionPortraitFrameIndex,
 }: SourceBaseBuildingVisualOptions): EntityVisual => ({
   id,
   kind: "entity",
@@ -466,7 +470,7 @@ const sourceBaseBuildingEntityVisual = ({
     size,
     pivot: { anchor: pivot },
   },
-  portrait: entitySelectionRepresentative(visualId, stem, selectionRepresentativeFrameIndex),
+  portrait: selectionPortrait(selectionPortraitFrameIndex),
   states: {
     idle: {
       clips: {
@@ -521,7 +525,7 @@ export const villagerEntityVisual = {
     size: { w: 60, h: 60 },
     pivot: { anchor: { x: 30, y: 52 } },
   },
-  portrait: entitySelectionRepresentative("villager", "farmerk", 0),
+  portrait: selectionPortrait(33),
   terminalPresentation: { state: "death" },
   states: {
     idle: {
@@ -610,7 +614,7 @@ export const swordsmanEntityVisual = {
     size: { w: 60, h: 60 },
     pivot: { anchor: { x: 30, y: 52 } },
   },
-  portrait: entitySelectionRepresentative("swordsman", "swordk", 128),
+  portrait: selectionPortrait(32),
   terminalPresentation: { state: "death" },
   states: {
     idle: {
@@ -672,7 +676,7 @@ export const japaneseSwordsmanEntityVisual = {
     size: { w: 60, h: 50 },
     pivot: { anchor: { x: 30, y: 44 } },
   },
-  portrait: entitySelectionRepresentative("japanese_swordsman", "swordj", 0),
+  portrait: selectionPortrait(3),
   terminalPresentation: { state: "death" },
   states: {
     idle: {
@@ -742,7 +746,7 @@ export const koreanMonkEntityVisual = {
     size: { w: 65, h: 50 },
     pivot: { anchor: { x: 32, y: 44 } },
   },
-  portrait: entitySelectionRepresentative("korean_monk", "budak", 100),
+  portrait: selectionPortrait(34),
   terminalPresentation: { state: "death" },
   states: {
     idle: { facings: ENTITY_FACING_ORDER, clips: staticallyRecoveredDirectionalClips({ visualId: "korean_monk", stem: "budak", frameStart: 100, frameStride: 8, phaseCount: 8, fps: PROVISIONAL_RECOVERED_ANIMATION_IDLE_FPS, loop: true }) },
@@ -765,7 +769,7 @@ export const archerEntityVisual = {
     size: { w: 60, h: 60 },
     pivot: { anchor: { x: 30, y: 52 } },
   },
-  portrait: entitySelectionRepresentative("archer", "archerk", 0),
+  portrait: selectionPortrait(31),
   terminalPresentation: { state: "death" },
   states: {
     idle: {
@@ -838,7 +842,7 @@ export const japaneseGunnerEntityVisual = {
     size: { w: 60, h: 60 },
     pivot: { anchor: { x: 30, y: 52 } },
   },
-  portrait: entitySelectionRepresentative("japanese_gunner", "gunj1", 0),
+  portrait: selectionPortrait(2),
   terminalPresentation: { state: "death" },
   states: {
     idle: {
@@ -917,7 +921,7 @@ export const japaneseFarmerEntityVisual = {
     size: { w: 66, h: 56 },
     pivot: { anchor: { x: 33, y: 50 } },
   },
-  portrait: entitySelectionRepresentative("japanese_farmer", "Farmerj", 0),
+  portrait: selectionPortrait(6),
   terminalPresentation: { state: "death" },
   states: {
     idle: {
@@ -1010,7 +1014,7 @@ export const japaneseShrineMaidenEntityVisual = {
     size: { w: 50, h: 50 },
     pivot: { anchor: { x: 25, y: 44 } },
   },
-  portrait: entitySelectionRepresentative("japanese_shrine_maiden", "advbudaj", 120),
+  portrait: selectionPortrait(5),
   terminalPresentation: { state: "death" },
   states: {
     idle: { facings: ENTITY_FACING_ORDER, clips: staticallyRecoveredDirectionalClips({ visualId: "japanese_shrine_maiden", stem: "advbudaj", frameStart: 120, frameStride: 8, phaseCount: 8, fps: PROVISIONAL_RECOVERED_ANIMATION_IDLE_FPS, loop: true }) },
@@ -1034,7 +1038,7 @@ export const japaneseSamuraiEntityVisual = {
     size: { w: 80, h: 80 },
     pivot: { anchor: { x: 40, y: 72 } },
   },
-  portrait: entitySelectionRepresentative("japanese_samurai", "horseswordj2", 0),
+  portrait: selectionPortrait(4),
   terminalPresentation: { state: "death" },
   states: {
     idle: {
@@ -1107,7 +1111,7 @@ export const japaneseTurtleTankEntityVisual = {
     size: { w: 70, h: 60 },
     pivot: { anchor: { x: 35, y: 52 } },
   },
-  portrait: entitySelectionRepresentative("japanese_turtle_tank", "ghosttankj", 16),
+  portrait: selectionPortrait(11),
   states: {
     idle: {
       facings: ENTITY_FACING_ORDER,
@@ -1183,7 +1187,7 @@ export const japaneseKonishiEntityVisual = {
     size: { w: 140, h: 108 },
     pivot: { anchor: { x: 70, y: 100 } },
   },
-  portrait: entitySelectionRepresentative("japanese_konishi", "generalj12", 0),
+  portrait: selectionPortrait(15),
   terminalPresentation: { state: "death" },
   states: {
     idle: {
@@ -1293,7 +1297,7 @@ export const gwonYulEntityVisual = {
     size: { w: 128, h: 108 },
     pivot: { anchor: { x: 64, y: 98 } },
   },
-  portrait: entitySelectionRepresentative("gwon_yul", "generalk13", 0),
+  portrait: selectionPortrait(46),
   terminalPresentation: { state: "death" },
   states: {
     idle: {
@@ -1365,7 +1369,7 @@ export const ryuSeongRyongEntityVisual = {
     size: { w: 88, h: 76 },
     pivot: { anchor: { x: 44, y: 66 } },
   },
-  portrait: entitySelectionRepresentative("ryu_seong_ryong", "generalk31", 0),
+  portrait: selectionPortrait(48),
   terminalPresentation: { state: "death" },
   states: {
     idle: {
@@ -1437,7 +1441,7 @@ export const townCenterEntityVisual = {
     size: { w: 131, h: 131 },
     pivot: { anchor: { x: 66, y: 101 } },
   },
-  portrait: entitySelectionRepresentative("town_center", "hqk", 7),
+  portrait: selectionPortrait(52),
   states: {
     idle: {
       clips: {
@@ -1469,7 +1473,7 @@ export const houseEntityVisual = {
     size: { w: 114, h: 107 },
     pivot: { anchor: { x: 57, y: 84 } },
   },
-  portrait: entitySelectionRepresentative("house", "millk", 7),
+  portrait: selectionPortrait(51),
   states: {
     idle: {
       clips: {
@@ -1496,7 +1500,7 @@ export const barracksEntityVisual = {
     size: { w: 128, h: 117 },
     pivot: { anchor: { x: 64, y: 91 } },
   },
-  portrait: entitySelectionRepresentative("barracks", "barrackk", 7),
+  portrait: selectionPortrait(54),
   states: {
     idle: {
       clips: {
@@ -1553,7 +1557,7 @@ export const japaneseCampHouseEntityVisual = sourceBuildingEntityVisual({
   idleFrameStart: 7,
   idleFrameCount: 1,
   idleFps: 1,
-  selectionRepresentativeFrameIndex: 7,
+  selectionPortraitFrameIndex: 28,
 });
 
 export const japaneseCampBarracksEntityVisual = sourceBaseBuildingEntityVisual({
@@ -1563,6 +1567,7 @@ export const japaneseCampBarracksEntityVisual = sourceBaseBuildingEntityVisual({
   stem: "barrackj",
   size: { w: 125, h: 110 },
   pivot: { x: 63, y: 86 },
+  selectionPortraitFrameIndex: 22,
 });
 
 export const japaneseCampTowerEntityVisual = sourceBaseBuildingEntityVisual({
@@ -1572,6 +1577,7 @@ export const japaneseCampTowerEntityVisual = sourceBaseBuildingEntityVisual({
   stem: "towerj",
   size: { w: 71, h: 98 },
   pivot: { x: 36, y: 74 },
+  selectionPortraitFrameIndex: 120,
 });
 
 export const japaneseCampFirehouseEntityVisual = sourceBuildingEntityVisual({
@@ -1585,7 +1591,7 @@ export const japaneseCampFirehouseEntityVisual = sourceBuildingEntityVisual({
   idleFrameStart: 7,
   idleFrameCount: 1,
   idleFps: 1,
-  selectionRepresentativeFrameIndex: 7,
+  selectionPortraitFrameIndex: 24,
 });
 
 export const japaneseCampAdvancedTowerEntityVisual = sourceBuildingEntityVisual({
@@ -1604,6 +1610,7 @@ export const koreanTrainingCommandEntityVisual = sourceBaseBuildingEntityVisual(
   stem: "advbarrackk",
   size: { w: 137, h: 118 },
   pivot: { x: 69, y: 92 },
+  selectionPortraitFrameIndex: 44,
 });
 
 export const japaneseHqEntityVisual = sourceBaseBuildingEntityVisual({
@@ -1613,6 +1620,7 @@ export const japaneseHqEntityVisual = sourceBaseBuildingEntityVisual({
   stem: "jhq",
   size: { w: 120, h: 133 },
   pivot: { x: 60, y: 104 },
+  selectionPortraitFrameIndex: 26,
 });
 
 export const royalCartEntityVisual = {
@@ -1721,7 +1729,7 @@ export function getThemeAssetUrl(theme: ThemeDefinition, visual: VisualBase, fra
   const fileName = frame.fileName ?? `${frame.textureKey}.png`;
   const assetRoot = theme.assetRoot.endsWith("/") ? theme.assetRoot.slice(0, -1) : theme.assetRoot;
 
-  return `${assetRoot}/${visual.assetPath}/${fileName}`;
+  return `${assetRoot}/${frame.assetPath ?? visual.assetPath}/${fileName}`;
 }
 
 export function getTerrainVisual(theme: ThemeDefinition, visualId: string): TerrainVisual | null {

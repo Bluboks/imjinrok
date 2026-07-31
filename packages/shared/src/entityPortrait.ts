@@ -1,6 +1,6 @@
 import type { EntityVisual, EntityVisualState, FrameRef } from "./visuals.js";
 
-/** A representative frame for product selection-panel presentation, not source portrait semantics. */
+/** A theme-provided selection-panel image, with optional source-specific semantics. */
 export interface ResolvedEntityPortraitFrame {
   frame: FrameRef;
   mirrorX: boolean;
