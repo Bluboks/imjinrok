@@ -1,0 +1,67 @@
+{
+  "analysisStatus": "partially-static-confirmed",
+  "sourceSha256": "076f727dd2d35125a0acbe7ce02d89440d93873e8fd83699bdd4813f7895bc48",
+  "sourceShape": [128, 117, 32],
+  "identity": {
+    "internalClass": 50,
+    "originalGameplayName": "조선 훈련소",
+    "spriteSlot": 108,
+    "baseFrame": 7,
+    "sourcePath": "char\\barrackk.spr",
+    "definitionRecordAddress": "0x00886ee8",
+    "flags": "0x00710002"
+  },
+  "primaryBody": {
+    "classSwitchFunction": "0x004291d0",
+    "classSwitchAddress": "0x004292b3",
+    "classSwitchDestination": "0x004292ba",
+    "damageStateField": "+0x250",
+    "healthy": {
+      "bodyDamageState": 0,
+      "spriteSlot": 108,
+      "configuredFrameOffset": 7,
+      "primaryConfigurationMode": 1,
+      "renderFrameFormula": "renderFrame = currentPhase + configuredFrameOffset"
+    },
+    "nonzeroDamageState": {
+      "bodyDamageState": 1,
+      "spriteSlot": 108,
+      "configuredFrameOffset": 8,
+      "primaryConfigurationMode": 1,
+      "renderFrameFormula": "renderFrame = currentPhase + configuredFrameOffset"
+    },
+    "idleStateValues": [8, 9],
+    "idleSelectorFunction": "0x0041d870",
+    "renderSlotField": "+0x0a",
+    "renderFrameField": "+0x0c",
+    "compositorOrder": "The verified primary path selects one slot/frame pair before the renderer's clipping/owner branches. No second class-50 slot/frame pair is configured in the generic class-50 branch."
+  },
+  "overlayConclusion": {
+    "status": "not-established",
+    "candidateSpriteFrames": [9, 10, 11, 12, 13, 14, 15],
+    "confirmedBinding": null,
+    "cadence": null,
+    "loop": null,
+    "placement": null,
+    "compositorOrder": null,
+    "stateGates": null,
+    "reason": "The verified class-50 initializer and primary idle selector configure slot 108 with the type base frame 7 (or 8 when WORD +0x250 is nonzero). They provide no class-50-specific source for frames 9..15. The remaining question is an independent effect/compositor producer outside this primary entity-record data flow.",
+    "productIntegration": "Do not restore a 9..15 overlay from visual similarity. A product mapping needs a source-side producer that writes or calls a second slot/frame draw with its gate, cadence, placement, and order."
+  },
+  "reproductionVectors": [
+    {
+      "bodyDamageState": 0,
+      "spriteSlot": 108,
+      "configuredFrameOffset": 7,
+      "primaryConfigurationMode": 1,
+      "renderFrameFormula": "renderFrame = currentPhase + configuredFrameOffset"
+    },
+    {
+      "bodyDamageState": 1,
+      "spriteSlot": 108,
+      "configuredFrameOffset": 8,
+      "primaryConfigurationMode": 1,
+      "renderFrameFormula": "renderFrame = currentPhase + configuredFrameOffset"
+    }
+  ]
+}

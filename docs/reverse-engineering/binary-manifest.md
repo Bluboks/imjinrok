@@ -84,6 +84,7 @@ Ghidra의 메모리 지도에는 PE 네 섹션 외에 헤더와 분석용 `tdb` 
 | `char/Farmerj.spr` | `e6cc67849a872f391c977079fc04118bf06d57b99ad8b5137b02398e26d9cdc5` | K01 class 31 일본 농부의 `+0x47a==0` core 및 `+0x47a!=0` idle/move frame |
 | `char/millk.spr` | `bb393d9a34cf7ae752c124a077cb4333bc0151f1a171f76a1e74201bbc57ac29` | K01 class 48 조선 방앗간 source identity·base frame 7 |
 | `char/hqk.spr` | `17e5640a7b34f8aaf1063d210bd087b8ba59d769e194f5025e92941e422c2d4e` | K01 class 49 조선 본영 source identity·base frame 7; body-state 파일럿은 별도 |
+| `char/barrackk.spr` | `076f727dd2d35125a0acbe7ce02d89440d93873e8fd83699bdd4813f7895bc48` | class 50 조선 훈련소 primary body configured frame offset 7/8; frame 9..15 overlay는 미확인 |
 | `char/advbarrackk.spr` | `df40eb785b60824087329ec991e27b0dd88d5fe4ec918f742d8b06c363aa6bf5` | K01 class 51 조선 훈련도감 source identity·base frame 7 |
 | `char/jhq.spr` | `db1b4e9b9a587473b4f18c651fb7cac9791a5d21ad23f56285c0a3f5c22ffba2` | K01 class 58 일본 본영 source identity·base frame 7 |
 | `char/barrackj.spr` | `f71072d74f7fbe1e2646c9ae13ca2f2172f5c096749262a77f477ae8dcb4038d` | K01 class 60 일본 훈련소 source identity·base frame 7 |
