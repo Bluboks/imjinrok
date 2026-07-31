@@ -53,6 +53,7 @@
 - [K01 tile placement-level·object/frame boundary](reverse-engineering/mechanics/k01-tile-placement-elevation-boundary.md)
 - [K01 cell projection output-table boundary](reverse-engineering/mechanics/k01-cell-projection-output-tables.md)
 - [K01 scheduler mode·selector producer boundary](reverse-engineering/mechanics/k01-clock-mode-producers.md)
+- [K01 cold-start interval selector initialization·persisted config 경계](reverse-engineering/mechanics/k01-clock-selector-initialization.md)
 - [source pathfinding boundary](reverse-engineering/mechanics/source-pathfinding-boundary.md)
 - [임진록 낮·밤 팔레트 schedule](reverse-engineering/mechanics/imjinrok-day-night-palette-schedule.md)
 - [`pannel.spr` HUD blit 결합](reverse-engineering/mechanics/pannel-spr-hud-blit.md)

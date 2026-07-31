@@ -1,0 +1,262 @@
+{
+  "question": "What initializes interval selector DWORD 0x00634acc, when can config.hq replace it, and what limited cadence statement follows?",
+  "analysisStatus": "static-confirmed-for-cold-start-load-failure-default-and-successful-transfer-boundary",
+  "reproductionStatus": "reproduction-complete-for-load-failure-default-successful-transfer-and-selector-consumer-boundary",
+  "implementationStatus": "none",
+  "sources": {
+    "executable": {
+      "path": "original/imjinrok2/imjinrok2.exe",
+      "sha256": "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e"
+    },
+    "generatedArtifacts": {
+      "functions": {
+        "path": "analysis/generated/imjinrok2/functions.json",
+        "byteLength": 1468333,
+        "sha256": "7e071fdfe425d22447780c265fe1d3fd271a1bedd1773682bebcb8ddc6d2e16e"
+      },
+      "references": {
+        "path": "analysis/generated/imjinrok2/references.json",
+        "byteLength": 17206569,
+        "sha256": "f64cfa6f04bc39573552f42a8b7bdd5b08fea1ba774d05865162d1d80daaf9a5"
+      }
+    },
+    "configFileString": {
+      "va": "0x004bb980",
+      "rawOffset": "0x000bb980",
+      "value": "config.hq",
+      "nulTerminatedSha256": "449c3469bb28cf424c82acaadb56b4f977d0b4aba5fa4d3824ebe4079fd2e836"
+    }
+  },
+  "functionEvidence": [
+    {
+      "entry": "0x0043f4f0",
+      "bodyRange": "0x0043f4f0-0x0043f55a",
+      "instructionCount": 37,
+      "instructionSha256": "eeee18b6012892ee3e108fadc425827e06bbb185ba583aeb6f514c16fbb74802"
+    },
+    {
+      "entry": "0x0043f580",
+      "bodyRange": "0x0043f580-0x0043f5c6",
+      "instructionCount": 20,
+      "instructionSha256": "dbdc4447f4bd656a29d55e10f719e29341276c62e4767778dc5decea3671dfc1"
+    },
+    {
+      "entry": "0x0043f6e0",
+      "bodyRange": "0x0043f6e0-0x0043f74f",
+      "instructionCount": 38,
+      "instructionSha256": "c2066429a049d75f33dd69b1bf75d590af1684d824b2aed345d08a1e798f4c24"
+    },
+    {
+      "entry": "0x0045f190",
+      "bodyRange": "0x0045f190-0x0045f243",
+      "instructionCount": 42,
+      "instructionSha256": "a69bbff3a7935d129f2786c5e0d56db59441fe460b7951b40e2b8ca637456b8b"
+    },
+    {
+      "entry": "0x0045f9c0",
+      "bodyRange": "0x0045f9c0-0x004607ac",
+      "instructionCount": 801,
+      "instructionSha256": "b694ee213a1b5f189ed7455e00690dcb29d970eca6ea87ef1f59c42c611cfb24"
+    }
+  ],
+  "rawCodeRanges": [
+    {
+      "id": "settings-default-initializer",
+      "byteRange": "0x0043f4f0-0x0043f55b (end exclusive)",
+      "bodySha256": "9910beb240b7ff2b275254b0449c921c54b99b4d091ee1feaa578873270447d3"
+    },
+    {
+      "id": "config-hq-loader",
+      "byteRange": "0x0043f6e0-0x0043f750 (end exclusive)",
+      "bodySha256": "d83fc043a41749329c44ec860b82f21b912bd1c31a9d84076897c43d4d7bc969"
+    },
+    {
+      "id": "main-settings-load-or-default",
+      "byteRange": "0x0045f190-0x0045f244 (end exclusive)",
+      "bodySha256": "b512d4288d72637a244cfbb9485ae6a2b74350414524a5c91e11afcd9f0074be"
+    }
+  ],
+  "callEdges": [
+    {
+      "callsite": "0x0045fa3b",
+      "caller": "0x0045f9c0",
+      "callee": "0x0045f190"
+    },
+    {
+      "callsite": "0x0045f20c",
+      "caller": "0x0045f190",
+      "callee": "0x0043f6e0"
+    },
+    {
+      "callsite": "0x0045f21a",
+      "caller": "0x0045f190",
+      "callee": "0x0043f4f0"
+    },
+    {
+      "callsite": "0x0043f728",
+      "caller": "0x0043f6e0",
+      "callee": "0x004adf44"
+    },
+    {
+      "callsite": "0x0043f73d",
+      "caller": "0x0043f6e0",
+      "callee": "0x0043f750"
+    }
+  ],
+  "evidencePoints": [
+    {
+      "va": "0x0043f4f4",
+      "rawOffset": "0x0003f4f4",
+      "bytes": "b9 75 00 00 00 33 c0 8b fa f3 ab",
+      "meaning": "initializer clears 0x75 DWORDs from its ECX object base"
+    },
+    {
+      "va": "0x0043f504",
+      "rawOffset": "0x0003f504",
+      "bytes": "c7 42 14 02 00 00 00",
+      "meaning": "initializer writes DWORD 2 at object+0x14"
+    },
+    {
+      "va": "0x0043f6f4",
+      "rawOffset": "0x0003f6f4",
+      "bytes": "68 80 b9 4b 00 e8 d2 36 00 00",
+      "meaning": "loader passes the config.hq string address to its open path"
+    },
+    {
+      "va": "0x0043f70f",
+      "rawOffset": "0x0003f70f",
+      "bytes": "83 c4 14 85 ff 75 09 5f 5e 81 c4 80 00 00 00 c3",
+      "meaning": "open result zero takes the early return; EAX is still the zero open result"
+    },
+    {
+      "va": "0x0043f71f",
+      "rawOffset": "0x0003f71f",
+      "bytes": "57 6a 01 68 d4 01 00 00 56 e8 17 e8 06 00",
+      "meaning": "success pushes stream, element size 1, count 0x1d4, then destination before calling FUN_004adf44"
+    },
+    {
+      "va": "0x0043f72d",
+      "rawOffset": "0x0003f72d",
+      "bytes": "57 e8 f2 df 06 00 66 8b 56 10 83 c4 14 8b ce 52 e8 0e 00 00 00",
+      "meaning": "success closes the stream, then separately forwards object+0x10 WORD to FUN_0043f750"
+    },
+    {
+      "va": "0x0043f743",
+      "rawOffset": "0x0003f743",
+      "bytes": "b8 01 00 00 00",
+      "meaning": "success returns one after the transfer and subsequent object+0x10 call"
+    },
+    {
+      "va": "0x0045f207",
+      "rawOffset": "0x0005f207",
+      "bytes": "b9 b8 4a 63 00 e8 cf 04 fe ff 85 c0 75 0a b9 b8 4a 63 00 e8 d1 02 fe ff",
+      "meaning": "startup passes 0x00634ab8 to loader and calls initializer only when loader returns zero"
+    },
+    {
+      "va": "0x0045fa3b",
+      "rawOffset": "0x0005fa3b",
+      "bytes": "e8 50 f7 ff ff",
+      "meaning": "main FUN_0045f9c0 calls the startup routine"
+    },
+    {
+      "va": "0x0043f590",
+      "rawOffset": "0x0003f590",
+      "bytes": "a1 cc 4a 63 00 83 f8 03",
+      "meaning": "the existing selector consumer reads DWORD 0x00634acc when scheduler mode is not one"
+    }
+  ],
+  "settingsObject": {
+    "base": "0x00634ab8",
+    "selector": "DWORD object+0x14 = DWORD 0x00634acc",
+    "initializer": {
+      "function": "FUN_0043f4f0",
+      "clearDwordCount": 117,
+      "selectorValue": 2,
+      "selectorWrite": "0x0043f504",
+      "boundary": "Other default writes in this function are not assigned semantics by this evidence unit."
+    }
+  },
+  "coldStartFlow": {
+    "mainCaller": "FUN_0045f9c0 callsite 0x0045fa3b -> FUN_0045f190",
+    "startup": "FUN_0045f190 passes ECX=0x00634ab8 to FUN_0043f6e0 at 0x0045f20c; a zero return reaches the same-base initializer call at 0x0045f21a.",
+    "loadFailure": "FUN_0043f6e0 returns its zero open result when its config.hq open path fails, so the caller invokes FUN_0043f4f0 and selector becomes DWORD 2.",
+    "loadSuccess": {
+      "callsite": "0x0043f728 -> FUN_004adf44",
+      "stackArguments": [
+        {
+          "calleeArgument": 1,
+          "value": "ESI destination object (0x00634ab8 from caller)"
+        },
+        {
+          "calleeArgument": 2,
+          "value": "0x1d4 count"
+        },
+        {
+          "calleeArgument": 3,
+          "value": "1 element size"
+        },
+        {
+          "calleeArgument": 4,
+          "value": "EDI stream"
+        }
+      ],
+      "transfer": "The successful path transfers/loads 0x1d4 bytes to the settings object before it returns one.",
+      "selectorCoverage": "object+0x14 is inside the 0x1d4-byte destination range, so persisted bytes at that offset can replace selector DWORD 0x00634acc.",
+      "separatePostTransferField": "The later FUN_0043f750 call forwards WORD object+0x10; it is not the selector DWORD at +0x14 and is not conflated with it."
+    }
+  },
+  "selectorConsumerBoundary": {
+    "crossCheckedWith": "extract-k01-clock-mode-producers.mjs and gameplay-speed-mouse-settings.md",
+    "selectorTwoWhenModeIsNotOne": 50,
+    "modeOneIndependentlyReturns": 50,
+    "statement": "Absent a successfully loaded persisted config and before later option changes, cold-start initialization establishes selector 2; the existing consumer yields a 50 ms base for selector 2 when scheduler mode is not one. Mode one also returns a 50 ms base independently.",
+    "nonClaim": "This does not claim every K01 session is fixed at 50 ms: successful persisted configuration, later option-control changes, scheduler mode, session reachability, feedback, and accepted-update timing remain separate boundaries.",
+    "laterOptionBoundary": "Existing option controls FUN_004ac480/FUN_004ac490 can change the selector later; their producer/reachability is not re-derived here."
+  },
+  "testVectors": [
+    {
+      "id": "load-failure-initializes-selector-two",
+      "input": {
+        "configLoadSucceeded": false
+      },
+      "result": {
+        "selector": 2,
+        "source": "initializer-after-load-failure"
+      },
+      "consumer": {
+        "modeWord": 0,
+        "baseIntervalMs": 50
+      }
+    },
+    {
+      "id": "load-success-retains-persisted-selector-byte-range",
+      "input": {
+        "configLoadSucceeded": true,
+        "persistedSelector": 3
+      },
+      "result": {
+        "selector": 3,
+        "source": "config-hq-transfer"
+      },
+      "consumer": {
+        "modeWord": 0,
+        "baseIntervalMs": 40
+      }
+    },
+    {
+      "id": "mode-one-consumer-bypasses-selector",
+      "input": {
+        "modeWord": 1,
+        "selector": 0
+      },
+      "result": {
+        "baseIntervalMs": 50
+      }
+    }
+  ],
+  "uncertainties": [
+    "This unit proves the cold-start branch and bounded transfer coverage, not that every config.hq byte sequence is valid or that a specific K01 session reaches either outcome.",
+    "The transfer callee is described neutrally from verified argument order; a stronger generic stream-function role is not claimed.",
+    "Later option-control mutation, scheduler-mode/session reachability, feedback, and exact accepted-update cadence remain governed by the linked existing evidence boundaries."
+  ]
+}
