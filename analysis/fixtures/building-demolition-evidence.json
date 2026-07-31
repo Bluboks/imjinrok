@@ -4,7 +4,8 @@
     "executableSha256": "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e",
     "functionsSha256": "7e071fdfe425d22447780c265fe1d3fd271a1bedd1773682bebcb8ddc6d2e16e",
     "referencesSha256": "f64cfa6f04bc39573552f42a8b7bdd5b08fea1ba774d05865162d1d80daaf9a5",
-    "entityTypeCatalogSha256": "572044d9eec6162689154f3625c7572f27d7ee9030d4e4f9f51151b6a88f8745"
+    "entityTypeCatalogSha256": "485344664b278c97a4ceed0756832abadbf2a71bd4a997b117b85c336d620708",
+    "entityTypeCatalogSchemaVersion": 2
   },
   "labels": {
     "action": 13,

@@ -17,6 +17,7 @@ test("hash-bound demolition evidence reproduces phases, completion, and the ship
   assert.equal(report.source.functions.sha256, fixture.source.functionsSha256);
   assert.equal(report.source.references.sha256, fixture.source.referencesSha256);
   assert.equal(report.source.entityTypeCatalog.sha256, fixture.source.entityTypeCatalogSha256);
+  assert.equal(report.source.entityTypeCatalog.schemaVersion, fixture.source.entityTypeCatalogSchemaVersion);
   const { runtimeLabelVa, ...sourceLabels } = report.labels;
   assert.equal(runtimeLabelVa, "0x00aa4b88");
   assert.deepEqual(sourceLabels, fixture.labels);

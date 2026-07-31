@@ -14,7 +14,8 @@ export const EXPECTED_FUNCTIONS_SHA256 =
 export const EXPECTED_REFERENCES_SHA256 =
   "f64cfa6f04bc39573552f42a8b7bdd5b08fea1ba774d05865162d1d80daaf9a5";
 export const EXPECTED_CATALOG_SHA256 =
-  "572044d9eec6162689154f3625c7572f27d7ee9030d4e4f9f51151b6a88f8745";
+  "485344664b278c97a4ceed0756832abadbf2a71bd4a997b117b85c336d620708";
+export const EXPECTED_CATALOG_SCHEMA_VERSION = 2;
 
 const DEFAULT_FUNCTIONS_PATH = "analysis/generated/imjinrok2/functions.json";
 const DEFAULT_REFERENCES_PATH = "analysis/generated/imjinrok2/references.json";
@@ -98,6 +99,7 @@ export function extractBuildingDemolitionEvidence({
   const functions = parseJson(functionsBytes, functionsPath).functions;
   const references = parseJson(referencesBytes, referencesPath).references;
   const catalog = parseJson(catalogBytes, catalogPath);
+  assertEqual(catalog.schemaVersion, EXPECTED_CATALOG_SCHEMA_VERSION, `${catalogPath} schema version`);
   const shipTypes = deriveShipTypes(catalog);
   verifyReferenceSet(references);
   const helpCStringBytes = readFullCStringBytes(buffer, requireRawOffset(image, 0x004c7764));
@@ -115,7 +117,7 @@ export function extractBuildingDemolitionEvidence({
       executable: { path: executablePath, sha256: EXPECTED_EXECUTABLE_SHA256 },
       functions: { path: functionsPath, sha256: EXPECTED_FUNCTIONS_SHA256, verified: EXPECTED_FUNCTIONS.map((expected) => verifyFunction(functions, expected)) },
       references: { path: referencesPath, sha256: EXPECTED_REFERENCES_SHA256 },
-      entityTypeCatalog: { path: catalogPath, sha256: EXPECTED_CATALOG_SHA256 },
+      entityTypeCatalog: { path: catalogPath, sha256: EXPECTED_CATALOG_SHA256, schemaVersion: EXPECTED_CATALOG_SCHEMA_VERSION },
     },
     rawCodeRanges: RAW_CODE_RANGES.map((range) => verifyRawCodeRange(buffer, image, range)),
     evidencePoints: STATIC_EVIDENCE.map((point) => verifyEvidencePoint(buffer, image, point)),
