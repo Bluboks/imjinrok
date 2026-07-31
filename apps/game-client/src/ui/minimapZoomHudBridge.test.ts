@@ -16,6 +16,8 @@ test("minimap zoom rail uses the typed bridge, consumes UI pointers, and cleans 
   assert.match(uiSource, /this\.minimapZoomControlZones = \{\};/);
   assert.match(skirmishSource, /on\(MINIMAP_ZOOM_REQUESTED_EVENT, this\.handleMinimapZoomRequested/);
   assert.match(skirmishSource, /off\(MINIMAP_ZOOM_REQUESTED_EVENT, this\.handleMinimapZoomRequested/);
+  assert.match(skirmishSource, /this\.zoomCameraAtScreenPoint\(this\.getCameraZoomAnchor\(pointer\), -deltaY \* 0\.001\)/);
+  assert.match(skirmishSource, /if \(this\.isPointerLocked \|\| this\.input\.mouse\?\.locked \|\| pointer\.locked\)/);
   assert.match(skirmishSource, /this\.setCameraZoomAtScreenPoint\(this\.getBattlefieldZoomAnchor\(\), nextZoom\)/);
   assert.match(skirmishSource, /MINIMAP_VIEWPORT_REGISTRY_KEY/);
 });

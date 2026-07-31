@@ -955,12 +955,12 @@ export class SkirmishScene extends Phaser.Scene {
     this.input.on(
       "wheel",
       (
-        _pointer: Phaser.Input.Pointer,
+        pointer: Phaser.Input.Pointer,
         _gameObjects: Phaser.GameObjects.GameObject[],
         _deltaX: number,
         deltaY: number,
       ) => {
-        this.zoomCameraAtScreenPoint(this.getBattlefieldZoomAnchor(), -deltaY * 0.001);
+        this.zoomCameraAtScreenPoint(this.getCameraZoomAnchor(pointer), -deltaY * 0.001);
       },
     );
   }
@@ -4090,6 +4090,14 @@ export class SkirmishScene extends Phaser.Scene {
 
     this.registry.set(GAME_PLAYBACK_REGISTRY_KEY, view);
     this.game.events.emit(GAME_PLAYBACK_CHANGED_EVENT, view);
+  }
+
+  private getCameraZoomAnchor(pointer: Phaser.Input.Pointer): Phaser.Math.Vector2 {
+    if (this.isPointerLocked || this.input.mouse?.locked || pointer.locked) {
+      return this.virtualCursorScreen.clone();
+    }
+
+    return new Phaser.Math.Vector2(pointer.x, pointer.y);
   }
 
   private zoomCameraAtScreenPoint(screenPoint: Phaser.Math.Vector2, zoomDelta: number): void {
