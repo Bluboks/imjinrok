@@ -17,6 +17,7 @@ import { resolvePathfindingProfileId } from "./navigation.js";
 import { createProjectileSystemState } from "./projectiles.js";
 import { resolveAttackTargetAuthorityPolicyId } from "./attackTargetAuthorityPolicy.js";
 import { resolveCapacityPolicyId } from "./capacity.js";
+import "./k01WarExpenseCapacity.js";
 import { createPlayerResearchState } from "./research.js";
 import { resourceBlocksBuilding, resourceBlocksMovement } from "./resources.js";
 import { applyScenarioScriptedEvents, createScenarioRuntimeState } from "./scenario.js";
@@ -138,6 +139,23 @@ export {
   type ProviderSupplyCapacityState,
 } from "./capacity.js";
 export { canQueuePopulation, DEFAULT_POPULATION_LIMIT, getPlayerPopulationState, getPopulationCost, getPopulationProvided, type PlayerPopulationState } from "./population.js";
+export {
+  createK01WarExpenseCapacityPolicy,
+  getK01WarExpenseCost,
+  getK01WarExpenseKindAdapter,
+  k01WarExpenseCapacityPolicy,
+  k01WarExpenseKindAdapters,
+  k01WarExpenseWithBuildingGateCapacityPolicy,
+  K01_WAR_EXPENSE_BUILDING_COUNT_CAP,
+  K01_WAR_EXPENSE_CAP,
+  K01_WAR_EXPENSE_CAPACITY_POLICY_ID,
+  K01_WAR_EXPENSE_ENTITY_COUNT_CAP,
+  K01_WAR_EXPENSE_WITH_BUILDING_GATE_CAPACITY_POLICY_ID,
+  type CreateK01WarExpenseCapacityPolicyOptions,
+  type K01OriginalBuildingGateMode,
+  type K01WarExpenseIdentityMapping,
+  type K01WarExpenseKindAdapter,
+} from "./k01WarExpenseCapacity.js";
 export { applyCompletedResearchToUnit, completeResearch, createPlayerResearchState, isResearchCompleted, isResearchPending } from "./research.js";
 export { findHarvestableResourceTile, findNearestHarvestableResource, findResourceNode, findResourceTile, getResourceNodeState, harvestResource, isResourceHarvestable, resourceBlocksBuilding, resourceBlocksMovement, updateResourceRegrowth } from "./resources.js";
 export { applyScenarioScriptedEvents, completeScenarioRuntime, createScenarioRuntimeState, evaluateScenarioRuntime } from "./scenario.js";

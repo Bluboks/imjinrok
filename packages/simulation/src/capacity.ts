@@ -488,7 +488,7 @@ function createCostBudgetCapacityConstraint(
       const used = sumEntryCost(context.entries, "live", costForKind);
       const pending = sumEntryCost(context.entries, "pending", costForKind);
       const requested = context.request?.phase === "queue" ? normalizeCost(costForKind(context.request.kind)) : 0;
-      return buildBudgetOutcome(used, pending, requested, cap);
+      return buildBudgetOutcome(used, pending, requested, cap, context.request?.phase === "completion");
     },
   });
 }
@@ -508,7 +508,7 @@ function createCountCapacityConstraint(
         ? context.entries.filter((entry) => entry.location === "pending" && matchesEntry(entry)).length
         : 0;
       const requested = context.request?.phase === "queue" && matchesRequest(context.request.kind) ? 1 : 0;
-      return buildBudgetOutcome(used, pending, requested, cap);
+      return buildBudgetOutcome(used, pending, requested, cap, context.request?.phase === "completion");
     },
   });
 }
@@ -547,9 +547,15 @@ function summarizeProviderSupply(context: CapacityPolicyContext, limit: number):
   };
 }
 
-function buildBudgetOutcome(used: number, pending: number, requested: number, cap: number): CapacityConstraintOutcome {
+function buildBudgetOutcome(
+  used: number,
+  pending: number,
+  requested: number,
+  cap: number,
+  enforceCurrentUsage = false,
+): CapacityConstraintOutcome {
   const available = Math.max(0, cap - used - pending);
-  const admitted = requested <= available;
+  const admitted = requested <= available && (!enforceCurrentUsage || used + pending <= cap);
 
   return Object.freeze({
     used,
