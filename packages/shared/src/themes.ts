@@ -522,6 +522,7 @@ export const villagerEntityVisual = {
     pivot: { anchor: { x: 30, y: 52 } },
   },
   portrait: entitySelectionRepresentative("villager", "farmerk", 0),
+  terminalPresentation: { state: "death" },
   states: {
     idle: {
       facings: ENTITY_FACING_ORDER,
@@ -610,6 +611,7 @@ export const swordsmanEntityVisual = {
     pivot: { anchor: { x: 30, y: 52 } },
   },
   portrait: entitySelectionRepresentative("swordsman", "swordk", 128),
+  terminalPresentation: { state: "death" },
   states: {
     idle: {
       facings: ENTITY_FACING_ORDER,
@@ -671,6 +673,7 @@ export const japaneseSwordsmanEntityVisual = {
     pivot: { anchor: { x: 30, y: 44 } },
   },
   portrait: entitySelectionRepresentative("japanese_swordsman", "swordj", 0),
+  terminalPresentation: { state: "death" },
   states: {
     idle: {
       facings: ENTITY_FACING_ORDER,
@@ -740,6 +743,7 @@ export const koreanMonkEntityVisual = {
     pivot: { anchor: { x: 32, y: 44 } },
   },
   portrait: entitySelectionRepresentative("korean_monk", "budak", 100),
+  terminalPresentation: { state: "death" },
   states: {
     idle: { facings: ENTITY_FACING_ORDER, clips: staticallyRecoveredDirectionalClips({ visualId: "korean_monk", stem: "budak", frameStart: 100, frameStride: 8, phaseCount: 8, fps: PROVISIONAL_RECOVERED_ANIMATION_IDLE_FPS, loop: true }) },
     move: { facings: ENTITY_FACING_ORDER, clips: staticallyRecoveredNormalMovementClips("korean_monk", "budak", 0, PROVISIONAL_RECOVERED_ANIMATION_ACTIVE_FPS) },
@@ -762,6 +766,7 @@ export const archerEntityVisual = {
     pivot: { anchor: { x: 30, y: 52 } },
   },
   portrait: entitySelectionRepresentative("archer", "archerk", 0),
+  terminalPresentation: { state: "death" },
   states: {
     idle: {
       facings: ENTITY_FACING_ORDER,
@@ -834,6 +839,7 @@ export const japaneseGunnerEntityVisual = {
     pivot: { anchor: { x: 30, y: 52 } },
   },
   portrait: entitySelectionRepresentative("japanese_gunner", "gunj1", 0),
+  terminalPresentation: { state: "death" },
   states: {
     idle: {
       facings: ENTITY_FACING_ORDER,
@@ -912,6 +918,7 @@ export const japaneseFarmerEntityVisual = {
     pivot: { anchor: { x: 33, y: 50 } },
   },
   portrait: entitySelectionRepresentative("japanese_farmer", "Farmerj", 0),
+  terminalPresentation: { state: "death" },
   states: {
     idle: {
       facings: ENTITY_FACING_ORDER,
@@ -1004,6 +1011,7 @@ export const japaneseShrineMaidenEntityVisual = {
     pivot: { anchor: { x: 25, y: 44 } },
   },
   portrait: entitySelectionRepresentative("japanese_shrine_maiden", "advbudaj", 120),
+  terminalPresentation: { state: "death" },
   states: {
     idle: { facings: ENTITY_FACING_ORDER, clips: staticallyRecoveredDirectionalClips({ visualId: "japanese_shrine_maiden", stem: "advbudaj", frameStart: 120, frameStride: 8, phaseCount: 8, fps: PROVISIONAL_RECOVERED_ANIMATION_IDLE_FPS, loop: true }) },
     move: { facings: ENTITY_FACING_ORDER, clips: staticallyRecoveredNormalMovementClips("japanese_shrine_maiden", "advbudaj", 0, PROVISIONAL_RECOVERED_ANIMATION_ACTIVE_FPS) },
@@ -1027,6 +1035,7 @@ export const japaneseSamuraiEntityVisual = {
     pivot: { anchor: { x: 40, y: 72 } },
   },
   portrait: entitySelectionRepresentative("japanese_samurai", "horseswordj2", 0),
+  terminalPresentation: { state: "death" },
   states: {
     idle: {
       facings: ENTITY_FACING_ORDER,
@@ -1175,6 +1184,7 @@ export const japaneseKonishiEntityVisual = {
     pivot: { anchor: { x: 70, y: 100 } },
   },
   portrait: entitySelectionRepresentative("japanese_konishi", "generalj12", 0),
+  terminalPresentation: { state: "death" },
   states: {
     idle: {
       facings: ENTITY_FACING_ORDER,
@@ -1284,6 +1294,7 @@ export const gwonYulEntityVisual = {
     pivot: { anchor: { x: 64, y: 98 } },
   },
   portrait: entitySelectionRepresentative("gwon_yul", "generalk13", 0),
+  terminalPresentation: { state: "death" },
   states: {
     idle: {
       facings: ENTITY_FACING_ORDER,
@@ -1355,6 +1366,7 @@ export const ryuSeongRyongEntityVisual = {
     pivot: { anchor: { x: 44, y: 66 } },
   },
   portrait: entitySelectionRepresentative("ryu_seong_ryong", "generalk31", 0),
+  terminalPresentation: { state: "death" },
   states: {
     idle: {
       facings: ENTITY_FACING_ORDER,
