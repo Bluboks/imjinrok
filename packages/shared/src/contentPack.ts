@@ -1,10 +1,12 @@
 import {
   actionDefinitions,
+  bankResourceDefinitions,
   factionDefinitions,
   resourceDefinitions,
   terrainDefinitions,
   unitDefinitions,
   type ActionDefinition,
+  type BankResourceDefinition,
   type FactionDefinition,
   type ResourceDefinition,
   type TerrainDefinition,
@@ -37,9 +39,10 @@ export interface ContentPackDefinition {
   version: string;
   terrains?: Record<string, TerrainDefinition>;
   factions?: Record<string, FactionDefinition>;
-  resources?: Record<string, ResourceDefinition>;
+  bankResources?: Record<string, BankResourceDefinition>;
+  resources?: Record<string, ResourceDefinition<string>>;
   actions?: Record<string, ActionDefinition>;
-  units?: Record<string, UnitDefinition>;
+  units?: Record<string, UnitDefinition<string>>;
   tilesets?: Record<string, TilesetDefinition>;
   environmentVisualProfiles?: Record<string, EnvironmentVisualProfile>;
   resourceVisualSets?: Record<string, ResourceVisualSetDefinition>;
@@ -51,9 +54,10 @@ export interface ContentRegistry {
   packs: readonly ContentPackDefinition[];
   terrains: Record<string, TerrainDefinition>;
   factions: Record<string, FactionDefinition>;
-  resources: Record<string, ResourceDefinition>;
+  bankResources: Record<string, BankResourceDefinition>;
+  resources: Record<string, ResourceDefinition<string>>;
   actions: Record<string, ActionDefinition>;
-  units: Record<string, UnitDefinition>;
+  units: Record<string, UnitDefinition<string>>;
   tilesets: Record<string, TilesetDefinition>;
   environmentVisualProfiles: Record<string, EnvironmentVisualProfile>;
   resourceVisualSets: Record<string, ResourceVisualSetDefinition>;
@@ -78,6 +82,7 @@ export const coreContentPack = {
   version: "0.1.0",
   terrains: terrainDefinitions,
   factions: factionDefinitions,
+  bankResources: bankResourceDefinitions,
   resources: resourceDefinitions,
   actions: actionDefinitions,
   units: unitDefinitions,
@@ -146,6 +151,7 @@ export const imjinrokSourceContentPack = {
   version: "0.1.0",
   terrains: {},
   factions: {},
+  bankResources: {},
   resources: {},
   actions: {},
   units: {},
@@ -208,6 +214,7 @@ export function createContentRegistry(packs: readonly ContentPackDefinition[] = 
     packs,
     terrains: mergeDefinitions(packs.map((pack) => pack.terrains ?? {})),
     factions: mergeDefinitions(packs.map((pack) => pack.factions ?? {})),
+    bankResources: mergeDefinitions(packs.map((pack) => pack.bankResources ?? {})),
     resources: mergeDefinitions(packs.map((pack) => pack.resources ?? {})),
     actions: mergeDefinitions(packs.map((pack) => pack.actions ?? {})),
     units: mergeDefinitions(packs.map((pack) => pack.units ?? {})),
@@ -217,6 +224,19 @@ export function createContentRegistry(packs: readonly ContentPackDefinition[] = 
     pathfindingProfiles: mergeDefinitions(packs.map((pack) => pack.pathfindingProfiles ?? {})),
     movementCollisionProfiles: mergeDefinitions(packs.map((pack) => pack.movementCollisionProfiles ?? {})),
   };
+}
+
+/**
+ * Returns a presentation-safe order without mutating registry ownership.
+ * Equal display orders intentionally compose across independent content packs;
+ * their stable ids provide the deterministic tie-break.
+ */
+export function listBankResourcesInDisplayOrder(
+  bankResources: Readonly<Record<string, BankResourceDefinition>>,
+): readonly BankResourceDefinition[] {
+  return Object.values(bankResources).sort((left, right) =>
+    left.order - right.order || (left.id < right.id ? -1 : left.id > right.id ? 1 : 0),
+  );
 }
 
 function createImjinrokTileset(theme: "normal" | "snow" | "brown"): TilesetDefinition {
@@ -275,6 +295,8 @@ export function validateContentRegistry(registry: ContentRegistry): ContentValid
 
   validateDefinitionIds(registry.terrains, "terrains", issues);
   validateDefinitionIds(registry.factions, "factions", issues);
+  validateDefinitionIds(registry.bankResources, "bankResources", issues);
+  validateBankResourceDefinitions(registry.bankResources, issues);
   validateDefinitionIds(registry.resources, "resources", issues);
   validateDefinitionIds(registry.actions, "actions", issues);
   validateDefinitionIds(registry.units, "units", issues);
@@ -372,6 +394,7 @@ function validateDefinitionOwnership(packs: readonly ContentPackDefinition[], is
   const namespaces: readonly [string, (pack: ContentPackDefinition) => Record<string, unknown> | undefined][] = [
     ["terrains", (pack) => pack.terrains],
     ["factions", (pack) => pack.factions],
+    ["bankResources", (pack) => pack.bankResources],
     ["resources", (pack) => pack.resources],
     ["actions", (pack) => pack.actions],
     ["units", (pack) => pack.units],
@@ -417,7 +440,24 @@ function validateDefinitionIds(
   }
 }
 
-const knownBankResourceKinds = new Set(["food", "wood", "gold", "stone"]);
+function validateBankResourceDefinitions(
+  definitions: Record<string, BankResourceDefinition>,
+  issues: ContentValidationIssue[],
+): void {
+  for (const [resourceId, definition] of Object.entries(definitions)) {
+    if (!definition.displayName.trim()) {
+      issues.push(createIssue(`bankResources.${resourceId}.displayName`, "Bank resource display name is required."));
+    }
+
+    if (!definition.shortLabel.trim()) {
+      issues.push(createIssue(`bankResources.${resourceId}.shortLabel`, "Bank resource short label is required."));
+    }
+
+    if (!Number.isSafeInteger(definition.order) || definition.order < 0) {
+      issues.push(createIssue(`bankResources.${resourceId}.order`, "Bank resource order must be a non-negative safe integer."));
+    }
+  }
+}
 
 function validateResourceDefinitions(registry: ContentRegistry, issues: ContentValidationIssue[]): void {
   for (const [resourceId, definition] of Object.entries(registry.resources)) {
@@ -429,7 +469,7 @@ function validateResourceDefinitions(registry: ContentRegistry, issues: ContentV
       issues.push(createIssue(`resources.${resourceId}.category`, "Resource category is required."));
     }
 
-    if (!knownBankResourceKinds.has(definition.yieldResource)) {
+    if (!registry.bankResources[definition.yieldResource]) {
       issues.push(createIssue(`resources.${resourceId}.yieldResource`, `Unknown bank resource '${definition.yieldResource}'.`));
     }
 
@@ -475,7 +515,7 @@ function validateResourceDefinitions(registry: ContentRegistry, issues: ContentV
 }
 
 function validateResourcePlaceholderVisual(
-  definition: ResourceDefinition,
+  definition: ResourceDefinition<string>,
   resourceId: string,
   issues: ContentValidationIssue[],
 ): void {
@@ -534,12 +574,12 @@ function validateUnitDefinitions(registry: ContentRegistry, issues: ContentValid
     }
 
     for (const [resource, amount] of Object.entries(definition.cost ?? {})) {
-      if (!knownBankResourceKinds.has(resource)) {
+      if (!registry.bankResources[resource]) {
         issues.push(createIssue(`units.${unitId}.cost.${resource}`, `Unknown bank resource '${resource}'.`));
         continue;
       }
 
-      validatePositiveNumber(amount, `units.${unitId}.cost.${resource}`, issues);
+      validatePositiveNumber(amount ?? Number.NaN, `units.${unitId}.cost.${resource}`, issues);
     }
 
     const hotkeysByActionId = new Map<string, string>();

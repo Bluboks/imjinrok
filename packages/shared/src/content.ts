@@ -37,7 +37,36 @@ export const factionDefinitions = {
 export type FactionId = keyof typeof factionDefinitions;
 export const factions = Object.keys(factionDefinitions) as FactionId[];
 
-export type BankResourceKind = "food" | "wood" | "gold" | "stone";
+/**
+ * Core economy ids retained for source compatibility and ergonomic built-in
+ * content authoring. Content packs may define additional bank resource ids.
+ */
+export type BuiltInBankResourceKind = "food" | "wood" | "gold" | "stone";
+
+/** Metadata used by future economy presenters; simulation storage stays separate. */
+export interface BankResourceDefinition {
+  /** Stable content-pack id used by yields and costs. */
+  id: string;
+  displayName: string;
+  /** Compact deterministic HUD/display label. */
+  shortLabel: string;
+  /** Non-negative display ordering key; stable ids break equal-order ties. */
+  order: number;
+}
+
+export const bankResourceDefinitions = {
+  food: { id: "food", displayName: "식량", shortLabel: "식", order: 0 },
+  wood: { id: "wood", displayName: "목재", shortLabel: "목", order: 1 },
+  gold: { id: "gold", displayName: "금", shortLabel: "금", order: 2 },
+  stone: { id: "stone", displayName: "석재", shortLabel: "석", order: 3 },
+} as const satisfies Record<BuiltInBankResourceKind, BankResourceDefinition>;
+
+/**
+ * A bare kind remains the built-in bank used by the current simulation.
+ * Content definitions opt into additional ids with `BankResourceKind<string>`;
+ * registry validation rejects references to undeclared ids.
+ */
+export type BankResourceKind<Extension extends string = never> = BuiltInBankResourceKind | Extension;
 export type ResourceCategory = "wood" | "grain" | "mineral" | (string & {});
 export type ResourceRegrowthTrigger = "rain";
 
@@ -64,11 +93,11 @@ export interface ResourcePlaceholderVisualDefinition {
   minimapColor: number;
 }
 
-export interface ResourceDefinition {
+export interface ResourceDefinition<BankResourceExtension extends string = never> {
   id: string;
   displayName: string;
   category: ResourceCategory;
-  yieldResource: BankResourceKind;
+  yieldResource: BankResourceKind<BankResourceExtension>;
   capacity: number;
   gatherAmountPerTick: number;
   activeOccupancy: ResourceOccupancyDefinition;
@@ -232,18 +261,18 @@ export interface PlacementDefinition {
 
 const grassPlacement = { allowedTerrain: ["grass"] } as const satisfies PlacementDefinition;
 
-export interface UnitDefinition {
+export interface UnitDefinition<BankResourceExtension extends string = never> {
   id: string;
   displayName: string;
   category: "building" | "worker" | "infantry";
   actionIds: readonly ActionDefinitionId[];
-  cost?: Partial<Record<BankResourceKind, number>>;
+  cost?: Partial<Record<BankResourceKind<BankResourceExtension>, number>>;
   trainTimeTicks?: number;
   buildTimeTicks?: number;
   populationCost?: number;
   populationProvided?: number;
   resourceGatherCapacity?: number;
-  resourceDropoff?: readonly BankResourceKind[];
+  resourceDropoff?: readonly BankResourceKind<BankResourceExtension>[];
   footprint: FootprintDefinition;
   placement?: PlacementDefinition;
   baseAttributes: {

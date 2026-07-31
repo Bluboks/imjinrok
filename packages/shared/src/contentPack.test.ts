@@ -1,6 +1,14 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { coreContentPack, createContentRegistry, imjinrokSourceContentPack, validateContentRegistry } from "./contentPack.js";
+import { resourceDefinitions, unitDefinitions } from "./content.js";
+import {
+  coreContentPack,
+  createContentRegistry,
+  imjinrokSourceContentPack,
+  listBankResourcesInDisplayOrder,
+  validateContentRegistry,
+  type ContentPackDefinition,
+} from "./contentPack.js";
 
 test("default core and source catalog packs have distinct definition ownership", () => {
   const result = validateContentRegistry(createContentRegistry());
@@ -22,6 +30,120 @@ test("content registry rejects duplicate namespace ownership even for the same o
   assert.deepEqual(result.issues.filter((issue) => issue.severity === "error").map((issue) => issue.path), [
     "packs[1].terrains.grass",
     "packs[1].tilesets.core-default",
+  ]);
+});
+
+test("content packs can declare and use a custom bank resource", () => {
+  const manaCrystalPack = {
+    id: "mana-crystal-content",
+    displayName: "Mana Crystal Content",
+    version: "0.1.0",
+    bankResources: {
+      "mana-crystal": { id: "mana-crystal", displayName: "마나 수정", shortLabel: "마나", order: 4 },
+    },
+    resources: {
+      "mana-crystal-vein": {
+        ...resourceDefinitions.gold,
+        id: "mana-crystal-vein",
+        displayName: "마나 수정 광맥",
+        yieldResource: "mana-crystal",
+      },
+    },
+    units: {
+      "mana-adept": {
+        ...unitDefinitions.villager,
+        id: "mana-adept",
+        displayName: "마나 수련자",
+        cost: { "mana-crystal": 12 },
+      },
+    },
+  } satisfies ContentPackDefinition;
+
+  const registry = createContentRegistry([coreContentPack, manaCrystalPack]);
+
+  assert.deepEqual(registry.bankResources["mana-crystal"], manaCrystalPack.bankResources["mana-crystal"]);
+  assert.equal(validateContentRegistry(registry).ok, true);
+});
+
+test("content registry rejects undeclared bank resource yields and costs", () => {
+  const undeclaredResourcePack = {
+    id: "undeclared-bank-resource",
+    displayName: "Undeclared Bank Resource",
+    version: "0.1.0",
+    resources: {
+      "mana-crystal-vein": {
+        ...resourceDefinitions.gold,
+        id: "mana-crystal-vein",
+        yieldResource: "mana-crystal",
+      },
+    },
+    units: {
+      "mana-adept": {
+        ...unitDefinitions.villager,
+        id: "mana-adept",
+        cost: { "mana-crystal": 12 },
+      },
+    },
+  } satisfies ContentPackDefinition;
+
+  const result = validateContentRegistry(createContentRegistry([coreContentPack, undeclaredResourcePack]));
+
+  assert.deepEqual(result.issues.filter((issue) => issue.severity === "error").map((issue) => issue.path), [
+    "resources.mana-crystal-vein.yieldResource",
+    "units.mana-adept.cost.mana-crystal",
+  ]);
+});
+
+test("content registry rejects duplicate bank resource ownership", () => {
+  const duplicatePack = {
+    id: "duplicate-bank-resource",
+    displayName: "Duplicate Bank Resource",
+    version: "0.1.0",
+    bankResources: { food: coreContentPack.bankResources.food },
+  };
+
+  const result = validateContentRegistry(createContentRegistry([coreContentPack, duplicatePack]));
+
+  assert.deepEqual(result.issues.filter((issue) => issue.severity === "error").map((issue) => issue.path), [
+    "packs[1].bankResources.food",
+  ]);
+});
+
+test("bank resource definitions reject id mismatch and invalid display metadata", () => {
+  const registry = createContentRegistry();
+  registry.bankResources.invalid = { id: "not-invalid", displayName: "", shortLabel: "", order: -1 };
+
+  assert.deepEqual(
+    validateContentRegistry(registry).issues.filter((issue) => issue.path.startsWith("bankResources.invalid")).map((issue) => issue.path),
+    [
+      "bankResources.invalid.id",
+      "bankResources.invalid.displayName",
+      "bankResources.invalid.shortLabel",
+      "bankResources.invalid.order",
+    ],
+  );
+});
+
+test("bank resource display order uses stable ids to break same-order custom resource ties", () => {
+  const sameOrderPack = {
+    id: "same-order-bank-resources",
+    displayName: "Same Order Bank Resources",
+    version: "0.1.0",
+    bankResources: {
+      "mana-crystal": { id: "mana-crystal", displayName: "마나 수정", shortLabel: "마나", order: 4 },
+      "arcane-dust": { id: "arcane-dust", displayName: "비전 가루", shortLabel: "비전", order: 4 },
+    },
+  } satisfies ContentPackDefinition;
+  const registry = createContentRegistry([coreContentPack, sameOrderPack]);
+
+  assert.equal(validateContentRegistry(registry).ok, true);
+  assert.deepEqual(listBankResourcesInDisplayOrder(registry.bankResources).map((resource) => resource.id), [
+    "food",
+    "wood",
+    "gold",
+    "stone",
+    "arcane-dust",
+    "mana-crystal",
   ]);
 });
 
