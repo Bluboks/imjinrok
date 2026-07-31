@@ -4,6 +4,7 @@ import {
   DEFAULT_DEBUG_PRESENTATION_STATE,
   clampGridViewportBounds,
   derivePaddedGridViewportBounds,
+  mergeDebugPresentationRecords,
   readDebugPresentationState,
   resolveDebugPresentationVisibility,
   shouldRevealDebugPresentationFog,
@@ -44,4 +45,14 @@ test("wireframe culling includes both isometric side wedges, not only diagonal c
   assert.deepEqual(allCornerBounds, { minX: 1, maxX: 9, minY: 1, maxY: 9 });
   assert.equal(allCornerBounds?.maxX, 9, "upper-right wedge must remain in the cull bounds");
   assert.equal(allCornerBounds?.maxY, 9, "lower-left wedge must remain in the cull bounds");
+});
+
+test("fog-off resource presentation is transient and does not teach discovery memory", () => {
+  const remembered = [{ id: "seen-rice" }];
+  const mapResources = [...remembered, { id: "unseen-gold" }];
+  const revealed = mergeDebugPresentationRecords(true, remembered, mapResources, (resource) => resource.id);
+  assert.deepEqual(revealed.map((resource) => resource.id), ["seen-rice", "unseen-gold"]);
+  assert.deepEqual(remembered.map((resource) => resource.id), ["seen-rice"]);
+  const restored = mergeDebugPresentationRecords(false, remembered, mapResources, (resource) => resource.id);
+  assert.deepEqual(restored.map((resource) => resource.id), ["seen-rice"]);
 });

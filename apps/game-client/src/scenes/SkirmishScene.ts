@@ -296,6 +296,7 @@ import {
 } from "../gameplayAudio.js";
 import {
   derivePaddedGridViewportBounds,
+  mergeDebugPresentationRecords,
   readDebugPresentationState,
   resolveDebugPresentationVisibility,
   setDebugPresentationCollapsed,
@@ -8605,7 +8606,7 @@ export class SkirmishScene extends Phaser.Scene {
     point: GridPoint;
     visibility: TileVisibility;
   }> {
-    for (const resourceView of this.knownResourceViews.values()) {
+    for (const resourceView of this.getResourcePresentationViews()) {
       const visibility = this.getPresentationTileVisibility(resourceView.point);
 
       if (visibility === TileVisibility.Unexplored) {
@@ -8623,7 +8624,7 @@ export class SkirmishScene extends Phaser.Scene {
           x: tileIndex % this.worldState.map.width,
           y: Math.floor(tileIndex / this.worldState.map.width),
         };
-        const visibility = this.getPresentationTileVisibility(point);
+        const visibility = getTileVisibility(this.playerVisibility, point);
 
         if (visibility !== TileVisibility.Visible) {
           continue;
@@ -8643,6 +8644,23 @@ export class SkirmishScene extends Phaser.Scene {
         });
       }
     }
+  }
+
+  /** Debug reveal reads map records transiently; it never inserts them into discovery memory. */
+  private getResourcePresentationViews(): KnownResourceView[] {
+    const remembered = Array.from(this.knownResourceViews.values());
+    if (!shouldRevealDebugPresentationFog(this.debugPresentationState)) return remembered;
+    const transient: KnownResourceView[] = [];
+    for (const layer of this.worldState.map.layers) {
+      layer.tiles.forEach((tile, tileIndex) => {
+        if (!tile.resource || !RESOURCE_DEFINITIONS[tile.resource.kind]) return;
+        transient.push({
+          point: { x: tileIndex % this.map.width, y: Math.floor(tileIndex / this.map.width) },
+          resource: { ...tile.resource },
+        });
+      });
+    }
+    return mergeDebugPresentationRecords(true, remembered, transient, (view) => this.getResourceMemoryKey(view.point));
   }
 
   private serializeKnownResourceViews(): SerializedKnownResourceView[] {
@@ -8686,7 +8704,7 @@ export class SkirmishScene extends Phaser.Scene {
 
   private publishMinimapResources(): void {
     const resources: MinimapResourcesView = {
-      resources: Array.from(this.knownResourceViews.values())
+      resources: this.getResourcePresentationViews()
         .map((view) => {
           const visibility = this.getPresentationTileVisibility(view.point);
 

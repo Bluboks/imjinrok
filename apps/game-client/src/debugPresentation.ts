@@ -70,6 +70,23 @@ export function resolveDebugPresentationVisibility<T>(state: DebugPresentationSt
   return shouldRevealDebugPresentationFog(state) ? visible : authoritative;
 }
 
+/**
+ * Returns inspector-only records without modifying discovery memory.  The
+ * transient collection is considered only while presentation fog is disabled.
+ */
+export function mergeDebugPresentationRecords<T>(
+  reveal: boolean,
+  remembered: readonly T[],
+  transient: readonly T[],
+  keyOf: (record: T) => string,
+): T[] {
+  if (!reveal) return [...remembered];
+  const records = new Map<string, T>();
+  for (const record of remembered) records.set(keyOf(record), record);
+  for (const record of transient) records.set(keyOf(record), record);
+  return [...records.values()];
+}
+
 export interface GridViewportBounds {
   minX: number;
   maxX: number;
