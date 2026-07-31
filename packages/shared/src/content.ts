@@ -198,6 +198,21 @@ export const actionDefinitions = {
 
 export type ActionDefinitionId = keyof typeof actionDefinitions;
 
+/**
+ * Content-owned train/build targets whose admission must be published to the
+ * HUD. This keeps UI availability and simulation-policy evaluation on the
+ * same action-to-entity contract without encoding a scenario in either layer.
+ */
+export const actionCapacityTargetUnits = {
+  build: "house",
+  "build-town-center": "town-center",
+  "build-barracks": "barracks",
+  "build-beacon": "beacon",
+  "train-villager": "villager",
+  "train-swordsman": "swordsman",
+  "train-archer": "archer",
+} as const satisfies Partial<Record<ActionDefinitionId, UnitDefinitionId>>;
+
 const workerActionIds = ["move", "gather", "build", "build-town-center", "build-barracks", "build-beacon", "stop", "attack-move", "patrol", "repair", "hold"] as const satisfies readonly ActionDefinitionId[];
 const townCenterActionIds = ["train-villager", "cancel-production", "rally-point", "research-loom", "stop", "town-bell", "set-gather", "demolish"] as const satisfies readonly ActionDefinitionId[];
 const barracksActionIds = ["train-swordsman", "train-archer", "cancel-production", "rally-point", "stop", "demolish"] as const satisfies readonly ActionDefinitionId[];

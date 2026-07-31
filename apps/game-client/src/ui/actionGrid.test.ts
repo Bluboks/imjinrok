@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { getActionSlots, resolveActionGridSlotRects, resolveActionIconVisual } from "./actionGrid";
+import type { PlayerEconomyView } from "../hud.js";
 import { IMJINROK_SOURCE_COMMAND_ICON_PROFILE, ORIGINAL_COMMAND_ICON_ASSETS } from "./sourceFogAndCommandAssets";
 
 test("keeps the generic command grid's twelve-slot default", () => {
@@ -196,4 +197,47 @@ test("magic auto-use keeps glyph fallback outside the opted-in K01 source profil
       .map(({ actionId, label }) => [actionId, label]),
   );
   assert.equal(selectedWithoutState[0]?.globalAction, undefined);
+});
+
+test("published capacity admissions control both train and build slots while legacy views retain population", () => {
+  const k01Economy: PlayerEconomyView = {
+    playerId: "p1",
+    resources: { food: 1_000, wood: 1_000, gold: 1_000, stone: 1_000 },
+    population: { used: 0, pending: 0, provided: 10, cap: 10, limit: 50, available: 10 },
+    capacity: {
+      policyId: "k01:war-expense",
+      presentation: {
+        primaryConstraintId: "fixed-budget",
+        summaryLabel: "전비",
+        actionDisabledReason: "전비 부족",
+        commandFailureReason: "war expense cap reached",
+      },
+      summary: { used: 2_496, pending: 0, cap: 2_500, unlimited: false, available: 4 },
+      admissions: {
+        villager: { admitted: false, rejectionConstraintId: "fixed-budget" },
+        house: { admitted: false, rejectionConstraintId: "fixed-budget" },
+      },
+    },
+    research: { completed: [], pending: [] },
+  };
+
+  const train = getActionSlots([{ id: "town-center", kind: "town-center" }], k01Economy)
+    .find(({ actionId }) => actionId === "train-villager");
+  const build = getActionSlots([{ id: "villager", kind: "villager" }], k01Economy)
+    .find(({ actionId }) => actionId === "build");
+
+  assert.deepEqual({ enabled: train?.enabled, disabledReason: train?.disabledReason }, { enabled: false, disabledReason: "전비 부족" });
+  assert.deepEqual({ enabled: build?.enabled, disabledReason: build?.disabledReason }, { enabled: false, disabledReason: "전비 부족" });
+
+  const legacyPopulationEconomy = {
+    ...k01Economy,
+    capacity: undefined,
+    population: { used: 10, pending: 0, provided: 10, cap: 10, limit: 50, available: 0 },
+  };
+  const legacyTrain = getActionSlots([{ id: "town-center", kind: "town-center" }], legacyPopulationEconomy)
+    .find(({ actionId }) => actionId === "train-villager");
+  assert.deepEqual(
+    { enabled: legacyTrain?.enabled, disabledReason: legacyTrain?.disabledReason },
+    { enabled: false, disabledReason: "인구" },
+  );
 });

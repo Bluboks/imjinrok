@@ -210,6 +210,16 @@ export function validateCommand(state: WorldState, envelope: CommandEnvelope): C
         return { ok: false, reason: "not enough resources" };
       }
 
+      const buildingCapacity = canAdmitPlayerCapacity(
+        state,
+        envelope.playerId,
+        envelope.command.building,
+        state.capacityPolicyId,
+      );
+      if (!buildingCapacity.admitted) {
+        return { ok: false, reason: buildingCapacity.evaluation.presentation.commandFailureReason };
+      }
+
       if (!findBuildWorkPath(state, actor.unit, envelope.command.building, envelope.command.target)) {
         return { ok: false, reason: "no path to build site" };
       }
@@ -269,8 +279,9 @@ export function validateCommand(state: WorldState, envelope: CommandEnvelope): C
         return { ok: false, reason: "not enough resources" };
       }
 
-      if (!canAdmitPlayerCapacity(state, envelope.playerId, envelope.command.unit, state.capacityPolicyId).admitted) {
-        return { ok: false, reason: "population cap reached" };
+      const unitCapacity = canAdmitPlayerCapacity(state, envelope.playerId, envelope.command.unit, state.capacityPolicyId);
+      if (!unitCapacity.admitted) {
+        return { ok: false, reason: unitCapacity.evaluation.presentation.commandFailureReason };
       }
 
       if (!findUnitSpawnPoint(state, actor.unit, envelope.command.unit)) {

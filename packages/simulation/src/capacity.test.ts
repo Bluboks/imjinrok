@@ -100,6 +100,12 @@ test("fixed budget counts live and queued costs while allowing a zero-cost hero"
   });
 
   const evaluation = evaluatePlayerCapacity(state, "p1", policy);
+  assert.deepEqual(evaluation.presentation, {
+    primaryConstraintId: "fixed-budget",
+    summaryLabel: "인구",
+    actionDisabledReason: "인구",
+    commandFailureReason: "population cap reached",
+  });
   assert.deepEqual(evaluation.constraints[0], {
     constraintId: "fixed-budget",
     used: 1,
@@ -420,6 +426,7 @@ test("custom registered policies remain registry-owned and deterministic", () =>
     const state = createCapacityFixture();
     const admission = canAdmitPlayerCapacity(state, "p1", "archer", "test:custom-policy");
     assert.equal(admission.admitted, false);
+    assert.equal(admission.evaluation.presentation.primaryConstraintId, "deny-archers");
     assert.deepEqual(admission.rejection, { constraintId: "deny-archers", reason: "constraint-rejected" });
   } finally {
     unregister();
