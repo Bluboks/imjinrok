@@ -1,7 +1,7 @@
 {
-  "question": "What source-backed fog resource, neighbor-lookup, caller-state, and six-subframe composition contract do FUN_00467de0 and FUN_0046a530 establish?",
-  "analysisStatus": "정적 확정 (resource family, lookup, caller state branches, six-subframe composition, and frame algebra only)",
-  "reproductionStatus": "재현 완료 (hash-bound extraction, resource records, lookup/frame vectors, and loop bounds only)",
+  "question": "What source-backed fog resource, neighbor-lookup, caller projection/argument ordering, placement adjustment, and six-subframe composition contract do FUN_00467de0 and FUN_0046a530 establish?",
+  "analysisStatus": "정적 확정 (resource family, lookup, caller projection/argument ordering, bounded placement arithmetic, six-subframe composition, and frame algebra only)",
+  "reproductionStatus": "재현 완료 (hash-bound extraction, resource records, lookup/frame/placement vectors, loop bounds, and fail-closed reference inputs)",
   "implementationStatus": "없음",
   "sources": {
     "executable": {
@@ -455,7 +455,308 @@
       0,
       15
     ],
-    "lookupThenCompositorCall": true
+    "lookupThenCompositorCall": true,
+    "argumentOrder": [
+      "projectedX",
+      "projectedY",
+      "cellX",
+      "cellY",
+      "literalState",
+      "lookupSelector"
+    ],
+    "projection": {
+      "callerRange": {
+        "label": "FUN_00468600 caller range within FUN_00467de0",
+        "address": "0x00468600"
+      },
+      "callerWindow": {
+        "function": "FUN_00467de0",
+        "byteRange": "0x00468634-0x004686aa (end exclusive)"
+      },
+      "inputs": {
+        "cellX": "int16([esp+0x14])",
+        "cellY": "int16([esp+0x18])",
+        "cameraX": "int16(map+0x2d98)",
+        "cameraY": "int16(map+0x2d9c)",
+        "viewport": {
+          "left": "DAT_00aa4000",
+          "top": "DAT_00aa4004",
+          "right": "DAT_00aa4008",
+          "bottom": "DAT_00aa400c"
+        }
+      },
+      "formulas": {
+        "projectedX": "(x - y + cameraY - cameraX) * 32 + viewportLeft + trunc((viewportRight - viewportLeft + 1) / 2)",
+        "projectedY": "(x + y - cameraX - cameraY) * 16 + viewportTop + trunc((viewportBottom - viewportTop + 1) / 2)"
+      },
+      "syntheticVectors": [
+        {
+          "input": {
+            "x": 3,
+            "y": 5,
+            "cameraX": 1,
+            "cameraY": 2,
+            "viewportLeft": 10,
+            "viewportRight": 109,
+            "viewportTop": 20,
+            "viewportBottom": 79
+          },
+          "output": {
+            "projectedX": 28,
+            "projectedY": 130
+          }
+        },
+        {
+          "input": {
+            "x": -2,
+            "y": 4,
+            "cameraX": -3,
+            "cameraY": 5,
+            "viewportLeft": -100,
+            "viewportRight": 100,
+            "viewportTop": -50,
+            "viewportBottom": 50
+          },
+          "output": {
+            "projectedX": 64,
+            "projectedY": 0
+          }
+        }
+      ]
+    }
+  },
+  "placement": {
+    "compositor": {
+      "function": "FUN_0046a530",
+      "byteRange": "0x0046a530-0x0046a5c8 (end exclusive)"
+    },
+    "drawLeft": "argument1(projectedX) - 32",
+    "drawTop": {
+      "lowNibbleEquals2": "argument2(projectedY) - (int16(helperReturn) << 4)",
+      "other": "argument2(projectedY) - ((abs(int16(helperReturn)) + 1) << 4)"
+    },
+    "syntheticVectors": [
+      {
+        "input": {
+          "projectedX": 200,
+          "projectedY": 100,
+          "x": 2,
+          "y": 3,
+          "lowNibble": 2,
+          "helperReturn": 3
+        },
+        "output": {
+          "x": 2,
+          "y": 3,
+          "lowNibble": 2,
+          "helperReturn": 3,
+          "placementBranch": "low-nibble-equals-2",
+          "verticalShift": 48,
+          "drawLeft": 168,
+          "drawTop": 52
+        }
+      },
+      {
+        "input": {
+          "projectedX": 200,
+          "projectedY": 100,
+          "x": 2,
+          "y": 3,
+          "lowNibble": 1,
+          "helperReturn": -1
+        },
+        "output": {
+          "x": 2,
+          "y": 3,
+          "lowNibble": 1,
+          "helperReturn": -1,
+          "placementBranch": "other-low-nibble",
+          "verticalShift": 32,
+          "drawLeft": 168,
+          "drawTop": 68
+        }
+      }
+    ],
+    "k01": {
+      "scope": "K01 hash-bound map cell fields plus an explicit synthetic 640x480 viewport input; the viewport is not claimed to be stored by the K01 map.",
+      "mapCamera": {
+        "x": 13,
+        "y": 8,
+        "source": "int16(map+0x2d98), int16(map+0x2d9c)"
+      },
+      "viewportInput": {
+        "left": 0,
+        "right": 639,
+        "top": 0,
+        "bottom": 479
+      },
+      "allCellDistribution": {
+        "cellCount": 3600,
+        "helperReturn": {
+          "0": 3600
+        },
+        "lowNibble": {
+          "1": 735,
+          "2": 2865
+        },
+        "verticalShift": {
+          "0": 2865,
+          "16": 735
+        },
+        "streamSha256": "2f631bc0209fe72db3c4310b7602fb3fc84e23e871561152d450acbfbd0d7864"
+      },
+      "vectors": [
+        {
+          "input": {
+            "x": 0,
+            "y": 0,
+            "cameraX": 13,
+            "cameraY": 8,
+            "viewportLeft": 0,
+            "viewportRight": 639,
+            "viewportTop": 0,
+            "viewportBottom": 479
+          },
+          "mapFields": {
+            "familyByte": 10,
+            "lowNibble": 1,
+            "placementSelector": 2,
+            "placementLookup": 0,
+            "helperReturn": 0
+          },
+          "projection": {
+            "projectedX": 160,
+            "projectedY": -96
+          },
+          "draw": {
+            "x": 0,
+            "y": 0,
+            "lowNibble": 1,
+            "helperReturn": 0,
+            "placementBranch": "other-low-nibble",
+            "verticalShift": 16,
+            "drawLeft": 128,
+            "drawTop": -112
+          }
+        },
+        {
+          "input": {
+            "x": 0,
+            "y": 1,
+            "cameraX": 13,
+            "cameraY": 8,
+            "viewportLeft": 0,
+            "viewportRight": 639,
+            "viewportTop": 0,
+            "viewportBottom": 479
+          },
+          "mapFields": {
+            "familyByte": 0,
+            "lowNibble": 2,
+            "placementSelector": 2,
+            "placementLookup": 0,
+            "helperReturn": 0
+          },
+          "projection": {
+            "projectedX": 128,
+            "projectedY": -80
+          },
+          "draw": {
+            "x": 0,
+            "y": 1,
+            "lowNibble": 2,
+            "helperReturn": 0,
+            "placementBranch": "low-nibble-equals-2",
+            "verticalShift": 0,
+            "drawLeft": 96,
+            "drawTop": -80
+          }
+        },
+        {
+          "input": {
+            "x": 6,
+            "y": 6,
+            "cameraX": 13,
+            "cameraY": 8,
+            "viewportLeft": 0,
+            "viewportRight": 639,
+            "viewportTop": 0,
+            "viewportBottom": 479
+          },
+          "mapFields": {
+            "familyByte": 0,
+            "lowNibble": 2,
+            "placementSelector": 2,
+            "placementLookup": 0,
+            "helperReturn": 0
+          },
+          "projection": {
+            "projectedX": 160,
+            "projectedY": 96
+          },
+          "draw": {
+            "x": 6,
+            "y": 6,
+            "lowNibble": 2,
+            "helperReturn": 0,
+            "placementBranch": "low-nibble-equals-2",
+            "verticalShift": 0,
+            "drawLeft": 128,
+            "drawTop": 96
+          }
+        },
+        {
+          "input": {
+            "x": 59,
+            "y": 59,
+            "cameraX": 13,
+            "cameraY": 8,
+            "viewportLeft": 0,
+            "viewportRight": 639,
+            "viewportTop": 0,
+            "viewportBottom": 479
+          },
+          "mapFields": {
+            "familyByte": 0,
+            "lowNibble": 2,
+            "placementSelector": 4,
+            "placementLookup": 0,
+            "helperReturn": 0
+          },
+          "projection": {
+            "projectedX": 160,
+            "projectedY": 1792
+          },
+          "draw": {
+            "x": 59,
+            "y": 59,
+            "lowNibble": 2,
+            "helperReturn": 0,
+            "placementBranch": "low-nibble-equals-2",
+            "verticalShift": 0,
+            "drawLeft": 128,
+            "drawTop": 1792
+          }
+        }
+      ]
+    },
+    "localCompositePlacement": {
+      "compositeSize": {
+        "width": 64,
+        "height": 48
+      },
+      "imageAnchor": {
+        "x": 32,
+        "y": 0
+      },
+      "formula": "drawLeft = projectedX - 32; drawTop = projectedY - rawVerticalShift",
+      "K01RawVerticalShift": {
+        "lowNibbleEquals2": 0,
+        "other": 16
+      },
+      "boundary": "This caller/callee-local image anchor does not assign renderer-wide pivot semantics, viewport ownership, clip/mode, alpha/blend, or web placement policy."
+    },
+    "boundary": "K01's hash-bound helper return is 0 for every cell. The low-nibble==2 versus other arithmetic is static-confirmed/reproduced, but the helper's human meaning and any terrain/visibility interpretation remain unresolved."
   },
   "composition": {
     "subframeGrid": {
@@ -559,9 +860,49 @@
       "id": "FUN_0046a530",
       "byteRange": "0x0046a530-0x0046a8e8 (end exclusive)",
       "bodySha256": "b4dc5ba4f0d8be3cac135ccfd02a372173dfcf01dad79f262cf8468572ea8e7a"
+    },
+    {
+      "id": "FUN_00467de0 caller projection window",
+      "byteRange": "0x00468634-0x004686aa (end exclusive)",
+      "bodySha256": "5a88c41d80dfd2f871d90266fbf3e9a5c978a6cdaa7575d15b337c94bd0a7849"
+    },
+    {
+      "id": "FUN_0046a530 placement prologue and vertical adjustment",
+      "byteRange": "0x0046a530-0x0046a5c8 (end exclusive)",
+      "bodySha256": "23bbcbfa9bc0ec79a979e3271a3251b8eab669d4a7767ae0de86054016284813"
     }
   ],
   "evidencePoints": [
+    {
+      "va": "0x00468634",
+      "rawOffset": "0x00068634",
+      "bytes": "66 8b 8e 9c 2d 00 00 66 8b be 98 2d 00 00 8b 54 24 18 8b 44 24 14 8b 2d 00 40 aa 00 8b d9 2b df 2b da 03 d8 a1 08 40 aa 00 2b c5 c1 e3 05 40 89 5c 24 28 99 2b c2 8b d8 8b 44 24 28 d1 fb 03 e8 a1 0c 40 aa 00 03 dd 8b 6c 24 14 8b d5 2b d7 2b d1 8b 4c 24 18 03 d1 8b 0d 04 40 aa 00 2b c1 c1 e2 04 40 89 54 24 28 99 2b c2 8b 54 24 28 8b f8 03 ca d1 ff 03 f9",
+      "meaning": "FUN_00467de0 reads cell x/y from [esp+0x14]/[esp+0x18], camera tile x/y from map+0x2d98/+0x2d9c, and forms the two viewport-centered isometric projected arguments."
+    },
+    {
+      "va": "0x00468848",
+      "rawOffset": "0x00068848",
+      "bytes": "0f bf c0 8b 54 24 18 66 0f b6 88 c4 f9 4b 00 8b 44 24 14 51 6a 04 52 50 57 53 8b ce e8 c7 1c 00 00",
+      "meaning": "The state-4 dispatch pushes lookup selector, literal 4, cell y, cell x, projected y, then projected x before the direct call to FUN_0046a530."
+    },
+    {
+      "va": "0x00468966",
+      "rawOffset": "0x00068966",
+      "bytes": "0f bf c0 8b 54 24 18 66 0f b6 88 c4 f9 4b 00 8b 44 24 14 51 6a 08 52 50 57 53 8b ce e8 a9 1b 00 00",
+      "meaning": "The state-8 dispatch preserves the same six-argument ordering and changes only the literal state to 8."
+    },
+    {
+      "va": "0x0046a530",
+      "rawOffset": "0x0006a530",
+      "bytes": "83 ec 30 8b 44 24 34 53 8b 5c 24 44 55 56 57 8b 7c 24 4c 8d 68 e0",
+      "meaning": "FUN_0046a530 reads argument 1 as projected x, saves argument 3 as cell x after its register saves, and derives draw-left as projected x minus 32."
+    },
+    {
+      "va": "0x0046a587",
+      "rawOffset": "0x0006a587",
+      "bytes": "66 3d 02 00 75 18 53 57 8b ce e8 ba 30 00 00 8b 4c 24 48 c1 e0 04 2b c8 89 4c 24 44 eb 23 53 57 8b ce e8 a2 30 00 00 0f bf c0 99 33 c2 2b c2 40 c1 e0 04 8b d0 8b 44 24 48 2b c2 89 44 24 44 8b c8",
+      "meaning": "FUN_0046a530 takes the low-nibble-equals-2 branch only in-bounds, calls FUN_0046d650(map, cellX, cellY), subtracts helper<<4 there, and otherwise subtracts (abs(int16(helper))+1)<<4 from argument 2."
+    },
     {
       "va": "0x00468743",
       "rawOffset": "0x00068743",
@@ -647,5 +988,31 @@
       "meaning": "The non-state-4 path also has inner <2 and outer <3 loop bounds, but its call target differs from the state-4 path."
     }
   ],
-  "unresolvedBoundary": "Visibility/exploration semantics, product-state mapping, generic map-file provenance and runtime producer/lifetime of the family byte, wall-clock behavior, and pixel placement remain unresolved. K01's hash-bound static byte distribution is recorded only as a bounded map-data observation. The frame algebra is confined to the caller-proven selector domain and normal fog header contract; it does not assign a human meaning to either state or selector."
+  "callEdges": [
+    {
+      "from": "0x00468864",
+      "to": "0x0046a530",
+      "bytes": "e8 c7 1c 00 00",
+      "label": "state-4 caller dispatch"
+    },
+    {
+      "from": "0x00468982",
+      "to": "0x0046a530",
+      "bytes": "e8 a9 1b 00 00",
+      "label": "state-8 caller dispatch"
+    },
+    {
+      "from": "0x0046a591",
+      "to": "0x0046d650",
+      "bytes": "e8 ba 30 00 00",
+      "label": "low-nibble-equals-2 placement helper"
+    },
+    {
+      "from": "0x0046a5a9",
+      "to": "0x0046d650",
+      "bytes": "e8 a2 30 00 00",
+      "label": "other-low-nibble placement helper"
+    }
+  ],
+  "unresolvedBoundary": "The arithmetic in this caller/compositor slice is static-confirmed and reproduced, but state 4/8 human meaning, visibility mapping, alpha/tint, web chunk scheduling, generic map-file provenance, family-byte runtime producer/lifetime, helper human meaning, and original renderer-wide pivot/placement semantics remain unresolved or explicit product adaptation. K01's hash-bound static byte distribution is recorded only as a bounded map-data observation. The frame algebra is confined to the caller-proven selector domain and normal fog header contract; it does not assign a human meaning to either state or selector."
 }
