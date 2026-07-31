@@ -40,11 +40,54 @@
         72,
         72,
         72
+      ],
+      "frameOpaquePixelCounts": [
+        804,
+        804,
+        804,
+        804,
+        804,
+        804,
+        804,
+        804,
+        804,
+        804,
+        804,
+        804,
+        804,
+        804,
+        804,
+        804,
+        0,
+        0,
+        0,
+        0
       ]
     }
   },
-  "assetMappingStatus": "unverified-no-runtime-frame-binding",
-  "productBoundary": "These exports are intentionally not loaded by the web HUD clock until a complete original draw/frame mapping is statically confirmed and reproduced.",
+  "assetMappingStatus": "source-identity-with-intentional-superset-runtime-adapter",
+  "productAdapter": {
+    "runtimeFrameIndexes": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15
+    ],
+    "frameSelector": "floor(normalized simulation environment.timeOfDay01 * 16) % 16",
+    "boundary": "This selection is a product adapter. It does not assign original frame meanings or establish original draw/update/time mapping."
+  },
   "assets": [
     {
       "frameIndex": 0,

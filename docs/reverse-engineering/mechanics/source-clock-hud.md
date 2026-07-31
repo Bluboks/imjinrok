@@ -24,8 +24,9 @@
 
 `0x004bc200`의 four-byte little-endian 값은 `0x004bd2ec`이며, 그 주소의 null-terminated 문자열은
 정확히 `fnt\\clock.spr`이다. 해시 결박 파서는 `clock.spr`가 32×36, 20 frame임을 확인한다. frame
-0~15의 encoded byte size는 각각 900이고 frame 16~19는 각각 72이지만, 이 차이만으로 각 frame의
-시계면·바늘·상태 의미를 부여할 수 없다.
+0~15의 encoded byte size는 각각 900이고 decoded opaque pixel은 각각 804이다. frame 16~19는 각각
+72 byte이며 decoded opaque pixel은 0이다. 따라서 제품 adapter는 실제 nonblank subset 0~15만 선택한다.
+그러나 이 데이터 차이만으로 각 frame의 시계면·바늘·상태 의미를 부여할 수 없다.
 
 재현 fixture와 export 명령:
 
@@ -35,8 +36,9 @@ pnpm imjinrok:export-source-clock-assets
 ```
 
 두 번째 명령은 `apps/game-client/public/assets/themes/default/ui/source-clock/`에 원본 20 frame을
-손실 없이 PNG로 내보내고 manifest에 원본 hash를 기록한다. 그 manifest는 `unverified-no-runtime-frame-binding`을
-명시한다. 웹 runtime은 이 PNG를 load하지 않는다.
+손실 없이 PNG로 내보내고 manifest에 원본 hash를 기록한다. manifest의
+`source-identity-with-intentional-superset-runtime-adapter` 표기는 source identity와 제품 frame selection을
+분리한다.
 
 ## 닫히지 않은 경계
 
@@ -53,17 +55,20 @@ pnpm imjinrok:export-source-clock-assets
 
 ## 제품 적응 계약
 
-`apps/game-client/src/ui/hudClock.ts`는 원본 frame을 사용하지 않는 일반 HUD clock adapter다.
+`apps/game-client/src/ui/hudClock.ts`는 source identity를 사용하는 제품 HUD clock adapter다.
 
 - 입력은 `SkirmishScene`이 simulation `worldState.environment`에서 그대로 publish한
   `BattlefieldEnvironmentView.environment.timeOfDay01` 하나다. browser wall clock이나 scene time은 읽지 않는다.
-- adapter는 정규화된 cycle progress를 12-hour dial의 hour/minute hand으로 그린다. 이 식은 원작에서
-  복원한 규칙이 아니라, 명시적인 web superset 표시 정책이다.
+- adapter는 exported `clock.spr` frame 0~15만 preload하고 nearest filtering으로 하나의 non-interactive
+  Phaser Image를 재사용한다. environment publish마다 object를 만들지 않고 texture만 바꾼다.
+- frame selector는 `floor(normalized timeOfDay01 * 16) % 16`이다. 0~15가 nonblank라는 컨테이너 관찰과
+  normalized simulation progress를 연결한 명시적 web superset 정책일 뿐, 해당 frame의 원작 시계면·바늘
+  의미나 원작 시간→frame mapping을 복원했다는 주장이 아니다. frame 16~19는 runtime에서 선택하지 않는다.
 - `resolveMinimapHudAncillaryLayout()`은 minimap panel bounds에서 clock bounds와 left zoom rail bounds를
   함께 반환한다. 시계는 title rail의 오른쪽, zoom rail은 왼쪽 본문에 예약되어 이후 +/- control과 겹치지 않는다.
-- graphics는 interactive object를 만들지 않아 minimap navigate 또는 후속 zoom input을 가로채지 않는다.
+- Image는 interactive object를 만들지 않아 minimap navigate 또는 후속 zoom input을 가로채지 않는다.
 
-이 어댑터는 원본 palette schedule의 `8,640 admitted update` 단위나 프로젝트 24 Hz 변환을 시계 각도에
+이 어댑터는 원본 palette schedule의 `8,640 admitted update` 단위나 프로젝트 24 Hz 변환을 frame selector에
 재사용하지 않는다. 이는 [낮·밤 팔레트 schedule](imjinrok-day-night-palette-schedule.md)의 미해결
 wall-clock calibration 경계를 유지한다.
 
@@ -73,13 +78,14 @@ wall-clock calibration 경계를 유지한다.
 | --- | --- | --- |
 | resource pointer | original EXE의 `0x004bc200` | `0x004bd2ec`, `fnt\\clock.spr` |
 | sprite header | hash-bound `clock.spr` | `32×36`, 20 frame |
-| cycle start | `timeOfDay01=0` | hour 0°, minute 0° |
-| quarter cycle | `timeOfDay01=.25` | hour 90°, minute 0° |
-| wrap | `timeOfDay01=1` | hour 0°, minute 0° |
+| cycle start | `timeOfDay01=0` | source frame 0 |
+| quarter cycle | `timeOfDay01=.25` | source frame 4 |
+| end boundary | `timeOfDay01=.9999` | source frame 15 |
+| wrap | `timeOfDay01=1` | source frame 0 |
 | responsive collision | 190×136 / 280×178 minimap bounds | clock bounds와 left zoom rail bounds가 disjoint |
 
 `tools/imjinrok/source-clock-asset.test.mjs`는 원본 identity fixture와 hash rejection을, `hudClock.test.ts`는
-adapter angle 및 responsive rail collision을 검사한다.
+adapter frame selection 및 responsive rail collision을 검사한다.
 
 ## 다음 분석 작업
 

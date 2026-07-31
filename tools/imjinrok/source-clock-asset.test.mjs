@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { readFileSync, writeFileSync } from "node:fs";
-import { mkdtemp } from "node:fs/promises";
+import { mkdtemp, rm } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import test from "node:test";
@@ -15,10 +15,14 @@ test("hash-binds the original clock source identity and sprite container", () =>
 
 test("rejects a changed clock sprite instead of retaining a stale identity", async () => {
   const directory = await mkdtemp(join(tmpdir(), "source-clock-"));
-  const spritePath = join(directory, "clock.spr");
-  const changed = Buffer.from(readFileSync("original/imjinrok2/fnt/clock.spr"));
-  changed[0x0c] ^= 1;
-  writeFileSync(spritePath, changed);
+  try {
+    const spritePath = join(directory, "clock.spr");
+    const changed = Buffer.from(readFileSync("original/imjinrok2/fnt/clock.spr"));
+    changed[0x0c] ^= 1;
+    writeFileSync(spritePath, changed);
 
-  assert.throws(() => extractSourceClockAsset({ clockSpritePath: spritePath }), /SHA-256/u);
+    assert.throws(() => extractSourceClockAsset({ clockSpritePath: spritePath }), /SHA-256/u);
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
 });

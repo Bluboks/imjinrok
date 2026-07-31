@@ -3,7 +3,7 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { parseSpriteLikeHeader } from "./codec.mjs";
+import { decodeSpriteFrame, parseSpriteLikeHeader, TRANSPARENT_INDEX } from "./codec.mjs";
 import { readCString, readPeImage, toHex } from "./pe-image.mjs";
 import { assertEqual, readJson, sha256, verifyEvidencePoint } from "./static-evidence.mjs";
 
@@ -52,6 +52,15 @@ export function extractSourceClockAsset({
   assertEqual(header.width, 32, "clock sprite width");
   assertEqual(header.height, 36, "clock sprite height");
   assertEqual(header.frameCount, 20, "clock sprite frame count");
+  const frameOpaquePixelCounts = header.frames.map((frame) =>
+    decodeSpriteFrame(sprite, header, frame.index).reduce((count, pixel) => count + (pixel === TRANSPARENT_INDEX ? 0 : 1), 0),
+  );
+  for (const frameIndex of Array.from({ length: 16 }, (_value, index) => index)) {
+    if ((frameOpaquePixelCounts[frameIndex] ?? 0) === 0) throw new Error(`clock sprite frame ${frameIndex} is unexpectedly blank`);
+  }
+  for (const frameIndex of [16, 17, 18, 19]) {
+    assertEqual(frameOpaquePixelCounts[frameIndex], 0, `clock sprite frame ${frameIndex} opaque pixel count`);
+  }
 
   return {
     schemaVersion: 1,
@@ -72,6 +81,7 @@ export function extractSourceClockAsset({
         height: header.height,
         frameCount: header.frameCount,
         frameByteSizes: header.frames.map((frame) => frame.size),
+        frameOpaquePixelCounts,
       },
     },
     evidence: { dataTablePointer: evidencePoint, reference },

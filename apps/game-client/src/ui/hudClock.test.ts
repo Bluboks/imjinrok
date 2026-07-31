@@ -1,6 +1,13 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import test from "node:test";
-import { boundsOverlap, resolveHudClockHandAngles, resolveMinimapHudAncillaryLayout } from "./hudClock.js";
+import {
+  boundsOverlap,
+  ORIGINAL_SOURCE_CLOCK_FRAME_ASSETS,
+  resolveMinimapHudAncillaryLayout,
+  resolveSourceClockFrameIndex,
+} from "./hudClock.js";
 
 test("HUD clock is minimap-relative and leaves the left zoom rail unused", () => {
   for (const minimapBounds of [
@@ -16,10 +23,22 @@ test("HUD clock is minimap-relative and leaves the left zoom rail unused", () =>
   }
 });
 
-test("HUD clock hand adapter derives only from normalized simulation day progress", () => {
-  assert.deepEqual(resolveHudClockHandAngles(0), { hourDegrees: 0, minuteDegrees: 0 });
-  assert.deepEqual(resolveHudClockHandAngles(0.25), { hourDegrees: 90, minuteDegrees: 0 });
-  assert.deepEqual(resolveHudClockHandAngles(0.5), { hourDegrees: 180, minuteDegrees: 0 });
-  assert.deepEqual(resolveHudClockHandAngles(1), { hourDegrees: 0, minuteDegrees: 0 });
-  assert.deepEqual(resolveHudClockHandAngles(Number.NaN), { hourDegrees: 0, minuteDegrees: 0 });
+test("HUD clock adapter cycles only the nonblank source frame subset from simulation progress", () => {
+  assert.deepEqual(ORIGINAL_SOURCE_CLOCK_FRAME_ASSETS.map((asset) => asset.sourceFrameIndex), Array.from({ length: 16 }, (_value, index) => index));
+  assert.equal(resolveSourceClockFrameIndex(0), 0);
+  assert.equal(resolveSourceClockFrameIndex(0.0625), 1);
+  assert.equal(resolveSourceClockFrameIndex(0.25), 4);
+  assert.equal(resolveSourceClockFrameIndex(0.9999), 15);
+  assert.equal(resolveSourceClockFrameIndex(1), 0);
+  assert.equal(resolveSourceClockFrameIndex(Number.NaN), 0);
+});
+
+test("UIScene preloads one source texture per selectable frame and reuses one non-interactive image", () => {
+  const sceneSource = readFileSync(resolve("apps/game-client/src/scenes/UIScene.ts"), "utf8");
+
+  assert.match(sceneSource, /for \(const asset of ORIGINAL_SOURCE_CLOCK_FRAME_ASSETS\) \{\s+if \(!this\.textures\.exists\(asset\.textureKey\)\) \{\s+this\.load\.image\(asset\.textureKey, asset\.assetPath\);/u);
+  assert.match(sceneSource, /private minimapClockImage: Phaser\.GameObjects\.Image \| null = null;/u);
+  assert.match(sceneSource, /\.image\(clockBounds\.x, clockBounds\.y, ORIGINAL_SOURCE_CLOCK_FRAME_ASSETS\[0\]!\.textureKey\)/u);
+  assert.match(sceneSource, /image\.setTexture\(resolveSourceClockFrame\(environment\.timeOfDay01\)\.textureKey\);/u);
+  assert.doesNotMatch(sceneSource, /drawHudClock/u);
 });

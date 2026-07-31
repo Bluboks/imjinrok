@@ -39,8 +39,12 @@ export function exportSourceClockAssets({
     generatedBy: "tools/imjinrok/export-source-clock-assets.mjs",
     sourceClockEvidenceFixture: "analysis/fixtures/source-clock-asset.json",
     source: evidence.source,
-    assetMappingStatus: "unverified-no-runtime-frame-binding",
-    productBoundary: "These exports are intentionally not loaded by the web HUD clock until a complete original draw/frame mapping is statically confirmed and reproduced.",
+    assetMappingStatus: "source-identity-with-intentional-superset-runtime-adapter",
+    productAdapter: {
+      runtimeFrameIndexes: Array.from({ length: 16 }, (_value, frameIndex) => frameIndex),
+      frameSelector: "floor(normalized simulation environment.timeOfDay01 * 16) % 16",
+      boundary: "This selection is a product adapter. It does not assign original frame meanings or establish original draw/update/time mapping.",
+    },
     assets,
   };
   writeFileSync(resolve(assetDirectory, "clock.manifest.json"), `${JSON.stringify(manifest, null, 2)}\n`);
