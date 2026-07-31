@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
-import { createBlankMap } from "@shared";
+import { createBlankMap, createImjinrokMapScaffold, getTileAt } from "@shared";
 import { resolveGridGroundContactWorldPosition } from "./gridGroundContactPosition.js";
 
 const mapOrigin = { x: 320, y: 160 };
@@ -52,6 +52,25 @@ test("moves continuously from a flat cell across a ramp onto an adjacent plateau
   ]);
 });
 
+test("K01 adapts its proven relative projection difference to a seven-pixel ground-contact lift", () => {
+  const map = createImjinrokMapScaffold("imjinrok-k01");
+  assert.ok(map);
+  const point = { x: 0, y: 0 };
+  const tile = getTileAt(map, point.x, point.y);
+  assert.equal(tile.elevation, 1);
+  assert.deepEqual(tile.tilesetVisuals?.sourcePixelOffset, { x: 0, y: -16 });
+
+  const reliefGroundContact = resolveGridGroundContactWorldPosition(point, mapOrigin, map);
+  const bilinearRampGroundContact = resolveGridGroundContactWorldPosition({ x: 0, y: 0.5 }, mapOrigin, map);
+  tile.elevation = 0;
+  const flatGroundContact = resolveGridGroundContactWorldPosition(point, mapOrigin, map);
+
+  assert.deepEqual(reliefGroundContact, { x: 320, y: 153 });
+  assert.deepEqual(bilinearRampGroundContact, { x: 304, y: 164.5 });
+  assert.deepEqual(flatGroundContact, mapOrigin);
+  assert.equal(flatGroundContact.y - reliefGroundContact.y, 7);
+});
+
 test("rejects invalid grid and map-origin coordinates before producing a placement", () => {
   assert.throws(
     () => resolveGridGroundContactWorldPosition({ x: Number.NaN, y: 0 }, mapOrigin, mapGeometry),
@@ -73,7 +92,7 @@ test("SkirmishScene uses the ground-contact helper without the legacy half-tile 
   assert.doesNotMatch(method, /tileHeight \/ 2/);
 });
 
-test("SkirmishScene routes resource anchors through the same ground-contact contract as units", () => {
+test("SkirmishScene routes unit, building, and resource anchors through one ground-contact contract", () => {
   const scenePath = resolve(dirname(fileURLToPath(import.meta.url)), "../scenes/SkirmishScene.ts");
   const sceneSource = readFileSync(scenePath, "utf8");
   const resourceMethod = sceneSource.match(/  private getResourceWorldPosition\(point: GridPoint\): \{ x: number; y: number; depth: number \} \{[\s\S]*?\n  \}/)?.[0];
@@ -82,8 +101,18 @@ test("SkirmishScene routes resource anchors through the same ground-contact cont
   assert.match(resourceMethod, /resolveGridGroundContactWorldPosition\(point, this\.mapOrigin, this\.map\)/);
   assert.doesNotMatch(resourceMethod, /cartToIso/);
   assert.match(sceneSource, /private getUnitWorldPosition\(unit: UnitState\): Phaser\.Math\.Vector2 \{\s+return this\.getGridPointWorldPosition\(unit\.position\);/);
+  assert.match(sceneSource, /for \(const unit of Object\.values\(this\.worldState\.units\)\) \{[\s\S]*?const unitPosition = this\.getUnitWorldPosition\(unit\);/);
+  assert.match(sceneSource, /unitDefinitions\[unit\.kind\]\.category === "building"/);
   assert.match(sceneSource, /const unitPosition = this\.getUnitWorldPosition\(unit\);/);
   assert.match(sceneSource, /private getObjectiveAreaWorldPoints[\s\S]*?this\.getGridGroundContactWorldPoint\(/);
+});
+
+test("projectile presentation shares the same ground-contact resolver", () => {
+  const projectilePath = resolve(dirname(fileURLToPath(import.meta.url)), "./projectilePresentation.ts");
+  const projectileSource = readFileSync(projectilePath, "utf8");
+
+  assert.match(projectileSource, /resolveGridGroundContactWorldPosition\(projectile\.position, mapOrigin, map\)/);
+  assert.match(projectileSource, /resolveGridGroundContactWorldPosition\(projectile\.start, mapOrigin, map\)/);
 });
 
 test("editor preview projects terrain, resources, and spawns through the shared surface sampler", () => {

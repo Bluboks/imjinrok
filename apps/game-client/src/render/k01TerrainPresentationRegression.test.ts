@@ -43,8 +43,8 @@ test("K01 source raster keeps coverage and selected frames on one recovered surf
     },
     raisedCellEntity: {
       terrainSurface: { x: 320, y: 160 },
-      entityGroundContact: { x: 320, y: 144 },
-      elevationLiftPixels: 16,
+      entityGroundContact: { x: 320, y: 153 },
+      elevationLiftPixels: 7,
     },
   });
 });

@@ -9,6 +9,23 @@ export const K01_SOURCE_TILE_IMAGE_GEOMETRY = {
   height: 48,
   footprintAnchor: { x: 32, y: 0 },
 } as const;
+/**
+ * Hash-bound K01 `FUN_00464cc0` output-Y additions; see
+ * `docs/reverse-engineering/mechanics/k01-cell-projection-output-tables.md`.
+ * They are source projection values, not a recovered terrain-height or
+ * image-pivot meaning.
+ */
+export const K01_SOURCE_CELL_PROJECTION_OUTPUT_Y_ADDITIONS = {
+  base: 16,
+  raised: 9,
+} as const;
+/**
+ * Product ground-contact adaptation derived from K01's `+16` versus `+9`
+ * per-cell output-Y additions. The source artwork still uses its independent
+ * raw raster `0/16` branch through `sourcePixelOffset`.
+ */
+export const K01_SOURCE_RELATIVE_CELL_PROJECTION_LIFT_PX =
+  K01_SOURCE_CELL_PROJECTION_OUTPUT_Y_ADDITIONS.base - K01_SOURCE_CELL_PROJECTION_OUTPUT_Y_ADDITIONS.raised;
 /** Product-only alpha-coverage fallback; not an original draw-layer claim. */
 export const K01_SOURCE_TILE_UNDERLAY_ASSET_KEY = "k01-source:grss1:0000";
 
@@ -116,6 +133,11 @@ export function applyK01SourceTileVisuals(tiles: TileCell[], width: number, heig
 }
 
 export function assertK01SourceTileVisualArtifact(): void {
+  if (K01_SOURCE_CELL_PROJECTION_OUTPUT_Y_ADDITIONS.base !== 16
+    || K01_SOURCE_CELL_PROJECTION_OUTPUT_Y_ADDITIONS.raised !== 9
+    || K01_SOURCE_RELATIVE_CELL_PROJECTION_LIFT_PX !== 7) {
+    throw new Error("K01 source cell-projection lift must remain the proven 16 minus 9 pixel difference.");
+  }
   const { width, height } = K01_SOURCE_TILE_VISUAL_DIMENSIONS;
   if (!Number.isInteger(width) || !Number.isInteger(height) || width <= 0 || height <= 0) {
     throw new Error("K01 source tile visual artifact has invalid dimensions.");
