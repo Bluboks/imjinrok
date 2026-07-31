@@ -6,6 +6,8 @@ import {
   K01_SOURCE_TILE_VISUAL_PLACEMENT_OFFSET_DIGEST,
   K01_SOURCE_TILE_VISUAL_PAIR_DIGEST,
   K01_SOURCE_TILE_UNDERLAY_ASSET_KEY,
+  K01_SOURCE_CELL_PROJECTION_OUTPUT_Y_ADDITIONS,
+  K01_SOURCE_RELATIVE_CELL_PROJECTION_LIFT_PX,
   K01_SOURCE_FOG_DIMENSIONS,
   K01_SOURCE_FOG_FAMILY_DIGEST,
   applyK01SourceFogVisuals,
@@ -45,6 +47,8 @@ test("K01 source fog artifact preserves the exact x-major family stream and dist
 
 test("K01 source tile artifact preserves every hash-bound x-major source pair", () => {
   assertK01SourceTileVisualArtifact();
+  assert.deepEqual(K01_SOURCE_CELL_PROJECTION_OUTPUT_Y_ADDITIONS, { base: 16, raised: 9 });
+  assert.equal(K01_SOURCE_RELATIVE_CELL_PROJECTION_LIFT_PX, 7);
   assert.deepEqual(K01_SOURCE_TILE_VISUAL_DIMENSIONS, { width: 60, height: 60 });
   assert.equal(K01_SOURCE_TILE_VISUAL_ARTIFACT.pairCount, 3600);
   assert.equal(getK01SourceTileVisualAssets().length, 243);
@@ -98,6 +102,10 @@ test("only K01 applies source tile visuals after gameplay terrain mutations", ()
   assert.equal(elevations.filter((level) => level === 0).length, 2865);
   assert.equal(elevations.filter((level) => level === 1).length, 735);
   assert.equal(k01.layers[0]?.tiles.every((tile) => tile.tilesetVisuals?.flatArtworkEmbedsRelief === true), true);
+  assert.deepEqual(k01.elevationProfile, {
+    stepHeight: K01_SOURCE_RELATIVE_CELL_PROJECTION_LIFT_PX,
+    sampling: "bilinear",
+  });
   assert.equal(k02.layers.every((layer) => layer.tiles.every((tile) => tile.tilesetVisuals === undefined)), true);
   assert.equal(k01.fogVisualProfileId, "imjinrok-source-fog-composite");
   assert.equal(k01.layers[0]?.tiles.every((tile) => tile.fogVisuals?.familyIndex !== undefined), true);

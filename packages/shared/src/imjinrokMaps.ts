@@ -1,5 +1,5 @@
 import { resourceDefinitions, type BuiltInResourceDefinitionId, type FactionId, type TerrainType } from "./content.js";
-import { applyK01SourceTileVisuals } from "./k01SourceTileVisuals.js";
+import { applyK01SourceTileVisuals, K01_SOURCE_RELATIVE_CELL_PROJECTION_LIFT_PX } from "./k01SourceTileVisuals.js";
 import { applyK01SourceFogVisuals } from "./k01SourceFogVisuals.js";
 import { createBlankMap, getTileIndex, type MapDefinition, type ResourceNode, type SpawnPoint, type TileCell } from "./maps.js";
 
@@ -246,6 +246,12 @@ export function createImjinrokMapScaffold(mapId: string): MapDefinition | null {
     const groundLayer = map.layers[0];
     if (!groundLayer) throw new Error("K01 scaffold has no ground layer for source tile visual assignment.");
     applyK01SourceTileVisuals(groundLayer.tiles, map.width, map.height);
+    // Product surface adapter: the hash-bound K01 output-Y additions differ
+    // by seven pixels. Bilinear sampling remains an explicit web adaptation.
+    map.elevationProfile = {
+      stepHeight: K01_SOURCE_RELATIVE_CELL_PROJECTION_LIFT_PX,
+      sampling: "bilinear",
+    };
     map.terrainCompositionProfile = "source-raster-underlay";
     map.fogVisualProfileId = "imjinrok-source-fog-composite";
     applyK01SourceFogVisuals(groundLayer.tiles, map.width, map.height);
