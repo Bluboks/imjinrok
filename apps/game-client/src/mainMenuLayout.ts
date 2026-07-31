@@ -126,11 +126,34 @@ export function projectMainMenuSourceRect(
   sourceRect: MainMenuSourceRect,
 ): MainMenuSourceRect {
   return {
-    x: layout.offsetX + sourceRect.x * layout.scale,
-    y: layout.offsetY + sourceRect.y * layout.scale,
+    ...projectMainMenuSourcePoint(layout, sourceRect),
     width: sourceRect.width * layout.scale,
     height: sourceRect.height * layout.scale,
   };
+}
+
+/**
+ * Projects a logical source-art coordinate into the responsive viewport while
+ * keeping the source presentation profile separate from screen-space UI.
+ */
+export function projectMainMenuSourcePoint(
+  layout: MainMenuCanvasLayout,
+  sourcePoint: MainMenuSourcePoint,
+): MainMenuSourcePoint {
+  return {
+    x: layout.offsetX + sourcePoint.x * layout.scale,
+    y: layout.offsetY + sourcePoint.y * layout.scale,
+  };
+}
+
+/**
+ * Scales a logical source-art metric for a screen-space companion element.
+ */
+export function scaleMainMenuSourceMetric(
+  layout: MainMenuCanvasLayout,
+  sourceMetric: number,
+): number {
+  return sourceMetric * layout.scale;
 }
 
 export function getMainMenuSourcePoint(

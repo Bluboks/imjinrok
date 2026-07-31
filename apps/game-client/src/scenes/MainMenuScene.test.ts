@@ -43,3 +43,26 @@ test("campaign country screen uses the source map mask instead of a project list
   assert.match(sceneSource, /pointerup/u);
   assert.match(sceneSource, /resolveCampaignNationMissionAction/u);
 });
+
+test("dynamic menu text is projected into a separate screen-space container", () => {
+  const addText = sceneSource.slice(
+    sceneSource.indexOf("private addText"),
+    sceneSource.indexOf("private addSourceAction"),
+  );
+
+  assert.match(addText, /projectMainMenuSourcePoint\(layout, \{ x, y \}\)/u);
+  assert.match(addText, /this\.menuTextContainer\?\.add\(label\)/u);
+  assert.doesNotMatch(addText, /this\.menuContainer\?\.add\(label\)/u);
+  assert.match(addText, /resolvePreGameTextResolution/u);
+});
+
+test("dynamic menu text avoids fractional-pixel default strokes", () => {
+  const textStyle = sceneSource.slice(
+    sceneSource.indexOf("private projectTextStyle"),
+    sceneSource.indexOf("private addSourceAction"),
+  );
+
+  assert.match(textStyle, /strokeThickness: 0/u);
+  assert.match(textStyle, /scaleTextStrokeThickness/u);
+  assert.doesNotMatch(textStyle, /strokeThickness: 0\.4/u);
+});
