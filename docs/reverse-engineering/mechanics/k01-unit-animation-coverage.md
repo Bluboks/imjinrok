@@ -11,14 +11,16 @@
   `apps/game-client/src/render/k01UnitAnimationCoverage.test.ts`가 scenario-derived inventory, theme clip 존재와
   normal runtime idle/move/attack 선택을 확인한다. 후자는 모든 guarded runtime state×8방향을 실제
   `resolveEntityAnimationSelection`까지 통과시켜 다른 facing/default clip으로 fallback하지 않는지,
-  class 14의 eight raw-16 intermediate turn clip이 ordinary grid clip으로 fallback하지 않는지 함께 검사한다.
+  class 14의 eight raw-16 intermediate turn clip이 ordinary grid clip으로 fallback하지 않는지, 12개 opt-in
+  mobile visual의 terminal `death` clip이 live-state fallback 없이 one-shot으로 선택되는지를 함께 검사한다.
 - 표시 경계: source export manifest에는 frame index·width·height만 있고 original pivot metadata는 없다. 같은
   runtime audit는 guarded frame에 per-frame pivot 또는 visual lift가 없고, frame 교체 뒤에도
   `UnitState.position`에서 온 ground-contact 위치가 변하지 않는지를 결정론적으로 검사한다. 이는 source
   pivot 또는 original update→FPS 환산을 복원한 것이 아니라, 그 미확정값이 simulation position을 덮지
   않도록 하는 project adapter guard다.
-- 구현 상태: source-proven state clip의 drift를 막는 project guard. 원본 tick, pivot, collision 또는 death
-  lifecycle를 새로 이식하지 않는다.
+- 구현 상태: source-proven state clip의 drift를 막는 project guard와 12개 opt-in mobile visual의 client-only
+  terminal death presentation. clip 종료 뒤의 lifetime은 configured non-loop clip과 provisional FPS에서만
+  계산하므로 `death-timing`은 계속 격리하며, 원본 update→time 또는 death lifecycle 일치를 주장하지 않는다.
 
 `collectScenarioSpawnKinds(imjinrokK01Scenario)`는 initial `playerStarts`와 every `spawn-units` scripted
 action을 읽는다. 그 결과 중 building category를 제외한 mobile kind는 다음 13개이며,
@@ -48,8 +50,10 @@ action을 읽는다. 그 결과 중 building category를 제외한 mobile kind�
 - class 7 state 4는 source-created default에서 idle fallback일 뿐 attack clip이 아니다. class 31 state 4는
   frame mapping 자체가 미확정이다.
 - class 14의 creation-default destruction은 transient effect contract이며 generic death clip이 아니다.
-- source-proven death clips는 현 simulation의 terminal visual lifecycle이 아직 없으므로 normal runtime
-  idle/move/attack selector에서 제외한다.
+- 12개 opt-in mobile visual의 source-proven death clips는 terminal presentation에서만 one-shot으로 사용한다.
+  이들은 normal runtime idle/move/attack selector에 포함하지 않으며, class 14와 building visual은 terminal
+  presentation에 opt-in하지 않는다. client lifetime은 `death-timing` 격리를 유지하고 원본 timing을 주장하지
+  않는다.
 
 이러한 격리는 이미지 순서나 화면 인상으로 해제하지 않는다. 새 static evidence와 independent vector가
 생긴 뒤에만 matrix를 변경한다.
