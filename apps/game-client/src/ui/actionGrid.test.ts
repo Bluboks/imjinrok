@@ -47,6 +47,18 @@ test("completed buildings expose demolition while busy and demolishing buildings
     enabled: true,
   });
 
+  const sourceBound = getActionSlots(
+    [{ id: "barracks", kind: "barracks" }],
+    null,
+    IMJINROK_SOURCE_COMMAND_ICON_PROFILE,
+  ).find(({ actionId }) => actionId === "demolish");
+  assert.deepEqual(sourceBound?.sourceIcon, {
+    ...ORIGINAL_COMMAND_ICON_ASSETS.find((asset) => asset.sourceFrameIndex === 13)!,
+    sourceActionWord: 13,
+    sourceLabel: "해체",
+    evidenceStatus: "exact-source-control-binding",
+  });
+
   const busy = getActionSlots([{
     id: "barracks",
     kind: "barracks",

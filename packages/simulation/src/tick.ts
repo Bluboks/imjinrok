@@ -1116,7 +1116,7 @@ function advanceUnitCombat(state: WorldState, projectileRegistry: ProjectileRegi
       continue;
     }
 
-    if (isUnitUnderConstruction(unit)) {
+    if (isUnitUnderConstruction(unit) || unit.demolition) {
       continue;
     }
 

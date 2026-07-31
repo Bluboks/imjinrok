@@ -14,7 +14,7 @@ export const BUTTON_SOURCE = Object.freeze({
   path: "original/imjinrok2/fnt/button.spr",
   sha256: "cfe7bab02f2cb8a1f97a3161075e617ace22d6ecf5a976546263a7c67e4efbb4",
   header: { width: 34, height: 34, frameCount: 289 },
-  frames: [4, 6, 10, 11, 12, 16, 26, 27, 28, 29, 39, 43, 45],
+  frames: [4, 6, 10, 11, 12, 13, 16, 26, 27, 28, 29, 39, 43, 45],
 });
 
 export const NORMAL_FOG_SOURCES = Object.freeze(Array.from({ length: 15 }, (_, index) => ({

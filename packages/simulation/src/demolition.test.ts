@@ -138,6 +138,19 @@ test("demolition ticks remove the building only after the source zero boundary a
   assert.equal(state.playerResources.p1!.wood, beforeWood + 175);
 });
 
+test("demolishing defensive buildings cannot auto-attack nearby enemies", () => {
+  const state = createInitialWorldState(createBlankMap({ width: 16, height: 16 }), ["p1", "p2"]);
+  const beacon = createUnitState("p1-beacon", "p1", "beacon", { x: 6, y: 6 });
+  const target = createUnitState("p2-target", "p2", "villager", { x: 11, y: 6 });
+  state.units = { [beacon.id]: beacon, [target.id]: target };
+
+  assert.equal(issueCommand(state, demolishEnvelope(beacon.id)).ok, true);
+  advanceWorldTick(state);
+
+  assert.equal(target.health.current, target.health.max);
+  assert.equal(state.combatEvents.some((event) => event.sourceUnitId === beacon.id), false);
+});
+
 test("demolition state is preserved by a JSON snapshot roundtrip", () => {
   const { state, building } = createDemolitionWorld();
   assert.equal(issueCommand(state, demolishEnvelope(building.id)).ok, true);

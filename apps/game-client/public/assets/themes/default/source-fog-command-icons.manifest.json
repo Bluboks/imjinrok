@@ -39,6 +39,11 @@
         "sha256": "2c6bf32c5526d4ff68e5139cd4764af8a4f8059b056c7cd6afdd0fc87ba59b2d"
       },
       {
+        "index": 13,
+        "path": "ui/command-icons/button_0013.png",
+        "sha256": "02a54ac758e8a6cc3aa133a15aca98c0ea1e5542cbb91ee2f11dc15ceea5e25a"
+      },
+      {
         "index": 16,
         "path": "ui/command-icons/button_0016.png",
         "sha256": "3c71fa3d8adbc2b2430afee12645055abf7cb9116c3a0d6ce9d354f595616692"
