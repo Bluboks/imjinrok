@@ -57,6 +57,7 @@
 - [K01 cold-start interval selector initialization·persisted config 경계](reverse-engineering/mechanics/k01-clock-selector-initialization.md)
 - [source pathfinding boundary](reverse-engineering/mechanics/source-pathfinding-boundary.md)
 - [임진록 낮·밤 팔레트 schedule](reverse-engineering/mechanics/imjinrok-day-night-palette-schedule.md)
+- [원본 `clock.spr` 정체와 웹 HUD 시계 경계](reverse-engineering/mechanics/source-clock-hud.md)
 - [`pannel.spr` HUD blit 결합](reverse-engineering/mechanics/pannel-spr-hud-blit.md)
 - [단일 선택 renderer dispatch의 lock·호출 순서](reverse-engineering/mechanics/single-selection-renderer-dispatch.md)
 - [K01 단일 선택 `portrait.spr` 결합](reverse-engineering/mechanics/k01-selection-portraits.md)

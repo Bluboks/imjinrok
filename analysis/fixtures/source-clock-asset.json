@@ -1,0 +1,96 @@
+{
+  "schemaVersion": 1,
+  "question": "What can static source data prove about the original fnt\\clock.spr asset without inferring a HUD clock frame or time mapping?",
+  "analysisStatus": "static-confirmed-for-resource-identity-and-sprite-container-only",
+  "reproductionStatus": "reproduction-complete-for-hash-bound-path-pointer-and-sprite-header",
+  "implementationStatus": "intentional-adaptation-for-web-HUD-clock; original-frame-placement-and-time-mapping-unimplemented",
+  "source": {
+    "executable": {
+      "path": "original/imjinrok2/imjinrok2.exe",
+      "sha256": "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e"
+    },
+    "references": {
+      "path": "analysis/generated/imjinrok2/references.json",
+      "sha256": "f64cfa6f04bc39573552f42a8b7bdd5b08fea1ba774d05865162d1d80daaf9a5"
+    },
+    "resourceTableEntry": "0x004bc200",
+    "resourcePathAddress": "0x004bd2ec",
+    "resourcePath": "fnt\\clock.spr",
+    "clockSprite": {
+      "path": "original/imjinrok2/fnt/clock.spr",
+      "sha256": "c142349b5aa68f3659a99b42fc9aff8ca541758f0504549b24f27a928e1a08e6",
+      "width": 32,
+      "height": 36,
+      "frameCount": 20,
+      "frameByteSizes": [
+        900,
+        900,
+        900,
+        900,
+        900,
+        900,
+        900,
+        900,
+        900,
+        900,
+        900,
+        900,
+        900,
+        900,
+        900,
+        900,
+        72,
+        72,
+        72,
+        72
+      ],
+      "frameOpaquePixelCounts": [
+        804,
+        804,
+        804,
+        804,
+        804,
+        804,
+        804,
+        804,
+        804,
+        804,
+        804,
+        804,
+        804,
+        804,
+        804,
+        804,
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  },
+  "evidence": {
+    "dataTablePointer": {
+      "va": "0x004bc200",
+      "rawOffset": "0x000bc200",
+      "bytes": "ec d2 4b 00",
+      "meaning": "data-table entry points at the embedded fnt\\clock.spr path"
+    },
+    "reference": {
+      "from": "0x004bc200",
+      "to": "0x004bd2ec",
+      "type": "DATA",
+      "source": "DEFAULT",
+      "operandIndex": 0,
+      "primary": true,
+      "fromFunctionEntry": null,
+      "fromBlock": ".data",
+      "toBlock": ".data",
+      "toSymbol": "s_fnt\\clock.spr_004bd2ec"
+    }
+  },
+  "unresolved": [
+    "No bounded code path from this data-table entry to a clock draw call is recovered.",
+    "No clock.spr frame is assigned a face, hand, state, or time-of-day meaning.",
+    "No original placement, update cadence, input behavior, or original time-to-angle mapping is established."
+  ]
+}
