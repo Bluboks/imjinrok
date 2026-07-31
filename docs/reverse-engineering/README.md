@@ -17,6 +17,7 @@
 11. [조선 창병·내부 클래스 2 애니메이션 파일럿](mechanics/unit-animation-pilot.md)
 12. [K01 권율·유성룡 핵심 애니메이션 파일럿](mechanics/k01-hero-animation-pilot.md)
 13. [K01 권율·유성룡 일반 공격 phase 파일럿](mechanics/k01-hero-basic-attack-pilot.md)
+14. [K01 권율·유성룡 nearby aura 조사](mechanics/k01-hero-aura.md)
 14. [조선 본영 건설·체력 프레임 파일럿](mechanics/building-state-pilot.md)
 15. [조선 봉화대 건설·체력 프레임 파일럿](mechanics/beacon-state-pilot.md)
 16. [K01 팬 리마스터 MVP 정적 분석 계획](mechanics/campaign/k01.md)

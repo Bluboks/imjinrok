@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "evidenceStatus": "unverified-k01-hero-aura",
+  "question": "For K01 class 76 Gwon Yul and class 78 Ryu Seong-ryong, what exact nearby-ally aura, if any, changes which stat fields, and what source resource/frame/compositor draws the recipient mark?",
+  "sources": {
+    "executable": {
+      "path": "original/imjinrok2/imjinrok2.exe",
+      "sha256": "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e"
+    },
+    "eventMark": {
+      "path": "original/imjinrok2/fnt/eventmark.spr",
+      "sha256": "30bcdcc2236fe88b28be0321ba826543ce0fc313982f5d52c6e8cfb039535ee3"
+    }
+  },
+  "confirmedInputs": {
+    "heroTypeRecords": [
+      {
+        "internalClass": 76,
+        "originalGameplayName": "조선 권율",
+        "typeRecord": "0x008890a0",
+        "initializerCall": "0x0045d998"
+      },
+      {
+        "internalClass": 78,
+        "originalGameplayName": "조선 유성룡",
+        "typeRecord": "0x00889338",
+        "initializerCall": "0x0045daa1"
+      }
+    ],
+    "resourceCandidate": {
+      "sourcePath": "fnt\\eventmark.spr",
+      "resourcePointerTableEntry": "0x004bc214",
+      "spriteSlot": 96
+    }
+  },
+  "codeAnchors": [
+    {
+      "id": "class-76-type-call",
+      "va": "0x0045d98e",
+      "expectedBytes": "68 99 00 00 00 b9 a0 90 88 00 e8 63 e3 ff ff",
+      "matched": true
+    },
+    {
+      "id": "class-78-type-call",
+      "va": "0x0045da97",
+      "expectedBytes": "68 9e 00 00 00 b9 38 93 88 00 e8 5a e2 ff ff",
+      "matched": true
+    },
+    {
+      "id": "eventmark-resource-pointer",
+      "va": "0x004bc214",
+      "expectedBytes": "98 d2 4b 00",
+      "matched": true
+    }
+  ],
+  "unresolvedScope": [
+    "No complete producer-to-recipient control-flow path has been recovered for class 76 or 78.",
+    "Affected ally/type gates, radius metric/boundary, stat fields, modifier arithmetic, update/removal timing, and overlap/tie behavior are unverified.",
+    "The eventmark resource-table entry does not prove that it is the observed aura mark, nor any frame, placement, fog, or compositor gate.",
+    "No K01 aura profile or source sprite conversion is authorized by this evidence."
+  ]
+}
