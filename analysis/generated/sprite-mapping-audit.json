@@ -16,11 +16,11 @@
     },
     {
       "path": "packages/shared/src/content.ts",
-      "sha256": "4d800714d081dbc39e2e6786f7720830b1a42f6eca3d4555ae0eddf369af6181"
+      "sha256": "5e97e4f4fabb178c0298603f98f718e00eadd2748dd4d8041574862046c4617c"
     },
     {
       "path": "packages/shared/src/scenarios.ts",
-      "sha256": "80fbb97aef9cfa34fe89b49bcd4aac18f83adbc79088e26889e65d805f0ae4fa"
+      "sha256": "ac284213577ff8171f228c4c22466277270fe31a79f41efb2dfe19005833099c"
     },
     {
       "path": "packages/shared/src/k01UnitAnimationCoverage.ts",
@@ -32,7 +32,7 @@
     },
     {
       "path": "apps/game-client/src/scenes/SkirmishScene.ts",
-      "sha256": "fb009a9b3f6502ef8ba1bd81e0981b659788a3d14688dfd18a2c417deb2fcbc7"
+      "sha256": "18ff1006846219d9b7b52b2587c2f45b4b91cf9a4ab704c0e3cbb2cedeb1e7f8"
     },
     {
       "path": "apps/game-client/src/scenes/MissionBriefingScene.ts",
@@ -22744,7 +22744,8 @@
             "train-archer",
             "cancel-production",
             "rally-point",
-            "stop"
+            "stop",
+            "demolish"
           ],
           "footprint": {
             "width": 3,
@@ -22777,7 +22778,8 @@
         "projectGameplayAdapter": {
           "category": "building",
           "actionIds": [
-            "stop"
+            "stop",
+            "demolish"
           ],
           "footprint": {
             "width": 2,
@@ -22861,7 +22863,8 @@
         "projectGameplayAdapter": {
           "category": "building",
           "actionIds": [
-            "stop"
+            "stop",
+            "demolish"
           ],
           "footprint": {
             "width": 2,
@@ -22894,7 +22897,8 @@
         "projectGameplayAdapter": {
           "category": "building",
           "actionIds": [
-            "stop"
+            "stop",
+            "demolish"
           ],
           "footprint": {
             "width": 2,
@@ -22931,7 +22935,8 @@
         "projectGameplayAdapter": {
           "category": "building",
           "actionIds": [
-            "stop"
+            "stop",
+            "demolish"
           ],
           "footprint": {
             "width": 3,
@@ -22964,7 +22969,8 @@
         "projectGameplayAdapter": {
           "category": "building",
           "actionIds": [
-            "stop"
+            "stop",
+            "demolish"
           ],
           "footprint": {
             "width": 3,
@@ -22997,7 +23003,8 @@
         "projectGameplayAdapter": {
           "category": "building",
           "actionIds": [
-            "stop"
+            "stop",
+            "demolish"
           ],
           "footprint": {
             "width": 2,
@@ -23030,7 +23037,8 @@
         "projectGameplayAdapter": {
           "category": "building",
           "actionIds": [
-            "stop"
+            "stop",
+            "demolish"
           ],
           "footprint": {
             "width": 2,
@@ -23158,7 +23166,8 @@
         "projectGameplayAdapter": {
           "category": "building",
           "actionIds": [
-            "stop"
+            "stop",
+            "demolish"
           ],
           "footprint": {
             "width": 3,
@@ -23455,7 +23464,8 @@
         "projectGameplayAdapter": {
           "category": "building",
           "actionIds": [
-            "stop"
+            "stop",
+            "demolish"
           ],
           "footprint": {
             "width": 2,
@@ -23619,7 +23629,8 @@
             "research-loom",
             "stop",
             "town-bell",
-            "set-gather"
+            "set-gather",
+            "demolish"
           ],
           "footprint": {
             "width": 4,

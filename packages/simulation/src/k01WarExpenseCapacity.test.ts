@@ -8,7 +8,6 @@ import { createBlankMap, imjinrokCampaignScenarios, k01ReinforcementAdapter, k01
 import {
   canAdmitPlayerCapacity,
   canCompleteQueuedPlayerCapacity,
-  CORE_PROVIDER_SUPPLY_CAPACITY_POLICY_ID,
   createInitialWorldState,
   evaluatePlayerCapacity,
   getK01WarExpenseCost,
@@ -20,6 +19,7 @@ import {
   k01WarExpenseWithBuildingGateCapacityPolicy,
   requireCapacityPolicy,
   toWorldSnapshot,
+  validateCommand,
 } from "./index.js";
 import { createUnitState } from "./entities.js";
 
@@ -46,7 +46,7 @@ function addUnit(
   return unit;
 }
 
-test("K01 war-expense policies are registered built-ins but K01 scenarios do not opt in yet", () => {
+test("K01 war-expense policy is a registered built-in selected by the K01 scenario", () => {
   assert.equal(requireCapacityPolicy(K01_WAR_EXPENSE_CAPACITY_POLICY_ID), k01WarExpenseCapacityPolicy);
   assert.equal(
     requireCapacityPolicy(K01_WAR_EXPENSE_WITH_BUILDING_GATE_CAPACITY_POLICY_ID),
@@ -54,7 +54,7 @@ test("K01 war-expense policies are registered built-ins but K01 scenarios do not
   );
 
   const k01 = createInitialWorldState(createBlankMap(), [], imjinrokCampaignScenarios[0]);
-  assert.equal(k01.capacityPolicyId, CORE_PROVIDER_SUPPLY_CAPACITY_POLICY_ID);
+  assert.equal(k01.capacityPolicyId, K01_WAR_EXPENSE_CAPACITY_POLICY_ID);
 });
 
 test("K01 adapter values remain bound to the catalog, source fixture, and K01 scenario adapters", () => {
@@ -105,6 +105,13 @@ test("K01 war-expense policy totals exact live and pending source costs", () => 
   barracks.productionQueue = [{ id: "pending-archer", unit: "archer", remainingTicks: 1, totalTicks: 1 }];
 
   const evaluation = evaluatePlayerCapacity(state, "p1", K01_WAR_EXPENSE_CAPACITY_POLICY_ID);
+
+  assert.deepEqual(evaluation.presentation, {
+    primaryConstraintId: "fixed-budget",
+    summaryLabel: "전비",
+    actionDisabledReason: "전비 부족",
+    commandFailureReason: "war expense cap reached",
+  });
 
   assert.deepEqual(evaluation.constraints[0], {
     constraintId: "fixed-budget",
@@ -193,4 +200,34 @@ test("unmapped kinds fail closed and snapshots contain only the stable policy id
   const snapshot = toWorldSnapshot(state);
   assert.equal(snapshot.capacityPolicyId, K01_WAR_EXPENSE_CAPACITY_POLICY_ID);
   assert.equal(JSON.stringify(snapshot).includes("evaluate"), false);
+});
+
+test("K01 command admission rejects both train and build targets with the policy-provided war-expense reason", () => {
+  const trainState = createFixture();
+  trainState.capacityPolicyId = K01_WAR_EXPENSE_CAPACITY_POLICY_ID;
+  const barracks = addUnit(trainState, "p1-barracks", "barracks");
+  for (let index = 0; index < 191; index += 1) {
+    addUnit(trainState, `p1-swordsman-${index}`, "swordsman");
+  }
+
+  assert.deepEqual(validateCommand(trainState, {
+    sessionId: "capacity-test",
+    playerId: "p1",
+    issuedAtTick: trainState.tick,
+    command: { type: "train-unit", buildingUnitId: barracks.id, unit: "swordsman" },
+  }), { ok: false, reason: "war expense cap reached" });
+
+  const buildState = createFixture();
+  buildState.capacityPolicyId = K01_WAR_EXPENSE_CAPACITY_POLICY_ID;
+  const villager = addUnit(buildState, "p1-villager", "villager");
+  for (let index = 0; index < 191; index += 1) {
+    addUnit(buildState, `p1-swordsman-${index}`, "swordsman");
+  }
+
+  assert.deepEqual(validateCommand(buildState, {
+    sessionId: "capacity-test",
+    playerId: "p1",
+    issuedAtTick: buildState.tick,
+    command: { type: "build", builderUnitId: villager.id, building: "house", target: { x: 12, y: 12 } },
+  }), { ok: false, reason: "war expense cap reached" });
 });

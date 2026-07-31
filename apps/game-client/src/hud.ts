@@ -1,5 +1,5 @@
 import { unitDefinitions, type ActionDefinitionId, type DayPhase, type FactionId, type GridPoint, type MapDefinition, type ResearchDefinitionId, type ResourceAmountSet, type UnitDefinitionId, type WeatherKind } from "@shared";
-import type { CarriedResourceState, ConstructionState, DemolitionState, PlayerPopulationState, PlayerVisibilityState, ProductionQueueItemState, RallyPointState, ResearchQueueItemState, UnitOrderState, UnitState } from "@simulation";
+import type { CapacityPresentation, CarriedResourceState, ConstructionState, DemolitionState, PlayerPopulationState, PlayerVisibilityState, ProductionQueueItemState, RallyPointState, ResearchQueueItemState, UnitOrderState, UnitState } from "@simulation";
 import type { UiDomainAction } from "./ui/objectiveModalActions.js";
 import type { GameSpeedPreset } from "./gameplayPreferences.js";
 
@@ -107,10 +107,33 @@ export interface PlayerEconomyView {
   playerId: string;
   resources: ResourceAmountSet;
   population: PlayerPopulationState;
+  /**
+   * Policy-selected capacity summary and action targets. Optional only so
+   * older serialized snapshots retain the legacy population presentation.
+   */
+  capacity?: PlayerCapacityView;
   research: {
     completed: ResearchDefinitionId[];
     pending: ResearchDefinitionId[];
   };
+}
+
+export interface PlayerCapacityView {
+  policyId: string;
+  presentation: CapacityPresentation;
+  summary: {
+    used: number;
+    pending: number;
+    cap: number | null;
+    unlimited: boolean;
+    available: number | null;
+  };
+  admissions: Partial<Record<UnitDefinitionId, PlayerCapacityAdmissionView>>;
+}
+
+export interface PlayerCapacityAdmissionView {
+  admitted: boolean;
+  rejectionConstraintId?: string;
 }
 
 export interface BattlefieldSideSummaryView {

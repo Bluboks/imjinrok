@@ -64,10 +64,26 @@ export interface CapacityConstraint {
 export interface CapacityPolicy {
   readonly id: string;
   readonly constraints: readonly CapacityConstraint[];
+  /**
+   * Stable presentation metadata selected by the policy, rather than by a
+   * scenario-specific consumer. The HUD copies this data into its serializable
+   * view; it never transports executable policy code.
+   */
+  readonly presentation: CapacityPresentation;
+}
+
+export interface CapacityPresentation {
+  /** The constraint whose used/pending/cap values form the primary HUD readout. */
+  readonly primaryConstraintId: string;
+  readonly summaryLabel: string;
+  readonly actionDisabledReason: string;
+  /** Stable command-validation reason presented by the client. */
+  readonly commandFailureReason: string;
 }
 
 export interface CapacityEvaluation {
   readonly policyId: string;
+  readonly presentation: CapacityPresentation;
   readonly liveEntryCount: number;
   readonly pendingEntryCount: number;
   readonly constraints: readonly CapacityConstraintResult[];
@@ -96,6 +112,7 @@ export interface ProviderSupplyCapacityState {
 export interface CreateProviderSupplyCapacityPolicyOptions {
   readonly id?: string;
   readonly limit?: number;
+  readonly presentation?: CapacityPresentation;
 }
 
 export interface CreateFixedBudgetCapacityPolicyOptions {
@@ -103,12 +120,21 @@ export interface CreateFixedBudgetCapacityPolicyOptions {
   readonly cap: number;
   readonly costForKind?: (kind: UnitDefinitionId) => number;
   readonly constraints?: readonly CapacityConstraint[];
+  readonly presentation?: CapacityPresentation;
 }
 
 export interface CreateUncappedCapacityPolicyOptions {
   readonly id?: string;
   readonly constraints?: readonly CapacityConstraint[];
+  readonly presentation?: CapacityPresentation;
 }
+
+const DEFAULT_CAPACITY_PRESENTATION: CapacityPresentation = Object.freeze({
+  primaryConstraintId: "provider-supply",
+  summaryLabel: "인구",
+  actionDisabledReason: "인구",
+  commandFailureReason: "population cap reached",
+});
 
 export interface CreateCategoryCapacityConstraintOptions {
   readonly id: string;
@@ -211,6 +237,7 @@ export function createProviderSupplyCapacityPolicy(
   return createCapacityPolicy({
     id: options.id ?? CORE_PROVIDER_SUPPLY_CAPACITY_POLICY_ID,
     constraints: [createProviderSupplyCapacityConstraint(limit)],
+    presentation: options.presentation ?? DEFAULT_CAPACITY_PRESENTATION,
   });
 }
 
@@ -223,6 +250,7 @@ export function createFixedBudgetCapacityPolicy(
   return createCapacityPolicy({
     id: options.id,
     constraints: [createCostBudgetCapacityConstraint("fixed-budget", options.cap, costForKind), ...(options.constraints ?? [])],
+    presentation: options.presentation ?? createDefaultCapacityPresentation("fixed-budget"),
   });
 }
 
@@ -232,15 +260,27 @@ export function createUncappedCapacityPolicy(
   return createCapacityPolicy({
     id: options.id ?? CORE_UNCAPPED_CAPACITY_POLICY_ID,
     constraints: [createUncappedCapacityConstraint(), ...(options.constraints ?? [])],
+    presentation: options.presentation ?? createDefaultCapacityPresentation("uncapped"),
   });
 }
 
-export function createCapacityPolicy(policy: CapacityPolicy): CapacityPolicy {
-  validatePolicy(policy);
+export function createCapacityPolicy(
+  policy: Omit<CapacityPolicy, "presentation"> & { readonly presentation?: CapacityPresentation },
+): CapacityPolicy {
+  const normalizedPolicy: CapacityPolicy = {
+    ...policy,
+    presentation: policy.presentation ?? createDefaultCapacityPresentation(policy.constraints[0]?.id ?? "uncapped"),
+  };
+  validatePolicy(normalizedPolicy);
   return Object.freeze({
-    id: policy.id,
-    constraints: Object.freeze([...policy.constraints]),
+    id: normalizedPolicy.id,
+    constraints: Object.freeze([...normalizedPolicy.constraints]),
+    presentation: Object.freeze({ ...normalizedPolicy.presentation }),
   });
+}
+
+function createDefaultCapacityPresentation(primaryConstraintId: string): CapacityPresentation {
+  return { ...DEFAULT_CAPACITY_PRESENTATION, primaryConstraintId };
 }
 
 export function createCategoryCapacityConstraint(
@@ -365,6 +405,7 @@ function evaluateCapacity(
 
   return Object.freeze({
     policyId: policy.id,
+    presentation: policy.presentation,
     liveEntryCount,
     pendingEntryCount: context.entries.length - liveEntryCount,
     constraints: Object.freeze(constraints),
@@ -630,6 +671,26 @@ function validatePolicy(policy: CapacityPolicy): void {
       throw new Error(`Capacity policy '${policy.id}' contains duplicate constraint '${constraint.id}'.`);
     }
     constraintIds.add(constraint.id);
+  }
+
+  const presentation = policy.presentation;
+  if (!presentation || typeof presentation !== "object") {
+    throw new Error(`Capacity policy '${policy.id}' must provide presentation metadata.`);
+  }
+  assertStableId(presentation.primaryConstraintId, "Capacity presentation primary constraint");
+  for (const [field, value] of Object.entries({
+    summaryLabel: presentation.summaryLabel,
+    actionDisabledReason: presentation.actionDisabledReason,
+    commandFailureReason: presentation.commandFailureReason,
+  })) {
+    if (!value.trim()) {
+      throw new Error(`Capacity presentation ${field} must not be empty.`);
+    }
+  }
+  if (!constraintIds.has(presentation.primaryConstraintId)) {
+    throw new Error(
+      `Capacity policy '${policy.id}' presentation references unknown constraint '${presentation.primaryConstraintId}'.`,
+    );
   }
 }
 

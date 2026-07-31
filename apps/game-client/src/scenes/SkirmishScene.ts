@@ -4,6 +4,7 @@ import {
   defaultTheme,
   ELEVATION_NEIGHBOR_OFFSETS,
   actionDefinitions,
+  actionCapacityTargetUnits,
   createContentRegistry,
   factionDefinitions,
   createImjinrokMapScaffold,
@@ -57,6 +58,8 @@ import {
   cartToIso,
   createPlayerVisibility,
   createInitialWorldState,
+  canAdmitPlayerCapacity,
+  evaluatePlayerCapacity,
   findBuildWorkPath,
   getConstructionProgress,
   getEnvironmentLightLevel,
@@ -1994,6 +1997,8 @@ export class SkirmishScene extends Phaser.Scene {
         return "플레이어 자원 정보를 찾을 수 없습니다.";
       case "population cap reached":
         return "인구 한도에 도달했습니다. 집을 더 지으세요.";
+      case "war expense cap reached":
+        return "전비가 부족합니다.";
       case "production queue is full":
         return "생산 대기열이 가득 찼습니다.";
       case "building is researching":
@@ -5950,6 +5955,7 @@ export class SkirmishScene extends Phaser.Scene {
       playerId: this.localPlayerId,
       resources: { ...resources },
       population: getPlayerPopulationState(this.worldState, this.localPlayerId),
+      capacity: this.createPlayerCapacityView(this.localPlayerId),
       research: this.createPlayerResearchView(this.localPlayerId),
     };
 
@@ -5962,6 +5968,43 @@ export class SkirmishScene extends Phaser.Scene {
     this.playerEconomySignature = publication.signature;
     this.registry.set(PLAYER_ECONOMY_REGISTRY_KEY, view);
     this.game.events.emit(PLAYER_ECONOMY_CHANGED_EVENT, view);
+  }
+
+  private createPlayerCapacityView(playerId: string): NonNullable<PlayerEconomyView["capacity"]> {
+    const evaluation = evaluatePlayerCapacity(this.worldState, playerId, this.worldState.capacityPolicyId);
+    const primaryConstraint = evaluation.constraints.find(
+      (constraint) => constraint.constraintId === evaluation.presentation.primaryConstraintId,
+    );
+
+    if (!primaryConstraint) {
+      throw new Error(
+        `Capacity policy '${evaluation.policyId}' did not publish its primary constraint '${evaluation.presentation.primaryConstraintId}'.`,
+      );
+    }
+
+    const admissions: NonNullable<PlayerEconomyView["capacity"]>["admissions"] = {};
+    for (const kind of new Set(Object.values(actionCapacityTargetUnits))) {
+      const admission = canAdmitPlayerCapacity(this.worldState, playerId, kind, this.worldState.capacityPolicyId);
+      admissions[kind] = admission.admitted
+        ? { admitted: true }
+        : {
+            admitted: false,
+            ...(admission.rejection ? { rejectionConstraintId: admission.rejection.constraintId } : {}),
+          };
+    }
+
+    return {
+      policyId: evaluation.policyId,
+      presentation: { ...evaluation.presentation },
+      summary: {
+        used: primaryConstraint.used,
+        pending: primaryConstraint.pending,
+        cap: primaryConstraint.cap,
+        unlimited: primaryConstraint.unlimited,
+        available: primaryConstraint.available,
+      },
+      admissions,
+    };
   }
 
   private publishMagicAutoUse(): void {

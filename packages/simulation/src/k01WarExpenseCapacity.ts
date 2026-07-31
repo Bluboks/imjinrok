@@ -4,6 +4,7 @@ import {
   createFixedBudgetCapacityPolicy,
   createTotalCountCapacityConstraint,
   defaultCapacityPolicyRegistry,
+  type CapacityPresentation,
   type CapacityPolicy,
 } from "./capacity.js";
 
@@ -12,6 +13,18 @@ export const K01_WAR_EXPENSE_WITH_BUILDING_GATE_CAPACITY_POLICY_ID = "k01:war-ex
 export const K01_WAR_EXPENSE_CAP = 2_500;
 export const K01_WAR_EXPENSE_ENTITY_COUNT_CAP = 250;
 export const K01_WAR_EXPENSE_BUILDING_COUNT_CAP = 50;
+
+/**
+ * Korean product copy for the recovered fixed-budget rule. The original
+ * capacity arithmetic is source-backed; this responsive HUD wording is a
+ * project presentation adaptation selected by the policy.
+ */
+export const k01WarExpenseCapacityPresentation: CapacityPresentation = Object.freeze({
+  primaryConstraintId: "fixed-budget",
+  summaryLabel: "전비",
+  actionDisabledReason: "전비 부족",
+  commandFailureReason: "war expense cap reached",
+});
 
 export type K01WarExpenseIdentityMapping = "exact-static-identity-source";
 export type K01OriginalBuildingGateMode = "bypass" | "enabled";
@@ -115,6 +128,7 @@ export function createK01WarExpenseCapacityPolicy(
     cap: K01_WAR_EXPENSE_CAP,
     costForKind: getK01WarExpenseCost,
     constraints,
+    presentation: k01WarExpenseCapacityPresentation,
   });
 }
 

@@ -566,6 +566,9 @@ export const imjinrokK01Scenario = {
     "local-player": "local",
     "cpu-1": "cpu",
   },
+  // Stable selector resolved by the simulation registry. The K01 policy keeps
+  // the unresolved original building-category gate explicitly bypassed.
+  capacityPolicyId: "k01:war-expense",
   completionMode: "scripted",
   startingResources: originalCampaignStartingResources,
   startingUnits: defaultTownStart,

@@ -113,6 +113,16 @@ interface ActiveMinimapAlert extends MinimapAlertView {
   expiresAt: number;
 }
 
+function formatCapacitySummary(capacity: NonNullable<PlayerEconomyView["capacity"]>): string {
+  if (capacity.summary.unlimited || capacity.summary.cap === null) {
+    return `${capacity.presentation.summaryLabel} ∞`;
+  }
+
+  // Pending reservations are deliberately included in the displayed total so
+  // the HUD, disabled action slots, and command admission describe one state.
+  return `${capacity.presentation.summaryLabel} ${capacity.summary.used + capacity.summary.pending}/${capacity.summary.cap}`;
+}
+
 export class UIScene extends Phaser.Scene {
   private hudContainer: Phaser.GameObjects.Container | null = null;
   private selectionPanelContainer: Phaser.GameObjects.Container | null = null;
@@ -1400,9 +1410,12 @@ export class UIScene extends Phaser.Scene {
       return;
     }
 
-    const { resources, population } = this.playerEconomy;
+    const { resources, population, capacity } = this.playerEconomy;
+    const capacityText = capacity
+      ? formatCapacitySummary(capacity)
+      : `인 ${population.used + population.pending}/${population.cap}`;
     this.economyText.setText(
-      `식 ${Math.floor(resources.food)}  목 ${Math.floor(resources.wood)}  금 ${Math.floor(resources.gold)}  석 ${Math.floor(resources.stone)}  인 ${population.used + population.pending}/${population.cap}`,
+      `식 ${Math.floor(resources.food)}  목 ${Math.floor(resources.wood)}  금 ${Math.floor(resources.gold)}  석 ${Math.floor(resources.stone)}  ${capacityText}`,
     );
   }
 

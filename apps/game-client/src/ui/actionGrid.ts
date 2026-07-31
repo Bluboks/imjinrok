@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import { actionDefinitions, researchDefinitions, unitCanPerformAction, unitDefinitions, type ActionDefinitionId, type BankResourceKind, type ResearchDefinition, type ResearchDefinitionId, type UnitDefinition, type UnitDefinitionId } from "@shared";
+import { actionCapacityTargetUnits, actionDefinitions, researchDefinitions, unitCanPerformAction, unitDefinitions, type ActionDefinitionId, type BankResourceKind, type ResearchDefinition, type ResearchDefinitionId, type UnitDefinition, type UnitDefinitionId } from "@shared";
 import type { ActionTriggerSource, MagicAutoUseView, PlayerEconomyView, SelectedEntitiesView } from "../hud.js";
 import { drawPanelFrame, HUD_TEXT_STYLE, type PanelBounds } from "./hudPanel.js";
 import {
@@ -38,19 +38,6 @@ export interface ActionGridSlotRect {
   width: number;
   height: number;
 }
-
-const TRAIN_ACTION_UNITS: Partial<Record<ActionDefinitionId, UnitDefinitionId>> = {
-  "train-villager": "villager",
-  "train-swordsman": "swordsman",
-  "train-archer": "archer",
-};
-
-const BUILD_ACTION_BUILDINGS: Partial<Record<ActionDefinitionId, UnitDefinitionId>> = {
-  build: "house",
-  "build-town-center": "town-center",
-  "build-barracks": "barracks",
-  "build-beacon": "beacon",
-};
 
 const RESEARCH_ACTIONS: Partial<Record<ActionDefinitionId, ResearchDefinitionId>> = {
   "research-loom": "loom",
@@ -379,7 +366,7 @@ function getActionAvailability(
     return { enabled: false, disabledReason: isDemolishing ? "해체중" : isBusy ? "진행중" : isDestroyed ? "파괴됨" : "불가" };
   }
 
-  const trainUnit = TRAIN_ACTION_UNITS[actionId];
+  const trainUnit = isTrainAction(actionId) ? actionCapacityTargetUnits[actionId] : undefined;
 
   if (trainUnit && playerEconomy) {
     const trainSources = getActiveActionSources(selectedEntities, actionId);
@@ -403,8 +390,9 @@ function getActionAvailability(
       return { enabled: false, disabledReason: "자원" };
     }
 
-    if (!canFitPopulation(playerEconomy, trainUnit)) {
-      return { enabled: false, disabledReason: "인구" };
+    const capacityAvailability = getCapacityAvailability(playerEconomy, trainUnit);
+    if (!capacityAvailability.admitted) {
+      return { enabled: false, disabledReason: capacityAvailability.disabledReason };
     }
 
     return { enabled: true };
@@ -445,7 +433,7 @@ function getActionAvailability(
     return { enabled: true };
   }
 
-  const building = BUILD_ACTION_BUILDINGS[actionId];
+  const building = isBuildAction(actionId) ? actionCapacityTargetUnits[actionId] : undefined;
 
   if (building) {
     if (getActiveActionSources(selectedEntities, actionId).length === 0) {
@@ -454,6 +442,13 @@ function getActionAvailability(
 
     if (playerEconomy && !canAfford(playerEconomy, building)) {
       return { enabled: false, disabledReason: "자원" };
+    }
+
+    if (playerEconomy) {
+      const capacityAvailability = getCapacityAvailability(playerEconomy, building);
+      if (!capacityAvailability.admitted) {
+        return { enabled: false, disabledReason: capacityAvailability.disabledReason };
+      }
     }
 
     return { enabled: true };
@@ -508,8 +503,32 @@ function canAfford(playerEconomy: PlayerEconomyView, unit: UnitDefinitionId): bo
   });
 }
 
-function canFitPopulation(playerEconomy: PlayerEconomyView, unit: UnitDefinitionId): boolean {
-  const populationCost = (unitDefinitions[unit] as UnitDefinition).populationCost ?? 0;
+function isTrainAction(actionId: ActionDefinitionId): actionId is "train-villager" | "train-swordsman" | "train-archer" {
+  return actionId === "train-villager" || actionId === "train-swordsman" || actionId === "train-archer";
+}
 
-  return populationCost <= 0 || playerEconomy.population.available >= populationCost;
+function isBuildAction(actionId: ActionDefinitionId): actionId is "build" | "build-town-center" | "build-barracks" | "build-beacon" {
+  return actionId === "build" || actionId === "build-town-center" || actionId === "build-barracks" || actionId === "build-beacon";
+}
+
+function getCapacityAvailability(
+  playerEconomy: PlayerEconomyView,
+  unit: UnitDefinitionId,
+): { admitted: boolean; disabledReason: string } {
+  const publishedCapacity = playerEconomy.capacity;
+  if (publishedCapacity) {
+    const admission = publishedCapacity.admissions[unit];
+    return {
+      // A current capacity view that omits an actionable kind is deliberately
+      // fail-closed; legacy views without any capacity field keep population.
+      admitted: admission?.admitted === true,
+      disabledReason: publishedCapacity.presentation.actionDisabledReason,
+    };
+  }
+
+  const populationCost = (unitDefinitions[unit] as UnitDefinition).populationCost ?? 0;
+  return {
+    admitted: populationCost <= 0 || playerEconomy.population.available >= populationCost,
+    disabledReason: "인구",
+  };
 }
