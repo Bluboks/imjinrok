@@ -22,12 +22,12 @@ const fixture = JSON.parse(readFileSync(join(repositoryRoot, "analysis/fixtures/
 test("K01 hash-bound raw projection reproduces the complete RLE and record-crossing vectors", () => {
   const report = extractK01MapTerrainContract({ mapPath, executablePath, portSourcePath });
 
-  assert.deepEqual(report.sources.map.size, fixture.map.size);
-  assert.deepEqual(report.sources.map.sha256, fixture.map.sha256);
-  assert.deepEqual(report.sources.executable.size, fixture.executable.size);
-  assert.deepEqual(report.sources.executable.sha256, fixture.executable.sha256);
-  assert.deepEqual(report.sources.portSource.size, fixture.portSource.size);
-  assert.deepEqual(report.sources.portSource.sha256, fixture.portSource.sha256);
+  assert.deepEqual(report.sources.map.size, fixture.sources.map.size);
+  assert.deepEqual(report.sources.map.sha256, fixture.sources.map.sha256);
+  assert.deepEqual(report.sources.executable.size, fixture.sources.executable.size);
+  assert.deepEqual(report.sources.executable.sha256, fixture.sources.executable.sha256);
+  assert.deepEqual(report.sources.portSource.size, fixture.sources.portSource.size);
+  assert.deepEqual(report.sources.portSource.sha256, fixture.sources.portSource.sha256);
   assert.deepEqual(pickProjection(report.projection), fixture.projection);
   assert.deepEqual(report.values, fixture.values);
   assert.deepEqual(report.portSourceBinding, fixture.portSourceBinding);
@@ -128,5 +128,6 @@ function pickProjection(projection) {
     valueWidthBytes: projection.valueWidthBytes,
     streamStartAbsolute: projection.streamStartAbsolute,
     streamEndAbsoluteExclusive: projection.streamEndAbsoluteExclusive,
+    recordAddressing: projection.recordAddressing,
   };
 }

@@ -75,8 +75,8 @@ fixture의 RLE와 그 SHA-256이다. 이는 현재 포트의 `K01_TERRAIN_RLE` �
 문자열 일치는 값의 원본 지형 의미를 증명하지 않는다.
 
 이 포트 접점도 수동 비교가 아니다. 추출기는
-`packages/shared/src/imjinrokMaps.ts`의 기준 크기 `17,664`와 SHA-256
-`7a9c375aac4a051e2ce32a3bb575c1214dd2140458cdd7c6690f93d82036368d`를 먼저 검증하고, 그
+`packages/shared/src/imjinrokMaps.ts`의 기준 크기 `18,558`와 SHA-256
+`a60714f1dcb005d2c60d0939ccd68fb60111990b630658ccc7648d237666531d`를 먼저 검증하고, 그
 해시 고정 소스에서 이름이 정확히 `K01_TERRAIN_RLE`인 문자열 literal만 추출한다. 추출한 literal은
 원시 투영 RLE와 byte-for-byte 같아야 한다. 따라서 MAP·EXE·포트 소스 중 어느 하나가 바뀌거나,
 명명된 literal이 달라지면 report와 fixture test가 실패한다. 이 binding은 현재 포트 데이터와의
