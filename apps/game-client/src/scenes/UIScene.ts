@@ -75,6 +75,7 @@ import {
 } from "../ui/sourceFogAndCommandAssets.js";
 import { resolveProductActionGridLayoutForScenario } from "../ui/actionGridLayoutPolicy.js";
 import { drawPanelFrame, HUD_TEXT_STYLE, type PanelBounds } from "../ui/hudPanel.js";
+import { drawHudClock, resolveMinimapHudAncillaryLayout } from "../ui/hudClock.js";
 import {
   emitK01ObjectiveModalActionRequest,
   ObjectiveModalActionBridge,
@@ -116,6 +117,7 @@ export class UIScene extends Phaser.Scene {
   private minimapResources: MinimapResourcesView = { resources: [] };
   private minimapVisibility: MinimapVisibilityView | null = null;
   private minimapAvailability: MinimapAvailabilityView = { enabled: true };
+  private minimapPanelBounds: PanelBounds | null = null;
   private minimapGeometry: MinimapGeometry | null = null;
   private minimapTerrainGraphics: Phaser.GameObjects.RenderTexture | null = null;
   private minimapFog: MinimapFogTexture | null = null;
@@ -126,6 +128,7 @@ export class UIScene extends Phaser.Scene {
   private minimapViewportGraphics: Phaser.GameObjects.Graphics | null = null;
   private minimapBorderGraphics: Phaser.GameObjects.Graphics | null = null;
   private minimapUnavailableGraphics: Phaser.GameObjects.Graphics | null = null;
+  private minimapClockGraphics: Phaser.GameObjects.Graphics | null = null;
   private minimapZoomText: Phaser.GameObjects.Text | null = null;
   private economyText: Phaser.GameObjects.Text | null = null;
   private battlefieldSummaryText: Phaser.GameObjects.Text | null = null;
@@ -349,6 +352,7 @@ export class UIScene extends Phaser.Scene {
   private handleBattlefieldSummaryChanged(view: BattlefieldSummaryView): void {
     this.battlefieldSummary = view;
     this.updateBattlefieldSummaryText();
+    this.updateHudClock();
   }
 
   private handleGamePlaybackChanged(view: GamePlaybackView): void {
@@ -483,6 +487,8 @@ export class UIScene extends Phaser.Scene {
     this.minimapAlertGraphics = null;
     this.minimapUnavailableGraphics?.destroy();
     this.minimapUnavailableGraphics = null;
+    this.minimapClockGraphics?.destroy();
+    this.minimapClockGraphics = null;
     this.minimapAlerts.length = 0;
     this.hudContainer?.destroy(true);
     this.hudContainer = null;
@@ -570,6 +576,7 @@ export class UIScene extends Phaser.Scene {
     this.playbackPauseText = null;
     this.playbackSpeedText = null;
     this.minimapGeometry = null;
+    this.minimapPanelBounds = null;
 
     const width = this.scale.width;
     const height = this.scale.height;
@@ -692,8 +699,10 @@ export class UIScene extends Phaser.Scene {
     this.minimapViewportGraphics?.destroy();
     this.minimapBorderGraphics?.destroy();
     this.minimapUnavailableGraphics?.destroy();
+    this.minimapClockGraphics?.destroy();
     this.minimapZoomText?.destroy();
     const mapDefinition = this.minimapMap?.map ?? defaultMap;
+    this.minimapPanelBounds = { x, y, width, height };
     const geometry = createMinimapGeometry(x, y, width, height);
     this.minimapGeometry = geometry;
     this.minimapTerrainGraphics = this.add
@@ -709,6 +718,7 @@ export class UIScene extends Phaser.Scene {
     this.minimapViewportGraphics = this.add.graphics().setScrollFactor(0).setDepth(1007);
     this.minimapBorderGraphics = this.add.graphics().setScrollFactor(0).setDepth(1010);
     this.minimapUnavailableGraphics = this.add.graphics().setScrollFactor(0).setDepth(1009);
+    this.minimapClockGraphics = this.add.graphics().setScrollFactor(0).setDepth(1011);
     container.add([
       this.minimapTerrainGraphics,
       this.minimapResourceGraphics,
@@ -719,6 +729,7 @@ export class UIScene extends Phaser.Scene {
       this.minimapViewportGraphics,
       this.minimapUnavailableGraphics,
       this.minimapBorderGraphics,
+      this.minimapClockGraphics,
     ]);
     this.minimapZoomText = this.add.text(x + 18, y + height - 24, "", { ...HUD_TEXT_STYLE, fontSize: "11px", color: "#7f9b91" });
     container.add(this.minimapZoomText);
@@ -737,7 +748,20 @@ export class UIScene extends Phaser.Scene {
     this.drawMinimapViewportOverlay();
     this.minimapBorderGraphics.lineStyle(2, 0xd0b46a, 0.85);
     this.minimapBorderGraphics.strokePoints(getMinimapDiamondPoints(geometry), true);
+    this.updateHudClock();
     this.applyMinimapAvailabilityPresentation();
+  }
+
+  /** The hands redraw only when the authoritative simulation environment is published. */
+  private updateHudClock(): void {
+    const graphics = this.minimapClockGraphics;
+    if (!graphics || !this.minimapPanelBounds) {
+      return;
+    }
+
+    const { clockBounds } = resolveMinimapHudAncillaryLayout(this.minimapPanelBounds);
+    drawHudClock(graphics, clockBounds, this.battlefieldSummary?.environment ?? null);
+    graphics.setVisible(this.minimapAvailability.enabled);
   }
 
   private applyMinimapAvailabilityPresentation(): void {
@@ -751,6 +775,7 @@ export class UIScene extends Phaser.Scene {
     this.minimapAlertGraphics?.setVisible(enabled);
     this.minimapViewportGraphics?.setVisible(enabled);
     this.minimapZoomText?.setVisible(enabled);
+    this.minimapClockGraphics?.setVisible(enabled);
 
     const unavailableGraphics = this.minimapUnavailableGraphics;
     const geometry = this.minimapGeometry;
