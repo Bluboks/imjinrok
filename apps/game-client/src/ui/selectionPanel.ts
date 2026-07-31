@@ -113,13 +113,46 @@ export function drawSelectionPanel(
     color: "#dbe9d3",
   }));
 
-  if (selectedEntity.construction) {
+  if (selectedEntity.demolition) {
+    drawDemolitionProgress(scene, container, graphics, selectedEntity, textX, y + height - 32, healthBarWidth);
+  } else if (selectedEntity.construction) {
     drawConstructionProgress(scene, container, graphics, selectedEntity, textX, y + height - 32, healthBarWidth);
   } else if (selectedEntity.researchQueue && selectedEntity.researchQueue.length > 0) {
     drawResearchQueue(scene, container, graphics, selectedEntity, textX, y + height - 32, healthBarWidth);
   } else {
     drawProductionQueue(scene, container, graphics, selectedEntity, textX, y + height - 32, healthBarWidth);
   }
+}
+
+function drawDemolitionProgress(
+  scene: Phaser.Scene,
+  container: Phaser.GameObjects.Container,
+  graphics: Phaser.GameObjects.Graphics,
+  selectedEntity: SelectedEntityView,
+  x: number,
+  y: number,
+  width: number,
+): void {
+  const demolition = selectedEntity.demolition;
+
+  if (!demolition) {
+    return;
+  }
+
+  const ratio = Phaser.Math.Clamp(demolition.progress / 100, 0, 1);
+
+  graphics.fillStyle(0x071012, 1);
+  graphics.fillRoundedRect(x, y + 18, width, 9, 5);
+  graphics.fillStyle(0xd36b52, 0.95);
+  graphics.fillRoundedRect(x + 2, y + 20, Math.max(5, (width - 4) * ratio), 5, 3);
+  graphics.lineStyle(1, 0x29474c, 1);
+  graphics.strokeRoundedRect(x, y + 18, width, 9, 5);
+
+  container.add(scene.add.text(x, y, `해체 중 ${Math.round(ratio * 100)}% · 단계 ${demolition.phase}`, {
+    ...HUD_TEXT_STYLE,
+    fontSize: "12px",
+    color: "#f1c2ae",
+  }));
 }
 
 function getActivityStatusLabel(selectedEntity: SelectedEntityView): string {
@@ -369,6 +402,7 @@ function getGroupActivityKind(selection: SelectedEntityView): "moving" | "attack
 
   if (
     selection.construction ||
+    selection.demolition ||
     (selection.productionQueue?.length ?? 0) > 0 ||
     (selection.researchQueue?.length ?? 0) > 0
   ) {

@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
@@ -176,7 +176,7 @@ test("keeps original control bindings separate from exported image identity and 
     ORIGINAL_COMMAND_CONTROL_BINDINGS.map(({ sourceActionWord, frameOrResourceIndex, sourceLabel }) => [sourceActionWord, frameOrResourceIndex, sourceLabel]),
     [[61, 27, "자동마법설정"], [62, 26, "자동마법해제"], [63, 28, null], [64, 29, null]],
   );
-  assert.deepEqual(ORIGINAL_COMMAND_ICON_ASSETS.map(({ sourceFrameIndex }) => sourceFrameIndex), [4, 6, 10, 11, 12, 16, 26, 27, 28, 29, 39, 43, 45]);
+  assert.deepEqual(ORIGINAL_COMMAND_ICON_ASSETS.map(({ sourceFrameIndex }) => sourceFrameIndex), [4, 6, 10, 11, 12, 13, 16, 26, 27, 28, 29, 39, 43, 45]);
   assert.equal(resolveSourceCommandIcon("move"), undefined);
 });
 
@@ -199,11 +199,24 @@ test("the opt-in Imjinrok profile binds exact controls and labels source-backed 
       ["rally-point", 11, 21, "집결지설정", "exact-source-control-binding"],
       ["cancel-production", 45, 19, "취소", "exact-source-control-binding"],
       ["cancel-construction", 45, 19, "취소", "exact-source-control-binding"],
+      ["demolish", 13, 13, "해체", "exact-source-control-binding"],
       ["attack-move", 4, 5, "공격", "source-backed-adaptation"],
       ["build", 16, 11, "건설", "source-backed-adaptation"],
     ],
   );
   assert.equal(resolveSourceCommandIcon("move", IMJINROK_SOURCE_COMMAND_ICON_PROFILE)?.sourceFrameIndex, 6);
+  const demolitionIcon = ORIGINAL_COMMAND_ICON_ASSETS.find((asset) => asset.sourceFrameIndex === 13);
+  assert.ok(demolitionIcon);
+  assert.equal(
+    existsSync(resolve(dirname(fileURLToPath(import.meta.url)), "../../../..", "apps/game-client/public", demolitionIcon.assetPath)),
+    true,
+  );
+  assert.deepEqual(resolveSourceCommandIcon("demolish", IMJINROK_SOURCE_COMMAND_ICON_PROFILE), {
+    ...demolitionIcon,
+    sourceActionWord: 13,
+    sourceLabel: "해체",
+    evidenceStatus: "exact-source-control-binding",
+  });
   assert.deepEqual(
     resolveMagicAutoUseSourceCommandIcon(false, IMJINROK_SOURCE_COMMAND_ICON_PROFILE),
     {

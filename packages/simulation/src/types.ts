@@ -82,6 +82,16 @@ export interface ConstructionState {
   builderUnitId?: string;
 }
 
+/**
+ * Serializable action-13 progression. Phase is intentionally retained even
+ * though it is derivable: source update writes the phase before decrementing
+ * progress, so snapshotting both preserves the observed tick boundary.
+ */
+export interface DemolitionState {
+  progress: number;
+  phase: number;
+}
+
 export interface RallyPointState {
   target: GridPoint;
   mode?: "move" | "attack-move";
@@ -116,6 +126,7 @@ export interface UnitState {
   currentOrder?: UnitOrderState;
   attackCooldownTicks?: number;
   construction?: ConstructionState;
+  demolition?: DemolitionState;
   productionQueue?: ProductionQueueItemState[];
   researchQueue?: ResearchQueueItemState[];
   scriptedBehavior?: UnitScriptedBehaviorState;

@@ -27,6 +27,21 @@ test("selected entity views clone serializable portrait render metadata", () => 
   });
 });
 
+test("selected entity views publish serializable demolition progress", () => {
+  const unit: UnitState = {
+    id: "building-1",
+    playerId: "local-player",
+    kind: "barracks",
+    position: { x: 4, y: 7 },
+    movementSpeed: 0,
+    health: { current: 480, max: 1_200 },
+    mana: { current: 0, max: 0 },
+    demolition: { progress: 48, phase: 4 },
+  };
+
+  assert.deepEqual(toSelectedEntityView(unit).demolition, { progress: 48, phase: 4 });
+});
+
 test("magic auto-use HUD views initialize legacy or missing player state as disabled", () => {
   assert.deepEqual(createMagicAutoUseView("p1", undefined), { playerId: "p1", enabled: false });
   assert.deepEqual(createMagicAutoUseView("p1", false), { playerId: "p1", enabled: false });

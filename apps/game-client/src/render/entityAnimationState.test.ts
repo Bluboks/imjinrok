@@ -165,3 +165,15 @@ test("construction, damage, and attack states retain priority over carried-resou
     "attack",
   );
 });
+
+test("demolition reuses the construction visual state before damage and idle", () => {
+  const visual = visualWithStates("construction", "damaged", "idle");
+
+  assert.equal(
+    getEntityAnimationStateKey(
+      unit({ demolition: { progress: 48, phase: 4 }, health: { current: 20, max: 100 } }),
+      visual,
+    ),
+    "construction",
+  );
+});

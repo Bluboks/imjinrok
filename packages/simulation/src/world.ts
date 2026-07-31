@@ -25,7 +25,7 @@ import type { PlayerCheatState, PlayerState, ResourceBank, UnitState, WorldSnaps
 
 const STARTING_PLACEMENT_SEARCH_RADIUS = 12;
 
-export type { AttributePool, CarriedResourceState, CombatEventState, ConstructionState, ObjectiveRuntimeState, ObjectiveStatus, PlayerCheatState, PlayerResearchState, PlayerState, PlayerTeamId, ProductionQueueItemState, RallyPointState, ResearchQueueItemState, ResourceBank, ScenarioRuntimeEvent, ScenarioRuntimeState, ScenarioStatus, ScriptedEventRuntimeState, ScriptedEventStatus, UnitOrderState, UnitScriptedBehaviorState, UnitState, WorldSnapshot, WorldState } from "./types.js";
+export type { AttributePool, CarriedResourceState, CombatEventState, ConstructionState, DemolitionState, ObjectiveRuntimeState, ObjectiveStatus, PlayerCheatState, PlayerResearchState, PlayerState, PlayerTeamId, ProductionQueueItemState, RallyPointState, ResearchQueueItemState, ResourceBank, ScenarioRuntimeEvent, ScenarioRuntimeState, ScenarioStatus, ScriptedEventRuntimeState, ScriptedEventStatus, UnitOrderState, UnitScriptedBehaviorState, UnitState, WorldSnapshot, WorldState } from "./types.js";
 export { getBuildTimeTicks, getConstructionProgress, isUnitUnderConstruction } from "./construction.js";
 export { applyCommand, findBuildWorkPath, issueCommand, validateCommand, type CommandValidationResult, type IssueCommandResult } from "./commands.js";
 export { arePlayersAllied, arePlayersEnemies, getPlayerTeamId } from "./diplomacy.js";

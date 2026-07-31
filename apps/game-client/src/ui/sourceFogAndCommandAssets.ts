@@ -158,6 +158,11 @@ export const ORIGINAL_COMMAND_ICON_ASSETS: readonly SourceCommandIcon[] = Object
     sourceFrameIndex: 12,
   },
   {
+    textureKey: "original-command-button-frame-0013",
+    assetPath: "assets/themes/default/ui/command-icons/button_0013.png",
+    sourceFrameIndex: 13,
+  },
+  {
     textureKey: "original-command-button-frame-0016",
     assetPath: "assets/themes/default/ui/command-icons/button_0016.png",
     sourceFrameIndex: 16,
@@ -254,6 +259,7 @@ export const IMJINROK_SOURCE_COMMAND_ICON_PROFILE: SourceCommandIconProfile = Ob
     "rally-point": bindSourceCommandIcon("rally-point", 21, "집결지설정", 11, "exact-source-control-binding"),
     "cancel-production": bindSourceCommandIcon("cancel-production", 19, "취소", 45, "exact-source-control-binding"),
     "cancel-construction": bindSourceCommandIcon("cancel-construction", 19, "취소", 45, "exact-source-control-binding"),
+    demolish: bindSourceCommandIcon("demolish", 13, "해체", 13, "exact-source-control-binding"),
     "attack-move": bindSourceCommandIcon("attack-move", 5, "공격", 4, "source-backed-adaptation"),
     build: bindSourceCommandIcon("build", 11, "건설", 16, "source-backed-adaptation"),
   }),

@@ -1,4 +1,14 @@
 export * from "./iso.js";
+export {
+  ORIGINAL_DEMOLITION_INITIAL_PROGRESS,
+  advanceOriginalDemolitionTick,
+  calculateProjectDemolitionRefund,
+  createDemolitionState,
+  getOriginalDemolitionPhase,
+  replayOriginalDemolitionDecrement,
+  type DemolitionDecrementResult,
+  type DemolitionTickResult,
+} from "./demolition.js";
 export { getEnvironmentLightLevel, getEnvironmentSightMultiplier } from "./environment.js";
 export {
   advanceProjectileSystem,

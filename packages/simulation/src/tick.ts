@@ -2,6 +2,7 @@ import { createUnitId, findBuildWorkPath, findUnitSpawnPoint } from "./commands.
 import { applyScenarioScriptedEvents, evaluateScenarioRuntime } from "./scenario.js";
 import { SIM_TICK_SECONDS } from "./constants.js";
 import { advanceConstructionHealth, isUnitUnderConstruction, updateConstructionHealth } from "./construction.js";
+import { advanceOriginalDemolitionTick, calculateProjectDemolitionRefund } from "./demolition.js";
 import { resolveDamageAmount } from "./damage.js";
 import { applyAuraAttackDamage, defaultAuraProfileRegistry, refreshAuraEffects, type AuraProfileRegistry } from "./aura.js";
 import { arePlayersAllied, arePlayersEnemies } from "./diplomacy.js";
@@ -68,6 +69,7 @@ export function advanceWorldTick(state: WorldState, options: AdvanceWorldTickOpt
   }
   advanceProductionQueues(state);
   advanceResearchQueues(state);
+  advanceBuildingDemolitions(state);
 
   const movementReservation = createMovementReservationForState(state);
 
@@ -222,7 +224,7 @@ function advanceProductionQueues(state: WorldState): void {
     const queue = unit.productionQueue;
     const queueItem = queue?.[0];
 
-    if (isUnitUnderConstruction(unit) || !queue || !queueItem) {
+    if (isUnitUnderConstruction(unit) || unit.demolition || !queue || !queueItem) {
       continue;
     }
 
@@ -283,7 +285,7 @@ function advanceResearchQueues(state: WorldState): void {
     const queue = unit.researchQueue;
     const queueItem = queue?.[0];
 
-    if (isUnitUnderConstruction(unit) || !queue || !queueItem) {
+    if (isUnitUnderConstruction(unit) || unit.demolition || !queue || !queueItem) {
       continue;
     }
 
@@ -299,6 +301,45 @@ function advanceResearchQueues(state: WorldState): void {
     if (queue.length === 0) {
       delete unit.researchQueue;
     }
+  }
+}
+
+function advanceBuildingDemolitions(state: WorldState): void {
+  for (const building of iterateUnitsOrdered(state)) {
+    if (!building.demolition) {
+      continue;
+    }
+
+    const result = advanceOriginalDemolitionTick(building.demolition, building.health);
+
+    if (!result.completed) {
+      building.demolition = result.demolition;
+      building.health = result.health;
+      continue;
+    }
+
+    refundProjectDemolitionCost(state, building);
+    removeUnitFromWorld(state, building.id);
+  }
+}
+
+/**
+ * Deliberate product adapter: this applies the generic full-cost refund
+ * selected by `calculateProjectDemolitionRefund`, not an assertion that every
+ * current bank resource is an original action-13 refund resource.
+ */
+function refundProjectDemolitionCost(state: WorldState, building: UnitState): void {
+  const bank = state.playerResources[building.playerId];
+
+  if (!bank) {
+    return;
+  }
+
+  const refund = calculateProjectDemolitionRefund((unitDefinitions[building.kind] as UnitDefinition).cost);
+
+  for (const [resource, amount] of Object.entries(refund)) {
+    const kind = resource as BankResourceKind;
+    bank[kind] += amount ?? 0;
   }
 }
 
@@ -1075,7 +1116,7 @@ function advanceUnitCombat(state: WorldState, projectileRegistry: ProjectileRegi
       continue;
     }
 
-    if (isUnitUnderConstruction(unit)) {
+    if (isUnitUnderConstruction(unit) || unit.demolition) {
       continue;
     }
 

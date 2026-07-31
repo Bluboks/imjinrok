@@ -1,5 +1,5 @@
 import { unitDefinitions, type ActionDefinitionId, type DayPhase, type FactionId, type GridPoint, type MapDefinition, type ResearchDefinitionId, type ResourceAmountSet, type UnitDefinitionId, type WeatherKind } from "@shared";
-import type { CarriedResourceState, ConstructionState, PlayerPopulationState, PlayerVisibilityState, ProductionQueueItemState, RallyPointState, ResearchQueueItemState, UnitOrderState, UnitState } from "@simulation";
+import type { CarriedResourceState, ConstructionState, DemolitionState, PlayerPopulationState, PlayerVisibilityState, ProductionQueueItemState, RallyPointState, ResearchQueueItemState, UnitOrderState, UnitState } from "@simulation";
 import type { UiDomainAction } from "./ui/objectiveModalActions.js";
 import type { GameSpeedPreset } from "./gameplayPreferences.js";
 
@@ -53,6 +53,7 @@ export interface SelectedEntityView {
   productionQueue?: ProductionQueueItemView[];
   researchQueue?: ResearchQueueItemView[];
   construction?: ConstructionView;
+  demolition?: DemolitionView;
   carriedResource?: CarriedResourceView;
   rallyPoint?: RallyPointView;
   portrait?: SelectedEntityPortraitView;
@@ -87,6 +88,11 @@ export interface CarriedResourceView {
 export interface ConstructionView {
   remainingTicks: ConstructionState["remainingTicks"];
   totalTicks: ConstructionState["totalTicks"];
+}
+
+export interface DemolitionView {
+  progress: DemolitionState["progress"];
+  phase: DemolitionState["phase"];
 }
 
 export interface RallyPointView {
@@ -302,6 +308,13 @@ export function toSelectedEntityView(unit: UnitState, portrait?: SelectedEntityP
     view.construction = {
       remainingTicks: unit.construction.remainingTicks,
       totalTicks: unit.construction.totalTicks,
+    };
+  }
+
+  if (unit.demolition) {
+    view.demolition = {
+      progress: unit.demolition.progress,
+      phase: unit.demolition.phase,
     };
   }
 

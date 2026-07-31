@@ -36,6 +36,53 @@ test("generic action grids retain glyph fallback without an opted-in source prof
   assert.deepEqual(resolveActionIconVisual(move!), { kind: "glyph", glyph: "M" });
 });
 
+test("completed buildings expose demolition while busy and demolishing buildings fail closed", () => {
+  const completed = getActionSlots([{ id: "barracks", kind: "barracks" }], null)
+    .find(({ actionId }) => actionId === "demolish");
+  assert.deepEqual(completed, {
+    actionId: "demolish",
+    icon: "D",
+    hotkey: "D",
+    label: "해체",
+    enabled: true,
+  });
+
+  const sourceBound = getActionSlots(
+    [{ id: "barracks", kind: "barracks" }],
+    null,
+    IMJINROK_SOURCE_COMMAND_ICON_PROFILE,
+  ).find(({ actionId }) => actionId === "demolish");
+  assert.deepEqual(sourceBound?.sourceIcon, {
+    ...ORIGINAL_COMMAND_ICON_ASSETS.find((asset) => asset.sourceFrameIndex === 13)!,
+    sourceActionWord: 13,
+    sourceLabel: "해체",
+    evidenceStatus: "exact-source-control-binding",
+  });
+
+  const busy = getActionSlots([{
+    id: "barracks",
+    kind: "barracks",
+    productionQueue: [{ id: "train", unit: "swordsman", remainingTicks: 1, totalTicks: 2 }],
+  }], null).find(({ actionId }) => actionId === "demolish");
+  assert.equal(busy?.enabled, false);
+  assert.equal(busy?.disabledReason, "진행중");
+
+  const demolishing = getActionSlots([{
+    id: "barracks",
+    kind: "barracks",
+    demolition: { progress: 48, phase: 4 },
+  }], null);
+  assert.equal(demolishing.filter(({ actionId }) => actionId !== undefined).length, 1);
+  assert.deepEqual(demolishing[0], {
+    actionId: "demolish",
+    icon: "D",
+    hotkey: "D",
+    label: "해체",
+    enabled: false,
+    disabledReason: "해체중",
+  });
+});
+
 test("the Imjinrok profile supplies its source-backed bindings without changing the 4×3 grid", () => {
   const slots = getActionSlots(
     [{ id: "unit", kind: "villager", construction: false }],
