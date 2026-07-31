@@ -107,6 +107,7 @@ export {
   createFixedBudgetCapacityPolicy,
   createKindCapacityConstraint,
   createProviderSupplyCapacityPolicy,
+  createTotalCountCapacityConstraint,
   createUncappedCapacityPolicy,
   defaultCapacityPolicyRegistry,
   evaluatePlayerCapacity,
@@ -129,6 +130,7 @@ export {
   type CapacityRejection,
   type CapacityRejectionReason,
   type CapacityUnitCategory,
+  type CreateTotalCountCapacityConstraintOptions,
   type ProviderSupplyCapacityState,
 } from "./capacity.js";
 export { canQueuePopulation, DEFAULT_POPULATION_LIMIT, getPlayerPopulationState, getPopulationCost, getPopulationProvided, type PlayerPopulationState } from "./population.js";

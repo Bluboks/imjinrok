@@ -8,6 +8,7 @@ import {
   createFixedBudgetCapacityPolicy,
   createKindCapacityConstraint,
   createProviderSupplyCapacityPolicy,
+  createTotalCountCapacityConstraint,
   createUncappedCapacityPolicy,
   createInitialWorldState,
   evaluatePlayerCapacity,
@@ -152,6 +153,62 @@ test("exact-kind caps include pending production reservations", () => {
 
   assert.equal(canAdmitPlayerCapacity(state, "p1", "swordsman", policy).admitted, false);
   assert.equal(canAdmitPlayerCapacity(state, "p1", "archer", policy).admitted, true);
+});
+
+test("count constraints can explicitly exclude pending production", () => {
+  const state = createCapacityFixture();
+  const townCenter = addUnit(state, "town-center", "town-center");
+  addUnit(state, "swordsman", "swordsman");
+  queueUnit(townCenter, "queued-swordsman", "swordsman");
+
+  const includesPending = createUncappedCapacityPolicy({
+    id: "test:total-with-pending",
+    constraints: [createTotalCountCapacityConstraint({ id: "total", cap: 3 })],
+  });
+  const excludesPending = createUncappedCapacityPolicy({
+    id: "test:total-without-pending",
+    constraints: [createTotalCountCapacityConstraint({ id: "total", cap: 3, includePending: false })],
+  });
+
+  assert.equal(canAdmitPlayerCapacity(state, "p1", "archer", includesPending).admitted, false);
+  const admission = canAdmitPlayerCapacity(state, "p1", "archer", excludesPending);
+  assert.equal(admission.admitted, true);
+  assert.deepEqual(admission.evaluation.constraints[1], {
+    constraintId: "total",
+    used: 2,
+    pending: 0,
+    requested: 1,
+    cap: 3,
+    unlimited: false,
+    available: 1,
+    admitted: true,
+  });
+});
+
+test("composed budget, total, and category constraints use their declared pending rules", () => {
+  const state = createCapacityFixture();
+  const townCenter = addUnit(state, "town-center", "town-center");
+  addUnit(state, "house", "house");
+  addUnit(state, "swordsman", "swordsman");
+  queueUnit(townCenter, "queued-swordsman", "swordsman");
+  const policy = createFixedBudgetCapacityPolicy({
+    id: "test:composed-constraints",
+    cap: 2,
+    costForKind: (kind) => (kind === "swordsman" ? 1 : 0),
+    constraints: [
+      createTotalCountCapacityConstraint({ id: "total-live", cap: 3, includePending: false }),
+      createCategoryCapacityConstraint({ id: "buildings-live", category: "building", cap: 2, includePending: false }),
+    ],
+  });
+
+  const admission = canAdmitPlayerCapacity(state, "p1", "gwon-yul", policy);
+  assert.equal(admission.admitted, false);
+  assert.deepEqual(admission.rejection, { constraintId: "total-live", reason: "capacity-exceeded" });
+  assert.deepEqual(admission.evaluation.constraints.map((constraint) => [constraint.constraintId, constraint.used, constraint.pending, constraint.requested]), [
+    ["fixed-budget", 1, 1, 0],
+    ["total-live", 3, 0, 1],
+    ["buildings-live", 2, 0, 0],
+  ]);
 });
 
 test("multiple constraints reject in declared deterministic order", () => {

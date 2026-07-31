@@ -107,12 +107,23 @@ export interface CreateCategoryCapacityConstraintOptions {
   readonly id: string;
   readonly category: CapacityUnitCategory;
   readonly cap: number;
+  /** Queued production reserves capacity unless a policy explicitly excludes it. */
+  readonly includePending?: boolean;
 }
 
 export interface CreateKindCapacityConstraintOptions {
   readonly id: string;
   readonly kind: UnitDefinitionId;
   readonly cap: number;
+  /** Queued production reserves capacity unless a policy explicitly excludes it. */
+  readonly includePending?: boolean;
+}
+
+export interface CreateTotalCountCapacityConstraintOptions {
+  readonly id: string;
+  readonly cap: number;
+  /** Queued production reserves capacity unless a policy explicitly excludes it. */
+  readonly includePending?: boolean;
 }
 
 export interface RegisterCapacityPolicyOptions {
@@ -225,16 +236,35 @@ export function createCategoryCapacityConstraint(
   assertStableId(options.id, "Capacity constraint");
   assertCapacityValue(options.cap, "Category capacity cap");
 
-  return createCountCapacityConstraint(options.id, options.cap, (entry) => entry.category === options.category, (kind) => {
-    return unitDefinitions[kind].category === options.category;
-  });
+  return createCountCapacityConstraint(
+    options.id,
+    options.cap,
+    options.includePending ?? true,
+    (entry) => entry.category === options.category,
+    (kind) => unitDefinitions[kind].category === options.category,
+  );
 }
 
 export function createKindCapacityConstraint(options: CreateKindCapacityConstraintOptions): CapacityConstraint {
   assertStableId(options.id, "Capacity constraint");
   assertCapacityValue(options.cap, "Kind capacity cap");
 
-  return createCountCapacityConstraint(options.id, options.cap, (entry) => entry.kind === options.kind, (kind) => kind === options.kind);
+  return createCountCapacityConstraint(
+    options.id,
+    options.cap,
+    options.includePending ?? true,
+    (entry) => entry.kind === options.kind,
+    (kind) => kind === options.kind,
+  );
+}
+
+export function createTotalCountCapacityConstraint(
+  options: CreateTotalCountCapacityConstraintOptions,
+): CapacityConstraint {
+  assertStableId(options.id, "Capacity constraint");
+  assertCapacityValue(options.cap, "Total count capacity cap");
+
+  return createCountCapacityConstraint(options.id, options.cap, options.includePending ?? true, () => true, () => true);
 }
 
 export function evaluatePlayerCapacity(
@@ -387,6 +417,7 @@ function createCostBudgetCapacityConstraint(
 function createCountCapacityConstraint(
   id: string,
   cap: number,
+  includePending: boolean,
   matchesEntry: (entry: CapacityEntry) => boolean,
   matchesRequest: (kind: UnitDefinitionId) => boolean,
 ): CapacityConstraint {
@@ -394,7 +425,9 @@ function createCountCapacityConstraint(
     id,
     evaluate(context: CapacityPolicyContext) {
       const used = context.entries.filter((entry) => entry.location === "live" && matchesEntry(entry)).length;
-      const pending = context.entries.filter((entry) => entry.location === "pending" && matchesEntry(entry)).length;
+      const pending = includePending
+        ? context.entries.filter((entry) => entry.location === "pending" && matchesEntry(entry)).length
+        : 0;
       const requested = context.request && matchesRequest(context.request.kind) ? 1 : 0;
       return buildBudgetOutcome(used, pending, requested, cap);
     },
