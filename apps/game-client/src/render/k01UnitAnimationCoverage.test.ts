@@ -9,6 +9,7 @@ import {
 } from "@shared";
 import { getEntityAnimationStateKey, type EntityAnimationStateUnit } from "./entityAnimationState.js";
 import { resolveEntityAnimationSelection } from "./sourceOrientationAnimation.js";
+import { resolveEntityTerminalPresentation } from "./entityTerminalPresentation.js";
 import { getGroundContactPlacement } from "./visualScale.js";
 
 const unit = (overrides: Partial<EntityAnimationStateUnit> = {}): EntityAnimationStateUnit => ({
@@ -111,6 +112,32 @@ test("K01 runtime routing resolves every guarded clip without fallback or frame-
         );
       }
     }
+  }
+});
+
+test("K01 source-proven death clips use the terminal adapter once, while turtle tanks and buildings remain unsupported", () => {
+  for (const evidence of K01_UNIT_ANIMATION_EVIDENCE) {
+    const visual = defaultTheme.visuals[defaultTheme.entityBindings[evidence.kind]] as EntityVisual;
+
+    for (const stateKey of evidence.terminalRuntimeStates ?? []) {
+      for (const facing of FACINGS) {
+        const terminal = resolveEntityTerminalPresentation(visual, facing);
+        const expected = visual.states[stateKey]?.clips[facing];
+
+        assert.ok(expected, `${evidence.kind}/${stateKey}/${facing} must retain its directional source clip`);
+        assert.equal(terminal?.clip, expected, `${evidence.kind}/${stateKey}/${facing} must not fall back to a live clip`);
+        assert.equal(terminal?.clip.loop, false, `${evidence.kind}/${stateKey}/${facing} must remain one-shot`);
+        assert.equal(terminal?.lifetimeMs, (expected.frames.length * 1000) / expected.fps);
+      }
+    }
+  }
+
+  const turtleVisual = defaultTheme.visuals[defaultTheme.entityBindings["japanese-turtle-tank"]] as EntityVisual;
+  assert.equal(resolveEntityTerminalPresentation(turtleVisual, "s"), null);
+
+  for (const evidence of K01_BUILDING_VISUAL_EVIDENCE) {
+    const visual = defaultTheme.visuals[defaultTheme.entityBindings[evidence.kind]] as EntityVisual;
+    assert.equal(resolveEntityTerminalPresentation(visual, "s"), null, `${evidence.kind} has no generic terminal clip`);
   }
 });
 

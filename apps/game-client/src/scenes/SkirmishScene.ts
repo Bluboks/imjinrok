@@ -166,6 +166,14 @@ import {
 import { getEntityAnimationStateKey } from "../render/entityAnimationState.js";
 import { resolveEntityAnimationSelection } from "../render/sourceOrientationAnimation.js";
 import {
+  advanceEntityTerminalPlayback,
+  createEntityTerminalPlayback,
+  reconcileEntityRenderableIds,
+  resolveEntityTerminalPresentation,
+  type EntityTerminalPlayback,
+  type EntityTerminalPresentation,
+} from "../render/entityTerminalPresentation.js";
+import {
   getMapExplicitTileVisualPreloadDescriptors,
   getRegisteredExplicitTileVisualPreloadDescriptors,
   requireExplicitTileVisualTexture,
@@ -426,6 +434,8 @@ interface UnitRenderable {
   healthBarBack: Phaser.GameObjects.Graphics;
   healthBarFill: Phaser.GameObjects.Graphics;
   lastFacing: Facing;
+  terminalKind: UnitDefinitionId;
+  terminalSourceOrientation?: UnitState["sourceOrientation"];
   damageFlashUntil: number;
   lastHealth: number;
 }
@@ -450,6 +460,13 @@ interface EntityAnimationTracker {
 interface EntityAnimationSelection {
   key: string;
   clip: AnimationClip;
+}
+
+interface TerminalUnitRenderable {
+  renderable: UnitRenderable;
+  visual: EntityVisual;
+  presentation: EntityTerminalPresentation;
+  playback: EntityTerminalPlayback;
 }
 
 interface ResourceRenderable {
@@ -562,6 +579,8 @@ export class SkirmishScene extends Phaser.Scene {
   private readonly knownResourceViews = new Map<string, KnownResourceView>();
   private readonly resourceRenderables = new Map<string, ResourceRenderable>();
   private readonly unitRenderables = new Map<string, UnitRenderable>();
+  private readonly terminalUnitRenderables = new Map<string, TerminalUnitRenderable>();
+  private nextTerminalUnitRenderableId = 0;
   private readonly projectilePresentation = new ProjectilePresentationReconciler({
     create: (placement) => this.createProjectilePresentationHandle(placement),
   });
@@ -864,11 +883,13 @@ export class SkirmishScene extends Phaser.Scene {
     if (nextSnapshot === this.worldState && nextSnapshot.tick === this.lastSyncedTick) {
       this.updateEnvironmentOverlay();
       this.updateVisibleUnitAnimationFrames(animationDelta);
+      this.updateTerminalUnitRenderables(animationDelta);
       this.updateMissionDialogueOverlay(time);
       this.updateMissionResultOverlay();
       return;
     }
 
+    this.updateTerminalUnitRenderables(animationDelta);
     this.worldState = nextSnapshot;
     this.map = nextSnapshot.map;
     requireMinimapAvailabilityPolicyForMap(this.map);
@@ -1296,8 +1317,8 @@ export class SkirmishScene extends Phaser.Scene {
     this.resourceRenderables.forEach((renderable) => renderable.container.destroy(true));
     this.resourceRenderables.clear();
     this.knownResourceViews.clear();
-    this.unitRenderables.forEach((renderable) => renderable.container.destroy(true));
-    this.unitRenderables.clear();
+    this.clearUnitRenderables();
+    this.clearTerminalUnitRenderables();
     this.projectilePresentation.destroy();
     this.combatEffectGraphics.forEach((graphics) => graphics.destroy());
     this.combatEffectGraphics.clear();
@@ -2798,6 +2819,8 @@ export class SkirmishScene extends Phaser.Scene {
     this.lastControlGroupRecall = null;
     this.lastUnitSelectionClick = null;
     this.lastIdleWorkerUnitId = null;
+    this.clearUnitRenderables();
+    this.clearTerminalUnitRenderables();
     this.processedCombatEventIds.clear();
     snapshot.combatEvents.forEach((event) => this.processedCombatEventIds.add(event.id));
     this.combatEffectGraphics.forEach((graphics) => graphics.destroy());
@@ -6675,6 +6698,7 @@ export class SkirmishScene extends Phaser.Scene {
       return;
     }
 
+    this.updateTerminalUnitRenderables(0);
     this.worldState = snapshot;
     this.map = snapshot.map;
     requireMinimapAvailabilityPolicyForMap(this.map);
@@ -8215,8 +8239,7 @@ export class SkirmishScene extends Phaser.Scene {
     }
 
     if (loaded.some(({ visual }) => visual.kind === "entity")) {
-      this.unitRenderables.forEach((renderable) => renderable.container.destroy(true));
-      this.unitRenderables.clear();
+      this.clearUnitRenderables();
       this.syncUnitRenderables();
     }
   }
@@ -8673,16 +8696,120 @@ export class SkirmishScene extends Phaser.Scene {
     };
   }
 
+  /**
+   * Authoritative removal is observed from the current unit registry, rather
+   * than snapshot identity, because local transport mutates its world in
+   * place. Terminal renderables are created only from existing visible units.
+   * They are never added back to `worldState.units`, so they cannot be selected,
+   * targeted, collide, or influence simulation outcomes.
+   */
+  private promoteUnitRenderableToTerminal(unitId: string, renderable: UnitRenderable): void {
+    this.unitRenderables.delete(unitId);
+
+    const visual = this.getEntityVisual(renderable.terminalKind);
+    const presentation = visual
+      ? resolveEntityTerminalPresentation(visual, renderable.lastFacing, renderable.terminalSourceOrientation)
+      : null;
+    const baseLayer = renderable.spriteLayers?.[0];
+    const firstFrame = presentation?.clip.frames[0];
+
+    if (!visual || !presentation || !baseLayer || !firstFrame || !this.textures.exists(firstFrame.textureKey)) {
+      renderable.container.destroy(true);
+      return;
+    }
+
+    renderable.selectionRing.setVisible(false);
+    renderable.teamBadge?.setVisible(false);
+    renderable.damageFlash.clear();
+    renderable.healthBarBack.clear();
+    renderable.healthBarFill.clear();
+    renderable.spriteLayers?.slice(1).forEach((layer) => layer.sprite.setVisible(false));
+    baseLayer.animationKey = presentation.key;
+    baseLayer.animationFrameIndex = 0;
+    baseLayer.animationFrameElapsedMs = 0;
+    baseLayer.sprite
+      .setTexture(firstFrame.textureKey, firstFrame.frameName)
+      .setFlipX(presentation.clip.mirrorX ?? false)
+      .setVisible(true);
+    this.applyUnitSpriteGroundContactPlacement(baseLayer.sprite, visual, firstFrame);
+
+    const terminalId = `${unitId}:terminal:${this.nextTerminalUnitRenderableId}`;
+    this.nextTerminalUnitRenderableId += 1;
+    this.terminalUnitRenderables.set(terminalId, {
+      renderable,
+      visual,
+      presentation,
+      playback: createEntityTerminalPlayback(),
+    });
+  }
+
+  private updateTerminalUnitRenderables(deltaMs: number): void {
+    for (const [terminalId, terminal] of this.terminalUnitRenderables) {
+      const playback = advanceEntityTerminalPlayback(terminal.playback, terminal.presentation, deltaMs);
+
+      if (!playback) {
+        terminal.renderable.container.destroy(true);
+        this.terminalUnitRenderables.delete(terminalId);
+        continue;
+      }
+
+      terminal.playback = playback;
+      const frame = terminal.presentation.clip.frames[playback.frameIndex];
+      const sprite = terminal.renderable.spriteLayers?.[0]?.sprite;
+
+      if (!frame || !sprite || !this.textures.exists(frame.textureKey)) {
+        continue;
+      }
+
+      const frameMatches = sprite.texture.key === frame.textureKey &&
+        (frame.frameName === undefined || String(sprite.frame.name) === frame.frameName);
+
+      if (!frameMatches) {
+        sprite.setTexture(frame.textureKey, frame.frameName);
+        this.applyUnitSpriteGroundContactPlacement(sprite, terminal.visual, frame);
+      }
+
+      sprite.setFlipX(terminal.presentation.clip.mirrorX ?? false);
+    }
+  }
+
+  private clearTerminalUnitRenderables(): void {
+    this.terminalUnitRenderables.forEach((terminal) => terminal.renderable.container.destroy(true));
+    this.terminalUnitRenderables.clear();
+  }
+
+  private clearUnitRenderables(): void {
+    this.unitRenderables.forEach((renderable) => renderable.container.destroy(true));
+    this.unitRenderables.clear();
+  }
+
   private syncUnitRenderables(deltaMs = 0): void {
-    const liveIds = new Set(Object.values(this.worldState.units).filter((unit) => this.isUnitVisibleToLocalPlayer(unit)).map((unit) => unit.id));
-    for (const [id, renderable] of this.unitRenderables) {
-      if (!liveIds.has(id)) {
-        renderable.container.destroy(true);
-        this.unitRenderables.delete(id);
+    const units = Object.values(this.worldState.units);
+    const visibleUnits = units.filter((unit) => this.isUnitVisibleToLocalPlayer(unit));
+    const reconciliation = reconcileEntityRenderableIds(
+      this.unitRenderables.keys(),
+      new Set(units.map((unit) => unit.id)),
+      new Set(visibleUnits.map((unit) => unit.id)),
+    );
+
+    for (const unitId of reconciliation.terminal) {
+      const renderable = this.unitRenderables.get(unitId);
+
+      if (renderable) {
+        this.promoteUnitRenderableToTerminal(unitId, renderable);
       }
     }
 
-    Object.values(this.worldState.units).filter((unit) => this.isUnitVisibleToLocalPlayer(unit)).forEach((unit) => {
+    for (const unitId of reconciliation.destroy) {
+      const renderable = this.unitRenderables.get(unitId);
+
+      if (renderable) {
+        renderable.container.destroy(true);
+        this.unitRenderables.delete(unitId);
+      }
+    }
+
+    visibleUnits.forEach((unit) => {
       let renderable = this.unitRenderables.get(unit.id);
       if (!renderable) {
         renderable = this.createUnitRenderable(unit);
@@ -8694,6 +8821,8 @@ export class SkirmishScene extends Phaser.Scene {
       renderable.container.setPosition(unitPosition.x, unitPosition.y).setDepth(unitPosition.y + 20);
       renderable.container.setAlpha(unit.construction && !hasConstructionVisual ? 0.68 : 1);
       renderable.selectionRing.setVisible(this.selectedUnitIds.has(unit.id));
+      renderable.terminalKind = unit.kind;
+      renderable.terminalSourceOrientation = unit.sourceOrientation ? { ...unit.sourceOrientation } : undefined;
       this.updateUnitRenderableFrame(renderable, unit, deltaMs);
       this.updateUnitCombatFeedback(renderable, unit);
     });
@@ -8796,6 +8925,8 @@ export class SkirmishScene extends Phaser.Scene {
         healthBarBack,
         healthBarFill,
         lastFacing: initialFacing,
+        terminalKind: unit.kind,
+        terminalSourceOrientation: unit.sourceOrientation ? { ...unit.sourceOrientation } : undefined,
         damageFlashUntil: 0,
         lastHealth: unit.health.current,
       };
@@ -8815,6 +8946,8 @@ export class SkirmishScene extends Phaser.Scene {
       healthBarBack,
       healthBarFill,
       lastFacing: initialFacing,
+      terminalKind: unit.kind,
+      terminalSourceOrientation: unit.sourceOrientation ? { ...unit.sourceOrientation } : undefined,
       damageFlashUntil: 0,
       lastHealth: unit.health.current,
     };

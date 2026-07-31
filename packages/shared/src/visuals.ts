@@ -116,9 +116,20 @@ export interface EntityVisualLayer {
   states: Record<string, EntityVisualState>;
 }
 
+/**
+ * An explicit client-only terminal presentation. The authoritative simulation
+ * still removes the entity; renderers may retain this visual for one clip.
+ */
+export interface EntityTerminalPresentationPolicy {
+  /** A non-looping entity visual state, such as a statically recovered death clip. */
+  state: string;
+}
+
 export interface EntityVisual extends VisualBase {
   kind: "entity";
   states: Record<string, EntityVisualState>;
+  /** Opt-in terminal presentation metadata for client renderers. */
+  terminalPresentation?: EntityTerminalPresentationPolicy;
   layers?: readonly EntityVisualLayer[];
   shadow?: FrameRef;
   teamColorMask?: FrameRef;

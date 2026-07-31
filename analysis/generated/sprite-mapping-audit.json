@@ -8,11 +8,11 @@
   "sourceFiles": [
     {
       "path": "packages/shared/src/themes.ts",
-      "sha256": "1a3507dcc80ff70edf2766e0c2d5b13e48147521eb5e31a06b495993f9f63083"
+      "sha256": "8f26ec931f55950a19faf83460f3b6530a06ec1caa99fcf8d1a1923afbb21665"
     },
     {
       "path": "packages/shared/src/visuals.ts",
-      "sha256": "15b73d752f08837f28554d579e2239d3b617252bea176a424f2e5b4fa87a3739"
+      "sha256": "985a51996e613b6e7f4accc301e6f46f84ff0ff5a00b882555954e7771e0b995"
     },
     {
       "path": "packages/shared/src/content.ts",
@@ -24,11 +24,11 @@
     },
     {
       "path": "packages/shared/src/k01UnitAnimationCoverage.ts",
-      "sha256": "2fcd21aaaf459db92be34ba58c0bb5187d1e6c4af1e64ff38dbbcc44d21c66f5"
+      "sha256": "d850be0743ac2c9ececfba2d39f91438bfc5d2af99e2f060550a69cd5b2e1d3a"
     },
     {
       "path": "apps/game-client/src/scenes/SkirmishScene.ts",
-      "sha256": "a2e6831dbe008f9dc5af65da8a084926ebd6c52ff3d32298de99c646fda6896a"
+      "sha256": "993f4270c8bd9e05479a19e3186307845e8c8e6e7bcbf6dac2122f38848bcc0d"
     },
     {
       "path": "apps/game-client/src/scenes/MissionBriefingScene.ts",
@@ -24220,14 +24220,17 @@
           "idle",
           "move"
         ],
+        "terminalRuntimeStates": [
+          "death"
+        ],
         "quarantines": [
           {
             "state": "attack",
             "reason": "Class-7 state 4 is only proven as a creation-default fallback to idle, not as a product attack clip."
           },
           {
-            "state": "death-runtime",
-            "reason": "The current simulation does not retain a terminal visual lifecycle, so the source-proven death clip is not selected by the normal runtime state adapter."
+            "state": "death-timing",
+            "reason": "The client-only terminal lifetime is derived from the configured non-loop clip and its provisional FPS; original update-to-time mapping remains unverified."
           }
         ],
         "evidenceDocument": "docs/reverse-engineering/mechanics/k01-korean-farmer-core-frames.md",
@@ -24258,14 +24261,17 @@
           "move",
           "attack"
         ],
+        "terminalRuntimeStates": [
+          "death"
+        ],
         "quarantines": [
           {
             "state": "state-2",
             "reason": "The alternate movement frame block is recovered, but its environment meaning and project policy remain intentionally unbound."
           },
           {
-            "state": "death-runtime",
-            "reason": "The current simulation does not retain a terminal visual lifecycle, so the source-proven death clip is not selected by the normal runtime state adapter."
+            "state": "death-timing",
+            "reason": "The client-only terminal lifetime is derived from the configured non-loop clip and its provisional FPS; original update-to-time mapping remains unverified."
           }
         ],
         "evidenceDocument": "docs/reverse-engineering/mechanics/k01-core-unit-animation-states.md",
@@ -24296,14 +24302,17 @@
           "move",
           "attack"
         ],
+        "terminalRuntimeStates": [
+          "death"
+        ],
         "quarantines": [
           {
             "state": "state-2",
             "reason": "The alternate movement frame block is recovered, but its environment meaning and project policy remain intentionally unbound."
           },
           {
-            "state": "death-runtime",
-            "reason": "The current simulation does not retain a terminal visual lifecycle, so the source-proven death clip is not selected by the normal runtime state adapter."
+            "state": "death-timing",
+            "reason": "The client-only terminal lifetime is derived from the configured non-loop clip and its provisional FPS; original update-to-time mapping remains unverified."
           }
         ],
         "evidenceDocument": "docs/reverse-engineering/mechanics/k01-core-unit-animation-states.md",
@@ -24334,10 +24343,13 @@
           "move",
           "attack"
         ],
+        "terminalRuntimeStates": [
+          "death"
+        ],
         "quarantines": [
           {
-            "state": "death-runtime",
-            "reason": "The current simulation does not retain a terminal visual lifecycle, so the source-proven death clip is not selected by the normal runtime state adapter."
+            "state": "death-timing",
+            "reason": "The client-only terminal lifetime is derived from the configured non-loop clip and its provisional FPS; original update-to-time mapping remains unverified."
           }
         ],
         "evidenceDocument": "docs/reverse-engineering/mechanics/k01-opening-unit-bindings.md",
@@ -24368,14 +24380,17 @@
           "move",
           "attack"
         ],
+        "terminalRuntimeStates": [
+          "death"
+        ],
         "quarantines": [
           {
             "state": "state-2",
             "reason": "The alternate movement frame block is recovered, but its environment meaning and project policy remain intentionally unbound."
           },
           {
-            "state": "death-runtime",
-            "reason": "The current simulation does not retain a terminal visual lifecycle, so the source-proven death clip is not selected by the normal runtime state adapter."
+            "state": "death-timing",
+            "reason": "The client-only terminal lifetime is derived from the configured non-loop clip and its provisional FPS; original update-to-time mapping remains unverified."
           }
         ],
         "evidenceDocument": "docs/reverse-engineering/mechanics/k01-core-unit-animation-states.md",
@@ -24407,14 +24422,17 @@
           "move",
           "attack"
         ],
+        "terminalRuntimeStates": [
+          "death"
+        ],
         "quarantines": [
           {
             "state": "state-2",
             "reason": "The second movement variant has no approved project-state policy."
           },
           {
-            "state": "death-runtime",
-            "reason": "The current simulation does not retain a terminal visual lifecycle, so the source-proven death clip is not selected by the normal runtime state adapter."
+            "state": "death-timing",
+            "reason": "The client-only terminal lifetime is derived from the configured non-loop clip and its provisional FPS; original update-to-time mapping remains unverified."
           }
         ],
         "evidenceDocument": "docs/reverse-engineering/mechanics/k01-normal-reinforcement-animation-batch.md",
@@ -24446,10 +24464,13 @@
           "move",
           "attack"
         ],
+        "terminalRuntimeStates": [
+          "death"
+        ],
         "quarantines": [
           {
-            "state": "death-runtime",
-            "reason": "The current simulation does not retain a terminal visual lifecycle, so the source-proven death clip is not selected by the normal runtime state adapter."
+            "state": "death-timing",
+            "reason": "The client-only terminal lifetime is derived from the configured non-loop clip and its provisional FPS; original update-to-time mapping remains unverified."
           }
         ],
         "evidenceDocument": "docs/reverse-engineering/mechanics/k01-samurai-animation-pilot.md",
@@ -24480,10 +24501,13 @@
           "move",
           "attack"
         ],
+        "terminalRuntimeStates": [
+          "death"
+        ],
         "quarantines": [
           {
-            "state": "death-runtime",
-            "reason": "The current simulation does not retain a terminal visual lifecycle, so the source-proven death clip is not selected by the normal runtime state adapter."
+            "state": "death-timing",
+            "reason": "The client-only terminal lifetime is derived from the configured non-loop clip and its provisional FPS; original update-to-time mapping remains unverified."
           }
         ],
         "evidenceDocument": "docs/reverse-engineering/mechanics/k01-opening-unit-bindings.md",
@@ -24512,14 +24536,17 @@
           "idle",
           "move"
         ],
+        "terminalRuntimeStates": [
+          "death"
+        ],
         "quarantines": [
           {
             "state": "attack",
             "reason": "Class-31 state 4 has no static-confirmed source-to-frame mapping."
           },
           {
-            "state": "death-runtime",
-            "reason": "The current simulation does not retain a terminal visual lifecycle, so the source-proven death clip is not selected by the normal runtime state adapter."
+            "state": "death-timing",
+            "reason": "The client-only terminal lifetime is derived from the configured non-loop clip and its provisional FPS; original update-to-time mapping remains unverified."
           }
         ],
         "evidenceDocument": "docs/reverse-engineering/mechanics/k01-japanese-farmer-frames.md",
@@ -24550,10 +24577,13 @@
           "move",
           "attack"
         ],
+        "terminalRuntimeStates": [
+          "death"
+        ],
         "quarantines": [
           {
-            "state": "death-runtime",
-            "reason": "The current simulation does not retain a terminal visual lifecycle, so the source-proven death clip is not selected by the normal runtime state adapter."
+            "state": "death-timing",
+            "reason": "The client-only terminal lifetime is derived from the configured non-loop clip and its provisional FPS; original update-to-time mapping remains unverified."
           }
         ],
         "evidenceDocument": "docs/reverse-engineering/mechanics/k01-hero-animation-pilot.md",
@@ -24584,10 +24614,13 @@
           "move",
           "attack"
         ],
+        "terminalRuntimeStates": [
+          "death"
+        ],
         "quarantines": [
           {
-            "state": "death-runtime",
-            "reason": "The current simulation does not retain a terminal visual lifecycle, so the source-proven death clip is not selected by the normal runtime state adapter."
+            "state": "death-timing",
+            "reason": "The client-only terminal lifetime is derived from the configured non-loop clip and its provisional FPS; original update-to-time mapping remains unverified."
           }
         ],
         "evidenceDocument": "docs/reverse-engineering/mechanics/k01-hero-animation-pilot.md",
@@ -24665,10 +24698,13 @@
           "move",
           "attack"
         ],
+        "terminalRuntimeStates": [
+          "death"
+        ],
         "quarantines": [
           {
-            "state": "death-runtime",
-            "reason": "The current simulation does not retain a terminal visual lifecycle, so the source-proven death clip is not selected by the normal runtime state adapter."
+            "state": "death-timing",
+            "reason": "The client-only terminal lifetime is derived from the configured non-loop clip and its provisional FPS; original update-to-time mapping remains unverified."
           }
         ],
         "evidenceDocument": "docs/reverse-engineering/mechanics/k01-konishi-animation-pilot.md",
@@ -24991,8 +25027,8 @@
             "reason": "Class-7 state 4 is only proven as a creation-default fallback to idle, not as a product attack clip."
           },
           {
-            "state": "death-runtime",
-            "reason": "The current simulation does not retain a terminal visual lifecycle, so the source-proven death clip is not selected by the normal runtime state adapter."
+            "state": "death-timing",
+            "reason": "The client-only terminal lifetime is derived from the configured non-loop clip and its provisional FPS; original update-to-time mapping remains unverified."
           }
         ],
         "semanticStatus": "source-frame-representative"
@@ -25019,8 +25055,8 @@
             "reason": "The alternate movement frame block is recovered, but its environment meaning and project policy remain intentionally unbound."
           },
           {
-            "state": "death-runtime",
-            "reason": "The current simulation does not retain a terminal visual lifecycle, so the source-proven death clip is not selected by the normal runtime state adapter."
+            "state": "death-timing",
+            "reason": "The client-only terminal lifetime is derived from the configured non-loop clip and its provisional FPS; original update-to-time mapping remains unverified."
           }
         ],
         "semanticStatus": "source-frame-representative"
@@ -25047,8 +25083,8 @@
             "reason": "The alternate movement frame block is recovered, but its environment meaning and project policy remain intentionally unbound."
           },
           {
-            "state": "death-runtime",
-            "reason": "The current simulation does not retain a terminal visual lifecycle, so the source-proven death clip is not selected by the normal runtime state adapter."
+            "state": "death-timing",
+            "reason": "The client-only terminal lifetime is derived from the configured non-loop clip and its provisional FPS; original update-to-time mapping remains unverified."
           }
         ],
         "semanticStatus": "source-frame-representative"
@@ -25071,8 +25107,8 @@
         ],
         "quarantines": [
           {
-            "state": "death-runtime",
-            "reason": "The current simulation does not retain a terminal visual lifecycle, so the source-proven death clip is not selected by the normal runtime state adapter."
+            "state": "death-timing",
+            "reason": "The client-only terminal lifetime is derived from the configured non-loop clip and its provisional FPS; original update-to-time mapping remains unverified."
           }
         ],
         "semanticStatus": "source-frame-representative"
@@ -25099,8 +25135,8 @@
             "reason": "The alternate movement frame block is recovered, but its environment meaning and project policy remain intentionally unbound."
           },
           {
-            "state": "death-runtime",
-            "reason": "The current simulation does not retain a terminal visual lifecycle, so the source-proven death clip is not selected by the normal runtime state adapter."
+            "state": "death-timing",
+            "reason": "The client-only terminal lifetime is derived from the configured non-loop clip and its provisional FPS; original update-to-time mapping remains unverified."
           }
         ],
         "semanticStatus": "source-frame-representative"
@@ -25127,8 +25163,8 @@
             "reason": "The second movement variant has no approved project-state policy."
           },
           {
-            "state": "death-runtime",
-            "reason": "The current simulation does not retain a terminal visual lifecycle, so the source-proven death clip is not selected by the normal runtime state adapter."
+            "state": "death-timing",
+            "reason": "The client-only terminal lifetime is derived from the configured non-loop clip and its provisional FPS; original update-to-time mapping remains unverified."
           }
         ],
         "semanticStatus": "source-frame-representative"
@@ -25151,8 +25187,8 @@
         ],
         "quarantines": [
           {
-            "state": "death-runtime",
-            "reason": "The current simulation does not retain a terminal visual lifecycle, so the source-proven death clip is not selected by the normal runtime state adapter."
+            "state": "death-timing",
+            "reason": "The client-only terminal lifetime is derived from the configured non-loop clip and its provisional FPS; original update-to-time mapping remains unverified."
           }
         ],
         "semanticStatus": "source-frame-representative"
@@ -25175,8 +25211,8 @@
         ],
         "quarantines": [
           {
-            "state": "death-runtime",
-            "reason": "The current simulation does not retain a terminal visual lifecycle, so the source-proven death clip is not selected by the normal runtime state adapter."
+            "state": "death-timing",
+            "reason": "The client-only terminal lifetime is derived from the configured non-loop clip and its provisional FPS; original update-to-time mapping remains unverified."
           }
         ],
         "semanticStatus": "source-frame-representative"
@@ -25202,8 +25238,8 @@
             "reason": "Class-31 state 4 has no static-confirmed source-to-frame mapping."
           },
           {
-            "state": "death-runtime",
-            "reason": "The current simulation does not retain a terminal visual lifecycle, so the source-proven death clip is not selected by the normal runtime state adapter."
+            "state": "death-timing",
+            "reason": "The client-only terminal lifetime is derived from the configured non-loop clip and its provisional FPS; original update-to-time mapping remains unverified."
           }
         ],
         "semanticStatus": "source-frame-representative"
@@ -25226,8 +25262,8 @@
         ],
         "quarantines": [
           {
-            "state": "death-runtime",
-            "reason": "The current simulation does not retain a terminal visual lifecycle, so the source-proven death clip is not selected by the normal runtime state adapter."
+            "state": "death-timing",
+            "reason": "The client-only terminal lifetime is derived from the configured non-loop clip and its provisional FPS; original update-to-time mapping remains unverified."
           }
         ],
         "semanticStatus": "source-frame-representative"
@@ -25250,8 +25286,8 @@
         ],
         "quarantines": [
           {
-            "state": "death-runtime",
-            "reason": "The current simulation does not retain a terminal visual lifecycle, so the source-proven death clip is not selected by the normal runtime state adapter."
+            "state": "death-timing",
+            "reason": "The client-only terminal lifetime is derived from the configured non-loop clip and its provisional FPS; original update-to-time mapping remains unverified."
           }
         ],
         "semanticStatus": "source-frame-representative"
@@ -25297,8 +25333,8 @@
         ],
         "quarantines": [
           {
-            "state": "death-runtime",
-            "reason": "The current simulation does not retain a terminal visual lifecycle, so the source-proven death clip is not selected by the normal runtime state adapter."
+            "state": "death-timing",
+            "reason": "The client-only terminal lifetime is derived from the configured non-loop clip and its provisional FPS; original update-to-time mapping remains unverified."
           }
         ],
         "semanticStatus": "source-frame-representative"
@@ -25790,97 +25826,97 @@
       "severity": "info",
       "code": "k01-runtime-visual-quarantine",
       "kind": "villager",
-      "state": "death-runtime",
+      "state": "death-timing",
       "evidenceDocument": "docs/reverse-engineering/mechanics/k01-korean-farmer-core-frames.md",
-      "detail": "The current simulation does not retain a terminal visual lifecycle, so the source-proven death clip is not selected by the normal runtime state adapter."
+      "detail": "The client-only terminal lifetime is derived from the configured non-loop clip and its provisional FPS; original update-to-time mapping remains unverified."
     },
     {
       "severity": "info",
       "code": "k01-runtime-visual-quarantine",
       "kind": "swordsman",
-      "state": "death-runtime",
+      "state": "death-timing",
       "evidenceDocument": "docs/reverse-engineering/mechanics/k01-core-unit-animation-states.md",
-      "detail": "The current simulation does not retain a terminal visual lifecycle, so the source-proven death clip is not selected by the normal runtime state adapter."
+      "detail": "The client-only terminal lifetime is derived from the configured non-loop clip and its provisional FPS; original update-to-time mapping remains unverified."
     },
     {
       "severity": "info",
       "code": "k01-runtime-visual-quarantine",
       "kind": "archer",
-      "state": "death-runtime",
+      "state": "death-timing",
       "evidenceDocument": "docs/reverse-engineering/mechanics/k01-core-unit-animation-states.md",
-      "detail": "The current simulation does not retain a terminal visual lifecycle, so the source-proven death clip is not selected by the normal runtime state adapter."
+      "detail": "The client-only terminal lifetime is derived from the configured non-loop clip and its provisional FPS; original update-to-time mapping remains unverified."
     },
     {
       "severity": "info",
       "code": "k01-runtime-visual-quarantine",
       "kind": "korean-monk",
-      "state": "death-runtime",
+      "state": "death-timing",
       "evidenceDocument": "docs/reverse-engineering/mechanics/k01-opening-unit-bindings.md",
-      "detail": "The current simulation does not retain a terminal visual lifecycle, so the source-proven death clip is not selected by the normal runtime state adapter."
+      "detail": "The client-only terminal lifetime is derived from the configured non-loop clip and its provisional FPS; original update-to-time mapping remains unverified."
     },
     {
       "severity": "info",
       "code": "k01-runtime-visual-quarantine",
       "kind": "japanese-swordsman",
-      "state": "death-runtime",
+      "state": "death-timing",
       "evidenceDocument": "docs/reverse-engineering/mechanics/k01-core-unit-animation-states.md",
-      "detail": "The current simulation does not retain a terminal visual lifecycle, so the source-proven death clip is not selected by the normal runtime state adapter."
+      "detail": "The client-only terminal lifetime is derived from the configured non-loop clip and its provisional FPS; original update-to-time mapping remains unverified."
     },
     {
       "severity": "info",
       "code": "k01-runtime-visual-quarantine",
       "kind": "japanese-gunner",
-      "state": "death-runtime",
+      "state": "death-timing",
       "evidenceDocument": "docs/reverse-engineering/mechanics/k01-normal-reinforcement-animation-batch.md",
-      "detail": "The current simulation does not retain a terminal visual lifecycle, so the source-proven death clip is not selected by the normal runtime state adapter."
+      "detail": "The client-only terminal lifetime is derived from the configured non-loop clip and its provisional FPS; original update-to-time mapping remains unverified."
     },
     {
       "severity": "info",
       "code": "k01-runtime-visual-quarantine",
       "kind": "japanese-samurai",
-      "state": "death-runtime",
+      "state": "death-timing",
       "evidenceDocument": "docs/reverse-engineering/mechanics/k01-samurai-animation-pilot.md",
-      "detail": "The current simulation does not retain a terminal visual lifecycle, so the source-proven death clip is not selected by the normal runtime state adapter."
+      "detail": "The client-only terminal lifetime is derived from the configured non-loop clip and its provisional FPS; original update-to-time mapping remains unverified."
     },
     {
       "severity": "info",
       "code": "k01-runtime-visual-quarantine",
       "kind": "japanese-shrine-maiden",
-      "state": "death-runtime",
+      "state": "death-timing",
       "evidenceDocument": "docs/reverse-engineering/mechanics/k01-opening-unit-bindings.md",
-      "detail": "The current simulation does not retain a terminal visual lifecycle, so the source-proven death clip is not selected by the normal runtime state adapter."
+      "detail": "The client-only terminal lifetime is derived from the configured non-loop clip and its provisional FPS; original update-to-time mapping remains unverified."
     },
     {
       "severity": "info",
       "code": "k01-runtime-visual-quarantine",
       "kind": "japanese-farmer",
-      "state": "death-runtime",
+      "state": "death-timing",
       "evidenceDocument": "docs/reverse-engineering/mechanics/k01-japanese-farmer-frames.md",
-      "detail": "The current simulation does not retain a terminal visual lifecycle, so the source-proven death clip is not selected by the normal runtime state adapter."
+      "detail": "The client-only terminal lifetime is derived from the configured non-loop clip and its provisional FPS; original update-to-time mapping remains unverified."
     },
     {
       "severity": "info",
       "code": "k01-runtime-visual-quarantine",
       "kind": "gwon-yul",
-      "state": "death-runtime",
+      "state": "death-timing",
       "evidenceDocument": "docs/reverse-engineering/mechanics/k01-hero-animation-pilot.md",
-      "detail": "The current simulation does not retain a terminal visual lifecycle, so the source-proven death clip is not selected by the normal runtime state adapter."
+      "detail": "The client-only terminal lifetime is derived from the configured non-loop clip and its provisional FPS; original update-to-time mapping remains unverified."
     },
     {
       "severity": "info",
       "code": "k01-runtime-visual-quarantine",
       "kind": "ryu-seong-ryong",
-      "state": "death-runtime",
+      "state": "death-timing",
       "evidenceDocument": "docs/reverse-engineering/mechanics/k01-hero-animation-pilot.md",
-      "detail": "The current simulation does not retain a terminal visual lifecycle, so the source-proven death clip is not selected by the normal runtime state adapter."
+      "detail": "The client-only terminal lifetime is derived from the configured non-loop clip and its provisional FPS; original update-to-time mapping remains unverified."
     },
     {
       "severity": "info",
       "code": "k01-runtime-visual-quarantine",
       "kind": "japanese-konishi",
-      "state": "death-runtime",
+      "state": "death-timing",
       "evidenceDocument": "docs/reverse-engineering/mechanics/k01-konishi-animation-pilot.md",
-      "detail": "The current simulation does not retain a terminal visual lifecycle, so the source-proven death clip is not selected by the normal runtime state adapter."
+      "detail": "The client-only terminal lifetime is derived from the configured non-loop clip and its provisional FPS; original update-to-time mapping remains unverified."
     },
     {
       "severity": "info",

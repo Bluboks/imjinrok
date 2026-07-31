@@ -18,6 +18,8 @@ export interface K01UnitAnimationEvidence {
   readonly themeStates?: readonly string[];
   /** States selected by the current normal runtime presentation adapter. */
   readonly runtimeStates: readonly ("idle" | "move" | "attack")[];
+  /** States selected by the client-only terminal presentation adapter. */
+  readonly terminalRuntimeStates?: readonly ("death")[];
   readonly quarantines: readonly K01UnitAnimationQuarantine[];
   readonly sourceOrientation?: {
     readonly state: "move";
@@ -64,9 +66,9 @@ export interface K01SelectionPortraitRegistryEntry {
   readonly semanticStatus: "source-frame-representative";
 }
 
-const noRuntimeDeathLifecycle: K01UnitAnimationQuarantine = {
-  state: "death-runtime",
-  reason: "The current simulation does not retain a terminal visual lifecycle, so the source-proven death clip is not selected by the normal runtime state adapter.",
+const provisionalTerminalTiming: K01UnitAnimationQuarantine = {
+  state: "death-timing",
+  reason: "The client-only terminal lifetime is derived from the configured non-loop clip and its provisional FPS; original update-to-time mapping remains unverified.",
 };
 
 /**
@@ -80,9 +82,10 @@ export const K01_UNIT_ANIMATION_EVIDENCE = [
     missionSources: ["initial-map"],
     sourceStates: ["idle", "move", "death"],
     runtimeStates: ["idle", "move"],
+    terminalRuntimeStates: ["death"],
     quarantines: [
       { state: "attack", reason: "Class-7 state 4 is only proven as a creation-default fallback to idle, not as a product attack clip." },
-      noRuntimeDeathLifecycle,
+      provisionalTerminalTiming,
     ],
     evidenceDocument: "docs/reverse-engineering/mechanics/k01-korean-farmer-core-frames.md",
     defaultFrameFileName: "farmerk_0000.png",
@@ -93,9 +96,10 @@ export const K01_UNIT_ANIMATION_EVIDENCE = [
     missionSources: ["initial-map"],
     sourceStates: ["idle", "move", "attack", "death"],
     runtimeStates: ["idle", "move", "attack"],
+    terminalRuntimeStates: ["death"],
     quarantines: [
       { state: "state-2", reason: "The alternate movement frame block is recovered, but its environment meaning and project policy remain intentionally unbound." },
-      noRuntimeDeathLifecycle,
+      provisionalTerminalTiming,
     ],
     evidenceDocument: "docs/reverse-engineering/mechanics/k01-core-unit-animation-states.md",
     defaultFrameFileName: "swordk_0128.png",
@@ -106,9 +110,10 @@ export const K01_UNIT_ANIMATION_EVIDENCE = [
     missionSources: ["initial-map"],
     sourceStates: ["idle", "move", "attack", "death"],
     runtimeStates: ["idle", "move", "attack"],
+    terminalRuntimeStates: ["death"],
     quarantines: [
       { state: "state-2", reason: "The alternate movement frame block is recovered, but its environment meaning and project policy remain intentionally unbound." },
-      noRuntimeDeathLifecycle,
+      provisionalTerminalTiming,
     ],
     evidenceDocument: "docs/reverse-engineering/mechanics/k01-core-unit-animation-states.md",
     defaultFrameFileName: "archerk_0000.png",
@@ -119,7 +124,8 @@ export const K01_UNIT_ANIMATION_EVIDENCE = [
     missionSources: ["initial-map"],
     sourceStates: ["idle", "move", "attack", "death"],
     runtimeStates: ["idle", "move", "attack"],
-    quarantines: [noRuntimeDeathLifecycle],
+    terminalRuntimeStates: ["death"],
+    quarantines: [provisionalTerminalTiming],
     evidenceDocument: "docs/reverse-engineering/mechanics/k01-opening-unit-bindings.md",
     defaultFrameFileName: "budak_0100.png",
   },
@@ -129,9 +135,10 @@ export const K01_UNIT_ANIMATION_EVIDENCE = [
     missionSources: ["initial-map"],
     sourceStates: ["idle", "move", "attack", "death"],
     runtimeStates: ["idle", "move", "attack"],
+    terminalRuntimeStates: ["death"],
     quarantines: [
       { state: "state-2", reason: "The alternate movement frame block is recovered, but its environment meaning and project policy remain intentionally unbound." },
-      noRuntimeDeathLifecycle,
+      provisionalTerminalTiming,
     ],
     evidenceDocument: "docs/reverse-engineering/mechanics/k01-core-unit-animation-states.md",
     defaultFrameFileName: "swordj_0000.png",
@@ -142,9 +149,10 @@ export const K01_UNIT_ANIMATION_EVIDENCE = [
     missionSources: ["initial-map", "k0120-reinforcement"],
     sourceStates: ["idle", "move", "attack", "death"],
     runtimeStates: ["idle", "move", "attack"],
+    terminalRuntimeStates: ["death"],
     quarantines: [
       { state: "state-2", reason: "The second movement variant has no approved project-state policy." },
-      noRuntimeDeathLifecycle,
+      provisionalTerminalTiming,
     ],
     evidenceDocument: "docs/reverse-engineering/mechanics/k01-normal-reinforcement-animation-batch.md",
     defaultFrameFileName: "gunj1_0000.png",
@@ -155,7 +163,8 @@ export const K01_UNIT_ANIMATION_EVIDENCE = [
     missionSources: ["initial-map", "k0120-reinforcement"],
     sourceStates: ["idle", "move", "attack", "death"],
     runtimeStates: ["idle", "move", "attack"],
-    quarantines: [noRuntimeDeathLifecycle],
+    terminalRuntimeStates: ["death"],
+    quarantines: [provisionalTerminalTiming],
     evidenceDocument: "docs/reverse-engineering/mechanics/k01-samurai-animation-pilot.md",
     defaultFrameFileName: "horseswordj2_0000.png",
   },
@@ -165,7 +174,8 @@ export const K01_UNIT_ANIMATION_EVIDENCE = [
     missionSources: ["initial-map"],
     sourceStates: ["idle", "move", "attack", "death"],
     runtimeStates: ["idle", "move", "attack"],
-    quarantines: [noRuntimeDeathLifecycle],
+    terminalRuntimeStates: ["death"],
+    quarantines: [provisionalTerminalTiming],
     evidenceDocument: "docs/reverse-engineering/mechanics/k01-opening-unit-bindings.md",
     defaultFrameFileName: "advbudaj_0120.png",
   },
@@ -175,9 +185,10 @@ export const K01_UNIT_ANIMATION_EVIDENCE = [
     missionSources: ["initial-map"],
     sourceStates: ["idle", "move", "death"],
     runtimeStates: ["idle", "move"],
+    terminalRuntimeStates: ["death"],
     quarantines: [
       { state: "attack", reason: "Class-31 state 4 has no static-confirmed source-to-frame mapping." },
-      noRuntimeDeathLifecycle,
+      provisionalTerminalTiming,
     ],
     evidenceDocument: "docs/reverse-engineering/mechanics/k01-japanese-farmer-frames.md",
     defaultFrameFileName: "Farmerj_0000.png",
@@ -188,7 +199,8 @@ export const K01_UNIT_ANIMATION_EVIDENCE = [
     missionSources: ["initial-map"],
     sourceStates: ["idle", "move", "attack", "death"],
     runtimeStates: ["idle", "move", "attack"],
-    quarantines: [noRuntimeDeathLifecycle],
+    terminalRuntimeStates: ["death"],
+    quarantines: [provisionalTerminalTiming],
     evidenceDocument: "docs/reverse-engineering/mechanics/k01-hero-animation-pilot.md",
     defaultFrameFileName: "generalk13_0000.png",
   },
@@ -198,7 +210,8 @@ export const K01_UNIT_ANIMATION_EVIDENCE = [
     missionSources: ["initial-map"],
     sourceStates: ["idle", "move", "attack", "death"],
     runtimeStates: ["idle", "move", "attack"],
-    quarantines: [noRuntimeDeathLifecycle],
+    terminalRuntimeStates: ["death"],
+    quarantines: [provisionalTerminalTiming],
     evidenceDocument: "docs/reverse-engineering/mechanics/k01-hero-animation-pilot.md",
     defaultFrameFileName: "generalk31_0000.png",
   },
@@ -225,7 +238,8 @@ export const K01_UNIT_ANIMATION_EVIDENCE = [
     missionSources: ["k0120-reinforcement"],
     sourceStates: ["idle", "move", "attack", "death"],
     runtimeStates: ["idle", "move", "attack"],
-    quarantines: [noRuntimeDeathLifecycle],
+    terminalRuntimeStates: ["death"],
+    quarantines: [provisionalTerminalTiming],
     evidenceDocument: "docs/reverse-engineering/mechanics/k01-konishi-animation-pilot.md",
     defaultFrameFileName: "generalj12_0000.png",
   },
