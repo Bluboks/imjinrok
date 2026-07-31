@@ -86,6 +86,27 @@ export function clampGridViewportBounds(bounds: GridViewportBounds, width: numbe
   return minX <= maxX && minY <= maxY ? { minX, maxX, minY, maxY } : null;
 }
 
+/**
+ * An isometric viewport is a diamond, so opposite screen corners alone do
+ * not enclose its full grid footprint.  Keep every screen-corner sample.
+ */
+export function derivePaddedGridViewportBounds(
+  samples: readonly { x: number; y: number }[],
+  padding: number,
+  width: number,
+  height: number,
+): GridViewportBounds | null {
+  if (!Number.isFinite(padding) || padding < 0 || samples.length === 0) return null;
+  const finiteSamples = samples.filter((sample) => Number.isFinite(sample.x) && Number.isFinite(sample.y));
+  if (finiteSamples.length !== samples.length) return null;
+  return clampGridViewportBounds({
+    minX: Math.min(...finiteSamples.map((sample) => sample.x)) - padding,
+    maxX: Math.max(...finiteSamples.map((sample) => sample.x)) + padding,
+    minY: Math.min(...finiteSamples.map((sample) => sample.y)) - padding,
+    maxY: Math.max(...finiteSamples.map((sample) => sample.y)) + padding,
+  }, width, height);
+}
+
 function isStateRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
 }

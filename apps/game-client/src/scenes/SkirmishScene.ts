@@ -62,6 +62,8 @@ import {
   getEnvironmentLightLevel,
   getPlayerPopulationState,
   getResourceNodeState,
+  resourceBlocksBuilding,
+  resourceBlocksMovement,
   getFootprintTiles,
   getTileVisibility,
   isoToCart,
@@ -286,7 +288,7 @@ import {
   type UnitAudioAction,
 } from "../gameplayAudio.js";
 import {
-  clampGridViewportBounds,
+  derivePaddedGridViewportBounds,
   readDebugPresentationState,
   resolveDebugPresentationVisibility,
   setDebugPresentationCollapsed,
@@ -6115,14 +6117,13 @@ export class SkirmishScene extends Phaser.Scene {
   }
 
   private drawDebugTerrainWireframe(graphics: Phaser.GameObjects.Graphics): void {
-    const upperLeft = this.getGridPointFromScreenPoint(new Phaser.Math.Vector2(0, 0));
-    const lowerRight = this.getGridPointFromScreenPoint(new Phaser.Math.Vector2(this.scale.width, this.getHudTop()));
-    const bounds = clampGridViewportBounds({
-      minX: Math.min(upperLeft.x, lowerRight.x) - 3,
-      maxX: Math.max(upperLeft.x, lowerRight.x) + 3,
-      minY: Math.min(upperLeft.y, lowerRight.y) - 3,
-      maxY: Math.max(upperLeft.y, lowerRight.y) + 3,
-    }, this.map.width, this.map.height);
+    const fieldBottom = this.getHudTop();
+    const bounds = derivePaddedGridViewportBounds([
+      this.getGridPointFromScreenPoint(new Phaser.Math.Vector2(0, 0)),
+      this.getGridPointFromScreenPoint(new Phaser.Math.Vector2(this.scale.width, 0)),
+      this.getGridPointFromScreenPoint(new Phaser.Math.Vector2(this.scale.width, fieldBottom)),
+      this.getGridPointFromScreenPoint(new Phaser.Math.Vector2(0, fieldBottom)),
+    ], 3, this.map.width, this.map.height);
     if (!bounds) return;
     for (let y = bounds.minY; y <= bounds.maxY; y += 1) {
       for (let x = bounds.minX; x <= bounds.maxX; x += 1) {
@@ -6247,9 +6248,14 @@ export class SkirmishScene extends Phaser.Scene {
       sourcePixelOffset: tile.tilesetVisuals?.sourcePixelOffset ?? null,
       fogFamily: tile.fogVisuals?.familyIndex ?? null,
       visibility: getTileVisibility(this.playerVisibility, point),
-      collision: `${terrainDefinitions[tile.terrain].blocksMovement ? "blocked" : "walkable"}; resource ${tile.resource ? (getResourceNodeState(tile.resource) === "active" ? "active" : "depleted") : "none"}; profile ${this.map.movementCollisionProfileId ?? "default"}`,
+      collision: `terrain blocksMovement=${terrainDefinitions[tile.terrain].blocksMovement}; ${this.getTerrainDebugResourceOccupancy(tile.resource)}; profile ${this.map.movementCollisionProfileId ?? "default"}`,
       assets,
     };
+  }
+
+  private getTerrainDebugResourceOccupancy(resource: ResourceNode | undefined): string {
+    if (!resource) return "resource none";
+    return `resource ${getResourceNodeState(resource)} blocksMovement=${resourceBlocksMovement(resource)} blocksBuilding=${resourceBlocksBuilding(resource)}`;
   }
 
   private createTerrainDebugAssetInfo(

@@ -3,6 +3,7 @@ import test from "node:test";
 import {
   DEFAULT_DEBUG_PRESENTATION_STATE,
   clampGridViewportBounds,
+  derivePaddedGridViewportBounds,
   readDebugPresentationState,
   resolveDebugPresentationVisibility,
   shouldRevealDebugPresentationFog,
@@ -30,4 +31,17 @@ test("debug presentation state is typed, conservative, and storage-safe", () => 
 test("debug wireframe bounds cull and clamp without accepting invalid maps", () => {
   assert.deepEqual(clampGridViewportBounds({ minX: -2, maxX: 8.2, minY: 3.1, maxY: 20 }, 8, 10), { minX: 0, maxX: 7, minY: 3, maxY: 9 });
   assert.equal(clampGridViewportBounds({ minX: 1, maxX: 2, minY: 1, maxY: 2 }, 0, 10), null);
+});
+
+test("wireframe culling includes both isometric side wedges, not only diagonal corners", () => {
+  const upperLeft = { x: 4, y: 4 };
+  const upperRight = { x: 9, y: 1 };
+  const lowerRight = { x: 6, y: 6 };
+  const lowerLeft = { x: 1, y: 9 };
+  const twoCornerBounds = derivePaddedGridViewportBounds([upperLeft, lowerRight], 0, 12, 12);
+  const allCornerBounds = derivePaddedGridViewportBounds([upperLeft, upperRight, lowerRight, lowerLeft], 0, 12, 12);
+  assert.deepEqual(twoCornerBounds, { minX: 4, maxX: 6, minY: 4, maxY: 6 });
+  assert.deepEqual(allCornerBounds, { minX: 1, maxX: 9, minY: 1, maxY: 9 });
+  assert.equal(allCornerBounds?.maxX, 9, "upper-right wedge must remain in the cull bounds");
+  assert.equal(allCornerBounds?.maxY, 9, "lower-left wedge must remain in the cull bounds");
 });
