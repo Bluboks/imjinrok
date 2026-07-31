@@ -9,6 +9,7 @@ import {
   normalizeMissionPortraitId,
 } from "../missionPortraits.js";
 import { collectMissionBriefingBackdropFrames } from "../missionBriefingBackdrop.js";
+import { resolveOriginalBriefingMetadataLayout } from "../originalBriefingMetadataLayout.js";
 import {
   createMissionBriefingReplayState,
   getMissionBriefingClickAction,
@@ -206,6 +207,9 @@ export class MissionBriefingScene extends Phaser.Scene {
 
     if (line || this.dismissed) {
       this.addSpeechPresentation(container, briefing.lines, line, this.lineIndex, width, height);
+    }
+    if (this.isIntroReady(this.time.now)) {
+      this.addBriefingMetadataPresentation(container, briefing, width, height);
     }
 
     container.add(
@@ -449,6 +453,45 @@ export class MissionBriefingScene extends Phaser.Scene {
       wordWrap: { width: layout.text.maxWidth },
       resolution: resolvePreGameTextResolution(undefined, layout.scale),
     }).setOrigin(0, 0.5));
+  }
+
+  private addBriefingMetadataPresentation(
+    container: Phaser.GameObjects.Container,
+    briefing: ScenarioBriefingDefinition,
+    viewportWidth: number,
+    viewportHeight: number,
+  ): void {
+    const layout = resolveOriginalBriefingMetadataLayout(viewportWidth, viewportHeight);
+    const fontSize = `${Math.max(1, Math.round(16 * layout.scale))}px`;
+    const textStyle = {
+      fontFamily: PRE_GAME_KOREAN_FONT_FAMILY,
+      fontSize,
+      color: "#ffffff",
+      stroke: "#000000",
+      strokeThickness: Math.max(2, Math.round(2 * layout.scale)),
+      resolution: resolvePreGameTextResolution(undefined, layout.scale),
+    } as const;
+
+    if (briefing.objective.trim()) {
+      container.add(this.add.text(
+        layout.objective.x,
+        layout.objective.firstStringCenterY,
+        briefing.objective,
+        {
+          ...textStyle,
+          lineSpacing: Math.max(0, Math.round(4 * layout.scale)),
+          wordWrap: { width: layout.objective.maxWidth },
+        },
+      ).setOrigin(0, 0.5));
+    }
+    if (briefing.title.trim()) {
+      container.add(this.add.text(
+        layout.title.x,
+        layout.title.centerY,
+        briefing.title,
+        textStyle,
+      ).setOrigin(0, 0.5));
+    }
   }
 
   private getParticipants(lines: readonly ScenarioBriefingLineDefinition[], lineIndex: number): Participant[] {
