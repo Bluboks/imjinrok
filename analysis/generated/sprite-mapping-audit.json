@@ -8,11 +8,11 @@
   "sourceFiles": [
     {
       "path": "packages/shared/src/themes.ts",
-      "sha256": "8f26ec931f55950a19faf83460f3b6530a06ec1caa99fcf8d1a1923afbb21665"
+      "sha256": "f801ff93e75d5dcf154fb96ff719e223096ce8282aca71c8256d507d69c98a82"
     },
     {
       "path": "packages/shared/src/visuals.ts",
-      "sha256": "985a51996e613b6e7f4accc301e6f46f84ff0ff5a00b882555954e7771e0b995"
+      "sha256": "d0f6d0a097c52d657dff7d32c473b7808ea6c8aa2788f42cbb82eb192ebde3c5"
     },
     {
       "path": "packages/shared/src/content.ts",
@@ -24,7 +24,11 @@
     },
     {
       "path": "packages/shared/src/k01UnitAnimationCoverage.ts",
-      "sha256": "d850be0743ac2c9ececfba2d39f91438bfc5d2af99e2f060550a69cd5b2e1d3a"
+      "sha256": "218b40a902582c7266408cfdad057ca0792414e910fa9a72b1aebc3cf9090761"
+    },
+    {
+      "path": "tools/imjinrok/extract-k01-selection-portrait-bindings.mjs",
+      "sha256": "aa2e5bd099309e6f62c6f8cbf7fdf9f053d3a15d5bab497dc2b4d72af308e58e"
     },
     {
       "path": "apps/game-client/src/scenes/SkirmishScene.ts",
@@ -112,7 +116,7 @@
     },
     {
       "path": "tools/imjinrok/audit-sprite-mappings.mjs",
-      "sha256": "077574b2165f885bd1e17be003ed8c90552484d7f0b96a980bf06fc1f8ae037c"
+      "sha256": "3b1b9cb0b122ec245e777f73f1dab537af3aeade4d8b24668ba43c77039eb45d"
     },
     {
       "path": "apps/game-client/public/assets/themes/default/ui/mission-portraits/hero.manifest.json",
@@ -24201,7 +24205,7 @@
     ]
   },
   "k01EntityVisualCoverage": {
-    "policy": "K01 runtime coverage records exact source-backed states and explicitly retains every unsupported scope as a quarantine. Selection representatives are source frames for product UI, not a claim about an original selection-panel portrait resource.",
+    "policy": "K01 runtime coverage records exact source-backed states and explicitly retains every unsupported scope as a quarantine. The exact fnt/portrait.spr frame from the selected-entity helper binds each in-scope selection portrait.",
     "entries": [
       {
         "kind": "villager",
@@ -24235,6 +24239,7 @@
         ],
         "evidenceDocument": "docs/reverse-engineering/mechanics/k01-korean-farmer-core-frames.md",
         "defaultFrameFileName": "farmerk_0000.png",
+        "selectionPortraitFrameFileName": "portrait_0033.png",
         "visualId": "villager-korean-farmer",
         "missingStates": [],
         "missingFrames": [],
@@ -24276,6 +24281,7 @@
         ],
         "evidenceDocument": "docs/reverse-engineering/mechanics/k01-core-unit-animation-states.md",
         "defaultFrameFileName": "swordk_0128.png",
+        "selectionPortraitFrameFileName": "portrait_0032.png",
         "visualId": "korean-swordsman",
         "missingStates": [],
         "missingFrames": [],
@@ -24317,6 +24323,7 @@
         ],
         "evidenceDocument": "docs/reverse-engineering/mechanics/k01-core-unit-animation-states.md",
         "defaultFrameFileName": "archerk_0000.png",
+        "selectionPortraitFrameFileName": "portrait_0031.png",
         "visualId": "korean-archer",
         "missingStates": [],
         "missingFrames": [],
@@ -24354,6 +24361,7 @@
         ],
         "evidenceDocument": "docs/reverse-engineering/mechanics/k01-opening-unit-bindings.md",
         "defaultFrameFileName": "budak_0100.png",
+        "selectionPortraitFrameFileName": "portrait_0034.png",
         "visualId": "korean-monk",
         "missingStates": [],
         "missingFrames": [],
@@ -24395,6 +24403,7 @@
         ],
         "evidenceDocument": "docs/reverse-engineering/mechanics/k01-core-unit-animation-states.md",
         "defaultFrameFileName": "swordj_0000.png",
+        "selectionPortraitFrameFileName": "portrait_0003.png",
         "visualId": "japanese-swordsman",
         "missingStates": [],
         "missingFrames": [],
@@ -24437,6 +24446,7 @@
         ],
         "evidenceDocument": "docs/reverse-engineering/mechanics/k01-normal-reinforcement-animation-batch.md",
         "defaultFrameFileName": "gunj1_0000.png",
+        "selectionPortraitFrameFileName": "portrait_0002.png",
         "visualId": "japanese-gunner",
         "missingStates": [],
         "missingFrames": [],
@@ -24475,6 +24485,7 @@
         ],
         "evidenceDocument": "docs/reverse-engineering/mechanics/k01-samurai-animation-pilot.md",
         "defaultFrameFileName": "horseswordj2_0000.png",
+        "selectionPortraitFrameFileName": "portrait_0004.png",
         "visualId": "japanese-samurai",
         "missingStates": [],
         "missingFrames": [],
@@ -24512,6 +24523,7 @@
         ],
         "evidenceDocument": "docs/reverse-engineering/mechanics/k01-opening-unit-bindings.md",
         "defaultFrameFileName": "advbudaj_0120.png",
+        "selectionPortraitFrameFileName": "portrait_0005.png",
         "visualId": "japanese-shrine-maiden",
         "missingStates": [],
         "missingFrames": [],
@@ -24551,6 +24563,7 @@
         ],
         "evidenceDocument": "docs/reverse-engineering/mechanics/k01-japanese-farmer-frames.md",
         "defaultFrameFileName": "Farmerj_0000.png",
+        "selectionPortraitFrameFileName": "portrait_0006.png",
         "visualId": "japanese-farmer",
         "missingStates": [],
         "missingFrames": [],
@@ -24588,6 +24601,7 @@
         ],
         "evidenceDocument": "docs/reverse-engineering/mechanics/k01-hero-animation-pilot.md",
         "defaultFrameFileName": "generalk13_0000.png",
+        "selectionPortraitFrameFileName": "portrait_0046.png",
         "visualId": "korean-gwon-yul",
         "missingStates": [],
         "missingFrames": [],
@@ -24625,6 +24639,7 @@
         ],
         "evidenceDocument": "docs/reverse-engineering/mechanics/k01-hero-animation-pilot.md",
         "defaultFrameFileName": "generalk31_0000.png",
+        "selectionPortraitFrameFileName": "portrait_0048.png",
         "visualId": "korean-ryu-seong-ryong",
         "missingStates": [],
         "missingFrames": [],
@@ -24672,6 +24687,7 @@
         },
         "evidenceDocument": "docs/reverse-engineering/mechanics/k01-turtle-tank-animation-pilot.md",
         "defaultFrameFileName": "ghosttankj_0016.png",
+        "selectionPortraitFrameFileName": "portrait_0011.png",
         "visualId": "japanese-turtle-tank",
         "missingStates": [],
         "missingFrames": [],
@@ -24709,6 +24725,7 @@
         ],
         "evidenceDocument": "docs/reverse-engineering/mechanics/k01-konishi-animation-pilot.md",
         "defaultFrameFileName": "generalj12_0000.png",
+        "selectionPortraitFrameFileName": "portrait_0015.png",
         "visualId": "japanese-konishi",
         "missingStates": [],
         "missingFrames": [],
@@ -24734,6 +24751,7 @@
           "idle"
         ],
         "defaultFrameFileName": "barrackk_0007.png",
+        "selectionPortraitFrameFileName": "portrait_0054.png",
         "quarantines": [
           {
             "state": "building-states",
@@ -24766,6 +24784,7 @@
           "idle"
         ],
         "defaultFrameFileName": "millk_0007.png",
+        "selectionPortraitFrameFileName": "portrait_0051.png",
         "quarantines": [
           {
             "state": "building-states",
@@ -24798,6 +24817,7 @@
           "idle"
         ],
         "defaultFrameFileName": "barrackj_0007.png",
+        "selectionPortraitFrameFileName": "portrait_0022.png",
         "quarantines": [
           {
             "state": "building-states",
@@ -24830,6 +24850,7 @@
           "idle"
         ],
         "defaultFrameFileName": "firehousej_0007.png",
+        "selectionPortraitFrameFileName": "portrait_0024.png",
         "quarantines": [
           {
             "state": "building-states",
@@ -24862,6 +24883,7 @@
           "idle"
         ],
         "defaultFrameFileName": "millj_0007.png",
+        "selectionPortraitFrameFileName": "portrait_0028.png",
         "quarantines": [
           {
             "state": "building-states",
@@ -24894,6 +24916,7 @@
           "idle"
         ],
         "defaultFrameFileName": "towerj_0007.png",
+        "selectionPortraitFrameFileName": "portrait_0120.png",
         "quarantines": [
           {
             "state": "building-states",
@@ -24926,6 +24949,7 @@
           "idle"
         ],
         "defaultFrameFileName": "jhq_0007.png",
+        "selectionPortraitFrameFileName": "portrait_0026.png",
         "quarantines": [
           {
             "state": "building-states",
@@ -24958,6 +24982,7 @@
           "idle"
         ],
         "defaultFrameFileName": "advbarrackk_0007.png",
+        "selectionPortraitFrameFileName": "portrait_0044.png",
         "quarantines": [
           {
             "state": "building-states",
@@ -24990,6 +25015,7 @@
           "idle"
         ],
         "defaultFrameFileName": "hqk_0007.png",
+        "selectionPortraitFrameFileName": "portrait_0052.png",
         "quarantines": [
           {
             "state": "building-states",
@@ -25010,11 +25036,12 @@
         "kind": "villager",
         "visualId": "villager-korean-farmer",
         "frame": {
-          "textureKey": "default_entity_villager_farmerk_0000",
-          "fileName": "farmerk_0000.png"
+          "textureKey": "default_ui_selection_portrait_0033",
+          "fileName": "portrait_0033.png",
+          "assetPath": "ui/portraits"
         },
         "mirrorX": false,
-        "sourceFrameFileName": "farmerk_0000.png",
+        "sourcePortraitFrameFileName": "portrait_0033.png",
         "evidenceDocument": "docs/reverse-engineering/mechanics/k01-korean-farmer-core-frames.md",
         "sourceStates": [
           "idle",
@@ -25031,17 +25058,18 @@
             "reason": "The client-only terminal lifetime is derived from the configured non-loop clip and its provisional FPS; original update-to-time mapping remains unverified."
           }
         ],
-        "semanticStatus": "source-frame-representative"
+        "semanticStatus": "source-selection-panel-portrait"
       },
       {
         "kind": "swordsman",
         "visualId": "korean-swordsman",
         "frame": {
-          "textureKey": "default_entity_swordsman_swordk_0128",
-          "fileName": "swordk_0128.png"
+          "textureKey": "default_ui_selection_portrait_0032",
+          "fileName": "portrait_0032.png",
+          "assetPath": "ui/portraits"
         },
         "mirrorX": false,
-        "sourceFrameFileName": "swordk_0128.png",
+        "sourcePortraitFrameFileName": "portrait_0032.png",
         "evidenceDocument": "docs/reverse-engineering/mechanics/k01-core-unit-animation-states.md",
         "sourceStates": [
           "idle",
@@ -25059,17 +25087,18 @@
             "reason": "The client-only terminal lifetime is derived from the configured non-loop clip and its provisional FPS; original update-to-time mapping remains unverified."
           }
         ],
-        "semanticStatus": "source-frame-representative"
+        "semanticStatus": "source-selection-panel-portrait"
       },
       {
         "kind": "archer",
         "visualId": "korean-archer",
         "frame": {
-          "textureKey": "default_entity_archer_archerk_0000",
-          "fileName": "archerk_0000.png"
+          "textureKey": "default_ui_selection_portrait_0031",
+          "fileName": "portrait_0031.png",
+          "assetPath": "ui/portraits"
         },
         "mirrorX": false,
-        "sourceFrameFileName": "archerk_0000.png",
+        "sourcePortraitFrameFileName": "portrait_0031.png",
         "evidenceDocument": "docs/reverse-engineering/mechanics/k01-core-unit-animation-states.md",
         "sourceStates": [
           "idle",
@@ -25087,17 +25116,18 @@
             "reason": "The client-only terminal lifetime is derived from the configured non-loop clip and its provisional FPS; original update-to-time mapping remains unverified."
           }
         ],
-        "semanticStatus": "source-frame-representative"
+        "semanticStatus": "source-selection-panel-portrait"
       },
       {
         "kind": "korean-monk",
         "visualId": "korean-monk",
         "frame": {
-          "textureKey": "default_entity_korean_monk_budak_0100",
-          "fileName": "budak_0100.png"
+          "textureKey": "default_ui_selection_portrait_0034",
+          "fileName": "portrait_0034.png",
+          "assetPath": "ui/portraits"
         },
         "mirrorX": false,
-        "sourceFrameFileName": "budak_0100.png",
+        "sourcePortraitFrameFileName": "portrait_0034.png",
         "evidenceDocument": "docs/reverse-engineering/mechanics/k01-opening-unit-bindings.md",
         "sourceStates": [
           "idle",
@@ -25111,17 +25141,18 @@
             "reason": "The client-only terminal lifetime is derived from the configured non-loop clip and its provisional FPS; original update-to-time mapping remains unverified."
           }
         ],
-        "semanticStatus": "source-frame-representative"
+        "semanticStatus": "source-selection-panel-portrait"
       },
       {
         "kind": "japanese-swordsman",
         "visualId": "japanese-swordsman",
         "frame": {
-          "textureKey": "default_entity_japanese_swordsman_swordj_0000",
-          "fileName": "swordj_0000.png"
+          "textureKey": "default_ui_selection_portrait_0003",
+          "fileName": "portrait_0003.png",
+          "assetPath": "ui/portraits"
         },
         "mirrorX": false,
-        "sourceFrameFileName": "swordj_0000.png",
+        "sourcePortraitFrameFileName": "portrait_0003.png",
         "evidenceDocument": "docs/reverse-engineering/mechanics/k01-core-unit-animation-states.md",
         "sourceStates": [
           "idle",
@@ -25139,17 +25170,18 @@
             "reason": "The client-only terminal lifetime is derived from the configured non-loop clip and its provisional FPS; original update-to-time mapping remains unverified."
           }
         ],
-        "semanticStatus": "source-frame-representative"
+        "semanticStatus": "source-selection-panel-portrait"
       },
       {
         "kind": "japanese-gunner",
         "visualId": "japanese-gunner",
         "frame": {
-          "textureKey": "default_entity_japanese_gunner_gunj1_0000",
-          "fileName": "gunj1_0000.png"
+          "textureKey": "default_ui_selection_portrait_0002",
+          "fileName": "portrait_0002.png",
+          "assetPath": "ui/portraits"
         },
         "mirrorX": false,
-        "sourceFrameFileName": "gunj1_0000.png",
+        "sourcePortraitFrameFileName": "portrait_0002.png",
         "evidenceDocument": "docs/reverse-engineering/mechanics/k01-normal-reinforcement-animation-batch.md",
         "sourceStates": [
           "idle",
@@ -25167,17 +25199,18 @@
             "reason": "The client-only terminal lifetime is derived from the configured non-loop clip and its provisional FPS; original update-to-time mapping remains unverified."
           }
         ],
-        "semanticStatus": "source-frame-representative"
+        "semanticStatus": "source-selection-panel-portrait"
       },
       {
         "kind": "japanese-samurai",
         "visualId": "japanese-samurai",
         "frame": {
-          "textureKey": "default_entity_japanese_samurai_horseswordj2_0000",
-          "fileName": "horseswordj2_0000.png"
+          "textureKey": "default_ui_selection_portrait_0004",
+          "fileName": "portrait_0004.png",
+          "assetPath": "ui/portraits"
         },
         "mirrorX": false,
-        "sourceFrameFileName": "horseswordj2_0000.png",
+        "sourcePortraitFrameFileName": "portrait_0004.png",
         "evidenceDocument": "docs/reverse-engineering/mechanics/k01-samurai-animation-pilot.md",
         "sourceStates": [
           "idle",
@@ -25191,17 +25224,18 @@
             "reason": "The client-only terminal lifetime is derived from the configured non-loop clip and its provisional FPS; original update-to-time mapping remains unverified."
           }
         ],
-        "semanticStatus": "source-frame-representative"
+        "semanticStatus": "source-selection-panel-portrait"
       },
       {
         "kind": "japanese-shrine-maiden",
         "visualId": "japanese-shrine-maiden",
         "frame": {
-          "textureKey": "default_entity_japanese_shrine_maiden_advbudaj_0120",
-          "fileName": "advbudaj_0120.png"
+          "textureKey": "default_ui_selection_portrait_0005",
+          "fileName": "portrait_0005.png",
+          "assetPath": "ui/portraits"
         },
         "mirrorX": false,
-        "sourceFrameFileName": "advbudaj_0120.png",
+        "sourcePortraitFrameFileName": "portrait_0005.png",
         "evidenceDocument": "docs/reverse-engineering/mechanics/k01-opening-unit-bindings.md",
         "sourceStates": [
           "idle",
@@ -25215,17 +25249,18 @@
             "reason": "The client-only terminal lifetime is derived from the configured non-loop clip and its provisional FPS; original update-to-time mapping remains unverified."
           }
         ],
-        "semanticStatus": "source-frame-representative"
+        "semanticStatus": "source-selection-panel-portrait"
       },
       {
         "kind": "japanese-farmer",
         "visualId": "japanese-farmer",
         "frame": {
-          "textureKey": "default_entity_japanese_farmer_Farmerj_0000",
-          "fileName": "Farmerj_0000.png"
+          "textureKey": "default_ui_selection_portrait_0006",
+          "fileName": "portrait_0006.png",
+          "assetPath": "ui/portraits"
         },
         "mirrorX": false,
-        "sourceFrameFileName": "Farmerj_0000.png",
+        "sourcePortraitFrameFileName": "portrait_0006.png",
         "evidenceDocument": "docs/reverse-engineering/mechanics/k01-japanese-farmer-frames.md",
         "sourceStates": [
           "idle",
@@ -25242,17 +25277,18 @@
             "reason": "The client-only terminal lifetime is derived from the configured non-loop clip and its provisional FPS; original update-to-time mapping remains unverified."
           }
         ],
-        "semanticStatus": "source-frame-representative"
+        "semanticStatus": "source-selection-panel-portrait"
       },
       {
         "kind": "gwon-yul",
         "visualId": "korean-gwon-yul",
         "frame": {
-          "textureKey": "default_entity_gwon_yul_generalk13_0000",
-          "fileName": "generalk13_0000.png"
+          "textureKey": "default_ui_selection_portrait_0046",
+          "fileName": "portrait_0046.png",
+          "assetPath": "ui/portraits"
         },
         "mirrorX": false,
-        "sourceFrameFileName": "generalk13_0000.png",
+        "sourcePortraitFrameFileName": "portrait_0046.png",
         "evidenceDocument": "docs/reverse-engineering/mechanics/k01-hero-animation-pilot.md",
         "sourceStates": [
           "idle",
@@ -25266,17 +25302,18 @@
             "reason": "The client-only terminal lifetime is derived from the configured non-loop clip and its provisional FPS; original update-to-time mapping remains unverified."
           }
         ],
-        "semanticStatus": "source-frame-representative"
+        "semanticStatus": "source-selection-panel-portrait"
       },
       {
         "kind": "ryu-seong-ryong",
         "visualId": "korean-ryu-seong-ryong",
         "frame": {
-          "textureKey": "default_entity_ryu_seong_ryong_generalk31_0000",
-          "fileName": "generalk31_0000.png"
+          "textureKey": "default_ui_selection_portrait_0048",
+          "fileName": "portrait_0048.png",
+          "assetPath": "ui/portraits"
         },
         "mirrorX": false,
-        "sourceFrameFileName": "generalk31_0000.png",
+        "sourcePortraitFrameFileName": "portrait_0048.png",
         "evidenceDocument": "docs/reverse-engineering/mechanics/k01-hero-animation-pilot.md",
         "sourceStates": [
           "idle",
@@ -25290,17 +25327,18 @@
             "reason": "The client-only terminal lifetime is derived from the configured non-loop clip and its provisional FPS; original update-to-time mapping remains unverified."
           }
         ],
-        "semanticStatus": "source-frame-representative"
+        "semanticStatus": "source-selection-panel-portrait"
       },
       {
         "kind": "japanese-turtle-tank",
         "visualId": "japanese-turtle-tank",
         "frame": {
-          "textureKey": "default_entity_japanese_turtle_tank_ghosttankj_0016",
-          "fileName": "ghosttankj_0016.png"
+          "textureKey": "default_ui_selection_portrait_0011",
+          "fileName": "portrait_0011.png",
+          "assetPath": "ui/portraits"
         },
         "mirrorX": false,
-        "sourceFrameFileName": "ghosttankj_0016.png",
+        "sourcePortraitFrameFileName": "portrait_0011.png",
         "evidenceDocument": "docs/reverse-engineering/mechanics/k01-turtle-tank-animation-pilot.md",
         "sourceStates": [
           "idle",
@@ -25313,17 +25351,18 @@
             "reason": "The recovered creation-default destruction path is a transient effect contract, not a generic entity death clip."
           }
         ],
-        "semanticStatus": "source-frame-representative"
+        "semanticStatus": "source-selection-panel-portrait"
       },
       {
         "kind": "japanese-konishi",
         "visualId": "japanese-konishi",
         "frame": {
-          "textureKey": "default_entity_japanese_konishi_generalj12_0000",
-          "fileName": "generalj12_0000.png"
+          "textureKey": "default_ui_selection_portrait_0015",
+          "fileName": "portrait_0015.png",
+          "assetPath": "ui/portraits"
         },
         "mirrorX": false,
-        "sourceFrameFileName": "generalj12_0000.png",
+        "sourcePortraitFrameFileName": "portrait_0015.png",
         "evidenceDocument": "docs/reverse-engineering/mechanics/k01-konishi-animation-pilot.md",
         "sourceStates": [
           "idle",
@@ -25337,17 +25376,18 @@
             "reason": "The client-only terminal lifetime is derived from the configured non-loop clip and its provisional FPS; original update-to-time mapping remains unverified."
           }
         ],
-        "semanticStatus": "source-frame-representative"
+        "semanticStatus": "source-selection-panel-portrait"
       },
       {
         "kind": "barracks",
         "visualId": "korean-barracks",
         "frame": {
-          "textureKey": "default_entity_barracks_barrackk_0007",
-          "fileName": "barrackk_0007.png"
+          "textureKey": "default_ui_selection_portrait_0054",
+          "fileName": "portrait_0054.png",
+          "assetPath": "ui/portraits"
         },
         "mirrorX": false,
-        "sourceFrameFileName": "barrackk_0007.png",
+        "sourcePortraitFrameFileName": "portrait_0054.png",
         "evidenceDocument": "docs/reverse-engineering/data-structures/entity-type-catalog.md",
         "sourceStates": [
           "base-frame-7"
@@ -25358,17 +25398,18 @@
             "reason": "K01 catalog evidence binds only class-50 base frame 7; construction, damage, overlays, timing, pivot, and lift remain unverified."
           }
         ],
-        "semanticStatus": "source-frame-representative"
+        "semanticStatus": "source-selection-panel-portrait"
       },
       {
         "kind": "house",
         "visualId": "korean-mill-house-proxy",
         "frame": {
-          "textureKey": "default_entity_house_millk_0007",
-          "fileName": "millk_0007.png"
+          "textureKey": "default_ui_selection_portrait_0051",
+          "fileName": "portrait_0051.png",
+          "assetPath": "ui/portraits"
         },
         "mirrorX": false,
-        "sourceFrameFileName": "millk_0007.png",
+        "sourcePortraitFrameFileName": "portrait_0051.png",
         "evidenceDocument": "docs/reverse-engineering/mechanics/k01-opening-building-bindings.md",
         "sourceStates": [
           "base-frame-7"
@@ -25379,17 +25420,18 @@
             "reason": "K01 class-48 evidence binds only base frame 7; construction, damage, overlays, timing, pivot, and lift remain unverified."
           }
         ],
-        "semanticStatus": "source-frame-representative"
+        "semanticStatus": "source-selection-panel-portrait"
       },
       {
         "kind": "japanese-camp-barracks",
         "visualId": "japanese-camp-barracks",
         "frame": {
-          "textureKey": "default_entity_japanese_camp_barracks_barrackj_0007",
-          "fileName": "barrackj_0007.png"
+          "textureKey": "default_ui_selection_portrait_0022",
+          "fileName": "portrait_0022.png",
+          "assetPath": "ui/portraits"
         },
         "mirrorX": false,
-        "sourceFrameFileName": "barrackj_0007.png",
+        "sourcePortraitFrameFileName": "portrait_0022.png",
         "evidenceDocument": "docs/reverse-engineering/mechanics/k01-opening-building-bindings.md",
         "sourceStates": [
           "base-frame-7"
@@ -25400,17 +25442,18 @@
             "reason": "K01 class-60 evidence binds only base frame 7; construction, damage, overlays, timing, pivot, and lift remain unverified."
           }
         ],
-        "semanticStatus": "source-frame-representative"
+        "semanticStatus": "source-selection-panel-portrait"
       },
       {
         "kind": "japanese-camp-firehouse",
         "visualId": "japanese-camp-firehouse",
         "frame": {
-          "textureKey": "default_entity_japanese_camp_firehouse_firehousej_0007",
-          "fileName": "firehousej_0007.png"
+          "textureKey": "default_ui_selection_portrait_0024",
+          "fileName": "portrait_0024.png",
+          "assetPath": "ui/portraits"
         },
         "mirrorX": false,
-        "sourceFrameFileName": "firehousej_0007.png",
+        "sourcePortraitFrameFileName": "portrait_0024.png",
         "evidenceDocument": "docs/reverse-engineering/data-structures/entity-type-catalog.md",
         "sourceStates": [
           "base-frame-7"
@@ -25421,17 +25464,18 @@
             "reason": "K01 catalog evidence binds only class-62 base frame 7; construction, damage, overlays, timing, pivot, and lift remain unverified."
           }
         ],
-        "semanticStatus": "source-frame-representative"
+        "semanticStatus": "source-selection-panel-portrait"
       },
       {
         "kind": "japanese-camp-house",
         "visualId": "japanese-camp-house",
         "frame": {
-          "textureKey": "default_entity_japanese_camp_house_millj_0007",
-          "fileName": "millj_0007.png"
+          "textureKey": "default_ui_selection_portrait_0028",
+          "fileName": "portrait_0028.png",
+          "assetPath": "ui/portraits"
         },
         "mirrorX": false,
-        "sourceFrameFileName": "millj_0007.png",
+        "sourcePortraitFrameFileName": "portrait_0028.png",
         "evidenceDocument": "docs/reverse-engineering/data-structures/entity-type-catalog.md",
         "sourceStates": [
           "base-frame-7"
@@ -25442,17 +25486,18 @@
             "reason": "K01 catalog evidence binds only class-57 base frame 7; construction, damage, overlays, timing, pivot, and lift remain unverified."
           }
         ],
-        "semanticStatus": "source-frame-representative"
+        "semanticStatus": "source-selection-panel-portrait"
       },
       {
         "kind": "japanese-camp-tower",
         "visualId": "japanese-camp-tower",
         "frame": {
-          "textureKey": "default_entity_japanese_camp_tower_towerj_0007",
-          "fileName": "towerj_0007.png"
+          "textureKey": "default_ui_selection_portrait_0120",
+          "fileName": "portrait_0120.png",
+          "assetPath": "ui/portraits"
         },
         "mirrorX": false,
-        "sourceFrameFileName": "towerj_0007.png",
+        "sourcePortraitFrameFileName": "portrait_0120.png",
         "evidenceDocument": "docs/reverse-engineering/mechanics/k01-opening-building-bindings.md",
         "sourceStates": [
           "base-frame-7"
@@ -25463,17 +25508,18 @@
             "reason": "K01 class-63 evidence binds only base frame 7; construction, damage, overlays, timing, pivot, and lift remain unverified."
           }
         ],
-        "semanticStatus": "source-frame-representative"
+        "semanticStatus": "source-selection-panel-portrait"
       },
       {
         "kind": "japanese-hq",
         "visualId": "japanese-hq",
         "frame": {
-          "textureKey": "default_entity_japanese_hq_jhq_0007",
-          "fileName": "jhq_0007.png"
+          "textureKey": "default_ui_selection_portrait_0026",
+          "fileName": "portrait_0026.png",
+          "assetPath": "ui/portraits"
         },
         "mirrorX": false,
-        "sourceFrameFileName": "jhq_0007.png",
+        "sourcePortraitFrameFileName": "portrait_0026.png",
         "evidenceDocument": "docs/reverse-engineering/mechanics/k01-opening-building-bindings.md",
         "sourceStates": [
           "base-frame-7"
@@ -25484,17 +25530,18 @@
             "reason": "K01 class-58 evidence binds only base frame 7; construction, damage, overlays, timing, pivot, and lift remain unverified."
           }
         ],
-        "semanticStatus": "source-frame-representative"
+        "semanticStatus": "source-selection-panel-portrait"
       },
       {
         "kind": "korean-training-command",
         "visualId": "korean-training-command",
         "frame": {
-          "textureKey": "default_entity_korean_training_command_advbarrackk_0007",
-          "fileName": "advbarrackk_0007.png"
+          "textureKey": "default_ui_selection_portrait_0044",
+          "fileName": "portrait_0044.png",
+          "assetPath": "ui/portraits"
         },
         "mirrorX": false,
-        "sourceFrameFileName": "advbarrackk_0007.png",
+        "sourcePortraitFrameFileName": "portrait_0044.png",
         "evidenceDocument": "docs/reverse-engineering/mechanics/k01-opening-building-bindings.md",
         "sourceStates": [
           "base-frame-7"
@@ -25505,17 +25552,18 @@
             "reason": "K01 class-51 evidence binds only base frame 7; construction, damage, overlays, timing, pivot, and lift remain unverified."
           }
         ],
-        "semanticStatus": "source-frame-representative"
+        "semanticStatus": "source-selection-panel-portrait"
       },
       {
         "kind": "town-center",
         "visualId": "korean-hq",
         "frame": {
-          "textureKey": "default_entity_town_center_hqk_0007",
-          "fileName": "hqk_0007.png"
+          "textureKey": "default_ui_selection_portrait_0052",
+          "fileName": "portrait_0052.png",
+          "assetPath": "ui/portraits"
         },
         "mirrorX": false,
-        "sourceFrameFileName": "hqk_0007.png",
+        "sourcePortraitFrameFileName": "portrait_0052.png",
         "evidenceDocument": "docs/reverse-engineering/mechanics/k01-opening-building-bindings.md",
         "sourceStates": [
           "base-frame-7"
@@ -25526,7 +25574,185 @@
             "reason": "K01 class-49 base frame 7 is scoped; construction and damage have separate bounded evidence, while timing, pivot, and lift remain unverified."
           }
         ],
-        "semanticStatus": "source-frame-representative"
+        "semanticStatus": "source-selection-panel-portrait"
+      }
+    ],
+    "sourceSelectionPortraitBindings": [
+      {
+        "internalClass": 2,
+        "kind": "swordsman",
+        "typeRecordAddress": "0x008830a8",
+        "typeField": "+0x08",
+        "frameIndex": 32,
+        "fileName": "portrait_0032.png"
+      },
+      {
+        "internalClass": 3,
+        "kind": "japanese-swordsman",
+        "typeRecordAddress": "0x008831f4",
+        "typeField": "+0x08",
+        "frameIndex": 3,
+        "fileName": "portrait_0003.png"
+      },
+      {
+        "internalClass": 4,
+        "kind": "archer",
+        "typeRecordAddress": "0x00883340",
+        "typeField": "+0x08",
+        "frameIndex": 31,
+        "fileName": "portrait_0031.png"
+      },
+      {
+        "internalClass": 7,
+        "kind": "villager",
+        "typeRecordAddress": "0x00883724",
+        "typeField": "+0x08",
+        "frameIndex": 33,
+        "fileName": "portrait_0033.png"
+      },
+      {
+        "internalClass": 11,
+        "kind": "korean-monk",
+        "typeRecordAddress": "0x00883c54",
+        "typeField": "+0x08",
+        "frameIndex": 34,
+        "fileName": "portrait_0034.png"
+      },
+      {
+        "internalClass": 12,
+        "kind": "japanese-gunner",
+        "typeRecordAddress": "0x00883da0",
+        "typeField": "+0x08",
+        "frameIndex": 2,
+        "fileName": "portrait_0002.png"
+      },
+      {
+        "internalClass": 13,
+        "kind": "japanese-samurai",
+        "typeRecordAddress": "0x00883eec",
+        "typeField": "+0x08",
+        "frameIndex": 4,
+        "fileName": "portrait_0004.png"
+      },
+      {
+        "internalClass": 14,
+        "kind": "japanese-turtle-tank",
+        "typeRecordAddress": "0x00884038",
+        "typeField": "+0x08",
+        "frameIndex": 11,
+        "fileName": "portrait_0011.png"
+      },
+      {
+        "internalClass": 16,
+        "kind": "japanese-shrine-maiden",
+        "typeRecordAddress": "0x008842d0",
+        "typeField": "+0x08",
+        "frameIndex": 5,
+        "fileName": "portrait_0005.png"
+      },
+      {
+        "internalClass": 31,
+        "kind": "japanese-farmer",
+        "typeRecordAddress": "0x00885644",
+        "typeField": "+0x08",
+        "frameIndex": 6,
+        "fileName": "portrait_0006.png"
+      },
+      {
+        "internalClass": 48,
+        "kind": "house",
+        "typeRecordAddress": "0x00886c50",
+        "typeField": "+0x08",
+        "frameIndex": 51,
+        "fileName": "portrait_0051.png"
+      },
+      {
+        "internalClass": 49,
+        "kind": "town-center",
+        "typeRecordAddress": "0x00886d9c",
+        "typeField": "+0x08",
+        "frameIndex": 52,
+        "fileName": "portrait_0052.png"
+      },
+      {
+        "internalClass": 50,
+        "kind": "barracks",
+        "typeRecordAddress": "0x00886ee8",
+        "typeField": "+0x08",
+        "frameIndex": 54,
+        "fileName": "portrait_0054.png"
+      },
+      {
+        "internalClass": 51,
+        "kind": "korean-training-command",
+        "typeRecordAddress": "0x00887034",
+        "typeField": "+0x08",
+        "frameIndex": 44,
+        "fileName": "portrait_0044.png"
+      },
+      {
+        "internalClass": 57,
+        "kind": "japanese-camp-house",
+        "typeRecordAddress": "0x008877fc",
+        "typeField": "+0x08",
+        "frameIndex": 28,
+        "fileName": "portrait_0028.png"
+      },
+      {
+        "internalClass": 58,
+        "kind": "japanese-hq",
+        "typeRecordAddress": "0x00887948",
+        "typeField": "+0x08",
+        "frameIndex": 26,
+        "fileName": "portrait_0026.png"
+      },
+      {
+        "internalClass": 60,
+        "kind": "japanese-camp-barracks",
+        "typeRecordAddress": "0x00887be0",
+        "typeField": "+0x08",
+        "frameIndex": 22,
+        "fileName": "portrait_0022.png"
+      },
+      {
+        "internalClass": 62,
+        "kind": "japanese-camp-firehouse",
+        "typeRecordAddress": "0x00887e78",
+        "typeField": "+0x08",
+        "frameIndex": 24,
+        "fileName": "portrait_0024.png"
+      },
+      {
+        "internalClass": 63,
+        "kind": "japanese-camp-tower",
+        "typeRecordAddress": "0x00887fc4",
+        "typeField": "+0x08",
+        "frameIndex": 120,
+        "fileName": "portrait_0120.png"
+      },
+      {
+        "internalClass": 76,
+        "kind": "gwon-yul",
+        "typeRecordAddress": "0x008890a0",
+        "typeField": "+0x08",
+        "frameIndex": 46,
+        "fileName": "portrait_0046.png"
+      },
+      {
+        "internalClass": 78,
+        "kind": "ryu-seong-ryong",
+        "typeRecordAddress": "0x00889338",
+        "typeField": "+0x08",
+        "frameIndex": 48,
+        "fileName": "portrait_0048.png"
+      },
+      {
+        "internalClass": 82,
+        "kind": "japanese-konishi",
+        "typeRecordAddress": "0x00889868",
+        "typeField": "+0x08",
+        "frameIndex": 15,
+        "fileName": "portrait_0015.png"
       }
     ]
   },

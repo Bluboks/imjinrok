@@ -29,6 +29,7 @@ import { extractK01KonishiAnimationPilot } from "./extract-k01-konishi-animation
 import { extractK01CoreUnitAnimations } from "./extract-k01-core-unit-animations.mjs";
 import { extractK01JapaneseFarmerFrames } from "./extract-k01-japanese-farmer-frames.mjs";
 import { extractK01KoreanFarmerCoreFrames } from "./extract-k01-korean-farmer-core-frames.mjs";
+import { extractK01SelectionPortraitBindings } from "./extract-k01-selection-portrait-bindings.mjs";
 import { extractK01FarmerResourceBranchFrames } from "./extract-k01-farmer-resource-branch-frames.mjs";
 import { extractK01FarmerResourceWorkFrames } from "./extract-k01-farmer-resource-work-frames.mjs";
 import { extractK01FarmerState4FallbackFrames } from "./extract-k01-farmer-state4-fallback-frames.mjs";
@@ -49,6 +50,10 @@ const scenariosPath = join(repositoryRoot, "packages/shared/src/scenarios.ts");
 const k01EntityVisualCoveragePath = join(
   repositoryRoot,
   "packages/shared/src/k01UnitAnimationCoverage.ts",
+);
+const k01SelectionPortraitBindingsPath = join(
+  repositoryRoot,
+  "tools/imjinrok/extract-k01-selection-portrait-bindings.mjs",
 );
 const generatorPath = join(
   repositoryRoot,
@@ -242,7 +247,12 @@ const portraitAudit = buildPortraitAudit();
 findings.push(...portraitAudit.findings);
 const k01EntityVisualCoverage = assessK01EntityVisualCoverage(defaultTheme);
 const k01SelectionPortraitRegistry = getK01SelectionPortraitRegistry(defaultTheme);
-appendK01EntityVisualCoverageFindings(k01EntityVisualCoverage, k01SelectionPortraitRegistry);
+const k01SelectionPortraitBindings = extractK01SelectionPortraitBindings();
+appendK01EntityVisualCoverageFindings(
+  k01EntityVisualCoverage,
+  k01SelectionPortraitRegistry,
+  k01SelectionPortraitBindings,
+);
 
 const report = {
   schemaVersion: 4,
@@ -259,6 +269,7 @@ const report = {
     sourceFileRecord(contentPath),
     sourceFileRecord(scenariosPath),
     sourceFileRecord(k01EntityVisualCoveragePath),
+    sourceFileRecord(k01SelectionPortraitBindingsPath),
     sourceFileRecord(skirmishScenePath),
     sourceFileRecord(missionBriefingScenePath),
     sourceFileRecord(missionPortraitsPath),
@@ -362,9 +373,10 @@ const report = {
     cues: portraitAudit.cues,
   },
   k01EntityVisualCoverage: {
-    policy: "K01 runtime coverage records exact source-backed states and explicitly retains every unsupported scope as a quarantine. Selection representatives are source frames for product UI, not a claim about an original selection-panel portrait resource.",
+    policy: "K01 runtime coverage records exact source-backed states and explicitly retains every unsupported scope as a quarantine. The exact fnt/portrait.spr frame from the selected-entity helper binds each in-scope selection portrait.",
     entries: k01EntityVisualCoverage,
     selectionPortraitRegistry: k01SelectionPortraitRegistry,
+    sourceSelectionPortraitBindings: k01SelectionPortraitBindings.bindings,
   },
   findings: findings.sort(compareFindings),
 };
@@ -528,8 +540,11 @@ function appendPivotFindings(visual) {
   }
 }
 
-function appendK01EntityVisualCoverageFindings(coverageEntries, selectionRegistry) {
+function appendK01EntityVisualCoverageFindings(coverageEntries, selectionRegistry, sourcePortraitBindings) {
   const selectionKinds = new Set(selectionRegistry.map(({ kind }) => kind));
+  const sourcePortraitByKind = new Map(
+    sourcePortraitBindings.bindings.map(({ kind, fileName }) => [kind, fileName]),
+  );
 
   for (const coverage of coverageEntries) {
     const missingRuntimeStates = coverage.runtimeStates.filter(
@@ -555,7 +570,7 @@ function appendK01EntityVisualCoverageFindings(coverageEntries, selectionRegistr
         missingSourceOrientationDirections: coverage.missingSourceOrientationDirections,
         missingDefaultFrame: coverage.missingDefaultFrame,
         missingExplicitSelectionRepresentative: coverage.missingExplicitSelectionRepresentative,
-        detail: "A K01 spawnable entity is missing a statically bounded runtime visual or its explicit source-frame selection representative.",
+        detail: "A K01 spawnable entity is missing a statically bounded runtime visual or its exact source selection portrait.",
       });
     }
 
@@ -565,7 +580,21 @@ function appendK01EntityVisualCoverageFindings(coverageEntries, selectionRegistr
         code: "k01-selection-portrait-coverage-gap",
         kind: coverage.kind,
         evidenceDocument: coverage.evidenceDocument,
-        detail: "A K01 spawnable entity has no validated source-frame selection representative.",
+        detail: "A K01 spawnable entity has no validated source selection portrait.",
+      });
+    }
+
+    const registryPortrait = selectionRegistry.find(({ kind }) => kind === coverage.kind);
+    const sourcePortraitFileName = sourcePortraitByKind.get(coverage.kind);
+    if (registryPortrait?.frame.fileName !== sourcePortraitFileName) {
+      findings.push({
+        severity: "blocking",
+        code: "k01-selection-portrait-source-drift",
+        kind: coverage.kind,
+        evidenceDocument: coverage.evidenceDocument,
+        expectedFileName: sourcePortraitFileName ?? null,
+        actualFileName: registryPortrait?.frame.fileName ?? null,
+        detail: "The theme selection portrait does not match the statically recovered fnt/portrait.spr frame.",
       });
     }
 

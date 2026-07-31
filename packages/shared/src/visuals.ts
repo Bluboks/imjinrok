@@ -27,8 +27,10 @@ export interface PivotSpec {
 export interface FrameRef {
   /** Runtime texture key. Keep this namespaced by theme/visual to allow swaps later. */
   textureKey: string;
-  /** File name relative to the visual asset folder. Defaults to `${textureKey}.png`. */
+  /** File name relative to the frame override or visual asset folder. Defaults to `${textureKey}.png`. */
   fileName?: string;
+  /** Optional path relative to the theme asset root, overriding the visual asset folder. */
+  assetPath?: string;
   /** Optional atlas frame name for future atlas-backed visuals. */
   frameName?: string;
   /** Optional per-frame source size override. */
