@@ -22,7 +22,7 @@ import { arePlayersAllied } from "./diplomacy.js";
 import { createCurrentVisibilityResolver, getAttackTargetAuthorityPolicy, isAttackTargetAuthorized } from "./attackTargetAuthorityPolicy.js";
 import { findPathForUnit } from "./navigation.js";
 import { getFootprintTiles, validateBuildingPlacement } from "./placement.js";
-import { canQueuePopulation } from "./population.js";
+import { canAdmitPlayerCapacity } from "./capacity.js";
 import { isResearchCompleted, isResearchPending } from "./research.js";
 import { findHarvestableResourceTile, findResourceNode, getResourceDefinition } from "./resources.js";
 import type { UnitState, WorldState } from "./types.js";
@@ -268,7 +268,7 @@ export function validateCommand(state: WorldState, envelope: CommandEnvelope): C
         return { ok: false, reason: "not enough resources" };
       }
 
-      if (!canQueuePopulation(state, envelope.playerId, envelope.command.unit)) {
+      if (!canAdmitPlayerCapacity(state, envelope.playerId, envelope.command.unit, state.capacityPolicyId).admitted) {
         return { ok: false, reason: "population cap reached" };
       }
 
