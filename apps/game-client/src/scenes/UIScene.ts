@@ -16,6 +16,7 @@ import {
   MINIMAP_AVAILABILITY_CHANGED_EVENT,
   MINIMAP_AVAILABILITY_REGISTRY_KEY,
   MINIMAP_NAVIGATE_EVENT,
+  MINIMAP_ZOOM_REQUESTED_EVENT,
   MINIMAP_ENTITIES_CHANGED_EVENT,
   MINIMAP_ENTITIES_REGISTRY_KEY,
   MINIMAP_MAP_CHANGED_EVENT,
@@ -43,6 +44,7 @@ import {
   type MagicAutoUseView,
   type MinimapMapView,
   type MinimapResourcesView,
+  type MinimapZoomRequestedView,
   type MinimapViewportView,
   type MinimapEntitiesView,
   type MinimapVisibilityView,
@@ -75,6 +77,13 @@ import {
 } from "../ui/sourceFogAndCommandAssets.js";
 import { resolveProductActionGridLayoutForScenario } from "../ui/actionGridLayoutPolicy.js";
 import { drawPanelFrame, HUD_TEXT_STYLE, type PanelBounds } from "../ui/hudPanel.js";
+import {
+  formatMinimapZoomPercent,
+  resolveAdjacentMinimapZoomPreset,
+  resolveMinimapZoomRailLayout,
+  type MinimapZoomDirection,
+  type MinimapZoomRailBounds,
+} from "../ui/minimapZoom.js";
 import {
   emitK01ObjectiveModalActionRequest,
   ObjectiveModalActionBridge,
@@ -126,6 +135,9 @@ export class UIScene extends Phaser.Scene {
   private minimapViewportGraphics: Phaser.GameObjects.Graphics | null = null;
   private minimapBorderGraphics: Phaser.GameObjects.Graphics | null = null;
   private minimapUnavailableGraphics: Phaser.GameObjects.Graphics | null = null;
+  private minimapZoomControlGraphics: Phaser.GameObjects.Graphics | null = null;
+  private minimapZoomControlZones: Partial<Record<MinimapZoomDirection, Phaser.GameObjects.Zone>> = {};
+  private minimapZoomRailLayout: Partial<Record<MinimapZoomDirection, MinimapZoomRailBounds>> = {};
   private minimapZoomText: Phaser.GameObjects.Text | null = null;
   private economyText: Phaser.GameObjects.Text | null = null;
   private battlefieldSummaryText: Phaser.GameObjects.Text | null = null;
@@ -253,11 +265,13 @@ export class UIScene extends Phaser.Scene {
     });
     if (opened) {
       this.isMinimapNavigating = false;
+      this.updateMinimapZoomControls();
     }
   };
 
   private readonly handleObjectiveModalDismissed = (): void => {
     this.objectiveModalRequestState.close();
+    this.updateMinimapZoomControls();
   };
 
   private handleResize(): void {
@@ -562,6 +576,9 @@ export class UIScene extends Phaser.Scene {
     this.minimapViewportGraphics = null;
     this.minimapBorderGraphics = null;
     this.minimapUnavailableGraphics = null;
+    this.minimapZoomControlGraphics = null;
+    this.minimapZoomControlZones = {};
+    this.minimapZoomRailLayout = {};
     this.minimapZoomText = null;
     this.economyText = null;
     this.battlefieldSummaryText = null;
@@ -692,6 +709,7 @@ export class UIScene extends Phaser.Scene {
     this.minimapViewportGraphics?.destroy();
     this.minimapBorderGraphics?.destroy();
     this.minimapUnavailableGraphics?.destroy();
+    this.minimapZoomControlGraphics?.destroy();
     this.minimapZoomText?.destroy();
     const mapDefinition = this.minimapMap?.map ?? defaultMap;
     const geometry = createMinimapGeometry(x, y, width, height);
@@ -709,6 +727,7 @@ export class UIScene extends Phaser.Scene {
     this.minimapViewportGraphics = this.add.graphics().setScrollFactor(0).setDepth(1007);
     this.minimapBorderGraphics = this.add.graphics().setScrollFactor(0).setDepth(1010);
     this.minimapUnavailableGraphics = this.add.graphics().setScrollFactor(0).setDepth(1009);
+    this.minimapZoomControlGraphics = this.add.graphics().setScrollFactor(0).setDepth(1011);
     container.add([
       this.minimapTerrainGraphics,
       this.minimapResourceGraphics,
@@ -719,8 +738,9 @@ export class UIScene extends Phaser.Scene {
       this.minimapViewportGraphics,
       this.minimapUnavailableGraphics,
       this.minimapBorderGraphics,
+      this.minimapZoomControlGraphics,
     ]);
-    this.minimapZoomText = this.add.text(x + 18, y + height - 24, "", { ...HUD_TEXT_STYLE, fontSize: "11px", color: "#7f9b91" });
+    this.minimapZoomText = this.add.text(x + 44, y + height - 24, "", { ...HUD_TEXT_STYLE, fontSize: "11px", color: "#7f9b91" });
     container.add(this.minimapZoomText);
 
     if (this.perfEnabled()) console.time("minimap terrain cache");
@@ -737,6 +757,7 @@ export class UIScene extends Phaser.Scene {
     this.drawMinimapViewportOverlay();
     this.minimapBorderGraphics.lineStyle(2, 0xd0b46a, 0.85);
     this.minimapBorderGraphics.strokePoints(getMinimapDiamondPoints(geometry), true);
+    this.createMinimapZoomControls(container, { x, y, width, height });
     this.applyMinimapAvailabilityPresentation();
   }
 
@@ -751,6 +772,7 @@ export class UIScene extends Phaser.Scene {
     this.minimapAlertGraphics?.setVisible(enabled);
     this.minimapViewportGraphics?.setVisible(enabled);
     this.minimapZoomText?.setVisible(enabled);
+    this.minimapZoomControlGraphics?.setVisible(enabled);
 
     const unavailableGraphics = this.minimapUnavailableGraphics;
     const geometry = this.minimapGeometry;
@@ -765,6 +787,7 @@ export class UIScene extends Phaser.Scene {
     if (!enabled) {
       unavailableGraphics.fillStyle(0x000000, 1);
       unavailableGraphics.fillPoints(getMinimapDiamondPoints(geometry), true);
+      this.updateMinimapZoomControls();
       return;
     }
 
@@ -774,6 +797,109 @@ export class UIScene extends Phaser.Scene {
     this.drawMinimapEntitiesOverlay();
     this.drawMinimapAlertOverlay(this.time.now);
     this.drawMinimapViewportOverlay();
+  }
+
+  private createMinimapZoomControls(
+    container: Phaser.GameObjects.Container,
+    bounds: MinimapZoomRailBounds,
+  ): void {
+    const layout = resolveMinimapZoomRailLayout(bounds);
+    this.minimapZoomRailLayout = {
+      1: layout.increase,
+      "-1": layout.decrease,
+    };
+
+    for (const direction of [1, -1] as const) {
+      const buttonBounds = this.minimapZoomRailLayout[direction];
+      if (!buttonBounds) {
+        throw new Error(`minimap zoom rail layout is missing direction ${direction}`);
+      }
+
+      const zone = this.add
+        .zone(buttonBounds.x, buttonBounds.y, buttonBounds.width, buttonBounds.height)
+        .setOrigin(0, 0)
+        .setInteractive({ useHandCursor: true })
+        .on(
+          "pointerdown",
+          (
+            _pointer: Phaser.Input.Pointer,
+            _localX: number,
+            _localY: number,
+            event: Phaser.Types.Input.EventData,
+          ) => event.stopPropagation(),
+        )
+        .on(
+          "pointerup",
+          (
+            _pointer: Phaser.Input.Pointer,
+            _localX: number,
+            _localY: number,
+            event: Phaser.Types.Input.EventData,
+          ) => {
+            event.stopPropagation();
+            this.requestMinimapZoom(direction);
+          },
+        );
+
+      this.minimapZoomControlZones[direction] = zone;
+      container.add(zone);
+    }
+
+    this.updateMinimapZoomControls();
+  }
+
+  private requestMinimapZoom(direction: MinimapZoomDirection): void {
+    if (!this.isMinimapZoomControlEnabled(direction)) {
+      return;
+    }
+
+    this.isMinimapNavigating = false;
+    const request: MinimapZoomRequestedView = { direction, source: "rail-button" };
+    this.game.events.emit(MINIMAP_ZOOM_REQUESTED_EVENT, request);
+  }
+
+  private isMinimapZoomControlEnabled(direction: MinimapZoomDirection): boolean {
+    return !this.isObjectiveModalActive() &&
+      this.minimapAvailability.enabled &&
+      this.minimapViewport !== null &&
+      resolveAdjacentMinimapZoomPreset(this.minimapViewport.zoom, direction) !== null;
+  }
+
+  private updateMinimapZoomControls(): void {
+    const graphics = this.minimapZoomControlGraphics;
+    if (!graphics) {
+      return;
+    }
+
+    graphics.clear();
+
+    for (const direction of [1, -1] as const) {
+      const buttonBounds = this.minimapZoomRailLayout[direction];
+      const zone = this.minimapZoomControlZones[direction];
+      if (!buttonBounds) {
+        continue;
+      }
+
+      const enabled = this.isMinimapZoomControlEnabled(direction);
+      if (enabled) {
+        zone?.setInteractive({ useHandCursor: true });
+      } else {
+        zone?.disableInteractive();
+      }
+
+      graphics.fillStyle(enabled ? 0x1a3034 : 0x0b1517, enabled ? 0.98 : 0.72);
+      graphics.fillRoundedRect(buttonBounds.x, buttonBounds.y, buttonBounds.width, buttonBounds.height, 4);
+      graphics.lineStyle(1, enabled ? 0xd0b46a : 0x31474b, enabled ? 0.9 : 0.55);
+      graphics.strokeRoundedRect(buttonBounds.x, buttonBounds.y, buttonBounds.width, buttonBounds.height, 4);
+
+      const centerX = buttonBounds.x + buttonBounds.width / 2;
+      const centerY = buttonBounds.y + buttonBounds.height / 2;
+      graphics.lineStyle(1.5, enabled ? 0xf1dfaa : 0x60736d, enabled ? 1 : 0.52);
+      graphics.lineBetween(buttonBounds.x + 5, centerY, buttonBounds.x + buttonBounds.width - 5, centerY);
+      if (direction > 0) {
+        graphics.lineBetween(centerX, buttonBounds.y + 5, centerX, buttonBounds.y + buttonBounds.height - 5);
+      }
+    }
   }
 
   private updateMinimapFogOverlay(): void {
@@ -864,7 +990,10 @@ export class UIScene extends Phaser.Scene {
     const geometry = this.minimapGeometry;
     const viewport = this.minimapViewport;
 
-    if (!this.minimapViewportGraphics || !geometry || !viewport) return;
+    if (!this.minimapViewportGraphics || !geometry || !viewport) {
+      this.updateMinimapZoomControls();
+      return;
+    }
 
     const graphics = this.minimapViewportGraphics;
     graphics.clear();
@@ -874,7 +1003,8 @@ export class UIScene extends Phaser.Scene {
     graphics.fillPoints(points, true);
     graphics.lineStyle(2, 0xf4df8e, 0.9);
     graphics.strokePoints(points, true);
-    this.minimapZoomText?.setText(`시야 ${viewport.zoom.toFixed(2)}x`);
+    this.minimapZoomText?.setText(`시야 ${formatMinimapZoomPercent(viewport.zoom)}`);
+    this.updateMinimapZoomControls();
   }
 
   private drawMinimapResourcesOverlay(): void {
