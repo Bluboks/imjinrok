@@ -8,6 +8,10 @@ import {
   UI_SCENE_KEY,
 } from "../gameplaySceneRegistration.js";
 import type { GameLaunchContext } from "../session.js";
+import {
+  PRE_GAME_KOREAN_FONT_FAMILY,
+  resolvePreGameTextResolution,
+} from "../ui/preGameTypography.js";
 
 const MAIN_MENU_SCENE_KEY = "main-menu";
 
@@ -101,8 +105,9 @@ export class GameplayLaunchScene extends Phaser.Scene {
     this.cameras.main.setBackgroundColor("#102325");
     this.add.text(width / 2, height / 2, "게임 화면을 불러오는 중…", {
       color: "#f1dfaa",
-      fontFamily: "Noto Sans KR, Malgun Gothic, Apple SD Gothic Neo, sans-serif",
+      fontFamily: PRE_GAME_KOREAN_FONT_FAMILY,
       fontSize: "18px",
+      resolution: resolvePreGameTextResolution(),
     }).setOrigin(0.5);
   }
 
@@ -125,8 +130,9 @@ export class GameplayLaunchScene extends Phaser.Scene {
     const message = this.add.text(width / 2, height / 2 - 34, `게임 화면을 불러오지 못했습니다.\n${details}`, {
       align: "center",
       color: "#ffd7d7",
-      fontFamily: "Noto Sans KR, Malgun Gothic, Apple SD Gothic Neo, sans-serif",
+      fontFamily: PRE_GAME_KOREAN_FONT_FAMILY,
       fontSize: "16px",
+      resolution: resolvePreGameTextResolution(),
       wordWrap: { width: Math.max(240, width - 48) },
     }).setOrigin(0.5);
     const buttonWidth = 180;
@@ -138,8 +144,9 @@ export class GameplayLaunchScene extends Phaser.Scene {
       .setInteractive({ useHandCursor: true });
     const label = this.add.text(button.x, button.y, "메뉴로 돌아가기", {
       color: "#f1dfaa",
-      fontFamily: "Noto Sans KR, Malgun Gothic, Apple SD Gothic Neo, sans-serif",
+      fontFamily: PRE_GAME_KOREAN_FONT_FAMILY,
       fontSize: "14px",
+      resolution: resolvePreGameTextResolution(),
     }).setOrigin(0.5);
     button.on("pointerup", () => this.scene.start(MAIN_MENU_SCENE_KEY));
     label.setInteractive({ useHandCursor: true }).on("pointerup", () => this.scene.start(MAIN_MENU_SCENE_KEY));
