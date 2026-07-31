@@ -43,6 +43,7 @@
     "imjinrok:extract-selection-panel-slot-lifecycle": "node tools/imjinrok/extract-selection-panel-slot-lifecycle.mjs --json",
     "imjinrok:extract-transient-formatted-overlay": "node tools/imjinrok/extract-transient-formatted-overlay.mjs --json",
     "imjinrok:extract-persistent-selection-action-boundary": "node tools/imjinrok/extract-persistent-selection-action-boundary.mjs --json",
+    "imjinrok:extract-war-expense-capacity-evidence": "node tools/imjinrok/extract-war-expense-capacity-evidence.mjs --output analysis/fixtures/war-expense-capacity-vectors.json",
     "imjinrok:extract-hero-priority-queue-gate": "node tools/imjinrok/extract-hero-priority-queue-gate.mjs --json",
     "imjinrok:extract-magic-auto-use-gate": "node tools/imjinrok/extract-magic-auto-use-gate.mjs --json",
     "imjinrok:extract-unit-animation-pilot": "node tools/imjinrok/extract-unit-animation-pilot.mjs --json",
