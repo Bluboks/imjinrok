@@ -48,6 +48,7 @@
     "imjinrok:extract-k01-class2-locomotion-bridge": "node tools/imjinrok/extract-k01-class2-locomotion-bridge.mjs --json",
     "imjinrok:extract-k01-hero-movement-pilot": "node tools/imjinrok/extract-k01-hero-movement-pilot.mjs --json",
     "imjinrok:extract-k01-hero-basic-attack-pilot": "node tools/imjinrok/extract-k01-hero-basic-attack-pilot.mjs --json",
+    "imjinrok:extract-k01-hero-aura-evidence": "node tools/imjinrok/extract-k01-hero-aura-evidence.mjs --output analysis/fixtures/k01-hero-aura-evidence.json",
     "imjinrok:extract-k01-samurai-animation-pilot": "node tools/imjinrok/extract-k01-samurai-animation-pilot.mjs --json",
     "imjinrok:extract-k01-turtle-tank-animation-pilot": "node tools/imjinrok/extract-k01-turtle-tank-animation-pilot.mjs --json",
     "imjinrok:extract-k01-konishi-animation-pilot": "node tools/imjinrok/extract-k01-konishi-animation-pilot.mjs --json",

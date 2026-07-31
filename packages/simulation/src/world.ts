@@ -41,6 +41,15 @@ export {
 } from "./attackTargetAuthorityPolicy.js";
 export { resolveDamageAmount, type DamagePacket } from "./damage.js";
 export {
+  applyAuraAttackDamage,
+  defaultAuraProfileRegistry,
+  AuraProfileRegistry,
+  refreshAuraEffects,
+  registerAuraProfile,
+  type AuraProfile,
+  type RegisterAuraProfileOptions,
+} from "./aura.js";
+export {
   advanceOriginalProjectilePoolRandomState,
   allocateOriginalProjectileSlot,
   buildOriginalRyuProjectileRoute,
@@ -158,6 +167,7 @@ export function createInitialWorldState(
     tick: 0,
     map: worldMap,
     attackTargetAuthorityPolicyId: resolveAttackTargetAuthorityPolicyId(scenario.attackTargetAuthorityPolicyId),
+    ...(scenario.auraProfileId !== undefined ? { auraProfileId: scenario.auraProfileId } : {}),
     pathfindingProfileId: resolvePathfindingProfileId(worldMap, scenario),
     movementCollisionProfileId: resolveMovementCollisionProfileId(worldMap.movementCollisionProfileId),
     environment: createInitialEnvironmentState(worldMap),

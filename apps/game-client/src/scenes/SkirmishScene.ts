@@ -165,6 +165,8 @@ import {
   type SourceTerrainRasterRegion,
 } from "../render/k01TerrainRasterPlan.js";
 import { getEntityAnimationStateKey } from "../render/entityAnimationState.js";
+import { reconcileAuraIndicator } from "../render/auraIndicatorLifecycle.js";
+import { resolveAuraIndicatorPresentation } from "../render/auraIndicatorPresentation.js";
 import { resolveEntityAnimationSelection } from "../render/sourceOrientationAnimation.js";
 import {
   advanceEntityTerminalPlayback,
@@ -434,6 +436,7 @@ interface UnitRenderable {
   damageFlash: Phaser.GameObjects.Graphics;
   healthBarBack: Phaser.GameObjects.Graphics;
   healthBarFill: Phaser.GameObjects.Graphics;
+  auraIndicator: Phaser.GameObjects.Graphics | undefined;
   lastFacing: Facing;
   terminalKind: UnitDefinitionId;
   terminalSourceOrientation?: UnitState["sourceOrientation"];
@@ -8841,6 +8844,7 @@ export class SkirmishScene extends Phaser.Scene {
       renderable.terminalSourceOrientation = unit.sourceOrientation ? { ...unit.sourceOrientation } : undefined;
       this.updateUnitRenderableFrame(renderable, unit, deltaMs);
       this.updateUnitCombatFeedback(renderable, unit);
+      this.redrawUnitAuraIndicator(renderable, unit);
     });
   }
 
@@ -8940,6 +8944,7 @@ export class SkirmishScene extends Phaser.Scene {
         damageFlash,
         healthBarBack,
         healthBarFill,
+        auraIndicator: undefined,
         lastFacing: initialFacing,
         terminalKind: unit.kind,
         terminalSourceOrientation: unit.sourceOrientation ? { ...unit.sourceOrientation } : undefined,
@@ -8961,6 +8966,7 @@ export class SkirmishScene extends Phaser.Scene {
       damageFlash,
       healthBarBack,
       healthBarFill,
+      auraIndicator: undefined,
       lastFacing: initialFacing,
       terminalKind: unit.kind,
       terminalSourceOrientation: unit.sourceOrientation ? { ...unit.sourceOrientation } : undefined,
@@ -8977,6 +8983,30 @@ export class SkirmishScene extends Phaser.Scene {
     renderable.lastHealth = unit.health.current;
     this.redrawUnitHealthBar(renderable, unit);
     this.redrawUnitDamageFlash(renderable, unit);
+  }
+
+  /** Project/mod indicator only; no original K01 sprite or compositor is asserted here. */
+  private redrawUnitAuraIndicator(renderable: UnitRenderable, unit: UnitState): void {
+    const presentation = resolveAuraIndicatorPresentation(unit.auraEffects);
+    renderable.auraIndicator = reconcileAuraIndicator(
+      renderable.auraIndicator,
+      presentation,
+      () => {
+        const indicator = this.add.graphics();
+        renderable.container.addAt(indicator, renderable.container.getIndex(renderable.damageFlash));
+        return indicator;
+      },
+      (indicator, activePresentation) => {
+        indicator.clear();
+        indicator.lineStyle(2, activePresentation.color, 0.95);
+        indicator.strokePoints([
+          new Phaser.Geom.Point(0, -14),
+          new Phaser.Geom.Point(10, -4),
+          new Phaser.Geom.Point(0, 6),
+          new Phaser.Geom.Point(-10, -4),
+        ], true);
+      },
+    );
   }
 
   private redrawUnitHealthBar(renderable: UnitRenderable, unit: UnitState): void {

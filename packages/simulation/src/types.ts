@@ -1,4 +1,6 @@
 import type {
+  AppliedAuraEffectState,
+  AuraProfileId,
   BuildingDefinitionId,
   BankResourceKind,
   CommandEnvelope,
@@ -130,6 +132,8 @@ export interface UnitState {
    * the simulation execution boundary against its caller-owned registry.
    */
   projectileProfileId?: string;
+  /** Derived each simulation tick from the selected aura profile; snapshot-safe. */
+  auraEffects?: Record<string, AppliedAuraEffectState>;
   health: AttributePool;
   mana: AttributePool;
 }
@@ -213,6 +217,8 @@ export interface WorldState {
   map: MapDefinition;
   /** Stable, serializable authority policy; omitted only by legacy snapshots. */
   attackTargetAuthorityPolicyId?: string;
+  /** Optional opt-in profile; omitted worlds have no aura behavior. */
+  auraProfileId?: AuraProfileId;
   /** Stable profile id selected from scenario, map, or the built-in default. */
   pathfindingProfileId: string;
   /**
