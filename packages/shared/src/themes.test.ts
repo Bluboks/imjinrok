@@ -36,7 +36,14 @@ test("default theme entity bindings point to loadable source-converted assets", 
   assert.equal(defaultTheme.entityBindings["town-center"], "korean-hq");
 
   const missing = getThemeFrameRefs(defaultTheme)
-    .map(({ visual, frame }) => join(defaultThemeAssetRoot, visual.assetPath, frame.fileName ?? `${frame.textureKey}.png`))
+    .map(({ visual, frame }) => {
+      const fileName = frame.fileName ?? `${frame.textureKey}.png`;
+      const assetPath = frame.textureKey.startsWith("default_ui_selection_")
+        ? join("ui", "portraits")
+        : visual.assetPath;
+
+      return join(defaultThemeAssetRoot, assetPath, fileName);
+    })
     .filter((path) => !existsSync(path));
 
   assert.deepEqual(missing, []);

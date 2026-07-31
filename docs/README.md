@@ -59,6 +59,7 @@
 - [임진록 낮·밤 팔레트 schedule](reverse-engineering/mechanics/imjinrok-day-night-palette-schedule.md)
 - [`pannel.spr` HUD blit 결합](reverse-engineering/mechanics/pannel-spr-hud-blit.md)
 - [단일 선택 renderer dispatch의 lock·호출 순서](reverse-engineering/mechanics/single-selection-renderer-dispatch.md)
+- [K01 단일 선택 `portrait.spr` 결합](reverse-engineering/mechanics/k01-selection-portraits.md)
 - [선택 패널 slot dispatcher](reverse-engineering/mechanics/selection-panel-slot-dispatch.md)
 - [선택 패널로 탐색한 SPEECH slot lifecycle](reverse-engineering/mechanics/selection-panel-slot-lifecycle.md)
 - [고정 선택 패널 후보를 반증한 transient formatted overlay](reverse-engineering/mechanics/transient-formatted-overlay.md)
