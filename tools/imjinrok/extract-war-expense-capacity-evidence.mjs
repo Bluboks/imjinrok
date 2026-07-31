@@ -4,7 +4,9 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { readPeImage, toHex } from "./pe-image.mjs";
+import { readPeImage } from "./pe-image.mjs";
+import { extractEntityTypeCatalog } from "./extract-entity-type-catalog.mjs";
+import { extractPersistentSelectionActionBoundary } from "./extract-persistent-selection-action-boundary.mjs";
 import {
   assertEqual,
   sha256,
@@ -14,6 +16,19 @@ import {
 
 export const EXPECTED_EXECUTABLE_SHA256 =
   "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e";
+export const EXPECTED_SEEDS_SHA256 =
+  "8e7c8821e9c84c5d0877bb977b119b3b878271502b36bf75e7426b570507bfb7";
+export const EXPECTED_FUNCTIONS_SHA256 =
+  "7e071fdfe425d22447780c265fe1d3fd271a1bedd1773682bebcb8ddc6d2e16e";
+export const EXPECTED_REFERENCES_SHA256 =
+  "f64cfa6f04bc39573552f42a8b7bdd5b08fea1ba774d05865162d1d80daaf9a5";
+
+const DEFAULT_SEEDS_PATH = "analysis/generated/imjinrok2/seeds.json";
+const DEFAULT_FUNCTIONS_PATH = "analysis/generated/imjinrok2/functions.json";
+const DEFAULT_REFERENCES_PATH = "analysis/generated/imjinrok2/references.json";
+const MAXIMUM_WAR_EXPENSE_PLAYER_ZERO_ADDRESS = "0x0082dfd2";
+const EXPECTED_MAXIMUM_WAR_EXPENSE_DIRECT_REFERENCES_SHA256 =
+  "1366636b9199bf446adfb970783d2925f4d51ee35c285b207a481fed1d8ef719";
 
 const RAW_CODE_RANGES = [
   ["player-capacity-initializer", 0x004457d0, 0x004457f1, "40c81bdd36d2c6a7a00c904e68ae4dbeab7d3e337cc71bfa5fdec194e0a77058"],
@@ -23,6 +38,7 @@ const RAW_CODE_RANGES = [
   ["reservation-refund", 0x0047e300, 0x0047e330, "a5f5053de1f667c6b85d2822910a30af12b4c602cd844454d551f03541a40632"],
   ["reservation-admission", 0x0047e330, 0x0047e3a0, "2bdfc056fb9dd3b9a7505eda68fe264e074d52caf644efa99843f5af60907e42"],
   ["producer-handoff", 0x0042dfb1, 0x0042dfec, "25766a2fb3a053ae60fce8d2ea66220379279734b20ec8d1f0b86775b6c226df"],
+  ["flag-0x2-category-gate", 0x0047b200, 0x0047b232, "901c45b804403e788ba60ee37d83ec0a1d6280fff110778be3e61ab781ef3a22"],
 ].map(([id, start, endExclusive, digest]) => ({ id, start, endExclusive, sha256: digest }));
 
 const STATIC_EVIDENCE = [
@@ -40,6 +56,7 @@ const STATIC_EVIDENCE = [
   [0x0042dfc8, "0f bf 14 95 1e 2e 88 00 8d 04 40 8d 0c 80 c1 e1 04 8d 81 90 c4 82 00 8b 89 90 c4 82 00 2b ca", "player pending expense is subtracted immediately before constructor handoff"],
   [0x0047e5ba, "0f bf 85 4c 1b 00 00 03 f2 8d 54 24 20 52 8b 55 10 03 c2", "UI numerator is live expense + pending expense"],
   [0x0047e66b, "0f bf 95 52 1b 00 00", "UI denominator reads maximum war expense +0x1b52"],
+  [0x0047b200, "66 83 3d cc af 88 00 00 75 28 80 79 02 01 75 22 0f bf 91 50 1b 00 00 b8 67 66 66 66 f7 ea d1 fa 8b c2 c1 e8 1f 03 d0 0f bf 81 4e 1b 00 00 3b c2 7d 70", "when global WORD 0x0088afcc is zero and player+2 is one, the signed flag-0x2 category count must be below signed maximum entity count divided by five"],
   [0x0049142a, "bf 48 7a 4c 00 f2 ae f7 d1 2b f9 8b c1 8b f7 8b fb 8d 9a 10 28 00", "FUN_0048ea90 copies the source CP949 shortage message into runtime message storage"],
   [0x004c7a48, "c0 fc ba f1 b0 a1 20 ba ce c1 b7 c7 d5 b4 cf b4 d9 2e", "CP949 source string is 전비가 부족합니다."],
 ].map(([va, bytes, meaning]) => ({ va, bytes, meaning }));
@@ -57,6 +74,11 @@ const VECTORS = [
   { id: "reservation-resource-b-failure", operation: "reserve", state: { resourceA: 300, resourceB: 79, liveExpense: 0, pendingExpense: 0, maxExpense: 2500 }, resourceA: 70, resourceB: 80, typeExpense: 100 },
   { id: "reserve-refund-completion-transfer", operation: "reserve-refund-complete", state: { resourceA: 300, resourceB: 200, liveCount: 4, liveExpense: 2200, pendingExpense: 100, producerPendingExpense: 100, maxExpense: 2500 }, resourceA: 70, resourceB: 80, typeExpense: 100 },
   { id: "add-remove", operation: "add-remove", state: { liveCount: 4, liveExpense: 200, rawFlag2Count: 1 }, typeExpense: 50, typeFlags: 2 },
+  { id: "flag-0x2-category-count-49-accept", operation: "flag-0x2-category-admission", state: { rawFlag2Count: 49, maxCount: 250, globalWord0x88afcc: 0, playerByte2: 1 } },
+  { id: "flag-0x2-category-count-50-reject", operation: "flag-0x2-category-admission", state: { rawFlag2Count: 50, maxCount: 250, globalWord0x88afcc: 0, playerByte2: 1 } },
+  { id: "flag-0x2-category-global-bypass", operation: "flag-0x2-category-admission", state: { rawFlag2Count: 50, maxCount: 250, globalWord0x88afcc: 1, playerByte2: 1 } },
+  { id: "flag-0x2-category-player-byte-bypass", operation: "flag-0x2-category-admission", state: { rawFlag2Count: 50, maxCount: 250, globalWord0x88afcc: 0, playerByte2: 0 } },
+  { id: "flag-0x2-category-signed-division", operation: "flag-0x2-category-admission", state: { rawFlag2Count: -2, maxCount: -9, globalWord0x88afcc: 0, playerByte2: 1 } },
   { id: "action-115-class-76-zero-cost", operation: "zero-cost-hero", state: { resourceA: 300, resourceB: 200, liveCount: 249, liveExpense: 2500, pendingExpense: 0, maxCount: 250, maxExpense: 2500 }, action: 115, internalClass: 76, typeExpense: 0 },
 ];
 
@@ -70,9 +92,24 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
 
 export function extractWarExpenseCapacityEvidence({
   executablePath = "original/imjinrok2/imjinrok2.exe",
+  seedsPath = DEFAULT_SEEDS_PATH,
+  functionsPath = DEFAULT_FUNCTIONS_PATH,
+  referencesPath = DEFAULT_REFERENCES_PATH,
 } = {}) {
   const { buffer, image } = readPeImage(executablePath);
   assertEqual(sha256(buffer), EXPECTED_EXECUTABLE_SHA256, `${executablePath} SHA-256`);
+  const seedsBytes = readFileSync(seedsPath);
+  const functionsBytes = readFileSync(functionsPath);
+  const referencesBytes = readFileSync(referencesPath);
+  assertEqual(sha256(seedsBytes), EXPECTED_SEEDS_SHA256, `${seedsPath} SHA-256`);
+  assertEqual(sha256(functionsBytes), EXPECTED_FUNCTIONS_SHA256, `${functionsPath} SHA-256`);
+  assertEqual(sha256(referencesBytes), EXPECTED_REFERENCES_SHA256, `${referencesPath} SHA-256`);
+  const referencesDocument = parseJson(referencesBytes, referencesPath);
+  assertEqual(referencesDocument.sourceSha256, EXPECTED_EXECUTABLE_SHA256, `${referencesPath} source SHA-256`);
+  const maximumWriterScope = extractMaximumWriterScope(referencesDocument, referencesPath);
+  const entityTypeCatalog = extractEntityTypeCatalog({ executablePath, seedsPath });
+  const actionBoundary = extractPersistentSelectionActionBoundary({ executablePath, functionsPath, referencesPath });
+  const action115 = deriveAction115(actionBoundary, entityTypeCatalog);
 
   return {
     schemaVersion: 1,
@@ -80,7 +117,12 @@ export function extractWarExpenseCapacityEvidence({
     analysisStatus: "static-confirmed-for-bounded-war-expense-capacity-flow",
     reproductionStatus: "reproduction-complete-for-bounded-admission-reservation-transfer-and-removal",
     implementationStatus: "analysis-only-no-gameplay-change",
-    source: { executablePath, executableSha256: EXPECTED_EXECUTABLE_SHA256 },
+    source: {
+      executablePath, executableSha256: EXPECTED_EXECUTABLE_SHA256,
+      seedsPath, seedsSha256: EXPECTED_SEEDS_SHA256,
+      functionsPath, functionsSha256: EXPECTED_FUNCTIONS_SHA256,
+      referencesPath, referencesSha256: EXPECTED_REFERENCES_SHA256,
+    },
     rawCodeRanges: RAW_CODE_RANGES.map((range) => verifyRawCodeRange(buffer, image, range)),
     evidencePoints: STATIC_EVIDENCE.map((point) => verifyEvidencePoint(buffer, image, point)),
     playerRecord: {
@@ -89,7 +131,7 @@ export function extractWarExpenseCapacityEvidence({
         liveEntityCount: { offset: "+0x1b4a", width: "signed WORD" },
         maximumEntityCount: { offset: "+0x1b50", width: "signed WORD", initialValue: 250 },
         liveWarExpense: { offset: "+0x1b4c", width: "signed WORD" },
-        rawFlag0x2CategoryCount: { offset: "+0x1b4e", width: "signed WORD", meaning: "raw type-flag 0x2 category; not classified as buildings" },
+        flag0x2BuildingCount: { offset: "+0x1b4e", width: "signed WORD", meaning: "original building category count; canonical 95-type catalog verifies every flags&0x2 type is class 40..74" },
         maximumWarExpense: { offset: "+0x1b52", width: "signed WORD", initialValue: 2500 },
         pendingWarExpense: { offset: "+0x10", width: "DWORD" },
       },
@@ -106,13 +148,11 @@ export function extractWarExpenseCapacityEvidence({
       refund: "FUN_0047e300: refunds both resources and subtracts pending expense",
       completion: "FUN_0042de00 at 0x0042dfb1..0x0042dfeb subtracts producer and player pending expense immediately before constructor handoff",
       ui: "FUN_0047e400 formats live+pending at 0x0047e5ba and maximum at 0x0047e66b",
+      flag0x2BuildingGate: "FUN_0047b200 separately rejects only when global WORD 0x0088afcc is zero, player+2 byte is one, and signed building count >= signed maximum entity count / 5; it bypasses this gate otherwise",
     },
-    action115: { action: 115, producedInternalClass: 76, originalGameplayName: "권율", typeField0x0eExpense: 0 },
-    maximumWriterScope: {
-      directReferenceSet: "No runtime writer to player +0x1b52 was found in the complete direct-reference set outside initialization.",
-      unresolved: ["alias writers", "save/load writers", "map writers", "script writers"],
-      conclusion: "A remembered recruit/general-count cap increase is not confirmed and must not be implemented as original-game behavior.",
-    },
+    flag0x2BuildingCategory: deriveFlag0x2BuildingCategory(entityTypeCatalog),
+    action115,
+    maximumWriterScope,
     vectors: VECTORS.map((input) => ({ input, output: replayWarExpenseScenario(input) })),
   };
 }
@@ -129,6 +169,8 @@ export function replayWarExpenseScenario(vector) {
       return replayReserveRefundComplete(vector);
     case "add-remove":
       return replayAddRemove(vector);
+    case "flag-0x2-category-admission":
+      return replayFlag0x2CategoryAdmission(vector);
     case "zero-cost-hero":
       return replayZeroCostHero(vector);
     default:
@@ -168,6 +210,14 @@ function replayAddRemove(vector) {
   return { id: vector.id, operation: vector.operation, accepted: true, add: added, remove: removed };
 }
 
+function replayFlag0x2CategoryAdmission(vector) {
+  const { state } = vector;
+  const gated = state.globalWord0x88afcc === 0 && state.playerByte2 === 1;
+  const limit = Math.trunc(state.maxCount / 5);
+  const accepted = !gated || state.rawFlag2Count < limit;
+  return { id: vector.id, operation: vector.operation, accepted, gateApplied: gated, reason: accepted ? (gated ? "accepted" : "gate-bypassed") : "building-category-count", limit };
+}
+
 function replayZeroCostHero(vector) {
   const admitted = replayImmediateAdmission({ ...vector, operation: "immediate-admission", countMode: "normal" });
   const reserved = replayReserve({ ...vector, operation: "reserve", resourceA: 0, resourceB: 0 });
@@ -179,4 +229,84 @@ function readOutputPath(argv) {
   if (argv.length === 0 || (argv.length === 1 && argv[0] === "--json")) return undefined;
   if (argv.length === 2 && argv[0] === "--output" && argv[1]) return argv[1];
   throw new Error("Usage: extract-war-expense-capacity-evidence.mjs [--json | --output <path>]");
+}
+
+function parseJson(bytes, path) {
+  try {
+    return JSON.parse(bytes.toString("utf8"));
+  } catch (error) {
+    throw new Error(`Cannot parse ${path}: ${error.message}`, { cause: error });
+  }
+}
+
+function extractMaximumWriterScope(referencesDocument, referencesPath) {
+  const entries = referencesDocument.references.filter(({ to }) => to === MAXIMUM_WAR_EXPENSE_PLAYER_ZERO_ADDRESS);
+  const projection = entries.map(({ from, to, type, source, operandIndex, primary, fromFunctionEntry }) => ({ from, to, type, source, operandIndex, primary, fromFunctionEntry }));
+  const digest = sha256(Buffer.from(JSON.stringify(projection)));
+  assertEqual(entries.length, 6, "maximum war-expense direct-reference count");
+  assertEqual(digest, EXPECTED_MAXIMUM_WAR_EXPENSE_DIRECT_REFERENCES_SHA256, "maximum war-expense direct-reference projection SHA-256");
+  const writes = projection.filter(({ type }) => type === "WRITE");
+  assertEqual(writes.length, 1, "maximum war-expense direct WRITE count");
+  assertEqual(writes[0].fromFunctionEntry, "0x004457d0", "maximum war-expense direct WRITE owner");
+  return {
+    directReferenceSet: {
+      generatedReferencesPath: referencesPath,
+      playerZeroMaximumWarExpenseAddress: MAXIMUM_WAR_EXPENSE_PLAYER_ZERO_ADDRESS,
+      count: entries.length,
+      projectionSha256: digest,
+      directWriteReferences: writes,
+      conclusion: "The hash-bound generated direct-reference set has one WRITE, from the initializer FUN_004457d0; it has no other direct WRITE to this absolute player-zero field.",
+    },
+    unresolved: ["alias writers", "save/load writers", "map writers", "script writers"],
+    conclusion: "A remembered recruit/general-count cap increase is not confirmed and must not be implemented as original-game behavior.",
+  };
+}
+
+function deriveAction115(actionBoundary, entityTypeCatalog) {
+  const action = actionBoundary.productionAction;
+  assertEqual(action.actionId, 115, "persistent action evidence action ID");
+  assertEqual(action.producedInternalClass, 76, "persistent action evidence produced class");
+  assertEqual(action.producedTypeRawFields.field0x0eWord, 0, "persistent action evidence class 76 +0x0e expense");
+  const class76 = entityTypeCatalog.types.find(({ internalClass }) => internalClass === action.producedInternalClass);
+  if (!class76) throw new Error("canonical entity type catalog is missing action 115 produced class 76");
+  assertEqual(class76.originalGameplayName, action.producedTypeIdentity.originalGameplayName, "action 115 canonical class 76 name");
+  return {
+    action: action.actionId,
+    producedInternalClass: action.producedInternalClass,
+    originalGameplayName: class76.originalGameplayName,
+    typeField0x0eExpense: action.producedTypeRawFields.field0x0eWord,
+    provenance: {
+      persistentSelectionActionEvidence: {
+        sourceExecutableSha256: actionBoundary.sourceExecutableSha256,
+        sourceFunctionsSha256: actionBoundary.sourceFunctionsSha256,
+        sourceReferencesSha256: actionBoundary.sourceReferencesSha256,
+        definitionAddress: action.definitionAddress,
+        initializerCallAddress: action.initializerCallAddress,
+      },
+      canonicalEntityTypeCatalog: {
+        sourceExecutableSha256: entityTypeCatalog.source.executableSha256,
+        sourceSeedsSha256: EXPECTED_SEEDS_SHA256,
+        definitionAddress: class76.definition.recordAddress,
+        initializerCallAddress: class76.definition.initializerCallAddress,
+      },
+    },
+  };
+}
+
+function deriveFlag0x2BuildingCategory(entityTypeCatalog) {
+  const classes = entityTypeCatalog.types
+    .filter(({ definition }) => (Number.parseInt(definition.flags, 16) & 0x2) !== 0)
+    .map(({ internalClass, originalGameplayName, sprite }) => ({ internalClass, originalGameplayName, sourceSprite: sprite.sourcePathNormalized }));
+  assertEqual(classes.length, 35, "canonical flag-0x2 building type count");
+  assertEqual(classes[0].internalClass, 40, "canonical flag-0x2 first class");
+  assertEqual(classes.at(-1).internalClass, 74, "canonical flag-0x2 last class");
+  assertEqual(classes.every(({ internalClass }, index) => internalClass === index + 40), true, "canonical flag-0x2 class range");
+  return {
+    classification: "original-building-category",
+    flagMask: "0x2",
+    classRange: "40..74",
+    typeCount: classes.length,
+    types: classes,
+    provenance: "The canonical 95-type catalog, itself bound to the original EXE and seeds artifact hashes, contains no other flags&0x2 type.",
+  };
 }

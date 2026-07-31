@@ -165,6 +165,11 @@
 | `0x0045f9c0` | `FUN_0045f9c0`, `0x0045f9c0-0x004607ac` | 209 / 801 | application state `0x16`에서 공통 UI를 초기화하고 `0x17`에서 소유 함수 호출 | 공통 목표 모달 application owner 경로 정적 확정 |
 | `0x00460a10` | `FUN_00460a10`, `0x00460a10-0x00460b4e` | 5 / 90 | Win32 입력 handler 설치 | Escape dispatch 상위 설치 경로 정적 확정 |
 | `0x004700b0` | `FUN_004700b0`, `0x004700b0-0x0047056d` | 65 / 350 | map pointer/button 입력 갱신 | gameplay-panel 현재 button 상태 공급 경로 정적 확정 |
+| `0x0047b200` | `FUN_0047b200`, `0x0047b200-0x0047b3b6` | 105 | global WORD `0x0088afcc==0`·player `+0x02==1`일 때만 signed building count `+0x1b4e < truncTowardZero(+0x1b50/5)`를 요구하는 별도 admission gate | [전비·building category capacity](mechanics/war-expense-capacity.md)의 49/50·bypass 범위 정적 확정; 이후 type/action gate는 범위 밖 |
+| `0x0047e050` | `FUN_0047e050`, `0x0047e050-0x0047e0c8` | 33 | normal/alternate live entity count 및 `live expense + type +0x0e <= maximum war expense` admission | [전비 capacity](mechanics/war-expense-capacity.md) 정적 확정 |
+| `0x0047e0d0` / `0x0047e160` | `FUN_0047e0d0`, `0x0047e0d0-0x0047e151` / `FUN_0047e160`, `0x0047e160-0x0047e257` | 32 / 68 | live entity count·expense·type-flags-0x2 building count add/remove | [전비·building category capacity](mechanics/war-expense-capacity.md) 정적 확정 |
+| `0x0047e300` / `0x0047e330` | `FUN_0047e300`, `0x0047e300-0x0047e32d` / `FUN_0047e330`, `0x0047e330-0x0047e398` | 16 / 42 | resource refund/pending expense subtract 및 resource reservation/live+pending+new expense admission | [전비 capacity](mechanics/war-expense-capacity.md) 정적 확정 |
+| `0x0047e400` | `FUN_0047e400`, `0x0047e400-0x0047e6ed` | 243 | UI `live expense + pending expense` numerator와 maximum expense denominator formatting | [전비 capacity](mechanics/war-expense-capacity.md) 정적 확정 |
 | `0x00481ee0` | `FUN_00481ee0`, `0x00481ee0-0x00481fce` | 1 / 45 | gameplay UI signed WORD 사각형 필드 초기화 | panel left 138, top 457, width 28, height 15 정적 확정 |
 | `0x00482180` | `FUN_00482180`, `0x00482180-0x004822f4` | 16 / 114 | 스크립트 적재 또는 큐 등록 | 인수, 반환값과 오류 경로 |
 | `0x00482340` | `FUN_00482340`, `0x00482340-0x0048238c` | 4 / 22 | 스크립트 시작 또는 commit | 엔진 상태 변화 |
