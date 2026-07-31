@@ -12,6 +12,7 @@ import test from "node:test";
 
 import {
   EXPECTED_EXECUTABLE_SHA256,
+  EXPECTED_SEEDS_SHA256,
   extractEntityTypeCatalog,
 } from "./extract-entity-type-catalog.mjs";
 import { extractPersistentSelectionActionBoundary } from "./extract-persistent-selection-action-boundary.mjs";
@@ -45,6 +46,7 @@ test("extracts every original entity type identity from static data flow", () =>
     otherBaseFrameCount: 2,
   });
   assert.equal(report.source.executableSha256, EXPECTED_EXECUTABLE_SHA256);
+  assert.equal(report.source.seedsSha256, EXPECTED_SEEDS_SHA256);
   assert.ok(report.codeAnchors.every((anchor) => anchor.matched));
   assert.deepEqual(report.layout.fields.warExpense, {
     offset: "+0x0e",
@@ -61,6 +63,14 @@ test("extracts every original entity type identity from static data flow", () =>
     width: "signed WORD",
     writerArgumentIndex: 7,
   });
+  assert.match(
+    report.layout.economySemanticProvenance.grainCost,
+    /player \+0x08.*곡물이 부족합니다/u,
+  );
+  assert.match(
+    report.layout.economySemanticProvenance.woodCost,
+    /player \+0x0c.*목재가 부족합니다/u,
+  );
   assert.deepEqual(
     report.types.map((type) => type.internalClass),
     Array.from({ length: 95 }, (_value, index) => index + 1),
@@ -192,7 +202,7 @@ test("generated entity type catalog is deterministic and current", () => {
   assert.deepEqual(generated, regenerated);
 });
 
-test("rejects static analysis produced from another executable", (t) => {
+test("rejects altered seed provenance and arguments", (t) => {
   const temporaryDirectory = mkdtempSync(
     join(tmpdir(), "entity-type-catalog-"),
   );
@@ -214,7 +224,30 @@ test("rejects static analysis produced from another executable", (t) => {
         executablePath,
         seedsPath: mismatchedSeedsPath,
       }),
-    /source SHA-256 mismatch/,
+    /SHA-256 mismatch/,
+  );
+
+  const alteredArgumentSeeds = JSON.parse(readFileSync(seedsPath, "utf8"));
+  const initializer = alteredArgumentSeeds.functions.find(
+    ({ entry }) => entry === "0x0045bf50",
+  );
+  const firstPush = initializer?.instructions.find(({ text }) =>
+    text.startsWith("PUSH "),
+  );
+  assert.ok(firstPush, "type initializer must contain a recoverable PUSH argument");
+  firstPush.text = "PUSH 0x7fff";
+  const alteredArgumentSeedsPath = join(temporaryDirectory, "arguments.json");
+  writeFileSync(
+    alteredArgumentSeedsPath,
+    `${JSON.stringify(alteredArgumentSeeds)}\n`,
+  );
+  assert.throws(
+    () =>
+      extractEntityTypeCatalog({
+        executablePath,
+        seedsPath: alteredArgumentSeedsPath,
+      }),
+    /SHA-256 mismatch/,
   );
 });
 

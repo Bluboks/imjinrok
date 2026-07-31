@@ -34,6 +34,8 @@ const ARGUMENT_INDEX = {
 
 export const EXPECTED_EXECUTABLE_SHA256 =
   "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e";
+export const EXPECTED_SEEDS_SHA256 =
+  "8e7c8821e9c84c5d0877bb977b119b3b878271502b36bf75e7426b570507bfb7";
 
 const CODE_ANCHORS = [
   {
@@ -49,25 +51,51 @@ const CODE_ANCHORS = [
     meaning: "argument 1 is written to type record base frame +0x06",
   },
   {
-    id: "type-definition-war-expense-write",
-    va: 0x0045bd37,
-    bytes: "66 89 51 0e",
+    id: "type-definition-war-expense-argument-load-and-write",
+    va: 0x0045bd29,
+    bytes: "66 8b 54 24 18 66 89 41 0c 66 8b 44 24 1c 66 89 51 0e",
     meaning:
-      "argument 5 low WORD is written to signed type record war-expense field +0x0e",
+      "argument 5 low WORD is loaded from stack +0x18 and written to signed type record war-expense field +0x0e",
   },
   {
-    id: "type-definition-grain-cost-write",
-    va: 0x0045bd40,
-    bytes: "66 89 41 10",
+    id: "type-definition-grain-cost-argument-load-and-write",
+    va: 0x0045bd32,
+    bytes: "66 8b 44 24 1c 66 89 51 0e 66 8b 54 24 20 66 89 41 10",
     meaning:
-      "argument 6 low WORD is written to signed type record grain-cost field +0x10",
+      "argument 6 low WORD is loaded from stack +0x1c and written to signed type record grain-cost field +0x10",
   },
   {
-    id: "type-definition-wood-cost-write",
-    va: 0x0045bd49,
-    bytes: "66 89 51 12",
+    id: "type-definition-wood-cost-argument-load-and-write",
+    va: 0x0045bd3b,
+    bytes: "66 8b 54 24 20 66 89 41 10 66 8b 44 24 24 66 89 51 12",
     meaning:
-      "argument 7 low WORD is written to signed type record wood-cost field +0x12",
+      "argument 7 low WORD is loaded from stack +0x20 and written to signed type record wood-cost field +0x12",
+  },
+  {
+    id: "reservation-resource-argument-to-player-field-order",
+    va: 0x0047e339,
+    bytes: "39 5e 0c 72 53 8b 44 24 10 8b 4e 08 3b c8 72 48",
+    meaning:
+      "FUN_0047e330 compares caller argument 2 with player +0x0c before caller argument 1 with player +0x08",
+  },
+  {
+    id: "reservation-resource-deduct-call-order",
+    va: 0x0047e366,
+    bytes: "50 8b ce e8 f2 fe ff ff 85 c0 74 1f 53 8b ce e8 36 ff ff ff",
+    meaning:
+      "after admission FUN_0047e330 passes caller argument 1 to FUN_0047e260, then argument 2 to FUN_0047e2b0",
+  },
+  {
+    id: "grain-shortage-cp949-source",
+    va: 0x004c7a70,
+    bytes: "b0 ee b9 b0 c0 cc 20 ba ce c1 b7 c7 d5 b4 cf b4 d9 2e",
+    meaning: "CP949 source string is 곡물이 부족합니다.",
+  },
+  {
+    id: "wood-shortage-cp949-source",
+    va: 0x004c7a5c,
+    bytes: "b8 f1 c0 e7 b0 a1 20 ba ce c1 b7 c7 d5 b4 cf b4 d9 2e",
+    meaning: "CP949 source string is 목재가 부족합니다.",
   },
   {
     id: "type-definition-flags-write",
@@ -139,7 +167,8 @@ export function extractEntityTypeCatalog({
     `${executablePath} SHA-256`,
   );
 
-  const seeds = readSeeds(seedsPath);
+  const { document: seeds, sha256: seedsSha256 } = readSeeds(seedsPath);
+  assertEqual(seedsSha256, EXPECTED_SEEDS_SHA256, `${seedsPath} SHA-256`);
   assertEqual(
     seeds.sourceSha256,
     executableSha256,
@@ -180,6 +209,7 @@ export function extractEntityTypeCatalog({
       executablePath,
       executableSha256,
       seedsPath,
+      seedsSha256,
       seedsSourceSha256: seeds.sourceSha256,
       ghidraSchemaVersion: seeds.schemaVersion,
     },
@@ -211,6 +241,12 @@ export function extractEntityTypeCatalog({
         },
         flags: "+0x4c",
         namePointer: "+0x6c",
+      },
+      economySemanticProvenance: {
+        grainCost:
+          "type +0x10 is passed as FUN_0047e330 caller argument 1, compared with player +0x08, deducted by FUN_0047e260, and bound to the CP949 곡물이 부족합니다. source message",
+        woodCost:
+          "type +0x12 is passed as FUN_0047e330 caller argument 2, compared with player +0x0c, deducted by FUN_0047e2b0, and bound to the CP949 목재가 부족합니다. source message",
       },
     },
     analyzedFunctions: [
@@ -493,9 +529,11 @@ function validateCompleteClassRange(types) {
 }
 
 function readSeeds(path) {
+  let bytes;
   let parsed;
   try {
-    parsed = JSON.parse(readFileSync(path, "utf8"));
+    bytes = readFileSync(path);
+    parsed = JSON.parse(bytes.toString("utf8"));
   } catch (error) {
     throw new Error(`Cannot read Ghidra seed analysis from ${path}: ${error.message}`, {
       cause: error,
@@ -508,7 +546,7 @@ function readSeeds(path) {
   ) {
     throw new Error(`${path} is not a supported Ghidra seed analysis document`);
   }
-  return parsed;
+  return { document: parsed, sha256: sha256(bytes) };
 }
 
 function requireFunction(seeds, entry) {
