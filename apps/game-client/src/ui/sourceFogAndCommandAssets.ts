@@ -96,11 +96,15 @@ export interface EnvironmentOverlayLightContract {
 
 const SOURCE_FOG_ASSET_PREFIX = "assets/themes/default/fog/normal/composites";
 export const IMJINROK_SOURCE_FOG_PROFILE_ID = "imjinrok-source-fog-composite";
-/** Product image geometry for source composites; original pixel pivot remains unresolved. */
+/**
+ * Source-local 64x48 composite geometry: FUN_0046a530 places its image at
+ * `projectedX - 32, projectedY - rawVerticalShift`. The renderer-wide source
+ * pivot remains unresolved; the web placement adapter is still product policy.
+ */
 export const SOURCE_FOG_COMPOSITE_IMAGE_GEOMETRY = Object.freeze({
   width: 64,
   height: 48,
-  footprintAnchor: { x: 32, y: 16 },
+  footprintAnchor: { x: 32, y: 0 },
 });
 /** Product fog overlay tint. Source frame identity is retained; palette color is not. */
 export const SOURCE_FOG_OVERLAY_TINT = 0x020608;

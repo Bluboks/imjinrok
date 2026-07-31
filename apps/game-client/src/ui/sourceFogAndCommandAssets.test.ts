@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
+import { resolveTileImagePlacement } from "../render/explicitTileVisualResolver.js";
 import {
   ORIGINAL_COMMAND_CONTROL_BINDINGS,
   ORIGINAL_COMMAND_ICON_ASSETS,
@@ -75,13 +76,31 @@ test("source fog uses the exact corner bits, lookup, and six-frame algebra behin
   assert.throws(() => reproduceSourceFogFrameIndices(14), /0\.\.13/);
 });
 
-test("source fog composites keep source frame identity but use the shared 64x48 placement geometry and dark product tint", () => {
+test("source fog composites keep source frame identity, proven local anchor, and dark product tint", () => {
   assert.deepEqual(SOURCE_FOG_COMPOSITE_IMAGE_GEOMETRY, {
     width: 64,
     height: 48,
-    footprintAnchor: { x: 32, y: 16 },
+    footprintAnchor: { x: 32, y: 0 },
   });
   assert.equal(SOURCE_FOG_OVERLAY_TINT, 0x020608);
+});
+
+test("source fog local anchor keeps base and raised K01 draw tops at ground and ground minus raw shift", () => {
+  const ground = { x: 160, y: -96 };
+
+  assert.deepEqual(
+    resolveTileImagePlacement({ imageGeometry: SOURCE_FOG_COMPOSITE_IMAGE_GEOMETRY }, ground, 64, 32),
+    { origin: { x: 0.5, y: 0 }, position: ground, scale: 1 },
+  );
+  assert.deepEqual(
+    resolveTileImagePlacement(
+      { imageGeometry: SOURCE_FOG_COMPOSITE_IMAGE_GEOMETRY, sourcePixelOffset: { x: 0, y: -16 } },
+      ground,
+      64,
+      32,
+    ),
+    { origin: { x: 0.5, y: 0 }, position: { x: 160, y: -112 }, scale: 1 },
+  );
 });
 
 test("source fog keeps the generic fallback and malformed opt-ins fail loudly", () => {

@@ -7381,8 +7381,9 @@ export class SkirmishScene extends Phaser.Scene {
       this.map.tileHeight,
     );
     stamp
-      // This 64x48 image ground-contact placement and alpha are web-product
-      // adaptations; original fog pivot/alpha are not statically resolved.
+      // The local (32,0) source-composite anchor is statically confirmed.
+      // Alpha, tint, and web placement remain product adaptations; this does
+      // not establish the original renderer-wide pivot, clipping, or blending.
       .setOrigin(placement.origin.x, placement.origin.y)
       .setScale(placement.scale)
       .setAlpha(source.alpha)
