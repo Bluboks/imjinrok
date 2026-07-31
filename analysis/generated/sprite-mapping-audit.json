@@ -16,7 +16,7 @@
     },
     {
       "path": "packages/shared/src/content.ts",
-      "sha256": "5e97e4f4fabb178c0298603f98f718e00eadd2748dd4d8041574862046c4617c"
+      "sha256": "1c14e597449fcb33fd4bc524a6218e7e108b7628d22e0b2a07776865dd3eca0f"
     },
     {
       "path": "packages/shared/src/scenarios.ts",
