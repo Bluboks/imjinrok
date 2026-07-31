@@ -9,7 +9,7 @@ callee의 제한된 draw-rectangle 보정, state별 호출과 subframe 합성에
 | --- | --- | --- |
 | 분석 | 정적 확정 | `fog0..14`/`black` loader record, 16-byte lookup, literal state `4`/`8`의 별도 mask 경로, caller isometric projection·six stack argument order, `FUN_0046a530`의 `arg1-32`/low-nibble helper vertical adjustment, `map+0x4a0c4+x*180+y` family byte→record, 3×2 six-subframe loop·frame algebra와 두 call path |
 | 재현 | 재현 완료 | EXE·SPR hash/header·atlas fields, K01 map hash·family/low-nibble/helper stream, VA/raw offset/hash·direct call edge, 16 lookup vector, projection/draw synthetic·K01 vector, record address·frame vector와 loop bound의 결정론 추출 |
-| 구현 | 부분 이식·의도적 적응 | 15×14 `64×48` six-subframe composite와 K01 x-major family stream은 재현했다. 제품 state/visibility mapping, alpha/tint, web chunk scheduling과 broader product placement는 명시적 적응 또는 미확정이다. |
+| 구현 | 부분 이식·의도적 적응 | 15×14 `64×48` six-subframe composite와 K01 x-major family stream은 재현했다. lifecycle evidence가 뒷받침하는 literal `0`=visible, `4`=explored, `8`=unseen을 client가 부분 이식한다. product grid의 update lifecycle, alpha/tint, web chunk scheduling과 broader product placement는 명시적 적응 또는 미확정이다. |
 
 ## 고정 입력과 생성 산출물
 
@@ -148,16 +148,19 @@ table-domain 밖의 mask와 caller-reachable `0..13` 밖의 selector는 helper�
 - client는 byte-proven 8-neighbor corner-bit construction(상/하 `0x3`/`0xc`, 좌/우 `0x5`/`0xa`,
   네 diagonal `0x1`/`0x2`/`0x4`/`0x8`)과 lookup table만 쓴다. product grid의 top/bottom/left/right 이름은
   source bit의 사람용 방향 의미 주장이 아니다.
-- `unseen→literal state 4`, `explored→literal state 8`, explored alpha `0.58`, `64×48` image의
-  product ground-contact placement와 visibility update scheduler는 **source-backed adaptation**이다. 이번 caller/callee
-  slice의 projected argument와 local `(32,0)` anchor/`0|16` raw vertical shift는 정적 확정했지만, 그것만으로 full
-  original surface clip/mode, renderer-wide pivot, alpha/blend 또는 web placement policy를 일반화하지 않는다.
+- [visibility lifecycle evidence](source-fog-visibility-lifecycle.md)는 literal `0`=현재 local sight,
+  `4`=explored, `8`=unseen을 정적 확정했다. client adapter는 product grid의 `visible`을 source fog 없음으로,
+  `explored`/`unseen`을 각각 literal `4`/`8` renderer path로 변환한다. 이 product-grid conversion은 source
+  state 의미와 분리된 adapter boundary다. explored alpha `0.58`, `64×48` image의 product ground-contact placement와
+  visibility update scheduler는 **source-backed adaptation**이다. 이번 caller/callee slice의 projected argument와 local
+  `(32,0)` anchor/`0|16` raw vertical shift는 정적 확정했지만, 그것만으로 full original surface clip/mode,
+  renderer-wide pivot, alpha/blend 또는 web placement policy를 일반화하지 않는다.
 - source composite의 family/selector/six-frame identity는 보존한다. 현재 web adapter의 dark tint는 밝은
   source palette가 fog gap처럼 보이는 것을 막기 위한 제품 overlay policy이며 original palette/blend parity가 아니다.
 
 ## 미확인과 이식 경계
 
-- state `4`/`8`의 visible, explored, unseen 등 사람용 semantics와 product visibility mapping
+- product visibility lifecycle/grid conversion
 - family byte의 runtime producer/lifetime 및 K01 밖 generic map-file provenance
 - alpha/tint, scheduler/wall-clock behavior, web chunk scheduling, full renderer clip/mode·pixel pivot
 - 현재 제품 neighbor mask/alpha와 원본 state·bit ordering의 대응

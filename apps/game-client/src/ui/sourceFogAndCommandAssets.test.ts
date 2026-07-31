@@ -55,19 +55,37 @@ test("source fog uses the exact corner bits, lookup, and six-frame algebra behin
       familyIndex: 14,
       selector: 6,
       sourceFrameIndices: [12, 13, 44, 45, 76, 77],
-      sourceStateValue: 4,
+      sourceStateValue: 8,
       alpha: 1,
     },
   );
-  assert.equal(resolveSourceFogComposite(IMJINROK_SOURCE_FOG_PROFILE_ID, 0, "explored", () => "explored"), null);
-  assert.deepEqual(resolveSourceFogLayerPlan(IMJINROK_SOURCE_FOG_PROFILE_ID, 0, "unseen", () => "unseen"), {
-    drawBaseFog: true,
-    composite: null,
-  });
-  assert.deepEqual(resolveSourceFogLayerPlan(IMJINROK_SOURCE_FOG_PROFILE_ID, 0, "explored", () => "explored"), {
-    drawBaseFog: true,
-    composite: null,
-  });
+  const exploredComposite = resolveSourceFogComposite(
+    IMJINROK_SOURCE_FOG_PROFILE_ID,
+    0,
+    "explored",
+    (neighbor) => neighbor === "top" ? "explored" : "visible",
+  );
+  const unseenComposite = resolveSourceFogComposite(
+    IMJINROK_SOURCE_FOG_PROFILE_ID,
+    0,
+    "unseen",
+    (neighbor) => neighbor === "top" ? "unseen" : "visible",
+  );
+  assert.ok(exploredComposite);
+  assert.ok(unseenComposite);
+  assert.equal(exploredComposite.sourceStateValue, 4);
+  assert.equal(unseenComposite.sourceStateValue, 8);
+  assert.equal(resolveSourceFogComposite(IMJINROK_SOURCE_FOG_PROFILE_ID, 0, "visible", () => "visible"), null);
+  for (const visibility of ["unseen", "explored"] as const) {
+    assert.deepEqual(resolveSourceFogLayerPlan(IMJINROK_SOURCE_FOG_PROFILE_ID, 0, visibility, () => "visible"), {
+      drawBaseFog: true,
+      composite: null,
+    });
+    assert.deepEqual(resolveSourceFogLayerPlan(IMJINROK_SOURCE_FOG_PROFILE_ID, 0, visibility, () => visibility), {
+      drawBaseFog: true,
+      composite: null,
+    });
+  }
   assert.deepEqual(resolveSourceFogLayerPlan(IMJINROK_SOURCE_FOG_PROFILE_ID, 0, "visible", () => "visible"), {
     drawBaseFog: false,
     composite: null,
