@@ -85,6 +85,7 @@ import {
   resolveOriginalSpeechLayout,
 } from "../originalSpeechLayout";
 import { selectConstructionFrameIndex } from "../originalBuildingVisualState";
+import { clampCameraCenterToWorldField } from "../cameraFieldClamp.js";
 import {
   ACTION_TRIGGERED_EVENT,
   BATTLEFIELD_SUMMARY_ACTION_EVENT,
@@ -6372,11 +6373,23 @@ export class SkirmishScene extends Phaser.Scene {
     const originY = camera.height * camera.originY;
     const centerX = camera.scrollX + originX;
     const centerY = camera.scrollY + originY;
-    const clampedCenterX = Phaser.Math.Clamp(centerX, bounds.left, bounds.right);
-    const clampedCenterY = Phaser.Math.Clamp(centerY, bounds.top, bounds.bottom);
+    const clampedCenter = clampCameraCenterToWorldField({
+      cameraCenter: { x: centerX, y: centerY },
+      worldBounds: { x: bounds.x, y: bounds.y, width: bounds.width, height: bounds.height },
+      cameraViewport: {
+        x: camera.x,
+        y: camera.y,
+        width: camera.width,
+        height: camera.height,
+        originX: camera.originX,
+        originY: camera.originY,
+      },
+      fieldViewport: { x: 0, y: 0, width: this.scale.width, height: this.getHudTop() },
+      zoom: camera.zoom,
+    });
 
-    camera.scrollX = clampedCenterX - originX;
-    camera.scrollY = clampedCenterY - originY;
+    camera.scrollX = clampedCenter.x - originX;
+    camera.scrollY = clampedCenter.y - originY;
   }
 
   private centerCameraOnWorldPoint(point: MinimapPoint): void {
@@ -6408,6 +6421,7 @@ export class SkirmishScene extends Phaser.Scene {
     if (anchor) {
       const position = this.getUnitWorldPosition(anchor);
       this.cameras.main.centerOn(position.x, position.y);
+      this.clampCameraToWorld();
       return;
     }
 
@@ -6415,6 +6429,7 @@ export class SkirmishScene extends Phaser.Scene {
     const position = resolveGridGroundContactWorldPosition(spawn, this.mapOrigin, this.map);
 
     this.cameras.main.centerOn(position.x, position.y);
+    this.clampCameraToWorld();
   }
 
   private getWorldFieldBounds(): Phaser.Geom.Rectangle {
