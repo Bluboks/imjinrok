@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "source": {
+    "executableSha256": "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e",
+    "functionsSha256": "7e071fdfe425d22447780c265fe1d3fd271a1bedd1773682bebcb8ddc6d2e16e",
+    "referencesSha256": "f64cfa6f04bc39573552f42a8b7bdd5b08fea1ba774d05865162d1d80daaf9a5",
+    "entityTypeCatalogSha256": "485344664b278c97a4ceed0756832abadbf2a71bd4a997b117b85c336d620708",
+    "entityTypeCatalogSchemaVersion": 2
+  },
+  "labels": {
+    "action": 13,
+    "label": "해체",
+    "labelSourceVa": "0x004c84fc",
+    "help": "건물을 해체하여 없앱니다.",
+    "helpSourceVa": "0x004c7764",
+    "helpCStringSha256": "1bc5358ae5413b83c49d2b0151d0b3aaa5115e9d4b924e6eb8d6ccb1b4a85dd5",
+    "buttonSpriteFrame": 13
+  },
+  "phaseBoundaries": [
+    [0, 0], [9, 0], [10, 1], [19, 1], [20, 2], [29, 2], [30, 3], [39, 3],
+    [40, 4], [49, 4], [50, 5], [69, 5], [70, 6], [99, 6], [100, 7]
+  ],
+  "vectors": {
+    "decrementTwo": {
+      "input": { "progress": 3, "maximumHealth": 1000, "currentHealth": 1000, "delta": 2 },
+      "output": { "completed": false, "progress": 1, "currentHealth": 10 }
+    },
+    "decrementOne": {
+      "input": { "progress": 1, "maximumHealth": 1000, "currentHealth": 1000, "delta": 1 },
+      "output": { "completed": false, "progress": 0, "currentHealth": 1 }
+    },
+    "underflow": {
+      "input": { "progress": 1, "maximumHealth": 1000, "currentHealth": 7, "delta": 2 },
+      "output": { "completed": true, "progress": 0, "currentHealth": 7 }
+    },
+    "nonShipCompletion": {
+      "input": { "flags": 0, "grain": 30, "wood": 40, "grainCost": 70, "woodCost": 80 },
+      "output": { "grain": 100, "wood": 120, "pendingWarExpenseDelta": 0, "transformation": null }
+    },
+    "shipCompletion": {
+      "input": { "flags": 16, "entityIdentifier": 5, "owner": 1, "origin": [20, 30], "eligibleCells": [[19, 30], [21, 30]] },
+      "output": { "internalClass": 75, "entityIdentifier": 5, "owner": 1, "destination": [19, 30] }
+    }
+  },
+  "flag0x10Classes": [18, 19, 26, 27, 29, 30, 38],
+  "transformationClass": { "internalClass": 75, "name": "일본 건설수레", "spritePath": "char/carj.spr" }
+}
