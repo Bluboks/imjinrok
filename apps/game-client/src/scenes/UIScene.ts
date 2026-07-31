@@ -85,6 +85,11 @@ import {
   type MinimapZoomRailBounds,
 } from "../ui/minimapZoom.js";
 import {
+  ORIGINAL_SOURCE_CLOCK_FRAME_ASSETS,
+  resolveMinimapHudAncillaryLayout,
+  resolveSourceClockFrame,
+} from "../ui/hudClock.js";
+import {
   emitK01ObjectiveModalActionRequest,
   ObjectiveModalActionBridge,
   ObjectiveModalRequestState,
@@ -125,6 +130,7 @@ export class UIScene extends Phaser.Scene {
   private minimapResources: MinimapResourcesView = { resources: [] };
   private minimapVisibility: MinimapVisibilityView | null = null;
   private minimapAvailability: MinimapAvailabilityView = { enabled: true };
+  private minimapPanelBounds: PanelBounds | null = null;
   private minimapGeometry: MinimapGeometry | null = null;
   private minimapTerrainGraphics: Phaser.GameObjects.RenderTexture | null = null;
   private minimapFog: MinimapFogTexture | null = null;
@@ -135,6 +141,7 @@ export class UIScene extends Phaser.Scene {
   private minimapViewportGraphics: Phaser.GameObjects.Graphics | null = null;
   private minimapBorderGraphics: Phaser.GameObjects.Graphics | null = null;
   private minimapUnavailableGraphics: Phaser.GameObjects.Graphics | null = null;
+  private minimapClockImage: Phaser.GameObjects.Image | null = null;
   private minimapZoomControlGraphics: Phaser.GameObjects.Graphics | null = null;
   private minimapZoomControlZones: Partial<Record<MinimapZoomDirection, Phaser.GameObjects.Zone>> = {};
   private minimapZoomRailLayout: Partial<Record<MinimapZoomDirection, MinimapZoomRailBounds>> = {};
@@ -167,6 +174,11 @@ export class UIScene extends Phaser.Scene {
       );
     }
     for (const asset of ORIGINAL_COMMAND_ICON_ASSETS) {
+      if (!this.textures.exists(asset.textureKey)) {
+        this.load.image(asset.textureKey, asset.assetPath);
+      }
+    }
+    for (const asset of ORIGINAL_SOURCE_CLOCK_FRAME_ASSETS) {
       if (!this.textures.exists(asset.textureKey)) {
         this.load.image(asset.textureKey, asset.assetPath);
       }
@@ -363,6 +375,7 @@ export class UIScene extends Phaser.Scene {
   private handleBattlefieldSummaryChanged(view: BattlefieldSummaryView): void {
     this.battlefieldSummary = view;
     this.updateBattlefieldSummaryText();
+    this.updateHudClock();
   }
 
   private handleGamePlaybackChanged(view: GamePlaybackView): void {
@@ -497,6 +510,12 @@ export class UIScene extends Phaser.Scene {
     this.minimapAlertGraphics = null;
     this.minimapUnavailableGraphics?.destroy();
     this.minimapUnavailableGraphics = null;
+    this.minimapClockImage?.destroy();
+    this.minimapClockImage = null;
+    this.minimapZoomControlGraphics?.destroy();
+    this.minimapZoomControlGraphics = null;
+    this.minimapZoomControlZones = {};
+    this.minimapZoomRailLayout = {};
     this.minimapAlerts.length = 0;
     this.hudContainer?.destroy(true);
     this.hudContainer = null;
@@ -576,6 +595,7 @@ export class UIScene extends Phaser.Scene {
     this.minimapViewportGraphics = null;
     this.minimapBorderGraphics = null;
     this.minimapUnavailableGraphics = null;
+    this.minimapClockImage = null;
     this.minimapZoomControlGraphics = null;
     this.minimapZoomControlZones = {};
     this.minimapZoomRailLayout = {};
@@ -587,6 +607,7 @@ export class UIScene extends Phaser.Scene {
     this.playbackPauseText = null;
     this.playbackSpeedText = null;
     this.minimapGeometry = null;
+    this.minimapPanelBounds = null;
 
     const width = this.scale.width;
     const height = this.scale.height;
@@ -709,9 +730,12 @@ export class UIScene extends Phaser.Scene {
     this.minimapViewportGraphics?.destroy();
     this.minimapBorderGraphics?.destroy();
     this.minimapUnavailableGraphics?.destroy();
+    this.minimapClockImage?.destroy();
     this.minimapZoomControlGraphics?.destroy();
     this.minimapZoomText?.destroy();
     const mapDefinition = this.minimapMap?.map ?? defaultMap;
+    const minimapPanelBounds = { x, y, width, height };
+    this.minimapPanelBounds = minimapPanelBounds;
     const geometry = createMinimapGeometry(x, y, width, height);
     this.minimapGeometry = geometry;
     this.minimapTerrainGraphics = this.add
@@ -727,6 +751,16 @@ export class UIScene extends Phaser.Scene {
     this.minimapViewportGraphics = this.add.graphics().setScrollFactor(0).setDepth(1007);
     this.minimapBorderGraphics = this.add.graphics().setScrollFactor(0).setDepth(1010);
     this.minimapUnavailableGraphics = this.add.graphics().setScrollFactor(0).setDepth(1009);
+    const { clockBounds } = resolveMinimapHudAncillaryLayout(minimapPanelBounds);
+    for (const asset of ORIGINAL_SOURCE_CLOCK_FRAME_ASSETS) {
+      this.textures.get(asset.textureKey).setFilter(Phaser.Textures.FilterMode.NEAREST);
+    }
+    this.minimapClockImage = this.add
+      .image(clockBounds.x, clockBounds.y, ORIGINAL_SOURCE_CLOCK_FRAME_ASSETS[0]!.textureKey)
+      .setOrigin(0, 0)
+      .setDisplaySize(clockBounds.width, clockBounds.height)
+      .setScrollFactor(0)
+      .setDepth(1011);
     this.minimapZoomControlGraphics = this.add.graphics().setScrollFactor(0).setDepth(1011);
     container.add([
       this.minimapTerrainGraphics,
@@ -738,6 +772,7 @@ export class UIScene extends Phaser.Scene {
       this.minimapViewportGraphics,
       this.minimapUnavailableGraphics,
       this.minimapBorderGraphics,
+      this.minimapClockImage,
       this.minimapZoomControlGraphics,
     ]);
     this.minimapZoomText = this.add.text(x + 44, y + height - 24, "", { ...HUD_TEXT_STYLE, fontSize: "11px", color: "#7f9b91" });
@@ -757,8 +792,24 @@ export class UIScene extends Phaser.Scene {
     this.drawMinimapViewportOverlay();
     this.minimapBorderGraphics.lineStyle(2, 0xd0b46a, 0.85);
     this.minimapBorderGraphics.strokePoints(getMinimapDiamondPoints(geometry), true);
+    this.updateHudClock();
     this.createMinimapZoomControls(container, { x, y, width, height });
     this.applyMinimapAvailabilityPresentation();
+  }
+
+  /** Reuses one source-image object; only authoritative environment publication selects its texture. */
+  private updateHudClock(): void {
+    const image = this.minimapClockImage;
+    if (!image) {
+      return;
+    }
+    const environment = this.battlefieldSummary?.environment;
+    if (!environment) {
+      image.setVisible(false);
+      return;
+    }
+    image.setTexture(resolveSourceClockFrame(environment.timeOfDay01).textureKey);
+    image.setVisible(this.minimapAvailability.enabled);
   }
 
   private applyMinimapAvailabilityPresentation(): void {
@@ -772,6 +823,7 @@ export class UIScene extends Phaser.Scene {
     this.minimapAlertGraphics?.setVisible(enabled);
     this.minimapViewportGraphics?.setVisible(enabled);
     this.minimapZoomText?.setVisible(enabled);
+    this.minimapClockImage?.setVisible(enabled && this.battlefieldSummary !== null);
     this.minimapZoomControlGraphics?.setVisible(enabled);
 
     const unavailableGraphics = this.minimapUnavailableGraphics;
