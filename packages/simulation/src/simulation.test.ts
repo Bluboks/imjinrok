@@ -104,6 +104,24 @@ test("move and stop commands update waypoint movement state", () => {
   assert.equal(state.units["p1-villager-1"]?.currentOrder, undefined);
 });
 
+test("move commands already at their destination clear movement state immediately", () => {
+  const state = createInitialWorldState(createBlankMap({ width: 12, height: 12 }), ["p1"]);
+  const unit = createUnitState("p1-mover", "p1", "villager", { x: 4, y: 4 });
+  state.units = { [unit.id]: unit };
+
+  const result = issueCommand(state, {
+    sessionId: "test-session",
+    playerId: "p1",
+    issuedAtTick: state.tick,
+    command: { type: "move", unitId: unit.id, target: { x: 4, y: 4 } },
+  });
+
+  assert.equal(result.ok, true);
+  assert.equal(unit.movementTarget, undefined);
+  assert.equal(unit.movementPath, undefined);
+  assert.equal(unit.currentOrder, undefined);
+});
+
 test("cheat command grants food and wood to the issuing player", () => {
   const state = createInitialWorldState(defaultMap, ["p1", "p2"]);
   const beforeP1 = { ...state.playerResources.p1! };

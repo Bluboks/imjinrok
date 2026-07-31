@@ -61,6 +61,23 @@ test("carried-resource state selection falls back to existing movement and idle 
   assert.equal(getEntityAnimationStateKey(unit({ carriedResource: carryingFood }), visual), "idle");
 });
 
+test("only pending movement state selects move or walk clips", () => {
+  const visual = visualWithStates("move", "walk", "idle");
+  const completedMoveOrder = { type: "move", target: { x: 2, y: 3 } } as const;
+
+  assert.equal(
+    getEntityAnimationStateKey(unit({ currentOrder: completedMoveOrder }), visual),
+    "idle",
+  );
+  assert.equal(
+    getEntityAnimationStateKey(
+      unit({ currentOrder: completedMoveOrder, movementTarget: { x: 2, y: 3 } }),
+      visual,
+    ),
+    "move",
+  );
+});
+
 test("stationary gathering falls back when a visual has no gather state", () => {
   const visualWithCarryIdle = visualWithStates("carry-idle", "idle");
   const visualWithOnlyIdle = visualWithStates("idle");
