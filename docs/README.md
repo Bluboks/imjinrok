@@ -35,6 +35,7 @@
 - [스프라이트 매핑 감사](reverse-engineering/sprite-mapping-audit.md)
 - [브리핑 `SPEECH` 초상화 매핑](reverse-engineering/mechanics/briefing-portraits.md)
 - [`SPEECH` 대화 레이아웃](reverse-engineering/mechanics/speech-layout.md)
+- [K0110 briefing `TITLE`·`OBJECTIVE` overlay와 `SETDELAYTIME`](reverse-engineering/mechanics/briefing-metadata-setdelay.md)
 - [공통 임무 목표 모달 기하·입력 파일럿](reverse-engineering/mechanics/objective-panel-layout.md)
 - [공통 임무 목표 모달의 K01 결합](reverse-engineering/mechanics/objective-modal-k01-binding.md)
 - [K01 공통 임무 목표 모달 진입 입력·컨트롤](reverse-engineering/mechanics/application-state-16-objective-control.md)

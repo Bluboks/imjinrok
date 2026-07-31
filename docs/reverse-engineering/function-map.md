@@ -175,9 +175,12 @@
 | `0x00482340` | `FUN_00482340`, `0x00482340-0x0048238c` | 4 / 22 | 스크립트 시작 또는 commit | 엔진 상태 변화 |
 | `0x004823a0` | `FUN_004823a0`, `0x004823a0-0x004823a3` | 1 / 2 | 스크립트 엔진 busy 확인 | 반환값을 읽는 모든 호출자 |
 | `0x004824c0` | `FUN_004824c0`, `0x004824c0-0x0048258b` | 16 / 62 | 스크립트 큐 소비와 레코드 전달 | `SPEECH` 경로는 정적 확정 |
-| `0x00482590` | `FUN_00482590`, `0x00482590-0x0048285c` | 169 명령어 | 11개 스크립트 명령 lookup | 명령 번호와 디스패처 분기 연결 |
-| `0x00482860` | `FUN_00482860`, `0x00482860-0x00482eda` | 31 / 456 | 스크립트 명령 디스패처, case 0은 `SPEECH` 레코드 생성 | 종류 0 레코드 소비자와 초상화 계산 |
-| `0x004830f0` | `FUN_004830f0`, `0x004830f0-0x004833bc` | 29 / 218 | 레코드 종류별 소비, case 0은 대사 표시 호출 | `SPEECH` 경로는 정적 확정 |
+| `0x00482590` | `FUN_00482590`, `0x00482590-0x0048285c` | 169 명령어 | 11개 스크립트 명령 lookup | `SETDELAYTIME=3`, `OBJECTIVE=7`, `TITLE=9`와 dispatcher 분기 정적 확정 |
+| `0x00482860` | `FUN_00482860`, `0x00482860-0x00482eda` | 31 / 456 | 스크립트 명령 디스패처, case 0은 `SPEECH` 레코드 생성 | case 3 signed-WORD, case 7 `0x200` two-string, case 9 `0x40` string payload와 `SPEECH` 경로 정적 확정 |
+| `0x004830f0` | `FUN_004830f0`, `0x004830f0-0x004833bc` | 29 / 218 | 레코드 종류별 소비, case 0은 대사 표시 호출 | case 3 `timeGetTime`/signed duration store, case 7 objective, case 9 title producer와 `SPEECH` 경로 정적 확정 |
+| `0x00483500` | `FUN_00483500`, `0x00483500-0x00483657` | 107 명령어 | record readiness | case 3 unsigned wrap elapsed strict `>`/field clear 정적 확정 |
+| `0x004a88f0` | `FUN_004a88f0`, `0x004a88f0-0x004a89dd` | 75 명령어 | 278×86 `OBJECTIVE` overlay producer | two-string wrap/draw anchors와 `+0x568=1` 정적 확정 |
+| `0x004a89e0` | `FUN_004a89e0`, `0x004a89e0-0x004a8abb` | 77 명령어 | 278×30 `TITLE` overlay producer | left title anchor·vertical centering과 `+0x564=1` 정적 확정 |
 | `0x00483a60` | `FUN_00483a60`, `0x00483a60-0x00483a9c` | 7 / 25 | inactive slot 1..1199 signed reuse-age 선택 | active table 0 후보, later-tie, 모든 inactive candidate WORD 증가·slot 0 failure 정적 확정 |
 | `0x00483aa0` | `FUN_00483aa0`, `0x00483aa0-0x00483c2e` | 12 / 95 | active-list swap-last 제거와 active/reuse WORD clear | dispatcher가 0을 반환한 class 76·78 state-7 경로의 release 순서 정적 확정 |
 | `0x00483c50` | `FUN_00483c50`, `0x00483c50-0x00483c9f` | 1 / 26 | generation WORD 증가와 entity create wrapper | 16-bit wrap·initializer 전달 및 K01 exact x/y create chain 정적 확정 |

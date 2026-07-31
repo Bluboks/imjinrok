@@ -1,0 +1,22 @@
+{
+  "sourceExecutableSha256": "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e",
+  "sourceK0110Sha256": "d9dcc3c78d0373181677afc63fe9331ff561387e36877a62912ca66515f4aea8",
+  "setDelayVectors": [
+    { "id": "zero-duration-is-immediately-ready-and-keeps-start", "input": { "startTick": 1234, "durationWord": 0 }, "expected": { "elapsed": null, "durationDword": 0, "ready": true, "final": { "startTick": 1234, "durationDword": 0 } } },
+    { "id": "normal-strict-boundary-retains", "input": { "startTick": 1000, "durationWord": 100, "nowTick": 1100 }, "expected": { "elapsed": 100, "durationDword": 100, "ready": false, "final": { "startTick": 1000, "durationDword": 100 } } },
+    { "id": "normal-duration-plus-one-clears", "input": { "startTick": 1000, "durationWord": 100, "nowTick": 1101 }, "expected": { "elapsed": 101, "durationDword": 100, "ready": true, "final": { "startTick": 0, "durationDword": 0 } } },
+    { "id": "dword-wrap-elapsed-clears", "input": { "startTick": 4294967280, "durationWord": 20, "nowTick": 6 }, "expected": { "elapsed": 22, "durationDword": 20, "ready": true, "final": { "startTick": 0, "durationDword": 0 } } },
+    { "id": "negative-one-never-completes-under-unsigned-compare", "input": { "startTick": 0, "durationWord": -1, "nowTick": 4294967295 }, "expected": { "elapsed": 4294967295, "durationDword": 4294967295, "ready": false, "final": { "startTick": 0, "durationDword": 4294967295 } } },
+    { "id": "negative-word-remains-a-high-unsigned-duration", "input": { "startTick": 0, "durationWord": -32768, "nowTick": 4294967295 }, "expected": { "elapsed": 4294967295, "durationDword": 4294934528, "ready": true, "final": { "startTick": 0, "durationDword": 0 } } }
+  ],
+  "overlayDispatchVectors": [
+    { "id": "objective-before-title", "input": { "field_0x568": 1, "field_0x564": 1 }, "expected": [{ "field": "field_0x568", "rectangle": { "left": 188, "top": 290, "right": 466, "bottom": 376 } }, { "field": "field_0x564", "rectangle": { "left": 188, "top": 65, "right": 466, "bottom": 95 } }] },
+    { "id": "non-one-flags-do-not-draw", "input": { "field_0x568": 2, "field_0x564": 0 }, "expected": [] }
+  ],
+  "k0110": {
+    "changeTitleRawDelayTotal": 665,
+    "preFirstSpeechDelay": 100,
+    "firstSpeech": { "identifier": "K3", "slot": "0", "resource": "k01010", "text": "전하, 왜의 전쟁준비에 대하여 다녀온 통신사들의 이야기는 다르나 만일에 대비하여 준비를 하여야 하옵니다. " },
+    "timingNotice": "665 is a raw scripted sum, not an exact wall-clock visual duration."
+  }
+}
