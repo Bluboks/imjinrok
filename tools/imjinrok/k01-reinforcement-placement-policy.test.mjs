@@ -258,7 +258,7 @@ test("rejects malformed replay input and stale static artifacts", () => {
       .instructions.find(({ address }) => address === "0x0045c3a4").text = "PUSH 0x0";
   });
   assert.throws(
-    () => extractK01ReinforcementPlacementPolicy({ seedsPath: tamperedSeeds }),
+    () => extractK01ReinforcementPlacementPolicy({ seedsPath: tamperedSeeds, catalogSeedsPath: paths.seedsPath }),
     /1x1 type footprint/,
   );
   const executable = join(temporaryDirectory(), "imjinrok2.exe");

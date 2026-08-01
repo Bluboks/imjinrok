@@ -76,7 +76,7 @@ test("rejects tampered canonical function, initializer, map, and source sprite e
   const seedsPath = copyJson(paths.seedsPath, (value) => {
     value.functions.find(({ entry }) => entry === "0x004291d0").instructions.find(({ address }) => address === "0x0042a653").text = "PUSH 0xb";
   });
-  assert.throws(() => extractK01SpecialUnitAnimations({ seedsPath }), /class 16 attack initializer/);
+  assert.throws(() => extractK01SpecialUnitAnimations({ seedsPath, catalogSeedsPath: paths.seedsPath }), /class 16 attack initializer/);
   const mapPath = join(temporaryDirectory, "k01.map");
   copyFileSync(join(root, "original/imjinrok2/stagemap/k01.map"), mapPath);
   const mapBytes = readFileSync(mapPath);

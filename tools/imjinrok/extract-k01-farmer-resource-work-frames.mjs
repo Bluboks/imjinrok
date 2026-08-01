@@ -116,7 +116,8 @@ const REQUIRED_CALL_EDGES = [
 
 export function extractK01FarmerResourceWorkFrames(options = {}) {
   const paths = { ...DEFAULTS, ...options };
-  const prior = extractK01FarmerResourceBranchFrames(options);
+  const catalogSeedsPath = paths.catalogSeedsPath ?? paths.seedsPath;
+  const prior = extractK01FarmerResourceBranchFrames({ ...options, catalogSeedsPath });
   const { buffer, image } = readPeImage(paths.executablePath);
   const functions = readArtifact(paths.functionsPath, "functions");
   const jumpTables = readArtifact(paths.jumpTablesPath, "jump tables");

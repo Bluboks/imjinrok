@@ -39,7 +39,7 @@ test("rejects tampered canonical artifacts, raw bytes, map, and Farmerj sprite",
   const jumpTablesPath = mutateJson(join(root, "analysis/generated/imjinrok2/jump-tables.json"), (value) => { Object.values(value.tables).find(({ functionEntry }) => functionEntry === "0x00428fb0").cases.find(({ label }) => label === 31).destination = "0x00429109"; });
   assert.throws(() => extractK01JapaneseFarmerFrames({ jumpTablesPath }), /idle helper class 31 destination/);
   const seedsPath = mutateJson(join(root, "analysis/generated/imjinrok2/seeds.json"), (value) => { value.functions.find(({ entry }) => entry === "0x004291d0").instructions.find(({ address }) => address === "0x00429ba7").text = "MOV EDI,0x92"; });
-  assert.throws(() => extractK01JapaneseFarmerFrames({ seedsPath }), /sprite slot register/);
+  assert.throws(() => extractK01JapaneseFarmerFrames({ seedsPath, catalogSeedsPath: join(root, "analysis/generated/imjinrok2/seeds.json") }), /sprite slot register/);
   const mapPath = join(temp, "k01.map"); copyFileSync(join(root, "original/imjinrok2/stagemap/k01.map"), mapPath); const mapBytes = readFileSync(mapPath); mapBytes[10] ^= 1; writeFileSync(mapPath, mapBytes);
   assert.throws(() => extractK01JapaneseFarmerFrames({ mapPath }), /K01 map SHA-256/);
   const farmerjPath = join(temp, "Farmerj.spr"); copyFileSync(join(root, "original/imjinrok2/char/Farmerj.spr"), farmerjPath); const spriteBytes = readFileSync(farmerjPath); spriteBytes[spriteBytes.length - 1] ^= 1; writeFileSync(farmerjPath, spriteBytes);

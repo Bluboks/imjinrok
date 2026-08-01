@@ -97,7 +97,7 @@ test("rejects tampered canonical function, reference, seed, and raw EXE evidence
   const jumpTablesPath = mutateJson(paths.jumpTablesPath, (value) => { Object.values(value.tables).find(({ switchAddress }) => switchAddress === "0x004554ec").cases.find(({ label }) => label === 7).destination = "0x00455883"; });
   assert.throws(() => extractK01FarmerResourceWorkFrames({ jumpTablesPath }), /resource-work action case 7 destination/);
   const seedsPath = mutateJson(paths.seedsPath, (value) => { value.functions.find(({ entry }) => entry === "0x0041d210").instructions.find(({ address }) => address === "0x0041d244").text = "JMP 0x0041edc1"; });
-  assert.throws(() => extractK01FarmerResourceWorkFrames({ seedsPath }), /seed instruction 0x0041d244/);
+  assert.throws(() => extractK01FarmerResourceWorkFrames({ seedsPath, catalogSeedsPath: paths.seedsPath }), /seed instruction 0x0041d244/);
   const executablePath = join(temporaryDirectory, "imjinrok2.exe");
   const bytes = readFileSync(paths.executablePath); bytes[0x1ecd0] ^= 1; writeFileSync(executablePath, bytes);
   assert.throws(() => extractK01FarmerResourceWorkFrames({ executablePath }), /EXE SHA-256/);

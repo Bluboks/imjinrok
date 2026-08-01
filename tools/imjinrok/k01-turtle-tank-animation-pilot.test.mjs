@@ -299,21 +299,21 @@ test("rejects stale functions and tampered class, attack, and direction switches
       const initializer = artifact.functions.find(({ entry }) => entry === "0x004291d0");
       initializer.instructions.find(({ address }) => address === "0x0042bb68").text = "MOV word ptr [ESI + 0x18c],0x0";
     });
-    assert.throws(() => extractReport({ seedsPath: path }), /class 14 initializer direct writes mismatch/);
+    assert.throws(() => extractReport({ seedsPath: path, catalogSeedsPath: paths.seedsPath }), /class 14 initializer direct writes mismatch/);
   });
   await t.test("seeded class-14 initializer DWORD destination", () => {
     const path = copiedJson(paths.seedsPath, (artifact) => {
       const initializer = artifact.functions.find(({ entry }) => entry === "0x004291d0");
       initializer.instructions.find(({ address }) => address === "0x0042bb68").text = "MOV dword ptr [ESI + 0x18c],0x0";
     });
-    assert.throws(() => extractReport({ seedsPath: path }), /class 14 initializer direct writes mismatch/);
+    assert.throws(() => extractReport({ seedsPath: path, catalogSeedsPath: paths.seedsPath }), /class 14 initializer direct writes mismatch/);
   });
   await t.test("seeded class-14 initializer non-write ESI operand", () => {
     const path = copiedJson(paths.seedsPath, (artifact) => {
       const initializer = artifact.functions.find(({ entry }) => entry === "0x004291d0");
       initializer.instructions.find(({ address }) => address === "0x0042bb68").text = "CMP byte ptr [ESI + 0xd0],0x0";
     });
-    assert.throws(() => extractReport({ seedsPath: path }), /class 14 initializer direct writes mismatch/);
+    assert.throws(() => extractReport({ seedsPath: path, catalogSeedsPath: paths.seedsPath }), /class 14 initializer direct writes mismatch/);
   });
   for (const [name, switchAddress, label, destination, message] of [
     ["class", "0x004292b3", 14, "0x0042bb8d", /class 14 initializer destination mismatch/],

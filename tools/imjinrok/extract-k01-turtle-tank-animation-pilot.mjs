@@ -255,6 +255,7 @@ export function extractK01TurtleTankAnimationPilot({
   functionsPath = DEFAULT_FUNCTIONS_PATH,
   jumpTablesPath = DEFAULT_JUMP_TABLES_PATH,
   seedsPath = DEFAULT_SEEDS_PATH,
+  catalogSeedsPath = seedsPath,
   spritePath = DEFAULT_SPRITE_PATH,
   exp1SpritePath = DEFAULT_EXP1_SPRITE_PATH,
   exp2SpritePath = DEFAULT_EXP2_SPRITE_PATH,
@@ -280,7 +281,7 @@ export function extractK01TurtleTankAnimationPilot({
   });
   validateCommonGridDirections(commonPilot);
 
-  const catalog = extractEntityTypeCatalog({ executablePath, seedsPath });
+  const catalog = extractEntityTypeCatalog({ executablePath, seedsPath: catalogSeedsPath });
   const type = catalog.types.find(({ internalClass }) => internalClass === 14);
   if (!type) throw new Error("entity catalog is missing class 14");
   validateType(type);

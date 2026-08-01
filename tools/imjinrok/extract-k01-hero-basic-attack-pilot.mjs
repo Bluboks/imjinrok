@@ -181,6 +181,7 @@ if (
 export function extractK01HeroBasicAttackPilot({
   executablePath = DEFAULT_EXECUTABLE_PATH,
   seedsPath = DEFAULT_SEEDS_PATH,
+  catalogSeedsPath = seedsPath,
 } = {}) {
   const { buffer, image } = readPeImage(executablePath);
   const executableSha256 = sha256(buffer);
@@ -189,11 +190,12 @@ export function extractK01HeroBasicAttackPilot({
   const typeCalls = extractTypeCalls(typeInitializer.instructions);
   const typeCatalog = extractEntityTypeCatalog({
     executablePath,
-    seedsPath,
+    seedsPath: catalogSeedsPath,
   });
   const animationPilot = extractK01HeroMovementPilot({
     executablePath,
     seedsPath,
+    catalogSeedsPath,
   });
 
   const heroes = HERO_EXPECTATIONS.map((expected) =>

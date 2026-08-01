@@ -61,6 +61,7 @@ const FUNCTION_CONTRACTS = [
 
 export function extractK01SpecialUnitAnimations(options = {}) {
   const paths = { ...DEFAULTS, ...options };
+  const catalogSeedsPath = paths.catalogSeedsPath ?? paths.seedsPath;
   const { buffer } = readPeImage(paths.executablePath);
   const executableSha256 = sha256(buffer);
   equal(executableSha256, EXPECTED_EXECUTABLE_SHA256, "EXE SHA-256");
@@ -69,7 +70,7 @@ export function extractK01SpecialUnitAnimations(options = {}) {
   const jumpTables = readArtifact(paths.jumpTablesPath, executableSha256, "jump tables");
   const classSwitch = requireSwitch(jumpTables, 0x004291d0, 0x004292b3);
   const seeds = readArtifact(paths.seedsPath, executableSha256, "seeds");
-  const catalog = extractEntityTypeCatalog({ executablePath: paths.executablePath, seedsPath: paths.seedsPath });
+  const catalog = extractEntityTypeCatalog({ executablePath: paths.executablePath, seedsPath: catalogSeedsPath });
   const spriteTable = extractOriginalSpriteTable(paths.executablePath);
   const mapBuffer = readFileSync(paths.mapPath);
   equal(sha256(mapBuffer), EXPECTED_K01_MAP_SHA256, "K01 map SHA-256");

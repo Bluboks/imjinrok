@@ -223,6 +223,7 @@ test("rejects tampered type constants and mismatched static-analysis sources", (
     () =>
       extractK01HeroBasicAttackPilot({
         seedsPath: tamperedSeedsPath,
+        catalogSeedsPath: seedsPath,
       }),
     /class 76 hitPhase mismatch/,
   );

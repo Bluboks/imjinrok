@@ -52,7 +52,7 @@
     },
     {
       "path": "tools/imjinrok/extract-k01-hero-movement-pilot.mjs",
-      "sha256": "8afdd2b99a64bcdf6c5213343304688c489bb2ff1f2c3074d19c4a7887f3b6c8"
+      "sha256": "1bd6dcde3083a48efb8fac32f627316c693a19b48e408abfadd07de0caf74aa3"
     },
     {
       "path": "tools/imjinrok/extract-k01-samurai-animation-pilot.mjs",
@@ -60,7 +60,7 @@
     },
     {
       "path": "tools/imjinrok/extract-k01-turtle-tank-animation-pilot.mjs",
-      "sha256": "6d703c2eb3f3fe9d8268e36e3d577a285fe3df698ecb8e50177c79472025318a"
+      "sha256": "e32f9328b93a3b65ab462aa52d0e75e2cc516d29b270570d52657ece3b97efea"
     },
     {
       "path": "tools/imjinrok/extract-k01-konishi-animation-pilot.mjs",
@@ -68,11 +68,11 @@
     },
     {
       "path": "tools/imjinrok/extract-k01-core-unit-animations.mjs",
-      "sha256": "9add215c3526fc9bdbcce3e58ef2b503ef5ddf55d1808b4a66cc0dc61e403f49"
+      "sha256": "73307792e4677a3e1b17b114a4a3505d0d350b5d06cf6a219495b7d081136bf5"
     },
     {
       "path": "tools/imjinrok/extract-k01-japanese-farmer-frames.mjs",
-      "sha256": "8d1b39783657fce73b5317ef71b854c5c2c66c8d4229542eee9d22e473cc7ad4"
+      "sha256": "05b9b679fbb37e54f19109a158183eab50fa07f928333dc56fb38c4cc591b25b"
     },
     {
       "path": "tools/imjinrok/extract-k01-korean-farmer-core-frames.mjs",
@@ -80,11 +80,11 @@
     },
     {
       "path": "tools/imjinrok/extract-k01-farmer-resource-branch-frames.mjs",
-      "sha256": "4a31b2069b3e4a0272559155da19e126f05a756bbba7d86ededca5139c351384"
+      "sha256": "f8651b9ebc8a462039cd8800df98c141b593e7bc6c66986ee4050e2b73afcf02"
     },
     {
       "path": "tools/imjinrok/extract-k01-farmer-resource-work-frames.mjs",
-      "sha256": "5f560740186b8a37dd8f005c3116771f4430df10af7cac499e136560400326e4"
+      "sha256": "b8aab60e7f6df06c6e3224f7e1294fa77c3e94b438aa52d5e12f13713797f174"
     },
     {
       "path": "tools/imjinrok/extract-k01-farmer-state4-fallback-frames.mjs",
@@ -92,7 +92,7 @@
     },
     {
       "path": "tools/imjinrok/extract-k01-special-unit-animations.mjs",
-      "sha256": "8512a5fef1a36516358ab78da912a9c66a2211e7c9e9e49e17046ea82b67748b"
+      "sha256": "2a0f83c8cfc2b9970ede2ee41e0f5e41ee7561b3c1b62246b0e8a276b6f06118"
     },
     {
       "path": "tools/imjinrok/extract-k01-normal-reinforcement-animation-batch.mjs",

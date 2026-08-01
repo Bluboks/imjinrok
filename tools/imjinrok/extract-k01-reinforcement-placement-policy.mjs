@@ -246,6 +246,7 @@ export function extractK01ReinforcementPlacementPolicy({
   executablePath = DEFAULT_EXECUTABLE_PATH,
   functionsPath = DEFAULT_FUNCTIONS_PATH,
   seedsPath = DEFAULT_SEEDS_PATH,
+  catalogSeedsPath = seedsPath,
   beaconOptions,
 } = {}) {
   const { buffer, image } = readPeImage(executablePath);
@@ -280,7 +281,7 @@ export function extractK01ReinforcementPlacementPolicy({
     requireCall(seeds, 0x00437650, 0x00438013, 0x00438790),
     requireCall(seeds, 0x00437650, 0x0043801a, 0x0043c9c0),
   ];
-  const typeCatalog = extractEntityTypeCatalog({ executablePath, seedsPath });
+  const typeCatalog = extractEntityTypeCatalog({ executablePath, seedsPath: catalogSeedsPath });
   const typeFootprints = recoverK01TypeFootprints(seeds, typeCatalog);
   const immediatePositionReads = recoverImmediatePositionReadInventory(seeds);
   const canonicalReplay = replayK01ReinforcementPlacement({

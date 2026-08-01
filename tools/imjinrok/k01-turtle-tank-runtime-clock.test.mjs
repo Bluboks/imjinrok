@@ -4,10 +4,12 @@ import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import test, { after } from "node:test";
 
+import { extractEntityTypeCatalog } from "./extract-entity-type-catalog.mjs";
 import {
   extractK01TurtleTankRuntimeClock,
   replayTurtleTankAcceptedUpdate,
   replayTurtleTankAcceptedTurnSequence,
+  validateK01TurtleTankClass14Binding,
 } from "./extract-k01-turtle-tank-runtime-clock.mjs";
 
 const root = resolve(import.meta.dirname, "../..");
@@ -179,7 +181,13 @@ test("rejects tampered source-bound analysis evidence", () => {
     const initializer = artifact.functions.find(({ entry }) => entry === "0x0045bf50");
     initializer.instructions.find(({ address }) => address === "0x0045c7ea").text = "PUSH 0x80143201";
   });
-  assert.throws(() => extractK01TurtleTankRuntimeClock({ ...paths, seedsPath }), /class 14 raw flags/);
+  assert.throws(() => extractK01TurtleTankRuntimeClock({ ...paths, seedsPath }), /SHA-256 mismatch/);
+  const tamperedCatalog = JSON.parse(JSON.stringify(extractEntityTypeCatalog({
+    executablePath: paths.executablePath,
+    seedsPath: paths.seedsPath,
+  })));
+  tamperedCatalog.types.find(({ internalClass }) => internalClass === 14).definition.flags = "0x80143201";
+  assert.throws(() => validateK01TurtleTankClass14Binding(tamperedCatalog), /class 14 raw flags/);
 
   const cadenceFunctionsPath = copiedJson(paths.functionsPath, (artifact) => {
     artifact.functions.find(({ entry }) => entry === "0x0045bd00").instructionSha256 = "1".repeat(64);

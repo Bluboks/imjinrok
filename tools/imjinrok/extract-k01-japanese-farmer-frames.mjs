@@ -70,13 +70,14 @@ const RAW_EVIDENCE = [
 
 export function extractK01JapaneseFarmerFrames(options = {}) {
   const paths = { ...DEFAULTS, ...options };
+  const catalogSeedsPath = paths.catalogSeedsPath ?? paths.seedsPath;
   const { buffer, image } = readPeImage(paths.executablePath);
   const executableSha256 = sha256(buffer);
   equal(executableSha256, EXPECTED_EXECUTABLE_SHA256, "EXE SHA-256");
   const functions = readArtifact(paths.functionsPath, executableSha256, "functions");
   const jumpTables = readArtifact(paths.jumpTablesPath, executableSha256, "jump tables");
   const seeds = readArtifact(paths.seedsPath, executableSha256, "seeds");
-  const catalog = extractEntityTypeCatalog({ executablePath: paths.executablePath, seedsPath: paths.seedsPath });
+  const catalog = extractEntityTypeCatalog({ executablePath: paths.executablePath, seedsPath: catalogSeedsPath });
   const spriteTable = extractOriginalSpriteTable(paths.executablePath);
   const mapBuffer = readFileSync(paths.mapPath);
   equal(sha256(mapBuffer), MAP_SHA256, "K01 map SHA-256");

@@ -355,6 +355,7 @@ export function extractK01HeroMovementPilot({
   executablePath = DEFAULT_EXECUTABLE_PATH,
   jumpTablesPath = DEFAULT_JUMP_TABLES_PATH,
   seedsPath = DEFAULT_SEEDS_PATH,
+  catalogSeedsPath = seedsPath,
   spearmanSpritePath = DEFAULT_SPEARMAN_SPRITE_PATH,
   gwonYulSpritePath = HERO_PROFILES[0].spritePath,
   gwonYulAttackSpritePath = DEFAULT_GWON_YUL_ATTACK_SPRITE_PATH,
@@ -371,7 +372,7 @@ export function extractK01HeroMovementPilot({
   });
   const typeCatalog = extractEntityTypeCatalog({
     executablePath,
-    seedsPath,
+    seedsPath: catalogSeedsPath,
   });
   const spriteTable = extractOriginalSpriteTable(executablePath);
   const { buffer: executableBuffer, image } = readPeImage(executablePath);

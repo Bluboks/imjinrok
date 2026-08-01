@@ -81,7 +81,7 @@ test("rejects tampered canonical analysis and source sprite evidence", () => {
   const seedsPath = copyJson(paths.seedsPath, (value) => {
     value.functions.find(({ entry }) => entry === "0x004291d0").instructions.find(({ address }) => address === "0x0042a1ee").text = "PUSH 0x79";
   });
-  assert.throws(() => extractK01CoreUnitAnimations({ seedsPath }), /class 4 attack initializer/);
+  assert.throws(() => extractK01CoreUnitAnimations({ seedsPath, catalogSeedsPath: paths.seedsPath }), /class 4 attack initializer/);
   const swordkPath = join(mkdtempSync(join(tmpdir(), "k01-core-unit-")), "swordk.spr");
   copyFileSync(paths.swordkPath, swordkPath);
   const bytes = readFileSync(swordkPath);

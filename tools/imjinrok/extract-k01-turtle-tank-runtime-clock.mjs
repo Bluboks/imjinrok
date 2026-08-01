@@ -83,6 +83,7 @@ export function extractK01TurtleTankRuntimeClock({
   referencesPath = DEFAULT_REFERENCES_PATH,
   jumpTablesPath = DEFAULT_JUMP_TABLES_PATH,
   seedsPath = DEFAULT_SEEDS_PATH,
+  catalogSeedsPath = seedsPath,
 } = {}) {
   const { buffer, image } = readPeImage(executablePath);
   const executableSha256 = sha256(buffer);
@@ -90,8 +91,8 @@ export function extractK01TurtleTankRuntimeClock({
   const functions = readArtifact(functionsPath, executableSha256, "functions");
   const references = readArtifact(referencesPath, executableSha256, "references");
   const jumpTables = readArtifact(jumpTablesPath, executableSha256, "jump tables");
-  const typeCatalog = extractEntityTypeCatalog({ executablePath, seedsPath });
-  const class14Binding = requireClass14Binding(typeCatalog);
+  const typeCatalog = extractEntityTypeCatalog({ executablePath, seedsPath: catalogSeedsPath });
+  const class14Binding = validateK01TurtleTankClass14Binding(typeCatalog);
   const actionFive = requireActionFive(jumpTables);
 
   return {
@@ -209,7 +210,7 @@ function turn(currentDirection, targetDirection, normalDirection, cadenceCounter
   return { currentDirection, targetDirection, normalDirection, cadenceCounter, cadenceLimit: 2, turnPending, dirty: 0 };
 }
 
-function requireClass14Binding(typeCatalog) {
+export function validateK01TurtleTankClass14Binding(typeCatalog) {
   const type = typeCatalog.types.find(({ internalClass }) => internalClass === 14);
   if (!type) throw new Error("type catalog is missing class 14");
   assertEqual(type.definition.recordAddress, "0x00884038", "class 14 type record address");

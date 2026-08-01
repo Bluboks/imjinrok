@@ -129,6 +129,7 @@ const REQUIRED_CALL_EDGES = [
 
 export function extractK01FarmerResourceBranchFrames(options = {}) {
   const paths = { ...DEFAULTS, ...options };
+  const catalogSeedsPath = paths.catalogSeedsPath ?? paths.seedsPath;
   const { buffer, image } = readPeImage(paths.executablePath);
   equal(sha256(buffer), EXPECTED_EXECUTABLE_SHA256, "EXE SHA-256");
   const functions = readArtifact(paths.functionsPath, "functions");
@@ -141,7 +142,7 @@ export function extractK01FarmerResourceBranchFrames(options = {}) {
   const callEdges = REQUIRED_CALL_EDGES.map(([from, fromFunctionEntry, to]) => verifyCallEdge(references, { from, fromFunctionEntry, to }));
   const classSwitches = verifyClassSwitches(jumpTables);
   const seedsEvidence = verifySeedInstructions(seeds);
-  const catalog = extractEntityTypeCatalog({ executablePath: paths.executablePath, seedsPath: paths.seedsPath });
+  const catalog = extractEntityTypeCatalog({ executablePath: paths.executablePath, seedsPath: catalogSeedsPath });
   const identities = verifyIdentities(catalog, paths);
   const fieldFlow = recoverFieldFlow();
   const states = Object.fromEntries(Object.entries(FARMERS).map(([internalClass, farmer]) => [internalClass, buildStates(farmer)]));
