@@ -21,7 +21,7 @@ import { createDemolitionState } from "./demolition.js";
 import { createUnitState } from "./entities.js";
 import { arePlayersAllied } from "./diplomacy.js";
 import { createCurrentVisibilityResolver, getAttackTargetAuthorityPolicy, isAttackTargetAuthorized } from "./attackTargetAuthorityPolicy.js";
-import { findNavigationRouteForUnit, findPathForUnit } from "./navigation.js";
+import { applyNavigationRoute, clearNavigationRoute, findNavigationRouteForUnit, findPathForUnit } from "./navigation.js";
 import { getFootprintTiles, validateBuildingPlacement } from "./placement.js";
 import { canAdmitPlayerCapacity } from "./capacity.js";
 import { isResearchCompleted, isResearchPending } from "./research.js";
@@ -49,7 +49,12 @@ const SIMULATION_CHEAT_CODES = new Set<CheatCodeId>([
 export type CommandValidationResult = { ok: true } | { ok: false; reason: string };
 
 export type IssueCommandResult =
-  | { ok: true; envelope: CommandEnvelope }
+  | {
+      ok: true;
+      envelope: CommandEnvelope;
+      /** Move/attack-move dispatch admitted a physical route or a mobile wait. */
+      navigationAccepted?: boolean;
+    }
   | { ok: false; reason: string };
 
 export function validateCommand(state: WorldState, envelope: CommandEnvelope): CommandValidationResult {
@@ -467,7 +472,22 @@ export function issueCommand(state: WorldState, envelope: CommandEnvelope): Issu
   }
 
   applyCommand(state, envelope);
+  if (envelope.command.type === "move" || envelope.command.type === "attack-move") {
+    const unit = state.units[envelope.command.unitId];
+    return { ok: true, envelope, navigationAccepted: unit ? hasAcceptedStrategicNavigation(unit) : false };
+  }
+
   return { ok: true, envelope };
+}
+
+function hasAcceptedStrategicNavigation(unit: UnitState): boolean {
+  const order = unit.currentOrder;
+
+  if (order?.type !== "move" && order?.type !== "attack-move") {
+    return false;
+  }
+
+  return unit.navigation?.terminalReason === "mobile-obstruction" || Boolean(unit.movementPath?.length);
 }
 
 export function applyCommand(state: WorldState, envelope: CommandEnvelope): void {
@@ -493,27 +513,17 @@ export function applyCommand(state: WorldState, envelope: CommandEnvelope): void
         return;
       }
 
-      const nextTarget = route.path[0];
-
-      if (!nextTarget && route.terminalReason === "already-at-goal") {
+      if (route.terminalReason === "already-at-goal") {
         // A zero-length route is complete immediately; retaining its
         // destination would falsely advertise an active movement between ticks.
         delete unit.movementTarget;
         delete unit.movementPath;
         delete unit.currentOrder;
+        clearNavigationRoute(unit);
         return;
       }
 
-      unit.movementPath = route.path;
-      if (nextTarget) {
-        unit.movementTarget = nextTarget;
-      } else if (route.terminalReason !== "already-at-goal") {
-        // Keep a concrete movement anchor for a non-completing resolved route
-        // without putting a sentinel node into the ordinary path array.
-        unit.movementTarget = { ...route.resolvedGoal };
-      } else {
-        delete unit.movementTarget;
-      }
+      applyNavigationRoute(unit, route);
       unit.currentOrder = {
         type: envelope.command.type,
         target: { ...route.requestedGoal },
@@ -534,12 +544,7 @@ export function applyCommand(state: WorldState, envelope: CommandEnvelope): void
         return;
       }
 
-      unit.movementPath = route.path;
-      if (route.path[0]) {
-        unit.movementTarget = route.path[0];
-      } else {
-        delete unit.movementTarget;
-      }
+      applyNavigationRoute(unit, route);
       unit.currentOrder = {
         type: "patrol",
         origin: clampMapPoint(state.map, { x: Math.round(unit.position.x), y: Math.round(unit.position.y) }),
@@ -559,6 +564,7 @@ export function applyCommand(state: WorldState, envelope: CommandEnvelope): void
 
       delete unit.movementTarget;
       delete unit.movementPath;
+      clearNavigationRoute(unit);
       unit.currentOrder = { type: "attack-unit", targetUnitId: target.id };
       return;
     }
@@ -568,6 +574,7 @@ export function applyCommand(state: WorldState, envelope: CommandEnvelope): void
       if (unit) {
         delete unit.movementTarget;
         delete unit.movementPath;
+        clearNavigationRoute(unit);
         unit.currentOrder = {
           type: "hold-position",
           anchor: clampMapPoint(state.map, { x: Math.round(unit.position.x), y: Math.round(unit.position.y) }),
@@ -608,6 +615,7 @@ export function applyCommand(state: WorldState, envelope: CommandEnvelope): void
         }
 
         unit.movementPath = path;
+        clearNavigationRoute(unit);
         const nextTarget = path[0];
 
         if (nextTarget) {
@@ -638,6 +646,7 @@ export function applyCommand(state: WorldState, envelope: CommandEnvelope): void
       }
 
       unit.movementPath = path;
+      clearNavigationRoute(unit);
       const nextTarget = path[0];
 
       if (nextTarget) {
@@ -656,6 +665,7 @@ export function applyCommand(state: WorldState, envelope: CommandEnvelope): void
         delete unit.movementTarget;
         delete unit.movementPath;
         delete unit.currentOrder;
+        clearNavigationRoute(unit);
       }
 
       return;
@@ -693,6 +703,7 @@ export function applyCommand(state: WorldState, envelope: CommandEnvelope): void
       updateConstructionHealth(building);
       state.units[buildingId] = building;
       unit.movementPath = buildPath;
+      clearNavigationRoute(unit);
       const nextTarget = buildPath[0];
       if (nextTarget) {
         unit.movementTarget = nextTarget;
@@ -722,6 +733,7 @@ export function applyCommand(state: WorldState, envelope: CommandEnvelope): void
       }
 
       unit.movementPath = path;
+      clearNavigationRoute(unit);
       const nextTarget = path[0];
 
       if (nextTarget) {
@@ -851,6 +863,7 @@ export function applyCommand(state: WorldState, envelope: CommandEnvelope): void
       delete building.movementTarget;
       delete building.movementPath;
       delete building.currentOrder;
+      clearNavigationRoute(building);
       building.demolition = createDemolitionState();
       return;
     }

@@ -3,8 +3,10 @@ import test from "node:test";
 import { createBlankMap } from "../../shared/src/index.js";
 import {
   CORE_STRICT_FOOTPRINT_RESERVATION_POLICY_ID,
+  coreStrictFootprintReservationPolicy,
   MovementCollisionPolicyRegistry,
   createInitialWorldState,
+  findNavigationRouteForUnit,
   findPathForUnit,
   registerMovementCollisionPolicy,
   toWorldSnapshot,
@@ -69,10 +71,91 @@ test("legacy snapshots without a collision id retain the strict footprint defaul
   assert.equal(CORE_STRICT_FOOTPRINT_RESERVATION_POLICY_ID, "core:strict-footprint-reservation");
 });
 
+test("strict policy exposes deterministic exact groups and honors mobile filtering", () => {
+  const state = createInitialWorldState(createBlankMap({ width: 8, height: 8 }), ["p1", "p2"]);
+  state.units = {};
+  const mover = addUnit(state, "mover", { x: 1, y: 3 });
+  const mobile = createUnitState("mobile", "p2", "villager", { x: 3, y: 3 });
+  const staticUnit = createUnitState("static", "p2", "house", { x: 5, y: 3 });
+  state.units[mobile.id] = mobile;
+  state.units[staticUnit.id] = staticUnit;
+  const policy = coreStrictFootprintReservationPolicy;
+
+  assert.equal(policy.getBlockingGroupAtTile(state, mover.id, { x: 3, y: 3 }, false), null);
+  assert.deepEqual(policy.getBlockingGroupAtTile(state, mover.id, { x: 3, y: 3 }, true), {
+    id: mobile.id,
+    classification: "mobile",
+    tiles: [{ x: 3, y: 3 }],
+  });
+  assert.equal(policy.getBlockingGroupAtTile(state, mover.id, { x: 5, y: 3 }, false)?.classification, "static");
+});
+
+test("malformed or missing blocker groups fail explicitly instead of falling back", () => {
+  const profileId = "test:invalid-blocking-group";
+  registerMovementCollisionPolicy({
+    ...coreStrictFootprintReservationPolicy,
+    id: profileId,
+    getBlockingGroupAtTile() {
+      return { id: "bad", classification: "mobile", tiles: [{ x: 3, y: 3 }, { x: 3, y: 3 }] };
+    },
+  });
+  const map = createBlankMap({ width: 8, height: 8 });
+  map.movementCollisionProfileId = profileId;
+  const state = createInitialWorldState(map, ["p1", "p2"]);
+  state.units = {};
+  const mover = addUnit(state, "mover", { x: 1, y: 3 });
+  state.units.blocker = createUnitState("blocker", "p2", "villager", { x: 3, y: 3 });
+
+  assert.throws(() => findNavigationRouteForUnit(state, mover, { x: 3, y: 3 }), /duplicate blocking-group tiles/);
+
+  const missingProfileId = "test:missing-blocking-group";
+  registerMovementCollisionPolicy({
+    ...coreStrictFootprintReservationPolicy,
+    id: missingProfileId,
+    getBlockingGroupAtTile() {
+      return null;
+    },
+  });
+  state.movementCollisionProfileId = missingProfileId;
+  assert.throws(() => findNavigationRouteForUnit(state, mover, { x: 3, y: 3 }), /no blocking group/);
+});
+
+test("blocking-group validation rejects empty, mixed, and out-of-map group shapes", () => {
+  const malformedGroups = [
+    { id: "empty", classification: "mobile", tiles: [] },
+    { id: "mixed", classification: "static", tiles: [{ x: 3, y: 3 }] },
+    { id: "oob", classification: "mobile", tiles: [{ x: -1, y: 3 }] },
+  ] as const;
+
+  malformedGroups.forEach((group, index) => {
+    const profileId = `test:invalid-blocking-group-${index}`;
+    registerMovementCollisionPolicy({
+      ...coreStrictFootprintReservationPolicy,
+      id: profileId,
+      getBlockingGroupAtTile() {
+        return group;
+      },
+    });
+    const map = createBlankMap({ width: 8, height: 8 });
+    map.movementCollisionProfileId = profileId;
+    const state = createInitialWorldState(map, ["p1", "p2"]);
+    state.units = {};
+    const mover = addUnit(state, "mover", { x: 1, y: 3 });
+    state.units.blocker = createUnitState("blocker", "p2", "villager", { x: 3, y: 3 });
+
+    assert.throws(() => findNavigationRouteForUnit(state, mover, { x: 3, y: 3 }), /invalid blocking group|does not contain|non-integer|out-of-map/);
+  });
+});
+
 const deterministicCenterDenyPolicy: MovementCollisionPolicy = {
   id: DETERMINISTIC_MOD_POLICY_ID,
   getEntityBlockingTiles() {
     return new Set([toTileKey(DENIED_TILE)]);
+  },
+  getBlockingGroupAtTile(_state, _excludedUnitId, tile) {
+    return tile.x === DENIED_TILE.x && tile.y === DENIED_TILE.y
+      ? { id: "deterministic-center", classification: "static", tiles: [{ ...DENIED_TILE }] }
+      : null;
   },
   canUnitOccupyPosition(_state, _unit, position) {
     return toTileKey(position) !== toTileKey(DENIED_TILE);

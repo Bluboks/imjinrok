@@ -5,11 +5,13 @@ import {
   type MapDefinition,
   type ScenarioDefinition,
 } from "../../shared/src/index.js";
-import { getEntityBlockingTiles } from "./collision.js";
+import { getBlockingGroupAtTile, getEntityBlockingTiles } from "./collision.js";
 import { defaultPathfinderRegistry, requirePathfinder } from "./pathfinderRegistry.js";
 import type { FindPathOptions, Pathfinder } from "./pathfinder.js";
+import { resourceBlocksMovement } from "./resources.js";
 import { isTilePassableForUnit } from "./terrain.js";
-import type { UnitState, WorldState } from "./types.js";
+import type { MovementBlockingGroup } from "./movementCollisionPolicy.js";
+import type { NavigationTerminalReason, UnitNavigationState, UnitState, WorldState } from "./types.js";
 
 const NEIGHBORS: readonly GridPoint[] = [
   { x: 1, y: 0 },
@@ -27,18 +29,14 @@ const MAX_GOAL_SEARCH_NODES = 8_192;
 const MAX_GOAL_CANDIDATES = 64;
 
 export type { FindPathOptions } from "./pathfinder.js";
-
-export type NavigationTerminalReason = "already-at-goal" | "mobile-obstruction" | "blocked-goal";
+export type { NavigationTerminalReason } from "./types.js";
 
 /**
  * Owns strategic destination separately from physical movement waypoints.
  * `path` never uses the current tile as a sentinel; terminal intent is explicit.
  */
-export interface NavigationRoute {
+export interface NavigationRoute extends UnitNavigationState {
   readonly path: GridPoint[];
-  readonly requestedGoal: GridPoint;
-  readonly resolvedGoal: GridPoint;
-  readonly terminalReason?: NavigationTerminalReason;
 }
 
 export const CORE_A_STAR_PATHFINDER_ID = "core:a-star";
@@ -107,20 +105,48 @@ export function findNavigationRouteForUnit(
     return null;
   }
 
-  const terminalReason = path.length === 0
-    ? sameTile(start, requestedGoal)
-      ? "already-at-goal"
-      : isDirectMobileTerminal(state, unit, start, requestedGoal, options)
+  const requestedBlocker = getRequestedBlockingGroup(state, unit, requestedGoal, options);
+  const resolvedGoal = path.at(-1) ?? start;
+  const terminalReason = sameTile(start, requestedGoal) && path.length === 0 &&
+    isTilePassableForUnit(state, unit, requestedGoal) && requestedBlocker === null
+    ? "already-at-goal"
+    : sameTile(resolvedGoal, requestedGoal)
+      ? undefined
+      : requestedBlocker?.classification === "mobile"
         ? "mobile-obstruction"
-        : "blocked-goal"
-    : undefined;
+        : "blocked-goal";
 
   return {
     path,
     requestedGoal,
-    resolvedGoal: path.at(-1) ?? start,
+    resolvedGoal,
     ...(terminalReason ? { terminalReason } : {}),
   };
+}
+
+/** Applies one strategic route without duplicating semantic endpoint inference in callers. */
+export function applyNavigationRoute(unit: UnitState, route: NavigationRoute): void {
+  unit.navigation = {
+    requestedGoal: { ...route.requestedGoal },
+    resolvedGoal: { ...route.resolvedGoal },
+    ...(route.terminalReason ? { terminalReason: route.terminalReason } : {}),
+  };
+  unit.movementPath = route.path.map((point) => ({ ...point }));
+  const nextTarget = unit.movementPath[0];
+
+  if (nextTarget) {
+    unit.movementTarget = { ...nextTarget };
+  } else if (route.terminalReason === "mobile-obstruction") {
+    // A concrete resolved endpoint keeps legacy observers aware of a pending
+    // mobile wait; the ordinary waypoint array remains free of sentinels.
+    unit.movementTarget = { ...route.resolvedGoal };
+  } else {
+    delete unit.movementTarget;
+  }
+}
+
+export function clearNavigationRoute(unit: UnitState): void {
+  delete unit.navigation;
 }
 
 function findPathWithCoreAStar(
@@ -136,11 +162,12 @@ function findPathWithCoreAStar(
     ? blockedTilesWithoutMobile
     : getEntityBlockingTiles(state, unit.id, true);
   const mobileBlockedTiles = getMobileBlockedTiles(blockedTiles, blockedTilesWithoutMobile);
+  const requestedBlocker = getRequestedBlockingGroup(state, unit, requestedGoal, options, blockedTiles, blockedTilesWithoutMobile, mobileBlockedTiles);
   const startKey = toTileKey(start);
 
   blockedTiles.delete(startKey);
 
-  const goals = resolveWalkableGoals(state, unit, requestedGoal, blockedTiles, blockedTilesWithoutMobile, mobileBlockedTiles);
+  const goals = resolveWalkableGoals(state, unit, requestedGoal, blockedTiles, requestedBlocker);
 
   if (goals.length === 0) {
     return null;
@@ -172,6 +199,7 @@ function findPathWithSourceGreedyLocalAdapter(
     ? blockedTilesWithoutMobile
     : getEntityBlockingTiles(state, unit.id, true);
   const mobileBlockedTiles = getMobileBlockedTiles(blockedTiles, blockedTilesWithoutMobile);
+  const requestedBlocker = getRequestedBlockingGroup(state, unit, requestedGoal, options, blockedTiles, blockedTilesWithoutMobile, mobileBlockedTiles);
   const startKey = toTileKey(start);
 
   blockedTiles.delete(startKey);
@@ -179,7 +207,7 @@ function findPathWithSourceGreedyLocalAdapter(
   // Reusing the existing product resolution keeps blocked-goal behavior
   // consistent with core:a-star; the source kernel still scores against the
   // user's requested tile, rather than an arbitrary resolved neighbor.
-  const goals = resolveWalkableGoals(state, unit, requestedGoal, blockedTiles, blockedTilesWithoutMobile, mobileBlockedTiles);
+  const goals = resolveWalkableGoals(state, unit, requestedGoal, blockedTiles, requestedBlocker);
 
   if (goals.length === 0) {
     return null;
@@ -239,26 +267,80 @@ function getMobileBlockedTiles(blockedTiles: ReadonlySet<string>, blockedTilesWi
   return new Set([...blockedTiles].filter((key) => !blockedTilesWithoutMobile.has(key)));
 }
 
-function isDirectMobileTerminal(
+function getRequestedBlockingGroup(
   state: WorldState,
   unit: UnitState,
-  start: GridPoint,
   requestedGoal: GridPoint,
   options: FindPathOptions,
-): boolean {
-  if (!isTilePassableForUnit(state, unit, requestedGoal) || options.ignoreMobileBlockers === true) {
-    return false;
-  }
-
-  const blockedTilesWithoutMobile = getEntityBlockingTiles(state, unit.id, false);
-  const blockedTiles = getEntityBlockingTiles(state, unit.id, true);
+  blockedTiles?: ReadonlySet<string>,
+  blockedTilesWithoutMobile?: ReadonlySet<string>,
+  mobileBlockedTiles?: ReadonlySet<string>,
+): MovementBlockingGroup | null {
+  const effectiveBlockedTiles = blockedTiles ?? getEntityBlockingTiles(state, unit.id, options.ignoreMobileBlockers !== true);
+  const effectiveBlockedTilesWithoutMobile = blockedTilesWithoutMobile ?? getEntityBlockingTiles(state, unit.id, false);
+  const effectiveMobileBlockedTiles = mobileBlockedTiles ?? getMobileBlockedTiles(effectiveBlockedTiles, effectiveBlockedTilesWithoutMobile);
   const requestedKey = toTileKey(requestedGoal);
 
-  if (blockedTilesWithoutMobile.has(requestedKey) || !getMobileBlockedTiles(blockedTiles, blockedTilesWithoutMobile).has(requestedKey)) {
-    return false;
+  if (!isTilePassableForUnit(state, unit, requestedGoal) || !effectiveBlockedTiles.has(requestedKey)) {
+    return null;
   }
 
-  return NEIGHBORS.some((offset) => toTileKey({ x: requestedGoal.x + offset.x, y: requestedGoal.y + offset.y }) === toTileKey(start));
+  const staticBlocked = effectiveBlockedTilesWithoutMobile.has(requestedKey);
+  const classification = staticBlocked ? "static" : effectiveMobileBlockedTiles.has(requestedKey) ? "mobile" : null;
+
+  if (!classification) {
+    throw new Error(`Movement collision policy returned inconsistent blocking tiles for requested goal '${requestedKey}'.`);
+  }
+
+  const group = getBlockingGroupAtTile(state, unit.id, requestedGoal, classification === "mobile");
+
+  if (!group) {
+    throw new Error(`Movement collision policy '${state.movementCollisionProfileId ?? "default"}' returned no blocking group for requested goal '${requestedKey}'.`);
+  }
+
+  validateBlockingGroup(state, group, requestedGoal, classification);
+  return group;
+}
+
+function validateBlockingGroup(
+  state: WorldState,
+  group: MovementBlockingGroup,
+  requestedGoal: GridPoint,
+  expectedClassification: MovementBlockingGroup["classification"],
+): void {
+  if (
+    typeof group.id !== "string" ||
+    !group.id.trim() ||
+    group.classification !== expectedClassification ||
+    !Array.isArray(group.tiles) ||
+    group.tiles.length === 0
+  ) {
+    throw new Error("Movement collision policy returned an invalid blocking group.");
+  }
+
+  const keys = new Set<string>();
+
+  for (const tile of group.tiles) {
+    if (!tile || typeof tile !== "object" || !Number.isInteger(tile.x) || !Number.isInteger(tile.y)) {
+      throw new Error("Movement collision policy returned a non-integer blocking-group tile.");
+    }
+
+    if (tile.x < 0 || tile.x >= state.map.width || tile.y < 0 || tile.y >= state.map.height) {
+      throw new Error("Movement collision policy returned an out-of-map blocking-group tile.");
+    }
+
+    const key = toTileKey(tile);
+
+    if (keys.has(key)) {
+      throw new Error("Movement collision policy returned duplicate blocking-group tiles.");
+    }
+
+    keys.add(key);
+  }
+
+  if (!keys.has(toTileKey(requestedGoal))) {
+    throw new Error("Movement collision policy returned a blocking group that does not contain the requested tile.");
+  }
 }
 
 /** Product-callback adapter for one bounded source-greedy local search. */
@@ -498,8 +580,7 @@ function resolveWalkableGoals(
   unit: UnitState,
   requestedGoal: GridPoint,
   blockedTiles: ReadonlySet<string>,
-  blockedTilesWithoutMobile: ReadonlySet<string>,
-  mobileBlockedTiles: ReadonlySet<string>,
+  requestedBlocker: MovementBlockingGroup | null,
 ): GridPoint[] {
   if (isWalkable(state, unit, requestedGoal, blockedTiles)) {
     return [requestedGoal];
@@ -513,8 +594,7 @@ function resolveWalkableGoals(
     unit,
     requestedGoal,
     blockedTiles,
-    blockedTilesWithoutMobile,
-    mobileBlockedTiles,
+    requestedBlocker,
   );
 
   while (queue.length > 0 && visited.size < MAX_GOAL_SEARCH_NODES && goals.length < MAX_GOAL_CANDIDATES) {
@@ -558,8 +638,7 @@ function createBlockedGoalTraversal(
   unit: UnitState,
   requestedGoal: GridPoint,
   blockedTiles: ReadonlySet<string>,
-  blockedTilesWithoutMobile: ReadonlySet<string>,
-  mobileBlockedTiles: ReadonlySet<string>,
+  requestedBlocker: MovementBlockingGroup | null,
 ): (point: GridPoint) => boolean {
   const requestedKey = toTileKey(requestedGoal);
   const requestedTile = getTileAt(state.map, requestedGoal.x, requestedGoal.y);
@@ -571,22 +650,20 @@ function createBlockedGoalTraversal(
       return (point) => getTileAt(state.map, point.x, point.y).terrain === requestedTile.terrain;
     }
 
+    if (resourceBlocksMovement(requestedTile.resource)) {
+      return (point) => sameTile(point, requestedGoal);
+    }
+
     return () => false;
   }
 
   if (blockedTiles.has(requestedKey)) {
-    // A mobile-only goal is resolved from its direct boundary. Traversing the
-    // whole connected mobile component can incorrectly make an unrelated
-    // blocker perimeter (including the mover's start) terminal.
-    if (
-      isTilePassableForUnit(state, unit, requestedGoal) &&
-      mobileBlockedTiles.has(requestedKey) &&
-      !blockedTilesWithoutMobile.has(requestedKey)
-    ) {
-      return () => false;
+    if (!requestedBlocker) {
+      throw new Error(`Movement collision policy did not provide a blocking group for requested goal '${requestedKey}'.`);
     }
 
-    return (point) => blockedTilesWithoutMobile.has(toTileKey(point));
+    const groupKeys = new Set(requestedBlocker.tiles.map(toTileKey));
+    return (point) => groupKeys.has(toTileKey(point));
   }
 
   return () => false;

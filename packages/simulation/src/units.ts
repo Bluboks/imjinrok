@@ -39,6 +39,7 @@ function clearUnitReferences(state: WorldState, unitId: string): void {
     ) {
       delete unit.movementTarget;
       delete unit.movementPath;
+      delete unit.navigation;
       delete unit.currentOrder;
     }
 

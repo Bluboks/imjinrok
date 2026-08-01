@@ -5,8 +5,50 @@ import { createInitialWorldState } from "./world.js";
 import { SkirmishAiController } from "./skirmishAi.js";
 import { createUnitState } from "./entities.js";
 import { advanceWorldTick } from "./tick.js";
+import { coreStrictFootprintReservationPolicy, registerMovementCollisionPolicy, type MovementCollisionPolicy } from "./movementCollisionPolicy.js";
 
 const BUILTIN_RESOURCE_DEFINITIONS = resourceDefinitions as Readonly<Record<string, ResourceDefinition>>;
+
+const MULTI_TILE_AI_POLICY_ID = "test:multi-tile-ai";
+
+const multiTileAiPolicy: MovementCollisionPolicy = {
+  ...coreStrictFootprintReservationPolicy,
+  id: MULTI_TILE_AI_POLICY_ID,
+  getEntityBlockingTiles(state, excludedUnitId, includeMobile = true) {
+    const blocked = coreStrictFootprintReservationPolicy.getEntityBlockingTiles(state, excludedUnitId, includeMobile);
+    const target = state.units["multi-ai-target-3x3"];
+
+    if (includeMobile && target && target.id !== excludedUnitId) {
+      for (const tile of getAiTargetTiles(target)) {
+        blocked.add(`${tile.x},${tile.y}`);
+      }
+    }
+
+    return blocked;
+  },
+  getBlockingGroupAtTile(state, excludedUnitId, tile, includeMobile = true) {
+    const target = state.units["multi-ai-target-3x3"];
+    const tiles = target ? getAiTargetTiles(target) : [];
+
+    if (includeMobile && target && target.id !== excludedUnitId && tiles.some((candidate) => candidate.x === tile.x && candidate.y === tile.y)) {
+      return { id: target.id, classification: "mobile", tiles };
+    }
+
+    return coreStrictFootprintReservationPolicy.getBlockingGroupAtTile(state, excludedUnitId, tile, includeMobile);
+  },
+};
+
+function getAiTargetTiles(target: { position: { x: number; y: number } }): { x: number; y: number }[] {
+  const tiles: { x: number; y: number }[] = [];
+
+  for (let y = target.position.y - 1; y <= target.position.y + 1; y += 1) {
+    for (let x = target.position.x - 1; x <= target.position.x + 1; x += 1) {
+      tiles.push({ x, y });
+    }
+  }
+
+  return tiles;
+}
 
 function createBlockedRiceAiFixture() {
   const map = createBlankMap({ width: 20, height: 20 });
@@ -591,6 +633,51 @@ test("skirmish AI routes past a connected allied mobile blocker with the normal 
   assert.deepEqual(reversed, canonical);
 });
 
+test("skirmish AI defends a multi-tile mobile target deterministically across insertion order and ticks", () => {
+  registerMovementCollisionPolicy(multiTileAiPolicy, { replace: true });
+
+  const run = (insertionOrder: readonly ("townCenter" | "mover" | "ally" | "target")[]) => {
+    const map = createBlankMap({ width: 24, height: 16 });
+    map.movementCollisionProfileId = MULTI_TILE_AI_POLICY_ID;
+    const state = createInitialWorldState(map, ["p1", "p2", "p3"], undefined, {
+      p2: "defenders",
+      p3: "defenders",
+    });
+    const units = {
+      townCenter: createUnitState("p2-multi-ai-town-center", "p2", "town-center", { x: 3, y: 4 }),
+      mover: createUnitState("p2-multi-ai-mover", "p2", "swordsman", { x: 8, y: 4 }),
+      ally: createUnitState("p3-multi-ai-ally", "p3", "swordsman", { x: 9, y: 4 }),
+      target: createUnitState("multi-ai-target-3x3", "p1", "swordsman", { x: 12, y: 4 }),
+    };
+    state.units = Object.fromEntries(insertionOrder.map((key) => [units[key].id, units[key]]));
+    const ai = new SkirmishAiController(["p2"], { tuning: { maxDefensiveBeacons: 0, maxBaseDefenders: 1 } });
+    state.tick = 45;
+    ai.update(state);
+
+    assert.equal(units.mover.currentOrder?.type, "attack-move");
+    assert.deepEqual(units.mover.currentOrder?.type === "attack-move" ? units.mover.currentOrder.target : undefined, units.target.position);
+    assert.ok((units.mover.movementPath?.length ?? 0) > 0);
+
+    for (let tick = 0; tick < 8; tick += 1) {
+      advanceWorldTick(state);
+    }
+
+    return {
+      position: { ...units.mover.position },
+      order: units.mover.currentOrder,
+      navigation: units.mover.navigation,
+      targetHealth: units.target.health.current,
+    };
+  };
+
+  const canonical = run(["townCenter", "mover", "ally", "target"]);
+  const reversed = run(["target", "ally", "mover", "townCenter"]);
+
+  assert.ok(canonical.position.x > 8 || canonical.position.y !== 4);
+  assert.ok(canonical.targetHealth < unitDefinitions.swordsman.baseAttributes.health || canonical.order?.type === "attack-unit");
+  assert.deepEqual(reversed, canonical);
+});
+
 test("skirmish AI redirects attacking fighters to defend threats near its base", () => {
   const map = createBlankMap({ width: 40, height: 40 });
   const state = createInitialWorldState(map, ["p1", "p2"]);
@@ -672,7 +759,7 @@ test("skirmish AI limits the number of base defenders it redirects", () => {
 
   assert.equal(firstFighter.currentOrder?.type, "attack-move");
   assert.deepEqual(firstFighter.currentOrder?.type === "attack-move" ? firstFighter.currentOrder.target : undefined, enemy.position);
-  assert.ok(firstFighter.movementTarget);
+  assert.ok(firstFighter.movementTarget || firstFighter.navigation?.resolvedGoal);
   assert.equal(secondFighter.currentOrder, undefined);
 });
 

@@ -15,6 +15,7 @@ import {
   registerPathfinder,
   runSourceGreedyLocalSearch,
   toWorldSnapshot,
+  type MovementCollisionPolicy,
   type Pathfinder,
   type WorldState,
 } from "./index.js";
@@ -151,9 +152,69 @@ test("a connected mobile blocker between the mover and target does not make the 
 
     assert.ok(route);
     assert.notDeepEqual(route.path, []);
-    assert.equal(route.terminalReason, undefined);
+    assert.equal(route.terminalReason, "mobile-obstruction");
     assert.deepEqual(route.requestedGoal, target.position);
   }
+});
+
+test("custom policy preserves exact 2x2 and 3x3 mobile groups at center and map edges", () => {
+  registerMovementCollisionPolicy(multiTileMobilePolicy, { replace: true });
+
+  for (const size of [2, 3] as const) {
+    for (const origin of [{ x: 5, y: 5 }, { x: 0, y: 0 }] as const) {
+      const map = createBlankMap({ width: 12, height: 12 });
+      map.pathfindingProfileId = CORE_A_STAR_PATHFINDER_ID;
+      map.movementCollisionProfileId = MULTI_TILE_MOBILE_POLICY_ID;
+      const state = createInitialWorldState(map, ["p1", "p2"]);
+      state.units = {};
+      const mover = createUnitState("mover", "p1", "swordsman", { x: 8, y: 5 });
+      const blocker = createUnitState(`mobile-target-${size}x${size}`, "p2", "villager", origin);
+      state.units[mover.id] = mover;
+      state.units[blocker.id] = blocker;
+      const group = getMultiTileGroup(blocker, state.map.width, state.map.height);
+      const boundary = [...new Set(group.tiles.flatMap((tile) => [
+        { x: tile.x + 1, y: tile.y },
+        { x: tile.x - 1, y: tile.y },
+        { x: tile.x, y: tile.y + 1 },
+        { x: tile.x, y: tile.y - 1 },
+        { x: tile.x + 1, y: tile.y + 1 },
+        { x: tile.x - 1, y: tile.y - 1 },
+        { x: tile.x + 1, y: tile.y - 1 },
+        { x: tile.x - 1, y: tile.y + 1 },
+      ].filter((point) => point.x >= 0 && point.x < map.width && point.y >= 0 && point.y < map.height && !group.tiles.some((groupTile) => groupTile.x === point.x && groupTile.y === point.y)).map(toTileKey)))].map(fromTileKey);
+
+      for (const point of boundary) {
+        mover.position = point;
+        const route = findNavigationRouteForUnit(state, mover, origin);
+        assert.ok(route, `${size}x${size} boundary ${toTileKey(point)}`);
+        assert.equal(route.terminalReason, "mobile-obstruction", toTileKey(point));
+        assert.deepEqual(route.requestedGoal, origin);
+      }
+    }
+  }
+});
+
+test("custom mobile groups route from farther away to their exact boundary without flooding touching blockers", () => {
+  registerMovementCollisionPolicy(multiTileMobilePolicy, { replace: true });
+  const map = createBlankMap({ width: 16, height: 12 });
+  map.pathfindingProfileId = SOURCE_GREEDY_LOCAL_ADAPTER_PATHFINDER_ID;
+  map.movementCollisionProfileId = MULTI_TILE_MOBILE_POLICY_ID;
+  const state = createInitialWorldState(map, ["p1", "p2"]);
+  state.units = {};
+  const mover = createUnitState("mover", "p1", "swordsman", { x: 1, y: 5 });
+  const blocker = createUnitState("mobile-target-3x3", "p2", "villager", { x: 6, y: 5 });
+  const touching = createUnitState("mobile-touching", "p2", "villager", { x: 8, y: 5 });
+  state.units[mover.id] = mover;
+  state.units[blocker.id] = blocker;
+  state.units[touching.id] = touching;
+
+  const route = findNavigationRouteForUnit(state, mover, blocker.position);
+
+  assert.ok(route);
+  assert.ok(route.path.length > 0);
+  assert.equal(route.terminalReason, "mobile-obstruction");
+  assert.deepEqual(route.resolvedGoal, route.path.at(-1));
+  assert.equal(route.path.some((point) => getMultiTileGroup(touching, map.width, map.height).tiles.some((tile) => tile.x === point.x && tile.y === point.y)), false);
 });
 
 test("mobile occupancy does not override terrain, resource, or static collision denial", () => {
@@ -199,6 +260,13 @@ test("the selected collision policy owns custom denial precedence over mobile oc
       const blocked = coreStrictFootprintReservationPolicy.getEntityBlockingTiles(state, excludedUnitId, includeMobile);
       blocked.add("3,4");
       return blocked;
+    },
+    getBlockingGroupAtTile(state, excludedUnitId, tile, includeMobile = true) {
+      if (tile.x === 3 && tile.y === 4) {
+        return { id: "custom-static", classification: "static", tiles: [{ x: 3, y: 4 }] };
+      }
+
+      return coreStrictFootprintReservationPolicy.getBlockingGroupAtTile(state, excludedUnitId, tile, includeMobile);
     },
   });
 
@@ -391,6 +459,64 @@ function keepOnlyVillager(state: WorldState): void {
       delete state.units[unitId];
     }
   }
+}
+
+const MULTI_TILE_MOBILE_POLICY_ID = "test:multi-tile-mobile";
+
+const multiTileMobilePolicy: MovementCollisionPolicy = {
+  ...coreStrictFootprintReservationPolicy,
+  id: MULTI_TILE_MOBILE_POLICY_ID,
+  getEntityBlockingTiles(state, excludedUnitId, includeMobile = true) {
+    const blocked = coreStrictFootprintReservationPolicy.getEntityBlockingTiles(state, excludedUnitId, includeMobile);
+
+    if (includeMobile) {
+      for (const unit of Object.values(state.units)) {
+        if (unit.id !== excludedUnitId && unit.id.startsWith("mobile-target-")) {
+          for (const tile of getMultiTileGroup(unit, state.map.width, state.map.height).tiles) {
+            blocked.add(toTileKey(tile));
+          }
+        }
+      }
+    }
+
+    return blocked;
+  },
+  getBlockingGroupAtTile(state, excludedUnitId, tile, includeMobile = true) {
+    if (includeMobile) {
+      for (const unit of Object.values(state.units)) {
+        const group = getMultiTileGroup(unit, state.map.width, state.map.height);
+        if (unit.id !== excludedUnitId && unit.id.startsWith("mobile-target-") && group.tiles.some((groupTile) => groupTile.x === tile.x && groupTile.y === tile.y)) {
+          return { id: unit.id, classification: "mobile", tiles: group.tiles };
+        }
+      }
+    }
+
+    return coreStrictFootprintReservationPolicy.getBlockingGroupAtTile(state, excludedUnitId, tile, includeMobile);
+  },
+};
+
+function getMultiTileGroup(unit: { id: string; position: GridPoint }, width: number, height: number): { id: string; tiles: GridPoint[] } {
+  const size = unit.id.includes("3x3") ? 3 : 2;
+  const tiles: GridPoint[] = [];
+
+  for (let y = unit.position.y; y < unit.position.y + size; y += 1) {
+    for (let x = unit.position.x; x < unit.position.x + size; x += 1) {
+      if (x >= 0 && x < width && y >= 0 && y < height) {
+        tiles.push({ x, y });
+      }
+    }
+  }
+
+  return { id: unit.id, tiles };
+}
+
+function fromTileKey(tileKey: string): GridPoint {
+  const [x, y] = tileKey.split(",").map(Number);
+  return { x, y };
+}
+
+function toTileKey(point: GridPoint): string {
+  return `${point.x},${point.y}`;
 }
 
 function key(point: GridPoint): string {

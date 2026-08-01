@@ -5,6 +5,15 @@ import { iterateUnitsOrdered } from "./units.js";
 
 export const CORE_STRICT_FOOTPRINT_RESERVATION_POLICY_ID = "core:strict-footprint-reservation";
 
+export type MovementBlockingGroupClassification = "mobile" | "static";
+
+/** Exact policy-owned blocker footprint selected by a requested tile. */
+export interface MovementBlockingGroup {
+  readonly id: string;
+  readonly classification: MovementBlockingGroupClassification;
+  readonly tiles: readonly GridPoint[];
+}
+
 /** Opaque tick-local state owned and interpreted by its collision policy. */
 export interface MovementReservation {
   readonly policyId: string;
@@ -18,6 +27,12 @@ export interface MovementReservation {
 export interface MovementCollisionPolicy {
   readonly id: string;
   getEntityBlockingTiles(state: WorldState, excludedUnitId?: string, includeMobile?: boolean): Set<string>;
+  getBlockingGroupAtTile(
+    state: WorldState,
+    excludedUnitId: string | undefined,
+    tile: GridPoint,
+    includeMobile?: boolean,
+  ): MovementBlockingGroup | null;
   canUnitOccupyPosition(state: WorldState, unit: UnitState, position: GridPoint): boolean;
   createReservation(): MovementReservation;
   reserveUnitPosition(reservation: MovementReservation, unit: UnitState, position: GridPoint): boolean;
@@ -75,6 +90,31 @@ export const coreStrictFootprintReservationPolicy: MovementCollisionPolicy = {
   id: CORE_STRICT_FOOTPRINT_RESERVATION_POLICY_ID,
   getEntityBlockingTiles(state, excludedUnitId, includeMobile = true) {
     return new Set(getOccupyingUnitIdsByTile(state, excludedUnitId, includeMobile).keys());
+  },
+  getBlockingGroupAtTile(state, excludedUnitId, tile, includeMobile = true) {
+    const requestedKey = toTileKey(tile);
+
+    for (const unit of iterateUnitsOrdered(state)) {
+      if (
+        unit.id === excludedUnitId ||
+        !unitDefinitions[unit.kind].footprint.blocksMovement ||
+        (!includeMobile && unit.movementSpeed > 0)
+      ) {
+        continue;
+      }
+
+      const tiles = getUnitOccupancyTiles(unit);
+
+      if (tiles.some((occupancyTile) => toTileKey(occupancyTile) === requestedKey)) {
+        return {
+          id: unit.id,
+          classification: unit.movementSpeed > 0 ? "mobile" : "static",
+          tiles,
+        };
+      }
+    }
+
+    return null;
   },
   canUnitOccupyPosition(state, unit, position) {
     const footprint = unitDefinitions[unit.kind].footprint;

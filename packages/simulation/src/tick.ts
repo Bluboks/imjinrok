@@ -8,7 +8,7 @@ import { applyAuraAttackDamage, defaultAuraProfileRegistry, refreshAuraEffects, 
 import { arePlayersAllied, arePlayersEnemies } from "./diplomacy.js";
 import { createUnitState } from "./entities.js";
 import { getEnvironmentSightMultiplier, updateEnvironment } from "./environment.js";
-import { findNavigationRouteForUnit, findPathForUnit } from "./navigation.js";
+import { applyNavigationRoute, clearNavigationRoute, findNavigationRouteForUnit, findPathForUnit } from "./navigation.js";
 import {
   canUnitOccupyPosition,
   createMovementReservationForState,
@@ -208,8 +208,7 @@ function reissueScriptedMove(
     return;
   }
 
-  unit.movementPath = route.path;
-  setNextMovementTarget(unit, route.path);
+  applyNavigationRoute(unit, route);
   unit.currentOrder = {
     type: "move",
     target: { ...behavior.moveTarget },
@@ -354,6 +353,7 @@ function applyProductionRally(state: WorldState, building: UnitState, unit: Unit
     const resourceRally = resolveProductionResourceRally(state, unit, rallyPoint);
 
     if (resourceRally) {
+      clearNavigationRoute(unit);
       unit.movementPath = resourceRally.path;
       setNextMovementTarget(unit, resourceRally.path);
       unit.currentOrder = {
@@ -379,8 +379,7 @@ function applyProductionRally(state: WorldState, building: UnitState, unit: Unit
     ? "attack-move"
     : "move";
 
-  unit.movementPath = route.path;
-  setNextMovementTarget(unit, route.path);
+  applyNavigationRoute(unit, route);
   unit.currentOrder = { type: orderType, target: { ...route.requestedGoal } };
 }
 
@@ -499,9 +498,10 @@ function advanceUnitMovement(
 function clearBlockedMovementWaypoint(unit: UnitState): void {
   delete unit.movementTarget;
   delete unit.movementPath;
+  clearNavigationRoute(unit);
 
   if (unit.currentOrder?.type === "move") {
-    delete unit.currentOrder;
+    clearUnitOrder(unit);
   }
 }
 
@@ -520,14 +520,13 @@ function repathBlockedMovementWaypoint(state: WorldState, unit: UnitState): void
     return;
   }
 
-  // The only reachable fallback can be the current footprint. Keep the blocked
-  // target so a later removal or move can admit the unit on a future tick.
-  if (route.path.length === 0) {
-    return;
+  if (unit.currentOrder?.type === "move" || unit.currentOrder?.type === "attack-move" || unit.currentOrder?.type === "patrol") {
+    applyNavigationRoute(unit, route);
+  } else {
+    clearNavigationRoute(unit);
+    unit.movementPath = route.path;
+    setNextMovementTarget(unit, route.path);
   }
-
-  unit.movementPath = route.path;
-  setNextMovementTarget(unit, route.path);
 }
 
 function getMovementDestination(unit: UnitState): GridPoint | undefined {
@@ -565,13 +564,29 @@ function advanceMovementWaypoint(state: WorldState, unit: UnitState): void {
 function completeTerminalTravelOrder(state: WorldState, unit: UnitState, pathExhausted: boolean): void {
   const order = unit.currentOrder;
 
+  if (
+    (order?.type === "move" || order?.type === "attack-move") &&
+    unit.navigation?.terminalReason === "mobile-obstruction"
+  ) {
+    return;
+  }
+
   if (pathExhausted && order?.type === "move" && order.followUpAttackTarget && !unit.movementTarget && !unit.movementPath) {
     applyFollowUpAttackTarget(state, unit, order.followUpAttackTarget);
     return;
   }
 
+  if (
+    (order?.type === "move" || order?.type === "attack-move") &&
+    unit.navigation?.terminalReason === "blocked-goal" &&
+    sameTile(unit.position, unit.navigation.resolvedGoal)
+  ) {
+    clearUnitOrder(unit);
+    return;
+  }
+
   if ((order?.type === "move" || order?.type === "attack-move") && isAtOrderTarget(unit, order.target)) {
-    delete unit.currentOrder;
+    clearUnitOrder(unit);
     return;
   }
 }
@@ -602,6 +617,7 @@ function applyFollowUpAttackTarget(
 
   delete unit.movementTarget;
   delete unit.movementPath;
+  clearNavigationRoute(unit);
 
   if (!target) {
     delete unit.currentOrder;
@@ -1007,6 +1023,7 @@ function clearUnitOrder(unit: UnitState): void {
   delete unit.movementTarget;
   delete unit.movementPath;
   delete unit.currentOrder;
+  clearNavigationRoute(unit);
 }
 
 function advanceUnitRepair(state: WorldState, unit: UnitState): void {
@@ -1096,7 +1113,32 @@ function advanceUnitPatrol(state: WorldState, unit: UnitState): void {
 
   const order = unit.currentOrder;
 
-  if (isAtOrderTarget(unit, order.nextTarget)) {
+  if (unit.navigation?.terminalReason === "mobile-obstruction") {
+    // Re-evaluate the exact requested group after a blocker may have left. If
+    // the target is still occupied, retain the pending wait; once it becomes
+    // reachable, continue through the normal patrol leg/reversal handling.
+    const resumedRoute = findNavigationRouteForUnit(state, unit, order.nextTarget);
+
+    if (!resumedRoute) {
+      clearUnitOrder(unit);
+      return;
+    }
+
+    if (resumedRoute.terminalReason !== "already-at-goal") {
+      applyNavigationRoute(unit, resumedRoute);
+      return;
+    }
+
+    clearNavigationRoute(unit);
+  }
+
+  if (
+    unit.navigation?.terminalReason === "blocked-goal" &&
+    sameTile(unit.position, unit.navigation.resolvedGoal)
+  ) {
+    order.nextTarget = sameTile(order.nextTarget, order.target) ? { ...order.origin } : { ...order.target };
+    clearNavigationRoute(unit);
+  } else if (isAtOrderTarget(unit, order.nextTarget)) {
     order.nextTarget = sameTile(order.nextTarget, order.target) ? { ...order.origin } : { ...order.target };
   }
 
@@ -1107,8 +1149,7 @@ function advanceUnitPatrol(state: WorldState, unit: UnitState): void {
     return;
   }
 
-  unit.movementPath = route.path;
-  setNextMovementTarget(unit, route.path);
+  applyNavigationRoute(unit, route);
 }
 
 function advanceUnitCombat(state: WorldState, projectileRegistry: ProjectileRegistry): void {
@@ -1303,14 +1344,9 @@ function moveUnitTowardCombatTarget(state: WorldState, unit: UnitState, target: 
     return false;
   }
 
+  clearNavigationRoute(unit);
   unit.movementPath = route.path;
-  const nextTarget = route.path[0];
-
-  if (nextTarget) {
-    unit.movementTarget = nextTarget;
-  } else {
-    delete unit.movementTarget;
-  }
+  setNextMovementTarget(unit, route.path);
 
   return true;
 }
@@ -1328,14 +1364,7 @@ function resumeAggressiveTravelDestination(state: WorldState, unit: UnitState): 
     return;
   }
 
-  unit.movementPath = route.path;
-  const nextTarget = route.path[0];
-
-  if (nextTarget) {
-    unit.movementTarget = nextTarget;
-  } else {
-    delete unit.movementTarget;
-  }
+  applyNavigationRoute(unit, route);
 }
 
 function isAggressiveTravelOrder(unit: UnitState): boolean {

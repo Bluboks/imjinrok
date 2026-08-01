@@ -32,6 +32,15 @@ export interface UnitTargetSelectorState {
   targetKind: UnitDefinitionId;
 }
 
+export type NavigationTerminalReason = "already-at-goal" | "mobile-obstruction" | "blocked-goal";
+
+/** Serializable semantic route state kept alongside physical movement waypoints. */
+export interface UnitNavigationState {
+  requestedGoal: GridPoint;
+  resolvedGoal: GridPoint;
+  terminalReason?: NavigationTerminalReason;
+}
+
 export interface UnitScriptedBehaviorState {
   type: "conditional-attack-target";
   moveTarget: GridPoint;
@@ -123,6 +132,7 @@ export interface UnitState {
   movementSpeed: number;
   movementTarget?: GridPoint;
   movementPath?: GridPoint[];
+  navigation?: UnitNavigationState;
   currentOrder?: UnitOrderState;
   attackCooldownTicks?: number;
   construction?: ConstructionState;

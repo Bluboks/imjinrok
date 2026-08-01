@@ -4,10 +4,11 @@ import {
   getMovementCollisionPolicy,
   getUnitOccupancyTiles,
   type MovementReservation,
+  type MovementBlockingGroup,
 } from "./movementCollisionPolicy.js";
 import type { UnitState, WorldState } from "./types.js";
 
-export { getUnitOccupancyTiles, type MovementReservation } from "./movementCollisionPolicy.js";
+export { getUnitOccupancyTiles, type MovementBlockingGroup, type MovementReservation } from "./movementCollisionPolicy.js";
 
 /** Delegates obstacle reporting to the world-selected movement collision policy. */
 export function getEntityBlockingTiles(
@@ -16,6 +17,16 @@ export function getEntityBlockingTiles(
   includeMobile = true,
 ): Set<string> {
   return getMovementCollisionPolicy(state).getEntityBlockingTiles(state, excludedUnitId, includeMobile);
+}
+
+/** Delegates exact requested-blocker grouping to the world-selected collision policy. */
+export function getBlockingGroupAtTile(
+  state: WorldState,
+  excludedUnitId: string | undefined,
+  tile: GridPoint,
+  includeMobile = true,
+): MovementBlockingGroup | null {
+  return getMovementCollisionPolicy(state).getBlockingGroupAtTile(state, excludedUnitId, tile, includeMobile);
 }
 
 /** Delegates movement-step admission to the world-selected collision policy. */

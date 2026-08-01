@@ -25,7 +25,7 @@ import type { PlayerCheatState, PlayerState, ResourceBank, UnitState, WorldSnaps
 
 const STARTING_PLACEMENT_SEARCH_RADIUS = 12;
 
-export type { AttributePool, CarriedResourceState, CombatEventState, ConstructionState, DemolitionState, ObjectiveRuntimeState, ObjectiveStatus, PlayerCheatState, PlayerResearchState, PlayerState, PlayerTeamId, ProductionQueueItemState, RallyPointState, ResearchQueueItemState, ResourceBank, ScenarioRuntimeEvent, ScenarioRuntimeState, ScenarioStatus, ScriptedEventRuntimeState, ScriptedEventStatus, UnitOrderState, UnitScriptedBehaviorState, UnitState, WorldSnapshot, WorldState } from "./types.js";
+export type { AttributePool, CarriedResourceState, CombatEventState, ConstructionState, DemolitionState, ObjectiveRuntimeState, ObjectiveStatus, PlayerCheatState, PlayerResearchState, PlayerState, PlayerTeamId, ProductionQueueItemState, RallyPointState, ResearchQueueItemState, ResourceBank, ScenarioRuntimeEvent, ScenarioRuntimeState, ScenarioStatus, ScriptedEventRuntimeState, ScriptedEventStatus, UnitNavigationState, UnitOrderState, UnitScriptedBehaviorState, UnitState, WorldSnapshot, WorldState } from "./types.js";
 export { getBuildTimeTicks, getConstructionProgress, isUnitUnderConstruction } from "./construction.js";
 export { applyCommand, findBuildWorkPath, issueCommand, validateCommand, type CommandValidationResult, type IssueCommandResult } from "./commands.js";
 export { arePlayersAllied, arePlayersEnemies, getPlayerTeamId } from "./diplomacy.js";
@@ -76,6 +76,8 @@ export {
   SOURCE_GREEDY_CANDIDATE_OFFSETS,
   SOURCE_GREEDY_LOCAL_ADAPTER_PATHFINDER_ID,
   coreAStarPathfinder,
+  applyNavigationRoute,
+  clearNavigationRoute,
   findPathForUnit,
   findNavigationRouteForUnit,
   isTerrainWalkable,
@@ -99,9 +101,12 @@ export {
   resolveMovementCollisionProfileId,
   MovementCollisionPolicyRegistry,
   type MovementCollisionPolicy,
+  type MovementBlockingGroup,
+  type MovementBlockingGroupClassification,
   type MovementReservation,
   type RegisterMovementCollisionPolicyOptions,
 } from "./movementCollisionPolicy.js";
+export { getBlockingGroupAtTile } from "./collision.js";
 export { getFootprintTiles, validateBuildingPlacement, type BuildingPlacementValidationResult } from "./placement.js";
 export {
   canAdmitPlayerCapacity,

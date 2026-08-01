@@ -28,6 +28,7 @@ import {
   completeScenarioRuntime,
   CORE_EXPLICIT_TARGET_TRACKING_AUTHORITY_POLICY_ID,
   CORE_UNCAPPED_CAPACITY_POLICY_ID,
+  coreStrictFootprintReservationPolicy,
   createPlayerVisibility,
   createInitialWorldState,
   findPathForUnit,
@@ -43,6 +44,10 @@ import {
   updatePlayerVisibility,
   updatePlayerVisibilityWithChanges,
   validateBuildingPlacement,
+  toWorldSnapshot,
+  registerMovementCollisionPolicy,
+  type MovementCollisionPolicy,
+  type UnitState,
 } from "./index.js";
 import { createUnitState } from "./entities.js";
 
@@ -256,6 +261,107 @@ test("move orders complete when the unit reaches its final waypoint", () => {
   assert.equal(unit.movementTarget, undefined);
   assert.equal(unit.movementPath, undefined);
   assert.equal(unit.currentOrder, undefined);
+});
+
+test("ordinary move orders clear at the physical endpoint of blocked terrain, resources, and buildings", () => {
+  for (const pathfindingProfileId of ["core:a-star", "imjinrok:source-greedy-local-adapter"]) {
+    for (const denial of ["forest", "water", "cliff", "resource", "building"] as const) {
+      const map = createBlankMap({ width: 12, height: 12 });
+      map.pathfindingProfileId = pathfindingProfileId;
+      const state = createInitialWorldState(map, ["p1"]);
+      state.units = {};
+      const mover = createUnitState(`mover-${denial}`, "p1", "swordsman", { x: 2, y: 2 });
+      mover.movementSpeed = 100;
+      state.units[mover.id] = mover;
+      const target = { x: 5, y: 5 };
+
+      if (denial === "resource") {
+        state.map.layers[0]!.tiles[getTileIndex(state.map.width, target.x, target.y)]!.resource = {
+          id: `${mover.id}-tree`,
+          kind: "tree",
+          amount: 100,
+        };
+      } else if (denial === "building") {
+        const building = createUnitState(`${mover.id}-building`, "p1", "house", target);
+        state.units[building.id] = building;
+      } else {
+        state.map.layers[0]!.tiles[getTileIndex(state.map.width, target.x, target.y)]!.terrain = denial;
+      }
+
+      const result = issueCommand(state, {
+        sessionId: "test-session",
+        playerId: "p1",
+        issuedAtTick: state.tick,
+        command: { type: "move", unitId: mover.id, target },
+      });
+
+      assert.equal(result.ok, true, `${pathfindingProfileId}:${denial}`);
+      assert.equal(mover.navigation?.terminalReason, "blocked-goal", `${pathfindingProfileId}:${denial}`);
+      const resolvedGoal = mover.navigation?.resolvedGoal;
+      assert.ok(resolvedGoal);
+
+      for (let tick = 0; tick < 8 && mover.currentOrder; tick += 1) {
+        advanceWorldTick(state);
+      }
+
+      assert.equal(mover.currentOrder, undefined, `${pathfindingProfileId}:${denial}`);
+      assert.equal(mover.navigation, undefined, `${pathfindingProfileId}:${denial}`);
+      assert.equal(mover.movementTarget, undefined, `${pathfindingProfileId}:${denial}`);
+      assert.equal(mover.movementPath, undefined, `${pathfindingProfileId}:${denial}`);
+      assert.deepEqual(mover.position, resolvedGoal, `${pathfindingProfileId}:${denial}`);
+    }
+  }
+});
+
+test("semantic navigation state survives a snapshot roundtrip and legacy absence", () => {
+  const state = createInitialWorldState(createBlankMap({ width: 12, height: 12 }), ["p1"]);
+  state.units = {};
+  const unit = createUnitState("p1-navigation-roundtrip", "p1", "swordsman", { x: 2, y: 2 });
+  state.units[unit.id] = unit;
+  state.map.layers[0]!.tiles[getTileIndex(state.map.width, 5, 5)]!.terrain = "forest";
+  issueCommand(state, {
+    sessionId: "test-session",
+    playerId: "p1",
+    issuedAtTick: state.tick,
+    command: { type: "move", unitId: unit.id, target: { x: 5, y: 5 } },
+  });
+
+  const snapshot = JSON.parse(JSON.stringify(toWorldSnapshot(state)));
+  assert.deepEqual(snapshot.units[unit.id].navigation, unit.navigation);
+  delete snapshot.units[unit.id].navigation;
+  assert.equal(snapshot.units[unit.id].navigation, undefined);
+});
+
+test("move dispatch reports physical progress or mobile waiting separately from command validation", () => {
+  const state = createInitialWorldState(createBlankMap({ width: 10, height: 10 }), ["p1", "p2"]);
+  state.units = {};
+  const mover = createUnitState("p1-dispatch-mover", "p1", "swordsman", { x: 2, y: 2 });
+  const staticBlocker = createUnitState("p1-dispatch-static", "p1", "house", { x: 3, y: 2 });
+  state.units[mover.id] = mover;
+  state.units[staticBlocker.id] = staticBlocker;
+  const target = { x: 3, y: 2 };
+  const staticResult = issueCommand(state, {
+    sessionId: "test-session",
+    playerId: "p1",
+    issuedAtTick: state.tick,
+    command: { type: "attack-move", unitId: mover.id, target },
+  });
+
+  assert.equal(staticResult.ok, true);
+  assert.equal(staticResult.ok ? staticResult.navigationAccepted : undefined, false);
+
+  delete state.units[staticBlocker.id];
+  const mobile = createUnitState("p2-dispatch-mobile", "p2", "villager", target);
+  state.units[mobile.id] = mobile;
+  const mobileResult = issueCommand(state, {
+    sessionId: "test-session",
+    playerId: "p1",
+    issuedAtTick: state.tick,
+    command: { type: "attack-move", unitId: mover.id, target },
+  });
+
+  assert.equal(mobileResult.ok, true);
+  assert.equal(mobileResult.ok ? mobileResult.navigationAccepted : undefined, true);
 });
 
 test("attack-move preserves its requested destination when routing beside a mobile target", () => {
@@ -873,6 +979,39 @@ test("patrol keeps its requested target when a mobile blocker occupies the adjac
   assert.deepEqual(patrolUnit.currentOrder?.type === "patrol" ? patrolUnit.currentOrder.target : undefined, target);
 });
 
+test("patrol reverses at an ordinary blocked-goal physical endpoint", () => {
+  const map = createBlankMap({ width: 14, height: 12 });
+  map.pathfindingProfileId = "core:a-star";
+  const state = createInitialWorldState(map, ["p1", "p2"]);
+  state.units = {};
+  const patrolUnit = createUnitState("p1-static-patrol", "p1", "swordsman", { x: 2, y: 2 });
+  patrolUnit.movementSpeed = 100;
+  const observer = createUnitState("p2-static-patrol-observer", "p2", "villager", { x: 12, y: 10 });
+  const target = { x: 5, y: 5 };
+  state.units[patrolUnit.id] = patrolUnit;
+  state.units[observer.id] = observer;
+  state.map.layers[0]!.tiles[getTileIndex(state.map.width, target.x, target.y)]!.terrain = "forest";
+
+  const result = issueCommand(state, {
+    sessionId: "test-session",
+    playerId: "p1",
+    issuedAtTick: state.tick,
+    command: { type: "patrol", unitId: patrolUnit.id, target },
+  });
+
+  assert.equal(result.ok, true);
+  const resolvedGoal = patrolUnit.navigation?.resolvedGoal;
+
+  for (let tick = 0; tick < 2; tick += 1) {
+    advanceWorldTick(state);
+  }
+
+  assert.deepEqual(patrolUnit.position, resolvedGoal);
+  assert.equal(patrolUnit.currentOrder?.type, "patrol");
+  assert.deepEqual(patrolUnit.currentOrder?.type === "patrol" ? patrolUnit.currentOrder.nextTarget : undefined, patrolUnit.currentOrder?.type === "patrol" ? patrolUnit.currentOrder.origin : undefined);
+  assert.ok(patrolUnit.movementTarget || patrolUnit.movementPath?.length);
+});
+
 test("production attack-move rally keeps its configured target through a mobile blocker", () => {
   const state = createInitialWorldState(createBlankMap({ width: 20, height: 14 }), ["p1", "p2"]);
   state.capacityPolicyId = CORE_UNCAPPED_CAPACITY_POLICY_ID;
@@ -899,6 +1038,106 @@ test("production attack-move rally keeps its configured target through a mobile 
 
   assert.ok(trained.position.x !== beforeRemoval.x || trained.position.y !== beforeRemoval.y);
   assert.deepEqual(trained.currentOrder?.type === "attack-move" ? trained.currentOrder.target : undefined, target);
+});
+
+test("patrol and production rallies resume toward a custom multi-tile mobile target after removal", () => {
+  registerMovementCollisionPolicy(multiTileRallyPolicy, { replace: true });
+
+  const patrolMap = createBlankMap({ width: 18, height: 14 });
+  patrolMap.movementCollisionProfileId = MULTI_TILE_RALLY_POLICY_ID;
+  const patrolState = createInitialWorldState(patrolMap, ["p1", "p2"]);
+  patrolState.units = {};
+  const patrolUnit = createUnitState("p1-multi-patrol", "p1", "swordsman", { x: 2, y: 6 });
+  patrolUnit.movementSpeed = 100;
+  const patrolBlocker = createUnitState("multi-rally-target-3x3", "p2", "villager", { x: 8, y: 5 });
+  const patrolObserver = createUnitState("p2-multi-patrol-observer", "p2", "villager", { x: 16, y: 12 });
+  patrolState.units[patrolUnit.id] = patrolUnit;
+  patrolState.units[patrolBlocker.id] = patrolBlocker;
+  patrolState.units[patrolObserver.id] = patrolObserver;
+  const patrolTarget = { ...patrolBlocker.position };
+
+  assert.equal(issueCommand(patrolState, {
+    sessionId: "test-session",
+    playerId: "p1",
+    issuedAtTick: patrolState.tick,
+    command: { type: "patrol", unitId: patrolUnit.id, target: patrolTarget },
+  }).ok, true);
+
+  for (let tick = 0; tick < 8 && patrolUnit.navigation?.terminalReason !== "mobile-obstruction"; tick += 1) {
+    advanceWorldTick(patrolState);
+  }
+
+  assert.equal(patrolUnit.currentOrder?.type, "patrol");
+  assert.deepEqual(patrolUnit.currentOrder?.type === "patrol" ? patrolUnit.currentOrder.target : undefined, patrolTarget);
+  assert.equal(patrolUnit.navigation?.terminalReason, "mobile-obstruction");
+  const patrolBoundary = { ...patrolUnit.position };
+  delete patrolState.units[patrolBlocker.id];
+  advanceWorldTick(patrolState);
+  assert.ok(patrolUnit.position.x !== patrolBoundary.x || patrolUnit.position.y !== patrolBoundary.y);
+  assert.deepEqual(patrolUnit.currentOrder?.type === "patrol" ? patrolUnit.currentOrder.target : undefined, patrolTarget);
+  const patrolAfterResume = { ...patrolUnit.position };
+  advanceWorldTick(patrolState);
+  assert.ok(patrolUnit.position.x !== patrolAfterResume.x || patrolUnit.position.y !== patrolAfterResume.y);
+
+  const rallyMap = createBlankMap({ width: 20, height: 14 });
+  rallyMap.movementCollisionProfileId = MULTI_TILE_RALLY_POLICY_ID;
+  const rallyState = createInitialWorldState(rallyMap, ["p1", "p2"]);
+  rallyState.capacityPolicyId = CORE_UNCAPPED_CAPACITY_POLICY_ID;
+  rallyState.units = {};
+  const barracks = createUnitState("p1-multi-rally-barracks", "p1", "barracks", { x: 2, y: 2 });
+  const rallyBlocker = createUnitState("multi-rally-target-3x3", "p2", "villager", { x: 8, y: 5 });
+  const rallyObserver = createUnitState("p2-multi-rally-observer", "p2", "villager", { x: 18, y: 12 });
+  const rallyTarget = { ...rallyBlocker.position };
+  barracks.rallyPoint = { target: rallyTarget, mode: "move" };
+  barracks.productionQueue = [{ id: "multi-rally-production", unit: "swordsman", remainingTicks: 1, totalTicks: 1 }];
+  rallyState.units[barracks.id] = barracks;
+  rallyState.units[rallyBlocker.id] = rallyBlocker;
+  rallyState.units[rallyObserver.id] = rallyObserver;
+  advanceWorldTick(rallyState);
+  const trained = Object.values(rallyState.units).find((unit) => unit.kind === "swordsman");
+  assert.ok(trained);
+  trained.movementSpeed = 100;
+  assert.equal(trained.navigation?.terminalReason, "mobile-obstruction");
+  const rallyBoundary = { ...trained.position };
+  delete rallyState.units[rallyBlocker.id];
+  advanceWorldTick(rallyState);
+  assert.ok(trained.position.x !== rallyBoundary.x || trained.position.y !== rallyBoundary.y);
+  assert.deepEqual(trained.currentOrder?.type === "move" ? trained.currentOrder.target : undefined, rallyTarget);
+});
+
+test("production move and attack-move rallies clear at an ordinary blocked-goal boundary", () => {
+  for (const mode of ["move", "attack-move"] as const) {
+    const map = createBlankMap({ width: 20, height: 14 });
+    map.pathfindingProfileId = "core:a-star";
+    const state = createInitialWorldState(map, ["p1", "p2"]);
+    state.capacityPolicyId = CORE_UNCAPPED_CAPACITY_POLICY_ID;
+    state.units = {};
+    const barracks = createUnitState(`p1-static-rally-${mode}`, "p1", "barracks", { x: 2, y: 2 });
+    const observer = createUnitState(`p2-static-rally-${mode}`, "p2", "villager", { x: 18, y: 10 });
+    const target = { x: 7, y: 7 };
+    barracks.rallyPoint = { target, mode };
+    barracks.productionQueue = [{ id: `static-rally-${mode}`, unit: "swordsman", remainingTicks: 1, totalTicks: 1 }];
+    state.units[barracks.id] = barracks;
+    state.units[observer.id] = observer;
+    state.map.layers[0]!.tiles[getTileIndex(state.map.width, target.x, target.y)]!.terrain = "cliff";
+
+    advanceWorldTick(state);
+
+    const trained = Object.values(state.units).find((unit) => unit.kind === "swordsman");
+    assert.ok(trained);
+    trained.movementSpeed = 100;
+    assert.equal(trained.currentOrder?.type, mode);
+    assert.equal(trained.navigation?.terminalReason, "blocked-goal");
+
+    for (let tick = 0; tick < 12 && trained.currentOrder; tick += 1) {
+      advanceWorldTick(state);
+    }
+
+    assert.equal(trained.currentOrder, undefined, mode);
+    assert.equal(trained.navigation, undefined, mode);
+    assert.equal(trained.movementTarget, undefined, mode);
+    assert.equal(trained.movementPath, undefined, mode);
+  }
 });
 
 test("resource rally point command sends newly trained workers to gather", () => {
@@ -3959,6 +4198,51 @@ function assertValidStartingPlacements(
       occupiedTiles.set(key, unit.id);
     }
   }
+}
+
+const MULTI_TILE_RALLY_POLICY_ID = "test:multi-tile-rally";
+
+const multiTileRallyPolicy: MovementCollisionPolicy = {
+  ...coreStrictFootprintReservationPolicy,
+  id: MULTI_TILE_RALLY_POLICY_ID,
+  getEntityBlockingTiles(state, excludedUnitId, includeMobile = true) {
+    const blocked = coreStrictFootprintReservationPolicy.getEntityBlockingTiles(state, excludedUnitId, includeMobile);
+
+    if (includeMobile) {
+      const target = Object.values(state.units).find((unit) => unit.id.startsWith("multi-rally-target-"));
+      if (target && target.id !== excludedUnitId) {
+        for (const tile of getRallyTargetTiles(target, state.map.width, state.map.height)) {
+          blocked.add(`${tile.x},${tile.y}`);
+        }
+      }
+    }
+
+    return blocked;
+  },
+  getBlockingGroupAtTile(state, excludedUnitId, tile, includeMobile = true) {
+    const target = Object.values(state.units).find((unit) => unit.id.startsWith("multi-rally-target-") && unit.id !== excludedUnitId);
+    const tiles = target ? getRallyTargetTiles(target, state.map.width, state.map.height) : [];
+
+    if (includeMobile && target && tiles.some((candidate) => candidate.x === tile.x && candidate.y === tile.y)) {
+      return { id: target.id, classification: "mobile", tiles };
+    }
+
+    return coreStrictFootprintReservationPolicy.getBlockingGroupAtTile(state, excludedUnitId, tile, includeMobile);
+  },
+};
+
+function getRallyTargetTiles(unit: UnitState, width: number, height: number): GridPoint[] {
+  const tiles: GridPoint[] = [];
+
+  for (let y = unit.position.y; y < unit.position.y + 3; y += 1) {
+    for (let x = unit.position.x; x < unit.position.x + 3; x += 1) {
+      if (x >= 0 && x < width && y >= 0 && y < height) {
+        tiles.push({ x, y });
+      }
+    }
+  }
+
+  return tiles;
 }
 
 function advanceTicks(state: ReturnType<typeof createInitialWorldState>, ticks: number): void {
