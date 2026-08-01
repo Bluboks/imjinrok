@@ -69,6 +69,7 @@ export {
   K01_ACCEPTED_UPDATE_COUNT_MAX,
   K01_ACCEPTED_UPDATE_COUNT_MIN,
   K01_SOURCE_RUNTIME_LEGACY_STATE_VERSION,
+  K01_SOURCE_RUNTIME_ENTITY_STATE_VERSION,
   K01_SOURCE_ENTITY_SLOT_MAX,
   K01_SOURCE_ENTITY_SLOT_MIN,
   K01_SOURCE_GENERATION_MAX,
@@ -87,6 +88,7 @@ export {
   clearK01SourceOccupancy,
   getK01SourceEntityHandleBySemanticUnitIdRuntime,
   migrateK01SourceRuntimeStateV1,
+  migrateK01SourceRuntimeStateV2,
   migrateSourceRuntimeProfileEnvelope,
   releaseK01SourceEntityRuntime,
   seedK01SourceOpeningRuntimeState,
@@ -116,6 +118,25 @@ export {
   type RegisterSourceRuntimeProfileOptions,
   type SourceRuntimeProfile,
 } from "./k01SourceRuntimeProfile.js";
+export {
+  K01_BEACON_CONSTRUCTION_SOURCE_INDEX_BASE,
+  K01_BEACON_NATIVE_ORIGIN,
+  K01_BEACON_NATIVE_SOURCE_INDEX_BASE,
+  K01_BEACON_ORIGINAL_CLASS,
+  K01_BEACON_ORIGINAL_OWNER_RELATION,
+  K01_BEACON_SCRIPT_LOADER_DEFAULT_RESULT,
+  advanceK01BeaconPolicy,
+  type K01BeaconPolicyAdvanceOptions,
+  type K01BeaconPolicyAdvanceResult,
+} from "./k01BeaconPolicy.js";
+export {
+  K01_BEACON_POLICY_STATE_VERSION,
+  cloneK01BeaconPolicyState,
+  createK01BeaconPolicyState,
+  validateK01BeaconPolicyState,
+  type K01BeaconPolicyState,
+  type K01BeaconPolicyTraceEntry,
+} from "./k01BeaconPolicyState.js";
 export {
   K01_SOURCE_EXACT_OPENING_PLACEMENT_POLICY_ID,
   defaultInitialPlacementPolicyRegistry,

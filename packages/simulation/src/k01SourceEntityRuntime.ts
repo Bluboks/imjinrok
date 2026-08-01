@@ -5,6 +5,12 @@ import {
   type MapDefinition,
   type UnitDefinitionId,
 } from "../../shared/src/index.js";
+import {
+  cloneK01BeaconPolicyState,
+  createK01BeaconPolicyState,
+  validateK01BeaconPolicyState,
+  type K01BeaconPolicyState,
+} from "./k01BeaconPolicyState.js";
 
 export const K01_SOURCE_ENTITY_TABLE_SIZE = 1200;
 export const K01_SOURCE_ENTITY_SLOT_MIN = 1;
@@ -81,6 +87,7 @@ export interface K01SourceRuntimeStateV2 {
   readonly acceptedUpdateCount: number;
   readonly entityRuntime: K01SourceEntityRuntimeState;
   readonly occupancy: K01SourceOccupancyState;
+  readonly policies: { readonly beacon: K01BeaconPolicyState };
 }
 
 interface MutableK01SourceEntityRuntimeState {
@@ -156,6 +163,7 @@ export function createK01SourceRuntimeStateV2(): K01SourceRuntimeStateV2 {
     acceptedUpdateCount: 0,
     entityRuntime: createEmptyK01EntityRuntimeState(),
     occupancy: createEmptyK01OccupancyState(),
+    policies: { beacon: createK01BeaconPolicyState() },
   };
 }
 
@@ -176,16 +184,20 @@ export function cloneK01SourceRuntimeStateV2(value: unknown): K01SourceRuntimeSt
       height: state.occupancy.height,
       ownerSlots: [...state.occupancy.ownerSlots],
     },
+    policies: { beacon: cloneK01BeaconPolicyState(state.policies.beacon) },
   };
 }
 
 export function validateK01SourceRuntimeStateV2(value: unknown): asserts value is K01SourceRuntimeStateV2 {
   assertPlainRecord(value, "K01 source runtime v2 state");
-  assertExactKeys(value, ["acceptedUpdateCount", "entityRuntime", "occupancy"], "K01 source runtime v2 state");
+  assertExactKeys(value, ["acceptedUpdateCount", "entityRuntime", "occupancy", "policies"], "K01 source runtime v2 state");
   assertIntegerInRange(value.acceptedUpdateCount, 0, 0xffffffff, "K01 source runtime acceptedUpdateCount");
 
   validateEntityRuntime(value.entityRuntime);
   validateOccupancy(value.occupancy, value.entityRuntime);
+  assertPlainRecord(value.policies, "K01 source runtime policies");
+  assertExactKeys(value.policies, ["beacon"], "K01 source runtime policies");
+  validateK01BeaconPolicyState(value.policies.beacon);
 }
 
 export function updateK01SourceRuntimeStateV2(
@@ -199,6 +211,7 @@ export function updateK01SourceRuntimeStateV2(
     acceptedUpdateCount: patch.acceptedUpdateCount ?? state.acceptedUpdateCount,
     entityRuntime: patch.entityRuntime ?? state.entityRuntime,
     occupancy: patch.occupancy ?? state.occupancy,
+    policies: state.policies,
   });
 }
 
@@ -259,6 +272,7 @@ export function allocateK01SourceEntity(
     acceptedUpdateCount: state.acceptedUpdateCount,
     entityRuntime: runtime,
     occupancy: state.occupancy,
+    policies: state.policies,
   });
 
   return { state: next, handle: { slot: bestSlot, generation } };
@@ -357,6 +371,7 @@ export function writeSourceOccupancy(
     acceptedUpdateCount: state.acceptedUpdateCount,
     entityRuntime: state.entityRuntime,
     occupancy,
+    policies: state.policies,
   });
 }
 
@@ -381,6 +396,7 @@ export function clearSourceOccupancy(
     acceptedUpdateCount: state.acceptedUpdateCount,
     entityRuntime: state.entityRuntime,
     occupancy,
+    policies: state.policies,
   });
 }
 
@@ -416,6 +432,7 @@ export function releaseK01SourceEntity(
     acceptedUpdateCount: cleared.acceptedUpdateCount,
     entityRuntime: runtime,
     occupancy: cleared.occupancy,
+    policies: cleared.policies,
   });
 }
 
@@ -440,6 +457,7 @@ export function seedK01SourceOpeningRuntime(
       height: request.map.height,
       ownerSlots: Array.from({ length: request.map.width * request.map.height }, () => 0),
     },
+    policies: state.policies,
   });
   let next = seeded;
   const units = Object.values(request.units);

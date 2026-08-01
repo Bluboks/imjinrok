@@ -30,11 +30,22 @@ import {
   type K01SourceRuntimeStateV2,
 } from "./k01SourceEntityRuntime.js";
 import type { SourceRuntimeProfileEnvelope } from "./types.js";
+import { createK01BeaconPolicyState } from "./k01BeaconPolicyState.js";
+export {
+  K01_BEACON_POLICY_STATE_VERSION,
+  cloneK01BeaconPolicyState,
+  createK01BeaconPolicyState,
+  validateK01BeaconPolicyState,
+  type K01BeaconPolicyState,
+  type K01BeaconPolicyTraceEntry,
+} from "./k01BeaconPolicyState.js";
 
 /** Stable process-local selector for the first source-runtime profile. */
 export const K01_SOURCE_RUNTIME_PROFILE_ID = "k01:source-runtime";
-export const K01_SOURCE_RUNTIME_STATE_VERSION = 2;
+export const K01_SOURCE_RUNTIME_STATE_VERSION = 3;
 export const K01_SOURCE_RUNTIME_LEGACY_STATE_VERSION = 1;
+/** A02 entity-runtime state before the T01 policy namespace was added. */
+export const K01_SOURCE_RUNTIME_ENTITY_STATE_VERSION = 2;
 export {
   K01_SOURCE_ENTITY_SLOT_MAX,
   K01_SOURCE_ENTITY_SLOT_MIN,
@@ -275,17 +286,40 @@ export function migrateK01SourceRuntimeStateV1(value: unknown): K01SourceRuntime
   };
 }
 
+/** Explicit A02 v2 → T01 v3 migration. General runtime fields are preserved;
+ * the new policy namespace starts from its deterministic initial state. */
+export function migrateK01SourceRuntimeStateV2(value: unknown): K01SourceRuntimeState {
+  assertPlainRecord(value, "K01 source runtime v2 state");
+  assertExactKeys(value, ["acceptedUpdateCount", "entityRuntime", "occupancy"], "K01 source runtime v2 state");
+  const candidate = {
+    ...value,
+    policies: { beacon: createK01BeaconPolicyState() },
+  };
+  validateK01SourceRuntimeStateV2(candidate);
+  return cloneK01SourceRuntimeState(candidate);
+}
+
 export function migrateSourceRuntimeProfileEnvelope(value: unknown): SourceRuntimeProfileEnvelope {
   assertPlainRecord(value, "source runtime profile envelope");
   assertExactKeys(value, ["profileId", "stateVersion", "state"], "source runtime profile envelope");
-  if (value.profileId !== K01_SOURCE_RUNTIME_PROFILE_ID || value.stateVersion !== K01_SOURCE_RUNTIME_LEGACY_STATE_VERSION) {
-    throw new Error("Only the K01 source runtime v1 envelope has an explicit migration path.");
+  if (value.profileId !== K01_SOURCE_RUNTIME_PROFILE_ID) {
+    throw new Error("Only the K01 source runtime profile has an explicit migration path.");
   }
-  return {
-    profileId: K01_SOURCE_RUNTIME_PROFILE_ID,
-    stateVersion: K01_SOURCE_RUNTIME_STATE_VERSION,
-    state: cloneK01SourceRuntimeState(migrateK01SourceRuntimeStateV1(value.state)),
-  };
+  if (value.stateVersion === K01_SOURCE_RUNTIME_LEGACY_STATE_VERSION) {
+    return {
+      profileId: K01_SOURCE_RUNTIME_PROFILE_ID,
+      stateVersion: K01_SOURCE_RUNTIME_STATE_VERSION,
+      state: cloneK01SourceRuntimeState(migrateK01SourceRuntimeStateV1(value.state)),
+    };
+  }
+  if (value.stateVersion === K01_SOURCE_RUNTIME_ENTITY_STATE_VERSION) {
+    return {
+      profileId: K01_SOURCE_RUNTIME_PROFILE_ID,
+      stateVersion: K01_SOURCE_RUNTIME_STATE_VERSION,
+      state: cloneK01SourceRuntimeState(migrateK01SourceRuntimeStateV2(value.state)),
+    };
+  }
+  throw new Error(`Unsupported K01 source runtime migration version ${String(value.stateVersion)}.`);
 }
 
 /**
@@ -306,7 +340,10 @@ export function cloneSourceRuntimeProfileEnvelope(value: unknown): SourceRuntime
     throw new TypeError("source runtime profile envelope stateVersion must be an integer");
   }
 
-  if (profile.id === K01_SOURCE_RUNTIME_PROFILE_ID && value.stateVersion === K01_SOURCE_RUNTIME_LEGACY_STATE_VERSION) {
+  if (
+    profile.id === K01_SOURCE_RUNTIME_PROFILE_ID &&
+    (value.stateVersion === K01_SOURCE_RUNTIME_LEGACY_STATE_VERSION || value.stateVersion === K01_SOURCE_RUNTIME_ENTITY_STATE_VERSION)
+  ) {
     return migrateSourceRuntimeProfileEnvelope(value);
   }
 

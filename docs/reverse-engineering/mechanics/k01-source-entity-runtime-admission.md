@@ -34,7 +34,7 @@ K01 opening semantic IDs와 source order는 `packages/shared/src/scenarios.ts`�
 [opening footprint anchor](k01-opening-footprint-anchor.md)의 범위만 사용한다. mobile/hero의 1×1은
 원본 전체 footprint를 확정한 것이 아니라 `project-adaptation`이다.
 
-## v2 schema와 실패 경계
+## v3 profile schema와 실패 경계
 
 `entityRuntime`은 generation counter, 1,200-entry active table, active-list order, 1,200-entry
 signed reuse-age table, slot-sorted records를 단일 SSOT로 보존한다. 각 record는 static evidence가
@@ -43,8 +43,9 @@ semantic ID, source-adapter order index, slot/generation handle 및 footprint ev
 `occupancy.ownerSlots`는 map 크기와 일치하는 WORD cell 배열이다. malformed/missing/duplicate/OOB,
 slot 0, stale generation, collision, full capacity는 설명적 예외로 실패한다.
 
-A01 v1은 class/owner/coordinate/semantic mapping이 없으므로 빈 `entities`만 v2로 명시적으로
-이동한다. non-empty v1 save는 필드를 추측하지 않고 거부한다.
+A01 v1은 class/owner/coordinate/semantic mapping이 없으므로 빈 `entities`만 v3로 명시적으로
+이동한다. A02 v2는 general `entityRuntime`/`occupancy`를 보존하고 빈 beacon policy namespace를
+추가한다. non-empty v1 save는 필드를 추측하지 않고 거부한다.
 
 ## 검증
 
@@ -55,3 +56,24 @@ node --import tsx --test \
 ```
 
 전체 simulation/full workspace test와 typecheck/build는 통합 branch의 최종 gate에서 재실행한다.
+
+## T01 K0120 policy contact
+
+`packages/simulation/src/k01BeaconPolicy.ts`는 이 general runtime을 유일한 source SSOT로
+재사용한다. accepted world update에서 먼저 `ConstructionCompleted` sequence를 policy cursor로
+exactly-once 소비하고, class 52 beacon은 `admitCompletedK01ConstructionRuntime`의 명시적인
+`intentional-adaptation` timing으로 admission한다. 그 다음 source record를 slot `1..1199`
+오름차순으로 읽으며 active-table/active/positive-health, raw owner-relation, class `52`, progress
+`0x64`를 모두 통과한 record만 match한다. blocker가 0이 아니거나 trigger WORD가 정확히 0이 아니면
+scan을 건너뛴다.
+
+정적 확정된 K0120 descriptor 9개는 `k01ReinforcementAdapter`의 class/owner/offset 순서를 그대로
+사용한다. allocator·generation·occupancy write는 A02 API를 호출하며, OOB·slot exhaustion·collision·
+semantic mapping 실패는 policy trace에 남고 semantic unit은 만들지 않는다. script busy, loader
+`0/1`, void start와 native descriptor effects는 서로 독립된 trace boundary다. loader 결과는
+diagnostic outcome이지 trigger authority가 아니다. dialogue, objective, mission result와 source raw
+global writes는 이 구현 범위에 없다.
+
+K01의 legacy `k01-reinforcement-wave` scripted event는 K01 source profile에서만 consumed/no-op으로
+처리하여 duplicate spawn을 막는다. generic worlds와 profile-absent scenarios는 이 policy 및
+namespace를 생성하지 않는다.

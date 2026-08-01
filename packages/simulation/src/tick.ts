@@ -26,6 +26,7 @@ import { advanceUnitOrientationForProjectTarget, getSourceOrientationProfileForU
 import { getIdleCombatPolicy } from "./idleCombatPolicy.js";
 import { createCurrentVisibilityResolver, getAttackTargetAuthorityPolicy, isAttackTargetAuthorized, type AttackTargetAuthorityPolicy } from "./attackTargetAuthorityPolicy.js";
 import { tryExecutePlayerAutoAbility } from "./autoAbilityPolicy.js";
+import { advanceK01BeaconPolicy } from "./k01BeaconPolicy.js";
 import { advanceProjectileSystem, PRODUCT_PROJECTILE_REGISTRY, type ProjectileRegistry } from "./projectiles.js";
 import {
   resolveCombatProjectileImpacts,
@@ -88,6 +89,12 @@ export function advanceWorldTick(state: WorldState, options: AdvanceWorldTickOpt
       advanceUnitConstruction(state, unit);
       advanceUnitRepair(state, unit);
     }
+  }
+
+  // Source-profile policies run once at the accepted-update boundary after
+  // construction events are appended, before later systems observe this tick.
+  if (state.sourceRuntimeProfile?.profileId === "k01:source-runtime") {
+    advanceK01BeaconPolicy(state);
   }
 
   // Aura effects are a live, derived snapshot: movement, owner teams, and

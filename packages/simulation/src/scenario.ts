@@ -135,6 +135,21 @@ export function applyScenarioScriptedEvents(state: WorldState, options: ApplySce
       continue;
     }
 
+    // K01's source-profile policy is the sole authority for K0120 native
+    // reinforcement. Keep the legacy scenario event observable as consumed,
+    // but do not execute its generic spawn/objective actions on that profile.
+    if (
+      state.sourceRuntimeProfile?.profileId === "k01:source-runtime" &&
+      scriptedEvent.id === "k01-reinforcement-wave"
+    ) {
+      if (scriptedEvent.status === "pending" && isScenarioTriggerMet(state, scriptedEvent.trigger)) {
+        scriptedEvent.status = "executed";
+        scriptedEvent.executedAtTick = state.tick;
+        state.scenario.events.push(createScenarioEvent(state, "scripted-event", undefined, scriptedEvent.id));
+      }
+      continue;
+    }
+
     if (scriptedEvent.status !== "pending" || !isScenarioTriggerMet(state, scriptedEvent.trigger)) {
       continue;
     }

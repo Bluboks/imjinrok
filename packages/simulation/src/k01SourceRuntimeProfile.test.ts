@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   K01_SOURCE_RUNTIME_LEGACY_STATE_VERSION,
+  K01_SOURCE_RUNTIME_ENTITY_STATE_VERSION,
   K01_SOURCE_RUNTIME_PROFILE_ID,
   K01_SOURCE_RUNTIME_STATE_VERSION,
   cloneSourceRuntimeProfileEnvelope,
@@ -9,6 +10,7 @@ import {
   createK01SourceRuntimeState,
   createSourceRuntimeProfileEnvelope,
   migrateK01SourceRuntimeStateV1,
+  migrateK01SourceRuntimeStateV2,
   parseSourceRuntimeProfileEnvelope,
   toWorldSnapshot,
   updateK01SourceRuntimeState,
@@ -71,7 +73,7 @@ test("K01 source envelope rejects malformed v2 values and keeps generic profile 
     ["array", []],
     ["wrong profile id type", { ...envelope, profileId: 3 }],
     ["unknown profile id", { ...envelope, profileId: "missing:source-runtime" }],
-    ["unsupported version", { ...envelope, stateVersion: 3 }],
+    ["unsupported version", { ...envelope, stateVersion: 4 }],
     ["missing state field", { profileId: envelope.profileId, stateVersion: envelope.stateVersion }],
     ["extra envelope field", { ...envelope, executable: () => true }],
     ["state array", { ...envelope, state: [] }],
@@ -106,6 +108,20 @@ test("v1 migration is explicit, accepts only empty legacy state, and rejects non
     }),
     null,
   );
+});
+
+test("A02 v2 migration adds only the strict T01 policy namespace", () => {
+  const envelope = createSourceRuntimeProfileEnvelope(K01_SOURCE_RUNTIME_PROFILE_ID);
+  const v2State = { ...envelope.state } as Record<string, unknown>;
+  delete v2State.policies;
+  const migrated = cloneSourceRuntimeProfileEnvelope({
+    profileId: K01_SOURCE_RUNTIME_PROFILE_ID,
+    stateVersion: K01_SOURCE_RUNTIME_ENTITY_STATE_VERSION,
+    state: v2State,
+  });
+  assert.equal(migrated.stateVersion, K01_SOURCE_RUNTIME_STATE_VERSION);
+  assert.equal((migrated.state as K01SourceRuntimeState).policies.beacon.eventCursorSequence, 0);
+  assert.equal(migrateK01SourceRuntimeStateV2(v2State).entityRuntime.entities.length, 0);
 });
 
 test("source profile envelope round-trips JSON without executable policy state", () => {

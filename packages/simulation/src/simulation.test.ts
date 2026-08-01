@@ -51,6 +51,7 @@ import {
   type UnitState,
 } from "./index.js";
 import { createUnitState } from "./entities.js";
+import { appendConstructionCompletedEvent } from "./events.js";
 
 const simulationSrcDirectory = dirname(fileURLToPath(import.meta.url));
 
@@ -2153,13 +2154,14 @@ test("imjinrok K01 reinforcement preserves its static-proven requested coordinat
     "beacon",
     { x: 12, y: 12 },
   );
+  appendConstructionCompletedEvent(state, state.units["local-player-test-beacon"]!);
 
   advanceWorldTick(state);
 
   assert.equal(state.scenario.objectives["build-beacon"]?.status, "completed");
   assert.equal(state.scenario.scriptedEvents["k01-reinforcement-wave"]?.status, "executed");
   assert.equal(state.scenario.scriptedEvents["k01-reinforcement-wave"]?.executedAtTick, state.tick);
-  assert.equal(state.scenario.objectives["withdraw-after-reinforcements"]?.status, "completed");
+  assert.equal(state.scenario.objectives["withdraw-after-reinforcements"]?.status, "pending");
   assert.deepEqual(
     state.units["local-player-reinforcement-blocker"]?.position,
     { x: 53, y: 51 },
@@ -2224,7 +2226,7 @@ test("imjinrok K01 reinforcement preserves its static-proven requested coordinat
   assert.equal(state.scenario.endedAtTick, undefined);
   assert.deepEqual(
     state.scenario.events.slice(-2).map((event) => event.type),
-    ["scripted-event", "objective-completed"],
+    ["objective-completed", "scripted-event"],
   );
 
   assert.equal(completeScenarioRuntime(state, "victory"), true);
