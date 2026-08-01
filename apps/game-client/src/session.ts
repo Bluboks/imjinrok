@@ -12,6 +12,7 @@ import {
 } from "@shared";
 import {
   createProjectileSystemState,
+  parseSourceRuntimeProfileEnvelope,
   parseSerializedProjectileImpactLog,
   parseSerializedProjectileSystemState,
   type PlayerVisibilityState,
@@ -225,6 +226,14 @@ export function normalizeSavedWorldSnapshot(snapshot: unknown): WorldSnapshot | 
   const projectileImpactEvents = candidate.projectileImpactEvents === undefined
     ? []
     : parseSerializedProjectileImpactLog(candidate.projectileImpactEvents);
+  let sourceRuntimeProfile: WorldSnapshot["sourceRuntimeProfile"] | undefined;
+
+  if (candidate.sourceRuntimeProfile !== undefined) {
+    sourceRuntimeProfile = parseSourceRuntimeProfileEnvelope(candidate.sourceRuntimeProfile) ?? undefined;
+    if (sourceRuntimeProfile === undefined) {
+      return null;
+    }
+  }
 
   if (
     typeof candidate.tick !== "number" ||
@@ -262,6 +271,10 @@ export function normalizeSavedWorldSnapshot(snapshot: unknown): WorldSnapshot | 
   candidate.projectileSystem = projectileSystem;
   candidate.projectileImpactEvents = projectileImpactEvents;
   candidate.lastAcceptedCommand ??= null;
+
+  if (sourceRuntimeProfile !== undefined) {
+    candidate.sourceRuntimeProfile = sourceRuntimeProfile;
+  }
 
   return candidate as WorldSnapshot;
 }

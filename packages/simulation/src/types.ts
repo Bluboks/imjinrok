@@ -22,6 +22,17 @@ import type { ProjectileImpactLogEntry, ProjectileSystemState } from "./projecti
 
 export type ResourceBank = ResourceAmountSet;
 
+/**
+ * Generic world-facing envelope for an optional source runtime profile.
+ * Profile-specific code owns validation and interpretation of `state`; the
+ * generic simulation only transports this JSON-safe opaque value.
+ */
+export interface SourceRuntimeProfileEnvelope {
+  readonly profileId: string;
+  readonly stateVersion: number;
+  readonly state: Record<string, unknown>;
+}
+
 export interface AttributePool {
   current: number;
   max: number;
@@ -261,6 +272,8 @@ export interface WorldState {
   projectileSystem: ProjectileSystemState;
   /** Bounded deterministic lifecycle events for consumers such as damage and presentation. */
   projectileImpactEvents: ProjectileImpactLogEntry[];
+  /** Optional source-runtime envelope; absent generic worlds retain old snapshots byte-for-byte. */
+  sourceRuntimeProfile?: SourceRuntimeProfileEnvelope;
   lastAcceptedCommand: CommandEnvelope | null;
 }
 

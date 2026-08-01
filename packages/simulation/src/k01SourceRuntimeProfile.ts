@@ -1,0 +1,371 @@
+import type { SourceRuntimeProfileEnvelope } from "./types.js";
+
+/** Stable process-local selector for the first source-runtime profile. */
+export const K01_SOURCE_RUNTIME_PROFILE_ID = "k01:source-runtime";
+export const K01_SOURCE_RUNTIME_STATE_VERSION = 1;
+export const K01_SOURCE_ENTITY_SLOT_MIN = 1;
+export const K01_SOURCE_ENTITY_SLOT_MAX = 1199;
+export const K01_SOURCE_GENERATION_MIN = 0;
+export const K01_SOURCE_GENERATION_MAX = 0xffff;
+export const K01_SOURCE_HEALTH_MIN = -0x8000;
+export const K01_SOURCE_HEALTH_MAX = 0x7fff;
+export const K01_ACCEPTED_UPDATE_COUNT_MIN = 0;
+export const K01_ACCEPTED_UPDATE_COUNT_MAX = 0xffffffff;
+
+/**
+ * The only source entity facts currently closed by E01. Slot/generation are
+ * handle identity, while active and signed health are the owning validity
+ * fields. They remain inside the K01-owned opaque state and never become
+ * generic UnitState fields.
+ */
+export interface K01SourceEntityState {
+  readonly slot: number;
+  readonly generation: number;
+  readonly active: boolean;
+  readonly health: number;
+}
+
+/**
+ * Serializable K01 state. `acceptedUpdateCount` is an adapter-owned ordinal,
+ * not a claim about raw clock units or a fixed-Hz conversion. Coordinates,
+ * scheduler clocks, occupancy aliases, and projectile units stay out until
+ * their evidence boundaries are closed.
+ */
+export interface K01SourceRuntimeState {
+  readonly [key: string]: unknown;
+  readonly acceptedUpdateCount: number;
+  readonly entities: readonly K01SourceEntityState[];
+}
+
+export interface K01SourceRuntimeStatePatch {
+  readonly acceptedUpdateCount?: number;
+  readonly entities?: readonly K01SourceEntityState[];
+}
+
+export interface SourceRuntimeProfile {
+  readonly id: string;
+  readonly stateVersion: number;
+  createInitialState(): Record<string, unknown>;
+  validateState(state: unknown): void;
+  cloneState(state: unknown): Record<string, unknown>;
+}
+
+export interface RegisterSourceRuntimeProfileOptions {
+  readonly replace?: boolean;
+}
+
+export class SourceRuntimeProfileRegistry {
+  private readonly profiles = new Map<string, SourceRuntimeProfile>();
+
+  register(profile: SourceRuntimeProfile, options: RegisterSourceRuntimeProfileOptions = {}): void {
+    validateProfileDefinition(profile);
+
+    if (this.profiles.has(profile.id) && options.replace !== true) {
+      throw new Error(`Source runtime profile '${profile.id}' is already registered.`);
+    }
+
+    this.profiles.set(profile.id, profile);
+  }
+
+  require(id: string): SourceRuntimeProfile {
+    assertStableProfileId(id);
+    const profile = this.profiles.get(id);
+
+    if (!profile) {
+      throw new Error(`Unknown source runtime profile '${id}'. Register its profile before creating or restoring the world.`);
+    }
+
+    return profile;
+  }
+
+  has(id: string): boolean {
+    return this.profiles.has(id);
+  }
+
+  ids(): readonly string[] {
+    return Object.freeze([...this.profiles.keys()].sort());
+  }
+
+  unregister(id: string): void {
+    this.profiles.delete(id);
+  }
+}
+
+const k01SourceRuntimeProfile: SourceRuntimeProfile = {
+  id: K01_SOURCE_RUNTIME_PROFILE_ID,
+  stateVersion: K01_SOURCE_RUNTIME_STATE_VERSION,
+  createInitialState: () => cloneK01SourceRuntimeState(createK01SourceRuntimeState()),
+  validateState: validateK01SourceRuntimeState,
+  cloneState(value) {
+    return cloneK01SourceRuntimeState(value);
+  },
+};
+
+export const defaultSourceRuntimeProfileRegistry = new SourceRuntimeProfileRegistry();
+defaultSourceRuntimeProfileRegistry.register(k01SourceRuntimeProfile);
+
+export function registerSourceRuntimeProfile(
+  profile: SourceRuntimeProfile,
+  options?: RegisterSourceRuntimeProfileOptions,
+): () => void {
+  defaultSourceRuntimeProfileRegistry.register(profile, options);
+  return () => defaultSourceRuntimeProfileRegistry.unregister(profile.id);
+}
+
+export function requireSourceRuntimeProfile(id: string): SourceRuntimeProfile {
+  return defaultSourceRuntimeProfileRegistry.require(id);
+}
+
+export function resolveSourceRuntimeProfileId(id: string | undefined): string | undefined {
+  if (id === undefined) {
+    return undefined;
+  }
+
+  requireSourceRuntimeProfile(id);
+  return id;
+}
+
+export function createK01SourceRuntimeState(): K01SourceRuntimeState {
+  return {
+    acceptedUpdateCount: 0,
+    entities: [],
+  };
+}
+
+/** Pure replacement API; it never advances a tick or mutates its input. */
+export function updateK01SourceRuntimeState(
+  state: K01SourceRuntimeState,
+  patch: K01SourceRuntimeStatePatch,
+): K01SourceRuntimeState {
+  validateK01SourceRuntimeState(state);
+  assertPlainObject(patch, "K01 source runtime state patch");
+  assertAllowedKeys(patch, ["acceptedUpdateCount", "entities"], "K01 source runtime state patch");
+
+  const next: K01SourceRuntimeState = {
+    acceptedUpdateCount: patch.acceptedUpdateCount ?? state.acceptedUpdateCount,
+    entities: patch.entities === undefined
+      ? state.entities
+      : [...patch.entities].sort((left, right) => left.slot - right.slot),
+  };
+
+  validateK01SourceRuntimeState(next);
+  return cloneK01SourceRuntimeState(next);
+}
+
+export function createSourceRuntimeProfileEnvelope(profileId: string): SourceRuntimeProfileEnvelope {
+  const profile = requireSourceRuntimeProfile(profileId);
+  const state = profile.createInitialState();
+  profile.validateState(state);
+  const clonedState = profile.cloneState(state);
+  assertJsonSafeRecord(clonedState, "source runtime profile state");
+
+  return {
+    profileId: profile.id,
+    stateVersion: profile.stateVersion,
+    state: clonedState,
+  };
+}
+
+/**
+ * Validates and deep-clones a serialized envelope. Unknown ids and versions,
+ * malformed JSON shapes, and unsupported state data all fail closed.
+ */
+export function cloneSourceRuntimeProfileEnvelope(value: unknown): SourceRuntimeProfileEnvelope {
+  assertPlainRecord(value, "source runtime profile envelope");
+  assertExactKeys(value, ["profileId", "stateVersion", "state"], "source runtime profile envelope");
+
+  if (typeof value.profileId !== "string") {
+    throw new TypeError("source runtime profile envelope profileId must be a string");
+  }
+
+  const profile = requireSourceRuntimeProfile(value.profileId);
+
+  if (!Number.isInteger(value.stateVersion)) {
+    throw new TypeError("source runtime profile envelope stateVersion must be an integer");
+  }
+
+  if (value.stateVersion !== profile.stateVersion) {
+    throw new RangeError(
+      `Source runtime profile '${profile.id}' does not support state version ${String(value.stateVersion)}; expected ${profile.stateVersion}.`,
+    );
+  }
+
+  profile.validateState(value.state);
+  const clonedState = profile.cloneState(value.state);
+  assertJsonSafeRecord(clonedState, "source runtime profile state");
+
+  return {
+    profileId: profile.id,
+    stateVersion: profile.stateVersion,
+    state: clonedState,
+  };
+}
+
+export function validateSourceRuntimeProfileEnvelope(value: unknown): void {
+  cloneSourceRuntimeProfileEnvelope(value);
+}
+
+/** Compatibility parser for nullable save/load validators. The throwing clone
+ * remains the owning boundary for callers that need the exact failure. */
+export function parseSourceRuntimeProfileEnvelope(value: unknown): SourceRuntimeProfileEnvelope | null {
+  try {
+    return cloneSourceRuntimeProfileEnvelope(value);
+  } catch {
+    return null;
+  }
+}
+
+export function validateK01SourceRuntimeState(value: unknown): asserts value is K01SourceRuntimeState {
+  assertPlainRecord(value, "K01 source runtime state");
+  assertExactKeys(value, ["acceptedUpdateCount", "entities"], "K01 source runtime state");
+
+  assertIntegerInRange(
+    value.acceptedUpdateCount,
+    K01_ACCEPTED_UPDATE_COUNT_MIN,
+    K01_ACCEPTED_UPDATE_COUNT_MAX,
+    "K01 source runtime acceptedUpdateCount",
+  );
+
+  if (!Array.isArray(value.entities)) {
+    throw new TypeError("K01 source runtime entities must be an array");
+  }
+
+  let previousSlot = K01_SOURCE_ENTITY_SLOT_MIN - 1;
+
+  for (const entity of value.entities) {
+    assertPlainRecord(entity, "K01 source runtime entity");
+    assertExactKeys(entity, ["slot", "generation", "active", "health"], "K01 source runtime entity");
+
+    assertIntegerInRange(entity.slot, K01_SOURCE_ENTITY_SLOT_MIN, K01_SOURCE_ENTITY_SLOT_MAX, "K01 source entity slot");
+    if (entity.slot <= previousSlot) {
+      throw new RangeError("K01 source runtime entities must be strictly ordered by unique slot");
+    }
+    previousSlot = entity.slot;
+
+    assertIntegerInRange(entity.generation, K01_SOURCE_GENERATION_MIN, K01_SOURCE_GENERATION_MAX, "K01 source entity generation");
+
+    if (typeof entity.active !== "boolean") {
+      throw new TypeError("K01 source entity active must be a boolean");
+    }
+
+    assertIntegerInRange(entity.health, K01_SOURCE_HEALTH_MIN, K01_SOURCE_HEALTH_MAX, "K01 source entity health");
+  }
+}
+
+function cloneK01SourceRuntimeState(value: unknown): K01SourceRuntimeState {
+  validateK01SourceRuntimeState(value);
+  const state = value as K01SourceRuntimeState;
+
+  return {
+    acceptedUpdateCount: state.acceptedUpdateCount,
+    entities: state.entities.map((entity) => ({
+      slot: entity.slot,
+      generation: entity.generation,
+      active: entity.active,
+      health: entity.health,
+    })),
+  };
+}
+
+function validateProfileDefinition(profile: SourceRuntimeProfile): void {
+  assertStableProfileId(profile.id);
+
+  if (!Number.isInteger(profile.stateVersion) || profile.stateVersion <= 0) {
+    throw new RangeError(`Source runtime profile '${profile.id}' stateVersion must be a positive integer.`);
+  }
+
+  if (typeof profile.createInitialState !== "function" || typeof profile.validateState !== "function" || typeof profile.cloneState !== "function") {
+    throw new TypeError(`Source runtime profile '${profile.id}' must provide executable state boundaries.`);
+  }
+}
+
+function assertStableProfileId(id: string): void {
+  if (typeof id !== "string" || !id.trim()) {
+    throw new TypeError("Source runtime profile id must be a non-empty string.");
+  }
+
+  if (id !== id.trim()) {
+    throw new Error(`Source runtime profile id '${id}' must not have surrounding whitespace.`);
+  }
+}
+
+function assertIntegerInRange(value: unknown, min: number, max: number, label: string): asserts value is number {
+  if (typeof value !== "number" || !Number.isInteger(value) || !Number.isFinite(value) || value < min || value > max) {
+    throw new RangeError(`${label} must be an integer in ${min}..${max}; got ${String(value)}`);
+  }
+}
+
+function assertPlainRecord(value: unknown, label: string): asserts value is Record<string, unknown> {
+  assertPlainObject(value, label);
+}
+
+function assertPlainObject(value: unknown, label: string): void {
+  if (value === null || typeof value !== "object" || Array.isArray(value)) {
+    throw new TypeError(`${label} must be a plain object`);
+  }
+
+  const prototype = Object.getPrototypeOf(value);
+  if (prototype !== Object.prototype && prototype !== null) {
+    throw new TypeError(`${label} must be a plain object`);
+  }
+}
+
+function assertExactKeys(value: Record<string, unknown>, expected: readonly string[], label: string): void {
+  const actual = Object.keys(value).sort();
+  const canonicalExpected = [...expected].sort();
+
+  if (actual.length !== canonicalExpected.length || actual.some((key, index) => key !== canonicalExpected[index])) {
+    throw new TypeError(`${label} has unsupported or missing fields; expected ${canonicalExpected.join(",")}`);
+  }
+}
+
+function assertAllowedKeys(value: object, allowed: readonly string[], label: string): void {
+  const allowedSet = new Set(allowed);
+  const unsupported = Object.keys(value).find((key) => !allowedSet.has(key));
+
+  if (unsupported !== undefined) {
+    throw new TypeError(`${label} has unsupported field '${unsupported}'`);
+  }
+}
+
+function assertJsonSafeRecord(value: unknown, label: string): asserts value is Record<string, unknown> {
+  assertPlainRecord(value, label);
+  assertJsonSafeValue(value, label, new Set<object>());
+}
+
+function assertJsonSafeValue(value: unknown, label: string, seen: Set<object>): void {
+  if (value === null || typeof value === "string" || typeof value === "boolean") {
+    return;
+  }
+
+  if (typeof value === "number") {
+    if (!Number.isFinite(value)) {
+      throw new TypeError(`${label} contains a non-finite number`);
+    }
+    return;
+  }
+
+  if (typeof value !== "object") {
+    throw new TypeError(`${label} contains a non-JSON value`);
+  }
+
+  if (seen.has(value)) {
+    throw new TypeError(`${label} contains a cyclic value`);
+  }
+  seen.add(value);
+
+  if (Array.isArray(value)) {
+    value.forEach((item, index) => assertJsonSafeValue(item, `${label}[${index}]`, seen));
+  } else {
+    const prototype = Object.getPrototypeOf(value);
+    if (prototype !== Object.prototype && prototype !== null) {
+      throw new TypeError(`${label} contains a non-plain object`);
+    }
+
+    for (const [key, item] of Object.entries(value)) {
+      assertJsonSafeValue(item, `${label}.${key}`, seen);
+    }
+  }
+
+  seen.delete(value);
+}

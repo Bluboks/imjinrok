@@ -1,8 +1,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { createBlankMap, defaultMap, defaultSkirmishScenario, imjinrokK02Scenario, type ScenarioDefinition } from "@shared";
+import { createBlankMap, defaultMap, defaultSkirmishScenario, imjinrokK01Scenario, imjinrokK02Scenario, type ScenarioDefinition } from "@shared";
 import {
   createInitialWorldState,
+  K01_SOURCE_RUNTIME_PROFILE_ID,
   PRODUCT_IMMEDIATE_PROJECTILE_PROFILE,
   PRODUCT_PROJECTILE_REGISTRY,
   spawnProjectile,
@@ -140,6 +141,40 @@ test("malformed present projectile lifecycle save data is rejected while unknown
   invalid.projectileSystem = malformed.projectileSystem;
   invalid.projectileImpactEvents = [{ ...malformed.projectileImpactEvents[0]!, payload: { constructor: "unsafe" } }];
   assert.equal(normalizeSavedWorldSnapshot(invalid), null);
+});
+
+test("K01 quick-save and local SessionTransport preserve the opaque profile envelope with independent clones", () => {
+  const map = createBlankMap({ id: imjinrokK01Scenario.mapId });
+  const snapshot = createInitialWorldState(map, ["local-player"], imjinrokK01Scenario);
+  const profile = snapshot.sourceRuntimeProfile;
+
+  assert.equal(profile?.profileId, K01_SOURCE_RUNTIME_PROFILE_ID);
+  assert.ok(profile);
+  Object.assign(profile, {
+    state: {
+      acceptedUpdateCount: 9,
+      entities: [{ slot: 17, generation: 3, active: true, health: 480 }],
+    },
+  });
+
+  const normalized = normalizeSavedWorldSnapshot(JSON.parse(JSON.stringify(snapshot)));
+  assert.ok(normalized);
+  assert.deepEqual(normalized.sourceRuntimeProfile, snapshot.sourceRuntimeProfile);
+
+  const normalizedState = normalized.sourceRuntimeProfile?.state as { entities: { health: number }[] };
+  normalizedState.entities[0]!.health = 1;
+  assert.equal((snapshot.sourceRuntimeProfile?.state.entities[0] as { health: number }).health, 480);
+
+  const transport = new LocalSessionTransport(snapshot);
+  assert.deepEqual(transport.getSnapshot().sourceRuntimeProfile, snapshot.sourceRuntimeProfile);
+
+  const malformed = structuredClone(snapshot) as WorldSnapshot;
+  malformed.sourceRuntimeProfile = {
+    profileId: "missing:source-runtime",
+    stateVersion: 1,
+    state: { acceptedUpdateCount: 0, entities: [] },
+  };
+  assert.equal(normalizeSavedWorldSnapshot(malformed), null);
 });
 
 test("quick-load world snapshots preserve timed weather overrides", () => {

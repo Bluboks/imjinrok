@@ -210,6 +210,8 @@ export interface ScenarioDefinition {
    * simulation registry, so scenarios and snapshots are serializable.
    */
   capacityPolicyId?: string;
+  /** Optional source-runtime profile selected by the authoritative world-creation boundary. */
+  sourceRuntimeProfileId?: string;
   playerIds?: readonly string[];
   playerTeams?: Readonly<Record<string, string>>;
   completionMode?: "objectives" | "scripted";
@@ -569,6 +571,7 @@ export const imjinrokK01Scenario = {
   // Stable selector resolved by the simulation registry. The K01 policy keeps
   // the unresolved original building-category gate explicitly bypassed.
   capacityPolicyId: "k01:war-expense",
+  sourceRuntimeProfileId: "k01:source-runtime",
   completionMode: "scripted",
   startingResources: originalCampaignStartingResources,
   startingUnits: defaultTownStart,

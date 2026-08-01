@@ -54,6 +54,35 @@ export {
   spawnCombatProjectile,
 } from "./projectileCombat.js";
 export * from "./world.js";
+export {
+  K01_ACCEPTED_UPDATE_COUNT_MAX,
+  K01_ACCEPTED_UPDATE_COUNT_MIN,
+  K01_SOURCE_ENTITY_SLOT_MAX,
+  K01_SOURCE_ENTITY_SLOT_MIN,
+  K01_SOURCE_GENERATION_MAX,
+  K01_SOURCE_GENERATION_MIN,
+  K01_SOURCE_HEALTH_MAX,
+  K01_SOURCE_HEALTH_MIN,
+  K01_SOURCE_RUNTIME_PROFILE_ID,
+  K01_SOURCE_RUNTIME_STATE_VERSION,
+  cloneSourceRuntimeProfileEnvelope,
+  createK01SourceRuntimeState,
+  createSourceRuntimeProfileEnvelope,
+  defaultSourceRuntimeProfileRegistry,
+  parseSourceRuntimeProfileEnvelope,
+  registerSourceRuntimeProfile,
+  requireSourceRuntimeProfile,
+  resolveSourceRuntimeProfileId,
+  SourceRuntimeProfileRegistry,
+  updateK01SourceRuntimeState,
+  validateSourceRuntimeProfileEnvelope,
+  validateK01SourceRuntimeState,
+  type K01SourceEntityState,
+  type K01SourceRuntimeState,
+  type K01SourceRuntimeStatePatch,
+  type RegisterSourceRuntimeProfileOptions,
+  type SourceRuntimeProfile,
+} from "./k01SourceRuntimeProfile.js";
 export { SkirmishAiController, SKIRMISH_AI_TUNING, type SkirmishAiControllerOptions, type SkirmishAiDifficulty, type SkirmishAiTuning } from "./skirmishAi.js";
 export {
   CORE_CURRENT_VISIBILITY_SKIRMISH_AI_PERCEPTION_POLICY_ID,

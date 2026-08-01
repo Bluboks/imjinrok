@@ -1,5 +1,5 @@
 import { resourceDefinitions, type CommandEnvelope, type MapDefinition, type ResourceDefinition, type ScenarioDefinition } from "@shared";
-import { advanceWorldTick, completeScenarioRuntime, CORE_CURRENT_VISIBILITY_SKIRMISH_AI_PERCEPTION_POLICY_ID, createInitialWorldState, createPlayerResearchState, createProjectileSystemState, issueCommand as issueWorldCommand, parseSerializedProjectileImpactLog, parseSerializedProjectileSystemState, PRODUCT_PROJECTILE_REGISTRY, SIM_TICK_SECONDS, SkirmishAiController, type IssueCommandResult, type ProjectileRegistry, type ScenarioStatus, type SkirmishAiControllerOptions, type WorldSnapshot, type WorldState } from "@simulation";
+import { advanceWorldTick, cloneSourceRuntimeProfileEnvelope, completeScenarioRuntime, CORE_CURRENT_VISIBILITY_SKIRMISH_AI_PERCEPTION_POLICY_ID, createInitialWorldState, createPlayerResearchState, createProjectileSystemState, issueCommand as issueWorldCommand, parseSerializedProjectileImpactLog, parseSerializedProjectileSystemState, PRODUCT_PROJECTILE_REGISTRY, SIM_TICK_SECONDS, SkirmishAiController, type IssueCommandResult, type ProjectileRegistry, type ScenarioStatus, type SkirmishAiControllerOptions, type WorldSnapshot, type WorldState } from "@simulation";
 import type { GameLaunchContext } from "../session.js";
 import { NetworkClient } from "./NetworkClient.js";
 
@@ -266,6 +266,10 @@ function normalizeWorldSnapshot(
   normalized.combatEvents ??= [];
   normalized.projectileSystem = normalizeRuntimeProjectileSystem(normalized.projectileSystem);
   normalized.projectileImpactEvents = normalizeRuntimeProjectileImpactEvents(normalized.projectileImpactEvents);
+  const sourceRuntimeProfile = normalizeRuntimeSourceRuntimeProfile(normalized.sourceRuntimeProfile);
+  if (sourceRuntimeProfile !== undefined) {
+    normalized.sourceRuntimeProfile = sourceRuntimeProfile;
+  }
   normalized.lastAcceptedCommand ??= null;
   hydrateScenarioObjectiveMetadata(normalized, scenario);
   hydrateMapMetadata(normalized, mapMetadataSource);
@@ -292,6 +296,18 @@ function normalizeRuntimeProjectileImpactEvents(value: unknown): WorldState["pro
   const parsed = parseSerializedProjectileImpactLog(value);
   if (!parsed) throw new TypeError("world snapshot contains malformed projectile impact events");
   return parsed;
+}
+
+function normalizeRuntimeSourceRuntimeProfile(value: unknown): WorldState["sourceRuntimeProfile"] {
+  if (value === undefined) {
+    return undefined;
+  }
+
+  try {
+    return cloneSourceRuntimeProfileEnvelope(value);
+  } catch (error) {
+    throw new TypeError(`world snapshot contains malformed source runtime profile envelope: ${error instanceof Error ? error.message : String(error)}`);
+  }
 }
 
 function normalizeRuntimeEnvironment(value: unknown): WorldState["environment"] {

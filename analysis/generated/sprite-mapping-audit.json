@@ -20,7 +20,7 @@
     },
     {
       "path": "packages/shared/src/scenarios.ts",
-      "sha256": "ac284213577ff8171f228c4c22466277270fe31a79f41efb2dfe19005833099c"
+      "sha256": "3253feeed17e7d68907d8c32391d2a0f4c9bc20f742bfd78d79ae1b66d791611"
     },
     {
       "path": "packages/shared/src/k01UnitAnimationCoverage.ts",

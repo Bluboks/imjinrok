@@ -18,6 +18,7 @@ import { createProjectileSystemState } from "./projectiles.js";
 import { resolveAttackTargetAuthorityPolicyId } from "./attackTargetAuthorityPolicy.js";
 import { resolveCapacityPolicyId } from "./capacity.js";
 import "./k01WarExpenseCapacity.js";
+import { cloneSourceRuntimeProfileEnvelope, createSourceRuntimeProfileEnvelope, resolveSourceRuntimeProfileId } from "./k01SourceRuntimeProfile.js";
 import { createPlayerResearchState } from "./research.js";
 import { resourceBlocksBuilding, resourceBlocksMovement } from "./resources.js";
 import { applyScenarioScriptedEvents, createScenarioRuntimeState } from "./scenario.js";
@@ -25,7 +26,7 @@ import type { PlayerCheatState, PlayerState, ResourceBank, UnitState, WorldSnaps
 
 const STARTING_PLACEMENT_SEARCH_RADIUS = 12;
 
-export type { AttributePool, CarriedResourceState, CombatEventState, ConstructionState, DemolitionState, ObjectiveRuntimeState, ObjectiveStatus, PlayerCheatState, PlayerResearchState, PlayerState, PlayerTeamId, ProductionQueueItemState, RallyPointState, ResearchQueueItemState, ResourceBank, ScenarioRuntimeEvent, ScenarioRuntimeState, ScenarioStatus, ScriptedEventRuntimeState, ScriptedEventStatus, UnitNavigationState, UnitOrderState, UnitScriptedBehaviorState, UnitState, WorldSnapshot, WorldState } from "./types.js";
+export type { AttributePool, CarriedResourceState, CombatEventState, ConstructionState, DemolitionState, ObjectiveRuntimeState, ObjectiveStatus, PlayerCheatState, PlayerResearchState, PlayerState, PlayerTeamId, ProductionQueueItemState, RallyPointState, ResearchQueueItemState, ResourceBank, ScenarioRuntimeEvent, ScenarioRuntimeState, ScenarioStatus, ScriptedEventRuntimeState, ScriptedEventStatus, SourceRuntimeProfileEnvelope, UnitNavigationState, UnitOrderState, UnitScriptedBehaviorState, UnitState, WorldSnapshot, WorldState } from "./types.js";
 export { getBuildTimeTicks, getConstructionProgress, isUnitUnderConstruction } from "./construction.js";
 export { applyCommand, findBuildWorkPath, issueCommand, validateCommand, type CommandValidationResult, type IssueCommandResult } from "./commands.js";
 export { arePlayersAllied, arePlayersEnemies, getPlayerTeamId } from "./diplomacy.js";
@@ -251,13 +252,27 @@ export function createInitialWorldState(
     lastAcceptedCommand: null,
   };
 
+  const sourceRuntimeProfileId = resolveSourceRuntimeProfileId(scenario.sourceRuntimeProfileId);
+  if (sourceRuntimeProfileId !== undefined) {
+    state.sourceRuntimeProfile = createSourceRuntimeProfileEnvelope(sourceRuntimeProfileId);
+  }
+
   applyScenarioScriptedEvents(state, { tickTriggersOnly: true });
 
   return state;
 }
 
 export function toWorldSnapshot(state: WorldState): WorldSnapshot {
-  return structuredClone(state);
+  const sourceRuntimeProfile = state.sourceRuntimeProfile === undefined
+    ? undefined
+    : cloneSourceRuntimeProfileEnvelope(state.sourceRuntimeProfile);
+  const snapshot = structuredClone(state);
+
+  if (sourceRuntimeProfile !== undefined) {
+    snapshot.sourceRuntimeProfile = sourceRuntimeProfile;
+  }
+
+  return snapshot;
 }
 
 function createPlacedStartingUnits(
