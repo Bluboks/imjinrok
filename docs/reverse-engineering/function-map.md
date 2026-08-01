@@ -121,6 +121,7 @@
 | `0x0045bd00` | `FUN_0045bd00`, `0x0045bd00-0x0045bef8` | 1 / 103 | stride `0x14c` 타입 정의 레코드 writer | slot·base frame·이름·footprint `+0x14/+0x16` 필드 정적 확정 |
 | `0x0045bf50` | `FUN_0045bf50`, `0x0045bf50-0x0045efb9` | 1 / 5,100 | 전체 엔티티 타입 정의 초기화 | class 1~95 슬롯·기본 프레임·flags·이름 포인터와 K01 class 12/13/14/82 1×1·bit `0x08` clear 정적 확정 |
 | `0x0045f9c0` | `FUN_0045f9c0`, `0x0045f9c0-0x004607ac` | 209 / 801 | main Windows message loop와 state switch | scheduler와 result `0x18..0x1d`, `0x8c/0x96` relay·final route 범위 정적 확정 |
+| `0x0045f9c0` (outer-loop slice) | `FUN_0045f9c0`, `0x0045f9c0-0x004607ac` | 801 | `PeekMessageA(remove=0)` present branch dispatch/restart; idle `timeGetTime` sample 뒤 signed-WORD state switch `0x14` | K0110 outer cadence의 message-vs-idle boundary 정적 확정 |
 | `0x00460ba0` | `FUN_00460ba0`, `0x00460ba0-0x00460e20` | 17 / 144 | ECX base에서 `0x1f6aa` DWORD zero fill 후 후속 raw 초기화 | 표준 mission entry의 `[0x007c5ed8,0x00843980)` prefix 범위 정적 확정 |
 | `0x004610e0` | `FUN_004610e0`, `0x004610e0-0x004611fd` | ? / 91 | fog dirty clear·state age 후 active entity sight recomputation | mode WORD 1 및 raw `+0x1ec`의 `4→0`/`0→4` branches와 `FUN_00439260` iteration 정적 확정; `+0x1ec` 사람용 의미 미확정 |
 | `0x00461570` | `FUN_00461570`, `0x00461570-0x00461590` | 1 / 6 | raw enable·좌표 DWORD writer | K01 call의 `0x00843674/78/7c = 1/55/53` 정적 확정; consumer 의미 미확정 |
@@ -175,17 +176,21 @@
 | `0x00482340` | `FUN_00482340`, `0x00482340-0x0048238c` | 4 / 22 | 스크립트 시작 또는 commit | 엔진 상태 변화 |
 | `0x004823a0` | `FUN_004823a0`, `0x004823a0-0x004823a3` | 1 / 2 | 스크립트 엔진 busy 확인 | 반환값을 읽는 모든 호출자 |
 | `0x004824c0` | `FUN_004824c0`, `0x004824c0-0x0048258b` | 16 / 62 | 스크립트 큐 소비와 레코드 전달 | `SPEECH` 경로는 정적 확정 |
+| `0x0047f300` | `FUN_0047f300`, `0x0047f300-0x0047f430` | 87 | state `0x14` briefing caller; owner `0x00c5ce78`로 `0x004824c0`을 한 번 호출한 뒤 render/update work | K0110 outer visit 단위와 TITLE/OBJECTIVE ordered draw 경계 |
+| `0x004824c0` (cadence slice) | `FUN_004824c0`, `0x004824c0-0x0048258b` | 62 | active/readiness/key gate 후 current record consumer를 최대 한 번 호출하고 end-of-queue teardown을 검사 | previous non-ready retain, one-record-per-accepted-visit 정적 확정 |
 | `0x00482590` | `FUN_00482590`, `0x00482590-0x0048285c` | 169 명령어 | 11개 스크립트 명령 lookup | `CHANGETITLE=1`, `SETDELAYTIME=3`, `OBJECTIVE=7`, `TITLE=9`와 dispatcher 분기 정적 확정 |
 | `0x00482860` | `FUN_00482860`, `0x00482860-0x00482eda` | 31 / 456 | 스크립트 명령 디스패처, case 0은 `SPEECH` 레코드 생성 | case 1 `0x80` source-path payload, case 3 signed-WORD, case 7 `0x200` two-string, case 9 `0x40` string payload와 `SPEECH` 경로 정적 확정 |
 | `0x00482fc0` | `FUN_00482fc0`, `0x00482fc0-0x0048304f` | 40 명령어 | CHANGETITLE image load gate 및 path normalization | 기존 `owner+0xc14` 보존 branch, resource loader failure 후에도 return 1 정적 확정 |
 | `0x00483050` | `FUN_00483050`, `0x00483050-0x00483074` | 12 명령어 | CHANGETITLE image release helper | `owner+0xc14` 검사→resource free→pointer zero 정적 확정 |
 | `0x004830f0` | `FUN_004830f0`, `0x004830f0-0x004833bc` | 29 / 218 | 레코드 종류별 소비, case 0은 대사 표시 호출 | case 1 release-then-load replacement와 record count, case 3 `timeGetTime`/signed duration store, case 7 objective, case 9 title producer 정적 확정 |
+| `0x004833f0` | `FUN_004833f0`, `0x004833f0-0x004834c5` | 74 | previous-record cleanup, key/advance gate에서만 실행 | 별도 GetAsyncKeyState gate와 queue progression 분리 |
 | `0x00443440` | `FUN_00443440`, `0x00443440-0x00443464` | 10 명령어 | resource subobject image free | image release 후 caller-owned pointer zero 정적 확정 |
 | `0x004434a0` | `FUN_004434a0`, `0x004434a0-0x0044357e` | 77 명령어 | source path image loader | image resource type check와 `resource+0xbf4` store/failure log 정적 확정 |
 | `0x00482010` | `FUN_00482010`, `0x00482010-0x00482146` | 101 명령어 | script teardown entry | shutdown 호출, record payload free, CHANGETITLE image release 정적 확정 |
 | `0x004823d0` | `FUN_004823d0`, `0x004823d0-0x004824b6` | 78 명령어 | script shutdown resource cleanup | objective→title clear order, remaining resource free, `Sleep(1000)` 정적 확정 |
 | `0x004a84e0` | `FUN_004a84e0`, `0x004a84e0-0x004a8606` | 103 명령어 | scratch surface overlay compositor | objective then title text rectangles blit; `owner+0xc14` direct read edge는 미확인 |
 | `0x00483500` | `FUN_00483500`, `0x00483500-0x00483657` | 107 명령어 | record readiness | case 3 unsigned wrap elapsed strict `>`/field clear 정적 확정 |
+| `0x004838b0` | `FUN_004838b0`, `0x004838b0-0x004838ef` | 23 | GetAsyncKeyState Escape/Return sampling과 500-unit debounce | Windows message queue가 아닌 별도 key/advance gate 정적 확정 |
 | `0x004a88f0` | `FUN_004a88f0`, `0x004a88f0-0x004a89dd` | 75 명령어 | 278×86 `OBJECTIVE` overlay producer | two-string wrap/draw anchors와 `+0x568=1` 정적 확정 |
 | `0x004a89e0` | `FUN_004a89e0`, `0x004a89e0-0x004a8abb` | 77 명령어 | 278×30 `TITLE` overlay producer | left title anchor·vertical centering과 `+0x564=1` 정적 확정 |
 | `0x00483a60` | `FUN_00483a60`, `0x00483a60-0x00483a9c` | 7 / 25 | inactive slot 1..1199 signed reuse-age 선택 | active table 0 후보, later-tie, 모든 inactive candidate WORD 증가·slot 0 failure 정적 확정 |

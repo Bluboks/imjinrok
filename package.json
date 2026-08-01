@@ -82,6 +82,7 @@
     "imjinrok:setup-static-analysis": "bash tools/imjinrok/setup-static-analysis.sh",
     "imjinrok:analyze-exe": "bash tools/imjinrok/run-static-analysis.sh",
     "imjinrok:extract-changetitle-consumer": "node tools/imjinrok/extract-changetitle-consumer-evidence.mjs",
+    "imjinrok:extract-briefing-outer-update-cadence": "node tools/imjinrok/extract-briefing-outer-update-cadence.mjs",
     "imjinrok:verify-static-analysis": "node tools/imjinrok/validate-static-analysis.mjs"
   },
   "dependencies": {

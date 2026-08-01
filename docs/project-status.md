@@ -1,10 +1,11 @@
 # 프로젝트 상태
 
-기준일: 2026-07-29
+기준일: 2026-08-01
 
 ## 요약
 
 현재 저장소는 기능이 풍부한 웹 RTS 프로토타입이다. 실행 가능한 기능의 수와 원작 일치 수준은 별개다.
+K0110 briefing outer update cadence도 message-vs-idle 분기, state-0x14 call chain, strict delay 경계와 one-record progression까지 정적 복원·재현했지만 exact wall-clock/fps와 CHANGETITLE sprite compositor는 미확정이다.
 전체 게임이 원작과 일치한다고 완료 판정할 단계는 아니다. 제한된 단위 중 브리핑 `SPEECH` 초상화와
 대화 핵심 레이아웃은 정적 복원·재현·이식을 완료했다. 내부 클래스 2는 원본 `조선 창병`과
 `swordk.spr`로 식별했으며 상태 1 일반 이동 방향·미러를 `move`·`walk`에 이식했다. 조선 본영은
@@ -93,6 +94,7 @@ K02는 이 단기 MVP의 완료 조건이 아니다. 기존 K02 프로토타입�
 | 건물 상태 이미지 | 조선 본영·봉화대 건설 0~7·정상 7·반파 8 이식 | 클래스 49·52 정체와 공통 건물 진행도·체력 분기 확정 | 모든 진행도·50% 체력 경계 테스트 | 두 건물 본체 범위 원본 기반, 나머지 7개 미검증 |
 | 브리핑 초상화 | 17개 ID·`hero.spr` 프레임 이식 | 파서→조회→프레임 표→그리기 정적 확정 | 추출기·클라이언트 교차 테스트 | 원본 기반 |
 | `SPEECH` 대화 레이아웃 | 숫자 슬롯·초상화·대사 공통 배치 이식. K01 브리핑의 blank→완성 frame fade, 초상화 첫 등장 motion, 대화 중 simulation pause와 전면 click advance는 웹 포트 연출 | 640×480 슬롯 4개와 대사 좌표 정적 확정 | 추출기·배율 변환 테스트, 포트 timeline·pause ownership 단위 테스트 | 좌표·초상화 frame은 원본 기반; 도입·pause·입력 연출은 의도적 적응 |
+| K0110 outer update cadence | production 변경 없음 | `PeekMessageA` idle path→state `0x14`→briefing queue, one-record/strict delay·TITLE/OBJECTIVE/SPEECH ordering 정적 확정 | hash-bound extractor·fixture·tamper/progression tests | exact wall-clock/fps와 CHANGETITLE compositor 미확정 |
 | K01 공통 임무 목표 모달 결합 | 검증된 raster·기하·K0110 텍스트·strict release와 유효 base wrap 폭 300을 독립 presenter에 연결; HUD button/event는 프로젝트 전용 | 진입·dispatcher에 더해 GDI `Arial` height 12/HANGEUL_CHARSET 요청, CP949 byte chunk·strict wrap·배치·실패 경로 정적 확정 | lifecycle 재현 완료; typography 제어 흐름은 공급한 synthetic GDI metrics 아래 부분 재현 | frame/content/dismiss·action·text·유효 폭은 원본 기반; 실제 font realization·glyph 폭·Korean wrap·빈 문자열 `SIZE.cy`, gameplay-panel 정체, mechanism source, dismiss visual·sound 미확정 |
 | UI·입력 | 반응형 목표 추적 HUD와 K01 generic 4×3 12-slot action grid, K01 opt-in `button.spr` command frame profile 존재 | 임무 목표 모달 확정; transient overlay 후보 반증; action 115 admission/removal, queue-count marker·type 76 state handoff와 player-scoped hero-priority·magic-auto-use gates, class 78 auto/manual pending-store·일반 공격 경계와 bounded command control 2/3/5/11/16/19/21/35/39→pixel frame 정적 확정; original 3×3 command-grid는 정적 evidence로 보존 | 기존 범위와 class 78 cadence·target admission·action 40/59 delivery·manual pending 충돌 부분 재현 | original raw queue/state/gate와 3×3 command-grid는 product에 이식하지 않는다. K01 4×3 12-slot grid와 selection UI는 의도적 프로젝트 UI이며, `attack-move`/`build` source icons는 semantic adaptation이다. |
 | VM 동적 분석 | 과거 도구·기록 존재 | 다수 시행착오 기록 | 원시 증거가 저장소에 없음 | 보관, 기본 경로에서 제외 |
