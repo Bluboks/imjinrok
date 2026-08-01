@@ -4,15 +4,17 @@
 
 - 분석 근거: `정적 확정`인 1,200-slot allocator·generation·handle validity·active-list release와
   owner-grid write/clear의 좁은 범위만 사용한다.
-- 재현: production state v2의 allocator age/tie/wrap, generation wrap, stale handle, swap-last
+- 재현: production state v3의 allocator age/tie/wrap, generation wrap, stale handle, swap-last
   release, source/adapted footprint, collision/OOB 및 save/load vectors로 고정한다.
-- 구현: A01 profile envelope를 v2 `entityRuntime`/`occupancy` 계층으로 확장했다. K01 opening seed와
-  명시적 completed-construction adapter만 제공하며 K0120 scan, trigger flag, script/native
-  reinforcement/result/UI는 이 계층에 연결하지 않는다.
+- 구현: A01 profile envelope를 v3 `entityRuntime`/`occupancy` 계층으로 확장했다. K01 opening seed와
+  명시적 completed-construction adapter는 T01 K0120 policy가 source SSOT로 소비하며, 일반
+  entity admission과 native 1×1 overwrite admission의 경계를 분리한다. dialogue/result/UI는
+  이 계층에 연결하지 않는다.
 
 `ConstructionCompleted` 시점에 class 52 봉화대를 admission하는 것은 원본에서 source record가 더
 일찍 존재했을 가능성을 보존하지 못하므로 `intentional-adaptation` timing classification을 호출자가
-명시해야 한다. 이 문서는 그 event를 소비하거나 원본 trigger를 주장하지 않는다.
+명시해야 한다. T01 policy는 이 adapter를 accepted-update event cursor와 함께 호출하며, 이는
+원본 trigger timing을 주장하지 않는 명시적 프로젝트 adaptation이다.
 
 ## source 근거
 
@@ -46,6 +48,8 @@ semantic ID, source-adapter order index, slot/generation handle 및 footprint ev
 slot 0, stale generation, collision, full capacity는 설명적 예외로 실패한다. 일반 admission은
 collision-strict를 유지하고, 정적 원본 계약이 닫힌 K0120 native 1×1 admission만 reservation의
 reuse-age 결과를 보존한 채 OOB를 건너뛰며, 성공 시 기존 owner cell을 후행 descriptor가 덮어쓴다.
+활성 record의 semantic ID/source index만 현재 mapping으로 취급해 각각 전역 유일해야 하며,
+inactive retired record의 stale fields는 slot당 하나의 record invariant 아래 보존할 수 있다.
 
 A01 v1은 class/owner/coordinate/semantic mapping이 없으므로 빈 `entities`만 v3로 명시적으로
 이동한다. A02 v2는 general `entityRuntime`/`occupancy`를 보존하고 빈 beacon policy namespace를

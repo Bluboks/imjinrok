@@ -710,14 +710,19 @@ function validateEntityRuntime(value: unknown): asserts value is K01SourceEntity
       throw new RangeError("K01 source entities must be strictly ordered by unique slot.");
     }
     previousSlot = entity.slot;
-    if (sourceIndexes.has(entity.sourceRecordIndex)) {
-      throw new RangeError(`K01 source entities contain duplicate source record index ${entity.sourceRecordIndex}.`);
+    // Retired records intentionally preserve stale semantic/source fields for
+    // forensic visibility. Only current active records own the admission
+    // mappings and therefore participate in uniqueness validation.
+    if (entity.active) {
+      if (sourceIndexes.has(entity.sourceRecordIndex)) {
+        throw new RangeError(`K01 source entities contain duplicate source record index ${entity.sourceRecordIndex}.`);
+      }
+      sourceIndexes.add(entity.sourceRecordIndex);
+      if (semanticIds.has(entity.semanticUnitId)) {
+        throw new RangeError(`K01 source entities contain duplicate semantic id '${entity.semanticUnitId}'.`);
+      }
+      semanticIds.add(entity.semanticUnitId);
     }
-    sourceIndexes.add(entity.sourceRecordIndex);
-    if (semanticIds.has(entity.semanticUnitId)) {
-      throw new RangeError(`K01 source entities contain duplicate semantic id '${entity.semanticUnitId}'.`);
-    }
-    semanticIds.add(entity.semanticUnitId);
     const tableActive = value.activeTable[entity.slot] !== 0;
     if (entity.active !== tableActive) {
       throw new RangeError(`K01 source entity slot ${entity.slot} active flag disagrees with active table.`);

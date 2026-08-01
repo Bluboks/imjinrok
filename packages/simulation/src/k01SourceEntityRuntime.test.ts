@@ -41,6 +41,14 @@ function runtimeState(): K01SourceRuntimeState {
   };
 }
 
+function assertCurrentMappingsUnique(state: K01SourceRuntimeState): void {
+  const entities = state.entityRuntime.entities;
+  const active = entities.filter((entity) => entity.active);
+  assert.equal(new Set(entities.map((entity) => entity.slot)).size, entities.length, "one record per source slot");
+  assert.equal(new Set(active.map((entity) => entity.semanticUnitId)).size, active.length, "active semantic mappings are unique");
+  assert.equal(new Set(active.map((entity) => entity.sourceRecordIndex)).size, active.length, "active source mappings are unique");
+}
+
 test("allocator preserves source slot range, later tie-break, generation WORD wrap, and stale handles", () => {
   let state = runtimeState();
   const first = allocateK01SourceEntityRuntime(state, request(1));
@@ -143,6 +151,78 @@ test("released source slots replace retired records on reuse and survive save/lo
     roundTripped.state.entityRuntime.entities.find((entity) => entity.slot === retired.slot)?.semanticUnitId,
     "reused-source",
   );
+});
+
+test("ordinary mostly-free reuse permits the same retired semantic and source mapping", () => {
+  const originalRequest = request(101);
+  let state = runtimeState();
+  const original = allocateK01SourceEntityRuntime(state, originalRequest);
+  state = releaseK01SourceEntityRuntime(original.state, original.handle);
+
+  const reused = allocateK01SourceEntityRuntime(state, originalRequest);
+  state = reused.state;
+  assert.equal(original.handle.slot, K01_SOURCE_ENTITY_SLOT_MAX);
+  assert.equal(reused.handle.slot, K01_SOURCE_ENTITY_SLOT_MAX - 1, "reuse-age winner is a different free slot");
+  assert.notEqual(reused.handle.slot, original.handle.slot);
+  assert.throws(() => validateK01SourceEntityHandleRuntime(state, original.handle), /stale or inactive/);
+  assert.deepEqual(getK01SourceEntityHandleBySemanticUnitIdRuntime(state, originalRequest.semanticUnitId), reused.handle);
+  assertCurrentMappingsUnique(state);
+  const roundTripped = cloneSourceRuntimeProfileEnvelope({
+    profileId: "k01:source-runtime",
+    stateVersion: 3,
+    state: JSON.parse(JSON.stringify(state)),
+  });
+  assertCurrentMappingsUnique(roundTripped.state);
+  assert.deepEqual(roundTripped.state, state);
+});
+
+test("ordinary reuse permits the same semantic mapping with a new source index", () => {
+  const originalRequest = request(102);
+  let state = runtimeState();
+  const original = allocateK01SourceEntityRuntime(state, originalRequest);
+  state = releaseK01SourceEntityRuntime(original.state, original.handle);
+
+  const reused = allocateK01SourceEntityRuntime(state, {
+    ...originalRequest,
+    sourceRecordIndex: originalRequest.sourceRecordIndex + 1,
+  });
+  state = reused.state;
+  assert.equal(state.entityRuntime.entities.filter((entity) => entity.active && entity.semanticUnitId === originalRequest.semanticUnitId).length, 1);
+  assert.equal(state.entityRuntime.entities.filter((entity) => entity.active && entity.sourceRecordIndex === originalRequest.sourceRecordIndex + 1).length, 1);
+  assertCurrentMappingsUnique(state);
+});
+
+test("ordinary reuse permits a new semantic mapping with the same retired source index", () => {
+  const originalRequest = request(103);
+  let state = runtimeState();
+  const original = allocateK01SourceEntityRuntime(state, originalRequest);
+  state = releaseK01SourceEntityRuntime(original.state, original.handle);
+
+  const reused = allocateK01SourceEntityRuntime(state, {
+    ...originalRequest,
+    semanticUnitId: "replacement-semantic",
+  });
+  state = reused.state;
+  assert.equal(state.entityRuntime.entities.filter((entity) => entity.active && entity.semanticUnitId === "replacement-semantic").length, 1);
+  assert.equal(state.entityRuntime.entities.filter((entity) => entity.active && entity.sourceRecordIndex === originalRequest.sourceRecordIndex).length, 1);
+  assertCurrentMappingsUnique(state);
+});
+
+test("active semantic and source mappings still reject explicit duplicates", () => {
+  const originalRequest = request(104);
+  let state = runtimeState();
+  const original = allocateK01SourceEntityRuntime(state, originalRequest);
+  state = original.state;
+  assert.throws(
+    () => allocateK01SourceEntityRuntime(state, { ...originalRequest, sourceRecordIndex: originalRequest.sourceRecordIndex + 1 }),
+    /semantic mapping already exists/,
+  );
+  assert.throws(
+    () => allocateK01SourceEntityRuntime(state, { ...originalRequest, semanticUnitId: "different-active-semantic" }),
+    /source record mapping already exists/,
+  );
+  assert.equal(state.entityRuntime.entities.filter((entity) => entity.active).length, 1);
+  assertCurrentMappingsUnique(state);
 });
 
 test("occupancy stores slot WORD only, validates footprint bounds/collision, and clears safely", () => {
