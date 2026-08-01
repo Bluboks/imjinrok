@@ -103,6 +103,22 @@ test("core:a-star produces the same path for repeated equal-cost route choices",
   }
 });
 
+test("mobile blocked goals keep a terminal route node while zero-distance routes stay empty", () => {
+  for (const profileId of [CORE_A_STAR_PATHFINDER_ID, SOURCE_GREEDY_LOCAL_ADAPTER_PATHFINDER_ID]) {
+    const map = createBlankMap({ width: 8, height: 8 });
+    map.pathfindingProfileId = profileId;
+    const state = createInitialWorldState(map, ["p1", "p2"]);
+    state.units = {};
+    const attacker = createUnitState("p1-attacker", "p1", "swordsman", { x: 2, y: 2 });
+    const target = createUnitState("p2-target", "p2", "villager", { x: 3, y: 2 });
+    state.units[attacker.id] = attacker;
+    state.units[target.id] = target;
+
+    assert.deepEqual(findPathForUnit(state, attacker, target.position), [attacker.position]);
+    assert.deepEqual(findPathForUnit(state, attacker, attacker.position), []);
+  }
+});
+
 test("source-greedy local adapter preserves the recovered candidate order and strict-score local boundary", () => {
   assert.equal(SOURCE_GREEDY_ACCEPTED_NODE_LIMIT, 6_000);
   assert.deepEqual(SOURCE_GREEDY_CANDIDATE_OFFSETS, [

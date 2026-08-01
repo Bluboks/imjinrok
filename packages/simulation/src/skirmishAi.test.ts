@@ -624,16 +624,43 @@ test("skirmish AI limits the number of base defenders it redirects", () => {
 
   state.units = {
     [townCenter.id]: townCenter,
-    [firstFighter.id]: firstFighter,
-    [secondFighter.id]: secondFighter,
     [enemy.id]: enemy,
+    [secondFighter.id]: secondFighter,
+    [firstFighter.id]: firstFighter,
   };
   state.tick = 45;
 
   ai.update(state);
 
   assert.equal(firstFighter.currentOrder?.type, "attack-move");
+  assert.deepEqual(firstFighter.currentOrder?.type === "attack-move" ? firstFighter.currentOrder.target : undefined, enemy.position);
+  assert.ok(firstFighter.movementTarget);
   assert.equal(secondFighter.currentOrder, undefined);
+});
+
+test("skirmish AI leaves fighters idle when a base threat is unreachable", () => {
+  const map = createBlankMap({ width: 30, height: 30 });
+  const state = createInitialWorldState(map, ["p1", "p2"]);
+  const ai = new SkirmishAiController(["p2"]);
+  const townCenter = createUnitState("p2-town-center-test", "p2", "town-center", { x: 5, y: 5 });
+  const fighter = createUnitState("p2-swordsman-test", "p2", "swordsman", { x: 12, y: 5 });
+  const enemy = createUnitState("p1-swordsman-threat", "p1", "swordsman", { x: 8, y: 5 });
+
+  for (let y = 0; y < state.map.height; y += 1) {
+    state.map.layers[0]!.tiles[getTileIndex(state.map.width, 10, y)] = { terrain: "water", elevation: 0 };
+  }
+
+  state.units = {
+    [enemy.id]: enemy,
+    [fighter.id]: fighter,
+    [townCenter.id]: townCenter,
+  };
+  state.tick = 45;
+
+  ai.update(state);
+
+  assert.equal(fighter.currentOrder, undefined);
+  assert.equal(fighter.movementTarget, undefined);
 });
 
 test("skirmish AI can redeploy fighters after a completed base defense order", () => {

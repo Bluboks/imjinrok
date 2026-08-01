@@ -5,7 +5,7 @@ import {
   type MapDefinition,
   type ScenarioDefinition,
 } from "../../shared/src/index.js";
-import { getEntityBlockingTiles } from "./collision.js";
+import { getEntityBlockingTiles, getUnitOccupancyTiles } from "./collision.js";
 import { defaultPathfinderRegistry, requirePathfinder } from "./pathfinderRegistry.js";
 import type { FindPathOptions, Pathfinder } from "./pathfinder.js";
 import { isTilePassableForUnit } from "./terrain.js";
@@ -99,6 +99,12 @@ function findPathWithCoreAStar(
     return null;
   }
 
+  const immediatePath = resolveImmediateBlockedMobileGoalPath(state, unit, start, requestedGoal, goals);
+
+  if (immediatePath) {
+    return immediatePath;
+  }
+
   return findPathToAnyGoal(state, unit, start, goals, blockedTiles, requestedGoal, options);
 }
 
@@ -132,6 +138,12 @@ function findPathWithSourceGreedyLocalAdapter(
 
   if (goals.length === 0) {
     return null;
+  }
+
+  const immediatePath = resolveImmediateBlockedMobileGoalPath(state, unit, start, requestedGoal, goals);
+
+  if (immediatePath) {
+    return immediatePath;
   }
 
   const goalKeys = new Set(goals.map(toTileKey));
@@ -182,6 +194,35 @@ function findPathWithSourceGreedyLocalAdapter(
   }
 
   return options.allowPartial === true && path.length > 0 ? path : null;
+}
+
+/**
+ * Preserve a terminal route state when a unit is already in attack range of a
+ * mobile blocker. A zero-length route is normally the correct result for a
+ * walkable destination, but a blocked mobile target resolves to an adjacent
+ * goal; returning the current tile keeps the caller's strategic order alive
+ * while the target remains occupied.
+ */
+function resolveImmediateBlockedMobileGoalPath(
+  state: WorldState,
+  unit: UnitState,
+  start: GridPoint,
+  requestedGoal: GridPoint,
+  goals: readonly GridPoint[],
+): GridPoint[] | null {
+  if (!goals.some((goal) => toTileKey(goal) === toTileKey(start)) || !hasMobileBlockerAt(state, unit.id, requestedGoal)) {
+    return null;
+  }
+
+  return [start];
+}
+
+function hasMobileBlockerAt(state: WorldState, excludedUnitId: string, point: GridPoint): boolean {
+  return Object.values(state.units).some((candidate) =>
+    candidate.id !== excludedUnitId &&
+    candidate.movementSpeed > 0 &&
+    getUnitOccupancyTiles(candidate).some((tile) => tile.x === point.x && tile.y === point.y),
+  );
 }
 
 /** Product-callback adapter for one bounded source-greedy local search. */
