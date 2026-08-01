@@ -7,13 +7,17 @@ K01 mobile 1×1 entity가 생성 뒤 action 1 update에서 이전 점유를 어�
 
 ## 분석·재현·구현 상태
 
-- 분석 상태: `미확인` (질문의 전체 범위)
-- 재현 상태: `미재현`
-- 구현 상태: `없음`
+- 분석 상태: `부분 범위 superseded` — action 1·movement commit·death/release의 bounded 결과는
+  [K01 occupancy-owner transition](k01-occupancy-owner-transition.md)에서 정적 확정했다.
+- 재현 상태: `후속 문서에서 완료`
+- 구현 상태: `analysis-only-no-production-change`
 
 생성 경로의 `FUN_0043ad30` mobile 1×1 write는 별도
 [K01 증원 슬롯·정확 배치 정책](k01-reinforcement-placement-policy.md)에서 정적 확정·재현 완료다.
 그 사실은 movement destination selection 또는 collision response를 확정하지 않는다.
+
+이 문서의 기존 미확인 결론을 인용하지 말고 후속 문서의 source-bound vector와 unresolved 목록을
+사용한다. scheduler 전체 순서와 generic/non-mobile alias는 여전히 미확정이다.
 
 ## 입력과 근거
 

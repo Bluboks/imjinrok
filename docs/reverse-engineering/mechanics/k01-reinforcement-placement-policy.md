@@ -123,7 +123,9 @@ type writer `0x0045bd00`은 paired footprint argument를 type `+0x14/+0x16`에 �
 사용하고 OOB request를 skip하며, in-bounds request는 terrain/passability, occupancy,
 `findOpenSpawnPoint`를 우회해 exact create한다. 기본 spawn은 기존 clamp+open-point 탐색 정책을 유지한다.
 
-이식 범위는 요청 좌표의 exact creation뿐이다. 프로젝트 `state.units`는 동일 좌표의 unit 공존을 허용하지만,
+이식 범위는 요청 좌표의 exact creation뿐이다. create-return 이후 action 1, movement coordinate commit,
+death/release와 stale owner side-effect의 source-bound 결과는 [K01 occupancy-owner transition](k01-occupancy-owner-transition.md)에서
+별도로 정적 확정·재현했다. 프로젝트 `state.units`는 동일 좌표의 unit 공존을 허용하지만,
 원본의 1,200-slot allocator, signed reuse-age, generation, explicit occupancy-owner grid와 그 grid의
 overwrite 저장 모델을 구현하지 않는다. 이후 movement/pathfinding 및 네 class의 stats·행동도 이 메커니즘으로
 원작 일치라고 주장하지 않는다.
