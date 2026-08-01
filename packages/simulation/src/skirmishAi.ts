@@ -521,7 +521,7 @@ export class SkirmishAiController {
       },
     });
 
-    return result.ok && result.navigationAccepted === true;
+    return result.ok;
   }
 
   private tryBuildBarracks(
@@ -739,7 +739,7 @@ export class SkirmishAiController {
       },
     });
 
-    return result.ok;
+    return result.ok && result.navigationAccepted === true;
   }
 
   private issueAttackWave(

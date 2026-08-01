@@ -158,11 +158,21 @@ function findPathWithCoreAStar(
   const start = toTilePoint(unit.position);
   const requestedGoal = toTilePoint(target);
   const blockedTilesWithoutMobile = getEntityBlockingTiles(state, unit.id, false);
+  const blockedTilesWithMobile = getEntityBlockingTiles(state, unit.id, true);
   const blockedTiles = options.ignoreMobileBlockers === true
     ? blockedTilesWithoutMobile
-    : getEntityBlockingTiles(state, unit.id, true);
-  const mobileBlockedTiles = getMobileBlockedTiles(blockedTiles, blockedTilesWithoutMobile);
-  const requestedBlocker = getRequestedBlockingGroup(state, unit, requestedGoal, options, blockedTiles, blockedTilesWithoutMobile, mobileBlockedTiles);
+    : blockedTilesWithMobile;
+  const mobileBlockedTiles = getMobileBlockedTiles(blockedTilesWithMobile, blockedTilesWithoutMobile);
+  const requestedBlocker = getRequestedBlockingGroup(
+    state,
+    unit,
+    requestedGoal,
+    options,
+    blockedTiles,
+    blockedTilesWithoutMobile,
+    mobileBlockedTiles,
+    blockedTilesWithMobile,
+  );
   const startKey = toTileKey(start);
 
   blockedTiles.delete(startKey);
@@ -195,11 +205,21 @@ function findPathWithSourceGreedyLocalAdapter(
   const start = toTilePoint(unit.position);
   const requestedGoal = toTilePoint(target);
   const blockedTilesWithoutMobile = getEntityBlockingTiles(state, unit.id, false);
+  const blockedTilesWithMobile = getEntityBlockingTiles(state, unit.id, true);
   const blockedTiles = options.ignoreMobileBlockers === true
     ? blockedTilesWithoutMobile
-    : getEntityBlockingTiles(state, unit.id, true);
-  const mobileBlockedTiles = getMobileBlockedTiles(blockedTiles, blockedTilesWithoutMobile);
-  const requestedBlocker = getRequestedBlockingGroup(state, unit, requestedGoal, options, blockedTiles, blockedTilesWithoutMobile, mobileBlockedTiles);
+    : blockedTilesWithMobile;
+  const mobileBlockedTiles = getMobileBlockedTiles(blockedTilesWithMobile, blockedTilesWithoutMobile);
+  const requestedBlocker = getRequestedBlockingGroup(
+    state,
+    unit,
+    requestedGoal,
+    options,
+    blockedTiles,
+    blockedTilesWithoutMobile,
+    mobileBlockedTiles,
+    blockedTilesWithMobile,
+  );
   const startKey = toTileKey(start);
 
   blockedTiles.delete(startKey);
@@ -275,10 +295,15 @@ function getRequestedBlockingGroup(
   blockedTiles?: ReadonlySet<string>,
   blockedTilesWithoutMobile?: ReadonlySet<string>,
   mobileBlockedTiles?: ReadonlySet<string>,
+  blockedTilesWithMobile?: ReadonlySet<string>,
 ): MovementBlockingGroup | null {
-  const effectiveBlockedTiles = blockedTiles ?? getEntityBlockingTiles(state, unit.id, options.ignoreMobileBlockers !== true);
   const effectiveBlockedTilesWithoutMobile = blockedTilesWithoutMobile ?? getEntityBlockingTiles(state, unit.id, false);
-  const effectiveMobileBlockedTiles = mobileBlockedTiles ?? getMobileBlockedTiles(effectiveBlockedTiles, effectiveBlockedTilesWithoutMobile);
+  const aggregateBlockedTiles = blockedTilesWithMobile ?? getEntityBlockingTiles(state, unit.id, true);
+  validateBlockingTileMonotonicity(effectiveBlockedTilesWithoutMobile, aggregateBlockedTiles);
+  const effectiveBlockedTiles = blockedTiles ?? (options.ignoreMobileBlockers === true
+    ? effectiveBlockedTilesWithoutMobile
+    : aggregateBlockedTiles);
+  const effectiveMobileBlockedTiles = mobileBlockedTiles ?? getMobileBlockedTiles(aggregateBlockedTiles, effectiveBlockedTilesWithoutMobile);
   const requestedKey = toTileKey(requestedGoal);
 
   if (!isTilePassableForUnit(state, unit, requestedGoal) || !effectiveBlockedTiles.has(requestedKey)) {
@@ -298,11 +323,78 @@ function getRequestedBlockingGroup(
     throw new Error(`Movement collision policy '${state.movementCollisionProfileId ?? "default"}' returned no blocking group for requested goal '${requestedKey}'.`);
   }
 
-  validateBlockingGroup(state, group, requestedGoal, classification);
+  validateBlockingGroup(
+    state,
+    unit,
+    group,
+    requestedGoal,
+    classification,
+    aggregateBlockedTiles,
+    effectiveBlockedTilesWithoutMobile,
+  );
   return group;
 }
 
+function validateBlockingTileMonotonicity(
+  blockedTilesWithoutMobile: ReadonlySet<string>,
+  blockedTilesWithMobile: ReadonlySet<string>,
+): void {
+  for (const key of blockedTilesWithoutMobile) {
+    if (!blockedTilesWithMobile.has(key)) {
+      throw new Error(`Movement collision policy returned a non-monotonic blocking view: without-mobile tile '${key}' is absent from the with-mobile aggregate.`);
+    }
+  }
+}
+
 function validateBlockingGroup(
+  state: WorldState,
+  unit: UnitState,
+  group: MovementBlockingGroup,
+  requestedGoal: GridPoint,
+  expectedClassification: MovementBlockingGroup["classification"],
+  blockedTilesWithMobile: ReadonlySet<string>,
+  blockedTilesWithoutMobile: ReadonlySet<string>,
+): void {
+  validateBlockingGroupShape(state, group, requestedGoal, expectedClassification);
+  const keys = new Set(group.tiles.map(toTileKey));
+
+  const applicableAggregate = expectedClassification === "static"
+    ? blockedTilesWithoutMobile
+    : blockedTilesWithMobile;
+
+  for (const tile of group.tiles) {
+    const key = toTileKey(tile);
+
+    if (!applicableAggregate.has(key)) {
+      throw new Error(`Movement collision policy returned a ${expectedClassification} blocking-group tile '${key}' absent from its applicable aggregate.`);
+    }
+
+    const tileGroup = getBlockingGroupAtTile(
+      state,
+      unit.id,
+      tile,
+      expectedClassification === "mobile",
+    );
+
+    if (!tileGroup) {
+      throw new Error(`Movement collision policy returned no ${expectedClassification} blocking group for declared tile '${key}'.`);
+    }
+
+    validateBlockingGroupShape(state, tileGroup, tile, expectedClassification);
+    const tileGroupKeys = new Set(tileGroup.tiles.map(toTileKey));
+
+    if (
+      tileGroup.id !== group.id ||
+      tileGroup.classification !== group.classification ||
+      tileGroupKeys.size !== keys.size ||
+      [...keys].some((groupKey) => !tileGroupKeys.has(groupKey))
+    ) {
+      throw new Error(`Movement collision policy returned inconsistent blocker group identity for declared tile '${key}'.`);
+    }
+  }
+}
+
+function validateBlockingGroupShape(
   state: WorldState,
   group: MovementBlockingGroup,
   requestedGoal: GridPoint,

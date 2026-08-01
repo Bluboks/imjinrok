@@ -6,6 +6,7 @@ import { SkirmishAiController } from "./skirmishAi.js";
 import { createUnitState } from "./entities.js";
 import { advanceWorldTick } from "./tick.js";
 import { coreStrictFootprintReservationPolicy, registerMovementCollisionPolicy, type MovementCollisionPolicy } from "./movementCollisionPolicy.js";
+import { CORE_UNCAPPED_CAPACITY_POLICY_ID } from "./capacity.js";
 
 const BUILTIN_RESOURCE_DEFINITIONS = resourceDefinitions as Readonly<Record<string, ResourceDefinition>>;
 
@@ -465,6 +466,43 @@ test("skirmish AI caps military production queue while rallying barracks toward 
   assert.equal(barracks.productionQueue?.filter((item) => item.unit === "swordsman").length, 1);
 });
 
+test("normal and hard AI charge one preferred military unit per update", () => {
+  for (const difficulty of ["normal", "hard"] as const) {
+    const state = createInitialWorldState(createBlankMap({ width: 20, height: 20 }), ["p1", "p2"]);
+    state.capacityPolicyId = CORE_UNCAPPED_CAPACITY_POLICY_ID;
+    const barracks = createUnitState(`p2-one-train-${difficulty}`, "p2", "barracks", { x: 4, y: 4 });
+    state.units = { [barracks.id]: barracks };
+    state.playerResources.p2 = { food: 1000, wood: 1000, gold: 1000, stone: 1000 };
+    const before = { ...state.playerResources.p2 };
+    state.tick = difficulty === "hard" ? 30 : 45;
+
+    new SkirmishAiController(["p2"], { difficulty }).update(state);
+
+    assert.equal(barracks.productionQueue?.length, 1, difficulty);
+    assert.equal(barracks.productionQueue?.[0]?.unit, "swordsman", difficulty);
+    assert.equal(state.playerResources.p2.food, before.food - unitDefinitions.swordsman.cost.food!, difficulty);
+    assert.equal(state.playerResources.p2.gold, before.gold - unitDefinitions.swordsman.cost.gold!, difficulty);
+    assert.equal(state.playerResources.p2.wood, before.wood, difficulty);
+  }
+});
+
+test("AI fallback trains only after the preferred military command actually fails", () => {
+  const state = createInitialWorldState(createBlankMap({ width: 20, height: 20 }), ["p1", "p2"]);
+  state.capacityPolicyId = CORE_UNCAPPED_CAPACITY_POLICY_ID;
+  const barracks = createUnitState("p2-fallback-barracks", "p2", "barracks", { x: 4, y: 4 });
+  state.units = { [barracks.id]: barracks };
+  state.playerResources.p2 = { food: 50, wood: 100, gold: 100, stone: 100 };
+  state.tick = 45;
+
+  new SkirmishAiController(["p2"]).update(state);
+
+  assert.equal(barracks.productionQueue?.length, 1);
+  assert.equal(barracks.productionQueue?.[0]?.unit, "archer");
+  assert.equal(state.playerResources.p2.food, 5);
+  assert.equal(state.playerResources.p2.wood, 65);
+  assert.equal(state.playerResources.p2.gold, 100);
+});
+
 test("skirmish AI sets barracks rally toward a reachable enemy when the nearest enemy is blocked", () => {
   const map = createBlankMap({ width: 24, height: 16 });
   const state = createInitialWorldState(map, ["p1", "p2"]);
@@ -744,7 +782,7 @@ test("skirmish AI limits the number of base defenders it redirects", () => {
   const ai = new SkirmishAiController(["p2"], { tuning: { maxBaseDefenders: 1 } });
   const townCenter = createUnitState("p2-town-center-test", "p2", "town-center", { x: 10, y: 10 });
   const firstFighter = createUnitState("p2-swordsman-1-test", "p2", "swordsman", { x: 12, y: 10 });
-  const secondFighter = createUnitState("p2-swordsman-2-test", "p2", "swordsman", { x: 13, y: 10 });
+  const secondFighter = createUnitState("p2-swordsman-2-test", "p2", "swordsman", { x: 15, y: 10 });
   const enemy = createUnitState("p1-swordsman-threat", "p1", "swordsman", { x: 11, y: 10 });
 
   state.units = {
@@ -759,8 +797,11 @@ test("skirmish AI limits the number of base defenders it redirects", () => {
 
   assert.equal(firstFighter.currentOrder?.type, "attack-move");
   assert.deepEqual(firstFighter.currentOrder?.type === "attack-move" ? firstFighter.currentOrder.target : undefined, enemy.position);
-  assert.ok(firstFighter.movementTarget || firstFighter.navigation?.resolvedGoal);
-  assert.equal(secondFighter.currentOrder, undefined);
+  assert.equal(firstFighter.navigation?.terminalReason, "blocked-goal");
+  assert.equal(firstFighter.movementPath?.length ?? 0, 0);
+  assert.equal(secondFighter.currentOrder?.type, "attack-move");
+  assert.deepEqual(secondFighter.currentOrder?.type === "attack-move" ? secondFighter.currentOrder.target : undefined, enemy.position);
+  assert.ok((secondFighter.movementPath?.length ?? 0) > 0 || secondFighter.navigation?.terminalReason === "mobile-obstruction");
 });
 
 test("skirmish AI leaves fighters idle when a base threat is unreachable", () => {

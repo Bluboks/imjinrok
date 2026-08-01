@@ -313,6 +313,51 @@ test("ordinary move orders clear at the physical endpoint of blocked terrain, re
   }
 });
 
+test("zero-path static terminals complete before blocker removal can repath", () => {
+  registerMovementCollisionPolicy(staticToggleCollisionPolicy, { replace: true });
+  const profiles = [
+    { pathfindingProfileId: "core:a-star", movementCollisionProfileId: undefined },
+    { pathfindingProfileId: "imjinrok:source-greedy-local-adapter", movementCollisionProfileId: undefined },
+    { pathfindingProfileId: "core:a-star", movementCollisionProfileId: STATIC_TOGGLE_COLLISION_POLICY_ID },
+  ] as const;
+
+  for (const profile of profiles) {
+    for (const commandType of ["move", "attack-move"] as const) {
+      const map = createBlankMap({ width: 12, height: 12 });
+      map.pathfindingProfileId = profile.pathfindingProfileId;
+      map.movementCollisionProfileId = profile.movementCollisionProfileId;
+      const state = createInitialWorldState(map, ["p1", "p2"]);
+      state.units = {};
+      const mover = createUnitState(`static-terminal-${commandType}-${profile.pathfindingProfileId}-${profile.movementCollisionProfileId ?? "strict"}`, "p1", "swordsman", { x: 2, y: 2 });
+      mover.movementSpeed = 100;
+      const blocker = createUnitState("static-toggle-blocker", "p2", "house", { x: 3, y: 2 });
+      state.units[mover.id] = mover;
+      state.units[blocker.id] = blocker;
+      const target = { x: 3, y: 2 };
+
+      const result = issueCommand(state, {
+        sessionId: "test-session",
+        playerId: "p1",
+        issuedAtTick: state.tick,
+        command: { type: commandType, unitId: mover.id, target },
+      });
+
+      assert.equal(result.ok, true, `${profile.pathfindingProfileId}:${commandType}`);
+      assert.equal(mover.navigation?.terminalReason, "blocked-goal");
+      assert.equal(mover.movementPath?.length ?? 0, 0);
+      const startingPosition = { ...mover.position };
+      delete state.units[blocker.id];
+      advanceWorldTick(state);
+
+      assert.equal(mover.currentOrder, undefined, `${profile.pathfindingProfileId}:${commandType}`);
+      assert.equal(mover.navigation, undefined, `${profile.pathfindingProfileId}:${commandType}`);
+      assert.equal(mover.movementPath, undefined, `${profile.pathfindingProfileId}:${commandType}`);
+      assert.equal(mover.movementTarget, undefined, `${profile.pathfindingProfileId}:${commandType}`);
+      assert.deepEqual(mover.position, startingPosition, `${profile.pathfindingProfileId}:${commandType}`);
+    }
+  }
+});
+
 test("semantic navigation state survives a snapshot roundtrip and legacy absence", () => {
   const state = createInitialWorldState(createBlankMap({ width: 12, height: 12 }), ["p1"]);
   state.units = {};
@@ -510,6 +555,25 @@ test("completed legacy move orders without movement targets are cleared on tick"
   advanceWorldTick(state);
 
   assert.equal(unit.currentOrder, undefined);
+});
+
+test("legacy move orders without semantic navigation still hydrate a reachable route", () => {
+  const state = createInitialWorldState(createBlankMap({ width: 30, height: 30 }), ["p1", "p2"], {
+    ...defaultSkirmishScenario,
+    id: "legacy-move-order-hydration",
+    objectives: [],
+  });
+  const unit = createUnitState("p1-swordsman-legacy-route", "p1", "swordsman", { x: 5, y: 5 });
+  const distantEnemy = createUnitState("p2-villager-legacy-route", "p2", "villager", { x: 25, y: 25 });
+  unit.currentOrder = { type: "move", target: { x: 7, y: 5 } };
+  state.units = { [unit.id]: unit, [distantEnemy.id]: distantEnemy };
+
+  advanceWorldTick(state);
+
+  assert.equal(unit.currentOrder?.type, "move");
+  assert.ok(unit.movementTarget || unit.movementPath?.length);
+  assert.equal(unit.navigation?.requestedGoal.x, 7);
+  assert.equal(unit.navigation?.requestedGoal.y, 5);
 });
 
 test("building placement rejects occupied footprints and accepts clear grass", () => {
@@ -1012,6 +1076,41 @@ test("patrol reverses at an ordinary blocked-goal physical endpoint", () => {
   assert.ok(patrolUnit.movementTarget || patrolUnit.movementPath?.length);
 });
 
+test("zero-path static patrol reverses before a removed blocker can become its target", () => {
+  registerMovementCollisionPolicy(staticToggleCollisionPolicy, { replace: true });
+  for (const profile of [
+    { pathfindingProfileId: "core:a-star", movementCollisionProfileId: undefined },
+    { pathfindingProfileId: "imjinrok:source-greedy-local-adapter", movementCollisionProfileId: undefined },
+    { pathfindingProfileId: "core:a-star", movementCollisionProfileId: STATIC_TOGGLE_COLLISION_POLICY_ID },
+  ] as const) {
+    const map = createBlankMap({ width: 12, height: 12 });
+    map.pathfindingProfileId = profile.pathfindingProfileId;
+    map.movementCollisionProfileId = profile.movementCollisionProfileId;
+    const state = createInitialWorldState(map, ["p1", "p2"]);
+    state.units = {};
+    const patrolUnit = createUnitState(`p1-zero-patrol-${profile.pathfindingProfileId}-${profile.movementCollisionProfileId ?? "strict"}`, "p1", "swordsman", { x: 2, y: 2 });
+    patrolUnit.movementSpeed = 100;
+    const blocker = createUnitState("static-toggle-blocker", "p2", "house", { x: 3, y: 2 });
+    state.units[patrolUnit.id] = patrolUnit;
+    state.units[blocker.id] = blocker;
+
+    assert.equal(issueCommand(state, {
+      sessionId: "test-session",
+      playerId: "p1",
+      issuedAtTick: state.tick,
+      command: { type: "patrol", unitId: patrolUnit.id, target: { x: 3, y: 2 } },
+    }).ok, true);
+    assert.equal(patrolUnit.navigation?.terminalReason, "blocked-goal");
+    assert.equal(patrolUnit.movementPath?.length ?? 0, 0);
+    delete state.units[blocker.id];
+    advanceWorldTick(state);
+
+    assert.equal(patrolUnit.currentOrder?.type, "patrol");
+    assert.deepEqual(patrolUnit.currentOrder?.type === "patrol" ? patrolUnit.currentOrder.nextTarget : undefined, patrolUnit.currentOrder?.type === "patrol" ? patrolUnit.currentOrder.origin : undefined);
+    assert.notDeepEqual(patrolUnit.position, { x: 3, y: 2 });
+  }
+});
+
 test("production attack-move rally keeps its configured target through a mobile blocker", () => {
   const state = createInitialWorldState(createBlankMap({ width: 20, height: 14 }), ["p1", "p2"]);
   state.capacityPolicyId = CORE_UNCAPPED_CAPACITY_POLICY_ID;
@@ -1137,6 +1236,38 @@ test("production move and attack-move rallies clear at an ordinary blocked-goal 
     assert.equal(trained.navigation, undefined, mode);
     assert.equal(trained.movementTarget, undefined, mode);
     assert.equal(trained.movementPath, undefined, mode);
+  }
+});
+
+test("production static zero-path rallies do not enter a blocker removed before movement", () => {
+  registerMovementCollisionPolicy(staticToggleCollisionPolicy, { replace: true });
+
+  for (const mode of ["move", "attack-move"] as const) {
+    const map = createBlankMap({ width: 12, height: 12 });
+    map.movementCollisionProfileId = STATIC_TOGGLE_COLLISION_POLICY_ID;
+    const state = createInitialWorldState(map, ["p1", "p2"]);
+    state.capacityPolicyId = CORE_UNCAPPED_CAPACITY_POLICY_ID;
+    state.units = {};
+    const barracks = createUnitState(`static-toggle-rally-${mode}`, "p1", "barracks", { x: 1, y: 1 });
+    const blocker = createUnitState("static-toggle-blocker", "p1", "house", { x: 3, y: 1 });
+    barracks.rallyPoint = { target: { x: 3, y: 1 }, mode };
+    barracks.productionQueue = [{ id: `static-toggle-${mode}`, unit: "swordsman", remainingTicks: 1, totalTicks: 1 }];
+    state.units[barracks.id] = barracks;
+    state.units[blocker.id] = blocker;
+
+    advanceWorldTick(state);
+    const trained = Object.values(state.units).find((unit) => unit.kind === "swordsman");
+    assert.ok(trained);
+    trained.movementSpeed = 100;
+    const startingPosition = { ...trained.position };
+    assert.equal(trained.currentOrder, undefined);
+    assert.equal(trained.navigation, undefined);
+    delete state.units[blocker.id];
+    advanceWorldTick(state);
+
+    assert.equal(trained.currentOrder, undefined, mode);
+    assert.equal(trained.navigation, undefined, mode);
+    assert.deepEqual(trained.position, startingPosition, mode);
   }
 });
 
@@ -4201,6 +4332,29 @@ function assertValidStartingPlacements(
 }
 
 const MULTI_TILE_RALLY_POLICY_ID = "test:multi-tile-rally";
+
+const STATIC_TOGGLE_COLLISION_POLICY_ID = "test:static-toggle-terminal";
+
+const staticToggleCollisionPolicy: MovementCollisionPolicy = {
+  ...coreStrictFootprintReservationPolicy,
+  id: STATIC_TOGGLE_COLLISION_POLICY_ID,
+  getEntityBlockingTiles(state, excludedUnitId, includeMobile = true) {
+    const blocker = state.units["static-toggle-blocker"];
+    if (!blocker || blocker.id === excludedUnitId || !includeMobile && blocker.movementSpeed > 0) {
+      return new Set();
+    }
+
+    return new Set([`${blocker.position.x},${blocker.position.y}`]);
+  },
+  getBlockingGroupAtTile(state, excludedUnitId, tile) {
+    const blocker = state.units["static-toggle-blocker"];
+    if (!blocker || blocker.id === excludedUnitId || tile.x !== blocker.position.x || tile.y !== blocker.position.y) {
+      return null;
+    }
+
+    return { id: blocker.id, classification: "static", tiles: [{ ...blocker.position }] };
+  },
+};
 
 const multiTileRallyPolicy: MovementCollisionPolicy = {
   ...coreStrictFootprintReservationPolicy,

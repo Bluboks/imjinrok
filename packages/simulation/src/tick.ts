@@ -445,6 +445,10 @@ function advanceUnitMovement(
 
   if (!target || unit.movementSpeed <= 0) {
     if (!target) {
+      if (completeTerminalTravelOrder(state, unit, true)) {
+        return;
+      }
+
       repathBlockedMovementWaypoint(state, unit);
       completeTerminalTravelOrder(state, unit, false);
     }
@@ -561,34 +565,48 @@ function advanceMovementWaypoint(state: WorldState, unit: UnitState): void {
   completeTerminalTravelOrder(state, unit, true);
 }
 
-function completeTerminalTravelOrder(state: WorldState, unit: UnitState, pathExhausted: boolean): void {
+function completeTerminalTravelOrder(state: WorldState, unit: UnitState, pathExhausted: boolean): boolean {
   const order = unit.currentOrder;
 
   if (
     (order?.type === "move" || order?.type === "attack-move") &&
     unit.navigation?.terminalReason === "mobile-obstruction"
   ) {
-    return;
+    return false;
   }
 
   if (pathExhausted && order?.type === "move" && order.followUpAttackTarget && !unit.movementTarget && !unit.movementPath) {
     applyFollowUpAttackTarget(state, unit, order.followUpAttackTarget);
-    return;
+    return true;
   }
 
   if (
-    (order?.type === "move" || order?.type === "attack-move") &&
-    unit.navigation?.terminalReason === "blocked-goal" &&
-    sameTile(unit.position, unit.navigation.resolvedGoal)
+    !unit.movementTarget &&
+    !(unit.movementPath && unit.movementPath.length > 0) &&
+    unit.navigation?.terminalReason === "blocked-goal"
   ) {
-    clearUnitOrder(unit);
-    return;
+    if (order?.type === "patrol") {
+      order.nextTarget = sameTile(order.nextTarget, order.target) ? { ...order.origin } : { ...order.target };
+      clearNavigationRoute(unit);
+      // Keep the reversed leg visible for the patrol phase. The concrete
+      // current-tile anchor is consumed on the next movement update without
+      // encoding a sentinel in the ordinary waypoint path.
+      unit.movementTarget = { ...unit.position };
+      return true;
+    }
+
+    if (order?.type === "move" || order?.type === "attack-move") {
+      clearUnitOrder(unit);
+      return true;
+    }
   }
 
   if ((order?.type === "move" || order?.type === "attack-move") && isAtOrderTarget(unit, order.target)) {
     clearUnitOrder(unit);
-    return;
+    return true;
   }
+
+  return false;
 }
 
 function applyConditionalTravelFollowUp(state: WorldState, unit: UnitState): boolean {

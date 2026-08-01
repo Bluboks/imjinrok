@@ -11,6 +11,7 @@ import {
   coreStrictFootprintReservationPolicy,
   findNavigationRouteForUnit,
   findPathForUnit,
+  issueCommand,
   registerMovementCollisionPolicy,
   registerPathfinder,
   runSourceGreedyLocalSearch,
@@ -215,6 +216,70 @@ test("custom mobile groups route from farther away to their exact boundary witho
   assert.equal(route.terminalReason, "mobile-obstruction");
   assert.deepEqual(route.resolvedGoal, route.path.at(-1));
   assert.equal(route.path.some((point) => getMultiTileGroup(touching, map.width, map.height).tiles.some((tile) => tile.x === point.x && tile.y === point.y)), false);
+});
+
+test("both pathfinders reject non-monotonic and inconsistent blocker-group views before mutation", () => {
+  const modes = [
+    {
+      name: "non-monotonic aggregate",
+      error: /non-monotonic blocking view/,
+      requested: { x: 4, y: 4 },
+      makePolicy: createConsistencyPolicy("non-monotonic", "non-monotonic"),
+    },
+    {
+      name: "classification mismatch",
+      error: /invalid blocking group/,
+      requested: { x: 4, y: 4 },
+      makePolicy: createConsistencyPolicy("classification-mismatch", "classification-mismatch"),
+    },
+    {
+      name: "group tile absent from aggregate",
+      error: /absent from its applicable aggregate/,
+      requested: { x: 4, y: 4 },
+      makePolicy: createConsistencyPolicy("missing-tile", "missing-tile"),
+    },
+    {
+      name: "touching tile changes group identity",
+      error: /inconsistent blocker group identity/,
+      requested: { x: 4, y: 4 },
+      makePolicy: createConsistencyPolicy("touching-identity", "touching-identity"),
+    },
+  ] as const;
+
+  for (const profile of modes) {
+    registerMovementCollisionPolicy(profile.makePolicy, { replace: true });
+
+    for (const pathfindingProfileId of [CORE_A_STAR_PATHFINDER_ID, SOURCE_GREEDY_LOCAL_ADAPTER_PATHFINDER_ID]) {
+      const map = createBlankMap({ width: 12, height: 12 });
+      map.pathfindingProfileId = pathfindingProfileId;
+      map.movementCollisionProfileId = profile.makePolicy.id;
+      const state = createInitialWorldState(map, ["p1"]);
+      state.units = {};
+      const mover = createUnitState(`mover-${profile.name}-${pathfindingProfileId}`, "p1", "swordsman", { x: 2, y: 4 });
+      state.units[mover.id] = mover;
+
+      assert.throws(
+        () => findNavigationRouteForUnit(state, mover, profile.requested),
+        profile.error,
+        `${profile.name}:${pathfindingProfileId}`,
+      );
+      assert.equal(mover.currentOrder, undefined);
+      assert.equal(mover.navigation, undefined);
+      assert.equal(mover.movementPath, undefined);
+      assert.equal(mover.movementTarget, undefined);
+
+      assert.throws(() => issueCommand(state, {
+        sessionId: "test-session",
+        playerId: "p1",
+        issuedAtTick: state.tick,
+        command: { type: "move", unitId: mover.id, target: profile.requested },
+      }), profile.error);
+      assert.equal(mover.currentOrder, undefined);
+      assert.equal(mover.navigation, undefined);
+      assert.equal(mover.movementPath, undefined);
+      assert.equal(mover.movementTarget, undefined);
+    }
+  }
 });
 
 test("mobile occupancy does not override terrain, resource, or static collision denial", () => {
@@ -462,6 +527,52 @@ function keepOnlyVillager(state: WorldState): void {
 }
 
 const MULTI_TILE_MOBILE_POLICY_ID = "test:multi-tile-mobile";
+
+type ConsistencyPolicyMode = "non-monotonic" | "classification-mismatch" | "missing-tile" | "touching-identity";
+
+function createConsistencyPolicy(name: string, mode: ConsistencyPolicyMode): MovementCollisionPolicy {
+  const requested = { x: 4, y: 4 };
+  const touching = { x: 5, y: 4 };
+  const requestedKey = toTileKey(requested);
+  const touchingKey = toTileKey(touching);
+
+  return {
+    ...coreStrictFootprintReservationPolicy,
+    id: `test:group-consistency-${name}`,
+    getEntityBlockingTiles(_state, _excludedUnitId, includeMobile = true) {
+      if (mode === "non-monotonic") {
+        return includeMobile ? new Set() : new Set([requestedKey]);
+      }
+
+      if (mode === "missing-tile") {
+        return new Set([requestedKey]);
+      }
+
+      return new Set([requestedKey, touchingKey]);
+    },
+    getBlockingGroupAtTile(_state, _excludedUnitId, tile) {
+      const key = toTileKey(tile);
+
+      if (mode === "classification-mismatch") {
+        return { id: "mismatch", classification: "mobile", tiles: [{ ...requested }] };
+      }
+
+      if (mode === "missing-tile") {
+        return { id: "missing", classification: "static", tiles: [{ ...requested }, { x: 5, y: 5 }] };
+      }
+
+      if (mode === "touching-identity" && key === touchingKey) {
+        return { id: "other-group", classification: "static", tiles: [{ ...touching }] };
+      }
+
+      return {
+        id: mode === "touching-identity" ? "requested-group" : mode,
+        classification: "static",
+        tiles: mode === "touching-identity" ? [{ ...requested }, { ...touching }] : [{ ...requested }],
+      };
+    },
+  };
+}
 
 const multiTileMobilePolicy: MovementCollisionPolicy = {
   ...coreStrictFootprintReservationPolicy,

@@ -93,28 +93,34 @@ export const coreStrictFootprintReservationPolicy: MovementCollisionPolicy = {
   },
   getBlockingGroupAtTile(state, excludedUnitId, tile, includeMobile = true) {
     const requestedKey = toTileKey(tile);
+    const candidates = [...iterateUnitsOrdered(state)].filter((unit) =>
+      unit.id !== excludedUnitId &&
+      unitDefinitions[unit.kind].footprint.blocksMovement &&
+      (includeMobile || unit.movementSpeed <= 0),
+    );
+    const seed = candidates.find((unit) => getUnitOccupancyTiles(unit).some((occupancyTile) => toTileKey(occupancyTile) === requestedKey));
 
-    for (const unit of iterateUnitsOrdered(state)) {
-      if (
-        unit.id === excludedUnitId ||
-        !unitDefinitions[unit.kind].footprint.blocksMovement ||
-        (!includeMobile && unit.movementSpeed > 0)
-      ) {
-        continue;
-      }
-
-      const tiles = getUnitOccupancyTiles(unit);
-
-      if (tiles.some((occupancyTile) => toTileKey(occupancyTile) === requestedKey)) {
-        return {
-          id: unit.id,
-          classification: unit.movementSpeed > 0 ? "mobile" : "static",
-          tiles,
-        };
-      }
+    if (!seed) {
+      return null;
     }
 
-    return null;
+    const classification = seed.movementSpeed > 0 ? "mobile" : "static";
+    const group = candidates.filter((candidate) =>
+      (candidate.movementSpeed > 0) === (classification === "mobile") &&
+      areOccupancyGroupsConnected(candidate, seed, candidates),
+    );
+    const tiles = [...new Map(
+      group.flatMap((candidate) => getUnitOccupancyTiles(candidate).map((occupancyTile) => [
+        toTileKey(occupancyTile),
+        occupancyTile,
+      ] as const)),
+    ).values()];
+
+    return {
+      id: group[0]?.id ?? seed.id,
+      classification,
+      tiles,
+    };
   },
   canUnitOccupyPosition(state, unit, position) {
     const footprint = unitDefinitions[unit.kind].footprint;
@@ -207,6 +213,48 @@ function getOccupyingUnitIdsByTile(
   }
 
   return occupants;
+}
+
+function areOccupancyGroupsConnected(
+  candidate: UnitState,
+  seed: UnitState,
+  candidates: readonly UnitState[],
+): boolean {
+  // Overlapping same-class blockers form one policy-owned canonical group so
+  // every declared footprint tile resolves to one stable identity. Adjacent
+  // but non-overlapping blockers remain independent groups.
+  const classification = seed.movementSpeed > 0;
+  const connectedIds = new Set<string>([seed.id]);
+  const connectedUnits: UnitState[] = [seed];
+
+  for (let index = 0; index < connectedUnits.length; index += 1) {
+    const connected = connectedUnits[index];
+    if (!connected) {
+      continue;
+    }
+
+    const connectedTiles = getUnitOccupancyTiles(connected);
+
+    for (const next of candidates) {
+      if (
+        connectedIds.has(next.id) ||
+        (next.movementSpeed > 0) !== classification ||
+        !occupancyTilesOverlap(connectedTiles, getUnitOccupancyTiles(next))
+      ) {
+        continue;
+      }
+
+      connectedIds.add(next.id);
+      connectedUnits.push(next);
+    }
+  }
+
+  return connectedIds.has(candidate.id);
+}
+
+function occupancyTilesOverlap(left: readonly GridPoint[], right: readonly GridPoint[]): boolean {
+  const rightKeys = new Set(right.map(toTileKey));
+  return left.some((tile) => rightKeys.has(toTileKey(tile)));
 }
 
 function requireStrictFootprintReservation(reservation: MovementReservation): StrictFootprintReservation {

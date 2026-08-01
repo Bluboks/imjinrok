@@ -48,12 +48,20 @@ const SIMULATION_CHEAT_CODES = new Set<CheatCodeId>([
 
 export type CommandValidationResult = { ok: true } | { ok: false; reason: string };
 
+type NavigationCommand = Extract<CommandEnvelope["command"], { type: "move" | "attack-move" }>;
+type NavigationCommandEnvelope = Omit<CommandEnvelope, "command"> & { command: NavigationCommand };
+
 export type IssueCommandResult =
   | {
       ok: true;
-      envelope: CommandEnvelope;
+      envelope: NavigationCommandEnvelope;
       /** Move/attack-move dispatch admitted a physical route or a mobile wait. */
-      navigationAccepted?: boolean;
+      navigationAccepted: boolean;
+    }
+  | {
+      ok: true;
+      envelope: CommandEnvelope;
+      navigationAccepted?: never;
     }
   | { ok: false; reason: string };
 
@@ -472,12 +480,16 @@ export function issueCommand(state: WorldState, envelope: CommandEnvelope): Issu
   }
 
   applyCommand(state, envelope);
-  if (envelope.command.type === "move" || envelope.command.type === "attack-move") {
+  if (isNavigationCommandEnvelope(envelope)) {
     const unit = state.units[envelope.command.unitId];
     return { ok: true, envelope, navigationAccepted: unit ? hasAcceptedStrategicNavigation(unit) : false };
   }
 
   return { ok: true, envelope };
+}
+
+function isNavigationCommandEnvelope(envelope: CommandEnvelope): envelope is NavigationCommandEnvelope {
+  return envelope.command.type === "move" || envelope.command.type === "attack-move";
 }
 
 function hasAcceptedStrategicNavigation(unit: UnitState): boolean {
