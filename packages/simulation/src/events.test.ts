@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   createBlankMap,
+  createImjinrokMapScaffold,
   imjinrokK01Scenario,
   type WorldState,
 } from "../../shared/src/index.js";
@@ -170,7 +171,10 @@ test("snapshot normalization migrates only absent legacy fields and rejects pres
 
 test("generic and K01-profile worlds emit the same semantic payload", () => {
   const generic = createConstructionState("p1-generic", 1);
-  const k01 = createInitialWorldState(createBlankMap({ id: imjinrokK01Scenario.mapId, width: 16, height: 16 }), ["p1"], imjinrokK01Scenario);
+  const k01Map = createImjinrokMapScaffold(imjinrokK01Scenario.mapId);
+  assert.ok(k01Map);
+  const k01 = createInitialWorldState(k01Map, ["local-player", "cpu-1"], imjinrokK01Scenario);
+  assert.equal(k01.sourceRuntimeProfile?.profileId, "k01:source-runtime");
   const building = createUnitState("p1-k01", "p1", "beacon", { x: 5, y: 5 });
   const worker = createUnitState("p1-worker", "p1", "villager", { x: 4, y: 5 });
   building.construction = { remainingTicks: 1, totalTicks: 1 };
