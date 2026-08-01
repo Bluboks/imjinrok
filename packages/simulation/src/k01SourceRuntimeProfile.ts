@@ -1,5 +1,6 @@
 import {
   admitCompletedK01Construction,
+  admitK01NativeSourceEntity,
   admitK01SourceEntity,
   allocateK01SourceEntity,
   clearSourceOccupancy,
@@ -22,6 +23,9 @@ import {
   type K01CompletedConstructionAdmissionRequest,
   type K01SourceEntityAdmissionRequest,
   type K01SourceEntityAdmissionResult,
+  type K01NativeSourceEntityAdmissionRequest,
+  type K01NativeSourceEntityAdmissionResult,
+  type K01NativeSourceEntityAdmissionOutcome,
   type K01SourceEntityHandle,
   type K01SourceEntityRecord,
   type K01SourceEntityRuntimeState,
@@ -73,6 +77,9 @@ export type {
   K01CompletedConstructionAdmissionRequest,
   K01SourceEntityAdmissionRequest,
   K01SourceEntityAdmissionResult,
+  K01NativeSourceEntityAdmissionRequest,
+  K01NativeSourceEntityAdmissionResult,
+  K01NativeSourceEntityAdmissionOutcome,
   K01SourceEntityHandle,
   K01SourceEntityRecord,
   K01SourceEntityRuntimeState,
@@ -200,6 +207,13 @@ export function allocateK01SourceEntityRuntime(
   request: K01SourceEntityAdmissionRequest,
 ): K01SourceEntityAdmissionResult {
   return allocateK01SourceEntity(state, request);
+}
+
+export function admitK01NativeSourceEntityRuntime(
+  state: K01SourceRuntimeState,
+  request: K01NativeSourceEntityAdmissionRequest,
+): K01NativeSourceEntityAdmissionResult {
+  return admitK01NativeSourceEntity(state, request);
 }
 
 export function admitCompletedK01ConstructionRuntime(

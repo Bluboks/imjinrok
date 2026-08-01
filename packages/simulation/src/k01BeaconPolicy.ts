@@ -2,12 +2,10 @@ import {
   k01ReinforcementAdapter,
   k01ReinforcementOwnerAdapter,
   unitDefinitions,
-  type GridPoint,
 } from "../../shared/src/index.js";
 import {
   admitCompletedK01ConstructionRuntime,
-  allocateK01SourceEntityRuntime,
-  writeK01SourceOccupancy,
+  admitK01NativeSourceEntityRuntime,
   validateK01SourceRuntimeState,
   type K01SourceRuntimeState,
 } from "./k01SourceRuntimeProfile.js";
@@ -235,7 +233,8 @@ function createNativeReinforcements(world: WorldState, run: MutablePolicyRun, ma
 
     const sourceRecordIndex = K01_BEACON_NATIVE_SOURCE_INDEX_BASE + (matchOrdinal - 1) * k01ReinforcementAdapter.length + descriptorIndex;
     try {
-      const allocated = allocateK01SourceEntityRuntime(run.source, {
+      const unit = createUnitState(semanticUnitId, k01ReinforcementOwnerAdapter.projectPlayerId, descriptor.projectKind, position);
+      const admitted = admitK01NativeSourceEntityRuntime(run.source, {
         semanticUnitId,
         sourceRecordIndex,
         originalClass: descriptor.originalClass,
@@ -244,16 +243,21 @@ function createNativeReinforcements(world: WorldState, run: MutablePolicyRun, ma
         health: clampSourceHealth(unitDefinitions[descriptor.projectKind].baseAttributes.health),
         position,
         footprint: { width: 1, height: 1, evidence: "static-confirmed" },
+        mapWidth: world.map.width,
+        mapHeight: world.map.height,
       });
-      run.source = allocated.state;
-      if (!isPointInsideMap(world.map.width, world.map.height, position)) {
-        appendTrace(run, world.tick, { type: "reinforcement-failure", descriptorIndex, semanticUnitId, slot: allocated.handle.slot, generation: allocated.handle.generation, reason: "out-of-bounds" });
+      run.source = admitted.state;
+      if (admitted.outcome === "slot-exhausted") {
+        appendTrace(run, world.tick, { type: "reinforcement-failure", descriptorIndex, semanticUnitId, reason: "slot-exhaustion" });
+        return;
+      }
+      if (admitted.outcome === "out-of-bounds") {
+        appendTrace(run, world.tick, { type: "reinforcement-failure", descriptorIndex, semanticUnitId, slot: admitted.slot, reason: "out-of-bounds" });
         continue;
       }
-      run.source = writeK01SourceOccupancy(run.source, allocated.handle);
-      world.units[semanticUnitId] = createUnitState(semanticUnitId, k01ReinforcementOwnerAdapter.projectPlayerId, descriptor.projectKind, position);
+      world.units[semanticUnitId] = unit;
       run.nativeSuccessCount += 1;
-      appendTrace(run, world.tick, { type: "reinforcement-success", descriptorIndex, semanticUnitId, slot: allocated.handle.slot, generation: allocated.handle.generation });
+      appendTrace(run, world.tick, { type: "reinforcement-success", descriptorIndex, semanticUnitId, slot: admitted.slot, generation: admitted.handle.generation });
     } catch (error) {
       appendTrace(run, world.tick, { type: "reinforcement-failure", descriptorIndex, semanticUnitId, reason: error instanceof Error ? error.message : String(error) });
     }
@@ -294,10 +298,6 @@ function rejectionReason(source: K01SourceRuntimeState, record: K01SourceRuntime
 
 function clampSourceHealth(value: number): number {
   return Math.max(-0x8000, Math.min(0x7fff, Math.trunc(value)));
-}
-
-function isPointInsideMap(width: number, height: number, point: GridPoint): boolean {
-  return point.x >= 0 && point.x < width && point.y >= 0 && point.y < height;
 }
 
 function validatePolicyOptions(options: K01BeaconPolicyAdvanceOptions): void {

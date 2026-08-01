@@ -37,11 +37,15 @@ K01 opening semantic IDs와 source order는 `packages/shared/src/scenarios.ts`�
 ## v3 profile schema와 실패 경계
 
 `entityRuntime`은 generation counter, 1,200-entry active table, active-list order, 1,200-entry
-signed reuse-age table, slot-sorted records를 단일 SSOT로 보존한다. 각 record는 static evidence가
+signed reuse-age table, slot-sorted records를 단일 SSOT로 보존한다. 각 slot에는 현재 record가
+최대 하나만 존재하며, release 뒤 retired record를 재사용할 때는 새 generation과 semantic/source
+mapping으로 같은 배열 entry를 교체한다. 각 record는 static evidence가
 닫은 signed coordinate, owner/relation raw signed byte, class byte, progress byte, signed health,
 semantic ID, source-adapter order index, slot/generation handle 및 footprint evidence를 가진다.
 `occupancy.ownerSlots`는 map 크기와 일치하는 WORD cell 배열이다. malformed/missing/duplicate/OOB,
-slot 0, stale generation, collision, full capacity는 설명적 예외로 실패한다.
+slot 0, stale generation, collision, full capacity는 설명적 예외로 실패한다. 일반 admission은
+collision-strict를 유지하고, 정적 원본 계약이 닫힌 K0120 native 1×1 admission만 reservation의
+reuse-age 결과를 보존한 채 OOB를 건너뛰며, 성공 시 기존 owner cell을 후행 descriptor가 덮어쓴다.
 
 A01 v1은 class/owner/coordinate/semantic mapping이 없으므로 빈 `entities`만 v3로 명시적으로
 이동한다. A02 v2는 general `entityRuntime`/`occupancy`를 보존하고 빈 beacon policy namespace를
@@ -68,8 +72,10 @@ exactly-once 소비하고, class 52 beacon은 `admitCompletedK01ConstructionRunt
 scan을 건너뛴다.
 
 정적 확정된 K0120 descriptor 9개는 `k01ReinforcementAdapter`의 class/owner/offset 순서를 그대로
-사용한다. allocator·generation·occupancy write는 A02 API를 호출하며, OOB·slot exhaustion·collision·
-semantic mapping 실패는 policy trace에 남고 semantic unit은 만들지 않는다. script busy, loader
+사용한다. 일반 allocator의 strict admission과 별도로 `admitK01NativeSourceEntityRuntime`은
+selection/reuse-age와 in-bounds activation/generation/mapping/table/list를 분리한다. OOB는
+reuse-age만 남기고, slot 0은 즉시 descriptor loop를 중단하며, native 1×1 occupancy는 후행 owner로
+overwrite한다. 각 failure는 policy trace에 남고 semantic unit은 만들지 않는다. script busy, loader
 `0/1`, void start와 native descriptor effects는 서로 독립된 trace boundary다. loader 결과는
 diagnostic outcome이지 trigger authority가 아니다. dialogue, objective, mission result와 source raw
 global writes는 이 구현 범위에 없다.

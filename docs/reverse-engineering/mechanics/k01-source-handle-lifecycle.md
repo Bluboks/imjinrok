@@ -11,7 +11,7 @@
 | --- | --- | --- |
 | 분석 | 정적 확정(범위 한정) | 원본 1,200-slot source pool의 allocator, generation write, active-list release, 확인된 reader predicate와 K01/native/projectile 소비자 |
 | 재현 | 재현 완료 | allocator age/tie/wrap, generation wrap, validity gates, swap-last release, same-slot stale/new handle, native failure/OOB/terminator, death retain/release |
-| 프로젝트 이식 | 없음(분석 전용) | production package/app에는 변경하지 않음. 전체 entity mega-struct, 모든 runtime writer와 identity policy는 닫지 않음 |
+| 프로젝트 이식 | 부분 이식 | production source runtime이 slot/generation/active-list/reuse-age와 stale-handle 경계를 보존한다. 전체 entity mega-struct, 모든 runtime writer와 identity policy는 닫지 않음 |
 
 이 문서는 [`k01-hero-death-lifecycle.md`](k01-hero-death-lifecycle.md)의 health→death→release 결과와
 [`k01-reinforcement-placement-policy.md`](k01-reinforcement-placement-policy.md)의 descriptor 정책을
@@ -89,8 +89,9 @@ and (entity +0x1b6, entity +0x1b8) == supplied(slot, generation)
 
 release는 health, `+0x1f0`, `+0x1b6/+0x1b8`을 eager-clear하지 않는다. 그러므로 health가 0이 된
 retained record 또는 release 후 record에 남은 old full reference는 table/health/generation reader에서
-실패한다. release 뒤 allocator가 같은 slot을 고르고 generation을 다시 증가시키면 old handle은
-generation mismatch로 실패하고 새 handle만 통과한다.
+실패한다. production source runtime은 release된 slot의 retired record를 새 admission 때 같은
+slot entry로 교체하며 generation을 다시 증가시킨다. old handle은 generation mismatch로 실패하고
+새 handle만 통과하며, slot당 record·semantic/source mapping은 하나로 유지된다.
 
 ## death, native create, projectile consumer
 

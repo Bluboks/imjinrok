@@ -129,11 +129,12 @@ class 49 `(5,4) → x=4..6,y=3..5`의 3×3, class 7 `(7,6) → (7,6)`의 1×1 co
 사용하고 OOB request를 skip하며, in-bounds request는 terrain/passability, occupancy,
 `findOpenSpawnPoint`를 우회해 exact create한다. 기본 spawn은 기존 clamp+open-point 탐색 정책을 유지한다.
 
-이식 범위는 요청 좌표의 exact creation뿐이다. create-return 이후 action 1, movement coordinate commit,
-death/release와 stale owner side-effect의 source-bound 결과는 [K01 occupancy-owner transition](k01-occupancy-owner-transition.md)에서
-별도로 정적 확정·재현했다. 프로젝트 `state.units`는 동일 좌표의 unit 공존을 허용하지만,
-원본의 1,200-slot allocator, signed reuse-age, generation, explicit occupancy-owner grid와 그 grid의
-overwrite 저장 모델을 구현하지 않는다. 이후 movement/pathfinding 및 네 class의 stats·행동도 이 메커니즘으로
+T01 K0120 policy는 `admitK01NativeSourceEntityRuntime`의 명시적 native adapter를 통해 요청 좌표의
+exact creation과 source 1,200-slot allocator를 연결한다. selection/reuse-age는 bounds보다 먼저
+실행되고, OOB에서는 그 age effect만 남긴다. in-bounds native 1×1은 일반 collision-strict
+`writeSourceOccupancy`가 아니라 source-confirmed overwrite writer를 사용하므로 같은 cell의 두
+match는 둘 다 active record/world unit을 보존하고 후행 slot이 owner cell을 갖는다. slot 0은 남은
+descriptor를 즉시 중단한다. 이후 movement/pathfinding 및 네 class의 stats·행동은 이 메커니즘으로
 원작 일치라고 주장하지 않는다.
 
 현재 project `town-center` definition의 `4×4 blocksMovement` footprint는 UI/gameplay collision을 위한

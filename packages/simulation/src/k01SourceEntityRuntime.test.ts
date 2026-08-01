@@ -8,6 +8,7 @@ import {
   admitK01SourceEntityRuntime,
   allocateK01SourceEntityRuntime,
   clearK01SourceOccupancy,
+  cloneSourceRuntimeProfileEnvelope,
   createK01SourceRuntimeState,
   getK01SourceEntityHandleBySemanticUnitIdRuntime,
   releaseK01SourceEntityRuntime,
@@ -89,6 +90,59 @@ test("allocator rejects slot 0/full capacity and preserves signed reuse-age orde
   };
   const wrappedAge = allocateK01SourceEntityRuntime(ageWrap, request(2));
   assert.equal(wrappedAge.state.entityRuntime.reuseAges[K01_SOURCE_ENTITY_SLOT_MAX], -0x8000);
+});
+
+test("released source slots replace retired records on reuse and survive save/load", () => {
+  let state: K01SourceRuntimeState = {
+    ...runtimeState(),
+    entityRuntime: {
+      ...runtimeState().entityRuntime,
+      generationCounter: K01_SOURCE_GENERATION_MAX,
+    },
+  };
+  const initialHandles = [];
+  for (let index = 0; index < K01_SOURCE_ENTITY_SLOT_MAX; index += 1) {
+    const allocated = allocateK01SourceEntityRuntime(state, request(index));
+    initialHandles.push(allocated.handle);
+    state = allocated.state;
+  }
+  const retired = initialHandles[0]!;
+  assert.equal(retired.slot, K01_SOURCE_ENTITY_SLOT_MAX);
+  assert.equal(retired.generation, 0, "generation WORD wraps on first allocation");
+  state = releaseK01SourceEntityRuntime(state, retired);
+  assert.equal(state.entityRuntime.entities.length, K01_SOURCE_ENTITY_SLOT_MAX);
+
+  const reused = allocateK01SourceEntityRuntime(state, {
+    ...request(0xbeef, { x: 4, y: 4 }),
+    semanticUnitId: "reused-source",
+    sourceRecordIndex: 0xbeef,
+  });
+  state = reused.state;
+  assert.equal(reused.handle.slot, retired.slot);
+  assert.notEqual(reused.handle.generation, retired.generation);
+  assert.equal(state.entityRuntime.entities.length, K01_SOURCE_ENTITY_SLOT_MAX, "reuse replaces, never appends");
+  assert.equal(state.entityRuntime.entities.filter((entity) => entity.slot === retired.slot).length, 1);
+  assert.equal(getK01SourceEntityHandleBySemanticUnitIdRuntime(state, "unit-0"), undefined);
+  assert.deepEqual(getK01SourceEntityHandleBySemanticUnitIdRuntime(state, "reused-source"), reused.handle);
+  assert.throws(() => validateK01SourceEntityHandleRuntime(state, retired), /stale or inactive/);
+  assert.equal(validateK01SourceEntityHandleRuntime(state, reused.handle).semanticUnitId, "reused-source");
+
+  const occupied = writeK01SourceOccupancy(state, reused.handle);
+  assert.equal(occupied.occupancy.ownerSlots[4 * 8 + 4], reused.handle.slot);
+  const cleared = clearK01SourceOccupancy(occupied, reused.handle);
+  assert.equal(cleared.occupancy.ownerSlots[4 * 8 + 4], 0);
+
+  const roundTripped = cloneSourceRuntimeProfileEnvelope({
+    profileId: "k01:source-runtime",
+    stateVersion: 3,
+    state: JSON.parse(JSON.stringify(cleared)),
+  });
+  assert.equal(roundTripped.state.entityRuntime.entities.length, K01_SOURCE_ENTITY_SLOT_MAX);
+  assert.equal(roundTripped.state.entityRuntime.entities.filter((entity) => entity.slot === retired.slot).length, 1);
+  assert.deepEqual(
+    roundTripped.state.entityRuntime.entities.find((entity) => entity.slot === retired.slot)?.semanticUnitId,
+    "reused-source",
+  );
 });
 
 test("occupancy stores slot WORD only, validates footprint bounds/collision, and clears safely", () => {

@@ -132,6 +132,39 @@ export interface K01SourceEntityAdmissionResult {
   readonly handle: K01SourceEntityHandle;
 }
 
+/**
+ * Native K0120 creation has a narrower commit contract than the general
+ * source admission path: slot selection/reuse-age mutation happens first,
+ * bounds are checked next, and only an in-bounds descriptor activates a
+ * record and writes its 1×1 owner cell (with source-confirmed overwrite).
+ */
+export interface K01NativeSourceEntityAdmissionRequest extends K01SourceEntityAdmissionRequest {
+  readonly mapWidth: number;
+  readonly mapHeight: number;
+}
+
+export type K01NativeSourceEntityAdmissionOutcome = "success" | "out-of-bounds" | "slot-exhausted";
+
+export type K01NativeSourceEntityAdmissionResult =
+  | {
+      readonly state: K01SourceRuntimeStateV2;
+      readonly outcome: "success";
+      readonly slot: number;
+      readonly handle: K01SourceEntityHandle;
+    }
+  | {
+      readonly state: K01SourceRuntimeStateV2;
+      readonly outcome: "out-of-bounds";
+      /** Selected slot is retained for deterministic OOB diagnostics. */
+      readonly slot: number;
+    }
+  | {
+      readonly state: K01SourceRuntimeStateV2;
+      readonly outcome: "slot-exhausted";
+      /** Zero is the source allocator failure sentinel. */
+      readonly slot: 0;
+    };
+
 export interface K01SourceOpeningSeedUnit {
   readonly id: string;
   readonly kind: UnitDefinitionId;
@@ -228,54 +261,42 @@ export function allocateK01SourceEntity(
   validateAdmissionRequest(request);
   assertUniqueAdmissionKeys(state, request);
 
-  const runtime = cloneRuntime(state.entityRuntime);
-  let bestSlot = 0;
-  let bestAge = 0;
-
-  for (let slot = K01_SOURCE_ENTITY_SLOT_MIN; slot <= K01_SOURCE_ENTITY_SLOT_MAX; slot += 1) {
-    if (runtime.activeTable[slot] !== 0) {
-      continue;
-    }
-
-    const age = runtime.reuseAges[slot]!;
-    if (age >= bestAge) {
-      bestSlot = slot;
-      bestAge = age;
-    }
-    runtime.reuseAges[slot] = wrapSignedWord(age + 1);
-  }
-
-  if (bestSlot === 0) {
+  const reservation = reserveSourceEntitySlot(state);
+  if (reservation.slot === 0) {
     throw new Error("K01 source entity allocation failed: no inactive slot with a non-negative reuse age (slot 0 is failure).");
   }
 
-  const generation = wrapUnsignedWord(runtime.generationCounter + 1);
-  runtime.generationCounter = generation;
-  runtime.activeTable[bestSlot] = 1;
-  runtime.activeList.push(bestSlot);
-  runtime.entities.push({
-    slot: bestSlot,
-    generation,
-    semanticUnitId: request.semanticUnitId,
-    sourceRecordIndex: request.sourceRecordIndex,
-    originalClass: request.originalClass,
-    ownerRelation: request.ownerRelation,
-    progress: request.progress,
-    active: true,
-    health: request.health,
-    position: { ...request.position },
-    footprint: { ...request.footprint },
-  });
-  runtime.entities.sort((left, right) => left.slot - right.slot);
+  return activateReservedSourceEntity(reservation.state, reservation.slot, request);
+}
 
-  const next = cloneK01SourceRuntimeStateV2({
-    acceptedUpdateCount: state.acceptedUpdateCount,
-    entityRuntime: runtime,
-    occupancy: state.occupancy,
-    policies: state.policies,
-  });
+/**
+ * Native K0120 admission is intentionally one atomic public transition. The
+ * intermediate reservation is retained internally so OOB creation exposes
+ * only reuse-age mutation; no generation, active table/list, or mapping is
+ * committed until bounds pass. Native 1×1 occupancy overwrites the prior
+ * owner, while general `writeSourceOccupancy` remains collision-strict.
+ */
+export function admitK01NativeSourceEntity(
+  state: K01SourceRuntimeStateV2,
+  request: K01NativeSourceEntityAdmissionRequest,
+): K01NativeSourceEntityAdmissionResult {
+  validateK01SourceRuntimeStateV2(state);
+  validateNativeAdmissionRequest(request);
+  assertUniqueAdmissionKeys(state, request);
+  assertNativeOccupancyShape(state.occupancy, request.mapWidth, request.mapHeight);
 
-  return { state: next, handle: { slot: bestSlot, generation } };
+  const reservation = reserveSourceEntitySlot(state);
+  if (reservation.slot === 0) {
+    return { state: reservation.state, outcome: "slot-exhausted", slot: 0 };
+  }
+
+  if (!isPointInsideMap(request.mapWidth, request.mapHeight, request.position)) {
+    return { state: reservation.state, outcome: "out-of-bounds", slot: reservation.slot };
+  }
+
+  const activated = activateReservedSourceEntity(reservation.state, reservation.slot, request);
+  const occupied = writeNativeSourceOccupancy(activated.state, activated.handle);
+  return { state: occupied, outcome: "success", slot: reservation.slot, handle: activated.handle };
 }
 
 /** Allocate and atomically write the owner cells after all collision/bounds checks pass. */
@@ -367,6 +388,29 @@ export function writeSourceOccupancy(
     occupancy.ownerSlots[occupancyIndex(occupancy.width, tile)] = record.slot;
   }
 
+  return cloneK01SourceRuntimeStateV2({
+    acceptedUpdateCount: state.acceptedUpdateCount,
+    entityRuntime: state.entityRuntime,
+    occupancy,
+    policies: state.policies,
+  });
+}
+
+/** Native action-1 owner write: exact 1×1 source cell overwrite, no collision reject. */
+function writeNativeSourceOccupancy(
+  state: K01SourceRuntimeStateV2,
+  handle: K01SourceEntityHandle,
+): K01SourceRuntimeStateV2 {
+  const record = validateK01SourceEntityHandle(state, handle);
+  if (record.footprint.width !== 1 || record.footprint.height !== 1) {
+    throw new Error(`K01 native source occupancy requires a 1×1 footprint for '${record.semanticUnitId}'.`);
+  }
+  const occupancy = cloneOccupancy(state.occupancy);
+  const tiles = footprintTiles(record.position, record.footprint);
+  assertTilesInBounds(occupancy, tiles, record.semanticUnitId);
+  for (const tile of tiles) {
+    occupancy.ownerSlots[occupancyIndex(occupancy.width, tile)] = record.slot;
+  }
   return cloneK01SourceRuntimeStateV2({
     acceptedUpdateCount: state.acceptedUpdateCount,
     entityRuntime: state.entityRuntime,
@@ -515,13 +559,120 @@ function validateAdmissionRequest(request: K01SourceEntityAdmissionRequest): voi
   validateFootprint(request.footprint);
 }
 
+function validateNativeAdmissionRequest(request: K01NativeSourceEntityAdmissionRequest): void {
+  validateAdmissionRequest(request);
+  assertMapDimensions(request.mapWidth, request.mapHeight);
+  if (request.footprint.width !== 1 || request.footprint.height !== 1) {
+    throw new Error("K01 native source admission requires a 1×1 footprint.");
+  }
+}
+
+function assertNativeOccupancyShape(
+  occupancy: K01SourceOccupancyState,
+  mapWidth: number,
+  mapHeight: number,
+): void {
+  if (occupancy.width !== mapWidth || occupancy.height !== mapHeight) {
+    throw new Error(
+      `K01 native source occupancy dimensions ${occupancy.width}×${occupancy.height} do not match map ${mapWidth}×${mapHeight}.`,
+    );
+  }
+}
+
 function assertUniqueAdmissionKeys(state: K01SourceRuntimeStateV2, request: K01SourceEntityAdmissionRequest): void {
-  if (state.entityRuntime.entities.some((entity) => entity.semanticUnitId === request.semanticUnitId)) {
+  if (state.entityRuntime.entities.some((entity) => entity.active && entity.semanticUnitId === request.semanticUnitId)) {
     throw new Error(`K01 source semantic mapping already exists for '${request.semanticUnitId}'.`);
   }
-  if (state.entityRuntime.entities.some((entity) => entity.sourceRecordIndex === request.sourceRecordIndex)) {
+  if (state.entityRuntime.entities.some((entity) => entity.active && entity.sourceRecordIndex === request.sourceRecordIndex)) {
     throw new Error(`K01 source record mapping already exists for index ${request.sourceRecordIndex}.`);
   }
+}
+
+interface K01SourceEntitySlotReservation {
+  readonly state: K01SourceRuntimeStateV2;
+  readonly slot: number;
+}
+
+/** Source allocator's selection/reuse-age phase, with no record activation. */
+function reserveSourceEntitySlot(state: K01SourceRuntimeStateV2): K01SourceEntitySlotReservation {
+  const runtime = cloneRuntime(state.entityRuntime);
+  let bestSlot = 0;
+  let bestAge = 0;
+
+  for (let slot = K01_SOURCE_ENTITY_SLOT_MIN; slot <= K01_SOURCE_ENTITY_SLOT_MAX; slot += 1) {
+    if (runtime.activeTable[slot] !== 0) {
+      continue;
+    }
+
+    const age = runtime.reuseAges[slot]!;
+    if (age >= bestAge) {
+      bestSlot = slot;
+      bestAge = age;
+    }
+    runtime.reuseAges[slot] = wrapSignedWord(age + 1);
+  }
+
+  return {
+    state: cloneK01SourceRuntimeStateV2({
+      acceptedUpdateCount: state.acceptedUpdateCount,
+      entityRuntime: runtime,
+      occupancy: state.occupancy,
+      policies: state.policies,
+    }),
+    slot: bestSlot,
+  };
+}
+
+/** Record activation phase: increment generation and replace any retired slot record. */
+function activateReservedSourceEntity(
+  state: K01SourceRuntimeStateV2,
+  slot: number,
+  request: K01SourceEntityAdmissionRequest,
+): K01SourceEntityAdmissionResult {
+  if (slot < K01_SOURCE_ENTITY_SLOT_MIN || slot > K01_SOURCE_ENTITY_SLOT_MAX) {
+    throw new RangeError(`K01 source activation slot must be in ${K01_SOURCE_ENTITY_SLOT_MIN}..${K01_SOURCE_ENTITY_SLOT_MAX}; got ${String(slot)}.`);
+  }
+  const runtime = cloneRuntime(state.entityRuntime);
+  if (runtime.activeTable[slot] !== 0) {
+    throw new Error(`K01 source activation slot ${slot} is already active.`);
+  }
+
+  const generation = wrapUnsignedWord(runtime.generationCounter + 1);
+  runtime.generationCounter = generation;
+  runtime.activeTable[slot] = 1;
+  runtime.activeList.push(slot);
+  const record: K01SourceEntityRecord = {
+    slot,
+    generation,
+    semanticUnitId: request.semanticUnitId,
+    sourceRecordIndex: request.sourceRecordIndex,
+    originalClass: request.originalClass,
+    ownerRelation: request.ownerRelation,
+    progress: request.progress,
+    active: true,
+    health: request.health,
+    position: { ...request.position },
+    footprint: { ...request.footprint },
+  };
+  const existingIndex = runtime.entities.findIndex((candidate) => candidate.slot === slot);
+  if (existingIndex >= 0) {
+    const existing = runtime.entities[existingIndex]!;
+    if (existing.active) {
+      throw new Error(`K01 source activation slot ${slot} has an active record.`);
+    }
+    runtime.entities[existingIndex] = record;
+  } else {
+    runtime.entities.push(record);
+  }
+  runtime.entities.sort((left, right) => left.slot - right.slot);
+
+  const next = cloneK01SourceRuntimeStateV2({
+    acceptedUpdateCount: state.acceptedUpdateCount,
+    entityRuntime: runtime,
+    occupancy: state.occupancy,
+    policies: state.policies,
+  });
+  return { state: next, handle: { slot, generation } };
 }
 
 function validateEntityRuntime(value: unknown): asserts value is K01SourceEntityRuntimeState {
@@ -631,6 +782,10 @@ function validateFootprint(value: unknown): asserts value is K01SourceEntityFoot
   if (value.evidence !== "static-confirmed" && value.evidence !== "project-adaptation") {
     throw new TypeError("K01 source footprint evidence must be static-confirmed or project-adaptation");
   }
+}
+
+function isPointInsideMap(width: number, height: number, point: GridPoint): boolean {
+  return point.x >= 0 && point.x < width && point.y >= 0 && point.y < height;
 }
 
 function cloneRuntime(value: K01SourceEntityRuntimeState): MutableK01SourceEntityRuntimeState {

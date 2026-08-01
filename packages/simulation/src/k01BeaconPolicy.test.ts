@@ -2,12 +2,17 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   advanceK01BeaconPolicy,
+  admitK01NativeSourceEntityRuntime,
+  allocateK01SourceEntityRuntime,
+  cloneSourceRuntimeProfileEnvelope,
+  createK01SourceRuntimeState,
   createInitialWorldState,
+  K01_SOURCE_ENTITY_SLOT_MAX,
   toWorldSnapshot,
   type K01SourceRuntimeState,
   advanceWorldTick,
 } from "./index.js";
-import { createImjinrokMapScaffold, createBlankMap, imjinrokK01Scenario } from "../../shared/src/index.js";
+import { createImjinrokMapScaffold, createBlankMap, imjinrokK01Scenario, k01ReinforcementAdapter } from "../../shared/src/index.js";
 import { createUnitState } from "./entities.js";
 import { appendConstructionCompletedEvent } from "./events.js";
 
@@ -99,6 +104,102 @@ test("K01 source blocker and owner gate skip the scan while loader 0 remains ind
   assert.equal(busyPolicy.lastLoaderResult, null);
   assert.equal(busyPolicy.trace.some((entry: { type: string }) => entry.type === "script-busy"), true);
   assert.equal(busyPolicy.trace.some((entry: { type: string }) => entry.type === "script-load-request"), false);
+});
+
+test("two qualifying beacons execute ordered native blocks and later match owns repeated cells", () => {
+  const state = createK01World();
+  appendBeaconCompletion(state, "local-player-first-beacon", { x: 20, y: 20 });
+  appendBeaconCompletion(state, "local-player-second-beacon", { x: 24, y: 20 });
+  const replay = JSON.parse(JSON.stringify(toWorldSnapshot(state))) as typeof state;
+
+  const result = advanceK01BeaconPolicy(state);
+  const replayResult = advanceK01BeaconPolicy(replay);
+  assert.equal(result.matchedBeaconCount, 2);
+  assert.equal(result.nativeSuccessCount, 18);
+  assert.deepEqual(replayResult, result);
+  assert.deepEqual(toWorldSnapshot(replay), toWorldSnapshot(state), "native state/trace replay is deterministic after JSON save/load");
+  assert.equal(Object.values(state.units).filter((unit) => unit.id.includes("k0120-reinforcement")).length, 18);
+  const source = state.sourceRuntimeProfile?.state as K01SourceRuntimeState;
+  const nativeRecords = source.entityRuntime.entities.filter((entity) => entity.sourceRecordIndex >= 0x6000);
+  assert.equal(nativeRecords.length, 18);
+  const later = nativeRecords.find((entity) => entity.semanticUnitId === "cpu-1-k0120-reinforcement-0x52-match2");
+  assert.ok(later);
+  assert.equal(source.occupancy.ownerSlots[51 * source.occupancy.width + 55], later.slot);
+  assert.deepEqual(
+    source.policies.beacon.trace.filter((entry) => entry.type === "reinforcement-success").map((entry) => entry.semanticUnitId),
+    [1, 2].flatMap((match) => k01ReinforcementAdapter.map((descriptor) => `cpu-1-${descriptor.idSuffix}${match === 1 ? "" : `-match${match}`}`)),
+  );
+});
+
+test("native OOB admission retains reuse-age effects without activation residue", () => {
+  let state = createK01SourceRuntimeState();
+  state = {
+    ...state,
+    occupancy: { width: 2, height: 2, ownerSlots: Array.from({ length: 4 }, () => 0) },
+  };
+  const result = admitK01NativeSourceEntityRuntime(state, {
+    semanticUnitId: "oob-native",
+    sourceRecordIndex: 0x6000,
+    originalClass: 12,
+    ownerRelation: 1,
+    progress: 0x64,
+    health: 100,
+    position: { x: -1, y: 0 },
+    footprint: { width: 1, height: 1, evidence: "static-confirmed" },
+    mapWidth: 2,
+    mapHeight: 2,
+  });
+  assert.equal(result.outcome, "out-of-bounds");
+  assert.equal(result.slot, K01_SOURCE_ENTITY_SLOT_MAX);
+  assert.equal(result.state.entityRuntime.generationCounter, 0);
+  assert.equal(result.state.entityRuntime.entities.length, 0);
+  assert.equal(result.state.entityRuntime.activeList.length, 0);
+  assert.equal(result.state.entityRuntime.activeTable[result.slot], 0);
+  assert.equal(result.state.entityRuntime.reuseAges[result.slot], 1);
+  assert.deepEqual(
+    cloneSourceRuntimeProfileEnvelope({
+      profileId: "k01:source-runtime",
+      stateVersion: 3,
+      state: JSON.parse(JSON.stringify(result.state)),
+    }).state,
+    result.state,
+  );
+});
+
+test("native slot exhaustion returns slot 0 and aborts the descriptor sequence", () => {
+  let state = createK01SourceRuntimeState();
+  state = {
+    ...state,
+    occupancy: { width: 60, height: 60, ownerSlots: Array.from({ length: 3600 }, () => 0) },
+  };
+  for (let index = 0; index < K01_SOURCE_ENTITY_SLOT_MAX; index += 1) {
+    state = allocateK01SourceEntityRuntime(state, {
+      semanticUnitId: `full-native-${index}`,
+      sourceRecordIndex: index,
+      originalClass: 2,
+      ownerRelation: 0,
+      progress: 0x64,
+      health: 100,
+      position: { x: 0, y: 0 },
+      footprint: { width: 1, height: 1, evidence: "project-adaptation" },
+    }).state;
+  }
+  const before = JSON.parse(JSON.stringify(state));
+  const result = admitK01NativeSourceEntityRuntime(state, {
+    semanticUnitId: "slot-exhausted-native",
+    sourceRecordIndex: 0x7000,
+    originalClass: 12,
+    ownerRelation: 1,
+    progress: 0x64,
+    health: 100,
+    position: { x: 0, y: 0 },
+    footprint: { width: 1, height: 1, evidence: "static-confirmed" },
+    mapWidth: 60,
+    mapHeight: 60,
+  });
+  assert.equal(result.outcome, "slot-exhausted");
+  assert.equal(result.slot, 0);
+  assert.deepEqual(result.state, before);
 });
 
 test("generic worlds never create K01 policy state or reinforcement side effects", () => {
