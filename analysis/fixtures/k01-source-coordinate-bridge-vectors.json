@@ -1,0 +1,126 @@
+{
+  "schemaVersion": 1,
+  "sourceSha256": "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e",
+  "acceptedReplayScope": "The vectors replay only the source coordinate domains and the explicitly closed conversion subset. They do not infer a universal scale, pixel anchor, ground contact, occupancy, scheduler frequency, or project-tick mapping.",
+  "vectors": [
+    {
+      "id": "source-word-zero-and-origin",
+      "operation": "source-word",
+      "input": { "word": 0 },
+      "expected": { "unsignedWord": 0, "signedWord": 0 }
+    },
+    {
+      "id": "source-word-negative-one",
+      "operation": "source-word",
+      "input": { "word": 65535 },
+      "expected": { "unsignedWord": 65535, "signedWord": -1 }
+    },
+    {
+      "id": "source-word-negative-word-minimum",
+      "operation": "source-word",
+      "input": { "word": 32768 },
+      "expected": { "unsignedWord": 32768, "signedWord": -32768 }
+    },
+    {
+      "id": "source-word-positive-word-maximum",
+      "operation": "source-word",
+      "input": { "word": 32767 },
+      "expected": { "unsignedWord": 32767, "signedWord": 32767 }
+    },
+    {
+      "id": "map-cell-origin-is-exact-grid-point",
+      "operation": "map-cell-to-grid",
+      "input": { "x": 0, "y": 0 },
+      "expected": { "accepted": true, "gridPoint": { "x": 0, "y": 0 }, "rounding": "none", "scale": 1 }
+    },
+    {
+      "id": "map-cell-max-edge-is-in-bounds",
+      "operation": "map-cell-to-grid",
+      "input": { "x": 59, "y": 59 },
+      "expected": { "accepted": true, "gridPoint": { "x": 59, "y": 59 }, "rounding": "none", "scale": 1 }
+    },
+    {
+      "id": "map-cell-first-positive-oob",
+      "operation": "map-cell-to-grid",
+      "input": { "x": 60, "y": 0 },
+      "expected": { "accepted": false, "reason": "out-of-bounds" }
+    },
+    {
+      "id": "map-cell-negative-signed-oob",
+      "operation": "map-cell-to-grid",
+      "input": { "x": -1, "y": 0 },
+      "expected": { "accepted": false, "reason": "out-of-bounds" }
+    },
+    {
+      "id": "placement-opening-origin-record",
+      "operation": "placement-to-grid",
+      "input": { "origin": { "x": 55, "y": 53 }, "offset": { "x": 0, "y": 0 } },
+      "expected": { "accepted": true, "sourceCoordinate": { "x": 55, "y": 53 }, "gridPoint": { "x": 55, "y": 53 }, "rounding": "none", "scale": 1 }
+    },
+    {
+      "id": "placement-negative-offset-pair",
+      "operation": "placement-to-grid",
+      "input": { "origin": { "x": 55, "y": 53 }, "offset": { "x": -2, "y": -2 } },
+      "expected": { "accepted": true, "sourceCoordinate": { "x": 53, "y": 51 }, "gridPoint": { "x": 53, "y": 51 }, "rounding": "none", "scale": 1 }
+    },
+    {
+      "id": "placement-word-sum-wraps-signed",
+      "operation": "placement-to-grid",
+      "input": { "origin": { "x": 32767, "y": 0 }, "offset": { "x": 1, "y": 0 } },
+      "expected": { "accepted": false, "reason": "out-of-bounds", "sourceCoordinate": { "x": -32768, "y": 0 } }
+    },
+    {
+      "id": "movement-accumulator-just-below-commit",
+      "operation": "movement-commit",
+      "input": { "accumulatorWord": 0, "rawInputWord": 49, "selectorByte": 0, "currentXWord": 10, "currentYWord": 20, "nextXWord": 11, "nextYWord": 20 },
+      "expected": { "committed": false, "accumulatorWord": 49, "currentXWord": 10, "currentYWord": 20 }
+    },
+    {
+      "id": "movement-accumulator-threshold-commits-and-subtracts",
+      "operation": "movement-commit",
+      "input": { "accumulatorWord": 0, "rawInputWord": 50, "selectorByte": 0, "currentXWord": 10, "currentYWord": 20, "nextXWord": 11, "nextYWord": 21 },
+      "expected": { "committed": true, "accumulatorWord": 65486, "currentXWord": 11, "currentYWord": 21, "snapshotXWord": 10, "snapshotYWord": 20 }
+    },
+    {
+      "id": "movement-selector-one-truncates-toward-zero",
+      "operation": "movement-commit",
+      "input": { "accumulatorWord": 0, "rawInputWord": 65532, "selectorByte": 1, "currentXWord": 30, "currentYWord": 40, "nextXWord": 31, "nextYWord": 40 },
+      "expected": { "committed": false, "appliedDeltaWord": 65533, "accumulatorWord": 65533, "currentXWord": 30, "currentYWord": 40 }
+    },
+    {
+      "id": "movement-negative-to-positive-clamps-zero",
+      "operation": "movement-commit",
+      "input": { "accumulatorWord": 65526, "rawInputWord": 20, "selectorByte": 0, "currentXWord": 3, "currentYWord": 4, "nextXWord": 4, "nextYWord": 4 },
+      "expected": { "committed": false, "accumulatorWord": 0, "currentXWord": 3, "currentYWord": 4 }
+    },
+    {
+      "id": "projectile-route-origin-and-endpoint",
+      "operation": "projectile-route",
+      "input": { "startX": 0, "startY": 0, "endX": 28, "endY": 14, "sampleInterval": 14 },
+      "expected": { "points": [ { "x": 0, "y": 0 }, { "x": 14, "y": 7 }, { "x": 28, "y": 14 } ], "finalRouteIndex": 2, "updateCountUntilImpact": 3 }
+    },
+    {
+      "id": "projectile-route-short-endpoint-keeps-start",
+      "operation": "projectile-route",
+      "input": { "startX": 10, "startY": 20, "endX": 23, "endY": 20, "sampleInterval": 14 },
+      "expected": { "points": [ { "x": 10, "y": 20 } ], "finalRouteIndex": 0, "updateCountUntilImpact": 1 }
+    },
+    {
+      "id": "projectile-route-signed-positive-boundary",
+      "operation": "projectile-route",
+      "input": { "startX": 32767, "startY": 32767, "endX": 32767, "endY": 32767, "sampleInterval": 14 },
+      "expected": { "points": [ { "x": 32767, "y": 32767 } ], "finalRouteIndex": 0, "updateCountUntilImpact": 1 }
+    },
+    {
+      "id": "coordinate-contract-keeps-unresolved-domains-opaque",
+      "operation": "coordinate-contract",
+      "input": {},
+      "expected": {
+        "mapCell": { "sourceToGrid": "identity-in-bounds", "gridToSource": "identity-in-bounds" },
+        "placement": { "sourceToGrid": "identity-in-bounds", "gridToSource": "identity-in-bounds" },
+        "locomotion": { "sourceToGrid": "reject-unresolved-scale", "gridToSource": "reject-unresolved-scale" },
+        "projectile": { "sourceToGrid": "reject-unresolved-scale", "gridToSource": "reject-unresolved-scale" }
+      }
+    }
+  ]
+}

@@ -1,0 +1,1676 @@
+{
+  "schemaVersion": 1,
+  "question": "Which coordinate domains does K01 use for map cells, exact placement, entity locomotion, movement accumulation/commit, and projectile start/end/route points, and which closed subset can be converted explicitly to semantic GridPoint?",
+  "analysisStatus": "static-confirmed-for-closed-coordinate-domains",
+  "reproductionStatus": "reproduction-complete-for-accepted-vectors-and-fail-closed-boundaries",
+  "implementationStatus": "analysis-only-no-production-change",
+  "sources": {
+    "executable": {
+      "path": "original/imjinrok2/imjinrok2.exe",
+      "byteLength": 843833,
+      "sha256": "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e"
+    },
+    "map": {
+      "path": "original/imjinrok2/stagemap/k01.map",
+      "byteLength": 1097100,
+      "sha256": "43ec3a173032f74c12d3cce1db1078b076b651ed79070a0914673a5b65da99cb",
+      "width": 60,
+      "height": 60
+    },
+    "generatedArtifacts": {
+      "functions": {
+        "path": "analysis/generated/imjinrok2/functions.json",
+        "byteLength": 1468333,
+        "sha256": "7e071fdfe425d22447780c265fe1d3fd271a1bedd1773682bebcb8ddc6d2e16e",
+        "sourceSha256": "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e"
+      },
+      "references": {
+        "path": "analysis/generated/imjinrok2/references.json",
+        "byteLength": 17206569,
+        "sha256": "f64cfa6f04bc39573552f42a8b7bdd5b08fea1ba774d05865162d1d80daaf9a5",
+        "sourceSha256": "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e"
+      },
+      "seeds": {
+        "path": "analysis/generated/imjinrok2/seeds.json",
+        "byteLength": 9112063,
+        "sha256": "8e7c8821e9c84c5d0877bb977b119b3b878271502b36bf75e7426b570507bfb7",
+        "sourceSha256": "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e"
+      },
+      "jumpTables": {
+        "path": "analysis/generated/imjinrok2/jump-tables.json",
+        "byteLength": 607724,
+        "sha256": "0ae517eb172f61b974ca7a4411e64c1cc42065c462ed53b3065ab2da633dfe2f",
+        "sourceSha256": "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e"
+      }
+    },
+    "fixture": {
+      "path": "analysis/fixtures/k01-source-coordinate-bridge-vectors.json",
+      "sourceSha256": "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e",
+      "vectorCount": 19
+    }
+  },
+  "coordinateDomains": [
+    {
+      "id": "k01-map-cell",
+      "storage": "map byte fields indexed by x*180+y; x/y are signed WORD arguments",
+      "width": "signed WORD inputs; K01 accepted 0..59",
+      "unit": "discrete source map cell",
+      "scale": "1 cell per integer index; no pixel or iso scale asserted",
+      "anchor": "logical cell index only; geometric/pixel anchor unknown",
+      "producers": [
+        "FUN_00466f20 raster loop",
+        "FUN_00464cc0 projection/reader",
+        "FUN_0046d650 helper"
+      ],
+      "consumers": [
+        "map field readers",
+        "bounded source projection consumers"
+      ],
+      "provenRange": {
+        "x": [
+          0,
+          59
+        ],
+        "y": [
+          0,
+          59
+        ],
+        "firstOutOfBounds": {
+          "x": 60,
+          "y": 0
+        }
+      },
+      "storageFields": {
+        "lowNibble": "map+0x32514+x*180+y",
+        "fogFamily": "map+0x4a0c4+x*180+y",
+        "object": "map+0x3a3a4+x*180+y",
+        "frame": "map+0x42234+x*180+y"
+      },
+      "conversion": "explicit identity to/from semantic GridPoint only for integer in-bounds K01 cells"
+    },
+    {
+      "id": "k01-exact-placement-coordinate",
+      "storage": "signed WORD origin plus signed WORD descriptor offset, wrapped to signed WORD before bounds",
+      "width": "signed WORD coordinate pair; K01 map bounds 0..59",
+      "unit": "exact source cell coordinate",
+      "scale": "1 source cell index; no rounding",
+      "anchor": "record x/y anchor; only native mobile classes 12/13/14/82 have proven 1x1 footprint",
+      "producers": [
+        "FUN_00488420 descriptor loop",
+        "FUN_00483c50 generation/create wrapper",
+        "K01 opening map entity arrays"
+      ],
+      "consumers": [
+        "FUN_00437650 record initializer",
+        "FUN_0043c300 position reader",
+        "FUN_0043ad30 mobile occupancy writer"
+      ],
+      "provenRange": {
+        "originAndOffset": [
+          -32768,
+          32767
+        ],
+        "inBounds": {
+          "x": [
+            0,
+            59
+          ],
+          "y": [
+            0,
+            59
+          ]
+        },
+        "outOfBoundsPolicy": "allocate/update age first, skip create, continue descriptor loop"
+      },
+      "conversion": "explicit identity to/from semantic GridPoint only after signed-WORD sum and in-bounds check"
+    },
+    {
+      "id": "k01-entity-current-and-raw-locomotion",
+      "storage": "entity WORD +0x1bc/+0x1be current pair, +0x4ee raw input, +0x4ea cadence limit, +0x4f2 accumulator; signed arithmetic in recovered branch",
+      "width": "16-bit WORD storage; signed interpretation where compare/division is proven",
+      "unit": "source locomotion field; coordinate unit and world-cell displacement unknown",
+      "scale": "unknown; no 24 Hz/FPS conversion",
+      "anchor": "current/next record fields only; interpolation/output helper semantics unknown",
+      "producers": [
+        "FUN_00437650 initializer",
+        "FUN_00425b20 normal movement",
+        "FUN_00425af0 wrapper"
+      ],
+      "consumers": [
+        "normal movement accumulator/commit branch",
+        "later interpolation/occupancy consumers outside scope"
+      ],
+      "provenRange": {
+        "storage": [
+          0,
+          65535
+        ],
+        "signed": [
+          -32768,
+          32767
+        ],
+        "commitThreshold": 50
+      },
+      "conversion": "fail-closed: no semantic GridPoint conversion until source unit/producer/consumer mapping is statically closed"
+    },
+    {
+      "id": "k01-movement-accumulator-commit",
+      "storage": "entity WORD +0x4f2; raw WORD +0x4ee is transformed only for selector BYTE +0xba == 1",
+      "width": "16-bit signed-WORD arithmetic with storage wrap",
+      "unit": "accumulator threshold units, not a confirmed cell or pixel distance",
+      "scale": "raw selector-1 transform raw-trunc(raw/3); otherwise raw; no fixed-time scale",
+      "anchor": "commit snapshots +0x1bc/+0x1be to +0x1cc/+0x1ce and copies +0x4d8/+0x4da to current pair",
+      "producers": [
+        "FUN_00425b20 normal movement"
+      ],
+      "consumers": [
+        "same function's signed threshold and current-pair commit"
+      ],
+      "provenRange": {
+        "justBelow": 49,
+        "threshold": 50,
+        "postCommit": -50,
+        "signedBoundaries": [
+          -32768,
+          -1,
+          0,
+          32767
+        ]
+      },
+      "conversion": "fail-closed: accumulator is not a GridPoint and current pair's source unit is unresolved"
+    },
+    {
+      "id": "k01-projectile-start-end-route",
+      "storage": "projectile record signed WORD start/end/current fields and signed WORD[160] route arrays",
+      "width": "source record fields are signed WORD; independent accepted route subset is 0..32767 per coordinate",
+      "unit": "integer route coordinate; route index is signed WORD and route sample interval is 14",
+      "scale": "integer Bresenham-style arithmetic; no rounding or product scale conversion",
+      "anchor": "route index 0 stores start; final route index is compared for arrival; endpoint is copied from target +0x32/+0x34",
+      "producers": [
+        "Ryu callsite 0x00417b84/0x00417bfb",
+        "FUN_004111b0 record initializer",
+        "FUN_0040f9b0 route builder"
+      ],
+      "consumers": [
+        "FUN_00410cc0 route update",
+        "subtype 0x0c arrival dispatcher"
+      ],
+      "provenRange": {
+        "acceptedPortSubset": [
+          0,
+          32767
+        ],
+        "rejectedForPort": [
+          -32768,
+          -1,
+          32768,
+          65535
+        ],
+        "routeCapacity": 160
+      },
+      "conversion": "fail-closed: source route scale and semantic GridPoint mapping are not statically proven"
+    }
+  ],
+  "exactTransforms": [
+    "map storage ordinal = x*180+y (x-major); no rounding",
+    "placement coordinate = signedWord(origin + signedWord(offset)); bounds are checked after allocation",
+    "selector BYTE +0xba == 1: raw - trunc(raw/3) toward zero; other selector values retain raw",
+    "movement accumulator stores signed-WORD sum, clamps negative-to-positive crossing to zero, commits at >=50, then subtracts 100",
+    "projectile route uses integer Bresenham-style stepping and retains every 14th point, with route index 0 as start",
+    "semantic GridPoint conversion is identity only for in-bounds map cell and exact placement coordinates"
+  ],
+  "nonTransforms": [
+    "No universal scale combines map cells, placement records, locomotion fields, and projectile route words.",
+    "No pixel, iso.ts, render output, clamping, or Math.round value is used as original-coordinate evidence.",
+    "No locomotion or projectile source coordinate is promoted to semantic GridPoint without a proven scale/anchor.",
+    "Negative, unsigned-32768, signed-32767, and overflowed sums fail closed outside each accepted contract."
+  ],
+  "sourceRecords": {
+    "mapEntityArrayOffsets": {
+      "type": "+0xa4",
+      "x": "+0x6e4",
+      "y": "+0xd24",
+      "owner": "+0x1364",
+      "elementWidth": 2,
+      "signedness": "signed WORD"
+    },
+    "openingUnits": {
+      "records": [
+        {
+          "originalClass": 13,
+          "rawOwnerWord": 1,
+          "sourcePosition": {
+            "x": 20,
+            "y": 29
+          }
+        },
+        {
+          "originalClass": 13,
+          "rawOwnerWord": 1,
+          "sourcePosition": {
+            "x": 36,
+            "y": 26
+          }
+        },
+        {
+          "originalClass": 12,
+          "rawOwnerWord": 1,
+          "sourcePosition": {
+            "x": 38,
+            "y": 6
+          }
+        },
+        {
+          "originalClass": 12,
+          "rawOwnerWord": 1,
+          "sourcePosition": {
+            "x": 50,
+            "y": 8
+          }
+        },
+        {
+          "originalClass": 13,
+          "rawOwnerWord": 1,
+          "sourcePosition": {
+            "x": 31,
+            "y": 44
+          }
+        },
+        {
+          "originalClass": 12,
+          "rawOwnerWord": 1,
+          "sourcePosition": {
+            "x": 38,
+            "y": 27
+          }
+        }
+      ],
+      "class7Supplement": [
+        {
+          "originalClass": 7,
+          "rawOwnerWord": 0,
+          "sourcePosition": {
+            "x": 7,
+            "y": 6
+          }
+        },
+        {
+          "originalClass": 7,
+          "rawOwnerWord": 0,
+          "sourcePosition": {
+            "x": 8,
+            "y": 6
+          }
+        }
+      ],
+      "bindingWitness": "exact-static-identity-source"
+    },
+    "openingBuildings": {
+      "records": [
+        {
+          "internalClass": 48,
+          "rawOwnerWord": 0,
+          "sourcePosition": {
+            "x": 11,
+            "y": 5
+          },
+          "originalGameplayName": "조선 방앗간",
+          "spriteSlot": 146,
+          "baseFrame": 7,
+          "sourcePath": "char\\millk.spr",
+          "identityMapping": "exact-static-identity-source"
+        },
+        {
+          "internalClass": 49,
+          "rawOwnerWord": 0,
+          "sourcePosition": {
+            "x": 5,
+            "y": 4
+          },
+          "originalGameplayName": "조선 본영",
+          "spriteSlot": 141,
+          "baseFrame": 7,
+          "sourcePath": "char\\hqk.spr",
+          "identityMapping": "exact-static-identity-source"
+        },
+        {
+          "internalClass": 51,
+          "rawOwnerWord": 0,
+          "sourcePosition": {
+            "x": 5,
+            "y": 8
+          },
+          "originalGameplayName": "조선 훈련도감",
+          "spriteSlot": 213,
+          "baseFrame": 7,
+          "sourcePath": "char\\advbarrackk.spr",
+          "identityMapping": "exact-static-identity-source"
+        },
+        {
+          "internalClass": 58,
+          "rawOwnerWord": 1,
+          "sourcePosition": {
+            "x": 7,
+            "y": 57
+          },
+          "originalGameplayName": "일본 본영",
+          "spriteSlot": 106,
+          "baseFrame": 7,
+          "sourcePath": "char\\jhq.spr",
+          "identityMapping": "exact-static-identity-source"
+        },
+        {
+          "internalClass": 58,
+          "rawOwnerWord": 1,
+          "sourcePosition": {
+            "x": 56,
+            "y": 6
+          },
+          "originalGameplayName": "일본 본영",
+          "spriteSlot": 106,
+          "baseFrame": 7,
+          "sourcePath": "char\\jhq.spr",
+          "identityMapping": "exact-static-identity-source"
+        },
+        {
+          "internalClass": 60,
+          "rawOwnerWord": 1,
+          "sourcePosition": {
+            "x": 6,
+            "y": 50
+          },
+          "originalGameplayName": "일본 훈련소",
+          "spriteSlot": 110,
+          "baseFrame": 7,
+          "sourcePath": "char\\barrackj.spr",
+          "identityMapping": "exact-static-identity-source"
+        },
+        {
+          "internalClass": 60,
+          "rawOwnerWord": 1,
+          "sourcePosition": {
+            "x": 55,
+            "y": 11
+          },
+          "originalGameplayName": "일본 훈련소",
+          "spriteSlot": 110,
+          "baseFrame": 7,
+          "sourcePath": "char\\barrackj.spr",
+          "identityMapping": "exact-static-identity-source"
+        },
+        {
+          "internalClass": 63,
+          "rawOwnerWord": 1,
+          "sourcePosition": {
+            "x": 18,
+            "y": 49
+          },
+          "originalGameplayName": "일본 망루",
+          "spriteSlot": 219,
+          "baseFrame": 7,
+          "sourcePath": "char\\towerj.spr",
+          "identityMapping": "exact-static-identity-source"
+        },
+        {
+          "internalClass": 63,
+          "rawOwnerWord": 1,
+          "sourcePosition": {
+            "x": 32,
+            "y": 40
+          },
+          "originalGameplayName": "일본 망루",
+          "spriteSlot": 219,
+          "baseFrame": 7,
+          "sourcePath": "char\\towerj.spr",
+          "identityMapping": "exact-static-identity-source"
+        },
+        {
+          "internalClass": 63,
+          "rawOwnerWord": 1,
+          "sourcePosition": {
+            "x": 35,
+            "y": 29
+          },
+          "originalGameplayName": "일본 망루",
+          "spriteSlot": 219,
+          "baseFrame": 7,
+          "sourcePath": "char\\towerj.spr",
+          "identityMapping": "exact-static-identity-source"
+        },
+        {
+          "internalClass": 63,
+          "rawOwnerWord": 1,
+          "sourcePosition": {
+            "x": 44,
+            "y": 5
+          },
+          "originalGameplayName": "일본 망루",
+          "spriteSlot": 219,
+          "baseFrame": 7,
+          "sourcePath": "char\\towerj.spr",
+          "identityMapping": "exact-static-identity-source"
+        }
+      ],
+      "bindingWitness": "exact-static-identity-source"
+    },
+    "reinforcement": {
+      "origin": {
+        "x": 55,
+        "y": 53
+      },
+      "descriptorCoordinates": [
+        {
+          "x": 53,
+          "y": 51
+        },
+        {
+          "x": 55,
+          "y": 51
+        },
+        {
+          "x": 57,
+          "y": 51
+        },
+        {
+          "x": 53,
+          "y": 53
+        },
+        {
+          "x": 55,
+          "y": 53
+        },
+        {
+          "x": 57,
+          "y": 53
+        },
+        {
+          "x": 53,
+          "y": 55
+        },
+        {
+          "x": 55,
+          "y": 55
+        },
+        {
+          "x": 57,
+          "y": 55
+        }
+      ],
+      "footprint": "1x1 only for classes 12/13/14/82",
+      "slotRange": [
+        1,
+        1199
+      ]
+    }
+  },
+  "linkedEvidence": {
+    "C01": {
+      "acceptedStep": [
+        "FUN_00447bc0",
+        "FUN_004464c0 (pre-update)",
+        "FUN_004481d0 (distinct raw-tick result wrapper)",
+        "FUN_0048ddb0 (pre-gates -> timer resolver -> stage dispatch)",
+        "FUN_0048d6f0 (timer resolver; before K01 stage updater)",
+        "FUN_0048a5c0 (stage 1 K01 updater, only on distinct tick and no prior result)",
+        "FUN_00447e10 (wall-clock acceptance gate)",
+        "FUN_00447360 (exactly once after acceptance)",
+        "FUN_0043c9c0 (once per active entity record in the pass)",
+        "FUN_00410cc0/FUN_00401440 (conditional active projectile slots)"
+      ],
+      "sourceUpdateToEntityAndProjectile": [
+        "FUN_00447bc0",
+        "FUN_004464c0",
+        "FUN_004481d0",
+        "FUN_0048ddb0",
+        "FUN_0048a5c0",
+        "FUN_00447360"
+      ],
+      "scope": "accepted source-update order and count only; raw clock→project tick and identity policy unresolved"
+    },
+    "E01": {
+      "sourceHandle": {
+        "allocator": "FUN_00483a60 slots 1..1199",
+        "generation": "FUN_00483c50 WORD increment",
+        "initializer": "FUN_00437650 writes signed x/y +0x1bc/+0x1be",
+        "validity": "FUN_00441e40 positive active record predicate"
+      },
+      "projectile": "projectile pool and source-entity handle references remain distinct pools",
+      "scope": "only evidence-confirmed slot/generation/coordinate linkage"
+    }
+  },
+  "proposedAdapter": {
+    "name": "analysis-only-k01-source-coordinate-bridge",
+    "input": "Tagged source coordinate domain; map dimensions and explicit direction (sourceToSemantic or semanticToSource)",
+    "output": "Tagged semantic GridPoint for map-cell/exact-placement accepted subset, or an explicit rejection reason",
+    "accepted": [
+      "map-cell x/y integer in 0..59",
+      "placement signed-WORD origin+offset after wrap and in-bounds check"
+    ],
+    "rejected": [
+      "locomotion current/raw fields until source unit is proven",
+      "movement accumulator values",
+      "projectile route values until source scale/anchor is proven",
+      "fractional, rounded, clamped, or pixel coordinates"
+    ],
+    "direction": {
+      "sourceToSemantic": "identity only in accepted map/placement subset",
+      "semanticToSource": "identity only for integer in-bounds GridPoint; otherwise reject"
+    },
+    "rounding": "none; any requested rounding is an explicit contract error",
+    "anchor": "logical cell anchor only; no ground-contact or pixel anchor",
+    "implementation": "not implemented; no production package/app change"
+  },
+  "evidence": {
+    "functionRanges": [
+      {
+        "name": "mapCellProjection",
+        "entry": "0x00464cc0",
+        "bodyRange": "0x00464cc0-0x00464ddd",
+        "byteRange": "0x00464cc0-0x00464ddd (end exclusive)",
+        "bodySize": 286,
+        "instructionCount": 103,
+        "instructionSha256": "0df728460a1833f756c0164f3968eda5de7312a64e87c52edc98aa5a33566781",
+        "rawBodySha256": "593a18dcc0efd1da13ba61b9759d9b68d6528fa2e7a27472b2e2cc53932688cd",
+        "callees": [
+          "0x0046d650"
+        ]
+      },
+      {
+        "name": "mapPlacementReader",
+        "entry": "0x00464ea0",
+        "bodyRange": "0x00464ea0-0x00465001",
+        "byteRange": "0x00464ea0-0x00465001 (end exclusive)",
+        "bodySize": 354,
+        "instructionCount": 119,
+        "instructionSha256": "994b5e5c35e8ed66626f303d725cdf69847adbedd526e645ce2c0c086ea3b946",
+        "rawBodySha256": "6f909bfbed17f88f8eef22b419e08c2e236d14af4104fb8f39128faf52e0e2da",
+        "callees": [
+          "0x0046d650"
+        ]
+      },
+      {
+        "name": "mapPlacementHelper",
+        "entry": "0x0046d650",
+        "bodyRange": "0x0046d650-0x0046d6d7",
+        "byteRange": "0x0046d650-0x0046d6d7 (end exclusive)",
+        "bodySize": 136,
+        "instructionCount": 50,
+        "instructionSha256": "c0ee5121eb2700198c121447334f0b7572d28dce08e9e971020293233036d385",
+        "rawBodySha256": "d81426f4ee25f53a964f3a52eb88114b462540bde404b26458da9830b0aa1d5b",
+        "callees": []
+      },
+      {
+        "name": "mapRasterCaller",
+        "entry": "0x00466f20",
+        "bodyRange": "0x00466f20-0x004676df",
+        "byteRange": "0x00466f20-0x004676df (end exclusive)",
+        "bodySize": 1984,
+        "instructionCount": 574,
+        "instructionSha256": "b37afc8a5141d906b4b83b08c76ecdc87bdfe43a8f1b9a9a17c4fe095d434e75",
+        "rawBodySha256": "7c2ea37fbd1b2b9063cc9efc130e8223b18b41bff5b722b81c27adb8e64a9f4a",
+        "callees": [
+          "0x00413fb0",
+          "0x0041d420",
+          "0x0041fdb0",
+          "0x00438aa0",
+          "0x0044aaf0",
+          "0x0044ae80",
+          "0x0044aef0",
+          "0x00469000",
+          "0x00469180",
+          "0x00469510",
+          "0x00469920",
+          "0x00469a50",
+          "0x00469df0",
+          "0x0046a190",
+          "0x004ad7e0",
+          "0x004adcb6"
+        ]
+      },
+      {
+        "name": "mapPlacementObjectFrame",
+        "entry": "0x00469510",
+        "bodyRange": "0x00469510-0x00469916",
+        "byteRange": "0x00469510-0x00469916 (end exclusive)",
+        "bodySize": 1031,
+        "instructionCount": 341,
+        "instructionSha256": "28849833f557b0f4863c88318828d72b8039639450bd42b5623927dd8ef036e3",
+        "rawBodySha256": "5b21e7d46f2a38250edae3184d701bb30d7f51d334b012b75cc35e54531db027",
+        "callees": [
+          "0x0044af50",
+          "0x0044afa0",
+          "0x00454250",
+          "0x004542e0",
+          "0x004547c0",
+          "0x00454960",
+          "0x0046d650"
+        ]
+      },
+      {
+        "name": "placementDescriptor",
+        "entry": "0x00488420",
+        "bodyRange": "0x00488420-0x004884b5",
+        "byteRange": "0x00488420-0x004884b5 (end exclusive)",
+        "bodySize": 150,
+        "instructionCount": 59,
+        "instructionSha256": "4b4841d6b3756b3d2dd3f3c6621ab98a413ce4608ea3d5c9c737ee1618c3ee8b",
+        "rawBodySha256": "63ff70127fc4b0e3a34dad1c81f8be685018ff23f885842b0b25af4a27fba8bf",
+        "callees": [
+          "0x00483a60",
+          "0x00483c50"
+        ]
+      },
+      {
+        "name": "placementAllocator",
+        "entry": "0x00483a60",
+        "bodyRange": "0x00483a60-0x00483a9c",
+        "byteRange": "0x00483a60-0x00483a9c (end exclusive)",
+        "bodySize": 61,
+        "instructionCount": 25,
+        "instructionSha256": "887217ddc12a9bc4dd90c38b9365be9bcaf65f14e1d0c709de86c62479cbd917",
+        "rawBodySha256": "b8210e7ea459473da9560228a8287f5671cedcb026dd5caaf729383c8b0a09f3",
+        "callees": []
+      },
+      {
+        "name": "placementCreate",
+        "entry": "0x00483c50",
+        "bodyRange": "0x00483c50-0x00483c9f",
+        "byteRange": "0x00483c50-0x00483c9f (end exclusive)",
+        "bodySize": 80,
+        "instructionCount": 26,
+        "instructionSha256": "d33ed40b3a614bcc92bc4b3b429dd372e61b4ef6ccb03b290feffd80c7a9ab4e",
+        "rawBodySha256": "74804c8127df5d7d5de87aa5425498d699a23ec68e804e67b9bf6e58bb192238",
+        "callees": [
+          "0x00437650"
+        ]
+      },
+      {
+        "name": "entityInitializer",
+        "entry": "0x00437650",
+        "bodyRange": "0x00437650-0x00438025",
+        "byteRange": "0x00437650-0x00438025 (end exclusive)",
+        "bodySize": 2518,
+        "instructionCount": 539,
+        "instructionSha256": "4605056775f6f43c9b2065ea5a4ddff5570137eb87587f4a09d2018618e13c28",
+        "rawBodySha256": "b4d2256df02d3ac87f95819b5a739366064eeb3451c04c1716eace0c029b5ba6",
+        "callees": [
+          "0x004291d0",
+          "0x0042e280",
+          "0x00438790",
+          "0x0043aa80",
+          "0x0043c9c0",
+          "0x004550c0",
+          "0x0045bf30",
+          "0x0045bf40",
+          "0x0047d160",
+          "0x0047fd90",
+          "0x00481310"
+        ]
+      },
+      {
+        "name": "locomotionWrapper",
+        "entry": "0x00425af0",
+        "bodyRange": "0x00425af0-0x00425b10",
+        "byteRange": "0x00425af0-0x00425b10 (end exclusive)",
+        "bodySize": 33,
+        "instructionCount": 11,
+        "instructionSha256": "272a5455b2f3c25d58ce435d1823c517615c8b739dc4952c8aec1f8cb03ce29c",
+        "rawBodySha256": "fb66a9f2fb484b3896b98c14214664ce6b22787a1910bf44049d822586bd7cf8",
+        "callees": [
+          "0x00425b20",
+          "0x004262e0"
+        ]
+      },
+      {
+        "name": "locomotionNormal",
+        "entry": "0x00425b20",
+        "bodyRange": "0x00425b20-0x004262df",
+        "byteRange": "0x00425b20-0x004262df (end exclusive)",
+        "bodySize": 1984,
+        "instructionCount": 506,
+        "instructionSha256": "088a31ecaf83338b1823a4a21e14bb859690289d56f8bc53338145492a8e24c7",
+        "rawBodySha256": "0005d14a27d3453b3ca50e3211c4a8062b07f4c6339ad1057527fe058bdc4813",
+        "callees": [
+          "0x00425a50",
+          "0x00426680",
+          "0x004266d0",
+          "0x00438310",
+          "0x00438460",
+          "0x0043ac50",
+          "0x0043d450",
+          "0x0043d540",
+          "0x00442770",
+          "0x00445290",
+          "0x00465010"
+        ]
+      },
+      {
+        "name": "projectileRouteBuilder",
+        "entry": "0x0040f9b0",
+        "bodyRange": "0x0040f9b0-0x0040fc8f",
+        "byteRange": "0x0040f9b0-0x0040fc8f (end exclusive)",
+        "bodySize": 736,
+        "instructionCount": 242,
+        "instructionSha256": "8400de915951c770d1e13db9614f8e4b47a3b88580271cdbfddbc410a327523e",
+        "rawBodySha256": "38a6ce291f92abb99ee09bb38645054b25151b90f6da62c14244ec9f3521e78a",
+        "callees": []
+      },
+      {
+        "name": "projectileRouteInitializer",
+        "entry": "0x00410ab0",
+        "bodyRange": "0x00410ab0-0x00410ada",
+        "byteRange": "0x00410ab0-0x00410ada (end exclusive)",
+        "bodySize": 43,
+        "instructionCount": 14,
+        "instructionSha256": "52e362530f1215820b4630c1d14a2175245af66d8c84554358fc37e9ae4b8652",
+        "rawBodySha256": "cdb1b019b9fbf3f1c5f692eff380748f50d76ae94018891e30ca9d42cfaca6ba",
+        "callees": [
+          "0x00410ae0",
+          "0x00410b10"
+        ]
+      },
+      {
+        "name": "projectileSpawn",
+        "entry": "0x004111b0",
+        "bodyRange": "0x004111b0-0x00411229",
+        "byteRange": "0x004111b0-0x00411229 (end exclusive)",
+        "bodySize": 122,
+        "instructionCount": 44,
+        "instructionSha256": "458657190d0d297c04a1d101ffd596043fba27ea20802e6c97f6d4b59cba3da3",
+        "rawBodySha256": "2f97bd777fc345d8b1eff7fe5291e77a6ec4fe9f886df4b30f92889af4854d7a",
+        "callees": [
+          "0x0040c6c0",
+          "0x0040f0e0"
+        ]
+      },
+      {
+        "name": "projectileUpdate",
+        "entry": "0x00410cc0",
+        "bodyRange": "0x00410cc0-0x0041115b",
+        "byteRange": "0x00410cc0-0x0041115b (end exclusive)",
+        "bodySize": 1180,
+        "instructionCount": 347,
+        "instructionSha256": "b08dd839526f08a64011c07152f3f8b3373a1d48c4518bfa30c0905e8d80ac7a",
+        "rawBodySha256": "d17f2a18c97aac8f2871162e875b38e23cf412d440909346fec29179c9d95e85",
+        "callees": [
+          "0x00401aa0",
+          "0x00401c30",
+          "0x00401c70",
+          "0x00401cb0",
+          "0x00401cf0",
+          "0x00402230",
+          "0x0040df10",
+          "0x0040f9b0",
+          "0x0040fd50",
+          "0x004107a0",
+          "0x00410ab0",
+          "0x004111b0",
+          "0x00438e30",
+          "0x00441e40",
+          "0x004426f0",
+          "0x00464cc0"
+        ]
+      },
+      {
+        "name": "projectilePool",
+        "entry": "0x00447360",
+        "bodyRange": "0x00447360-0x00447599",
+        "byteRange": "0x00447360-0x00447599 (end exclusive)",
+        "bodySize": 570,
+        "instructionCount": 156,
+        "instructionSha256": "8700298d4e2900a0f2833b1f9e1143c47d324478ef5fa419170e7945de7dd772",
+        "rawBodySha256": "783a092248ff1292fb2936d1752d7e5268e12962a934e3736b036c2665c698d0",
+        "callees": [
+          "0x00401440",
+          "0x00401ac0",
+          "0x00410cc0",
+          "0x00411180",
+          "0x0043c9c0",
+          "0x004610e0",
+          "0x0046eee0",
+          "0x0047e810",
+          "0x0047f7d0",
+          "0x00483aa0",
+          "0x00492510",
+          "0x004a7e30"
+        ]
+      },
+      {
+        "name": "sourceScheduler",
+        "entry": "0x00447bc0",
+        "bodyRange": "0x00447bc0-0x00447cfa",
+        "byteRange": "0x00447bc0-0x00447cfa (end exclusive)",
+        "bodySize": 315,
+        "instructionCount": 75,
+        "instructionSha256": "c5166177633b255028ae02aa6f7a60350f7e93f09ce5fcf101ac92ba066eefde",
+        "rawBodySha256": "c5d9c9c72d9aa6570ba33a6a12bd6edeb3c664273a2621807c94f17033adc845",
+        "callees": [
+          "0x00000052",
+          "0x00406af0",
+          "0x0043dc90",
+          "0x004400b0",
+          "0x00443080",
+          "0x004430b0",
+          "0x004464c0",
+          "0x00447360",
+          "0x00447e10",
+          "0x00447ed0",
+          "0x004676e0",
+          "0x0046f870",
+          "0x0046feb0",
+          "0x00477f50"
+        ]
+      },
+      {
+        "name": "k01StageUpdater",
+        "entry": "0x0048a5c0",
+        "bodyRange": "0x0048a5c0-0x0048a878",
+        "byteRange": "0x0048a5c0-0x0048a878 (end exclusive)",
+        "bodySize": 697,
+        "instructionCount": 181,
+        "instructionSha256": "c2a0e73fb0e208846f77187fa11310cdd4177f62c6fbd61732d822f513115791",
+        "rawBodySha256": "c633fe13b12fbcb770f4f3f5c0b43ecf647a96adbce78b78bc3b038f2acd4edc",
+        "callees": [
+          "0x00441de0",
+          "0x00441e40",
+          "0x00442ca0",
+          "0x00461570",
+          "0x004648d0",
+          "0x00482180",
+          "0x00482340",
+          "0x00482390",
+          "0x004823a0",
+          "0x00487fa0",
+          "0x00488080",
+          "0x00488420",
+          "0x004885e0",
+          "0x00488780",
+          "0x00488860",
+          "0x004888b0"
+        ]
+      },
+      {
+        "name": "sourceHandleValidity",
+        "entry": "0x00441e40",
+        "bodyRange": "0x00441e40-0x00441e7a",
+        "byteRange": "0x00441e40-0x00441e7a (end exclusive)",
+        "bodySize": 59,
+        "instructionCount": 19,
+        "instructionSha256": "01b3c1652d8edf30a6c0dc948215f734475111fc734338603d847545c43e7cda",
+        "rawBodySha256": "4e684e122a606473d6e2ab5b23d2252d21e54932b3ee6df909637d4b866a056b",
+        "callees": []
+      }
+    ],
+    "rawCodeRanges": [
+      {
+        "id": "map-cell-projection",
+        "byteRange": "0x00464cc0-0x00464dde (end exclusive)",
+        "sha256": "40b41b7ce95c3e7516c0bf2f6d01f1e86bf2848ed0ec5256f63d7858f55a1d10"
+      },
+      {
+        "id": "map-placement-reader",
+        "byteRange": "0x00464ea0-0x00465002 (end exclusive)",
+        "sha256": "c80b1952885965178d3093b88d8963de89f43c2c49a6ba414d46847d9e1fba0d"
+      },
+      {
+        "id": "map-placement-helper",
+        "byteRange": "0x0046d650-0x0046d6d8 (end exclusive)",
+        "sha256": "bb8e887ed7cd73e5f881f75c033532c60aa7a9f66c5dd755f9e1a05cc12b7e8a"
+      },
+      {
+        "id": "map-raster-caller",
+        "byteRange": "0x00466f20-0x004676e0 (end exclusive)",
+        "sha256": "bafebb7ea1dd47236aaac78fdb969ea463fbf667224fa49e4fdb88dad27c8dfc"
+      },
+      {
+        "id": "placement-descriptor",
+        "byteRange": "0x00488420-0x004884b5 (end exclusive)",
+        "sha256": "63ff70127fc4b0e3a34dad1c81f8be685018ff23f885842b0b25af4a27fba8bf"
+      },
+      {
+        "id": "placement-create",
+        "byteRange": "0x00483c50-0x00483c9f (end exclusive)",
+        "sha256": "74804c8127df5d7d5de87aa5425498d699a23ec68e804e67b9bf6e58bb192238"
+      },
+      {
+        "id": "entity-initializer",
+        "byteRange": "0x00437650-0x00438025 (end exclusive)",
+        "sha256": "b4d2256df02d3ac87f95819b5a739366064eeb3451c04c1716eace0c029b5ba6"
+      },
+      {
+        "id": "locomotion-normal",
+        "byteRange": "0x00425b20-0x004262df (end exclusive)",
+        "sha256": "0005d14a27d3453b3ca50e3211c4a8062b07f4c6339ad1057527fe058bdc4813"
+      },
+      {
+        "id": "projectile-route-builder",
+        "byteRange": "0x0040f9b0-0x0040fc8f (end exclusive)",
+        "sha256": "38a6ce291f92abb99ee09bb38645054b25151b90f6da62c14244ec9f3521e78a"
+      },
+      {
+        "id": "projectile-update",
+        "byteRange": "0x00410cc0-0x0041115b (end exclusive)",
+        "sha256": "d17f2a18c97aac8f2871162e875b38e23cf412d440909346fec29179c9d95e85"
+      },
+      {
+        "id": "projectile-pool",
+        "byteRange": "0x00447360-0x00447599 (end exclusive)",
+        "sha256": "783a092248ff1292fb2936d1752d7e5268e12962a934e3736b036c2665c698d0"
+      },
+      {
+        "id": "source-scheduler",
+        "byteRange": "0x00447bc0-0x00447cfa (end exclusive)",
+        "sha256": "c5d9c9c72d9aa6570ba33a6a12bd6edeb3c664273a2621807c94f17033adc845"
+      }
+    ],
+    "codeAnchors": [
+      {
+        "va": "0x00464cc6",
+        "rawOffset": "0x00064cc6",
+        "bytes": "8b 4c 24 14 66 85 c9 7c 23 8b 87 a0 2d 00 00 0f bf f1 3b f0 7d 16 8b 44 24 18 66 85 c0 7c 0d",
+        "meaning": "map projection admits signed x/y only inside map dimensions"
+      },
+      {
+        "va": "0x00464d27",
+        "rawOffset": "0x00064d27",
+        "bytes": "8d 14 33 c1 e0 05 c1 e2 04 89 01 89 55 00",
+        "meaning": "map projection writes the separate (x-y)<<5 and (x+y)<<4 base pair"
+      },
+      {
+        "va": "0x004695ab",
+        "rawOffset": "0x000695ab",
+        "bytes": "8d 84 9b e1 19 00 00 0f bf cd 8d 14 c0 89 4c 24 18 8d 04 91 66 0f b6 14 30",
+        "meaning": "placement reader loads the object byte from the x-major map field"
+      },
+      {
+        "va": "0x004695c4",
+        "rawOffset": "0x000695c4",
+        "bytes": "8d 84 9b 65 1d 00 00 0f bf fa 8d 04 c0",
+        "meaning": "placement reader forms the frame-byte field address"
+      },
+      {
+        "va": "0x00425f09",
+        "rawOffset": "0x00025f09",
+        "bytes": "66 8b 8e ee 04 00 00",
+        "meaning": "class-2 normal movement reads raw WORD +0x4ee"
+      },
+      {
+        "va": "0x00425f41",
+        "rawOffset": "0x00025f41",
+        "bytes": "66 89 86 f2 04 00 00",
+        "meaning": "class-2 normal movement stores the signed-WORD accumulator"
+      },
+      {
+        "va": "0x00425f63",
+        "rawOffset": "0x00025f63",
+        "bytes": "66 3d 32 00 0f 8c 9e 00 00 00",
+        "meaning": "coordinate commit is admitted only at signed accumulator >= 50"
+      },
+      {
+        "va": "0x00425f90",
+        "rawOffset": "0x00025f90",
+        "bytes": "66 89 8e bc 01 00 00",
+        "meaning": "coordinate commit writes next X to current +0x1bc"
+      },
+      {
+        "va": "0x0040fa11",
+        "rawOffset": "0x0000fa11",
+        "bytes": "66 89 a9 1c 01 00 00 66 3b d0 66 89 b9 5c 02 00 00 be 01 00 00 00",
+        "meaning": "projectile route stores signed-WORD start X/Y at route index zero and retains the 160-point cap"
+      },
+      {
+        "va": "0x00410e0a",
+        "rawOffset": "0x00010e0a",
+        "bytes": "66 8b 86 a6 00 00 00 0f bf c8 66 3b 86 a8 00 00 00",
+        "meaning": "projectile update compares current route index with final route index"
+      },
+      {
+        "va": "0x00417b84",
+        "rawOffset": "0x00017b84",
+        "bytes": "0f bf 86 22 01 00 00 8b ce 8d 14 c0 8d 04 50 8d 04 c0 c1 e0 03 66 8b b8 c2 52 63 00 66 8b 98 c4 52 63 00",
+        "meaning": "Ryu spawn reads the active target signed WORD endpoint fields"
+      },
+      {
+        "va": "0x00488468",
+        "rawOffset": "0x00088468",
+        "bytes": "66 85 c9 7c 2f 0f bf f1 3b 35 90 2d ac 00 7d 24",
+        "meaning": "native placement checks signed coordinate bounds after allocation"
+      },
+      {
+        "va": "0x0043782e",
+        "rawOffset": "0x0003782e",
+        "bytes": "66 89 86 b6 01 00 00 66 8b 44 24 24 66 89 be b0 01 00 00 88 5e 37 88 5e 38 66 89 8e b8 01 00 00 66 89 96 bc 01 00 00 66 89 86 be 01 00 00",
+        "meaning": "entity initializer writes slot, generation, and exact signed x/y fields"
+      }
+    ],
+    "callEdges": [
+      {
+        "callSite": "0x0046491a",
+        "caller": "0x004648e0",
+        "callee": "0x00464cc0",
+        "type": "UNCONDITIONAL_CALL"
+      },
+      {
+        "callSite": "0x00467160",
+        "caller": "0x00466f20",
+        "callee": "0x00469510",
+        "type": "UNCONDITIONAL_CALL"
+      },
+      {
+        "callSite": "0x00488440",
+        "caller": "0x00488420",
+        "callee": "0x00483a60",
+        "type": "UNCONDITIONAL_CALL"
+      },
+      {
+        "callSite": "0x00488494",
+        "caller": "0x00488420",
+        "callee": "0x00483c50",
+        "type": "UNCONDITIONAL_CALL"
+      },
+      {
+        "callSite": "0x00483c95",
+        "caller": "0x00483c50",
+        "callee": "0x00437650",
+        "type": "UNCONDITIONAL_CALL"
+      },
+      {
+        "callSite": "0x00410f7e",
+        "caller": "0x00410cc0",
+        "callee": "0x00464cc0",
+        "type": "UNCONDITIONAL_CALL"
+      },
+      {
+        "callSite": "0x00411218",
+        "caller": "0x004111b0",
+        "callee": "0x0040c6c0",
+        "type": "UNCONDITIONAL_CALL"
+      },
+      {
+        "callSite": "0x0040c830",
+        "caller": "0x0040c6c0",
+        "callee": "0x00410ab0",
+        "type": "UNCONDITIONAL_CALL"
+      },
+      {
+        "callSite": "0x0040c95c",
+        "caller": "0x0040c6c0",
+        "callee": "0x0040f9b0",
+        "type": "UNCONDITIONAL_CALL"
+      },
+      {
+        "callSite": "0x004474d0",
+        "caller": "0x00447360",
+        "callee": "0x00410cc0",
+        "type": "UNCONDITIONAL_CALL"
+      },
+      {
+        "callSite": "0x0045fd5d",
+        "caller": "0x0045f9c0",
+        "callee": "0x00447bc0",
+        "type": "UNCONDITIONAL_CALL"
+      },
+      {
+        "callSite": "0x00447cb8",
+        "caller": "0x00447bc0",
+        "callee": "0x00447360",
+        "type": "UNCONDITIONAL_CALL"
+      }
+    ]
+  },
+  "witnessExtractors": {
+    "mapPlacement": "reproduction-complete-for-all-K01-cell-vectors-and-fail-closed-reference-inputs",
+    "cellProjection": "reproduction-complete-for-hash-bound-K01-joint-distribution-output-digest-and-fail-closed-inputs",
+    "locomotion": "reproduction-complete-for-accumulator-coordinate-commit-vectors",
+    "projectile": "reproduction-complete",
+    "sourceHandle": "reproduction-complete",
+    "reinforcement": "reproduction-complete",
+    "openingUnits": "reproduction-complete",
+    "openingBuildings": "reproduction-complete",
+    "acceptedScheduler": "reproduction-complete"
+  },
+  "vectors": [
+    {
+      "id": "source-word-zero-and-origin",
+      "operation": "source-word",
+      "input": {
+        "word": 0
+      },
+      "expected": {
+        "unsignedWord": 0,
+        "signedWord": 0
+      },
+      "result": {
+        "unsignedWord": 0,
+        "signedWord": 0
+      }
+    },
+    {
+      "id": "source-word-negative-one",
+      "operation": "source-word",
+      "input": {
+        "word": 65535
+      },
+      "expected": {
+        "unsignedWord": 65535,
+        "signedWord": -1
+      },
+      "result": {
+        "unsignedWord": 65535,
+        "signedWord": -1
+      }
+    },
+    {
+      "id": "source-word-negative-word-minimum",
+      "operation": "source-word",
+      "input": {
+        "word": 32768
+      },
+      "expected": {
+        "unsignedWord": 32768,
+        "signedWord": -32768
+      },
+      "result": {
+        "unsignedWord": 32768,
+        "signedWord": -32768
+      }
+    },
+    {
+      "id": "source-word-positive-word-maximum",
+      "operation": "source-word",
+      "input": {
+        "word": 32767
+      },
+      "expected": {
+        "unsignedWord": 32767,
+        "signedWord": 32767
+      },
+      "result": {
+        "unsignedWord": 32767,
+        "signedWord": 32767
+      }
+    },
+    {
+      "id": "map-cell-origin-is-exact-grid-point",
+      "operation": "map-cell-to-grid",
+      "input": {
+        "x": 0,
+        "y": 0
+      },
+      "expected": {
+        "accepted": true,
+        "gridPoint": {
+          "x": 0,
+          "y": 0
+        },
+        "rounding": "none",
+        "scale": 1
+      },
+      "result": {
+        "accepted": true,
+        "gridPoint": {
+          "x": 0,
+          "y": 0
+        },
+        "rounding": "none",
+        "scale": 1
+      }
+    },
+    {
+      "id": "map-cell-max-edge-is-in-bounds",
+      "operation": "map-cell-to-grid",
+      "input": {
+        "x": 59,
+        "y": 59
+      },
+      "expected": {
+        "accepted": true,
+        "gridPoint": {
+          "x": 59,
+          "y": 59
+        },
+        "rounding": "none",
+        "scale": 1
+      },
+      "result": {
+        "accepted": true,
+        "gridPoint": {
+          "x": 59,
+          "y": 59
+        },
+        "rounding": "none",
+        "scale": 1
+      }
+    },
+    {
+      "id": "map-cell-first-positive-oob",
+      "operation": "map-cell-to-grid",
+      "input": {
+        "x": 60,
+        "y": 0
+      },
+      "expected": {
+        "accepted": false,
+        "reason": "out-of-bounds"
+      },
+      "result": {
+        "accepted": false,
+        "reason": "out-of-bounds"
+      }
+    },
+    {
+      "id": "map-cell-negative-signed-oob",
+      "operation": "map-cell-to-grid",
+      "input": {
+        "x": -1,
+        "y": 0
+      },
+      "expected": {
+        "accepted": false,
+        "reason": "out-of-bounds"
+      },
+      "result": {
+        "accepted": false,
+        "reason": "out-of-bounds"
+      }
+    },
+    {
+      "id": "placement-opening-origin-record",
+      "operation": "placement-to-grid",
+      "input": {
+        "origin": {
+          "x": 55,
+          "y": 53
+        },
+        "offset": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      "expected": {
+        "accepted": true,
+        "sourceCoordinate": {
+          "x": 55,
+          "y": 53
+        },
+        "gridPoint": {
+          "x": 55,
+          "y": 53
+        },
+        "rounding": "none",
+        "scale": 1
+      },
+      "result": {
+        "accepted": true,
+        "sourceCoordinate": {
+          "x": 55,
+          "y": 53
+        },
+        "gridPoint": {
+          "x": 55,
+          "y": 53
+        },
+        "rounding": "none",
+        "scale": 1
+      }
+    },
+    {
+      "id": "placement-negative-offset-pair",
+      "operation": "placement-to-grid",
+      "input": {
+        "origin": {
+          "x": 55,
+          "y": 53
+        },
+        "offset": {
+          "x": -2,
+          "y": -2
+        }
+      },
+      "expected": {
+        "accepted": true,
+        "sourceCoordinate": {
+          "x": 53,
+          "y": 51
+        },
+        "gridPoint": {
+          "x": 53,
+          "y": 51
+        },
+        "rounding": "none",
+        "scale": 1
+      },
+      "result": {
+        "accepted": true,
+        "sourceCoordinate": {
+          "x": 53,
+          "y": 51
+        },
+        "gridPoint": {
+          "x": 53,
+          "y": 51
+        },
+        "rounding": "none",
+        "scale": 1
+      }
+    },
+    {
+      "id": "placement-word-sum-wraps-signed",
+      "operation": "placement-to-grid",
+      "input": {
+        "origin": {
+          "x": 32767,
+          "y": 0
+        },
+        "offset": {
+          "x": 1,
+          "y": 0
+        }
+      },
+      "expected": {
+        "accepted": false,
+        "reason": "out-of-bounds",
+        "sourceCoordinate": {
+          "x": -32768,
+          "y": 0
+        }
+      },
+      "result": {
+        "accepted": false,
+        "reason": "out-of-bounds",
+        "sourceCoordinate": {
+          "x": -32768,
+          "y": 0
+        }
+      }
+    },
+    {
+      "id": "movement-accumulator-just-below-commit",
+      "operation": "movement-commit",
+      "input": {
+        "accumulatorWord": 0,
+        "rawInputWord": 49,
+        "selectorByte": 0,
+        "currentXWord": 10,
+        "currentYWord": 20,
+        "nextXWord": 11,
+        "nextYWord": 20
+      },
+      "expected": {
+        "committed": false,
+        "accumulatorWord": 49,
+        "currentXWord": 10,
+        "currentYWord": 20
+      },
+      "result": {
+        "selectorByte": 0,
+        "rawInputWord": 49,
+        "appliedDeltaWord": 49,
+        "accumulatorWord": 49,
+        "committed": false,
+        "currentXWord": 10,
+        "currentYWord": 20,
+        "snapshotXWord": null,
+        "snapshotYWord": null,
+        "interpolationNextXWord": null,
+        "interpolationNextYWord": null
+      }
+    },
+    {
+      "id": "movement-accumulator-threshold-commits-and-subtracts",
+      "operation": "movement-commit",
+      "input": {
+        "accumulatorWord": 0,
+        "rawInputWord": 50,
+        "selectorByte": 0,
+        "currentXWord": 10,
+        "currentYWord": 20,
+        "nextXWord": 11,
+        "nextYWord": 21
+      },
+      "expected": {
+        "committed": true,
+        "accumulatorWord": 65486,
+        "currentXWord": 11,
+        "currentYWord": 21,
+        "snapshotXWord": 10,
+        "snapshotYWord": 20
+      },
+      "result": {
+        "selectorByte": 0,
+        "rawInputWord": 50,
+        "appliedDeltaWord": 50,
+        "accumulatorWord": 65486,
+        "committed": true,
+        "currentXWord": 11,
+        "currentYWord": 21,
+        "snapshotXWord": 10,
+        "snapshotYWord": 20,
+        "interpolationNextXWord": 11,
+        "interpolationNextYWord": 21
+      }
+    },
+    {
+      "id": "movement-selector-one-truncates-toward-zero",
+      "operation": "movement-commit",
+      "input": {
+        "accumulatorWord": 0,
+        "rawInputWord": 65532,
+        "selectorByte": 1,
+        "currentXWord": 30,
+        "currentYWord": 40,
+        "nextXWord": 31,
+        "nextYWord": 40
+      },
+      "expected": {
+        "committed": false,
+        "appliedDeltaWord": 65533,
+        "accumulatorWord": 65533,
+        "currentXWord": 30,
+        "currentYWord": 40
+      },
+      "result": {
+        "selectorByte": 1,
+        "rawInputWord": 65532,
+        "appliedDeltaWord": 65533,
+        "accumulatorWord": 65533,
+        "committed": false,
+        "currentXWord": 30,
+        "currentYWord": 40,
+        "snapshotXWord": null,
+        "snapshotYWord": null,
+        "interpolationNextXWord": null,
+        "interpolationNextYWord": null
+      }
+    },
+    {
+      "id": "movement-negative-to-positive-clamps-zero",
+      "operation": "movement-commit",
+      "input": {
+        "accumulatorWord": 65526,
+        "rawInputWord": 20,
+        "selectorByte": 0,
+        "currentXWord": 3,
+        "currentYWord": 4,
+        "nextXWord": 4,
+        "nextYWord": 4
+      },
+      "expected": {
+        "committed": false,
+        "accumulatorWord": 0,
+        "currentXWord": 3,
+        "currentYWord": 4
+      },
+      "result": {
+        "selectorByte": 0,
+        "rawInputWord": 20,
+        "appliedDeltaWord": 20,
+        "accumulatorWord": 0,
+        "committed": false,
+        "currentXWord": 3,
+        "currentYWord": 4,
+        "snapshotXWord": null,
+        "snapshotYWord": null,
+        "interpolationNextXWord": null,
+        "interpolationNextYWord": null
+      }
+    },
+    {
+      "id": "projectile-route-origin-and-endpoint",
+      "operation": "projectile-route",
+      "input": {
+        "startX": 0,
+        "startY": 0,
+        "endX": 28,
+        "endY": 14,
+        "sampleInterval": 14
+      },
+      "expected": {
+        "points": [
+          {
+            "x": 0,
+            "y": 0
+          },
+          {
+            "x": 14,
+            "y": 7
+          },
+          {
+            "x": 28,
+            "y": 14
+          }
+        ],
+        "finalRouteIndex": 2,
+        "updateCountUntilImpact": 3
+      },
+      "result": {
+        "points": [
+          {
+            "x": 0,
+            "y": 0
+          },
+          {
+            "x": 14,
+            "y": 7
+          },
+          {
+            "x": 28,
+            "y": 14
+          }
+        ],
+        "finalRouteIndex": 2,
+        "updateCountUntilImpact": 3
+      }
+    },
+    {
+      "id": "projectile-route-short-endpoint-keeps-start",
+      "operation": "projectile-route",
+      "input": {
+        "startX": 10,
+        "startY": 20,
+        "endX": 23,
+        "endY": 20,
+        "sampleInterval": 14
+      },
+      "expected": {
+        "points": [
+          {
+            "x": 10,
+            "y": 20
+          }
+        ],
+        "finalRouteIndex": 0,
+        "updateCountUntilImpact": 1
+      },
+      "result": {
+        "points": [
+          {
+            "x": 10,
+            "y": 20
+          }
+        ],
+        "finalRouteIndex": 0,
+        "updateCountUntilImpact": 1
+      }
+    },
+    {
+      "id": "projectile-route-signed-positive-boundary",
+      "operation": "projectile-route",
+      "input": {
+        "startX": 32767,
+        "startY": 32767,
+        "endX": 32767,
+        "endY": 32767,
+        "sampleInterval": 14
+      },
+      "expected": {
+        "points": [
+          {
+            "x": 32767,
+            "y": 32767
+          }
+        ],
+        "finalRouteIndex": 0,
+        "updateCountUntilImpact": 1
+      },
+      "result": {
+        "points": [
+          {
+            "x": 32767,
+            "y": 32767
+          }
+        ],
+        "finalRouteIndex": 0,
+        "updateCountUntilImpact": 1
+      }
+    },
+    {
+      "id": "coordinate-contract-keeps-unresolved-domains-opaque",
+      "operation": "coordinate-contract",
+      "input": {},
+      "expected": {
+        "mapCell": {
+          "sourceToGrid": "identity-in-bounds",
+          "gridToSource": "identity-in-bounds"
+        },
+        "placement": {
+          "sourceToGrid": "identity-in-bounds",
+          "gridToSource": "identity-in-bounds"
+        },
+        "locomotion": {
+          "sourceToGrid": "reject-unresolved-scale",
+          "gridToSource": "reject-unresolved-scale"
+        },
+        "projectile": {
+          "sourceToGrid": "reject-unresolved-scale",
+          "gridToSource": "reject-unresolved-scale"
+        }
+      },
+      "result": {
+        "mapCell": {
+          "sourceToGrid": "identity-in-bounds",
+          "gridToSource": "identity-in-bounds"
+        },
+        "placement": {
+          "sourceToGrid": "identity-in-bounds",
+          "gridToSource": "identity-in-bounds"
+        },
+        "locomotion": {
+          "sourceToGrid": "reject-unresolved-scale",
+          "gridToSource": "reject-unresolved-scale"
+        },
+        "projectile": {
+          "sourceToGrid": "reject-unresolved-scale",
+          "gridToSource": "reject-unresolved-scale"
+        }
+      }
+    }
+  ],
+  "unresolved": [
+    "locomotion +0x1bc/+0x1be and +0x4ee/+0x4ea source unit, producer range, interpolation and occupancy mapping",
+    "projectile caller's full signed-WORD coordinate range, source-to-project GridPoint scale, endpoint producer and anchor",
+    "placement raw owner meaning, wider footprints, and create-return movement/pathfinding lifecycle",
+    "runtime WORD adjustment table lifetime/order and human terrain/elevation meaning",
+    "C01 raw scheduler clock to project tick and E01 source identity/generation to project entity identity"
+  ]
+}
