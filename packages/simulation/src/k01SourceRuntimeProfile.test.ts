@@ -1,19 +1,20 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  K01_SOURCE_RUNTIME_LEGACY_STATE_VERSION,
+  K01_SOURCE_RUNTIME_PROFILE_ID,
+  K01_SOURCE_RUNTIME_STATE_VERSION,
   cloneSourceRuntimeProfileEnvelope,
   createInitialWorldState,
   createK01SourceRuntimeState,
   createSourceRuntimeProfileEnvelope,
-  K01_SOURCE_RUNTIME_PROFILE_ID,
-  K01_SOURCE_RUNTIME_STATE_VERSION,
+  migrateK01SourceRuntimeStateV1,
   parseSourceRuntimeProfileEnvelope,
   toWorldSnapshot,
   updateK01SourceRuntimeState,
-  type K01SourceEntityState,
   type K01SourceRuntimeState,
 } from "./index.js";
-import { createBlankMap, defaultSkirmishScenario, imjinrokK01Scenario } from "../../shared/src/index.js";
+import { createBlankMap, createImjinrokMapScaffold, defaultSkirmishScenario, imjinrokK01Scenario } from "../../shared/src/index.js";
 
 test("generic fresh worlds omit the source runtime envelope and preserve the legacy JSON shape", () => {
   const state = createInitialWorldState(createBlankMap(), ["p1"]);
@@ -25,74 +26,57 @@ test("generic fresh worlds omit the source runtime envelope and preserve the leg
   assert.equal(JSON.stringify(snapshot).includes("source-runtime"), false);
 });
 
-test("K01 scenario opt-in creates the canonical profile and deterministic initial state", () => {
-  const first = createInitialWorldState(createBlankMap({ id: imjinrokK01Scenario.mapId }), ["local-player"], imjinrokK01Scenario);
-  const second = createInitialWorldState(createBlankMap({ id: imjinrokK01Scenario.mapId }), ["local-player"], imjinrokK01Scenario);
-
-  assert.deepEqual(first.sourceRuntimeProfile, {
-    profileId: K01_SOURCE_RUNTIME_PROFILE_ID,
-    stateVersion: K01_SOURCE_RUNTIME_STATE_VERSION,
-    state: {
-      acceptedUpdateCount: 0,
-      entities: [],
-    },
-  });
-  assert.deepEqual(toWorldSnapshot(first).sourceRuntimeProfile, first.sourceRuntimeProfile);
-  assert.equal(JSON.stringify(first.sourceRuntimeProfile).includes("createInitialState"), false);
-  assert.deepEqual(first.sourceRuntimeProfile, second.sourceRuntimeProfile);
+test("K01 scenario seeds the canonical profile deterministically and keeps source fields in general runtime layers", () => {
+  const map = createImjinrokMapScaffold(imjinrokK01Scenario.mapId);
+  assert.ok(map);
+  const first = createInitialWorldState(map, ["local-player", "cpu-1"], imjinrokK01Scenario);
+  const second = createInitialWorldState(map, ["local-player", "cpu-1"], imjinrokK01Scenario);
+  const profile = first.sourceRuntimeProfile;
+  assert.ok(profile);
+  assert.equal(profile.stateVersion, K01_SOURCE_RUNTIME_STATE_VERSION);
+  const sourceState = profile.state as K01SourceRuntimeState;
+  assert.equal(sourceState.entityRuntime.entities.length, 36);
+  assert.equal(sourceState.entityRuntime.activeList.length, 36);
+  assert.equal(sourceState.entityRuntime.activeList[0], 1199);
+  assert.equal(sourceState.entityRuntime.entities.find((entity) => entity.sourceRecordIndex === 0)?.sourceRecordIndex, 0);
+  assert.equal(sourceState.entityRuntime.entities.every((entity) => entity.active), true);
+  assert.equal(sourceState.occupancy.width, 60);
+  assert.equal(sourceState.occupancy.height, 60);
+  assert.deepEqual(toWorldSnapshot(first), toWorldSnapshot(second));
+  assert.equal(JSON.stringify(profile).includes("createInitialState"), false);
   assert.equal(defaultSkirmishScenario.sourceRuntimeProfileId, undefined);
 });
 
-test("K01 state updates are pure, clone-safe, and canonicalize insertion order", () => {
+test("K01 state updates are pure, clone-safe, and preserve strict v2 layers", () => {
   const initial = createK01SourceRuntimeState();
-  const entities: K01SourceEntityState[] = [
-    { slot: 12, generation: 4, active: true, health: 320 },
-    { slot: 3, generation: 0, active: false, health: 0 },
-  ];
-  const next = updateK01SourceRuntimeState(initial, {
-    acceptedUpdateCount: 17,
-    entities,
-  });
+  const next = updateK01SourceRuntimeState(initial, { acceptedUpdateCount: 17 });
 
-  assert.deepEqual(initial, { acceptedUpdateCount: 0, entities: [] });
-  assert.deepEqual(next, {
-    acceptedUpdateCount: 17,
-    entities: [entities[1], entities[0]],
-  });
-
-  entities[0].health = 1;
-  assert.equal(next.entities[1]?.health, 320);
+  assert.equal(initial.acceptedUpdateCount, 0);
+  assert.equal(next.acceptedUpdateCount, 17);
+  assert.deepEqual(next.entityRuntime, initial.entityRuntime);
+  assert.deepEqual(next.occupancy, initial.occupancy);
 
   const envelope = createSourceRuntimeProfileEnvelope(K01_SOURCE_RUNTIME_PROFILE_ID);
-  const modified = cloneSourceRuntimeProfileEnvelope({
-    ...envelope,
-    state: next,
-  });
+  const modified = cloneSourceRuntimeProfileEnvelope({ ...envelope, state: next });
   const parsed = cloneSourceRuntimeProfileEnvelope(JSON.parse(JSON.stringify(modified)));
   assert.deepEqual(parsed, modified);
-  (parsed.state.entities as K01SourceEntityState[])[0]!.health = 99;
-  assert.equal((modified.state.entities as K01SourceEntityState[])[0]!.health, 0);
+  (parsed.state as K01SourceRuntimeState).entityRuntime.activeTable[1] = 1;
+  assert.equal((modified.state as K01SourceRuntimeState).entityRuntime.activeTable[1], 0);
 });
 
-test("K01 source envelope boundaries reject unknown ids, unsupported versions, malformed fields, and unsafe ranges", () => {
+test("K01 source envelope rejects malformed v2 values and keeps generic profile boundaries closed", () => {
   const envelope = createSourceRuntimeProfileEnvelope(K01_SOURCE_RUNTIME_PROFILE_ID);
   const invalidValues: readonly [string, unknown][] = [
     ["null", null],
     ["array", []],
     ["wrong profile id type", { ...envelope, profileId: 3 }],
     ["unknown profile id", { ...envelope, profileId: "missing:source-runtime" }],
-    ["unsupported version", { ...envelope, stateVersion: 2 }],
+    ["unsupported version", { ...envelope, stateVersion: 3 }],
     ["missing state field", { profileId: envelope.profileId, stateVersion: envelope.stateVersion }],
     ["extra envelope field", { ...envelope, executable: () => true }],
     ["state array", { ...envelope, state: [] }],
-    ["NaN count", { ...envelope, state: { acceptedUpdateCount: Number.NaN, entities: [] } }],
-    ["infinite count", { ...envelope, state: { acceptedUpdateCount: Number.POSITIVE_INFINITY, entities: [] } }],
-    ["missing state field", { ...envelope, state: { entities: [] } }],
-    ["extra state field", { ...envelope, state: { acceptedUpdateCount: 0, entities: [], clock: 1 } }],
-    ["slot out of range", { ...envelope, state: { acceptedUpdateCount: 0, entities: [{ slot: 0, generation: 0, active: true, health: 1 }] } }],
-    ["generation out of range", { ...envelope, state: { acceptedUpdateCount: 0, entities: [{ slot: 1, generation: 65536, active: true, health: 1 }] } }],
-    ["health out of range", { ...envelope, state: { acceptedUpdateCount: 0, entities: [{ slot: 1, generation: 0, active: true, health: 32768 }] } }],
-    ["duplicate slots", { ...envelope, state: { acceptedUpdateCount: 0, entities: [{ slot: 1, generation: 0, active: true, health: 1 }, { slot: 1, generation: 1, active: false, health: 0 }] } }],
+    ["missing entity runtime", { ...envelope, state: { acceptedUpdateCount: 0, occupancy: { width: 0, height: 0, ownerSlots: [] } } }],
+    ["active table wrong width", { ...envelope, state: { acceptedUpdateCount: 0, entityRuntime: { generationCounter: 0, activeTable: [], activeList: [], reuseAges: Array(1200).fill(0), entities: [] }, occupancy: { width: 0, height: 0, ownerSlots: [] } } }],
   ];
 
   for (const [label, value] of invalidValues) {
@@ -101,42 +85,33 @@ test("K01 source envelope boundaries reject unknown ids, unsupported versions, m
   }
 });
 
-test("source registry executable behavior is absent from JSON and unknown profile creation fails closed", () => {
-  assert.throws(
-    () => createSourceRuntimeProfileEnvelope("missing:source-runtime"),
-    /Unknown source runtime profile 'missing:source-runtime'/,
-  );
-
-  const envelope = createSourceRuntimeProfileEnvelope(K01_SOURCE_RUNTIME_PROFILE_ID);
-  const json = JSON.stringify(envelope);
-  assert.equal(json.includes("createInitialState"), false);
-  assert.equal(json.includes("validateState"), false);
-  assert.equal(json.includes("cloneState"), false);
-});
-
-test("legacy snapshots remain accepted without inventing a schema version", () => {
-  const legacy = toWorldSnapshot(createInitialWorldState(createBlankMap(), ["p1"]));
-  const roundTrip = JSON.parse(JSON.stringify(legacy)) as typeof legacy;
-  assert.equal(roundTrip.sourceRuntimeProfile, undefined);
-  assert.deepEqual(roundTrip, legacy);
-});
-
-test("source profile updates preserve exact field round trips without advancing runtime", () => {
-  let state: K01SourceRuntimeState = createK01SourceRuntimeState();
-  state = updateK01SourceRuntimeState(state, { acceptedUpdateCount: 0xffffffff });
-  state = updateK01SourceRuntimeState(state, {
-    entities: [{ slot: 1199, generation: 0xffff, active: false, health: -0x8000 }],
-  });
-
-  const envelope = cloneSourceRuntimeProfileEnvelope({
+test("v1 migration is explicit, accepts only empty legacy state, and rejects non-empty records", () => {
+  const migrated = cloneSourceRuntimeProfileEnvelope({
     profileId: K01_SOURCE_RUNTIME_PROFILE_ID,
-    stateVersion: K01_SOURCE_RUNTIME_STATE_VERSION,
-    state,
+    stateVersion: K01_SOURCE_RUNTIME_LEGACY_STATE_VERSION,
+    state: { acceptedUpdateCount: 9, entities: [] },
   });
+  assert.equal(migrated.stateVersion, K01_SOURCE_RUNTIME_STATE_VERSION);
+  assert.equal((migrated.state as K01SourceRuntimeState).acceptedUpdateCount, 9);
+  assert.equal((migrated.state as K01SourceRuntimeState).entityRuntime.entities.length, 0);
+  assert.throws(
+    () => migrateK01SourceRuntimeStateV1({ acceptedUpdateCount: 0, entities: [{ slot: 1, generation: 0, active: true, health: 1 }] }),
+    /rejected non-empty entities/,
+  );
+  assert.equal(
+    parseSourceRuntimeProfileEnvelope({
+      profileId: K01_SOURCE_RUNTIME_PROFILE_ID,
+      stateVersion: K01_SOURCE_RUNTIME_LEGACY_STATE_VERSION,
+      state: { acceptedUpdateCount: 0, entities: [{ slot: 1, generation: 0, active: true, health: 1 }] },
+    }),
+    null,
+  );
+});
+
+test("source profile envelope round-trips JSON without executable policy state", () => {
+  const envelope = createSourceRuntimeProfileEnvelope(K01_SOURCE_RUNTIME_PROFILE_ID);
   const restored = cloneSourceRuntimeProfileEnvelope(JSON.parse(JSON.stringify(envelope)));
   assert.deepEqual(restored, envelope);
-  assert.equal((restored.state as K01SourceRuntimeState).acceptedUpdateCount, 0xffffffff);
-  assert.deepEqual((restored.state as K01SourceRuntimeState).entities, [
-    { slot: 1199, generation: 0xffff, active: false, health: -0x8000 },
-  ]);
+  assert.equal(JSON.stringify(restored).includes("createInitialState"), false);
+  assert.equal(JSON.stringify(restored).includes("validateState"), false);
 });

@@ -18,7 +18,7 @@ import { createProjectileSystemState } from "./projectiles.js";
 import { resolveAttackTargetAuthorityPolicyId } from "./attackTargetAuthorityPolicy.js";
 import { resolveCapacityPolicyId } from "./capacity.js";
 import "./k01WarExpenseCapacity.js";
-import { cloneSourceRuntimeProfileEnvelope, createSourceRuntimeProfileEnvelope, resolveSourceRuntimeProfileId } from "./k01SourceRuntimeProfile.js";
+import { cloneSourceRuntimeProfileEnvelope, createSourceRuntimeProfileEnvelope, resolveSourceRuntimeProfileId, seedK01SourceOpeningRuntimeState, validateK01SourceRuntimeState, K01_SOURCE_RUNTIME_PROFILE_ID } from "./k01SourceRuntimeProfile.js";
 import { requireInitialPlacementPolicy } from "./initialPlacement.js";
 import { resolveSourceRuntimeInitialPlacementPolicyId } from "./k01SourceRuntimeProfile.js";
 import { createPlayerResearchState } from "./research.js";
@@ -287,7 +287,23 @@ export function createInitialWorldState(
   };
 
   if (sourceRuntimeProfileId !== undefined) {
-    state.sourceRuntimeProfile = createSourceRuntimeProfileEnvelope(sourceRuntimeProfileId);
+    let sourceRuntimeProfile = createSourceRuntimeProfileEnvelope(sourceRuntimeProfileId);
+    if (sourceRuntimeProfileId === K01_SOURCE_RUNTIME_PROFILE_ID && worldMap.id === "imjinrok-k01") {
+      validateK01SourceRuntimeState(sourceRuntimeProfile.state);
+      sourceRuntimeProfile = {
+        ...sourceRuntimeProfile,
+        state: seedK01SourceOpeningRuntimeState(sourceRuntimeProfile.state, {
+          map: worldMap,
+          units: Object.fromEntries(Object.values(units).map((unit) => [unit.id, {
+            id: unit.id,
+            kind: unit.kind,
+            position: unit.position,
+            health: unit.health.current,
+          }])),
+        }),
+      };
+    }
+    state.sourceRuntimeProfile = sourceRuntimeProfile;
   }
 
   applyScenarioScriptedEvents(state, { tickTriggersOnly: true });

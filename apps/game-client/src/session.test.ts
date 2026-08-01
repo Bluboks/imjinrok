@@ -7,6 +7,7 @@ import {
   PRODUCT_IMMEDIATE_PROJECTILE_PROFILE,
   PRODUCT_PROJECTILE_REGISTRY,
   spawnProjectile,
+  type K01SourceRuntimeState,
   type ProjectileRegistry,
   type WorldSnapshot,
 } from "@simulation";
@@ -154,10 +155,13 @@ test("K01 quick-save and local SessionTransport preserve the opaque profile enve
 
   assert.equal(profile?.profileId, K01_SOURCE_RUNTIME_PROFILE_ID);
   assert.ok(profile);
+  const originalState = profile.state as K01SourceRuntimeState;
+  const editedEntities = originalState.entityRuntime.entities.map((entity, index) => index === 0 ? { ...entity, health: 480 } : entity);
   Object.assign(profile, {
     state: {
+      ...originalState,
       acceptedUpdateCount: 9,
-      entities: [{ slot: 17, generation: 3, active: true, health: 480 }],
+      entityRuntime: { ...originalState.entityRuntime, entities: editedEntities },
     },
   });
 
@@ -165,9 +169,10 @@ test("K01 quick-save and local SessionTransport preserve the opaque profile enve
   assert.ok(normalized);
   assert.deepEqual(normalized.sourceRuntimeProfile, snapshot.sourceRuntimeProfile);
 
-  const normalizedState = normalized.sourceRuntimeProfile?.state as { entities: { health: number }[] };
-  normalizedState.entities[0]!.health = 1;
-  assert.equal((snapshot.sourceRuntimeProfile?.state.entities[0] as { health: number }).health, 480);
+  const normalizedState = normalized.sourceRuntimeProfile?.state as K01SourceRuntimeState;
+  const normalizedEntities = normalizedState.entityRuntime.entities.map((entity, index) => index === 0 ? { ...entity, health: 1 } : entity);
+  normalizedState.entityRuntime.entities = normalizedEntities;
+  assert.equal((snapshot.sourceRuntimeProfile?.state as K01SourceRuntimeState).entityRuntime.entities[0]?.health, 480);
 
   const transport = new LocalSessionTransport(snapshot);
   assert.deepEqual(transport.getSnapshot().sourceRuntimeProfile, snapshot.sourceRuntimeProfile);

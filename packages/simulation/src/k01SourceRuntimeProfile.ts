@@ -1,14 +1,49 @@
+import {
+  admitCompletedK01Construction,
+  admitK01SourceEntity,
+  allocateK01SourceEntity,
+  clearSourceOccupancy,
+  cloneK01SourceRuntimeStateV2,
+  createK01SourceRuntimeStateV2,
+  getK01SourceEntityHandleBySemanticUnitId,
+  releaseK01SourceEntity,
+  seedK01SourceOpeningRuntime,
+  updateK01SourceRuntimeStateV2,
+  validateK01SourceEntityHandle,
+  validateK01SourceRuntimeStateV2,
+  writeSourceOccupancy,
+  K01_SOURCE_ENTITY_SLOT_MAX,
+  K01_SOURCE_ENTITY_SLOT_MIN,
+  K01_SOURCE_GENERATION_MAX,
+  K01_SOURCE_GENERATION_MIN,
+  K01_SOURCE_HEALTH_MAX,
+  K01_SOURCE_HEALTH_MIN,
+  K01_SOURCE_PROGRESS_COMPLETE,
+  type K01CompletedConstructionAdmissionRequest,
+  type K01SourceEntityAdmissionRequest,
+  type K01SourceEntityAdmissionResult,
+  type K01SourceEntityHandle,
+  type K01SourceEntityRecord,
+  type K01SourceEntityRuntimeState,
+  type K01SourceOccupancyState,
+  type K01SourceOpeningSeedRequest,
+  type K01SourceRuntimeStateV2,
+} from "./k01SourceEntityRuntime.js";
 import type { SourceRuntimeProfileEnvelope } from "./types.js";
 
 /** Stable process-local selector for the first source-runtime profile. */
 export const K01_SOURCE_RUNTIME_PROFILE_ID = "k01:source-runtime";
-export const K01_SOURCE_RUNTIME_STATE_VERSION = 1;
-export const K01_SOURCE_ENTITY_SLOT_MIN = 1;
-export const K01_SOURCE_ENTITY_SLOT_MAX = 1199;
-export const K01_SOURCE_GENERATION_MIN = 0;
-export const K01_SOURCE_GENERATION_MAX = 0xffff;
-export const K01_SOURCE_HEALTH_MIN = -0x8000;
-export const K01_SOURCE_HEALTH_MAX = 0x7fff;
+export const K01_SOURCE_RUNTIME_STATE_VERSION = 2;
+export const K01_SOURCE_RUNTIME_LEGACY_STATE_VERSION = 1;
+export {
+  K01_SOURCE_ENTITY_SLOT_MAX,
+  K01_SOURCE_ENTITY_SLOT_MIN,
+  K01_SOURCE_GENERATION_MAX,
+  K01_SOURCE_GENERATION_MIN,
+  K01_SOURCE_HEALTH_MAX,
+  K01_SOURCE_HEALTH_MIN,
+  K01_SOURCE_PROGRESS_COMPLETE,
+} from "./k01SourceEntityRuntime.js";
 export const K01_ACCEPTED_UPDATE_COUNT_MIN = 0;
 export const K01_ACCEPTED_UPDATE_COUNT_MAX = 0xffffffff;
 
@@ -18,29 +53,23 @@ export const K01_ACCEPTED_UPDATE_COUNT_MAX = 0xffffffff;
  * fields. They remain inside the K01-owned opaque state and never become
  * generic UnitState fields.
  */
-export interface K01SourceEntityState {
-  readonly slot: number;
-  readonly generation: number;
-  readonly active: boolean;
-  readonly health: number;
-}
-
-/**
- * Serializable K01 state. `acceptedUpdateCount` is an adapter-owned ordinal,
- * not a claim about raw clock units or a fixed-Hz conversion. Coordinates,
- * scheduler clocks, occupancy aliases, and projectile units stay out until
- * their evidence boundaries are closed.
- */
-export interface K01SourceRuntimeState {
-  readonly [key: string]: unknown;
-  readonly acceptedUpdateCount: number;
-  readonly entities: readonly K01SourceEntityState[];
-}
-
-export interface K01SourceRuntimeStatePatch {
-  readonly acceptedUpdateCount?: number;
-  readonly entities?: readonly K01SourceEntityState[];
-}
+/** Serializable K01 state. Policy flags, scripts, trigger results, and raw
+ * clocks intentionally do not belong to this general entity-runtime layer. */
+export type K01SourceRuntimeState = K01SourceRuntimeStateV2;
+export type K01SourceEntityState = K01SourceEntityRecord;
+export type K01SourceRuntimeStatePatch = Partial<Pick<K01SourceRuntimeState, "acceptedUpdateCount" | "entityRuntime" | "occupancy">>;
+export type {
+  K01CompletedConstructionAdmissionRequest,
+  K01SourceEntityAdmissionRequest,
+  K01SourceEntityAdmissionResult,
+  K01SourceEntityHandle,
+  K01SourceEntityRecord,
+  K01SourceEntityRuntimeState,
+  K01SourceEntityRuntimeState as K01SourceEntityRuntime,
+  K01SourceOccupancyState,
+  K01SourceOpeningSeedRequest,
+  K01SourceRuntimeStateV2,
+} from "./k01SourceEntityRuntime.js";
 
 export interface SourceRuntimeProfile {
   readonly id: string;
@@ -137,10 +166,7 @@ export function resolveSourceRuntimeProfileId(id: string | undefined): string | 
 }
 
 export function createK01SourceRuntimeState(): K01SourceRuntimeState {
-  return {
-    acceptedUpdateCount: 0,
-    entities: [],
-  };
+  return createK01SourceRuntimeStateV2();
 }
 
 /** Pure replacement API; it never advances a tick or mutates its input. */
@@ -148,19 +174,70 @@ export function updateK01SourceRuntimeState(
   state: K01SourceRuntimeState,
   patch: K01SourceRuntimeStatePatch,
 ): K01SourceRuntimeState {
-  validateK01SourceRuntimeState(state);
-  assertPlainObject(patch, "K01 source runtime state patch");
-  assertAllowedKeys(patch, ["acceptedUpdateCount", "entities"], "K01 source runtime state patch");
+  return updateK01SourceRuntimeStateV2(state, patch);
+}
 
-  const next: K01SourceRuntimeState = {
-    acceptedUpdateCount: patch.acceptedUpdateCount ?? state.acceptedUpdateCount,
-    entities: patch.entities === undefined
-      ? state.entities
-      : [...patch.entities].sort((left, right) => left.slot - right.slot),
-  };
+export function admitK01SourceEntityRuntime(
+  state: K01SourceRuntimeState,
+  request: K01SourceEntityAdmissionRequest,
+): K01SourceEntityAdmissionResult {
+  return admitK01SourceEntity(state, request);
+}
 
-  validateK01SourceRuntimeState(next);
-  return cloneK01SourceRuntimeState(next);
+export function allocateK01SourceEntityRuntime(
+  state: K01SourceRuntimeState,
+  request: K01SourceEntityAdmissionRequest,
+): K01SourceEntityAdmissionResult {
+  return allocateK01SourceEntity(state, request);
+}
+
+export function admitCompletedK01ConstructionRuntime(
+  state: K01SourceRuntimeState,
+  request: K01CompletedConstructionAdmissionRequest,
+): K01SourceEntityAdmissionResult {
+  return admitCompletedK01Construction(state, request);
+}
+
+export function validateK01SourceEntityHandleRuntime(
+  state: K01SourceRuntimeState,
+  handle: K01SourceEntityHandle,
+): K01SourceEntityRecord {
+  return validateK01SourceEntityHandle(state, handle);
+}
+
+export function getK01SourceEntityHandleBySemanticUnitIdRuntime(
+  state: K01SourceRuntimeState,
+  semanticUnitId: string,
+): K01SourceEntityHandle | undefined {
+  return getK01SourceEntityHandleBySemanticUnitId(state, semanticUnitId);
+}
+
+export function writeK01SourceOccupancy(
+  state: K01SourceRuntimeState,
+  handle: K01SourceEntityHandle,
+): K01SourceRuntimeState {
+  return writeSourceOccupancy(state, handle);
+}
+
+export function clearK01SourceOccupancy(
+  state: K01SourceRuntimeState,
+  handle: K01SourceEntityHandle,
+): K01SourceRuntimeState {
+  return clearSourceOccupancy(state, handle);
+}
+
+export function releaseK01SourceEntityRuntime(
+  state: K01SourceRuntimeState,
+  handle: K01SourceEntityHandle,
+): K01SourceRuntimeState {
+  return releaseK01SourceEntity(state, handle);
+}
+
+export function seedK01SourceOpeningRuntimeState(
+  state: K01SourceRuntimeState,
+  request: K01SourceOpeningSeedRequest,
+): K01SourceRuntimeState {
+  return seedK01SourceOpeningRuntime(state, request);
 }
 
 export function createSourceRuntimeProfileEnvelope(profileId: string): SourceRuntimeProfileEnvelope {
@@ -174,6 +251,40 @@ export function createSourceRuntimeProfileEnvelope(profileId: string): SourceRun
     profileId: profile.id,
     stateVersion: profile.stateVersion,
     state: clonedState,
+  };
+}
+
+/**
+ * Explicit v1 migration. A v1 entity record did not carry class, owner, map
+ * coordinates, footprint, or semantic identity, so only an empty v1 state is
+ * safe to migrate. Non-empty v1 saves fail loudly rather than inventing data.
+ */
+export function migrateK01SourceRuntimeStateV1(value: unknown): K01SourceRuntimeState {
+  assertPlainRecord(value, "K01 source runtime v1 state");
+  assertExactKeys(value, ["acceptedUpdateCount", "entities"], "K01 source runtime v1 state");
+  assertIntegerInRange(value.acceptedUpdateCount, K01_ACCEPTED_UPDATE_COUNT_MIN, K01_ACCEPTED_UPDATE_COUNT_MAX, "K01 source runtime acceptedUpdateCount");
+  if (!Array.isArray(value.entities)) {
+    throw new TypeError("K01 source runtime v1 entities must be an array");
+  }
+  if (value.entities.length !== 0) {
+    throw new Error("K01 source runtime v1 migration rejected non-empty entities: class/owner/coordinate/identity fields are unavailable.");
+  }
+  return {
+    ...createK01SourceRuntimeStateV2(),
+    acceptedUpdateCount: value.acceptedUpdateCount,
+  };
+}
+
+export function migrateSourceRuntimeProfileEnvelope(value: unknown): SourceRuntimeProfileEnvelope {
+  assertPlainRecord(value, "source runtime profile envelope");
+  assertExactKeys(value, ["profileId", "stateVersion", "state"], "source runtime profile envelope");
+  if (value.profileId !== K01_SOURCE_RUNTIME_PROFILE_ID || value.stateVersion !== K01_SOURCE_RUNTIME_LEGACY_STATE_VERSION) {
+    throw new Error("Only the K01 source runtime v1 envelope has an explicit migration path.");
+  }
+  return {
+    profileId: K01_SOURCE_RUNTIME_PROFILE_ID,
+    stateVersion: K01_SOURCE_RUNTIME_STATE_VERSION,
+    state: cloneK01SourceRuntimeState(migrateK01SourceRuntimeStateV1(value.state)),
   };
 }
 
@@ -193,6 +304,10 @@ export function cloneSourceRuntimeProfileEnvelope(value: unknown): SourceRuntime
 
   if (!Number.isInteger(value.stateVersion)) {
     throw new TypeError("source runtime profile envelope stateVersion must be an integer");
+  }
+
+  if (profile.id === K01_SOURCE_RUNTIME_PROFILE_ID && value.stateVersion === K01_SOURCE_RUNTIME_LEGACY_STATE_VERSION) {
+    return migrateSourceRuntimeProfileEnvelope(value);
   }
 
   if (value.stateVersion !== profile.stateVersion) {
@@ -227,55 +342,11 @@ export function parseSourceRuntimeProfileEnvelope(value: unknown): SourceRuntime
 }
 
 export function validateK01SourceRuntimeState(value: unknown): asserts value is K01SourceRuntimeState {
-  assertPlainRecord(value, "K01 source runtime state");
-  assertExactKeys(value, ["acceptedUpdateCount", "entities"], "K01 source runtime state");
-
-  assertIntegerInRange(
-    value.acceptedUpdateCount,
-    K01_ACCEPTED_UPDATE_COUNT_MIN,
-    K01_ACCEPTED_UPDATE_COUNT_MAX,
-    "K01 source runtime acceptedUpdateCount",
-  );
-
-  if (!Array.isArray(value.entities)) {
-    throw new TypeError("K01 source runtime entities must be an array");
-  }
-
-  let previousSlot = K01_SOURCE_ENTITY_SLOT_MIN - 1;
-
-  for (const entity of value.entities) {
-    assertPlainRecord(entity, "K01 source runtime entity");
-    assertExactKeys(entity, ["slot", "generation", "active", "health"], "K01 source runtime entity");
-
-    assertIntegerInRange(entity.slot, K01_SOURCE_ENTITY_SLOT_MIN, K01_SOURCE_ENTITY_SLOT_MAX, "K01 source entity slot");
-    if (entity.slot <= previousSlot) {
-      throw new RangeError("K01 source runtime entities must be strictly ordered by unique slot");
-    }
-    previousSlot = entity.slot;
-
-    assertIntegerInRange(entity.generation, K01_SOURCE_GENERATION_MIN, K01_SOURCE_GENERATION_MAX, "K01 source entity generation");
-
-    if (typeof entity.active !== "boolean") {
-      throw new TypeError("K01 source entity active must be a boolean");
-    }
-
-    assertIntegerInRange(entity.health, K01_SOURCE_HEALTH_MIN, K01_SOURCE_HEALTH_MAX, "K01 source entity health");
-  }
+  validateK01SourceRuntimeStateV2(value);
 }
 
 function cloneK01SourceRuntimeState(value: unknown): K01SourceRuntimeState {
-  validateK01SourceRuntimeState(value);
-  const state = value as K01SourceRuntimeState;
-
-  return {
-    acceptedUpdateCount: state.acceptedUpdateCount,
-    entities: state.entities.map((entity) => ({
-      slot: entity.slot,
-      generation: entity.generation,
-      active: entity.active,
-      health: entity.health,
-    })),
-  };
+  return cloneK01SourceRuntimeStateV2(value);
 }
 
 function validateProfileDefinition(profile: SourceRuntimeProfile): void {
