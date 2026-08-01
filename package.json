@@ -74,6 +74,7 @@
     "imjinrok:extract-source-fog-visibility-lifecycle": "node tools/imjinrok/extract-source-fog-visibility-lifecycle.mjs --output analysis/fixtures/source-fog-visibility-lifecycle.json",
     "imjinrok:extract-gameplay-input-speed-settings-evidence": "node tools/imjinrok/extract-gameplay-input-speed-settings-evidence.mjs > analysis/fixtures/gameplay-input-speed-settings-evidence.json",
     "imjinrok:extract-k01-clock-selector-initialization-evidence": "node tools/imjinrok/extract-k01-clock-selector-initialization-evidence.mjs > analysis/fixtures/k01-clock-selector-initialization-evidence.json",
+    "imjinrok:extract-k01-accepted-update-scheduler": "node tools/imjinrok/extract-k01-accepted-update-scheduler.mjs --output analysis/fixtures/k01-accepted-update-scheduler.json",
     "imjinrok:extract-campaign-country-selection-evidence": "node tools/imjinrok/extract-campaign-country-selection-evidence.mjs",
     "imjinrok:extract-entity-type-catalog": "node tools/imjinrok/extract-entity-type-catalog.mjs --output analysis/generated/entity-type-catalog.json",
     "imjinrok:audit-sprite-mappings": "node --import tsx tools/imjinrok/audit-sprite-mappings.mjs",

@@ -57,6 +57,7 @@
 - [K01 cell projection output-table boundary](reverse-engineering/mechanics/k01-cell-projection-output-tables.md)
 - [K01 scheduler mode·selector producer boundary](reverse-engineering/mechanics/k01-clock-mode-producers.md)
 - [K01 cold-start interval selector initialization·persisted config 경계](reverse-engineering/mechanics/k01-clock-selector-initialization.md)
+- [K01 accepted source-update scheduler·producer chain](reverse-engineering/mechanics/k01-accepted-update-scheduler.md)
 - [source pathfinding boundary](reverse-engineering/mechanics/source-pathfinding-boundary.md)
 - [임진록 낮·밤 팔레트 schedule](reverse-engineering/mechanics/imjinrok-day-night-palette-schedule.md)
 - [원본 `clock.spr` 정체와 웹 HUD 시계 경계](reverse-engineering/mechanics/source-clock-hud.md)

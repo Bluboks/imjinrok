@@ -1,0 +1,1144 @@
+{
+  "question": "After K01 stage 1 entry, which concrete source-bound producers determine scheduler mode, selector, guard, and persisted config, and in what order and count do the K01 updater, entity updates, projectile pools, and result resolver run in one accepted source update?",
+  "source": {
+    "executablePath": "/home/agent/coding/imjinrok/c01-accepted-update-scheduler/original/imjinrok2/imjinrok2.exe",
+    "byteLength": 843833,
+    "sha256": "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e"
+  },
+  "analysisStatus": "static-confirmed-bounded-chain-with-unresolved-mode-producer",
+  "reproductionStatus": "reproduction-complete",
+  "implementationStatus": "none",
+  "generatedArtifacts": {
+    "functions": {
+      "path": "analysis/generated/imjinrok2/functions.json",
+      "byteLength": 1468333,
+      "sha256": "7e071fdfe425d22447780c265fe1d3fd271a1bedd1773682bebcb8ddc6d2e16e"
+    },
+    "references": {
+      "path": "analysis/generated/imjinrok2/references.json",
+      "byteLength": 17206569,
+      "sha256": "f64cfa6f04bc39573552f42a8b7bdd5b08fea1ba774d05865162d1d80daaf9a5"
+    },
+    "jumpTables": {
+      "path": "analysis/generated/imjinrok2/jump-tables.json",
+      "byteLength": 607724,
+      "sha256": "0ae517eb172f61b974ca7a4411e64c1cc42065c462ed53b3065ab2da633dfe2f"
+    },
+    "seeds": {
+      "path": "analysis/generated/imjinrok2/seeds.json",
+      "byteLength": 9112063,
+      "sha256": "8e7c8821e9c84c5d0877bb977b119b3b878271502b36bf75e7426b570507bfb7"
+    }
+  },
+  "functionEvidence": [
+    {
+      "entry": "0x0043f4f0",
+      "bodyRange": "0x0043f4f0-0x0043f55a",
+      "instructionCount": 37,
+      "instructionSha256": "eeee18b6012892ee3e108fadc425827e06bbb185ba583aeb6f514c16fbb74802"
+    },
+    {
+      "entry": "0x0043f560",
+      "bodyRanges": [
+        "0x0043f560-0x0043f573"
+      ],
+      "instructionCount": 5,
+      "instructionSha256": "6b9beb20a706f798049e6891a9ab637878ae09daaa367b804e3cf6c980a540d7"
+    },
+    {
+      "entry": "0x0043f580",
+      "bodyRange": "0x0043f580-0x0043f5c6",
+      "instructionCount": 20,
+      "instructionSha256": "dbdc4447f4bd656a29d55e10f719e29341276c62e4767778dc5decea3671dfc1"
+    },
+    {
+      "entry": "0x0043f6e0",
+      "bodyRange": "0x0043f6e0-0x0043f74f",
+      "instructionCount": 38,
+      "instructionSha256": "c2066429a049d75f33dd69b1bf75d590af1684d824b2aed345d08a1e798f4c24"
+    },
+    {
+      "entry": "0x00441db0",
+      "name": "FUN_00441db0",
+      "bodyRanges": [
+        "0x00441db0-0x00441dd8"
+      ],
+      "instructionCount": 12,
+      "basicBlockCount": 3,
+      "instructionSha256": "12984df20c7bb82eb364b29180f75185fe17ac268bffb3d3c782a7fa6c5adf8e"
+    },
+    {
+      "entry": "0x00441de0",
+      "name": "FUN_00441de0",
+      "bodyRanges": [
+        "0x00441de0-0x00441e36"
+      ],
+      "instructionCount": 30,
+      "basicBlockCount": 8,
+      "instructionSha256": "089aff03f0dfdb520bdbf644b5070da4937027184f506790454cd129c6092528"
+    },
+    {
+      "entry": "0x00443080",
+      "name": "FUN_00443080",
+      "bodyRanges": [
+        "0x00443080-0x00443089"
+      ],
+      "basicBlockCount": 1,
+      "instructionCount": 3
+    },
+    {
+      "entry": "0x00443090",
+      "name": "FUN_00443090",
+      "bodyRanges": [
+        "0x00443090-0x004430a6"
+      ],
+      "basicBlockCount": 3,
+      "instructionCount": 8
+    },
+    {
+      "entry": "0x004430b0",
+      "name": "FUN_004430b0",
+      "bodyRanges": [
+        "0x004430b0-0x004430e4"
+      ],
+      "basicBlockCount": 3,
+      "instructionCount": 15
+    },
+    {
+      "entry": "0x004430f0",
+      "bodyRanges": [
+        "0x004430f0-0x00443146"
+      ],
+      "instructionCount": 30,
+      "instructionSha256": "e23c64ff754ac83e87662223cf1598ea4a4bfb87320150e9402cd9d6c205b9ce"
+    },
+    {
+      "entry": "0x00446420",
+      "bodyRanges": [
+        "0x00446420-0x004464be"
+      ],
+      "instructionCount": 33,
+      "instructionSha256": "439694b6de69137d87c47d6687e97d8a74f2ad073c808b443606a0b42906910a"
+    },
+    {
+      "entry": "0x004464c0",
+      "name": "FUN_004464c0",
+      "bodyRanges": [
+        "0x004464c0-0x0044735e"
+      ],
+      "basicBlockCount": 224,
+      "instructionCount": 988
+    },
+    {
+      "entry": "0x00447360",
+      "name": "FUN_00447360",
+      "bodyRanges": [
+        "0x00447360-0x00447599"
+      ],
+      "basicBlockCount": 35,
+      "instructionCount": 156
+    },
+    {
+      "entry": "0x00447bc0",
+      "bodyRanges": [
+        "0x00447bc0-0x00447cfa"
+      ],
+      "instructionCount": 75,
+      "instructionSha256": "c5166177633b255028ae02aa6f7a60350f7e93f09ce5fcf101ac92ba066eefde"
+    },
+    {
+      "entry": "0x00447e10",
+      "bodyRanges": [
+        "0x00447e10-0x00447ec8"
+      ],
+      "instructionCount": 66,
+      "instructionSha256": "75860fcb9a74162cab2cbe0b72b7d0238d774205c7f63f118dd6c5da6af2e4f5"
+    },
+    {
+      "entry": "0x004481d0",
+      "name": "FUN_004481d0",
+      "bodyRanges": [
+        "0x004481d0-0x00448225"
+      ],
+      "instructionCount": 21,
+      "basicBlockCount": 6,
+      "instructionSha256": "3c4ad59801dd66dcb03339fb810c187160b58ccdc18848f6e80ee39bd77b4d91"
+    },
+    {
+      "entry": "0x004492f0",
+      "name": "FUN_004492f0",
+      "bodyRanges": [
+        "0x004492f0-0x004492fa"
+      ],
+      "instructionCount": 2,
+      "basicBlockCount": 1,
+      "instructionSha256": "db1aafb4547828393fb63a1866d2d905456d693b577cdbd67ad50fa5c18d78c5"
+    },
+    {
+      "entry": "0x0045f190",
+      "bodyRange": "0x0045f190-0x0045f243",
+      "instructionCount": 42,
+      "instructionSha256": "a69bbff3a7935d129f2786c5e0d56db59441fe460b7951b40e2b8ca637456b8b"
+    },
+    {
+      "entry": "0x0045f250",
+      "bodyRanges": [
+        "0x0045f250-0x0045f307"
+      ],
+      "instructionCount": 49,
+      "instructionSha256": "7812f6c4db08302e4cbb110591317aaac9a834995fd9e140a28e22dad618dfe5"
+    },
+    {
+      "entry": "0x0045f9c0",
+      "bodyRange": "0x0045f9c0-0x004607ac",
+      "instructionCount": 801,
+      "instructionSha256": "b694ee213a1b5f189ed7455e00690dcb29d970eca6ea87ef1f59c42c611cfb24"
+    },
+    {
+      "entry": "0x004732a0",
+      "bodyRanges": [
+        "0x004732a0-0x0047352f"
+      ],
+      "instructionCount": 176,
+      "instructionSha256": "4bb7436582877b18af203f90aa3609e84f39dfc50f554ec2789f6ac6774856e3"
+    },
+    {
+      "entry": "0x00473b50",
+      "bodyRanges": [
+        "0x00473b50-0x0047418b"
+      ],
+      "instructionCount": 498,
+      "instructionSha256": "9ceb40f3a8548d1bed0ea93548b724a1054edb5339b28dc3f05700e85a54135f"
+    },
+    {
+      "entry": "0x00474770",
+      "bodyRanges": [
+        "0x00474770-0x00474856"
+      ],
+      "instructionCount": 58,
+      "instructionSha256": "fd1d176b03376f5c5dac2db2cec22ead092d5d17aa788ffad4e5e0b0206cc699"
+    },
+    {
+      "entry": "0x004748f0",
+      "bodyRanges": [
+        "0x004748f0-0x00474934"
+      ],
+      "instructionCount": 16,
+      "instructionSha256": "7acacb5b16d0a2eca9305635f69c0063ad1cdc7acb03fc9cf0c5bda4eb2d4c06"
+    },
+    {
+      "entry": "0x00477f50",
+      "name": "FUN_00477f50",
+      "bodyRanges": [
+        "0x00477f50-0x00478246"
+      ],
+      "basicBlockCount": 45,
+      "instructionCount": 231
+    },
+    {
+      "entry": "0x00481a80",
+      "bodyRanges": [
+        "0x00481a80-0x00481bbd"
+      ],
+      "instructionCount": 102,
+      "instructionSha256": "168d30d13877ffeb8fab35e1a213f4bdb5a6f67a941a3af8454ee8dade140db1"
+    },
+    {
+      "entry": "0x00481c50",
+      "bodyRanges": [
+        "0x00481c50-0x00481ed1"
+      ],
+      "instructionCount": 199,
+      "instructionSha256": "823cf8ad9d1b831c9183293c68646fa1e1641b0f8074fc3559a4f8d2feade5d8"
+    },
+    {
+      "entry": "0x00484130",
+      "bodyRanges": [
+        "0x00484130-0x004851da"
+      ],
+      "instructionCount": 1131,
+      "instructionSha256": "d44b4995e2906aa527ee362b7f6aee774bef7cd3fdf966aabc09a5fefdd13b73"
+    },
+    {
+      "entry": "0x00485890",
+      "bodyRanges": [
+        "0x00485890-0x0048594b"
+      ],
+      "instructionCount": 44,
+      "instructionSha256": "fb53dab9a92b41ace1d6e8c44d158a836f1e3bffdee6301f38361a08a1dbcde1"
+    },
+    {
+      "entry": "0x00486430",
+      "bodyRanges": [
+        "0x00486430-0x00486608"
+      ],
+      "instructionCount": 138,
+      "instructionSha256": "8806df0ba708941c3e177a88ca85e189b4c827dc1aee59876da948c50e8a0845"
+    },
+    {
+      "entry": "0x00488080",
+      "name": "FUN_00488080",
+      "bodyRanges": [
+        "0x00488080-0x004880e4"
+      ],
+      "instructionCount": 32,
+      "basicBlockCount": 7,
+      "instructionSha256": "329a17acba64de024a67a0e61cfde1782db422d657ac5c2a89556ed20cebeca5"
+    },
+    {
+      "entry": "0x004885e0",
+      "name": "FUN_004885e0",
+      "bodyRanges": [
+        "0x004885e0-0x0048866f"
+      ],
+      "instructionCount": 53,
+      "basicBlockCount": 7,
+      "instructionSha256": "09d7b2ff5ca83aef9a91e08043581e56378ee4374634b1e8a8bdaf5d0f62a175"
+    },
+    {
+      "entry": "0x0048a5c0",
+      "name": "FUN_0048a5c0",
+      "bodyRanges": [
+        "0x0048a5c0-0x0048a878"
+      ],
+      "instructionCount": 181,
+      "basicBlockCount": 32,
+      "instructionSha256": "c2a0e73fb0e208846f77187fa11310cdd4177f62c6fbd61732d822f513115791"
+    },
+    {
+      "entry": "0x0048d410",
+      "bodyRanges": [
+        "0x0048d410-0x0048d594"
+      ],
+      "instructionCount": 110,
+      "instructionSha256": "55e9e403f208ea2de9f779cb5176d11db85b33758a30d2310d14504dabd0c13d"
+    },
+    {
+      "entry": "0x0048d6f0",
+      "name": "FUN_0048d6f0",
+      "bodyRanges": [
+        "0x0048d6f0-0x0048d73a"
+      ],
+      "instructionCount": 31,
+      "basicBlockCount": 7,
+      "instructionSha256": "387402e726dae19fdb34ebfe157422a3f02a64b67f29e5b1067ff05386466ff3"
+    },
+    {
+      "entry": "0x0048dbe0",
+      "bodyRanges": [
+        "0x0048dbe0-0x0048dda9"
+      ],
+      "instructionCount": 147,
+      "instructionSha256": "f38e4577cf36c44f26097d94e200321d2a9bc6b0aa1696d572e40a600e7f7217"
+    },
+    {
+      "entry": "0x0048ddb0",
+      "name": "FUN_0048ddb0",
+      "bodyRanges": [
+        "0x0048ddb0-0x0048deca"
+      ],
+      "instructionCount": 105,
+      "basicBlockCount": 36,
+      "instructionSha256": "276da99513996baa45d73bd4c09da0fe231fb10e65b762b4bbf3bfb144908981"
+    },
+    {
+      "entry": "0x004a3d10",
+      "bodyRanges": [
+        "0x004a3d10-0x004a3e3c"
+      ],
+      "instructionCount": 105,
+      "instructionSha256": "a51d355c64fa30cf35c7ecc8d8a1b661330866f13da1779e0a9f26d0af451f93"
+    },
+    {
+      "entry": "0x004a5070",
+      "bodyRanges": [
+        "0x004a5070-0x004a50e6"
+      ],
+      "instructionCount": 26,
+      "instructionSha256": "1a170bc0fc85185f325fbca82a3f4d0f6c482c55f1858464d0cb5862c4dd006e"
+    },
+    {
+      "entry": "0x004ae539",
+      "name": "entry",
+      "bodyRanges": [
+        "0x004ae539-0x004ae623"
+      ],
+      "basicBlockCount": 6,
+      "instructionCount": 75
+    }
+  ],
+  "rawCodeRanges": [
+    {
+      "entry": "0x0043f4f0",
+      "ranges": [
+        "0x0043f4f0-0x0043f55a"
+      ]
+    },
+    {
+      "entry": "0x0043f560",
+      "ranges": [
+        "0x0043f560-0x0043f573"
+      ]
+    },
+    {
+      "entry": "0x0043f580",
+      "ranges": [
+        "0x0043f580-0x0043f5c6"
+      ]
+    },
+    {
+      "entry": "0x0043f6e0",
+      "ranges": [
+        "0x0043f6e0-0x0043f74f"
+      ]
+    },
+    {
+      "entry": "0x00441db0",
+      "ranges": [
+        "0x00441db0-0x00441dd8"
+      ]
+    },
+    {
+      "entry": "0x00441de0",
+      "ranges": [
+        "0x00441de0-0x00441e36"
+      ]
+    },
+    {
+      "entry": "0x00443080",
+      "ranges": [
+        "0x00443080-0x00443089"
+      ]
+    },
+    {
+      "entry": "0x00443090",
+      "ranges": [
+        "0x00443090-0x004430a6"
+      ]
+    },
+    {
+      "entry": "0x004430b0",
+      "ranges": [
+        "0x004430b0-0x004430e4"
+      ]
+    },
+    {
+      "entry": "0x004430f0",
+      "ranges": [
+        "0x004430f0-0x00443146"
+      ]
+    },
+    {
+      "entry": "0x00446420",
+      "ranges": [
+        "0x00446420-0x004464be"
+      ]
+    },
+    {
+      "entry": "0x004464c0",
+      "ranges": [
+        "0x004464c0-0x0044735e"
+      ]
+    },
+    {
+      "entry": "0x00447360",
+      "ranges": [
+        "0x00447360-0x00447599"
+      ]
+    },
+    {
+      "entry": "0x00447bc0",
+      "ranges": [
+        "0x00447bc0-0x00447cfa"
+      ]
+    },
+    {
+      "entry": "0x00447e10",
+      "ranges": [
+        "0x00447e10-0x00447ec8"
+      ]
+    },
+    {
+      "entry": "0x004481d0",
+      "ranges": [
+        "0x004481d0-0x00448225"
+      ]
+    },
+    {
+      "entry": "0x004492f0",
+      "ranges": [
+        "0x004492f0-0x004492fa"
+      ]
+    },
+    {
+      "entry": "0x0045f190",
+      "ranges": [
+        "0x0045f190-0x0045f243"
+      ]
+    },
+    {
+      "entry": "0x0045f250",
+      "ranges": [
+        "0x0045f250-0x0045f307"
+      ]
+    },
+    {
+      "entry": "0x0045f9c0",
+      "ranges": [
+        "0x0045f9c0-0x004607ac"
+      ]
+    },
+    {
+      "entry": "0x004732a0",
+      "ranges": [
+        "0x004732a0-0x0047352f"
+      ]
+    },
+    {
+      "entry": "0x00473b50",
+      "ranges": [
+        "0x00473b50-0x0047418b"
+      ]
+    },
+    {
+      "entry": "0x00474770",
+      "ranges": [
+        "0x00474770-0x00474856"
+      ]
+    },
+    {
+      "entry": "0x004748f0",
+      "ranges": [
+        "0x004748f0-0x00474934"
+      ]
+    },
+    {
+      "entry": "0x00477f50",
+      "ranges": [
+        "0x00477f50-0x00478246"
+      ]
+    },
+    {
+      "entry": "0x00481a80",
+      "ranges": [
+        "0x00481a80-0x00481bbd"
+      ]
+    },
+    {
+      "entry": "0x00481c50",
+      "ranges": [
+        "0x00481c50-0x00481ed1"
+      ]
+    },
+    {
+      "entry": "0x00484130",
+      "ranges": [
+        "0x00484130-0x004851da"
+      ]
+    },
+    {
+      "entry": "0x00485890",
+      "ranges": [
+        "0x00485890-0x0048594b"
+      ]
+    },
+    {
+      "entry": "0x00486430",
+      "ranges": [
+        "0x00486430-0x00486608"
+      ]
+    },
+    {
+      "entry": "0x00488080",
+      "ranges": [
+        "0x00488080-0x004880e4"
+      ]
+    },
+    {
+      "entry": "0x004885e0",
+      "ranges": [
+        "0x004885e0-0x0048866f"
+      ]
+    },
+    {
+      "entry": "0x0048a5c0",
+      "ranges": [
+        "0x0048a5c0-0x0048a878"
+      ]
+    },
+    {
+      "entry": "0x0048d410",
+      "ranges": [
+        "0x0048d410-0x0048d594"
+      ]
+    },
+    {
+      "entry": "0x0048d6f0",
+      "ranges": [
+        "0x0048d6f0-0x0048d73a"
+      ]
+    },
+    {
+      "entry": "0x0048dbe0",
+      "ranges": [
+        "0x0048dbe0-0x0048dda9"
+      ]
+    },
+    {
+      "entry": "0x0048ddb0",
+      "ranges": [
+        "0x0048ddb0-0x0048deca"
+      ]
+    },
+    {
+      "entry": "0x004a3d10",
+      "ranges": [
+        "0x004a3d10-0x004a3e3c"
+      ]
+    },
+    {
+      "entry": "0x004a5070",
+      "ranges": [
+        "0x004a5070-0x004a50e6"
+      ]
+    },
+    {
+      "entry": "0x004ae539",
+      "ranges": [
+        "0x004ae539-0x004ae623"
+      ]
+    }
+  ],
+  "callEdges": [
+    {
+      "callsite": "0x0045fa3b",
+      "caller": "0x0045f9c0",
+      "callee": "0x0045f190",
+      "role": "stage/session startup"
+    },
+    {
+      "callsite": "0x0045f20c",
+      "caller": "0x0045f190",
+      "callee": "0x0043f6e0",
+      "role": "config load"
+    },
+    {
+      "callsite": "0x0045f21a",
+      "caller": "0x0045f190",
+      "callee": "0x0043f4f0",
+      "role": "load failure default"
+    },
+    {
+      "callsite": "0x0043f728",
+      "caller": "0x0043f6e0",
+      "callee": "0x004adf44",
+      "role": "persisted settings transfer"
+    },
+    {
+      "callsite": "0x0045fd5d",
+      "caller": "0x0045f9c0",
+      "callee": "0x00447bc0",
+      "role": "state 3 scheduler"
+    },
+    {
+      "callsite": "0x0048dc6d",
+      "caller": "0x0048dbe0",
+      "callee": "0x0048d410",
+      "role": "stage dispatch"
+    },
+    {
+      "callsite": "0x0048d42b",
+      "caller": "0x0048d410",
+      "callee": "0x0048d740",
+      "role": "K01 map source"
+    },
+    {
+      "callsite": "0x00447c18",
+      "caller": "0x00447bc0",
+      "callee": "0x004464c0",
+      "role": "pre-update"
+    },
+    {
+      "callsite": "0x004464f5",
+      "caller": "0x004464c0",
+      "callee": "0x004481d0",
+      "role": "distinct tick result wrapper"
+    },
+    {
+      "callsite": "0x004481e4",
+      "caller": "0x004481d0",
+      "callee": "0x0048ddb0",
+      "role": "mission result resolver"
+    },
+    {
+      "callsite": "0x0048dde5",
+      "caller": "0x0048ddb0",
+      "callee": "0x0048d6f0",
+      "role": "win/loss timer resolver"
+    },
+    {
+      "callsite": "0x0048de12",
+      "caller": "0x0048ddb0",
+      "callee": "0x0048a5c0",
+      "role": "K01 stage 1 updater"
+    },
+    {
+      "callsite": "0x00447c65",
+      "caller": "0x00447bc0",
+      "callee": "0x00447e10",
+      "role": "wall-clock acceptance gate"
+    },
+    {
+      "callsite": "0x00447cb8",
+      "caller": "0x00447bc0",
+      "callee": "0x00447360",
+      "role": "accepted entity/projectile pass"
+    },
+    {
+      "callsite": "0x00447499",
+      "caller": "0x00447360",
+      "callee": "0x0043c9c0",
+      "role": "active entity update"
+    },
+    {
+      "callsite": "0x004474d0",
+      "caller": "0x00447360",
+      "callee": "0x00410cc0",
+      "role": "projectile pool A update"
+    },
+    {
+      "callsite": "0x004474da",
+      "caller": "0x00447360",
+      "callee": "0x00411180",
+      "role": "projectile pool A cleanup"
+    },
+    {
+      "callsite": "0x00447505",
+      "caller": "0x00447360",
+      "callee": "0x00401440",
+      "role": "projectile pool B update"
+    },
+    {
+      "callsite": "0x0044750f",
+      "caller": "0x00447360",
+      "callee": "0x00401ac0",
+      "role": "projectile pool B cleanup"
+    }
+  ],
+  "codeAnchors": [
+    {
+      "id": "stage-one-main-state-entry",
+      "va": "0x004600cb",
+      "rawOffset": "0x600cb",
+      "bytes": "e8 a0 56 fe ff e8 0b db 02 00 e8 f6 56 fe ff 66 89 3d c8 df 4b 00",
+      "meaning": "main state 1 enters standard mission startup and then stores continuation state 3",
+      "matched": true
+    },
+    {
+      "id": "stage-one-k01-case",
+      "va": "0x0048d410",
+      "rawOffset": "0x8d410",
+      "bytes": "0f bf 44 24 04 48 56 83 f8 1b 8b f1 0f 87 f8 00 00 00 ff 24 85 98 d5 48 00 8b ce e8 10 03 00 00",
+      "meaning": "signed stage selector case 1 reaches the K01 map source copier",
+      "matched": true
+    },
+    {
+      "id": "state-three-scheduler-call",
+      "va": "0x0045fd5d",
+      "rawOffset": "0x5fd5d",
+      "bytes": "e8 5e 7e fe ff",
+      "meaning": "raw main state 3 calls the accepted-update scheduler",
+      "matched": true
+    },
+    {
+      "id": "pre-update-result-call",
+      "va": "0x00447c18",
+      "rawOffset": "0x47c18",
+      "bytes": "e8 a3 e8 ff ff 83 f8 01 0f 84 ce 00 00 00",
+      "meaning": "pre-update returns one and rejects the scheduler attempt before wall-clock acceptance",
+      "matched": true
+    },
+    {
+      "id": "result-wrapper-order",
+      "va": "0x004481d0",
+      "rawOffset": "0x481d0",
+      "bytes": "a1 80 5f 7c 00 8b 0d 80 27 55 00 3b c1 74 44 a3 80 27 55 00 e8 c7 5b 04 00",
+      "meaning": "raw global tick is compared, cached first on a distinct value, then mission dispatch is called",
+      "matched": true
+    },
+    {
+      "id": "timer-before-stage",
+      "va": "0x0048ddb0",
+      "rawOffset": "0x8ddb0",
+      "bytes": "b8 01 00 00 00 56 66 39 05 34 6e c0 00 75 05 66 33 c0 5e c3 66 39 05 7c 62 7c 00",
+      "meaning": "dispatcher pre-gates and timer resolution precede signed stage dispatch",
+      "matched": true
+    },
+    {
+      "id": "accepted-pool-call",
+      "va": "0x00447c85",
+      "rawOffset": "0x47c85",
+      "bytes": "a1 80 5f 7c 00 40 83 f8 14 a3 80 5f 7c 00 72 23 75 11 8b 0d 04 2e 88 00 51 e8 dd b3 ff ff 83 c4 04 eb 10 8b 15 04 2e 88 00 52 50 e8 fb b3 ff ff 83 c4 08 e8 a3 f6 ff ff",
+      "meaning": "an accepted step increments the raw tick and calls the outer entity/projectile updater once",
+      "matched": true
+    },
+    {
+      "id": "entity-loop-and-pools",
+      "va": "0x004474bd",
+      "rawOffset": "0x474bd",
+      "bytes": "33 f6 bd e8 85 aa 00 bf 00 25 84 00 66 39 1f 74 14 8b cd e8 eb 97 fc ff 85 c0 75 09 56 e8 a1 9c fc ff 83 c4 04 46 83 c7 02 81 c5 a0 03 00 00 66 83 fe 64 7c d7",
+      "meaning": "the updater performs an active entity pass and a 100-slot projectile pass; its adjacent loop also covers 60 raw slots",
+      "matched": true
+    },
+    {
+      "id": "config-default-selector",
+      "va": "0x0043f504",
+      "rawOffset": "0x3f504",
+      "bytes": "c7 42 14 02 00 00 00",
+      "meaning": "load failure calls the initializer, which writes selector DWORD 2 at settings object +0x14",
+      "matched": true
+    },
+    {
+      "id": "config-success-transfer",
+      "va": "0x0043f71f",
+      "rawOffset": "0x3f71f",
+      "bytes": "57 6a 01 68 d4 01 00 00 56 e8 17 e8 06 00",
+      "meaning": "successful config load transfers 0x1d4 bytes into the settings object, including selector +0x14",
+      "matched": true
+    },
+    {
+      "id": "mode-guard-branch",
+      "va": "0x00485900",
+      "rawOffset": "0x85900",
+      "bytes": "83 3d f4 df 4b 00 00 75 31 66 8b 44 24 04 66 3d 01 00 75 16 66 a1 14 c8 c5 00 66 c7 05 20 6e c0 00 01 00",
+      "meaning": "mode writer accepts only argument WORD 1 and chooses mode 1 for guard zero or mode 0 for nonzero guard",
+      "matched": true
+    }
+  ],
+  "producerInventory": {
+    "stageReachability": {
+      "mainStateEntry": "raw WORD 1 at 0x004600cb",
+      "stageSelector": "signed WORD 1 at 0x0048d410/0x0048d422",
+      "mapSource": "0x0048d740 (stagemap\\k01.map)",
+      "continuation": "main loop continuation DI=3 writes raw main state 3",
+      "scheduler": "0x0045fd5d -> FUN_00447bc0",
+      "sourceBound": true
+    },
+    "persistedSelector": {
+      "address": "0x00634acc",
+      "width": "DWORD",
+      "object": "0x00634ab8 + 0x14",
+      "failure": "FUN_0045f9c0 -> FUN_0045f190 -> FUN_0043f6e0 returns zero -> FUN_0043f4f0 writes 2",
+      "success": "FUN_0043f6e0 transfers 0x1d4 bytes to the settings object; persisted +0x14 bytes are retained",
+      "producerStatus": "static-confirmed-cold-start-boundary"
+    },
+    "schedulerMode": {
+      "address": "0x00c06e20",
+      "width": "WORD",
+      "consumer": "raw state 23 calls FUN_00447bc0 only when mode equals 1; raw state 3 calls scheduler directly",
+      "argumentOne": "FUN_00485890 writes 1 when guard WORD 0x004bdff4 is zero, otherwise writes 0",
+      "argumentOther": "argument WORD 2 and all other values perform no mode write",
+      "directWriters": {
+        "target": "0x00c06e20",
+        "entries": [
+          {
+            "site": "0x00446483",
+            "caller": "0x00446420",
+            "target": "0x00c06e20",
+            "type": "WRITE"
+          },
+          {
+            "site": "0x00460377",
+            "caller": "0x0045f9c0",
+            "target": "0x00c06e20",
+            "type": "WRITE"
+          },
+          {
+            "site": "0x0047331c",
+            "caller": "0x004732a0",
+            "target": "0x00c06e20",
+            "type": "WRITE"
+          },
+          {
+            "site": "0x00481e89",
+            "caller": "0x00481c50",
+            "target": "0x00c06e20",
+            "type": "WRITE"
+          },
+          {
+            "site": "0x0048591a",
+            "caller": "0x00485890",
+            "target": "0x00c06e20",
+            "type": "WRITE"
+          },
+          {
+            "site": "0x00485942",
+            "caller": "0x00485890",
+            "target": "0x00c06e20",
+            "type": "WRITE"
+          }
+        ],
+        "sha256": "ed5440303ed3a488de53bbc998f83bb67e1154c91f3f618269557de11574eb62"
+      },
+      "k01Reachability": {
+        "stageOne": "raw main state 1 calls 0x0048dbe0; signed stage WORD 1 selects exactly the 0x0048d429 case and calls 0x0048d740.",
+        "continuation": "the dispatch loop loads DI=3 before its state switch; after the stage-one call it stores DI, therefore this recovered state-one invocation transitions to raw main state 3.",
+        "scheduler": "raw main state 3 directly calls the scheduler. Raw main state 5 is separately dispatched to FUN_00484130.",
+        "result": "No source-bound edge in this scope connects the stage-one state-1→3 transition to a reached state-5 EBX/mode-writer invocation. Therefore a standard K01 session is not assigned scheduler mode 0 or 1 from this mechanism.",
+        "firstUnresolvedEdge": "the first required unclosed edge is a concrete later transition from the stage-one-established raw main state 3 to raw main state 5 (including any indirect state-machine write), with the persistence/value of guard 0x004bdfF4 at that invocation."
+      },
+      "producerStatus": "K01-stage-1-value-unresolved"
+    },
+    "guard": {
+      "address": "0x004bdff4",
+      "width": "WORD",
+      "directWriters": {
+        "referenceArtifact": {
+          "path": "/home/agent/coding/imjinrok/c01-accepted-update-scheduler/analysis/generated/imjinrok2/references.json",
+          "byteLength": 17206569,
+          "sha256": "f64cfa6f04bc39573552f42a8b7bdd5b08fea1ba774d05865162d1d80daaf9a5"
+        },
+        "entries": [
+          {
+            "site": "0x0045fbfc",
+            "caller": "0x0045f9c0",
+            "target": "0x004bdff4",
+            "type": "WRITE"
+          },
+          {
+            "site": "0x00474845",
+            "caller": "0x00474770",
+            "target": "0x004bdff4",
+            "type": "WRITE"
+          },
+          {
+            "site": "0x00474929",
+            "caller": "0x004748f0",
+            "target": "0x004bdff4",
+            "type": "WRITE"
+          },
+          {
+            "site": "0x00486585",
+            "caller": "0x00486430",
+            "target": "0x004bdff4",
+            "type": "WRITE"
+          },
+          {
+            "site": "0x004865ca",
+            "caller": "0x00486430",
+            "target": "0x004bdff4",
+            "type": "WRITE"
+          }
+        ],
+        "sha256": "9a90b182cdbdf55dbeea5a41ec612115912c210a4daa0c8ddece3a647f0d520d"
+      },
+      "accepted": "guard == 0 allows argument WORD 1 to write scheduler mode 1",
+      "rejected": "guard != 0 makes argument WORD 1 write scheduler mode 0",
+      "aliasBoundary": "Direct references do not prove pointer-alias, indirect writer, global ordering, or session reachability absence. The next unresolved question is a concrete pre-stage-1 path reaching argument one, or persistence/order of the other direct writers.",
+      "producerStatus": "direct-reference-inventory-only"
+    },
+    "clock": {
+      "modeAddress": "0x00c06e20",
+      "selectorAddress": "0x00634acc",
+      "resultClockAddress": "0x00882e04",
+      "rawGlobalTickAddress": "0x007c5f80",
+      "cachedGlobalTickAddress": "0x00552780",
+      "lastAcceptedMillisecondsAddress": "0x0055276c",
+      "feedbackAddress": "0x0054a4a8",
+      "effectiveIntervalAddress": "0x00552794",
+      "periodicCounterAddress": "0x00552788",
+      "semanticBoundary": "raw millisecond fields and raw DWORD tick are source fields; no fixed-Hz or 24 Hz multiplier is inferred"
+    }
+  },
+  "acceptedStep": {
+    "scheduler": "FUN_00447bc0",
+    "orderedCalls": [
+      "FUN_00447bc0",
+      "FUN_004464c0 (pre-update)",
+      "FUN_004481d0 (distinct raw-tick result wrapper)",
+      "FUN_0048ddb0 (pre-gates -> timer resolver -> stage dispatch)",
+      "FUN_0048d6f0 (timer resolver; before K01 stage updater)",
+      "FUN_0048a5c0 (stage 1 K01 updater, only on distinct tick and no prior result)",
+      "FUN_00447e10 (wall-clock acceptance gate)",
+      "FUN_00447360 (exactly once after acceptance)",
+      "FUN_0043c9c0 (once per active entity record in the pass)",
+      "FUN_00410cc0/FUN_00401440 (conditional active projectile slots)"
+    ],
+    "resultOrdering": "K01 updater/result resolver runs in pre-update before entity/projectile updates. A result AX 1/0xffff makes FUN_004464c0 return 1 and prevents the accepted-step pool call.",
+    "invocationCounts": {
+      "k01StageUpdater": "at most one per FUN_004481d0 call; same raw tick skips wrapper dispatch",
+      "entityUpdater": "one FUN_0043c9c0 per active-list entry observed by FUN_00447360",
+      "outerProjectilePool": "one FUN_00447360 call per accepted scheduler step",
+      "projectilePoolA": "one forward pass over 100 raw slots per FUN_00447360 call",
+      "projectilePoolB": "one forward pass over 60 raw slots per FUN_00447360 call",
+      "resultResolver": "one FUN_0048d6f0 call per distinct-tick dispatcher call unless an earlier pre-gate returns"
+    },
+    "rejectionOrder": [
+      "state-23 mode != 1 (main-loop gate only)",
+      "scheduler transition branch",
+      "pre-update result == 1",
+      "clock gate == 0",
+      "command readiness == 0 when command gate mode == 0"
+    ],
+    "sourceBound": true
+  },
+  "vectors": [
+    {
+      "id": "config-open-failure-default-selector",
+      "result": {
+        "selector": 2,
+        "source": "initializer-after-load-failure"
+      },
+      "expected": {
+        "selector": 2,
+        "source": "initializer-after-load-failure"
+      }
+    },
+    {
+      "id": "config-success-retains-selector",
+      "result": {
+        "selector": 3,
+        "source": "config-hq-transfer"
+      },
+      "expected": {
+        "selector": 3,
+        "source": "config-hq-transfer"
+      }
+    },
+    {
+      "id": "selector-0-through-4",
+      "result": [
+        64,
+        60,
+        50,
+        40,
+        30
+      ],
+      "expected": [
+        64,
+        60,
+        50,
+        40,
+        30
+      ]
+    },
+    {
+      "id": "mode-one-bypasses-selector",
+      "result": 50,
+      "expected": 50
+    },
+    {
+      "id": "mode-non-one-uses-selector",
+      "result": 40,
+      "expected": 40
+    },
+    {
+      "id": "guard-reject-and-accept",
+      "result": [
+        {
+          "modeWord": 1,
+          "guardAccepted": true,
+          "write": 1
+        },
+        {
+          "modeWord": 0,
+          "guardAccepted": false,
+          "write": 0
+        }
+      ],
+      "expected": [
+        {
+          "modeWord": 1,
+          "guardAccepted": true,
+          "write": 1
+        },
+        {
+          "modeWord": 0,
+          "guardAccepted": false,
+          "write": 0
+        }
+      ]
+    },
+    {
+      "id": "same-raw-tick-skips-result-dispatch",
+      "result": 0,
+      "expected": 0
+    },
+    {
+      "id": "next-distinct-raw-tick-dispatches-result",
+      "result": 1,
+      "expected": 1
+    },
+    {
+      "id": "dispatcher-pre-gate-skips-k01",
+      "result": 0,
+      "expected": 0
+    },
+    {
+      "id": "accepted-step-pool-once",
+      "result": {
+        "poolCalls": 1,
+        "entityCalls": 3
+      },
+      "expected": {
+        "poolCalls": 1,
+        "entityCalls": 3
+      }
+    },
+    {
+      "id": "result-before-entity-and-pool",
+      "result": [
+        6,
+        -1
+      ],
+      "expected": [
+        6,
+        -1
+      ]
+    },
+    {
+      "id": "raw-tick-wrap-distinct",
+      "result": 1,
+      "expected": 1
+    },
+    {
+      "id": "clock-gate-boundary-reject",
+      "result": "clock-gate-reject",
+      "expected": "clock-gate-reject"
+    },
+    {
+      "id": "command-gate-boundary-reject",
+      "result": "command-readiness-reject",
+      "expected": "command-readiness-reject"
+    }
+  ],
+  "linkedEvidence": {
+    "selector": "What initializes interval selector DWORD 0x00634acc, when can config.hq replace it, and what limited cadence statement follows?",
+    "mode": "For a standard K01 single-player mission, can static producer flow fix scheduler mode WORD 0x00c06e20 or selector DWORD 0x00634acc enough to refine the accepted-update wall-clock interval, without choosing a project timing adapter?",
+    "modeReachability": "Can the standard K01 stage-one lifecycle source-bind a concrete 0 or 1 write to scheduler mode WORD 0x00c06e20 through FUN_00484130 and FUN_00485890, without tracing the option-object selector producer?",
+    "modeWriters": "What is the complete canonical direct WRITE set for scheduler mode WORD 0x00c06e20, and does the source-bound FUN_0045f250 -> FUN_004a5070 path invoke a mode-writing argument?",
+    "projectile": "How often is original projectile-pool updater 0x00447360 invoked, what static scheduling/call-chain controls that cadence, and can that cadence be mapped exactly to this project's fixed simulation tick without an inferred multiplier?",
+    "mission": "For K01, in what exact order and under what raw conditions does FUN_0048a5c0 first latch DWORD 0x00843740 for the general-presence and protected-hero failures, how can its beacon post-state return bypass the hero checks, how does FUN_0048d6f0 resolve DWORD 0x0084373c/0x00843740 across the strict 0x7d0 boundary, signed DWORD subtraction/absolute-value overflow and simultaneous timers, and how do FUN_0048ddb0 and FUN_004481d0 gate, notify, and commit the final result once per distinct raw global tick?"
+  },
+  "proposedAdapter": {
+    "inputs": [
+      "raw source mode WORD and selector DWORD (or explicit unresolved policy) ",
+      "raw global tick, cached tick, current/result-clock DWORDs",
+      "accepted/rejected scheduler gate outcomes",
+      "active entity records and projectile pool slot snapshots"
+    ],
+    "outputs": [
+      "ordered source-update event trace",
+      "entity update count and projectile pool pass count",
+      "raw mission result AX and result-code side effects"
+    ],
+    "integration": "analysis-only contract; no package/runtime adapter is authorized until raw clock units, identity mapping, and mode/guard producer reachability are separately closed"
+  },
+  "uncertainties": [
+    "K01 stage-one state 1 -> state 3 -> scheduler reachability is closed, but no source-bound edge proves the concrete mode WORD value at a K01 run.",
+    "The guard direct-write set is exact for canonical direct references but serialization/address aliases and indirect writers remain unresolved.",
+    "Successful config transfer retains selector bytes in the destination range; config validity and the selected K01 session are not inferred.",
+    "FUN_00446420 and the internal entity/projectile callees are retained as raw call contracts; their human semantics are outside this packet.",
+    "The raw result clock and raw global tick units are not mapped to project time, and no fixed-Hz multiplier is claimed."
+  ]
+}
