@@ -4483,9 +4483,18 @@ function assertValidStartingPlacements(
   label = state.scenario.id,
 ): void {
   const occupiedTiles = new Map<string, string>();
+  const hasExactSourceOpeningPolicy = state.sourceRuntimeProfile?.profileId === "k01:source-runtime";
 
   for (const unit of iterateUnitsOrdered(state)) {
     const definition = unitDefinitions[unit.kind];
+
+    // K01 exact opening uses the source logical footprint for admission. The
+    // current product town-center footprint is intentionally wider and may
+    // overlap a source 1x1 control record; that adaptation is tested by the
+    // exact-placement suite rather than treated as a source collision fact.
+    if (hasExactSourceOpeningPolicy && unit.id.includes("-source-")) {
+      continue;
+    }
 
     if (definition.category === "building") {
       delete state.units[unit.id];

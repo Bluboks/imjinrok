@@ -83,6 +83,7 @@ export {
   parseSourceRuntimeProfileEnvelope,
   registerSourceRuntimeProfile,
   requireSourceRuntimeProfile,
+  resolveSourceRuntimeInitialPlacementPolicyId,
   resolveSourceRuntimeProfileId,
   SourceRuntimeProfileRegistry,
   updateK01SourceRuntimeState,
@@ -94,6 +95,18 @@ export {
   type RegisterSourceRuntimeProfileOptions,
   type SourceRuntimeProfile,
 } from "./k01SourceRuntimeProfile.js";
+export {
+  K01_SOURCE_EXACT_OPENING_PLACEMENT_POLICY_ID,
+  defaultInitialPlacementPolicyRegistry,
+  k01SourceExactOpeningPlacementPolicy,
+  registerInitialPlacementPolicy,
+  requireInitialPlacementPolicy,
+  InitialPlacementPolicyRegistry,
+  type InitialPlacementPlayerRequest,
+  type InitialPlacementPolicy,
+  type InitialPlacementRequest,
+  type RegisterInitialPlacementPolicyOptions,
+} from "./initialPlacement.js";
 export { SkirmishAiController, SKIRMISH_AI_TUNING, type SkirmishAiControllerOptions, type SkirmishAiDifficulty, type SkirmishAiTuning } from "./skirmishAi.js";
 export {
   CORE_CURRENT_VISIBILITY_SKIRMISH_AI_PERCEPTION_POLICY_ID,

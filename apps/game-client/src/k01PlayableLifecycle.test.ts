@@ -5,7 +5,13 @@ import {
   imjinrokK01Scenario,
   unitDefinitions,
 } from "@shared";
-import { getFootprintTiles, toWorldSnapshot, type WorldSnapshot, type WorldState } from "@simulation";
+import {
+  getFootprintTiles,
+  k01SourceExactOpeningPlacementPolicy,
+  toWorldSnapshot,
+  type WorldSnapshot,
+  type WorldState,
+} from "@simulation";
 
 import {
   MISSION_BRIEFING_SCENE_KEY,
@@ -111,7 +117,11 @@ function advanceOpeningTicks(transport: ReturnType<typeof createLocalK01Session>
   transport.update(150, 50);
 }
 
-function assertOpeningPlacementSafety(snapshot: Pick<WorldState, "map" | "units">): void {
+function assertOpeningPlacementSafety(snapshot: Pick<WorldState, "map" | "units" | "sourceRuntimeProfile">): void {
+  if (snapshot.sourceRuntimeProfile?.profileId === "k01:source-runtime") {
+    assertExactK01SourcePlacement(snapshot);
+  }
+
   const occupiedTiles = new Map<string, string>();
 
   for (const unit of Object.values(snapshot.units)) {
@@ -119,6 +129,12 @@ function assertOpeningPlacementSafety(snapshot: Pick<WorldState, "map" | "units"
     assert.equal(Number.isInteger(unit.position.y), true, `${unit.id} has an integral y coordinate`);
 
     const footprint = unitDefinitions[unit.kind].footprint;
+    // Product footprints intentionally retain the town-center adaptation, so
+    // they are not a collision oracle for source records after the central
+    // source-policy assertion above has validated their logical footprints.
+    if (snapshot.sourceRuntimeProfile?.profileId === "k01:source-runtime" && unit.id.includes("-source-")) {
+      continue;
+    }
     for (const tile of getFootprintTiles(unit.position, footprint)) {
       assert.equal(tile.x >= 0 && tile.x < snapshot.map.width, true, `${unit.id} footprint is within map x bounds`);
       assert.equal(tile.y >= 0 && tile.y < snapshot.map.height, true, `${unit.id} footprint is within map y bounds`);
@@ -130,6 +146,35 @@ function assertOpeningPlacementSafety(snapshot: Pick<WorldState, "map" | "units"
       const key = `${tile.x},${tile.y}`;
       assert.equal(occupiedTiles.get(key), undefined, `${unit.id} collides with ${occupiedTiles.get(key)} at ${key}`);
       occupiedTiles.set(key, unit.id);
+    }
+  }
+}
+
+function assertExactK01SourcePlacement(snapshot: Pick<WorldState, "map" | "units">): void {
+  const playerIds = ["local-player", "cpu-1"] as const;
+  const positionsByPlayer = k01SourceExactOpeningPlacementPolicy.resolveStartingPositions({
+    map: snapshot.map,
+    players: playerIds.map((playerId, index) => {
+      const spawn = snapshot.map.spawnPoints[index];
+      assert.ok(spawn, `K01 source spawn ${index} should be present`);
+      return {
+        playerId,
+        spawn: { x: spawn.x, y: spawn.y },
+        startingUnits: imjinrokK01Scenario.playerStarts?.[playerId]?.startingUnits ?? imjinrokK01Scenario.startingUnits,
+      };
+    }),
+  });
+
+  for (const playerId of playerIds) {
+    const startingUnits = imjinrokK01Scenario.playerStarts?.[playerId]?.startingUnits ?? imjinrokK01Scenario.startingUnits;
+    const positions = positionsByPlayer.get(playerId);
+    assert.ok(positions, `K01 source policy should return positions for ${playerId}`);
+    assert.equal(positions.length, startingUnits.length);
+    for (const [index, definition] of startingUnits.entries()) {
+      const unitId = `${playerId}-${definition.idSuffix}`;
+      const unit = snapshot.units[unitId];
+      assert.ok(unit, `${unitId} should be present in the opening snapshot`);
+      assert.deepEqual(unit.position, positions[index], `${unitId} must retain the central exact-placement result`);
     }
   }
 }

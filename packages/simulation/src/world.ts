@@ -19,6 +19,8 @@ import { resolveAttackTargetAuthorityPolicyId } from "./attackTargetAuthorityPol
 import { resolveCapacityPolicyId } from "./capacity.js";
 import "./k01WarExpenseCapacity.js";
 import { cloneSourceRuntimeProfileEnvelope, createSourceRuntimeProfileEnvelope, resolveSourceRuntimeProfileId } from "./k01SourceRuntimeProfile.js";
+import { requireInitialPlacementPolicy } from "./initialPlacement.js";
+import { resolveSourceRuntimeInitialPlacementPolicyId } from "./k01SourceRuntimeProfile.js";
 import { createPlayerResearchState } from "./research.js";
 import { resourceBlocksBuilding, resourceBlocksMovement } from "./resources.js";
 import { applyScenarioScriptedEvents, createScenarioRuntimeState } from "./scenario.js";
@@ -198,6 +200,29 @@ export function createInitialWorldState(
   const playerResources: Record<string, ResourceBank> = {};
   const playerResearch: WorldState["playerResearch"] = {};
   const playerCheats: Record<string, PlayerCheatState> = {};
+  const sourceRuntimeProfileId = resolveSourceRuntimeProfileId(scenario.sourceRuntimeProfileId);
+  const initialPlacementPolicyId = resolveSourceRuntimeInitialPlacementPolicyId(sourceRuntimeProfileId);
+  const initialPlacementPolicy = initialPlacementPolicyId === undefined
+    ? undefined
+    : requireInitialPlacementPolicy(initialPlacementPolicyId);
+  const exactStartingPositions = initialPlacementPolicy?.resolveStartingPositions({
+    map: worldMap,
+    players: playerIds.map((playerId, index) => {
+      const spawn = worldMap.spawnPoints[index] ?? {
+        id: `fallback-${index}`,
+        x: 2 + index,
+        y: 2 + index,
+        faction: factions[index % factions.length] ?? "blue",
+      };
+      const playerStart = scenario.playerStarts?.[playerId] ?? scenario.playerStarts?.[`player-${index + 1}`];
+      return {
+        playerId,
+        spawn: { x: spawn.x, y: spawn.y },
+        startingUnits: playerStart?.startingUnits ?? scenario.startingUnits,
+      };
+    }),
+    existingUnits: units,
+  });
 
   playerIds.forEach((playerId, index) => {
     const fallbackFaction = factions[index % factions.length] ?? "blue";
@@ -226,7 +251,14 @@ export function createInitialWorldState(
     playerResearch[playerId] = createPlayerResearchState();
     playerCheats[playerId] = {};
 
-    for (const unit of createPlacedStartingUnits(playerId, { x: spawn.x, y: spawn.y }, startingUnits, worldMap, units)) {
+    for (const unit of createPlacedStartingUnits(
+      playerId,
+      { x: spawn.x, y: spawn.y },
+      startingUnits,
+      worldMap,
+      units,
+      exactStartingPositions?.get(playerId),
+    )) {
       units[unit.id] = unit;
     }
   });
@@ -254,7 +286,6 @@ export function createInitialWorldState(
     lastAcceptedCommand: null,
   };
 
-  const sourceRuntimeProfileId = resolveSourceRuntimeProfileId(scenario.sourceRuntimeProfileId);
   if (sourceRuntimeProfileId !== undefined) {
     state.sourceRuntimeProfile = createSourceRuntimeProfileEnvelope(sourceRuntimeProfileId);
   }
@@ -283,17 +314,32 @@ function createPlacedStartingUnits(
   startingUnits: readonly StartingUnitDefinition[],
   map: MapDefinition,
   placedUnits: Readonly<Record<string, UnitState>>,
+  exactPositions?: readonly GridPoint[],
 ): UnitState[] {
+  if (exactPositions !== undefined && exactPositions.length !== startingUnits.length) {
+    throw new Error(
+      `Initial placement policy returned ${exactPositions.length} positions for ${startingUnits.length} starting units of player '${playerId}'.`,
+    );
+  }
+
   const units: UnitState[] = [];
   const occupiedUnits: Record<string, UnitState> = { ...placedUnits };
 
-  for (const definition of startingUnits) {
+  for (const [definitionIndex, definition] of startingUnits.entries()) {
     const requestedPosition = {
       x: spawn.x + definition.offset.x,
       y: spawn.y + definition.offset.y,
     };
-    const unit = createUnitState(`${playerId}-${definition.idSuffix}`, playerId, definition.kind, requestedPosition);
-    const placement = findStartingPlacement(map, occupiedUnits, unit, requestedPosition);
+    const exactPosition = exactPositions?.[definitionIndex];
+    const unit = createUnitState(
+      `${playerId}-${definition.idSuffix}`,
+      playerId,
+      definition.kind,
+      exactPosition ?? requestedPosition,
+    );
+    const placement = exactPosition === undefined
+      ? findStartingPlacement(map, occupiedUnits, unit, requestedPosition)
+      : exactPosition;
 
     unit.position = placement ?? clampMapPoint(map, requestedPosition);
     units.push(unit);

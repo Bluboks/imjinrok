@@ -45,6 +45,8 @@ export interface K01SourceRuntimeStatePatch {
 export interface SourceRuntimeProfile {
   readonly id: string;
   readonly stateVersion: number;
+  /** Optional process-local initial-placement policy selected with this profile. */
+  readonly initialPlacementPolicyId?: string;
   createInitialState(): Record<string, unknown>;
   validateState(state: unknown): void;
   cloneState(state: unknown): Record<string, unknown>;
@@ -94,6 +96,7 @@ export class SourceRuntimeProfileRegistry {
 const k01SourceRuntimeProfile: SourceRuntimeProfile = {
   id: K01_SOURCE_RUNTIME_PROFILE_ID,
   stateVersion: K01_SOURCE_RUNTIME_STATE_VERSION,
+  initialPlacementPolicyId: "k01:source-exact-opening",
   createInitialState: () => cloneK01SourceRuntimeState(createK01SourceRuntimeState()),
   validateState: validateK01SourceRuntimeState,
   cloneState(value) {
@@ -114,6 +117,14 @@ export function registerSourceRuntimeProfile(
 
 export function requireSourceRuntimeProfile(id: string): SourceRuntimeProfile {
   return defaultSourceRuntimeProfileRegistry.require(id);
+}
+
+export function resolveSourceRuntimeInitialPlacementPolicyId(profileId: string | undefined): string | undefined {
+  if (profileId === undefined) {
+    return undefined;
+  }
+
+  return requireSourceRuntimeProfile(profileId).initialPlacementPolicyId;
 }
 
 export function resolveSourceRuntimeProfileId(id: string | undefined): string | undefined {
@@ -269,6 +280,9 @@ function cloneK01SourceRuntimeState(value: unknown): K01SourceRuntimeState {
 
 function validateProfileDefinition(profile: SourceRuntimeProfile): void {
   assertStableProfileId(profile.id);
+  if (profile.initialPlacementPolicyId !== undefined) {
+    assertStableProfileId(profile.initialPlacementPolicyId);
+  }
 
   if (!Number.isInteger(profile.stateVersion) || profile.stateVersion <= 0) {
     throw new RangeError(`Source runtime profile '${profile.id}' stateVersion must be a positive integer.`);

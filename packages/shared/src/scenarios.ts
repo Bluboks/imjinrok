@@ -475,19 +475,49 @@ export type K01SourceIdentityMapping =
   | "exact-static-identity-source"
   | "proxy";
 
+export type K01SourceFootprintEvidence =
+  | "static-confirmed"
+  | "project-adaptation";
+
+export interface K01SourceFootprint {
+  readonly width: number;
+  readonly height: number;
+  readonly evidence: K01SourceFootprintEvidence;
+}
+
 export interface K01SourceUnitAdapterRecord {
   originalClass: number;
   rawOwnerWord: 0 | 1;
   offset: GridPoint;
   projectKind: UnitDefinitionId;
   identityMapping: K01SourceIdentityMapping;
+  sourceFootprint?: K01SourceFootprint;
   idSuffix: string;
 }
+
+/**
+ * Source logical occupancy extents recovered by the K01 opening-footprint
+ * analysis. Classes outside that bounded building/control proof intentionally
+ * have no entry; the exact opening policy fails closed if it needs an
+ * unresolved source extent.
+ */
+export const k01SourceFootprintByOriginalClass: Readonly<Record<number, K01SourceFootprint>> = Object.freeze({
+  7: { width: 1, height: 1, evidence: "static-confirmed" },
+  48: { width: 3, height: 3, evidence: "static-confirmed" },
+  49: { width: 3, height: 3, evidence: "static-confirmed" },
+  50: { width: 3, height: 3, evidence: "static-confirmed" },
+  51: { width: 3, height: 3, evidence: "static-confirmed" },
+  57: { width: 3, height: 2, evidence: "static-confirmed" },
+  58: { width: 3, height: 3, evidence: "static-confirmed" },
+  60: { width: 3, height: 3, evidence: "static-confirmed" },
+  62: { width: 3, height: 3, evidence: "static-confirmed" },
+  63: { width: 2, height: 2, evidence: "static-confirmed" },
+});
 
 // The K01 map header stores source entity arrays at 0xac00a4/0xac06e4/0xac0d24/0xac1364.
 // `proxy` deliberately preserves current project fallbacks where identity or frame work is not
 // yet sufficient to claim a source binding. This adapter does not assert source gameplay behavior.
-export const k01SourceOpeningAdapter = [
+const k01SourceOpeningAdapterRecords = [
   { originalClass: 49, rawOwnerWord: 0, offset: { x: -1, y: -2 }, projectKind: "town-center", identityMapping: "exact-static-identity-source", idSuffix: "source-0x31-5-4" },
   { originalClass: 48, rawOwnerWord: 0, offset: { x: 5, y: -1 }, projectKind: "house", identityMapping: "exact-static-identity-source", idSuffix: "source-0x30-11-5" },
   { originalClass: 50, rawOwnerWord: 0, offset: { x: 7, y: 4 }, projectKind: "barracks", identityMapping: "exact-static-identity-source", idSuffix: "source-0x32-13-10" },
@@ -524,7 +554,12 @@ export const k01SourceOpeningAdapter = [
   { originalClass: 63, rawOwnerWord: 1, offset: { x: -8, y: -47 }, projectKind: "japanese-camp-tower", identityMapping: "exact-static-identity-source", idSuffix: "source-0x3f-44-5" },
   { originalClass: 63, rawOwnerWord: 1, offset: { x: -20, y: -12 }, projectKind: "japanese-camp-tower", identityMapping: "exact-static-identity-source", idSuffix: "source-0x3f-32-40" },
   { originalClass: 63, rawOwnerWord: 1, offset: { x: -17, y: -23 }, projectKind: "japanese-camp-tower", identityMapping: "exact-static-identity-source", idSuffix: "source-0x3f-35-29" },
-] as const satisfies readonly K01SourceUnitAdapterRecord[];
+] as const satisfies readonly Omit<K01SourceUnitAdapterRecord, "sourceFootprint">[];
+
+export const k01SourceOpeningAdapter = k01SourceOpeningAdapterRecords.map((record) => {
+  const sourceFootprint = k01SourceFootprintByOriginalClass[record.originalClass];
+  return sourceFootprint === undefined ? record : { ...record, sourceFootprint };
+}) as readonly K01SourceUnitAdapterRecord[];
 
 function deriveK01SourceOpeningStart(rawOwnerWord: 0 | 1): StartingUnitDefinition[] {
   return k01SourceOpeningAdapter
