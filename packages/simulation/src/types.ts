@@ -19,6 +19,7 @@ import type {
 import type { EnvironmentState } from "./environment.js";
 import type { SourceOrientationState } from "./orientation.js";
 import type { ProjectileImpactLogEntry, ProjectileSystemState } from "./projectiles.js";
+import type { SimulationEvent } from "./events.js";
 
 export type ResourceBank = ResourceAmountSet;
 
@@ -272,6 +273,10 @@ export interface WorldState {
   projectileSystem: ProjectileSystemState;
   /** Bounded deterministic lifecycle events for consumers such as damage and presentation. */
   projectileImpactEvents: ProjectileImpactLogEntry[];
+  /** Bounded generic semantic lifecycle events; policy consumers remain outside the simulation SSOT. */
+  simulationEvents: SimulationEvent[];
+  /** Monotonic event identity sequence retained across save/load. */
+  nextSimulationEventSequence: number;
   /** Optional source-runtime envelope; absent generic worlds retain old snapshots byte-for-byte. */
   sourceRuntimeProfile?: SourceRuntimeProfileEnvelope;
   lastAcceptedCommand: CommandEnvelope | null;

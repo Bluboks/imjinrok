@@ -12,6 +12,7 @@ import {
 } from "@shared";
 import {
   createProjectileSystemState,
+  normalizeSimulationEventState,
   parseSourceRuntimeProfileEnvelope,
   parseSerializedProjectileImpactLog,
   parseSerializedProjectileSystemState,
@@ -226,6 +227,10 @@ export function normalizeSavedWorldSnapshot(snapshot: unknown): WorldSnapshot | 
   const projectileImpactEvents = candidate.projectileImpactEvents === undefined
     ? []
     : parseSerializedProjectileImpactLog(candidate.projectileImpactEvents);
+  const simulationEventState = normalizeSimulationEventState(candidate);
+  if (!simulationEventState) {
+    return null;
+  }
   let sourceRuntimeProfile: WorldSnapshot["sourceRuntimeProfile"] | undefined;
 
   if (candidate.sourceRuntimeProfile !== undefined) {
@@ -270,6 +275,8 @@ export function normalizeSavedWorldSnapshot(snapshot: unknown): WorldSnapshot | 
   candidate.combatEvents ??= [];
   candidate.projectileSystem = projectileSystem;
   candidate.projectileImpactEvents = projectileImpactEvents;
+  candidate.simulationEvents = simulationEventState.simulationEvents;
+  candidate.nextSimulationEventSequence = simulationEventState.nextSimulationEventSequence;
   candidate.lastAcceptedCommand ??= null;
 
   if (sourceRuntimeProfile !== undefined) {

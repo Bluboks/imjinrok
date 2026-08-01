@@ -249,6 +249,8 @@ export function createInitialWorldState(
     combatEvents: [],
     projectileSystem: createProjectileSystemState(),
     projectileImpactEvents: [],
+    simulationEvents: [],
+    nextSimulationEventSequence: 1,
     lastAcceptedCommand: null,
   };
 

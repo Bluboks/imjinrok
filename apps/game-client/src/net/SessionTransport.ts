@@ -1,5 +1,5 @@
 import { resourceDefinitions, type CommandEnvelope, type MapDefinition, type ResourceDefinition, type ScenarioDefinition } from "@shared";
-import { advanceWorldTick, cloneSourceRuntimeProfileEnvelope, completeScenarioRuntime, CORE_CURRENT_VISIBILITY_SKIRMISH_AI_PERCEPTION_POLICY_ID, createInitialWorldState, createPlayerResearchState, createProjectileSystemState, issueCommand as issueWorldCommand, parseSerializedProjectileImpactLog, parseSerializedProjectileSystemState, PRODUCT_PROJECTILE_REGISTRY, SIM_TICK_SECONDS, SkirmishAiController, type IssueCommandResult, type ProjectileRegistry, type ScenarioStatus, type SkirmishAiControllerOptions, type WorldSnapshot, type WorldState } from "@simulation";
+import { advanceWorldTick, cloneSourceRuntimeProfileEnvelope, completeScenarioRuntime, CORE_CURRENT_VISIBILITY_SKIRMISH_AI_PERCEPTION_POLICY_ID, createInitialWorldState, createPlayerResearchState, createProjectileSystemState, issueCommand as issueWorldCommand, normalizeSimulationEventState, parseSerializedProjectileImpactLog, parseSerializedProjectileSystemState, PRODUCT_PROJECTILE_REGISTRY, SIM_TICK_SECONDS, SkirmishAiController, type IssueCommandResult, type ProjectileRegistry, type ScenarioStatus, type SkirmishAiControllerOptions, type WorldSnapshot, type WorldState } from "@simulation";
 import type { GameLaunchContext } from "../session.js";
 import { NetworkClient } from "./NetworkClient.js";
 
@@ -266,6 +266,12 @@ function normalizeWorldSnapshot(
   normalized.combatEvents ??= [];
   normalized.projectileSystem = normalizeRuntimeProjectileSystem(normalized.projectileSystem);
   normalized.projectileImpactEvents = normalizeRuntimeProjectileImpactEvents(normalized.projectileImpactEvents);
+  const simulationEventState = normalizeSimulationEventState(normalized);
+  if (!simulationEventState) {
+    throw new TypeError("world snapshot contains malformed simulation events");
+  }
+  normalized.simulationEvents = simulationEventState.simulationEvents;
+  normalized.nextSimulationEventSequence = simulationEventState.nextSimulationEventSequence;
   const sourceRuntimeProfile = normalizeRuntimeSourceRuntimeProfile(normalized.sourceRuntimeProfile);
   if (sourceRuntimeProfile !== undefined) {
     normalized.sourceRuntimeProfile = sourceRuntimeProfile;

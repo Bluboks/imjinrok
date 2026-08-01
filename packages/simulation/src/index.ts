@@ -55,6 +55,17 @@ export {
 } from "./projectileCombat.js";
 export * from "./world.js";
 export {
+  completeConstructionTransition,
+  CONSTRUCTION_COMPLETED_EVENT_TYPE,
+  normalizeSimulationEventState,
+  parseSerializedSimulationEventLog,
+  pruneSimulationEvents,
+  resolveSimulationEventSequence,
+  SIMULATION_EVENT_RETENTION_TICKS,
+  type ConstructionCompletedEvent,
+  type SimulationEvent,
+} from "./events.js";
+export {
   K01_ACCEPTED_UPDATE_COUNT_MAX,
   K01_ACCEPTED_UPDATE_COUNT_MIN,
   K01_SOURCE_ENTITY_SLOT_MAX,

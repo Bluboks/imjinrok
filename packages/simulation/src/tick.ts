@@ -2,6 +2,7 @@ import { createUnitId, findBuildWorkPath, findUnitSpawnPoint } from "./commands.
 import { applyScenarioScriptedEvents, evaluateScenarioRuntime } from "./scenario.js";
 import { SIM_TICK_SECONDS } from "./constants.js";
 import { advanceConstructionHealth, isUnitUnderConstruction, updateConstructionHealth } from "./construction.js";
+import { completeConstructionTransition, pruneSimulationEvents, SIMULATION_EVENT_RETENTION_TICKS } from "./events.js";
 import { advanceOriginalDemolitionTick, calculateProjectDemolitionRefund } from "./demolition.js";
 import { resolveDamageAmount } from "./damage.js";
 import { applyAuraAttackDamage, defaultAuraProfileRegistry, refreshAuraEffects, type AuraProfileRegistry } from "./aura.js";
@@ -38,8 +39,8 @@ const TARGET_EPSILON = 0.001;
 const DEFAULT_GATHER_CAPACITY = 10;
 const RESOURCE_RETARGET_RADIUS = 10;
 const REPAIR_HEALTH_PER_TICK = 4;
-const COMBAT_EVENT_RETENTION_TICKS = 8;
-const PROJECTILE_IMPACT_EVENT_RETENTION_TICKS = 8;
+const COMBAT_EVENT_RETENTION_TICKS = SIMULATION_EVENT_RETENTION_TICKS;
+const PROJECTILE_IMPACT_EVENT_RETENTION_TICKS = SIMULATION_EVENT_RETENTION_TICKS;
 const FAST_PRODUCTION_WORK_TICK_AMOUNT = 4;
 
 export interface AdvanceWorldTickOptions {
@@ -58,6 +59,7 @@ export function advanceWorldTick(state: WorldState, options: AdvanceWorldTickOpt
   state.tick += 1;
   pruneCombatEvents(state);
   pruneProjectileImpactEvents(state);
+  pruneSimulationEvents(state);
   // Environment updates first so future systems read this tick's state.
   updateEnvironment(state);
   advanceExplicitAttackTargetAuthorities(state, attackTargetAuthorityPolicy);
@@ -73,6 +75,9 @@ export function advanceWorldTick(state: WorldState, options: AdvanceWorldTickOpt
 
   const movementReservation = createMovementReservationForState(state);
 
+  // Construction transitions run in canonical unit-id order. Their semantic
+  // events are appended after the completed marker is removed and before aura,
+  // projectile, or combat systems observe the rest of this tick.
   for (const unit of iterateUnitsOrdered(state)) {
     if (state.units[unit.id]) {
       advanceUnitScriptedBehavior(state, unit);
@@ -1041,7 +1046,7 @@ function advanceUnitConstruction(state: WorldState, unit: UnitState): void {
     return;
   }
 
-  delete building.construction;
+  completeConstructionTransition(state, building);
   clearUnitOrder(unit);
 }
 
@@ -1135,7 +1140,7 @@ function advanceAssistedConstruction(state: WorldState, worker: UnitState, build
     return;
   }
 
-  delete building.construction;
+  completeConstructionTransition(state, building);
   clearUnitOrder(worker);
 }
 

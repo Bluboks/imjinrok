@@ -89,6 +89,8 @@ test("legacy world snapshots are normalized with missing runtime collections", (
   delete legacySnapshot.combatEvents;
   delete legacySnapshot.projectileSystem;
   delete legacySnapshot.projectileImpactEvents;
+  delete legacySnapshot.simulationEvents;
+  delete legacySnapshot.nextSimulationEventSequence;
   delete legacySnapshot.lastAcceptedCommand;
 
   const normalized = normalizeSavedWorldSnapshot(legacySnapshot);
@@ -96,6 +98,8 @@ test("legacy world snapshots are normalized with missing runtime collections", (
   assert.ok(normalized);
   assert.deepEqual(normalized.scenario.scriptedEvents, {});
   assert.deepEqual(normalized.scenario.events, []);
+  assert.deepEqual(normalized.simulationEvents, []);
+  assert.equal(normalized.nextSimulationEventSequence, 1);
   assert.deepEqual(normalized.environment, {
     weather: "clear",
     timeOfDay01: 0,
