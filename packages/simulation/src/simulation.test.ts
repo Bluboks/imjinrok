@@ -24,6 +24,7 @@ import {
 } from "../../shared/src/index.js";
 import {
   advanceWorldTick,
+  applyScenarioScriptedEvents,
   areTilesVisible,
   completeScenarioRuntime,
   CORE_EXPLICIT_TARGET_TRACKING_AUTHORITY_POLICY_ID,
@@ -358,6 +359,81 @@ test("zero-path static terminals complete before blocker removal can repath", ()
   }
 });
 
+test("scripted zero-path static terminals survive a blocker removal before movement", () => {
+  const profiles = ["core:a-star", "imjinrok:source-greedy-local-adapter"] as const;
+
+  for (const pathfindingProfileId of profiles) {
+    for (const orderType of ["move", "attack-move"] as const) {
+      for (const blockerKind of ["building", "resource"] as const) {
+        const { state, unit, target, removeBlocker } = createScriptedStaticTerminalState(
+          pathfindingProfileId,
+          orderType,
+          blockerKind,
+        );
+
+        assert.equal(unit.navigation?.terminalReason, "blocked-goal", `${pathfindingProfileId}:${orderType}:${blockerKind}`);
+        assert.equal(unit.movementPath?.length ?? 0, 0, `${pathfindingProfileId}:${orderType}:${blockerKind}`);
+        assert.equal(unit.movementTarget, undefined, `${pathfindingProfileId}:${orderType}:${blockerKind}`);
+        const startingPosition = { ...unit.position };
+        removeBlocker();
+
+        advanceWorldTick(state);
+
+        assert.equal(unit.currentOrder, undefined, `${pathfindingProfileId}:${orderType}:${blockerKind}`);
+        assert.equal(unit.scriptedBehavior, undefined, `${pathfindingProfileId}:${orderType}:${blockerKind}`);
+        assert.equal(unit.navigation, undefined, `${pathfindingProfileId}:${orderType}:${blockerKind}`);
+        assert.equal(unit.movementPath, undefined, `${pathfindingProfileId}:${orderType}:${blockerKind}`);
+        assert.equal(unit.movementTarget, undefined, `${pathfindingProfileId}:${orderType}:${blockerKind}`);
+        assert.deepEqual(unit.position, startingPosition, `${pathfindingProfileId}:${orderType}:${blockerKind}`);
+        assert.equal(unit.position.x, target.x - 1, `${pathfindingProfileId}:${orderType}:${blockerKind}`);
+      }
+    }
+  }
+});
+
+test("scripted blocked-goal terminals retire repeating behavior before a later due tick", () => {
+  for (const pathfindingProfileId of ["core:a-star", "imjinrok:source-greedy-local-adapter"] as const) {
+    const { state, unit, removeBlocker } = createScriptedStaticTerminalState(pathfindingProfileId, "move", "resource");
+
+    advanceWorldTick(state);
+    assert.equal(unit.currentOrder, undefined, pathfindingProfileId);
+    assert.equal(unit.scriptedBehavior, undefined, pathfindingProfileId);
+    assert.equal(unit.navigation, undefined, pathfindingProfileId);
+
+    removeBlocker();
+    advanceWorldTick(state);
+
+    assert.equal(unit.currentOrder, undefined, pathfindingProfileId);
+    assert.equal(unit.scriptedBehavior, undefined, pathfindingProfileId);
+    assert.equal(unit.navigation, undefined, pathfindingProfileId);
+    assert.equal(unit.movementTarget, undefined, pathfindingProfileId);
+  }
+});
+
+test("scripted zero-path terminals use the same semantic route for a custom static policy", () => {
+  registerMovementCollisionPolicy(staticToggleCollisionPolicy, { replace: true });
+
+  for (const pathfindingProfileId of ["core:a-star", "imjinrok:source-greedy-local-adapter"] as const) {
+    for (const orderType of ["move", "attack-move"] as const) {
+      const { state, unit, removeBlocker } = createScriptedStaticTerminalState(
+        pathfindingProfileId,
+        orderType,
+        "custom",
+      );
+
+      assert.equal(unit.navigation?.terminalReason, "blocked-goal", `${pathfindingProfileId}:${orderType}`);
+      removeBlocker();
+      advanceWorldTick(state);
+
+      assert.equal(unit.currentOrder, undefined, `${pathfindingProfileId}:${orderType}`);
+      assert.equal(unit.scriptedBehavior, undefined, `${pathfindingProfileId}:${orderType}`);
+      assert.equal(unit.navigation, undefined, `${pathfindingProfileId}:${orderType}`);
+      assert.equal(unit.movementTarget, undefined, `${pathfindingProfileId}:${orderType}`);
+      assert.equal(unit.movementPath, undefined, `${pathfindingProfileId}:${orderType}`);
+    }
+  }
+});
+
 test("semantic navigation state survives a snapshot roundtrip and legacy absence", () => {
   const state = createInitialWorldState(createBlankMap({ width: 12, height: 12 }), ["p1"]);
   state.units = {};
@@ -574,6 +650,72 @@ test("legacy move orders without semantic navigation still hydrate a reachable r
   assert.ok(unit.movementTarget || unit.movementPath?.length);
   assert.equal(unit.navigation?.requestedGoal.x, 7);
   assert.equal(unit.navigation?.requestedGoal.y, 5);
+});
+
+test("legacy follow-up move orders hydrate before considering a follow-up target", () => {
+  for (const pathfindingProfileId of ["core:a-star", "imjinrok:source-greedy-local-adapter"] as const) {
+    for (const followUpArea of [
+      undefined,
+      { x: 0, y: 0, width: 20, height: 20 },
+      { x: 0, y: 0, width: 2, height: 2 },
+    ] as const) {
+      const map = createBlankMap({ width: 30, height: 30 });
+      map.pathfindingProfileId = pathfindingProfileId;
+      const state = createInitialWorldState(map, ["p1", "p2"], {
+        ...defaultSkirmishScenario,
+        id: `legacy-follow-up-hydration-${pathfindingProfileId}-${followUpArea ? `${followUpArea.width}` : "none"}`,
+        completionMode: "scripted",
+        objectives: [],
+      });
+      state.units = {};
+      const mover = createUnitState("p1-legacy-follow-up", "p1", "swordsman", { x: 5, y: 5 });
+      const target = createUnitState("p2-legacy-follow-up-target", "p2", "villager", { x: 25, y: 25 });
+      mover.currentOrder = {
+        type: "move",
+        target: { x: 12, y: 5 },
+        followUpAttackTarget: { playerId: "p2", targetKind: "villager" },
+        ...(followUpArea ? { followUpWhenOutsideArea: followUpArea } : {}),
+      };
+      state.units = { [mover.id]: mover, [target.id]: target };
+
+      advanceWorldTick(state);
+
+      assert.equal(mover.currentOrder?.type, "move", `${pathfindingProfileId}:${followUpArea ? followUpArea.width : "none"}`);
+      assert.equal(mover.currentOrder?.target.x, 12, `${pathfindingProfileId}:${followUpArea ? followUpArea.width : "none"}`);
+      assert.equal(mover.navigation?.requestedGoal.x, 12, `${pathfindingProfileId}:${followUpArea ? followUpArea.width : "none"}`);
+      assert.ok(mover.movementTarget || mover.movementPath?.length, `${pathfindingProfileId}:${followUpArea ? followUpArea.width : "none"}`);
+    }
+  }
+});
+
+test("legacy follow-up fires only after the final waypoint is actually consumed", () => {
+  for (const pathfindingProfileId of ["core:a-star", "imjinrok:source-greedy-local-adapter"] as const) {
+    const map = createBlankMap({ width: 20, height: 20 });
+    map.pathfindingProfileId = pathfindingProfileId;
+    const state = createInitialWorldState(map, ["p1", "p2"], {
+      ...defaultSkirmishScenario,
+      id: `legacy-follow-up-exhaustion-${pathfindingProfileId}`,
+      completionMode: "scripted",
+      objectives: [],
+    });
+    state.units = {};
+    const mover = createUnitState("p1-legacy-follow-up-exhausted", "p1", "swordsman", { x: 5, y: 5 });
+    mover.movementSpeed = 100;
+    const target = createUnitState("p2-legacy-follow-up-exhausted-target", "p2", "villager", { x: 10, y: 5 });
+    mover.movementPath = [{ x: 6, y: 5 }];
+    mover.movementTarget = { x: 6, y: 5 };
+    mover.currentOrder = {
+      type: "move",
+      target: { x: 6, y: 5 },
+      followUpAttackTarget: { playerId: "p2", targetKind: "villager" },
+    };
+    state.units = { [mover.id]: mover, [target.id]: target };
+
+    advanceWorldTick(state);
+
+    assert.deepEqual(mover.currentOrder, { type: "attack-unit", targetUnitId: target.id }, pathfindingProfileId);
+    assert.deepEqual(mover.position, { x: 6, y: 5 }, pathfindingProfileId);
+  }
 });
 
 test("building placement rejects occupied footprints and accepts clear grass", () => {
@@ -4334,6 +4476,87 @@ function assertValidStartingPlacements(
 const MULTI_TILE_RALLY_POLICY_ID = "test:multi-tile-rally";
 
 const STATIC_TOGGLE_COLLISION_POLICY_ID = "test:static-toggle-terminal";
+
+function createScriptedStaticTerminalState(
+  pathfindingProfileId: "core:a-star" | "imjinrok:source-greedy-local-adapter",
+  orderType: "move" | "attack-move",
+  blockerKind: "building" | "resource" | "custom",
+): {
+  state: ReturnType<typeof createInitialWorldState>;
+  unit: UnitState;
+  target: GridPoint;
+  removeBlocker: () => void;
+} {
+  const target = { x: 4, y: 3 };
+  const map = createBlankMap({ width: 12, height: 12 });
+  map.pathfindingProfileId = pathfindingProfileId;
+  if (blockerKind === "custom") {
+    map.movementCollisionProfileId = STATIC_TOGGLE_COLLISION_POLICY_ID;
+  }
+
+  const scenario: ScenarioDefinition = {
+    ...defaultSkirmishScenario,
+    id: `scripted-static-terminal-${pathfindingProfileId}-${orderType}-${blockerKind}`,
+    completionMode: "scripted",
+    startingUnits: [],
+    playerStarts: { p1: { startingUnits: [] }, p2: { startingUnits: [] } },
+    objectives: [],
+    scriptedEvents: [
+      {
+        id: "scripted-static-terminal",
+        trigger: { type: "tick", tick: 1 },
+        actions: [
+          {
+            type: "spawn-units",
+            playerId: "p1",
+            origin: { x: 3, y: 3 },
+            units: [{ kind: "swordsman", idSuffix: "scripted-terminal", offset: { x: 0, y: 0 } }],
+            order: {
+              type: orderType,
+              target,
+              ...(orderType === "move"
+                ? {
+                    repeatMoveWhileInsideArea: true,
+                    followUpAttackTarget: { playerId: "p2", targetKind: "house" },
+                    followUpWhenOutsideArea: { x: 0, y: 0, width: 12, height: 12 },
+                    followUpCheckIntervalTicks: 1,
+                  }
+                : {}),
+            },
+          },
+        ],
+      },
+    ],
+  };
+  const state = createInitialWorldState(map, ["p1", "p2"], scenario);
+  const blocker = createUnitState("static-toggle-blocker", "p2", "house", target);
+
+  if (blockerKind === "resource") {
+    state.map.layers[0]!.tiles[getTileIndex(state.map.width, target.x, target.y)]!.resource = {
+      id: "scripted-terminal-resource",
+      kind: "tree",
+      amount: 100,
+    };
+  } else {
+    state.units[blocker.id] = blocker;
+  }
+
+  state.tick = 1;
+  applyScenarioScriptedEvents(state);
+
+  const unit = state.units["p1-scripted-terminal"];
+  assert.ok(unit, "scripted terminal test unit should spawn");
+
+  const removeBlocker = () => {
+    if (blockerKind === "resource") {
+      delete state.map.layers[0]!.tiles[getTileIndex(state.map.width, target.x, target.y)]!.resource;
+    } else {
+      delete state.units[blocker.id];
+    }
+  };
+
+  return { state, unit, target, removeBlocker };
+}
 
 const staticToggleCollisionPolicy: MovementCollisionPolicy = {
   ...coreStrictFootprintReservationPolicy,

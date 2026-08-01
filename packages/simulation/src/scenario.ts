@@ -10,7 +10,7 @@ import {
 import { isUnitUnderConstruction } from "./construction.js";
 import { arePlayersAllied, arePlayersEnemies } from "./diplomacy.js";
 import { createUnitState } from "./entities.js";
-import { findPathForUnit } from "./navigation.js";
+import { applyNavigationRoute, findNavigationRouteForUnit } from "./navigation.js";
 import { getFootprintTiles, validateBuildingPlacement } from "./placement.js";
 import { applyCompletedResearchToUnit } from "./research.js";
 import { isTilePassableForUnit } from "./terrain.js";
@@ -397,14 +397,13 @@ function applyScriptedUnitOrder(
   }
 
   const target = clampMapPoint(state, order.target);
-  const path = findPathForUnit(state, unit, target, { allowPartial: order.allowPartialPath === true });
+  const route = findNavigationRouteForUnit(state, unit, target, { allowPartial: order.allowPartialPath === true });
 
-  if (!path) {
+  if (!route) {
     return;
   }
 
-  unit.movementPath = path;
-  unit.movementTarget = path[0] ?? target;
+  applyNavigationRoute(unit, route);
   unit.currentOrder = {
     type: order.type,
     target,

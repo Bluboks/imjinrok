@@ -165,6 +165,18 @@ function advanceUnitScriptedBehavior(state: WorldState, unit: UnitState): void {
     return;
   }
 
+  // A scripted route that already proved a non-mobile terminal must be
+  // consumed before the repeating behavior can issue a fresh search. Mobile
+  // obstruction remains the sole resumable terminal.
+  if (
+    unit.navigation?.terminalReason &&
+    unit.navigation.terminalReason !== "mobile-obstruction" &&
+    !(unit.movementPath && unit.movementPath.length > 0) &&
+    completeTerminalTravelOrder(state, unit, true)
+  ) {
+    return;
+  }
+
   const interval = Math.max(1, behavior.checkIntervalTicks ?? 1);
 
   if (state.tick % interval !== 0) {
@@ -445,12 +457,18 @@ function advanceUnitMovement(
 
   if (!target || unit.movementSpeed <= 0) {
     if (!target) {
-      if (completeTerminalTravelOrder(state, unit, true)) {
+      // Only a recorded blocked-goal terminal proves that the missing
+      // waypoint is a completed terminal. Legacy orders without navigation
+      // must hydrate a route before any completion/follow-up decision.
+      if (
+        unit.navigation?.terminalReason === "blocked-goal" &&
+        completeTerminalTravelOrder(state, unit, true)
+      ) {
         return;
       }
 
       repathBlockedMovementWaypoint(state, unit);
-      completeTerminalTravelOrder(state, unit, false);
+      completeTerminalTravelOrder(state, unit, unit.navigation?.terminalReason === "already-at-goal");
     }
     return;
   }
@@ -575,13 +593,7 @@ function completeTerminalTravelOrder(state: WorldState, unit: UnitState, pathExh
     return false;
   }
 
-  if (pathExhausted && order?.type === "move" && order.followUpAttackTarget && !unit.movementTarget && !unit.movementPath) {
-    applyFollowUpAttackTarget(state, unit, order.followUpAttackTarget);
-    return true;
-  }
-
   if (
-    !unit.movementTarget &&
     !(unit.movementPath && unit.movementPath.length > 0) &&
     unit.navigation?.terminalReason === "blocked-goal"
   ) {
@@ -596,9 +608,15 @@ function completeTerminalTravelOrder(state: WorldState, unit: UnitState, pathExh
     }
 
     if (order?.type === "move" || order?.type === "attack-move") {
+      delete unit.scriptedBehavior;
       clearUnitOrder(unit);
       return true;
     }
+  }
+
+  if (pathExhausted && order?.type === "move" && order.followUpAttackTarget && !unit.movementTarget && !unit.movementPath) {
+    applyFollowUpAttackTarget(state, unit, order.followUpAttackTarget);
+    return true;
   }
 
   if ((order?.type === "move" || order?.type === "attack-move") && isAtOrderTarget(unit, order.target)) {
@@ -613,6 +631,12 @@ function applyConditionalTravelFollowUp(state: WorldState, unit: UnitState): boo
   const order = unit.currentOrder;
 
   if (order?.type !== "move" || !order.followUpAttackTarget || !order.followUpWhenOutsideArea) {
+    return false;
+  }
+
+  // A legacy order with no waypoint has not yet proved destination progress;
+  // hydrate it before allowing an area-triggered follow-up to fire.
+  if (!unit.movementTarget && !(unit.movementPath && unit.movementPath.length > 0)) {
     return false;
   }
 
