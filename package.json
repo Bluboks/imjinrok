@@ -62,6 +62,7 @@
     "imjinrok:extract-k01-normal-reinforcement-animation-batch": "node tools/imjinrok/extract-k01-normal-reinforcement-animation-batch.mjs --json",
     "imjinrok:extract-k01-opening-unit-bindings": "node tools/imjinrok/extract-k01-opening-unit-bindings.mjs",
     "imjinrok:extract-k01-opening-building-bindings": "node tools/imjinrok/extract-k01-opening-building-bindings.mjs",
+    "imjinrok:extract-k01-opening-footprint-anchor": "node tools/imjinrok/extract-k01-opening-footprint-anchor.mjs --json",
     "imjinrok:extract-k01-reinforcement-placement-policy": "node tools/imjinrok/extract-k01-reinforcement-placement-policy.mjs --json",
     "imjinrok:extract-k01-source-handle-lifecycle": "node tools/imjinrok/extract-k01-source-handle-lifecycle.mjs --json",
     "imjinrok:extract-k01-occupancy-owner-transition": "node tools/imjinrok/extract-k01-occupancy-owner-transition.mjs --json",

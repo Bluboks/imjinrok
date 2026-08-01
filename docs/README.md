@@ -87,6 +87,7 @@
 - [K01 농부 resource-work 상태 10·11·16 프레임](reverse-engineering/mechanics/k01-farmer-resource-work-frames.md)
 - [K01 시작 유닛 class 12·13 binding](reverse-engineering/mechanics/k01-opening-unit-bindings.md)
 - [K01 시작 건물 source binding](reverse-engineering/mechanics/k01-opening-building-bindings.md)
+- [K01 opening building footprint anchor](reverse-engineering/mechanics/k01-opening-footprint-anchor.md)
 - [K01 조선 농부 class 7 creation-default core frames](reverse-engineering/mechanics/k01-korean-farmer-core-frames.md)
 - [K01 normal reinforcement animation batch](reverse-engineering/mechanics/k01-normal-reinforcement-animation-batch.md)
 - [K01 일본 귀갑차 핵심 애니메이션 파일럿](reverse-engineering/mechanics/k01-turtle-tank-animation-pilot.md)

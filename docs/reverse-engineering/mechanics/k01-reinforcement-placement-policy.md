@@ -106,6 +106,12 @@ type writer `0x0045bd00`은 paired footprint argument를 type `+0x14/+0x16`에 �
 나중에 생성한 record가 occupancy owner를 덮어쓴다. reject나 relocate는 이 범위에 없다.
 `0x0043c58c`의 nearby-empty search는 bit `0x08`이 set일 때만 들어가므로 K01 네 class에는 적용되지 않는다.
 
+이 문서의 native 증원 class 12·13·14·82는 type `+0x14/+0x16 = 1×1`인 별도 범위다. K01 map opening
+building의 wider footprint는 [K01 opening footprint anchor](k01-opening-footprint-anchor.md)에서
+class 49 `(5,4) → x=4..6,y=3..5`의 3×3, class 7 `(7,6) → (7,6)`의 1×1 control과 함께 닫았다.
+따라서 class 49의 3×3은 class 7 cell을 포함하지 않으며, 이 결과는 P01의 증원 1×1 contract를
+확장하거나 production placement를 바꾸지 않는다.
+
 ## 재현 벡터
 
 - 정상: 위 descriptor에서 요청 좌표 9개, slot `1199..1191`, generation `1..9`.
@@ -129,6 +135,11 @@ death/release와 stale owner side-effect의 source-bound 결과는 [K01 occupanc
 원본의 1,200-slot allocator, signed reuse-age, generation, explicit occupancy-owner grid와 그 grid의
 overwrite 저장 모델을 구현하지 않는다. 이후 movement/pathfinding 및 네 class의 stats·행동도 이 메커니즘으로
 원작 일치라고 주장하지 않는다.
+
+현재 project `town-center` definition의 `4×4 blocksMovement` footprint는 UI/gameplay collision을 위한
+프로젝트 adaptation이다. X02는 이 값을 source class 49의 3×3으로 교체하지 않았고 production runtime
+footprint/collision behavior를 변경하지 않는다. source parity가 필요한 경우에는 source anchor evidence와
+별도의 project coordinate/visual adapter를 먼저 승인해야 한다.
 
 ## 남은 질문
 

@@ -135,7 +135,7 @@ ground-contact, fractional rounding 또는 universal scale도 추가하지 않�
 - `+0x4a0c4` runtime WORD adjustment, helper return, raw `0/16` branch를 terrain height/elevation 또는
   pixel pivot으로 부르지 않는다. K01 helper lookup/return stream은 모두 zero이며 table lifetime/order도
   별도 질문이다.
-- Exact placement의 raw owner, wider footprint, create-return 이후 movement/pathfinding은 닫히지 않았다.
+- Exact placement의 raw owner, project coordinate/visual adapter, create-return 이후 movement/pathfinding은 닫히지 않았다. Source opening footprint 자체는 [K01 opening footprint anchor](k01-opening-footprint-anchor.md)에서 닫혔다.
 - Locomotion `+0x1bc/+0x1be`의 source unit, `+0x4ee/+0x4ea` producer range, interpolation/occupancy,
   source update→24 Hz/FPS는 미확정이다.
 - Projectile caller가 전달 가능한 전체 signed-WORD 범위, endpoint producer와 source→GridPoint scale/anchor,
