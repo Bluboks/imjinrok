@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join, resolve } from "node:path";
+import { basename, join, resolve } from "node:path";
 import test from "node:test";
 
 import {
@@ -83,6 +83,42 @@ test("replays mode/guard, stage reachability, repeated ticks, wrap, and accepted
   assert.equal(result.events.findIndex(({ target }) => target === "0x00447360"), -1);
   assert.throws(() => replayAcceptedUpdate({ rawGlobalTick: 1, cachedGlobalTick: 0, clockGateResult: -1 }), /clockGateResult/);
   assert.throws(() => replayModeGuard({ previousModeWord: 0, guardWord: -1, argumentWord: 1 }), /guardWord/);
+});
+
+test("uses canonical repository-relative provenance across alternate absolute roots", () => {
+  const report = extractK01AcceptedUpdateScheduler(paths);
+  const alternateRoot = mkdtempSync(join(tmpdir(), "k01-accepted-update-scheduler-alt-"));
+  try {
+    symlinkSync(join(root, "original"), join(alternateRoot, "original"), "dir");
+    symlinkSync(join(root, "analysis"), join(alternateRoot, "analysis"), "dir");
+    const alternateReport = extractK01AcceptedUpdateScheduler({
+      executablePath: resolve(alternateRoot, "original/imjinrok2/imjinrok2.exe"),
+      functionsPath: resolve(alternateRoot, "analysis/generated/imjinrok2/functions.json"),
+      referencesPath: resolve(alternateRoot, "analysis/generated/imjinrok2/references.json"),
+      jumpTablesPath: resolve(alternateRoot, "analysis/generated/imjinrok2/jump-tables.json"),
+      seedsPath: resolve(alternateRoot, "analysis/generated/imjinrok2/seeds.json"),
+    });
+
+    assert.deepEqual(alternateReport, report);
+    assert.equal(report.source.executablePath, "original/imjinrok2/imjinrok2.exe");
+    assert.deepEqual(
+      Object.fromEntries(Object.entries(report.generatedArtifacts).map(([name, artifact]) => [name, artifact.path])),
+      {
+        functions: "analysis/generated/imjinrok2/functions.json",
+        references: "analysis/generated/imjinrok2/references.json",
+        jumpTables: "analysis/generated/imjinrok2/jump-tables.json",
+        seeds: "analysis/generated/imjinrok2/seeds.json",
+      },
+    );
+    const serialized = JSON.stringify(alternateReport);
+    const absoluteHomePrefix = [String.fromCharCode(47), "home", String.fromCharCode(47)].join("");
+    assert.equal(serialized.includes(absoluteHomePrefix), false);
+    assert.equal(serialized.includes(root), false);
+    assert.equal(serialized.includes(alternateRoot), false);
+    assert.equal(serialized.includes(`${basename(root)}/`), false);
+  } finally {
+    rmSync(alternateRoot, { recursive: true, force: true });
+  }
 });
 
 test("rejects changed executable and stale generated provenance loudly", () => {

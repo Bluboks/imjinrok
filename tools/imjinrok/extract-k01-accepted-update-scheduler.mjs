@@ -2,7 +2,7 @@
 
 import { createHash } from "node:crypto";
 import { readFileSync, writeFileSync } from "node:fs";
-import { relative, resolve } from "node:path";
+import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import {
@@ -39,6 +39,13 @@ const DEFAULT_PATHS = {
   referencesPath: resolve(ROOT, "analysis/generated/imjinrok2/references.json"),
   jumpTablesPath: resolve(ROOT, "analysis/generated/imjinrok2/jump-tables.json"),
   seedsPath: resolve(ROOT, "analysis/generated/imjinrok2/seeds.json"),
+};
+const CANONICAL_PATHS = {
+  executablePath: "original/imjinrok2/imjinrok2.exe",
+  functionsPath: "analysis/generated/imjinrok2/functions.json",
+  referencesPath: "analysis/generated/imjinrok2/references.json",
+  jumpTablesPath: "analysis/generated/imjinrok2/jump-tables.json",
+  seedsPath: "analysis/generated/imjinrok2/seeds.json",
 };
 const EXPECTED_EXE_SHA256 =
   "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e";
@@ -195,7 +202,7 @@ export function extractK01AcceptedUpdateScheduler(options = {}) {
     question:
       "After K01 stage 1 entry, which concrete source-bound producers determine scheduler mode, selector, guard, and persisted config, and in what order and count do the K01 updater, entity updates, projectile pools, and result resolver run in one accepted source update?",
     source: {
-      executablePath: resolve(paths.executablePath),
+      executablePath: CANONICAL_PATHS.executablePath,
       byteLength: buffer.byteLength,
       sha256: sourceSha256,
     },
@@ -203,10 +210,10 @@ export function extractK01AcceptedUpdateScheduler(options = {}) {
     reproductionStatus: "reproduction-complete",
     implementationStatus: "none",
     generatedArtifacts: {
-      functions: artifactProvenance(paths.functionsPath, sourceSha256, "functions"),
-      references: artifactProvenance(paths.referencesPath, sourceSha256, "references"),
-      jumpTables: artifactProvenance(paths.jumpTablesPath, sourceSha256, "jump tables"),
-      seeds: artifactProvenance(paths.seedsPath, sourceSha256, "seeds"),
+      functions: artifactProvenance(paths.functionsPath, sourceSha256, "functions", CANONICAL_PATHS.functionsPath),
+      references: artifactProvenance(paths.referencesPath, sourceSha256, "references", CANONICAL_PATHS.referencesPath),
+      jumpTables: artifactProvenance(paths.jumpTablesPath, sourceSha256, "jump tables", CANONICAL_PATHS.jumpTablesPath),
+      seeds: artifactProvenance(paths.seedsPath, sourceSha256, "seeds", CANONICAL_PATHS.seedsPath),
     },
     functionEvidence,
     rawCodeRanges: functionEvidence.map((entry) => ({
@@ -247,7 +254,7 @@ export function extractK01AcceptedUpdateScheduler(options = {}) {
       guard: {
         address: "0x004bdff4",
         width: "WORD",
-        directWriters: modeReachability.guardDirectWrites,
+        directWriters: canonicalizeGuardDirectWrites(modeReachability.guardDirectWrites),
         accepted: "guard == 0 allows argument WORD 1 to write scheduler mode 1",
         rejected: "guard != 0 makes argument WORD 1 write scheduler mode 0",
         aliasBoundary: modeWriters.contract.boundary,
@@ -523,14 +530,24 @@ function rejected(events, reason) {
 function hash(value) {
   return createHash("sha256").update(value).digest("hex");
 }
-function artifactProvenance(path, sourceSha256, label) {
+function artifactProvenance(path, sourceSha256, label, canonicalPath) {
   const buffer = readFileSync(path);
   const digest = hash(buffer);
   const document = JSON.parse(buffer.toString("utf8"));
   if (document.sourceSha256 !== sourceSha256) {
     throw new Error(`${label} source SHA-256: expected ${sourceSha256}, got ${document.sourceSha256}`);
   }
-  return { path: relative(ROOT, resolve(path)), byteLength: buffer.byteLength, sha256: digest };
+  return { path: canonicalPath, byteLength: buffer.byteLength, sha256: digest };
+}
+function canonicalizeGuardDirectWrites(directWriters) {
+  if (!directWriters.referenceArtifact) return directWriters;
+  return {
+    ...directWriters,
+    referenceArtifact: {
+      ...directWriters.referenceArtifact,
+      path: CANONICAL_PATHS.referencesPath,
+    },
+  };
 }
 function word(value, label) {
   if (!Number.isInteger(value) || value < 0 || value > 0xffff) throw new RangeError(`${label} must be an unsigned WORD; got ${value}`);
