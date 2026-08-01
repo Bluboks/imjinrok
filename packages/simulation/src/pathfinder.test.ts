@@ -8,7 +8,10 @@ import {
   SOURCE_GREEDY_LOCAL_ADAPTER_PATHFINDER_ID,
   PathfinderRegistry,
   createInitialWorldState,
+  coreStrictFootprintReservationPolicy,
+  findNavigationRouteForUnit,
   findPathForUnit,
+  registerMovementCollisionPolicy,
   registerPathfinder,
   runSourceGreedyLocalSearch,
   toWorldSnapshot,
@@ -103,7 +106,7 @@ test("core:a-star produces the same path for repeated equal-cost route choices",
   }
 });
 
-test("mobile blocked goals keep a terminal route node while zero-distance routes stay empty", () => {
+test("mobile blocked goals expose terminal intent without encoding the current tile in an ordinary path", () => {
   for (const profileId of [CORE_A_STAR_PATHFINDER_ID, SOURCE_GREEDY_LOCAL_ADAPTER_PATHFINDER_ID]) {
     const map = createBlankMap({ width: 8, height: 8 });
     map.pathfindingProfileId = profileId;
@@ -114,9 +117,105 @@ test("mobile blocked goals keep a terminal route node while zero-distance routes
     state.units[attacker.id] = attacker;
     state.units[target.id] = target;
 
-    assert.deepEqual(findPathForUnit(state, attacker, target.position), [attacker.position]);
+    assert.deepEqual(findPathForUnit(state, attacker, target.position), []);
+    assert.deepEqual(findNavigationRouteForUnit(state, attacker, target.position), {
+      path: [],
+      requestedGoal: target.position,
+      resolvedGoal: attacker.position,
+      terminalReason: "mobile-obstruction",
+    });
     assert.deepEqual(findPathForUnit(state, attacker, attacker.position), []);
+    assert.deepEqual(findNavigationRouteForUnit(state, attacker, attacker.position), {
+      path: [],
+      requestedGoal: attacker.position,
+      resolvedGoal: attacker.position,
+      terminalReason: "already-at-goal",
+    });
   }
+});
+
+test("a connected mobile blocker between the mover and target does not make the mover terminal", () => {
+  for (const profileId of [CORE_A_STAR_PATHFINDER_ID, SOURCE_GREEDY_LOCAL_ADAPTER_PATHFINDER_ID]) {
+    const map = createBlankMap({ width: 16, height: 10 });
+    map.pathfindingProfileId = profileId;
+    const state = createInitialWorldState(map, ["p1", "p2"]);
+    state.units = {};
+    const mover = createUnitState("p1-mover", "p1", "swordsman", { x: 8, y: 4 });
+    const blocker = createUnitState("p1-blocker", "p1", "swordsman", { x: 9, y: 4 });
+    const target = createUnitState("p2-target", "p2", "villager", { x: 10, y: 4 });
+    state.units[mover.id] = mover;
+    state.units[blocker.id] = blocker;
+    state.units[target.id] = target;
+
+    const route = findNavigationRouteForUnit(state, mover, target.position);
+
+    assert.ok(route);
+    assert.notDeepEqual(route.path, []);
+    assert.equal(route.terminalReason, undefined);
+    assert.deepEqual(route.requestedGoal, target.position);
+  }
+});
+
+test("mobile occupancy does not override terrain, resource, or static collision denial", () => {
+  for (const profileId of [CORE_A_STAR_PATHFINDER_ID, SOURCE_GREEDY_LOCAL_ADAPTER_PATHFINDER_ID]) {
+    for (const denial of ["terrain", "resource", "static"] as const) {
+      const map = createBlankMap({ width: 12, height: 10 });
+      map.pathfindingProfileId = profileId;
+      const state = createInitialWorldState(map, ["p1", "p2"]);
+      state.units = {};
+      const mover = createUnitState("p1-mover", "p1", "swordsman", { x: 2, y: 4 });
+      const target = { x: 3, y: 4 };
+      state.units[mover.id] = mover;
+
+      if (denial === "terrain") {
+        state.map.layers[0]!.tiles[getTileIndex(map.width, target.x, target.y)]!.terrain = "forest";
+      } else if (denial === "resource") {
+        state.map.layers[0]!.tiles[getTileIndex(map.width, target.x, target.y)]!.resource = {
+          id: "blocked-tree",
+          kind: "tree",
+          amount: 100,
+        };
+      } else {
+        const building = createUnitState("p1-building", "p1", "town-center", target);
+        state.units[building.id] = building;
+      }
+
+      const withoutMobile = findNavigationRouteForUnit(state, mover, target);
+      state.units["p2-mobile"] = createUnitState("p2-mobile", "p2", "villager", target);
+      const withMobile = findNavigationRouteForUnit(state, mover, target);
+
+      assert.deepEqual(withMobile?.path, withoutMobile?.path, denial);
+      assert.notEqual(withMobile?.terminalReason, "mobile-obstruction", denial);
+    }
+  }
+});
+
+test("the selected collision policy owns custom denial precedence over mobile occupancy", () => {
+  const profileId = "test:custom-static-denial";
+  registerMovementCollisionPolicy({
+    ...coreStrictFootprintReservationPolicy,
+    id: profileId,
+    getEntityBlockingTiles(state, excludedUnitId, includeMobile = true) {
+      const blocked = coreStrictFootprintReservationPolicy.getEntityBlockingTiles(state, excludedUnitId, includeMobile);
+      blocked.add("3,4");
+      return blocked;
+    },
+  });
+
+  const map = createBlankMap({ width: 12, height: 10 });
+  map.movementCollisionProfileId = profileId;
+  map.pathfindingProfileId = CORE_A_STAR_PATHFINDER_ID;
+  const state = createInitialWorldState(map, ["p1", "p2"]);
+  state.units = {};
+  const mover = createUnitState("p1-mover", "p1", "swordsman", { x: 2, y: 4 });
+  state.units[mover.id] = mover;
+
+  const withoutMobile = findNavigationRouteForUnit(state, mover, { x: 3, y: 4 });
+  state.units["p2-mobile"] = createUnitState("p2-mobile", "p2", "villager", { x: 3, y: 4 });
+  const withMobile = findNavigationRouteForUnit(state, mover, { x: 3, y: 4 });
+
+  assert.deepEqual(withMobile?.path, withoutMobile?.path);
+  assert.notEqual(withMobile?.terminalReason, "mobile-obstruction");
 });
 
 test("source-greedy local adapter preserves the recovered candidate order and strict-score local boundary", () => {

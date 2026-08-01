@@ -27,6 +27,7 @@ import {
   areTilesVisible,
   completeScenarioRuntime,
   CORE_EXPLICIT_TARGET_TRACKING_AUTHORITY_POLICY_ID,
+  CORE_UNCAPPED_CAPACITY_POLICY_ID,
   createPlayerVisibility,
   createInitialWorldState,
   findPathForUnit,
@@ -840,6 +841,64 @@ test("attack-move rally point sends newly trained combat units aggressively", ()
   assert.equal(state.units["p1-swordsman-3"]?.currentOrder?.type, "attack-move");
   assert.deepEqual(state.units["p1-swordsman-3"]?.currentOrder?.target, target);
   assert.ok(state.units["p1-swordsman-3"]?.movementTarget);
+});
+
+test("patrol keeps its requested target when a mobile blocker occupies the adjacent tile", () => {
+  const state = createInitialWorldState(createBlankMap({ width: 16, height: 12 }), ["p1", "p2"]);
+  state.units = {};
+  const patrolUnit = createUnitState("p1-patrol", "p1", "swordsman", { x: 4, y: 4 });
+  const blocker = createUnitState("p1-blocker", "p1", "villager", { x: 5, y: 4 });
+  const opponent = createUnitState("p2-observer", "p2", "villager", { x: 14, y: 10 });
+  state.units[patrolUnit.id] = patrolUnit;
+  state.units[blocker.id] = blocker;
+  state.units[opponent.id] = opponent;
+
+  const target = { x: 5, y: 4 };
+  const result = issueCommand(state, {
+    sessionId: "test-session",
+    playerId: "p1",
+    issuedAtTick: state.tick,
+    command: { type: "patrol", unitId: patrolUnit.id, target },
+  });
+
+  assert.equal(result.ok, true);
+  assert.deepEqual(patrolUnit.currentOrder?.type === "patrol" ? patrolUnit.currentOrder.target : undefined, target);
+  assert.deepEqual(patrolUnit.currentOrder?.type === "patrol" ? patrolUnit.currentOrder.nextTarget : undefined, target);
+
+  delete state.units[blocker.id];
+  advanceWorldTick(state);
+  advanceWorldTick(state);
+
+  assert.ok(patrolUnit.position.x > 4);
+  assert.deepEqual(patrolUnit.currentOrder?.type === "patrol" ? patrolUnit.currentOrder.target : undefined, target);
+});
+
+test("production attack-move rally keeps its configured target through a mobile blocker", () => {
+  const state = createInitialWorldState(createBlankMap({ width: 20, height: 14 }), ["p1", "p2"]);
+  state.capacityPolicyId = CORE_UNCAPPED_CAPACITY_POLICY_ID;
+  state.units = {};
+  const barracks = createUnitState("p1-rally-barracks", "p1", "barracks", { x: 4, y: 4 });
+  const blocker = createUnitState("p1-rally-blocker", "p1", "villager", { x: 8, y: 4 });
+  const opponent = createUnitState("p2-rally-observer", "p2", "villager", { x: 18, y: 10 });
+  const target = { x: 8, y: 4 };
+  barracks.rallyPoint = { target, mode: "attack-move" };
+  barracks.productionQueue = [{ id: "rally-test", unit: "swordsman", remainingTicks: 1, totalTicks: 1 }];
+  state.units[barracks.id] = barracks;
+  state.units[blocker.id] = blocker;
+  state.units[opponent.id] = opponent;
+
+  advanceWorldTick(state);
+
+  const trained = Object.values(state.units).find((unit) => unit.kind === "swordsman");
+  assert.ok(trained);
+  assert.deepEqual(trained.currentOrder?.type === "attack-move" ? trained.currentOrder.target : undefined, target);
+
+  const beforeRemoval = { ...trained.position };
+  delete state.units[blocker.id];
+  advanceWorldTick(state);
+
+  assert.ok(trained.position.x !== beforeRemoval.x || trained.position.y !== beforeRemoval.y);
+  assert.deepEqual(trained.currentOrder?.type === "attack-move" ? trained.currentOrder.target : undefined, target);
 });
 
 test("resource rally point command sends newly trained workers to gather", () => {

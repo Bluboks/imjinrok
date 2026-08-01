@@ -14,7 +14,7 @@ import { isUnitUnderConstruction } from "./construction.js";
 import { findBuildWorkPath, findUnitSpawnPoint, issueCommand as issueWorldCommand, TOWN_BELL_RADIUS } from "./commands.js";
 import { arePlayersEnemies } from "./diplomacy.js";
 import { createUnitState } from "./entities.js";
-import { findPathForUnit } from "./navigation.js";
+import { findNavigationRouteForUnit, findPathForUnit } from "./navigation.js";
 import { validateBuildingPlacement } from "./placement.js";
 import { getPlayerPopulationState } from "./population.js";
 import { isResearchCompleted, isResearchPending } from "./research.js";
@@ -255,12 +255,15 @@ export class SkirmishAiController {
           return;
         }
 
-        if (defenderIds.size >= this.tuning.maxBaseDefenders || !findPathForUnit(state, unit, baseThreat.position)) {
+        const route = findNavigationRouteForUnit(state, unit, baseThreat.position);
+
+        if (defenderIds.size >= this.tuning.maxBaseDefenders || !route) {
           return;
         }
 
-        this.issueAttackMove(state, playerId, unit, baseThreat.position);
-        defenderIds.add(unit.id);
+        if (this.issueAttackMove(state, playerId, unit, baseThreat.position)) {
+          defenderIds.add(unit.id);
+        }
       });
     }
 
@@ -720,12 +723,12 @@ export class SkirmishAiController {
     });
   }
 
-  private issueAttackMove(state: WorldState, playerId: string, unit: UnitState, target: GridPoint): void {
+  private issueAttackMove(state: WorldState, playerId: string, unit: UnitState, target: GridPoint): boolean {
     if (!unitCanPerformAction(unit.kind, "attack-move")) {
-      return;
+      return false;
     }
 
-    issueWorldCommand(state, {
+    const result = issueWorldCommand(state, {
       sessionId: "local-ai",
       playerId,
       issuedAtTick: state.tick,
@@ -735,6 +738,8 @@ export class SkirmishAiController {
         target,
       },
     });
+
+    return result.ok;
   }
 
   private issueAttackWave(

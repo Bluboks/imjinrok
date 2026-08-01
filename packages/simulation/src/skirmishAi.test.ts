@@ -553,6 +553,44 @@ test("skirmish AI dispatches idle fighters to defend threats near its base", () 
   assert.deepEqual(fighter.currentOrder?.target, enemy.position);
 });
 
+test("skirmish AI routes past a connected allied mobile blocker with the normal defense cap", () => {
+  const run = (insertionOrder: readonly ("townCenter" | "mover" | "blocker" | "enemy")[]) => {
+    const state = createInitialWorldState(createBlankMap({ width: 20, height: 12 }), ["p1", "p2", "p3"], undefined, {
+      p2: "defenders",
+      p3: "defenders",
+    });
+    const units = {
+      townCenter: createUnitState("p2-defense-town-center", "p2", "town-center", { x: 4, y: 4 }),
+      mover: createUnitState("p2-defense-mover", "p2", "swordsman", { x: 8, y: 4 }),
+      blocker: createUnitState("p3-defense-blocker", "p3", "swordsman", { x: 9, y: 4 }),
+      enemy: createUnitState("p1-defense-threat", "p1", "swordsman", { x: 10, y: 4 }),
+    };
+    state.units = Object.fromEntries(insertionOrder.map((key) => [units[key].id, units[key]]));
+    const ai = new SkirmishAiController(["p2"], { tuning: { maxDefensiveBeacons: 0, maxBaseDefenders: 1 } });
+    state.tick = 45;
+    ai.update(state);
+
+    assert.equal(units.mover.currentOrder?.type, "attack-move");
+    assert.deepEqual(units.mover.currentOrder?.type === "attack-move" ? units.mover.currentOrder.target : undefined, units.enemy.position);
+    assert.ok((units.mover.movementPath?.length ?? 0) > 0);
+
+    for (let tick = 0; tick < 8; tick += 1) {
+      advanceWorldTick(state);
+    }
+
+    return {
+      position: { ...units.mover.position },
+      target: units.mover.currentOrder?.type === "attack-move" ? { ...units.mover.currentOrder.target } : undefined,
+    };
+  };
+
+  const canonical = run(["townCenter", "mover", "blocker", "enemy"]);
+  const reversed = run(["enemy", "blocker", "mover", "townCenter"]);
+
+  assert.ok(canonical.position.y > 4 || canonical.position.x > 8);
+  assert.deepEqual(reversed, canonical);
+});
+
 test("skirmish AI redirects attacking fighters to defend threats near its base", () => {
   const map = createBlankMap({ width: 40, height: 40 });
   const state = createInitialWorldState(map, ["p1", "p2"]);

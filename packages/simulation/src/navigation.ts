@@ -5,7 +5,7 @@ import {
   type MapDefinition,
   type ScenarioDefinition,
 } from "../../shared/src/index.js";
-import { getEntityBlockingTiles, getUnitOccupancyTiles } from "./collision.js";
+import { getEntityBlockingTiles } from "./collision.js";
 import { defaultPathfinderRegistry, requirePathfinder } from "./pathfinderRegistry.js";
 import type { FindPathOptions, Pathfinder } from "./pathfinder.js";
 import { isTilePassableForUnit } from "./terrain.js";
@@ -27,6 +27,19 @@ const MAX_GOAL_SEARCH_NODES = 8_192;
 const MAX_GOAL_CANDIDATES = 64;
 
 export type { FindPathOptions } from "./pathfinder.js";
+
+export type NavigationTerminalReason = "already-at-goal" | "mobile-obstruction" | "blocked-goal";
+
+/**
+ * Owns strategic destination separately from physical movement waypoints.
+ * `path` never uses the current tile as a sentinel; terminal intent is explicit.
+ */
+export interface NavigationRoute {
+  readonly path: GridPoint[];
+  readonly requestedGoal: GridPoint;
+  readonly resolvedGoal: GridPoint;
+  readonly terminalReason?: NavigationTerminalReason;
+}
 
 export const CORE_A_STAR_PATHFINDER_ID = "core:a-star";
 /**
@@ -80,6 +93,36 @@ export function findPathForUnit(
   return requirePathfinder(state.pathfindingProfileId).findPath(state, unit, target, options);
 }
 
+export function findNavigationRouteForUnit(
+  state: WorldState,
+  unit: UnitState,
+  target: GridPoint,
+  options: FindPathOptions = {},
+): NavigationRoute | null {
+  const requestedGoal = toTilePoint(target);
+  const start = toTilePoint(unit.position);
+  const path = findPathForUnit(state, unit, requestedGoal, options);
+
+  if (path === null) {
+    return null;
+  }
+
+  const terminalReason = path.length === 0
+    ? sameTile(start, requestedGoal)
+      ? "already-at-goal"
+      : isDirectMobileTerminal(state, unit, start, requestedGoal, options)
+        ? "mobile-obstruction"
+        : "blocked-goal"
+    : undefined;
+
+  return {
+    path,
+    requestedGoal,
+    resolvedGoal: path.at(-1) ?? start,
+    ...(terminalReason ? { terminalReason } : {}),
+  };
+}
+
 function findPathWithCoreAStar(
   state: WorldState,
   unit: UnitState,
@@ -88,21 +131,19 @@ function findPathWithCoreAStar(
 ): GridPoint[] | null {
   const start = toTilePoint(unit.position);
   const requestedGoal = toTilePoint(target);
-  const blockedTiles = getEntityBlockingTiles(state, unit.id, options.ignoreMobileBlockers !== true);
+  const blockedTilesWithoutMobile = getEntityBlockingTiles(state, unit.id, false);
+  const blockedTiles = options.ignoreMobileBlockers === true
+    ? blockedTilesWithoutMobile
+    : getEntityBlockingTiles(state, unit.id, true);
+  const mobileBlockedTiles = getMobileBlockedTiles(blockedTiles, blockedTilesWithoutMobile);
   const startKey = toTileKey(start);
 
   blockedTiles.delete(startKey);
 
-  const goals = resolveWalkableGoals(state, unit, requestedGoal, blockedTiles);
+  const goals = resolveWalkableGoals(state, unit, requestedGoal, blockedTiles, blockedTilesWithoutMobile, mobileBlockedTiles);
 
   if (goals.length === 0) {
     return null;
-  }
-
-  const immediatePath = resolveImmediateBlockedMobileGoalPath(state, unit, start, requestedGoal, goals);
-
-  if (immediatePath) {
-    return immediatePath;
   }
 
   return findPathToAnyGoal(state, unit, start, goals, blockedTiles, requestedGoal, options);
@@ -126,7 +167,11 @@ function findPathWithSourceGreedyLocalAdapter(
 ): GridPoint[] | null {
   const start = toTilePoint(unit.position);
   const requestedGoal = toTilePoint(target);
-  const blockedTiles = getEntityBlockingTiles(state, unit.id, options.ignoreMobileBlockers !== true);
+  const blockedTilesWithoutMobile = getEntityBlockingTiles(state, unit.id, false);
+  const blockedTiles = options.ignoreMobileBlockers === true
+    ? blockedTilesWithoutMobile
+    : getEntityBlockingTiles(state, unit.id, true);
+  const mobileBlockedTiles = getMobileBlockedTiles(blockedTiles, blockedTilesWithoutMobile);
   const startKey = toTileKey(start);
 
   blockedTiles.delete(startKey);
@@ -134,16 +179,10 @@ function findPathWithSourceGreedyLocalAdapter(
   // Reusing the existing product resolution keeps blocked-goal behavior
   // consistent with core:a-star; the source kernel still scores against the
   // user's requested tile, rather than an arbitrary resolved neighbor.
-  const goals = resolveWalkableGoals(state, unit, requestedGoal, blockedTiles);
+  const goals = resolveWalkableGoals(state, unit, requestedGoal, blockedTiles, blockedTilesWithoutMobile, mobileBlockedTiles);
 
   if (goals.length === 0) {
     return null;
-  }
-
-  const immediatePath = resolveImmediateBlockedMobileGoalPath(state, unit, start, requestedGoal, goals);
-
-  if (immediatePath) {
-    return immediatePath;
   }
 
   const goalKeys = new Set(goals.map(toTileKey));
@@ -196,33 +235,30 @@ function findPathWithSourceGreedyLocalAdapter(
   return options.allowPartial === true && path.length > 0 ? path : null;
 }
 
-/**
- * Preserve a terminal route state when a unit is already in attack range of a
- * mobile blocker. A zero-length route is normally the correct result for a
- * walkable destination, but a blocked mobile target resolves to an adjacent
- * goal; returning the current tile keeps the caller's strategic order alive
- * while the target remains occupied.
- */
-function resolveImmediateBlockedMobileGoalPath(
+function getMobileBlockedTiles(blockedTiles: ReadonlySet<string>, blockedTilesWithoutMobile: ReadonlySet<string>): Set<string> {
+  return new Set([...blockedTiles].filter((key) => !blockedTilesWithoutMobile.has(key)));
+}
+
+function isDirectMobileTerminal(
   state: WorldState,
   unit: UnitState,
   start: GridPoint,
   requestedGoal: GridPoint,
-  goals: readonly GridPoint[],
-): GridPoint[] | null {
-  if (!goals.some((goal) => toTileKey(goal) === toTileKey(start)) || !hasMobileBlockerAt(state, unit.id, requestedGoal)) {
-    return null;
+  options: FindPathOptions,
+): boolean {
+  if (!isTilePassableForUnit(state, unit, requestedGoal) || options.ignoreMobileBlockers === true) {
+    return false;
   }
 
-  return [start];
-}
+  const blockedTilesWithoutMobile = getEntityBlockingTiles(state, unit.id, false);
+  const blockedTiles = getEntityBlockingTiles(state, unit.id, true);
+  const requestedKey = toTileKey(requestedGoal);
 
-function hasMobileBlockerAt(state: WorldState, excludedUnitId: string, point: GridPoint): boolean {
-  return Object.values(state.units).some((candidate) =>
-    candidate.id !== excludedUnitId &&
-    candidate.movementSpeed > 0 &&
-    getUnitOccupancyTiles(candidate).some((tile) => tile.x === point.x && tile.y === point.y),
-  );
+  if (blockedTilesWithoutMobile.has(requestedKey) || !getMobileBlockedTiles(blockedTiles, blockedTilesWithoutMobile).has(requestedKey)) {
+    return false;
+  }
+
+  return NEIGHBORS.some((offset) => toTileKey({ x: requestedGoal.x + offset.x, y: requestedGoal.y + offset.y }) === toTileKey(start));
 }
 
 /** Product-callback adapter for one bounded source-greedy local search. */
@@ -462,6 +498,8 @@ function resolveWalkableGoals(
   unit: UnitState,
   requestedGoal: GridPoint,
   blockedTiles: ReadonlySet<string>,
+  blockedTilesWithoutMobile: ReadonlySet<string>,
+  mobileBlockedTiles: ReadonlySet<string>,
 ): GridPoint[] {
   if (isWalkable(state, unit, requestedGoal, blockedTiles)) {
     return [requestedGoal];
@@ -470,7 +508,14 @@ function resolveWalkableGoals(
   const goals: GridPoint[] = [];
   const queue = [requestedGoal];
   const visited = new Set([toTileKey(requestedGoal)]);
-  const canTraverseBlockedTile = createBlockedGoalTraversal(state, requestedGoal, blockedTiles);
+  const canTraverseBlockedTile = createBlockedGoalTraversal(
+    state,
+    unit,
+    requestedGoal,
+    blockedTiles,
+    blockedTilesWithoutMobile,
+    mobileBlockedTiles,
+  );
 
   while (queue.length > 0 && visited.size < MAX_GOAL_SEARCH_NODES && goals.length < MAX_GOAL_CANDIDATES) {
     const current = queue.shift();
@@ -510,19 +555,38 @@ function resolveWalkableGoals(
 
 function createBlockedGoalTraversal(
   state: WorldState,
+  unit: UnitState,
   requestedGoal: GridPoint,
   blockedTiles: ReadonlySet<string>,
+  blockedTilesWithoutMobile: ReadonlySet<string>,
+  mobileBlockedTiles: ReadonlySet<string>,
 ): (point: GridPoint) => boolean {
   const requestedKey = toTileKey(requestedGoal);
-
-  if (blockedTiles.has(requestedKey)) {
-    return (point) => blockedTiles.has(toTileKey(point));
-  }
-
   const requestedTile = getTileAt(state.map, requestedGoal.x, requestedGoal.y);
 
-  if (terrainDefinitions[requestedTile.terrain].blocksMovement) {
-    return (point) => getTileAt(state.map, point.x, point.y).terrain === requestedTile.terrain;
+  // Terrain/resource denial owns the requested tile before collision policy
+  // occupancy is considered. A mobile occupant must not change that route.
+  if (!isTilePassableForUnit(state, unit, requestedGoal)) {
+    if (terrainDefinitions[requestedTile.terrain].blocksMovement) {
+      return (point) => getTileAt(state.map, point.x, point.y).terrain === requestedTile.terrain;
+    }
+
+    return () => false;
+  }
+
+  if (blockedTiles.has(requestedKey)) {
+    // A mobile-only goal is resolved from its direct boundary. Traversing the
+    // whole connected mobile component can incorrectly make an unrelated
+    // blocker perimeter (including the mover's start) terminal.
+    if (
+      isTilePassableForUnit(state, unit, requestedGoal) &&
+      mobileBlockedTiles.has(requestedKey) &&
+      !blockedTilesWithoutMobile.has(requestedKey)
+    ) {
+      return () => false;
+    }
+
+    return (point) => blockedTilesWithoutMobile.has(toTileKey(point));
   }
 
   return () => false;
@@ -620,4 +684,8 @@ function goalHeuristic(from: GridPoint, goals: readonly GridPoint[], fallback: G
 
 function toTileKey(point: GridPoint): string {
   return `${point.x},${point.y}`;
+}
+
+function sameTile(a: GridPoint, b: GridPoint): boolean {
+  return a.x === b.x && a.y === b.y;
 }

@@ -77,11 +77,14 @@ export {
   SOURCE_GREEDY_LOCAL_ADAPTER_PATHFINDER_ID,
   coreAStarPathfinder,
   findPathForUnit,
+  findNavigationRouteForUnit,
   isTerrainWalkable,
   resolvePathfindingProfileId,
   runSourceGreedyLocalSearch,
   sourceGreedyLocalAdapterPathfinder,
   type FindPathOptions,
+  type NavigationRoute,
+  type NavigationTerminalReason,
   type SourceGreedyLocalSearchResult,
 } from "./navigation.js";
 export { defaultPathfinderRegistry, PathfinderRegistry, registerPathfinder, requirePathfinder, type RegisterPathfinderOptions } from "./pathfinderRegistry.js";

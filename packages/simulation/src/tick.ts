@@ -8,7 +8,7 @@ import { applyAuraAttackDamage, defaultAuraProfileRegistry, refreshAuraEffects, 
 import { arePlayersAllied, arePlayersEnemies } from "./diplomacy.js";
 import { createUnitState } from "./entities.js";
 import { getEnvironmentSightMultiplier, updateEnvironment } from "./environment.js";
-import { findPathForUnit } from "./navigation.js";
+import { findNavigationRouteForUnit, findPathForUnit } from "./navigation.js";
 import {
   canUnitOccupyPosition,
   createMovementReservationForState,
@@ -202,14 +202,14 @@ function reissueScriptedMove(
   unit: UnitState,
   behavior: NonNullable<UnitState["scriptedBehavior"]>,
 ): void {
-  const path = findPathForUnit(state, unit, behavior.moveTarget, { allowPartial: behavior.allowPartialPath === true });
+  const route = findNavigationRouteForUnit(state, unit, behavior.moveTarget, { allowPartial: behavior.allowPartialPath === true });
 
-  if (!path) {
+  if (!route) {
     return;
   }
 
-  unit.movementPath = path;
-  setNextMovementTarget(unit, path);
+  unit.movementPath = route.path;
+  setNextMovementTarget(unit, route.path);
   unit.currentOrder = {
     type: "move",
     target: { ...behavior.moveTarget },
@@ -369,9 +369,9 @@ function applyProductionRally(state: WorldState, building: UnitState, unit: Unit
     return;
   }
 
-  const path = findPathForUnit(state, unit, rallyPoint.target);
+  const route = findNavigationRouteForUnit(state, unit, rallyPoint.target);
 
-  if (!path) {
+  if (!route) {
     return;
   }
 
@@ -379,9 +379,9 @@ function applyProductionRally(state: WorldState, building: UnitState, unit: Unit
     ? "attack-move"
     : "move";
 
-  unit.movementPath = path;
-  setNextMovementTarget(unit, path);
-  unit.currentOrder = { type: orderType, target: { ...(path[path.length - 1] ?? rallyPoint.target) } };
+  unit.movementPath = route.path;
+  setNextMovementTarget(unit, route.path);
+  unit.currentOrder = { type: orderType, target: { ...route.requestedGoal } };
 }
 
 function resolveProductionResourceRally(
@@ -393,10 +393,10 @@ function resolveProductionResourceRally(
     const resourceTarget = findHarvestableResourceTile(state.map, rallyPoint.resourceId);
 
     if (resourceTarget) {
-      const path = findPathForUnit(state, unit, resourceTarget);
+      const route = findNavigationRouteForUnit(state, unit, resourceTarget);
 
-      if (path) {
-        return { resourceId: rallyPoint.resourceId, target: resourceTarget, path };
+      if (route) {
+        return { resourceId: rallyPoint.resourceId, target: route.requestedGoal, path: route.path };
       }
     }
   }
@@ -414,10 +414,10 @@ function resolveProductionResourceRally(
     return null;
   }
 
-  const path = findPathForUnit(state, unit, replacement.point);
+  const route = findNavigationRouteForUnit(state, unit, replacement.point);
 
-  return path
-    ? { resourceId: replacement.id, target: replacement.point, path }
+  return route
+    ? { resourceId: replacement.id, target: route.requestedGoal, path: route.path }
     : null;
 }
 
@@ -446,6 +446,7 @@ function advanceUnitMovement(
 
   if (!target || unit.movementSpeed <= 0) {
     if (!target) {
+      repathBlockedMovementWaypoint(state, unit);
       completeTerminalTravelOrder(state, unit, false);
     }
     return;
@@ -511,22 +512,22 @@ function repathBlockedMovementWaypoint(state: WorldState, unit: UnitState): void
     return;
   }
 
-  const path = findPathForUnit(state, unit, destination, {
+  const route = findNavigationRouteForUnit(state, unit, destination, {
     allowPartial: unit.scriptedBehavior?.allowPartialPath === true,
   });
 
-  if (!path) {
+  if (!route) {
     return;
   }
 
   // The only reachable fallback can be the current footprint. Keep the blocked
   // target so a later removal or move can admit the unit on a future tick.
-  if (path.length === 0) {
+  if (route.path.length === 0) {
     return;
   }
 
-  unit.movementPath = path;
-  setNextMovementTarget(unit, path);
+  unit.movementPath = route.path;
+  setNextMovementTarget(unit, route.path);
 }
 
 function getMovementDestination(unit: UnitState): GridPoint | undefined {
@@ -1099,15 +1100,15 @@ function advanceUnitPatrol(state: WorldState, unit: UnitState): void {
     order.nextTarget = sameTile(order.nextTarget, order.target) ? { ...order.origin } : { ...order.target };
   }
 
-  const path = findPathForUnit(state, unit, order.nextTarget);
+  const route = findNavigationRouteForUnit(state, unit, order.nextTarget);
 
-  if (!path) {
+  if (!route) {
     clearUnitOrder(unit);
     return;
   }
 
-  unit.movementPath = path;
-  setNextMovementTarget(unit, path);
+  unit.movementPath = route.path;
+  setNextMovementTarget(unit, route.path);
 }
 
 function advanceUnitCombat(state: WorldState, projectileRegistry: ProjectileRegistry): void {
@@ -1293,17 +1294,17 @@ function shouldMoveTowardCombatTarget(
 }
 
 function moveUnitTowardCombatTarget(state: WorldState, unit: UnitState, target: UnitState): boolean {
-  const path = findPathForUnit(state, unit, {
+  const route = findNavigationRouteForUnit(state, unit, {
     x: Math.round(target.position.x),
     y: Math.round(target.position.y),
   });
 
-  if (!path) {
+  if (!route) {
     return false;
   }
 
-  unit.movementPath = path;
-  const nextTarget = path[0];
+  unit.movementPath = route.path;
+  const nextTarget = route.path[0];
 
   if (nextTarget) {
     unit.movementTarget = nextTarget;
@@ -1321,14 +1322,14 @@ function resumeAggressiveTravelDestination(state: WorldState, unit: UnitState): 
     return;
   }
 
-  const path = findPathForUnit(state, unit, target);
+  const route = findNavigationRouteForUnit(state, unit, target);
 
-  if (!path) {
+  if (!route) {
     return;
   }
 
-  unit.movementPath = path;
-  const nextTarget = path[0];
+  unit.movementPath = route.path;
+  const nextTarget = route.path[0];
 
   if (nextTarget) {
     unit.movementTarget = nextTarget;

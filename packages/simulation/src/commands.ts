@@ -21,7 +21,7 @@ import { createDemolitionState } from "./demolition.js";
 import { createUnitState } from "./entities.js";
 import { arePlayersAllied } from "./diplomacy.js";
 import { createCurrentVisibilityResolver, getAttackTargetAuthorityPolicy, isAttackTargetAuthorized } from "./attackTargetAuthorityPolicy.js";
-import { findPathForUnit } from "./navigation.js";
+import { findNavigationRouteForUnit, findPathForUnit } from "./navigation.js";
 import { getFootprintTiles, validateBuildingPlacement } from "./placement.js";
 import { canAdmitPlayerCapacity } from "./capacity.js";
 import { isResearchCompleted, isResearchPending } from "./research.js";
@@ -487,15 +487,15 @@ export function applyCommand(state: WorldState, envelope: CommandEnvelope): void
       }
 
       const target = clampMapPoint(state.map, envelope.command.target);
-      const path = findPathForUnit(state, unit, target);
+      const route = findNavigationRouteForUnit(state, unit, target);
 
-      if (!path) {
+      if (!route) {
         return;
       }
 
-      const nextTarget = path[0];
+      const nextTarget = route.path[0];
 
-      if (!nextTarget) {
+      if (!nextTarget && route.terminalReason === "already-at-goal") {
         // A zero-length route is complete immediately; retaining its
         // destination would falsely advertise an active movement between ticks.
         delete unit.movementTarget;
@@ -504,16 +504,19 @@ export function applyCommand(state: WorldState, envelope: CommandEnvelope): void
         return;
       }
 
-      unit.movementPath = path;
-      unit.movementTarget = nextTarget;
-      // An attack-move's target is its strategic destination. The path may
-      // temporarily end beside an occupied mobile footprint, but that routing
-      // fallback must not replace the destination used for later re-planning.
+      unit.movementPath = route.path;
+      if (nextTarget) {
+        unit.movementTarget = nextTarget;
+      } else if (route.terminalReason !== "already-at-goal") {
+        // Keep a concrete movement anchor for a non-completing resolved route
+        // without putting a sentinel node into the ordinary path array.
+        unit.movementTarget = { ...route.resolvedGoal };
+      } else {
+        delete unit.movementTarget;
+      }
       unit.currentOrder = {
         type: envelope.command.type,
-        target: envelope.command.type === "attack-move"
-          ? { ...target }
-          : { ...(path[path.length - 1] ?? target) },
+        target: { ...route.requestedGoal },
       };
       return;
     }
@@ -525,21 +528,23 @@ export function applyCommand(state: WorldState, envelope: CommandEnvelope): void
       }
 
       const target = clampMapPoint(state.map, envelope.command.target);
-      const path = findPathForUnit(state, unit, target);
+      const route = findNavigationRouteForUnit(state, unit, target);
 
-      if (!path) {
+      if (!route) {
         return;
       }
 
-      const patrolTarget = path[path.length - 1] ?? target;
-
-      unit.movementPath = path;
-      unit.movementTarget = path[0] ?? patrolTarget;
+      unit.movementPath = route.path;
+      if (route.path[0]) {
+        unit.movementTarget = route.path[0];
+      } else {
+        delete unit.movementTarget;
+      }
       unit.currentOrder = {
         type: "patrol",
         origin: clampMapPoint(state.map, { x: Math.round(unit.position.x), y: Math.round(unit.position.y) }),
-        target: { ...patrolTarget },
-        nextTarget: { ...patrolTarget },
+        target: { ...route.requestedGoal },
+        nextTarget: { ...route.requestedGoal },
       };
       return;
     }
