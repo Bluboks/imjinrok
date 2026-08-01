@@ -1,0 +1,138 @@
+{
+  "sourceSha256": "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e",
+  "vectors": [
+    {
+      "id": "allocation-all-free-later-tie",
+      "operation": "allocate",
+      "input": { "mode": "all-inactive", "inspectSlot": 1 },
+      "expected": { "selectedSlot": 1199, "ageAtFirst": 1, "ageAtLast": 1, "ageAtSlot": 1 },
+      "expectedSha256": "b995f8ead42cd3cc24c1d517a40fa860bc23ac120f7b34c26c27d62840151bf9"
+    },
+    {
+      "id": "allocation-slot-zero-reserved-full-pool",
+      "operation": "allocate",
+      "input": { "mode": "all-active", "inspectSlot": 1199 },
+      "expected": { "selectedSlot": 0, "ageAtFirst": 0, "ageAtLast": 0, "ageAtSlot": 0 },
+      "expectedSha256": "ccb97cbb9a847d55896395bd42421e9c98e22dc5f88d741091b65ca03ebac2da"
+    },
+    {
+      "id": "allocation-slot-1199-boundary",
+      "operation": "allocate",
+      "input": { "mode": "all-active-except", "inactiveSlots": [1199], "inspectSlot": 1199 },
+      "expected": { "selectedSlot": 1199, "ageAtFirst": 0, "ageAtLast": 1, "ageAtSlot": 1 },
+      "expectedSha256": "a9285aa1e5de523584a11c79539f99ae2ce42dcf428c9c8e0047ac65e1ae9686"
+    },
+    {
+      "id": "allocation-age-tie-prefers-later-slot",
+      "operation": "allocate",
+      "input": { "mode": "all-active-except", "inactiveSlots": [2, 1199], "ageOverrides": { "2": 5, "1199": 5 }, "inspectSlot": 2 },
+      "expected": { "selectedSlot": 1199, "ageAtFirst": 0, "ageAtLast": 6, "ageAtSlot": 6 },
+      "expectedSha256": "0fa53f964caeb6aedbc6592d27e5cd65cc86d24ab4c64b4d28fecf81d6cb89d3"
+    },
+    {
+      "id": "allocation-reuse-age-signed-wrap",
+      "operation": "allocate",
+      "input": { "mode": "all-active-except", "inactiveSlots": [1], "ageOverrides": { "1": 32767 }, "inspectSlot": 1 },
+      "expected": { "selectedSlot": 1, "ageAtFirst": -32768, "ageAtLast": 0, "ageAtSlot": -32768 },
+      "expectedSha256": "001817d614382558eadec3af55bb5beebf9644001f436b6a06a3aec52a1ece5a"
+    },
+    {
+      "id": "generation-initial-zero-increments-to-one",
+      "operation": "generation",
+      "input": { "generation": 0 },
+      "expected": { "nextGeneration": 1 },
+      "expectedSha256": "3309acd4f9fb7a6deb853fe6e64eeb78003d084c28bb5d1a8c5c3b8cc7323377"
+    },
+    {
+      "id": "generation-word-wrap-to-zero",
+      "operation": "generation",
+      "input": { "generation": 65535 },
+      "expected": { "nextGeneration": 0 },
+      "expectedSha256": "6bb4314da1c0c673c2d565c840ff92f454719995ae9e9d0d5d03d50d7f2fb452"
+    },
+    {
+      "id": "validity-matching-zero-generation",
+      "operation": "validity",
+      "input": { "slot": 1199, "generation": 0, "activeTableWord": 1, "healthWord": 100, "recordSlot": 1199, "recordGeneration": 0 },
+      "expected": { "valid": true, "reason": "valid" },
+      "expectedSha256": "db8f5d468a23cf1576d90936b1d49eab07daa2b8dfb3fa5a789577c8c5872237"
+    },
+    {
+      "id": "validity-health-zero-rejects-before-generation",
+      "operation": "validity",
+      "input": { "slot": 1199, "generation": 1, "activeTableWord": 1, "healthWord": 0, "recordSlot": 1199, "recordGeneration": 1 },
+      "expected": { "valid": false, "reason": "non-positive-health" },
+      "expectedSha256": "aa619b32c39e0004789833937edfa49ef19d62ac453da567560d3fa4dd62dfc5"
+    },
+    {
+      "id": "validity-generation-mismatch-after-reuse",
+      "operation": "validity",
+      "input": { "slot": 1199, "generation": 1, "activeTableWord": 1, "healthWord": 100, "recordSlot": 1199, "recordGeneration": 2 },
+      "expected": { "valid": false, "reason": "generation-mismatch" },
+      "expectedSha256": "dd248aeaecf824dc01d7a291b38502ad2b0b7630d5e50f5ad9896350f88eb0d1"
+    },
+    {
+      "id": "validity-active-gate-rejects-projectile-target",
+      "operation": "validity",
+      "input": { "slot": 1199, "generation": 1, "activeTableWord": 1, "healthWord": 100, "recordSlot": 1199, "recordGeneration": 1, "activeGateByte": 0, "requireGeneration": false, "requireActiveGate": true },
+      "expected": { "valid": false, "reason": "inactive-record-gate" },
+      "expectedSha256": "e3e097513dcbcc94c4eafa24adcc15b6fa9398e58c5a368374ca079bb9c19e58"
+    },
+    {
+      "id": "validity-released-slot-rejects-before-health",
+      "operation": "validity",
+      "input": { "slot": 1199, "generation": 1, "activeTableWord": 0, "healthWord": 100, "recordSlot": 1199, "recordGeneration": 1 },
+      "expected": { "valid": false, "reason": "inactive-slot" },
+      "expectedSha256": "81696b1132655e090f5662d6a4a83c003f6f1d8c7c9131d9eec2a7a0cb966351"
+    },
+    {
+      "id": "release-success-clears-active-and-age-after-list-swap",
+      "operation": "release",
+      "input": { "mode": "all-active-except", "inactiveSlots": [], "slot": 1199, "activeList": [1199, 100], "recordPosition": 0, "ageOverrides": { "1199": 7 } },
+      "expected": { "released": true, "reason": "released", "events": ["record-cleanup-before-list-swap", "active-list-swap-last", "active-list-last-entry-zero", "active-count-decrement", "moved-record-position-rewrite", "category-cleanup", "active-table-clear", "reuse-age-clear"], "activeTableWordAfter": 0, "reuseAgeAfter": 0, "activeListAfter": [100, 0] },
+      "expectedSha256": "eae91c7976d905bbf59f857afb6c27fb1a624b0e62ca3721187778af6045bd66"
+    },
+    {
+      "id": "release-double-free-is-inactive-early-return",
+      "operation": "release",
+      "input": { "mode": "all-active-except", "inactiveSlots": [1199], "slot": 1199, "activeList": [1199], "recordPosition": 0 },
+      "expected": { "released": false, "reason": "inactive-slot", "events": ["early-return-before-list-or-record-mutation"], "activeTableWordAfter": 0, "reuseAgeAfter": 0, "activeListAfter": [1199] },
+      "expectedSha256": "afd8cb7fa1992211e9dc43bade3df50fe3e52488d36bd66f7359b81b06970071"
+    },
+    {
+      "id": "same-slot-reuse-rejects-stale-and-accepts-new-generation",
+      "operation": "same-slot-reuse",
+      "input": { "slot": 1199, "generationBeforeFirstCreate": 0 },
+      "expected": { "firstHandle": { "slot": 1199, "generation": 1 }, "release": { "released": true, "activeAfter": 0 }, "secondHandle": { "slot": 1199, "generation": 2 }, "staleReference": { "valid": false, "reason": "generation-mismatch" }, "newReference": { "valid": true, "reason": "valid" } },
+      "expectedSha256": "145c10f3953240f1f24f1bc5e2008ba1f7ddb3463dd4b0ecd0c4ebdb3d0c6f91"
+    },
+    {
+      "id": "native-create-allocation-failure-retains-prior-record",
+      "operation": "placement",
+      "input": { "pool": { "mode": "all-active-except", "inactiveSlots": [1199] }, "generation": 0, "origin": { "x": 0, "y": 0 }, "mapWidth": 60, "mapHeight": 60, "descriptors": [ { "internalClass": 13, "dx": 0, "dy": 0 }, { "internalClass": 14, "dx": 1, "dy": 0 }, { "internalClass": 0, "dx": 0, "dy": 0 } ] },
+      "expected": { "returnValue": 0, "allocations": [ { "index": 0, "slot": 1199 }, { "index": 1, "slot": 0 } ], "records": [ { "index": 0, "slot": 1199, "generation": 1, "x": 0, "y": 0 } ], "generation": 1 },
+      "expectedSha256": "0445b87a31eeafdab56a17f3bfa72ca9a8dd0535ece39820d29a988b7ab3e12d"
+    },
+    {
+      "id": "native-create-oob-skips-and-continues",
+      "operation": "placement",
+      "input": { "pool": { "mode": "all-inactive" }, "generation": 0, "origin": { "x": 0, "y": 0 }, "mapWidth": 60, "mapHeight": 60, "descriptors": [ { "internalClass": 13, "dx": -1, "dy": 0 }, { "internalClass": 14, "dx": 0, "dy": 0 }, { "internalClass": 0, "dx": 0, "dy": 0 } ] },
+      "expected": { "returnValue": 1, "allocations": [ { "index": 0, "slot": 1199 }, { "index": 1, "slot": 1199 } ], "records": [ { "index": 1, "slot": 1199, "generation": 1, "x": 0, "y": 0 } ], "generation": 1 },
+      "expectedSha256": "dc44ab27243cb83dd6ebe2a8f8bd28c74cbd65d9c577c334124671544954ec78"
+    },
+    {
+      "id": "death-retain-bit-keeps-active-slot",
+      "operation": "death-release",
+      "input": { "retain": true },
+      "expected": { "dispatcherReturn": 1, "releaseCalled": false, "activeAfter": true, "slotTableWordAfter": 1 },
+      "expectedSha256": "fcab8961258d6fdfe686542aeea8c7d7e0654bb3194d6e217b8166131a5a2348"
+    },
+    {
+      "id": "death-release-return-zero-clears-slot",
+      "operation": "death-release",
+      "input": { "retain": false },
+      "expected": { "dispatcherReturn": 0, "releaseCalled": true, "activeAfter": false, "slotTableWordAfter": 0 },
+      "expectedSha256": "133fc851115f4e978beb28459a8ef688de9b2990544d5c0d0e9f78fc500e51d8"
+    }
+  ]
+}

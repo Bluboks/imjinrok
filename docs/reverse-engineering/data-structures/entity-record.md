@@ -2,8 +2,8 @@
 
 ## 상태
 
-- 분석 상태: `추정`
-- 재현 상태: `미재현`
+- 분석 상태: `source handle lifecycle 범위 정적 확정; 전체 구조체는 추정`
+- 재현 상태: `allocator/generation/validity/release 범위 재현 완료`
 
 과거 분석에는 서로 다른 엔티티 표현이 등장한다. 현재는 이를 하나의 구조체로 합치지 않는다.
 
@@ -29,6 +29,13 @@ K0120 scan의 base·stride·세 필드와 `0x00441e40(index)` active gate는
 [K01 봉화대·K0120 trigger](../mechanics/k01-beacon-k0120-trigger.md) 범위에서 정적
 확정했다. 보호 영웅 alive 검사는 같은 `0x558`-byte runtime entity record의 slot table,
 signed health `+0x3e`, full reference `+0x1b6/+0x1b8`을 사용한다.
+
+source handle의 좁은 lifecycle 경계(1..1199 allocator, signed reuse-age, generation
+increment-before-initializer, active-list swap-last release, positive-health/full-reference
+reader)는 [K01 source handle lifecycle](../mechanics/k01-source-handle-lifecycle.md)에서
+원본 SHA·seed·function·reference artifact와 19개 fixture로 정적 검증·재현했다. 이 결과는
+`+0x1b6/+0x1b8`의 해당 경로를 닫지만, 모든 offset의 공통 mega-struct, runtime writer/alias,
+사람용 identity와 포팅 `UnitState` 동일성을 확정하지 않는다.
 
 ## 렌더링 엔티티 객체 후보
 

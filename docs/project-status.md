@@ -44,7 +44,8 @@ unsigned DWORD 50/2000 strict poll, `0x8c→0x96→0x1c` relay와 external/stage
 표준 main state 1 mission entry에서는 stage 1 K01 map source를 선택하기 전에 broad
 `REP STOSD`가 `[0x007c5ed8,0x00843980)`을 0으로 채워 win/loss timer를 초기화하는 순서도
 정적 복원·재현했다.
-native 증원의 원본 class·SPR와 K01 60×60 요청 좌표 9개도 교차 확인했다. K01 전용 adapter는
+native 증원의 원본 class·SPR와 K01 60×60 요청 좌표 9개도 교차 확인했다. source slot allocator·generation·validity·release의
+범위 한정 lifecycle도 정적 분석·재현했지만 production에는 연결하지 않았다. K01 전용 adapter는
 class 12·13·14·82 아홉 record를 각각 `japanese-gunner`, `japanese-samurai`,
 `japanese-turtle-tank`, `japanese-konishi`의 exact static identity/source binding으로 연결했다.
 class 12 `japanese-gunner`의 상태 8/1/4/7 frame·8방향·mirror, class 13 `japanese-samurai`의 상태 8/1/4/7 frame·8방향·mirror와 class 14
@@ -81,7 +82,7 @@ K02는 이 단기 MVP의 완료 조건이 아니다. 기존 K02 프로토타입�
 | 원본 PE·주소 변환 | 고정 Ghidra 파이프라인 존재 | 일반 참조·점프 테이블 포함 | 2회 생성 해시 일치 | 정적 분석 1단계 완료 |
 | 스크립트·맵·SPR·YAV 파서 | 도구 존재 | 원본 파일 기반 | 파서별 편차 있음 | 재감사 후 유지 |
 | 엔티티 정체·자원 | 고유 연결 표시 이름 반영, 봉화대·K01 영웅 자원 수정 | 클래스 1~95 명칭·슬롯·기본 프레임·flags·경로 전수 확정 | 연속성·대표 타입·공유 경로·입력 해시 테스트 | 타입 정체 정적 확정, 행동·수치 의미는 별도 |
-| K01 캠페인 | 처음부터 결과까지 프로토타입, native 증원 9개 exact static identity/source adapter와 K01-only exact-position create 부분 이식 | 표준 entry timer reset, 봉화대→K0120, native class/요청 좌표·slot/OOB/exact create·1×1 occupancy overwrite, class 13·14·82 scoped 핵심 animation와 class-14 16-ring/destruction, latch→timer→commit, result presentation→final route 범위 확정 | 요청 좌표·slot/경계/overlap/WORD-wrap·exact static identity/source 9/9, class 13·14·82 grid frame/direction, class-14 turn/effect, native effect·timer·presentation·route 경계 재현 | 단기 팬 리마스터 MVP, class 14 generic Facing/runtime tick, 증원 stats/behavior·raw owner, 원본 1,200-slot/generation/occupancy-owner 저장 모델·이후 movement, raw clock/result policy 미완료 |
+| K01 캠페인 | 처음부터 결과까지 프로토타입, native 증원 9개 exact static identity/source adapter와 K01-only exact-position create 부분 이식 | 표준 entry timer reset, 봉화대→K0120, native class/요청 좌표·slot/OOB/exact create·1×1 occupancy overwrite, source handle allocator/generation/validity/release 범위, class 13·14·82 scoped 핵심 animation와 class-14 16-ring/destruction, latch→timer→commit, result presentation→final route 범위 확정 | 요청 좌표·slot/경계/overlap/WORD-wrap·source handle 19-vector·exact static identity/source 9/9, class 13·14·82 grid frame/direction, class-14 turn/effect, native effect·timer·presentation·route 경계 재현 | 단기 팬 리마스터 MVP, class 14 generic Facing/runtime tick, 증원 stats/behavior·raw owner, 전체 entity mega-struct와 모든 writer/alias, 원본 occupancy-owner 저장 모델·이후 movement, raw clock/result policy 미완료 |
 | K02 캠페인 | 프로토타입 존재 | 제한적 | 원본 재현 없음 | K01 이후로 연기 |
 | 전투 | 프로토타입, 유성룡 좌표 accepted subset `0..32767` 독립 계산 부분 이식 | K01 영웅 phase·피해·대상·사거리·투사체와 signed-health 사망·slot/reference 수명주기 확정 | 대상·투사체·scheduler 및 사망 phase·delay·stale reference 경계 재현 | 독립 단위 부분 이식; identity/좌표/24 Hz exact mapping과 opt-in 사망 정책 대기 |
 | 전투 | 프로토타입 구현 존재 | K01 일반 공격 phase·회복, action 40 소유권 이전, action 59 loop-carried full DWORD와 fixed reset·tracking·subtype 16 same-slot subtype 1 전환·mode 2 kind 2, generic mode 1 kind 2 열거/callback 입력, subtype 12 kind 9 및 direct full-generation/writer gate 경계 확정 | 일반 공격 제한 범위와 class 78 선택·pending 충돌·subtype 12/16 flight/종료·generic enumeration 입력/call 경계·선택 buffer/health write 부분 재현 | K01 영웅 제한 범위 부분 재현, generic K01 mode 1 producer 미확정, 자동 마법은 분석-only |
