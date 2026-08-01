@@ -168,13 +168,20 @@ function advanceUnitScriptedBehavior(state: WorldState, unit: UnitState): void {
   // A scripted route that already proved a non-mobile terminal must be
   // consumed before the repeating behavior can issue a fresh search. Mobile
   // obstruction remains the sole resumable terminal.
-  if (
-    unit.navigation?.terminalReason &&
-    unit.navigation.terminalReason !== "mobile-obstruction" &&
-    !(unit.movementPath && unit.movementPath.length > 0) &&
-    completeTerminalTravelOrder(state, unit, true)
-  ) {
-    return;
+  if (unit.navigation?.terminalReason && unit.navigation.terminalReason !== "mobile-obstruction") {
+    const hasRemainingWaypoints = unit.movementPath !== undefined && unit.movementPath.length > 0;
+
+    if (!hasRemainingWaypoints && completeTerminalTravelOrder(state, unit, true)) {
+      return;
+    }
+
+    // A non-mobile semantic terminal is sticky while its resolved physical
+    // route is still being consumed. Do not reopen the requested destination
+    // from the repeating script, but keep outside-area follow-up evaluation
+    // below available when its own interval/area gate is due.
+    if (hasRemainingWaypoints && isPointInScenarioArea(unit.position, behavior.whileInsideArea)) {
+      return;
+    }
   }
 
   const interval = Math.max(1, behavior.checkIntervalTicks ?? 1);

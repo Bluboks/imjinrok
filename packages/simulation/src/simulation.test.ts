@@ -434,6 +434,42 @@ test("scripted zero-path terminals use the same semantic route for a custom stat
   }
 });
 
+test("scripted static blocked routes keep a nonempty resolved path sticky", () => {
+  registerMovementCollisionPolicy(staticToggleCollisionPolicy, { replace: true });
+
+  for (const pathfindingProfileId of ["core:a-star", "imjinrok:source-greedy-local-adapter"] as const) {
+    for (const blockerKind of ["building", "resource", "custom"] as const) {
+      const { state, unit, target, removeBlocker } = createScriptedStaticTerminalState(
+        pathfindingProfileId,
+        "move",
+        blockerKind,
+        { x: 1, y: 3 },
+      );
+
+      assert.equal(unit.navigation?.terminalReason, "blocked-goal", `${pathfindingProfileId}:${blockerKind}`);
+      assert.ok((unit.movementPath?.length ?? 0) > 0, `${pathfindingProfileId}:${blockerKind}`);
+      const resolvedGoal = { ...unit.navigation!.resolvedGoal };
+      removeBlocker();
+
+      for (let tick = 0; tick < 40 && unit.currentOrder; tick += 1) {
+        advanceWorldTick(state);
+        if (unit.currentOrder) {
+          assert.deepEqual(unit.navigation?.requestedGoal, target, `${pathfindingProfileId}:${blockerKind}`);
+          assert.deepEqual(unit.navigation?.resolvedGoal, resolvedGoal, `${pathfindingProfileId}:${blockerKind}`);
+          assert.equal(unit.navigation?.terminalReason, "blocked-goal", `${pathfindingProfileId}:${blockerKind}`);
+        }
+      }
+
+      assert.equal(unit.currentOrder, undefined, `${pathfindingProfileId}:${blockerKind}`);
+      assert.equal(unit.scriptedBehavior, undefined, `${pathfindingProfileId}:${blockerKind}`);
+      assert.equal(unit.navigation, undefined, `${pathfindingProfileId}:${blockerKind}`);
+      assert.equal(unit.movementPath, undefined, `${pathfindingProfileId}:${blockerKind}`);
+      assert.equal(unit.movementTarget, undefined, `${pathfindingProfileId}:${blockerKind}`);
+      assert.deepEqual(unit.position, resolvedGoal, `${pathfindingProfileId}:${blockerKind}`);
+    }
+  }
+});
+
 test("semantic navigation state survives a snapshot roundtrip and legacy absence", () => {
   const state = createInitialWorldState(createBlankMap({ width: 12, height: 12 }), ["p1"]);
   state.units = {};
@@ -4481,6 +4517,7 @@ function createScriptedStaticTerminalState(
   pathfindingProfileId: "core:a-star" | "imjinrok:source-greedy-local-adapter",
   orderType: "move" | "attack-move",
   blockerKind: "building" | "resource" | "custom",
+  start: GridPoint = { x: 3, y: 3 },
 ): {
   state: ReturnType<typeof createInitialWorldState>;
   unit: UnitState;
@@ -4509,7 +4546,7 @@ function createScriptedStaticTerminalState(
           {
             type: "spawn-units",
             playerId: "p1",
-            origin: { x: 3, y: 3 },
+            origin: start,
             units: [{ kind: "swordsman", idSuffix: "scripted-terminal", offset: { x: 0, y: 0 } }],
             order: {
               type: orderType,
