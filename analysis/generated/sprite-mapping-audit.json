@@ -20,7 +20,7 @@
     },
     {
       "path": "packages/shared/src/scenarios.ts",
-      "sha256": "3253feeed17e7d68907d8c32391d2a0f4c9bc20f742bfd78d79ae1b66d791611"
+      "sha256": "b37a387e91f45dfea23239b3093141410bb9edd0f68c366b8183bf6acf948b6e"
     },
     {
       "path": "packages/shared/src/k01UnitAnimationCoverage.ts",
@@ -36,7 +36,7 @@
     },
     {
       "path": "apps/game-client/src/scenes/MissionBriefingScene.ts",
-      "sha256": "2491b5429a75f26db7013e17c1b2367c5bc277639c1e6fb2e2ed3a4074fdbd51"
+      "sha256": "94032d24fadbf8db06c2f777b88c08915ff78e5182a7b6fb11191bf04be6ee40"
     },
     {
       "path": "apps/game-client/src/missionPortraits.ts",

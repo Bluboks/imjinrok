@@ -3,6 +3,7 @@ import {
   type OriginalSpeechSlot,
   type ScenarioBriefingDefinition,
   type ScenarioBriefingLineDefinition,
+  type ScenarioBriefingPresentationTimingPolicy,
 } from "@shared";
 import {
   MISSION_PORTRAIT_IMAGE_CUES,
@@ -15,7 +16,10 @@ import {
   getMissionBriefingClickAction,
   getMissionBriefingIntroStage,
   getMissionBriefingPortraitScale,
+  getMissionBriefingRenderLayers,
   getMissionBriefingTitleFrameIndex,
+  requireMissionBriefingPresentationTimingPolicy,
+  shouldReplayMissionBriefingVoice,
 } from "../missionPresentationTimeline.js";
 import { getOriginalSpeechSlot, resolveOriginalSpeechLayout } from "../originalSpeechLayout.js";
 import {
@@ -38,7 +42,6 @@ import {
 } from "../ui/preGameTypography.js";
 
 const BRIEFING_DURATION_MS = 60_000;
-const BRIEFING_LINE_DURATION_MS = 5_500;
 const BACKDROP_SOURCE_WIDTH = 640;
 const BACKDROP_SOURCE_HEIGHT = 480;
 const VOICE_AUDIO_PREFIX = "audio:mission-voice:";
@@ -62,6 +65,7 @@ const portraitCueById = new Map(
 
 export class MissionBriefingScene extends Phaser.Scene {
   private context: GameLaunchContext | null = null;
+  private presentationTimingPolicy: ScenarioBriefingPresentationTimingPolicy | null = null;
   private launchController = new PreGameBriefingLaunchController();
   private container: Phaser.GameObjects.Container | null = null;
   private backdropImage: Phaser.GameObjects.Image | null = null;
@@ -97,7 +101,10 @@ export class MissionBriefingScene extends Phaser.Scene {
       }
     }
 
-    for (const frame of collectMissionBriefingBackdropFrames(this.context?.scenario?.briefing)) {
+    for (const frame of collectMissionBriefingBackdropFrames(
+      this.context?.scenario?.briefing,
+      this.context?.scenario?.briefing?.timing?.presentationPolicy,
+    )) {
       if (!this.textures.exists(frame.key)) {
         this.load.image(frame.key, frame.url);
       }
@@ -125,6 +132,8 @@ export class MissionBriefingScene extends Phaser.Scene {
       return;
     }
 
+    this.presentationTimingPolicy = requireMissionBriefingPresentationTimingPolicy(briefing);
+
     this.cameras.main.setBackgroundColor("#000000");
     this.resetPresentation();
     this.drawPresentation();
@@ -135,7 +144,7 @@ export class MissionBriefingScene extends Phaser.Scene {
         return;
       }
 
-      this.redrawPresentation(false);
+      this.redrawPresentation(shouldReplayMissionBriefingVoice("font-ready"));
     });
   }
 
@@ -166,7 +175,7 @@ export class MissionBriefingScene extends Phaser.Scene {
   }
 
   private handleResize(): void {
-    this.redrawPresentation(false);
+    this.redrawPresentation(shouldReplayMissionBriefingVoice("resize"));
   }
 
   private handleShutdown(): void {
@@ -175,6 +184,7 @@ export class MissionBriefingScene extends Phaser.Scene {
     this.typographyReadyUnsubscribe = null;
     this.stopAudio();
     this.destroyPresentation();
+    this.presentationTimingPolicy = null;
     this.introducedPortraitAt.clear();
   }
 
@@ -205,11 +215,15 @@ export class MissionBriefingScene extends Phaser.Scene {
     container.add(graphics);
     this.addBackdrop(container, width, height, briefing);
 
-    if (line || this.dismissed) {
-      this.addSpeechPresentation(container, briefing.lines, line, this.lineIndex, width, height);
-    }
-    if (this.isIntroReady(this.time.now)) {
-      this.addBriefingMetadataPresentation(container, briefing, width, height);
+    for (const layer of getMissionBriefingRenderLayers(
+      line !== undefined || this.dismissed,
+      this.isIntroReady(this.time.now),
+    )) {
+      if (layer === "speech") {
+        this.addSpeechPresentation(container, briefing.lines, line, this.lineIndex, width, height);
+      } else {
+        this.addBriefingMetadataPresentation(container, briefing, width, height);
+      }
     }
 
     container.add(
@@ -259,8 +273,8 @@ export class MissionBriefingScene extends Phaser.Scene {
     height: number,
     briefing: ScenarioBriefingDefinition,
   ): void {
-    const frames = collectMissionBriefingBackdropFrames(briefing);
-    const frameIndex = getMissionBriefingTitleFrameIndex(frames, this.introStartedAt ?? this.time.now, this.time.now, this.introCompleted);
+    const frames = collectMissionBriefingBackdropFrames(briefing, this.requirePresentationTimingPolicy());
+    const frameIndex = getMissionBriefingTitleFrameIndex(this.requirePresentationTimingPolicy(), this.introStartedAt ?? this.time.now, this.time.now, this.introCompleted);
     const frame = frames[frameIndex];
     if (!frame || !this.textures.exists(frame.key)) {
       return;
@@ -277,8 +291,8 @@ export class MissionBriefingScene extends Phaser.Scene {
       return;
     }
 
-    const frames = collectMissionBriefingBackdropFrames(briefing);
-    const frameIndex = getMissionBriefingTitleFrameIndex(frames, this.introStartedAt ?? time, time, this.introCompleted);
+    const frames = collectMissionBriefingBackdropFrames(briefing, this.requirePresentationTimingPolicy());
+    const frameIndex = getMissionBriefingTitleFrameIndex(this.requirePresentationTimingPolicy(), this.introStartedAt ?? time, time, this.introCompleted);
     const frame = frames[frameIndex];
     if (frame && this.backdropImage.texture.key !== frame.key) {
       this.backdropImage.setTexture(frame.key);
@@ -367,7 +381,7 @@ export class MissionBriefingScene extends Phaser.Scene {
 
   private isIntroReady(time: number): boolean {
     return getMissionBriefingIntroStage(
-      collectMissionBriefingBackdropFrames(this.context?.scenario?.briefing),
+      this.requirePresentationTimingPolicy(),
       this.introStartedAt ?? time,
       time,
       this.introCompleted,
@@ -382,7 +396,7 @@ export class MissionBriefingScene extends Phaser.Scene {
       return;
     }
 
-    const delay = respectDelay ? Math.max(0, Math.floor(line.delayBeforeMs ?? 0)) : 0;
+    const delay = respectDelay ? this.getLineDelayBeforeMs(line) : 0;
     if (delay > 0) {
       this.lineRevealAt = time + delay;
       this.nextLineAt = null;
@@ -390,8 +404,9 @@ export class MissionBriefingScene extends Phaser.Scene {
     }
 
     this.lineRevealAt = null;
+    const policy = this.requirePresentationTimingPolicy();
     this.nextLineAt = this.lineIndex + 1 < (this.context?.scenario?.briefing?.lines.length ?? 0)
-      ? time + getMissionLineDurationMs(line, BRIEFING_LINE_DURATION_MS)
+      ? time + getMissionLineDurationMs(line, policy.defaultLineDurationMs)
       : null;
   }
 
@@ -520,7 +535,7 @@ export class MissionBriefingScene extends Phaser.Scene {
 
     const { portrait } = resolveOriginalSpeechLayout(viewportWidth, viewportHeight, participant.speechSlot);
     const targetScale = portrait.width / 130;
-    const introductionScale = getMissionBriefingPortraitScale(introductionStartedAt, this.time.now);
+    const introductionScale = getMissionBriefingPortraitScale(this.requirePresentationTimingPolicy(), introductionStartedAt, this.time.now);
     const image = this.add.image(portrait.x + portrait.width / 2, portrait.y + portrait.height / 2, cue.key)
       .setScale(targetScale * introductionScale);
     if (!active) {
@@ -546,7 +561,7 @@ export class MissionBriefingScene extends Phaser.Scene {
 
   private updatePortraitTransitions(time: number): void {
     for (const transition of this.portraitTransitionImages.values()) {
-      transition.image.setScale(transition.targetScale * getMissionBriefingPortraitScale(transition.startedAt, time));
+      transition.image.setScale(transition.targetScale * getMissionBriefingPortraitScale(this.requirePresentationTimingPolicy(), transition.startedAt, time));
     }
   }
 
@@ -585,6 +600,20 @@ export class MissionBriefingScene extends Phaser.Scene {
     this.stopVoice();
     this.sound.stopByKey(this.getMusicCueKey());
     this.musicPlaying = false;
+  }
+
+  private getLineDelayBeforeMs(line: ScenarioBriefingLineDefinition): number {
+    const policy = this.requirePresentationTimingPolicy();
+
+    const delayMs = policy.lineDelayBeforeMsByVoiceId[normalizeMissionVoiceId(line.voiceId)];
+    return typeof delayMs === "number" && Number.isFinite(delayMs) && delayMs > 0 ? Math.floor(delayMs) : 0;
+  }
+
+  private requirePresentationTimingPolicy(): ScenarioBriefingPresentationTimingPolicy {
+    if (!this.presentationTimingPolicy) {
+      throw new Error("Mission briefing presentation timing policy is required before rendering.");
+    }
+    return this.presentationTimingPolicy;
   }
 }
 

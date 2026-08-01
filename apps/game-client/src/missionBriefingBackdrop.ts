@@ -1,6 +1,6 @@
 import type {
   ScenarioBriefingDefinition,
-  ScenarioBriefingTitleFrameDefinition,
+  ScenarioBriefingPresentationTimingPolicy,
 } from "@shared";
 
 const BACKDROP_IMAGE_PREFIX = "image:mission-briefing-backdrop:";
@@ -14,12 +14,22 @@ export interface MissionBriefingBackdropFrame {
 
 export function collectMissionBriefingBackdropFrames(
   briefing: ScenarioBriefingDefinition | undefined,
+  policy: ScenarioBriefingPresentationTimingPolicy | undefined,
 ): MissionBriefingBackdropFrame[] {
-  return (briefing?.titleSequence ?? []).map(createMissionBriefingBackdropFrame);
+  if (!briefing) {
+    return [];
+  }
+  if (!policy) {
+    throw new Error(
+      `Mission briefing '${briefing.sourceScript}' requires a calibrated presentation timing policy before loading backdrop frames.`,
+    );
+  }
+
+  return policy.titleFrames.map(createMissionBriefingBackdropFrame);
 }
 
 export function createMissionBriefingBackdropFrame(
-  frame: ScenarioBriefingTitleFrameDefinition,
+  frame: ScenarioBriefingPresentationTimingPolicy["titleFrames"][number],
 ): MissionBriefingBackdropFrame {
   const sourceAsset = normalizeMissionBriefingBackdropSourceAsset(frame.sourceAsset);
   const sourceWithoutExtension = sourceAsset.replace(/\.[^/.]+$/, "");

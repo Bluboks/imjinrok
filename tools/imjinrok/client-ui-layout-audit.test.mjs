@@ -3,11 +3,22 @@ import assert from "node:assert/strict";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { extractClientUiLayoutAudit } from "./extract-client-ui-layout-audit.mjs";
+import { imjinrokK01Scenario } from "../../packages/shared/src/scenarios.ts";
+import {
+  assertPresentationTimingPolicy,
+  shouldReplayMissionBriefingVoice,
+} from "../../apps/game-client/src/missionPresentationTimeline.ts";
 
 const repositoryRoot = join(dirname(fileURLToPath(import.meta.url)), "../..");
 
 test("client UI layout audit separates original evidence from intentional product adaptations", () => {
   const report = extractClientUiLayoutAudit(repositoryRoot);
+  const policy = imjinrokK01Scenario.briefing?.timing?.presentationPolicy;
+  assertPresentationTimingPolicy(policy);
+  assert.equal(policy.classification, "intentional-adaptation");
+  assert.equal(policy.sourceParity, "not-established");
+  assert.equal(shouldReplayMissionBriefingVoice("resize"), false);
+  assert.equal(shouldReplayMissionBriefingVoice("font-ready"), false);
 
   assert.equal(report.summary.probeCount, 7);
   assert.equal(report.summary.allPatternsPresent, true);
@@ -103,15 +114,15 @@ test("client UI layout audit routes provisional surfaces to original binary trac
   ]);
   assert.equal(
     preGameBriefingLayout.originalEvidenceStatus,
-    "source-preserved-title-sequence-boundaries;static-proven-for-SPEECH-slots-text-and-labels;project-adaptation-for-24Hz-wall-clock-portrait-cadence-and-final-click-dismiss",
+    "source-timing-order-and-update-semantics-preserved-as-metadata;static-proven-for-SPEECH-slots-text-and-labels;project-adaptation-for-web-calibrated-portrait-cadence-and-final-click-dismiss",
   );
   assert.equal(
     preGameBriefingLayout.currentBasis,
-    "source-preserved-title-sequence-and-static-proven-SPEECH-slots-text-labels-with-project-portrait-cadence-and-final-click-adaptations",
+    "source-timing-metadata-and-static-proven-SPEECH-slots-text-labels-with-explicit-web-calibrated-presentation-and-final-click-adaptations",
   );
-  assert.match(preGameBriefingLayout.followUp, /source-preserved title-frame boundaries/u);
+  assert.match(preGameBriefingLayout.followUp, /source timing order\/update semantics/u);
   assert.match(preGameBriefingLayout.followUp, /SPEECH slots, text, and labels/u);
-  assert.match(preGameBriefingLayout.followUp, /project 24Hz portrait wall-clock calibration and final-click dismiss/u);
+  assert.match(preGameBriefingLayout.followUp, /explicit web-calibrated portrait\/title policy and final-click dismiss/u);
   assert.equal(
     preGameBriefingLayout.patterns.every(
       (pattern) => pattern.present && Number.isInteger(pattern.line),
@@ -121,11 +132,7 @@ test("client UI layout audit routes provisional surfaces to original binary trac
   assert.deepEqual(
     preGameBriefingLayout.patterns.map((pattern) => pattern.text),
     [
-      "getMissionBriefingTitleFrameIndex(",
       "const targetScale = portrait.width / 130;",
-      "const introductionScale = getMissionBriefingPortraitScale(introductionStartedAt, this.time.now);",
-      ".setScale(targetScale * introductionScale);",
-      "transition.image.setScale(transition.targetScale * getMissionBriefingPortraitScale(transition.startedAt, time));",
       "const label = this.context?.scenario?.briefing?.portraitLabels?.[normalizeMissionPortraitId(participant.portraitId)];",
       "layout.label.centerX, layout.label.y, label",
     ],

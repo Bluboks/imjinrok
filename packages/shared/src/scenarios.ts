@@ -57,12 +57,49 @@ export interface ScenarioBriefingLineDefinition {
   voiceId: string;
   text: string;
   speechSlot: OriginalSpeechSlot;
-  delayBeforeMs?: number;
+  /** Raw script delay word. This is not a browser millisecond value. */
+  sourceDelayBefore?: number;
 }
 
 export interface ScenarioBriefingTitleFrameDefinition {
   sourceAsset: string;
+  /** Raw SETDELAYTIME word. The source cadence-to-wall-clock conversion is unresolved. */
+  sourceDuration: number;
+}
+
+export interface ScenarioBriefingSourceTimingDefinition {
+  /** Raw title SETDELAYTIME words in source record order. */
+  titleFrameDurations: readonly number[];
+  /** Raw SETDELAYTIME words immediately before the named speech resource. */
+  speechDelayBeforeByVoiceId: Readonly<Record<string, number>>;
+  updateSemantics: {
+    elapsedComparison: "strictly-greater-than";
+    maxAcceptedRecordsPerIdleVisit: 1;
+  };
+}
+
+export interface ScenarioBriefingPresentationTitleFrameDefinition {
+  sourceAsset: string;
+  /** Browser milliseconds chosen by an intentional web adaptation policy. */
   durationMs: number;
+}
+
+export interface ScenarioBriefingPresentationTimingPolicy {
+  /** Stable selector for a web-calibrated presentation policy. */
+  policyId: string;
+  classification: "intentional-adaptation";
+  /** Original exact wall-clock parity is not established by the source evidence. */
+  sourceParity: "not-established";
+  titleFrames: readonly ScenarioBriefingPresentationTitleFrameDefinition[];
+  lineDelayBeforeMsByVoiceId: Readonly<Record<string, number>>;
+  defaultLineDurationMs: number;
+  portraitIntroductionDurationMs: number;
+}
+
+export interface ScenarioBriefingTimingDefinition {
+  /** Present only when this briefing owns source timing evidence. */
+  source?: ScenarioBriefingSourceTimingDefinition;
+  presentationPolicy?: ScenarioBriefingPresentationTimingPolicy;
 }
 
 export interface ScenarioBriefingDefinition {
@@ -77,6 +114,7 @@ export interface ScenarioBriefingDefinition {
   /** Source speaker labels keyed by portrait ID; optional for generic/mod briefings. */
   portraitLabels?: Readonly<Record<string, string>>;
   titleSequence?: readonly ScenarioBriefingTitleFrameDefinition[];
+  timing?: ScenarioBriefingTimingDefinition;
   lines: ScenarioBriefingLineDefinition[];
 }
 
@@ -318,20 +356,56 @@ const k02RoyalEvacuationRouteWaypoints = [
 ] as const satisfies readonly GridPoint[];
 const k02RoyalEvacuationRouteWaypointLabels = ["한성 출발", "권율 합류", "평양성 도착"] as const;
 
-const joseonBriefingTitleSequence = [
-  { sourceAsset: "ybriefingfnt/k01/k01.spr", durationMs: 500 },
-  { sourceAsset: "ybriefingfnt/k01/k0101.spr", durationMs: 15 },
-  { sourceAsset: "ybriefingfnt/k01/k0102.spr", durationMs: 15 },
-  { sourceAsset: "ybriefingfnt/k01/k0103.spr", durationMs: 15 },
-  { sourceAsset: "ybriefingfnt/k01/k0104.spr", durationMs: 15 },
-  { sourceAsset: "ybriefingfnt/k01/k0105.spr", durationMs: 15 },
-  { sourceAsset: "ybriefingfnt/k01/k0106.spr", durationMs: 15 },
-  { sourceAsset: "ybriefingfnt/k01/k0107.spr", durationMs: 15 },
-  { sourceAsset: "ybriefingfnt/k01/k0108.spr", durationMs: 15 },
-  { sourceAsset: "ybriefingfnt/k01/k0109.spr", durationMs: 15 },
-  { sourceAsset: "ybriefingfnt/k01/k0110.spr", durationMs: 15 },
-  { sourceAsset: "ybriefingfnt/k01/k0111.spr", durationMs: 15 },
+const k01SourceBriefingTitleSequence = [
+  { sourceAsset: "ybriefingfnt/k01/k01.spr", sourceDuration: 500 },
+  { sourceAsset: "ybriefingfnt/k01/k0101.spr", sourceDuration: 15 },
+  { sourceAsset: "ybriefingfnt/k01/k0102.spr", sourceDuration: 15 },
+  { sourceAsset: "ybriefingfnt/k01/k0103.spr", sourceDuration: 15 },
+  { sourceAsset: "ybriefingfnt/k01/k0104.spr", sourceDuration: 15 },
+  { sourceAsset: "ybriefingfnt/k01/k0105.spr", sourceDuration: 15 },
+  { sourceAsset: "ybriefingfnt/k01/k0106.spr", sourceDuration: 15 },
+  { sourceAsset: "ybriefingfnt/k01/k0107.spr", sourceDuration: 15 },
+  { sourceAsset: "ybriefingfnt/k01/k0108.spr", sourceDuration: 15 },
+  { sourceAsset: "ybriefingfnt/k01/k0109.spr", sourceDuration: 15 },
+  { sourceAsset: "ybriefingfnt/k01/k0110.spr", sourceDuration: 15 },
+  { sourceAsset: "ybriefingfnt/k01/k0111.spr", sourceDuration: 15 },
 ] as const satisfies readonly ScenarioBriefingTitleFrameDefinition[];
+
+// K02's web presentation intentionally owns a separate frame list. It does
+// not inherit K01's raw timing metadata, whose exact source evidence is
+// scoped to K0110.
+const k02PresentationTitleFrames = [
+  { sourceAsset: "ybriefingfnt/k01/k01.spr", durationMs: 420 },
+  { sourceAsset: "ybriefingfnt/k01/k0101.spr", durationMs: 80 },
+  { sourceAsset: "ybriefingfnt/k01/k0102.spr", durationMs: 80 },
+  { sourceAsset: "ybriefingfnt/k01/k0103.spr", durationMs: 80 },
+  { sourceAsset: "ybriefingfnt/k01/k0104.spr", durationMs: 80 },
+  { sourceAsset: "ybriefingfnt/k01/k0105.spr", durationMs: 80 },
+  { sourceAsset: "ybriefingfnt/k01/k0106.spr", durationMs: 80 },
+  { sourceAsset: "ybriefingfnt/k01/k0107.spr", durationMs: 80 },
+  { sourceAsset: "ybriefingfnt/k01/k0108.spr", durationMs: 80 },
+  { sourceAsset: "ybriefingfnt/k01/k0109.spr", durationMs: 80 },
+  { sourceAsset: "ybriefingfnt/k01/k0110.spr", durationMs: 80 },
+  { sourceAsset: "ybriefingfnt/k01/k0111.spr", durationMs: 80 },
+] as const satisfies readonly ScenarioBriefingPresentationTitleFrameDefinition[];
+
+const k01PresentationTitleFrames = [
+  { sourceAsset: "ybriefingfnt/k01/k01.spr", durationMs: 420 },
+  { sourceAsset: "ybriefingfnt/k01/k0101.spr", durationMs: 80 },
+  { sourceAsset: "ybriefingfnt/k01/k0102.spr", durationMs: 80 },
+  { sourceAsset: "ybriefingfnt/k01/k0103.spr", durationMs: 80 },
+  { sourceAsset: "ybriefingfnt/k01/k0104.spr", durationMs: 80 },
+  { sourceAsset: "ybriefingfnt/k01/k0105.spr", durationMs: 80 },
+  { sourceAsset: "ybriefingfnt/k01/k0106.spr", durationMs: 80 },
+  { sourceAsset: "ybriefingfnt/k01/k0107.spr", durationMs: 80 },
+  { sourceAsset: "ybriefingfnt/k01/k0108.spr", durationMs: 80 },
+  { sourceAsset: "ybriefingfnt/k01/k0109.spr", durationMs: 80 },
+  { sourceAsset: "ybriefingfnt/k01/k0110.spr", durationMs: 80 },
+  { sourceAsset: "ybriefingfnt/k01/k0111.spr", durationMs: 80 },
+] as const satisfies readonly ScenarioBriefingPresentationTitleFrameDefinition[];
+
+export const K01_BRIEFING_PRESENTATION_TIMING_POLICY_ID = "web:k01-briefing-intentional-adaptation-v1";
+export const K02_BRIEFING_PRESENTATION_TIMING_POLICY_ID = "web:k02-briefing-intentional-adaptation-v1";
 
 // `FUN_004a7410` copies this recovered 17-entry SPEECH identifier/label table;
 // the source label renderer then selects the matching entry by portrait ID.
@@ -594,14 +668,33 @@ export const imjinrokK01Scenario = {
     cast: ["유성룡", "선조", "권율"],
     objective: "1. 봉화대를 짓고 적군 섬멸 (유성룡, 권율은 살아 남아야 한다.)",
     portraitLabels: joseonBriefingPortraitLabels,
-    titleSequence: joseonBriefingTitleSequence,
+    titleSequence: k01SourceBriefingTitleSequence,
+    timing: {
+      source: {
+        titleFrameDurations: [500, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15],
+        speechDelayBeforeByVoiceId: { k01010: 100, k01040: 100 },
+        updateSemantics: {
+          elapsedComparison: "strictly-greater-than",
+          maxAcceptedRecordsPerIdleVisit: 1,
+        },
+      },
+      presentationPolicy: {
+        policyId: K01_BRIEFING_PRESENTATION_TIMING_POLICY_ID,
+        classification: "intentional-adaptation",
+        sourceParity: "not-established",
+        titleFrames: k01PresentationTitleFrames,
+        lineDelayBeforeMsByVoiceId: { k01010: 160, k01040: 160 },
+        defaultLineDurationMs: 5_500,
+        portraitIntroductionDurationMs: 2_400,
+      },
+    },
     lines: [
       {
         speaker: "유성룡",
         portraitId: "K3",
         voiceId: "k01010",
         speechSlot: 0,
-        delayBeforeMs: 100,
+        sourceDelayBefore: 100,
         text: "전하, 왜의 전쟁준비에 대하여 다녀온 통신사들의 이야기는 다르나 만일에 대비하여 준비를 하여야 하옵니다.",
       },
       {
@@ -623,7 +716,7 @@ export const imjinrokK01Scenario = {
         portraitId: "K1",
         voiceId: "k01040",
         speechSlot: 2,
-        delayBeforeMs: 100,
+        sourceDelayBefore: 100,
         text: "전하, 왜군의 대부대가 지금 부산포에 침입하였다 하옵니다.",
       },
       {
@@ -844,14 +937,23 @@ export const imjinrokK02Scenario = {
     cast: ["유성룡", "선조", "권율"],
     objective: "1. 어가를 평양성까지 대피시킨다. (유성룡은 살아 남아야 한다.)",
     portraitLabels: joseonBriefingPortraitLabels,
-    titleSequence: joseonBriefingTitleSequence,
+    timing: {
+      presentationPolicy: {
+        policyId: K02_BRIEFING_PRESENTATION_TIMING_POLICY_ID,
+        classification: "intentional-adaptation",
+        sourceParity: "not-established",
+        titleFrames: k02PresentationTitleFrames,
+        lineDelayBeforeMsByVoiceId: { k02010: 160, k02070: 160 },
+        defaultLineDurationMs: 5_500,
+        portraitIntroductionDurationMs: 2_400,
+      },
+    },
     lines: [
       {
         speaker: "선조",
         portraitId: "K10",
         voiceId: "K02010",
         speechSlot: 0,
-        delayBeforeMs: 100,
         text: "상주의 방어군은 어찌되었소?",
       },
       {
@@ -894,7 +996,6 @@ export const imjinrokK02Scenario = {
         portraitId: "K10",
         voiceId: "K02070",
         speechSlot: 0,
-        delayBeforeMs: 100,
         text: "통신사들이 왜에 다녀온 후 전쟁에 대비하자던 그대의 말을 따랐더라면....",
       },
       {

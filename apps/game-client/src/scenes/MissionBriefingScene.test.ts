@@ -1,66 +1,73 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
-import { fileURLToPath } from "node:url";
 import test from "node:test";
+import { imjinrokK01Scenario } from "@shared";
+import { collectMissionBriefingBackdropFrames } from "../missionBriefingBackdrop.js";
+import {
+  createMissionBriefingReplayState,
+  getMissionBriefingClickAction,
+  getMissionBriefingRenderLayers,
+  requireMissionBriefingPresentationTimingPolicy,
+  shouldReplayMissionBriefingVoice,
+} from "../missionPresentationTimeline.js";
+import { resolveOriginalBriefingMetadataLayout } from "../originalBriefingMetadataLayout.js";
+import { resolveOriginalSpeechLayout } from "../originalSpeechLayout.js";
+import { PRE_GAME_KOREAN_FONT_FAMILY, resolvePreGameTextResolution } from "../ui/preGameTypography.js";
 
-const sceneSource = readFileSync(
-  fileURLToPath(new URL("./MissionBriefingScene.ts", import.meta.url)),
-  "utf8",
-);
-
-function sceneMethod(name: string, nextName: string): string {
-  return sceneSource.slice(
-    sceneSource.indexOf(`  private ${name}(`),
-    sceneSource.indexOf(`  private ${nextName}(`),
-  );
-}
-
-test("briefing redraw preserves voice playback for resize and font readiness", () => {
-  const create = sceneSource.slice(
-    sceneSource.indexOf("  create(data:"),
-    sceneSource.indexOf("  private handleResize("),
-  );
-  const resize = sceneMethod("handleResize", "handleShutdown");
-  const shutdown = sceneMethod("handleShutdown", "resetPresentation");
-  const redraw = sceneMethod("redrawPresentation", "getActiveLine");
-
-  assert.match(create, /whenPreGameTypographyReady\([\s\S]*?redrawPresentation\(false\)/u);
-  assert.match(resize, /redrawPresentation\(false\)/u);
-  assert.match(shutdown, /typographyReadyUnsubscribe\?\.\(\)/u);
-  assert.doesNotMatch(redraw, /resetPresentation\(/u);
+test("resize and font readiness redraws preserve voice playback while replay explicitly restarts it", () => {
+  assert.equal(shouldReplayMissionBriefingVoice("resize"), false);
+  assert.equal(shouldReplayMissionBriefingVoice("font-ready"), false);
+  assert.equal(shouldReplayMissionBriefingVoice("replay"), true);
+  assert.equal(shouldReplayMissionBriefingVoice("line-advance"), true);
 });
 
-test("briefing buttons, dialogue, and portrait labels share crisp pre-game typography", () => {
-  const button = sceneMethod("addButton", "advanceLine");
-  const speech = sceneMethod("addSpeechPresentation", "addBriefingMetadataPresentation");
-  const metadata = sceneMethod("addBriefingMetadataPresentation", "getParticipants");
-  const portrait = sceneMethod("addPortrait", "updatePortraitTransitions");
+test("presentation policy supplies calibrated backdrop frames without reading raw source durations", () => {
+  const briefing = imjinrokK01Scenario.briefing;
+  const policy = requireMissionBriefingPresentationTimingPolicy(briefing);
+  const frames = collectMissionBriefingBackdropFrames(briefing, policy);
 
-  assert.match(button, /fontFamily: PRE_GAME_KOREAN_FONT_FAMILY/u);
-  assert.match(button, /resolution: resolvePreGameTextResolution\(\)/u);
-  assert.match(speech, /fontFamily: PRE_GAME_KOREAN_FONT_FAMILY/u);
-  assert.match(speech, /resolution: resolvePreGameTextResolution\(undefined, layout\.scale\)/u);
-  assert.match(metadata, /fontFamily: PRE_GAME_KOREAN_FONT_FAMILY/u);
-  assert.match(metadata, /resolution: resolvePreGameTextResolution\(undefined, layout\.scale\)/u);
-  assert.match(portrait, /fontFamily: PRE_GAME_KOREAN_FONT_FAMILY/u);
-  assert.match(portrait, /resolution: resolvePreGameTextResolution\(undefined, layout\.scale\)/u);
+  assert.equal(frames.length, 12);
+  assert.equal(frames[0]?.durationMs, 420);
+  assert.equal(frames[1]?.durationMs, 80);
+  assert.equal(briefing.titleSequence?.[0]?.sourceDuration, 500);
 });
 
-test("briefing metadata appears after the intro and is rendered after persistent speech content", () => {
-  const draw = sceneSource.slice(
-    sceneSource.indexOf("  private drawPresentation("),
-    sceneSource.indexOf("  private redrawPresentation("),
-  );
-  const metadata = sceneMethod("addBriefingMetadataPresentation", "getParticipants");
+test("skip/replay state transitions keep simulation input ordering independent of presentation timing", () => {
+  const replay = createMissionBriefingReplayState(1_000);
 
-  assert.ok(draw.indexOf("this.addSpeechPresentation") < draw.indexOf("this.addBriefingMetadataPresentation"));
-  assert.match(
-    draw,
-    /if \(line \|\| this\.dismissed\) \{[\s\S]*?\}\s*if \(this\.isIntroReady\(this\.time\.now\)\)/u,
+  assert.equal(getMissionBriefingClickAction(false, false, false), "complete-intro");
+  assert.equal(getMissionBriefingClickAction(true, true, false), "reveal-line");
+  assert.equal(getMissionBriefingClickAction(true, false, false), "advance-line");
+  assert.equal(getMissionBriefingClickAction(true, false, true), "dismiss-line");
+  assert.equal(replay.lineIndex, 0);
+  assert.equal(replay.dismissed, false);
+});
+
+test("speech and metadata render in stable layer order at the intro boundary", () => {
+  assert.deepEqual(getMissionBriefingRenderLayers(false, false), []);
+  assert.deepEqual(getMissionBriefingRenderLayers(true, false), ["speech"]);
+  assert.deepEqual(getMissionBriefingRenderLayers(false, true), ["metadata"]);
+  assert.deepEqual(getMissionBriefingRenderLayers(true, true), ["speech", "metadata"]);
+
+  const speechLayout = resolveOriginalSpeechLayout(1_280, 720, 0);
+  const metadataLayout = resolveOriginalBriefingMetadataLayout(1_280, 720);
+  assert.ok(speechLayout.text.maxWidth > 0);
+  assert.ok(metadataLayout.objective.maxWidth > 0);
+});
+
+test("briefing text rendering keeps the shared pre-game font and finite scaled resolution contract", () => {
+  assert.match(PRE_GAME_KOREAN_FONT_FAMILY, /sans-serif/u);
+  assert.ok(Number.isFinite(resolvePreGameTextResolution()));
+  assert.ok(Number.isFinite(resolvePreGameTextResolution(undefined, 0.5)));
+});
+
+test("missing presentation calibration fails at the timing boundary instead of falling back to source metadata", () => {
+  assert.throws(
+    () => requireMissionBriefingPresentationTimingPolicy({
+      sourceScript: "script/generic",
+      title: "generic",
+      objective: "generic",
+      lines: [],
+    }),
+    /explicit web-calibrated presentation timing policy/u,
   );
-  assert.match(draw, /if \(this\.isIntroReady\(this\.time\.now\)\) \{\s*this\.addBriefingMetadataPresentation/u);
-  assert.match(metadata, /briefing\.objective\.trim\(\)/u);
-  assert.match(metadata, /briefing\.objective,[\s\S]*?wordWrap: \{ width: layout\.objective\.maxWidth \}/u);
-  assert.match(metadata, /briefing\.title\.trim\(\)/u);
-  assert.match(metadata, /briefing\.title,\s*textStyle/u);
 });

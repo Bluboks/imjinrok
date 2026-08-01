@@ -1,9 +1,10 @@
+import type {
+  ScenarioBriefingDefinition,
+  ScenarioBriefingPresentationTimingPolicy,
+} from "@shared";
+
 export const MISSION_BRIEFING_PORTRAIT_PROGRESS_STEP_PERCENT = 5;
 export const MISSION_BRIEFING_PORTRAIT_STEP_COUNT = 100 / MISSION_BRIEFING_PORTRAIT_PROGRESS_STEP_PERCENT;
-// The source dispatcher advances portrait progress by five percentage points on
-// each visit. Its wall-clock scheduler is not statically recovered; this is the
-// project's fixed 24 Hz presentation calibration, not a parity timing claim.
-export const MISSION_BRIEFING_PORTRAIT_STEP_MS = 1_000 / 24;
 
 export type MissionBriefingIntroStage = "playing" | "ready";
 export type MissionBriefingClickAction = "complete-intro" | "reveal-line" | "advance-line" | "dismiss-line" | "no-op";
@@ -12,6 +13,28 @@ export type MissionDialogueClickAction = "advance-line" | "finish-dialogue";
 export interface MissionDialoguePointerAdvance {
   action: MissionDialogueClickAction;
   consumesWorldInput: true;
+}
+
+export type MissionBriefingRedrawCause = "resize" | "font-ready" | "replay" | "line-advance";
+export type MissionBriefingRenderLayer = "speech" | "metadata";
+
+/** Resize/font readiness rebuilds preserve the currently playing voice. */
+export function shouldReplayMissionBriefingVoice(cause: MissionBriefingRedrawCause): boolean {
+  return cause === "replay" || cause === "line-advance";
+}
+
+export function getMissionBriefingRenderLayers(
+  hasSpeechContent: boolean,
+  introReady: boolean,
+): readonly MissionBriefingRenderLayer[] {
+  const layers: MissionBriefingRenderLayer[] = [];
+  if (hasSpeechContent) {
+    layers.push("speech");
+  }
+  if (introReady) {
+    layers.push("metadata");
+  }
+  return layers;
 }
 
 export interface PresentationPauseOwnership {
@@ -26,10 +49,6 @@ export interface MissionBriefingReplayState {
   nextLineAt: null;
   lineScheduled: false;
   dismissed: false;
-}
-
-interface TimedTitleFrame {
-  durationMs: number;
 }
 
 export function beginPresentationPause(playbackWasPaused: boolean): PresentationPauseOwnership {
@@ -49,32 +68,34 @@ export function isPresentationExternallyPaused(
 }
 
 export function getMissionBriefingTitleSequenceDurationMs(
-  frames: readonly TimedTitleFrame[] | undefined,
+  policy: ScenarioBriefingPresentationTimingPolicy,
 ): number {
-  return (frames ?? []).reduce((durationMs, frame) => durationMs + normalizeFrameDuration(frame.durationMs), 0);
+  assertPresentationTimingPolicy(policy);
+  return policy.titleFrames.reduce((durationMs, frame) => durationMs + normalizeFrameDuration(frame.durationMs), 0);
 }
 
 export function getMissionBriefingIntroStage(
-  frames: readonly TimedTitleFrame[] | undefined,
+  policy: ScenarioBriefingPresentationTimingPolicy,
   startedAt: number,
   time: number,
   completed: boolean,
 ): MissionBriefingIntroStage {
-  if (completed || getMissionBriefingTitleSequenceDurationMs(frames) === 0) {
+  if (completed || getMissionBriefingTitleSequenceDurationMs(policy) === 0) {
     return "ready";
   }
 
-  return Math.max(0, time - startedAt) >= getMissionBriefingTitleSequenceDurationMs(frames) ? "ready" : "playing";
+  return Math.max(0, time - startedAt) >= getMissionBriefingTitleSequenceDurationMs(policy) ? "ready" : "playing";
 }
 
-/** Returns the source title frame visible at `time`, or -1 when no sequence exists. */
+/** Returns the calibrated presentation frame visible at `time`, or -1 when no sequence exists. */
 export function getMissionBriefingTitleFrameIndex(
-  frames: readonly TimedTitleFrame[] | undefined,
+  policy: ScenarioBriefingPresentationTimingPolicy,
   startedAt: number,
   time: number,
   completed: boolean,
 ): number {
-  const sequence = frames ?? [];
+  assertPresentationTimingPolicy(policy);
+  const sequence = policy.titleFrames;
   if (sequence.length === 0) {
     return -1;
   }
@@ -95,11 +116,14 @@ export function getMissionBriefingTitleFrameIndex(
 
 /** Quantized 0..1 portrait scale matching the source's 5% progress increments. */
 export function getMissionBriefingPortraitScale(
+  policy: ScenarioBriefingPresentationTimingPolicy,
   startedAt: number,
   time: number,
 ): number {
+  assertPresentationTimingPolicy(policy);
   const elapsedMs = Math.max(0, time - startedAt);
-  const progressSteps = Math.min(MISSION_BRIEFING_PORTRAIT_STEP_COUNT, Math.floor(elapsedMs / MISSION_BRIEFING_PORTRAIT_STEP_MS));
+  const stepDurationMs = policy.portraitIntroductionDurationMs / MISSION_BRIEFING_PORTRAIT_STEP_COUNT;
+  const progressSteps = Math.min(MISSION_BRIEFING_PORTRAIT_STEP_COUNT, Math.floor(elapsedMs / stepDurationMs));
 
   return progressSteps * MISSION_BRIEFING_PORTRAIT_PROGRESS_STEP_PERCENT / 100;
 }
@@ -150,6 +174,58 @@ export function getMissionDialoguePointerAdvance(
     action: getMissionDialogueClickAction(lineIndex, lineCount),
     consumesWorldInput: true,
   };
+}
+
+export function assertPresentationTimingPolicy(
+  policy: ScenarioBriefingPresentationTimingPolicy,
+): void {
+  if (!policy || typeof policy !== "object") {
+    throw new TypeError("Mission briefing presentation timing policy is required.");
+  }
+  if (typeof policy.policyId !== "string" || !policy.policyId.trim()) {
+    throw new TypeError("Mission briefing presentation timing policy id must not be empty.");
+  }
+  if (!policy.policyId.startsWith("web:")) {
+    throw new Error(`Mission briefing timing policy '${policy.policyId}' is not a web-calibrated policy.`);
+  }
+  if (policy.classification !== "intentional-adaptation" || policy.sourceParity !== "not-established") {
+    throw new Error(`Mission briefing timing policy '${policy.policyId}' must be an explicit intentional web adaptation.`);
+  }
+  if (!Array.isArray(policy.titleFrames)) {
+    throw new TypeError(`Mission briefing timing policy '${policy.policyId}' title frames are missing.`);
+  }
+  for (const frame of policy.titleFrames) {
+    if (!frame || typeof frame !== "object" || !Number.isFinite(frame.durationMs) || frame.durationMs < 0) {
+      throw new TypeError(`Mission briefing timing policy '${policy.policyId}' contains an invalid calibrated frame duration.`);
+    }
+  }
+  if (!Number.isFinite(policy.defaultLineDurationMs) || policy.defaultLineDurationMs <= 0) {
+    throw new TypeError(`Mission briefing timing policy '${policy.policyId}' default line duration must be positive.`);
+  }
+  if (!Number.isFinite(policy.portraitIntroductionDurationMs) || policy.portraitIntroductionDurationMs <= 0) {
+    throw new TypeError(`Mission briefing timing policy '${policy.policyId}' portrait duration must be positive.`);
+  }
+  if (!policy.lineDelayBeforeMsByVoiceId || typeof policy.lineDelayBeforeMsByVoiceId !== "object") {
+    throw new TypeError(`Mission briefing timing policy '${policy.policyId}' line delay calibration is missing.`);
+  }
+  for (const delayMs of Object.values(policy.lineDelayBeforeMsByVoiceId)) {
+    if (!Number.isFinite(delayMs) || delayMs < 0) {
+      throw new TypeError(`Mission briefing timing policy '${policy.policyId}' contains an invalid calibrated line delay.`);
+    }
+  }
+}
+
+export function requireMissionBriefingPresentationTimingPolicy(
+  briefing: ScenarioBriefingDefinition,
+): ScenarioBriefingPresentationTimingPolicy {
+  const policy = briefing.timing?.presentationPolicy;
+  if (!policy) {
+    throw new Error(
+      `Mission briefing '${briefing.sourceScript}' requires an explicit web-calibrated presentation timing policy; source timing is metadata-only.`,
+    );
+  }
+  assertPresentationTimingPolicy(policy);
+  return policy;
 }
 
 function normalizeFrameDuration(durationMs: number): number {

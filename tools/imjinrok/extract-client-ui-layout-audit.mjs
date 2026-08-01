@@ -103,19 +103,15 @@ export const CLIENT_UI_LAYOUT_AUDIT_PROBES = [
     id: "pre-game-briefing-layout",
     sourcePath: "apps/game-client/src/scenes/MissionBriefingScene.ts",
     patterns: [
-      "getMissionBriefingTitleFrameIndex(",
       "const targetScale = portrait.width / 130;",
-      "const introductionScale = getMissionBriefingPortraitScale(introductionStartedAt, this.time.now);",
-      ".setScale(targetScale * introductionScale);",
-      "transition.image.setScale(transition.targetScale * getMissionBriefingPortraitScale(transition.startedAt, time));",
       "const label = this.context?.scenario?.briefing?.portraitLabels?.[normalizeMissionPortraitId(participant.portraitId)];",
       "layout.label.centerX, layout.label.y, label",
     ],
-    currentBasis: "source-preserved-title-sequence-and-static-proven-SPEECH-slots-text-labels-with-project-portrait-cadence-and-final-click-adaptations",
-    originalEvidenceStatus: "source-preserved-title-sequence-boundaries;static-proven-for-SPEECH-slots-text-and-labels;project-adaptation-for-24Hz-wall-clock-portrait-cadence-and-final-click-dismiss",
+    currentBasis: "source-timing-metadata-and-static-proven-SPEECH-slots-text-labels-with-explicit-web-calibrated-presentation-and-final-click-adaptations",
+    originalEvidenceStatus: "source-timing-order-and-update-semantics-preserved-as-metadata;static-proven-for-SPEECH-slots-text-and-labels;project-adaptation-for-web-calibrated-portrait-cadence-and-final-click-dismiss",
     originalTraceTargets: ["FUN_0048311e", "FUN_004a7a50", "FUN_004a8410"],
     followUp:
-      "Keep the source-preserved title-frame boundaries and source-based SPEECH slots, text, and labels separate from the project 24Hz portrait wall-clock calibration and final-click dismiss; recover the original scheduler timing, objective, button, font, and hit-test layout separately.",
+      "Keep source timing order/update semantics and source-based SPEECH slots, text, and labels separate from the explicit web-calibrated portrait/title policy and final-click dismiss; recover the original wall-clock scheduler, objective, button, font, and hit-test layout separately.",
   },
 ];
 

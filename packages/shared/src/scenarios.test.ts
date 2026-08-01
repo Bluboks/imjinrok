@@ -9,6 +9,7 @@ import { K01_PROVEN_OPENING_UNIT_BINDINGS } from "../../../tools/imjinrok/extrac
 import { extractK01ReinforcementIdentityMap } from "../../../tools/imjinrok/extract-k01-reinforcement-identity-map.mjs";
 import { extractMapEntities, parseMapHeader } from "../../../tools/imjinrok/map-codec.mjs";
 import {
+  defaultSkirmishScenario,
   getImjinrokMapMetadata,
   getScenarioLaunchPlayerIds,
   getScenarioLaunchPlayerTeams,
@@ -611,7 +612,7 @@ test("imjinrok K01 and K02 briefings cover every source script speech", () => {
   );
   assert.deepEqual(
     imjinrokK02Scenario.briefing?.lines.map(toSourceComparableSpeech),
-    readSourceSpeechLines("K0210", { includeSpeechSlot: true, includeDelayBefore: true }),
+    readSourceSpeechLines("K0210", { includeSpeechSlot: true }),
   );
 });
 
@@ -642,22 +643,28 @@ test("imjinrok K01 and K02 briefings preserve source title and objective text", 
   );
 });
 
-test("imjinrok K01 and K02 briefings preserve source title sequence timing", () => {
+test("K01 source title sequence keeps raw values while K02 owns calibrated frames only", () => {
   assert.deepEqual(
-    imjinrokK01Scenario.briefing?.titleSequence?.map(toSourceComparableTitleFrame),
+    imjinrokK01Scenario.briefing?.titleSequence?.map((frame) => ({
+      sourceAsset: frame.sourceAsset,
+      durationMs: frame.sourceDuration,
+    })),
     readSourceTitleFrames("K0110"),
   );
+  assert.equal(imjinrokK02Scenario.briefing?.titleSequence, undefined);
   assert.deepEqual(
-    imjinrokK02Scenario.briefing?.titleSequence?.map(toSourceComparableTitleFrame),
-    readSourceTitleFrames("K0210"),
+    imjinrokK01Scenario.briefing?.timing?.source?.titleFrameDurations,
+    [500, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15],
   );
+  assert.equal(imjinrokK02Scenario.briefing?.timing?.source, undefined);
+  assert.equal(imjinrokK02Scenario.briefing?.timing?.presentationPolicy?.classification, "intentional-adaptation");
 });
 
 test("imjinrok K01 and K02 briefing title frames resolve to converted client assets", () => {
   const framePaths = new Set<string>();
 
   for (const scenario of [imjinrokK01Scenario, imjinrokK02Scenario]) {
-    for (const frame of scenario.briefing?.titleSequence ?? []) {
+    for (const frame of scenario.briefing?.timing?.presentationPolicy?.titleFrames ?? []) {
       const pngPath = resolveBriefingTitleFrameAsset(frame.sourceAsset);
 
       framePaths.add(pngPath);
@@ -729,6 +736,27 @@ test("K01 briefing carries the recovered SPEECH label table through the optional
   });
 });
 
+test("K01 raw timing metadata keeps source units and update semantics through JSON round-trip", () => {
+  const timing = imjinrokK01Scenario.briefing?.timing;
+  assert.ok(timing?.source);
+  assert.deepEqual(timing.source.titleFrameDurations, [500, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15]);
+  assert.deepEqual(timing.source.speechDelayBeforeByVoiceId, { k01010: 100, k01040: 100 });
+  assert.deepEqual(timing.source.updateSemantics, {
+    elapsedComparison: "strictly-greater-than",
+    maxAcceptedRecordsPerIdleVisit: 1,
+  });
+  assert.deepEqual(JSON.parse(JSON.stringify(timing)), timing);
+});
+
+test("K02 and generic briefings cannot inherit K01 source timing metadata", () => {
+  assert.equal(imjinrokK02Scenario.briefing?.timing?.source, undefined);
+  assert.equal(defaultSkirmishScenario.briefing, undefined);
+  assert.notEqual(
+    imjinrokK01Scenario.briefing?.timing?.presentationPolicy?.policyId,
+    imjinrokK02Scenario.briefing?.timing?.presentationPolicy?.policyId,
+  );
+});
+
 function readSourceSpeechLines(
   scriptName: string,
   options: { includeSpeechSlot?: boolean; includeDelayBefore?: boolean } = {},
@@ -751,10 +779,10 @@ function readSourceSpeechLines(
     }
 
     if (options.includeDelayBefore && match.index !== undefined) {
-      const delayBeforeMs = readLastSourceDelayBeforeSpeech(script.slice(previousSpeechEnd, match.index));
+      const sourceDelayBefore = readLastSourceDelayBeforeSpeech(script.slice(previousSpeechEnd, match.index));
 
-      if (delayBeforeMs !== undefined) {
-        speech.delayBeforeMs = delayBeforeMs;
+      if (sourceDelayBefore !== undefined) {
+        speech.sourceDelayBefore = sourceDelayBefore;
       }
     }
 
@@ -812,7 +840,7 @@ interface SourceComparableSpeech {
   voiceId: string;
   text: string;
   speechSlot?: 0 | 1 | 2 | 3;
-  delayBeforeMs?: number;
+  sourceDelayBefore?: number;
 }
 
 interface SourceComparableTitleFrame {
@@ -831,18 +859,11 @@ function toSourceComparableSpeech(line: SourceComparableSpeech): SourceComparabl
     speech.speechSlot = line.speechSlot;
   }
 
-  if (line.delayBeforeMs !== undefined) {
-    speech.delayBeforeMs = line.delayBeforeMs;
+  if ("sourceDelayBefore" in line && line.sourceDelayBefore !== undefined) {
+    speech.sourceDelayBefore = line.sourceDelayBefore;
   }
 
   return speech;
-}
-
-function toSourceComparableTitleFrame(frame: SourceComparableTitleFrame): SourceComparableTitleFrame {
-  return {
-    sourceAsset: normalizeSourceAssetPath(frame.sourceAsset),
-    durationMs: frame.durationMs,
-  };
 }
 
 function collectScenarioVoiceIds(scenarios: readonly typeof imjinrokCampaignScenarios[number][]): string[] {
