@@ -26,14 +26,52 @@ canvas {
 }
 
 .debug-presentation-panel,
-.terrain-debug-tooltip {
+.terrain-debug-tooltip,
+.debug-presentation-cursor {
   box-sizing: border-box;
   color: #efffca;
   font-family: "Trebuchet MS", Verdana, sans-serif;
   letter-spacing: 0.02em;
-  pointer-events: auto;
   position: fixed;
+}
+
+.debug-presentation-panel,
+.terrain-debug-tooltip {
+  pointer-events: auto;
   z-index: 20;
+}
+
+.debug-presentation-cursor {
+  display: none;
+  height: 18px;
+  left: 0;
+  pointer-events: none;
+  top: 0;
+  transform: translate(-50%, -50%);
+  width: 18px;
+  z-index: 40;
+}
+
+.debug-presentation-cursor::before,
+.debug-presentation-cursor::after {
+  background: #f2ffd7;
+  box-shadow: 0 0 7px rgb(207 255 122 / 78%);
+  content: "";
+  position: absolute;
+}
+
+.debug-presentation-cursor::before {
+  height: 2px;
+  left: 0;
+  top: 8px;
+  width: 18px;
+}
+
+.debug-presentation-cursor::after {
+  height: 18px;
+  left: 8px;
+  top: 0;
+  width: 2px;
 }
 
 .debug-presentation-panel {

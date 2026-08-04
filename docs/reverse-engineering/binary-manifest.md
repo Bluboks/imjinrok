@@ -29,6 +29,11 @@ file original/imjinrok2/imjinrok2.exe
 objdump -x original/imjinrok2/imjinrok2.exe
 ```
 
+전수 시각 프로필 생성물은 위 실행 파일 SHA-256과 다음 PE 내 building selector table bytes hash를
+함께 기록한다: destination table `0x00423028` (`8add6e9681c751bad7478b85da6886c993ac705891091d7dcc2fef921668404b`),
+selector table `0x00423064` (`95ea741d97bd53a0538619dd706118106e48b7fd66d41b671e8196f7565007a6`).
+상세 범위와 재현 명령은 [원본 엔티티 전수 시각 프로필](mechanics/original-entity-visual-profiles.md)을 참조한다.
+
 ## 현재 정적 분석 평가
 
 - 고정 주소를 사용하는 32비트 x86 바이너리다.

@@ -12,7 +12,7 @@ import {
 import { MAP_FILE_SIZE, parseMapHeader } from "./map-codec.mjs";
 
 export const EXPECTED_ENTITY_CATALOG_SHA256 =
-  "485344664b278c97a4ceed0756832abadbf2a71bd4a997b117b85c336d620708";
+  "4cce8fd314848556433c5fd98263893919049b6be6a7a7e75988f628079c54da";
 export const EXPECTED_K01_MAP_SHA256 =
   "43ec3a173032f74c12d3cce1db1078b076b651ed79070a0914673a5b65da99cb";
 
@@ -79,7 +79,7 @@ const EXPECTED_TYPES = [
     visualDefaults: {
       render: { srcPxPerWu: 32, filtering: "nearest" },
       size: { w: 60, h: 60 },
-      pivot: { anchor: { x: 30, y: 52 } },
+      pivot: { anchor: { x: 30, y: 50 } },
     },
     defaultStillOnly: false,
     animationStateMapping: "static-proven-core-state-frames",
@@ -112,7 +112,7 @@ const EXPECTED_TYPES = [
     visualDefaults: {
       render: { srcPxPerWu: 32, filtering: "nearest" },
       size: { w: 80, h: 80 },
-      pivot: { anchor: { x: 40, y: 72 } },
+      pivot: { anchor: { x: 40, y: 64 } },
     },
     defaultStillOnly: false,
     animationStateMapping: "static-proven-core-state-frames",
@@ -145,7 +145,7 @@ const EXPECTED_TYPES = [
     visualDefaults: {
       render: { srcPxPerWu: 32, filtering: "nearest" },
       size: { w: 70, h: 60 },
-      pivot: { anchor: { x: 35, y: 52 } },
+      pivot: { anchor: { x: 35, y: 48 } },
     },
     defaultStillOnly: false,
     animationStateMapping: "static-proven-core-state-frames",
@@ -218,7 +218,7 @@ const EXPECTED_TYPES = [
     visualDefaults: {
       render: { srcPxPerWu: 32, filtering: "nearest" },
       size: { w: 140, h: 108 },
-      pivot: { anchor: { x: 70, y: 100 } },
+      pivot: { anchor: { x: 70, y: 91 } },
     },
     defaultStillOnly: false,
     animationStateMapping: "static-proven-core-state-frames",

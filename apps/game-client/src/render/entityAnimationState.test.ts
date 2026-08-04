@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import type { EntityVisual } from "@shared";
+import { defaultTheme, type EntityVisual } from "@shared";
 import {
   getEntityAnimationStateKey,
   type EntityAnimationStateUnit,
@@ -176,4 +176,14 @@ test("demolition reuses the construction visual state before damage and idle", (
     ),
     "construction",
   );
+});
+
+test("continuous building overlays expose idle/damaged layers but no construction layer", () => {
+  const visual = defaultTheme.visuals["korean-barracks"];
+  assert.equal(visual.kind, "entity");
+  if (visual.kind !== "entity") return;
+  const layer = visual.layers?.[0];
+  assert.ok(layer?.states.idle?.clips.default);
+  assert.ok(layer?.states.damaged?.clips.default);
+  assert.equal(layer?.states.construction, undefined);
 });

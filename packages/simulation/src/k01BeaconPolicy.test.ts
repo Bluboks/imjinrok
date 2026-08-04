@@ -12,7 +12,7 @@ import {
   type K01SourceRuntimeState,
   advanceWorldTick,
 } from "./index.js";
-import { createImjinrokMapScaffold, createBlankMap, imjinrokK01Scenario, k01ReinforcementAdapter } from "../../shared/src/index.js";
+import { createImjinrokMapScaffold, createBlankMap, imjinrokK01Scenario, k01ReinforcementAdapter, unitDefinitions } from "../../shared/src/index.js";
 import { createUnitState } from "./entities.js";
 import { appendConstructionCompletedEvent } from "./events.js";
 
@@ -28,9 +28,18 @@ function appendBeaconCompletion(state: ReturnType<typeof createK01World>, id: st
   appendConstructionCompletedEvent(state, building);
 }
 
+function removeOpeningHostileBuildings(state: ReturnType<typeof createK01World>): void {
+  for (const unit of Object.values(state.units)) {
+    if (unit.playerId === "cpu-1" && unitDefinitions[unit.kind].category === "building") {
+      delete state.units[unit.id];
+    }
+  }
+}
+
 test("K01 beacon policy consumes a completion at the accepted update boundary and emits nine native successes", () => {
   const state = createK01World();
   appendBeaconCompletion(state, "local-player-test-beacon", { x: 20, y: 20 });
+  removeOpeningHostileBuildings(state);
 
   const before = state.sourceRuntimeProfile?.state as { acceptedUpdateCount: number; policies: { beacon: { eventCursorSequence: number } } };
   assert.equal(before.acceptedUpdateCount, 0);
@@ -54,6 +63,7 @@ test("K01 beacon policy consumes a completion at the accepted update boundary an
 test("accepted update cadence advances the policy once per world tick", () => {
   const state = createK01World();
   appendBeaconCompletion(state, "local-player-cadence-beacon", { x: 20, y: 20 });
+  removeOpeningHostileBuildings(state);
   advanceWorldTick(state);
   const first = (state.sourceRuntimeProfile?.state as K01SourceRuntimeState).acceptedUpdateCount;
   advanceWorldTick(state);
@@ -69,6 +79,7 @@ test("K01 policy is one-shot, consumes non-beacon events, and does not duplicate
   state.units[house.id] = house;
   appendConstructionCompletedEvent(state, house);
   appendBeaconCompletion(state, "local-player-test-beacon", { x: 20, y: 20 });
+  removeOpeningHostileBuildings(state);
 
   advanceK01BeaconPolicy(state);
   const firstCount = Object.values(state.units).filter((unit) => unit.id.includes("k0120-reinforcement")).length;
@@ -90,6 +101,7 @@ test("K01 source blocker and owner gate skip the scan while loader 0 remains ind
   assert.equal((blocked.sourceRuntimeProfile?.state as K01SourceRuntimeState).policies.beacon.triggerFlag, 0);
 
   const wrongOwner = createK01World();
+  removeOpeningHostileBuildings(wrongOwner);
   const wrongOwnerBuilding = createUnitState("cpu-1-wrong-owner-beacon", "cpu-1", "beacon", { x: 20, y: 20 });
   wrongOwner.units[wrongOwnerBuilding.id] = wrongOwnerBuilding;
   appendConstructionCompletedEvent(wrongOwner, wrongOwnerBuilding);
@@ -98,6 +110,7 @@ test("K01 source blocker and owner gate skip the scan while loader 0 remains ind
 
   const busy = createK01World();
   appendBeaconCompletion(busy, "local-player-busy-beacon", { x: 20, y: 20 });
+  removeOpeningHostileBuildings(busy);
   const busyResult = advanceK01BeaconPolicy(busy, { scriptBusy: true, scriptLoaderResult: 0 });
   assert.equal(busyResult.nativeSuccessCount, 9);
   const busyPolicy = (busy.sourceRuntimeProfile?.state as K01SourceRuntimeState).policies.beacon;
@@ -106,10 +119,165 @@ test("K01 source blocker and owner gate skip the scan while loader 0 remains ind
   assert.equal(busyPolicy.trace.some((entry: { type: string }) => entry.type === "script-load-request"), false);
 });
 
+test("explicit blocker overrides remain deterministic for focused source tests", () => {
+  const first = createK01World();
+  const second = createK01World();
+  appendBeaconCompletion(first, "local-player-override-beacon", { x: 20, y: 20 });
+  appendBeaconCompletion(second, "local-player-override-beacon", { x: 20, y: 20 });
+
+  const firstResult = advanceK01BeaconPolicy(first, { blocker: 1 });
+  const secondResult = advanceK01BeaconPolicy(second, { blocker: 1 });
+  assert.deepEqual(secondResult, firstResult);
+  assert.equal(firstResult.matchedBeaconCount, 0);
+  assert.equal(secondResult.nativeSuccessCount, 0);
+});
+
+test("default K01 blocker holds the beacon gate for opening hostile buildings, then unblocks after removal", () => {
+  const state = createK01World();
+  appendBeaconCompletion(state, "local-player-opening-gate-beacon", { x: 20, y: 20 });
+
+  const blocked = advanceK01BeaconPolicy(state);
+  assert.equal(blocked.matchedBeaconCount, 0);
+  assert.equal(blocked.nativeSuccessCount, 0);
+  assert.equal(Object.values(state.units).filter((unit) => unit.id.includes("k0120-reinforcement")).length, 0);
+  assert.equal((state.sourceRuntimeProfile?.state as K01SourceRuntimeState).policies.beacon.triggerFlag, 0);
+  assert.equal(
+    (state.sourceRuntimeProfile?.state as K01SourceRuntimeState).policies.beacon.trace.some(
+      (entry) => entry.type === "scan-skipped-blocker",
+    ),
+    true,
+  );
+
+  removeOpeningHostileBuildings(state);
+  const unblocked = advanceK01BeaconPolicy(state);
+  assert.equal(unblocked.matchedBeaconCount, 1);
+  assert.equal(unblocked.nativeSuccessCount, 9);
+  assert.equal((state.sourceRuntimeProfile?.state as K01SourceRuntimeState).policies.beacon.triggerFlag, 1);
+});
+
+test("ordinary hostile soldiers with non-qualifying flags do not block an otherwise clear K01 gate", () => {
+  const state = createK01World();
+  appendBeaconCompletion(state, "local-player-soldier-only-beacon", { x: 20, y: 20 });
+  removeOpeningHostileBuildings(state);
+
+  const hostileSoldierRecords = (state.sourceRuntimeProfile?.state as K01SourceRuntimeState).entityRuntime.entities.filter(
+    (record) => record.ownerRelation === 1 && record.semanticUnitId in state.units,
+  );
+  assert.ok(hostileSoldierRecords.length > 0);
+  assert.equal(hostileSoldierRecords.every((record) => unitDefinitions[state.units[record.semanticUnitId]!.kind].category !== "building"), true);
+
+  const result = advanceK01BeaconPolicy(state);
+  assert.equal(result.matchedBeaconCount, 1);
+  assert.equal(result.nativeSuccessCount, 9);
+});
+
+test("destroyed semantic buildings stop blocking even when the seeded source health is stale", () => {
+  const state = createK01World();
+  appendBeaconCompletion(state, "local-player-destroyed-building-beacon", { x: 20, y: 20 });
+  for (const unit of Object.values(state.units)) {
+    if (unit.playerId === "cpu-1" && unitDefinitions[unit.kind].category === "building") {
+      unit.health.current = 0;
+    }
+  }
+
+  const result = advanceK01BeaconPolicy(state);
+  assert.equal(result.matchedBeaconCount, 1);
+  assert.equal(result.nativeSuccessCount, 9);
+});
+
+test("a source-dead but semantically live qualifying building fails the blocker gate closed", () => {
+  const state = createK01World();
+  const source = state.sourceRuntimeProfile?.state as K01SourceRuntimeState;
+  const target = source.entityRuntime.entities.find(
+    (record) => record.ownerRelation === 1 && state.units[record.semanticUnitId] !== undefined && unitDefinitions[state.units[record.semanticUnitId]!.kind].category === "building",
+  );
+  assert.ok(target);
+  for (const unit of Object.values(state.units)) {
+    if (unit.playerId === "cpu-1" && unitDefinitions[unit.kind].category === "building" && unit.id !== target.semanticUnitId) {
+      delete state.units[unit.id];
+    }
+  }
+  state.sourceRuntimeProfile = {
+    ...state.sourceRuntimeProfile!,
+    state: {
+      ...source,
+      entityRuntime: {
+        ...source.entityRuntime,
+        entities: source.entityRuntime.entities.map((record) => record.slot === target.slot ? { ...record, health: 0 } : record),
+      },
+    },
+  };
+  appendBeaconCompletion(state, "local-player-source-dead-live-beacon", { x: 20, y: 20 });
+
+  const result = advanceK01BeaconPolicy(state);
+  assert.equal(result.matchedBeaconCount, 0);
+  assert.equal(result.nativeSuccessCount, 0);
+});
+
+test("team-equivalent qualifying entities do not block the K01 gate", () => {
+  const state = createK01World();
+  state.players["local-player"]!.teamId = "shared-k01-team";
+  state.players["cpu-1"]!.teamId = "shared-k01-team";
+  appendBeaconCompletion(state, "local-player-allied-building-beacon", { x: 20, y: 20 });
+
+  const result = advanceK01BeaconPolicy(state);
+  assert.equal(result.matchedBeaconCount, 1);
+  assert.equal(result.nativeSuccessCount, 9);
+});
+
+test("missing class or relation mapping fails the derived blocker gate closed", () => {
+  const unknownClass = createK01World();
+  removeOpeningHostileBuildings(unknownClass);
+  const unknownClassUnit = createUnitState("cpu-1-unknown-class", "cpu-1", "house", { x: 40, y: 40 });
+  unknownClass.units[unknownClassUnit.id] = unknownClassUnit;
+  const unknownClassSource = unknownClass.sourceRuntimeProfile?.state as K01SourceRuntimeState;
+  unknownClass.sourceRuntimeProfile = {
+    ...unknownClass.sourceRuntimeProfile!,
+    state: allocateK01SourceEntityRuntime(unknownClassSource, {
+      semanticUnitId: unknownClassUnit.id,
+      sourceRecordIndex: 0x7000,
+      originalClass: 0xff,
+      ownerRelation: 1,
+      progress: 0x64,
+      health: unknownClassUnit.health.current,
+      position: unknownClassUnit.position,
+      footprint: { width: 1, height: 1, evidence: "project-adaptation" },
+    }).state,
+  };
+  appendBeaconCompletion(unknownClass, "local-player-unknown-class-beacon", { x: 20, y: 20 });
+  const unknownClassResult = advanceK01BeaconPolicy(unknownClass);
+  assert.equal(unknownClassResult.matchedBeaconCount, 0);
+  assert.equal(unknownClassResult.nativeSuccessCount, 0);
+
+  const unknownRelation = createK01World();
+  removeOpeningHostileBuildings(unknownRelation);
+  const unknownRelationUnit = createUnitState("cpu-1-unknown-relation", "cpu-1", "house", { x: 40, y: 40 });
+  unknownRelation.units[unknownRelationUnit.id] = unknownRelationUnit;
+  const unknownRelationSource = unknownRelation.sourceRuntimeProfile?.state as K01SourceRuntimeState;
+  unknownRelation.sourceRuntimeProfile = {
+    ...unknownRelation.sourceRuntimeProfile!,
+    state: allocateK01SourceEntityRuntime(unknownRelationSource, {
+      semanticUnitId: unknownRelationUnit.id,
+      sourceRecordIndex: 0x7001,
+      originalClass: 49,
+      ownerRelation: 99,
+      progress: 0x64,
+      health: unknownRelationUnit.health.current,
+      position: unknownRelationUnit.position,
+      footprint: { width: 1, height: 1, evidence: "project-adaptation" },
+    }).state,
+  };
+  appendBeaconCompletion(unknownRelation, "local-player-unknown-relation-beacon", { x: 20, y: 20 });
+  const unknownRelationResult = advanceK01BeaconPolicy(unknownRelation);
+  assert.equal(unknownRelationResult.matchedBeaconCount, 0);
+  assert.equal(unknownRelationResult.nativeSuccessCount, 0);
+});
+
 test("two qualifying beacons execute ordered native blocks and later match owns repeated cells", () => {
   const state = createK01World();
   appendBeaconCompletion(state, "local-player-first-beacon", { x: 20, y: 20 });
   appendBeaconCompletion(state, "local-player-second-beacon", { x: 24, y: 20 });
+  removeOpeningHostileBuildings(state);
   const replay = JSON.parse(JSON.stringify(toWorldSnapshot(state))) as typeof state;
 
   const result = advanceK01BeaconPolicy(state);

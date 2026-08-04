@@ -233,6 +233,28 @@ test("map validation rejects fractional tile levels and invalid elevation profil
   ]);
 });
 
+test("map validation constrains source-raster clear colors to explicit RGB profiles", () => {
+  const map = createBlankMap({ width: 2, height: 2 });
+  map.sourceRasterClearColor = 0x1000000;
+  assert.deepEqual(validateMapDefinition(map, createContentRegistry()).issues, [
+    { path: "sourceRasterClearColor", message: "Source-raster clear color requires a source-raster composition profile." },
+  ]);
+
+  map.terrainCompositionProfile = "source-raster";
+  assert.deepEqual(validateMapDefinition(map, createContentRegistry()).issues, [
+    { path: "sourceRasterClearColor", message: "Source-raster clear color must be an integer RGB value from 0x000000 through 0xffffff." },
+  ]);
+});
+
+test("map validation reports malformed runtime source-raster coverage objects without throwing", () => {
+  const map = createBlankMap({ width: 1, height: 1 });
+  map.terrainCompositionProfile = "source-raster";
+  map.sourceRasterCoverage = { assetKey: 42 } as never;
+  const result = validateMapDefinition(map, createContentRegistry());
+  assert.equal(result.ok, false);
+  assert.ok(result.issues.some(({ path, message }) => path === "sourceRasterCoverage.assetKey" && /must be a string/u.test(message)));
+});
+
 test("map validation reports concrete invalid day/night curve paths", () => {
   const map = createBlankMap();
   map.environment = {

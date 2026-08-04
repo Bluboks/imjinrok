@@ -1046,8 +1046,9 @@ function advanceUnitConstruction(state: WorldState, unit: UnitState): void {
     return;
   }
 
+  const previousRemainingTicks = construction.remainingTicks;
   construction.remainingTicks = Math.max(0, construction.remainingTicks - getPlayerWorkTickAmount(state, unit.playerId));
-  advanceConstructionHealth(building);
+  advanceConstructionHealth(building, previousRemainingTicks);
 
   if (construction.remainingTicks > 0) {
     return;
@@ -1140,8 +1141,9 @@ function advanceAssistedConstruction(state: WorldState, worker: UnitState, build
     return;
   }
 
+  const previousRemainingTicks = construction.remainingTicks;
   construction.remainingTicks = Math.max(0, construction.remainingTicks - getPlayerWorkTickAmount(state, worker.playerId));
-  advanceConstructionHealth(building);
+  advanceConstructionHealth(building, previousRemainingTicks);
 
   if (construction.remainingTicks > 0) {
     return;

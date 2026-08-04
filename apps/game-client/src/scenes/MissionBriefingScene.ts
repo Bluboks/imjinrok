@@ -13,12 +13,17 @@ import { collectMissionBriefingBackdropFrames } from "../missionBriefingBackdrop
 import { resolveOriginalBriefingMetadataLayout } from "../originalBriefingMetadataLayout.js";
 import {
   createMissionBriefingReplayState,
+  createMissionBriefingLineTransitionState,
   getMissionBriefingClickAction,
   getMissionBriefingIntroStage,
+  getMissionBriefingParticipantLineIndex,
   getMissionBriefingPortraitScale,
   getMissionBriefingRenderLayers,
   getMissionBriefingTitleFrameIndex,
+  hasMissionBriefingLineRevealPending,
+  queueMissionBriefingLineTransition,
   requireMissionBriefingPresentationTimingPolicy,
+  revealMissionBriefingLineTransition,
   shouldReplayMissionBriefingVoice,
 } from "../missionPresentationTimeline.js";
 import { getOriginalSpeechSlot, resolveOriginalSpeechLayout } from "../originalSpeechLayout.js";
@@ -71,8 +76,7 @@ export class MissionBriefingScene extends Phaser.Scene {
   private backdropImage: Phaser.GameObjects.Image | null = null;
   private introStartedAt: number | null = null;
   private hideAt: number | null = null;
-  private lineIndex = 0;
-  private lineRevealAt: number | null = null;
+  private lineTransition = createMissionBriefingLineTransitionState();
   private nextLineAt: number | null = null;
   private introCompleted = false;
   private lineScheduled = false;
@@ -161,7 +165,7 @@ export class MissionBriefingScene extends Phaser.Scene {
       this.redrawPresentation();
       return;
     }
-    if (this.lineRevealAt !== null && time >= this.lineRevealAt) {
+    if (this.lineTransition.lineRevealAt !== null && time >= this.lineTransition.lineRevealAt) {
       this.revealLine(time);
       return;
     }
@@ -193,8 +197,7 @@ export class MissionBriefingScene extends Phaser.Scene {
 
     this.introStartedAt = replay.introStartedAt;
     this.introCompleted = replay.introCompleted;
-    this.lineIndex = replay.lineIndex;
-    this.lineRevealAt = replay.lineRevealAt;
+    this.lineTransition = createMissionBriefingLineTransitionState(replay.lineIndex);
     this.nextLineAt = replay.nextLineAt;
     this.lineScheduled = replay.lineScheduled;
     this.dismissed = replay.dismissed;
@@ -220,7 +223,7 @@ export class MissionBriefingScene extends Phaser.Scene {
       this.isIntroReady(this.time.now),
     )) {
       if (layer === "speech") {
-        this.addSpeechPresentation(container, briefing.lines, line, this.lineIndex, width, height);
+        this.addSpeechPresentation(container, briefing.lines, line, width, height);
       } else {
         this.addBriefingMetadataPresentation(container, briefing, width, height);
       }
@@ -263,8 +266,9 @@ export class MissionBriefingScene extends Phaser.Scene {
     if (this.dismissed) {
       return undefined;
     }
-    const revealPending = this.lineRevealAt !== null && this.time.now < this.lineRevealAt;
-    return !this.lineScheduled || revealPending ? undefined : briefing.lines[this.lineIndex];
+    return !this.lineScheduled || !this.lineTransition.lineVisible
+      ? undefined
+      : briefing.lines[this.lineTransition.lineIndex];
   }
 
   private addBackdrop(
@@ -342,8 +346,8 @@ export class MissionBriefingScene extends Phaser.Scene {
 
     const action = getMissionBriefingClickAction(
       this.isIntroReady(time),
-      this.lineRevealAt !== null && time < this.lineRevealAt,
-      this.lineIndex + 1 >= briefing.lines.length,
+      hasMissionBriefingLineRevealPending(this.lineTransition),
+      this.lineTransition.lineIndex + 1 >= briefing.lines.length,
       this.dismissed,
     );
     if (action === "complete-intro") {
@@ -359,7 +363,11 @@ export class MissionBriefingScene extends Phaser.Scene {
     }
     if (action === "dismiss-line") {
       this.dismissed = true;
-      this.lineRevealAt = null;
+      this.lineTransition = {
+        ...this.lineTransition,
+        pendingLineIndex: null,
+        lineRevealAt: null,
+      };
       this.nextLineAt = null;
       this.stopVoice();
       this.redrawPresentation();
@@ -369,13 +377,16 @@ export class MissionBriefingScene extends Phaser.Scene {
       return;
     }
 
-    this.lineIndex += 1;
-    this.scheduleLine(time);
-    this.redrawPresentation();
+    const delayed = this.scheduleLine(time, true, this.lineTransition.lineIndex + 1);
+    // A delayed transition keeps the old voice playing while its line and
+    // portraits remain visible. The reveal redraw starts the new voice.
+    this.redrawPresentation(!delayed);
   }
 
   private revealLine(time: number): void {
-    this.scheduleLine(time, false);
+    const targetLineIndex = this.lineTransition.pendingLineIndex ?? this.lineTransition.lineIndex;
+    this.lineTransition = revealMissionBriefingLineTransition(this.lineTransition);
+    this.scheduleLine(time, false, targetLineIndex);
     this.redrawPresentation();
   }
 
@@ -388,26 +399,35 @@ export class MissionBriefingScene extends Phaser.Scene {
     ) === "ready";
   }
 
-  private scheduleLine(time: number, respectDelay = true): void {
-    const line = this.context?.scenario?.briefing?.lines[this.lineIndex];
+  private scheduleLine(time: number, respectDelay = true, targetLineIndex = this.lineTransition.lineIndex): boolean {
+    const line = this.context?.scenario?.briefing?.lines[targetLineIndex];
     if (!line) {
-      this.lineRevealAt = null;
+      this.lineTransition = {
+        ...this.lineTransition,
+        pendingLineIndex: null,
+        lineRevealAt: null,
+      };
       this.nextLineAt = null;
-      return;
+      return false;
     }
 
     const delay = respectDelay ? this.getLineDelayBeforeMs(line) : 0;
+    this.lineTransition = queueMissionBriefingLineTransition(
+      this.lineTransition,
+      targetLineIndex,
+      time,
+      delay,
+    );
     if (delay > 0) {
-      this.lineRevealAt = time + delay;
       this.nextLineAt = null;
-      return;
+      return true;
     }
 
-    this.lineRevealAt = null;
     const policy = this.requirePresentationTimingPolicy();
-    this.nextLineAt = this.lineIndex + 1 < (this.context?.scenario?.briefing?.lines.length ?? 0)
+    this.nextLineAt = this.lineTransition.lineIndex + 1 < (this.context?.scenario?.briefing?.lines.length ?? 0)
       ? time + getMissionLineDurationMs(line, policy.defaultLineDurationMs)
       : null;
+    return false;
   }
 
   private startGameplay(): void {
@@ -434,12 +454,12 @@ export class MissionBriefingScene extends Phaser.Scene {
     container: Phaser.GameObjects.Container,
     lines: readonly ScenarioBriefingLineDefinition[],
     activeLine: ScenarioBriefingLineDefinition | undefined,
-    lineIndex: number,
     viewportWidth: number,
     viewportHeight: number,
   ): void {
     const activeSlot = activeLine ? getOriginalSpeechSlot(activeLine) : null;
-    const participantLineIndex = this.dismissed ? lines.length - 1 : lineIndex;
+    const participantLineIndex = getMissionBriefingParticipantLineIndex(this.lineTransition, this.dismissed)
+      ?? (this.dismissed ? lines.length - 1 : -1);
     for (const participant of this.getParticipants(lines, participantLineIndex)) {
       const portraitKey = `${participant.speechSlot}:${normalizeMissionPortraitId(participant.portraitId)}`;
       const introductionStartedAt = this.introducedPortraitAt.get(portraitKey) ?? this.time.now;

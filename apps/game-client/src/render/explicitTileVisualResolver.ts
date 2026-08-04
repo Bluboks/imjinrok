@@ -40,7 +40,7 @@ export interface TileImagePlacementInput {
 }
 
 type TilesetRegistry = Pick<ContentRegistry, "tilesets">;
-type TilesetMap = Pick<MapDefinition, "id" | "tilesetId" | "layers">;
+type TilesetMap = Pick<MapDefinition, "id" | "tilesetId" | "layers" | "sourceRasterCoverage">;
 
 /**
  * Resolves only a tile's explicit mod-authored selection. A null result means
@@ -133,6 +133,18 @@ export function getMapExplicitTileVisualPreloadDescriptors(
         descriptors.set(underlay.textureKey, underlay);
       }
     }
+  }
+
+  const coverageAssetKey = map.sourceRasterCoverage?.assetKey;
+  if (coverageAssetKey) {
+    const coverage = resolveExplicitTileVisual(
+      registry,
+      map,
+      { tilesetVisuals: { flatAssetKey: coverageAssetKey, flatArtworkEmbedsRelief: true } },
+      "flat",
+    );
+    if (!coverage) throw new Error(`Map '${map.id}' source-raster coverage asset '${coverageAssetKey}' is unavailable.`);
+    descriptors.set(coverage.textureKey, coverage);
   }
 
   return Array.from(descriptors.values()).sort((left, right) => left.textureKey.localeCompare(right.textureKey));

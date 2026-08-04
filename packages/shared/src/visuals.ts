@@ -1,3 +1,5 @@
+import { originalEntityTypeProfilesByClass } from "./originalEntityTypeProfiles.generated.js";
+
 export type VisualKind = "terrain" | "entity" | "projectile" | "effect" | "ui";
 export type VisualFiltering = "nearest" | "linear";
 
@@ -45,9 +47,55 @@ export interface VisualBase {
   /** Path relative to the theme asset root, e.g. `terrain/hill0`. */
   assetPath: string;
   render: RenderProfile;
+  /** Static original-game identity for source-backed gameplay visuals. */
+  originalSourceProfile?: OriginalSourceProfileRef;
   defaults: {
     size: VisualSize;
     pivot: PivotSpec;
+  };
+}
+
+export interface OriginalSourceProfileRef {
+  readonly internalClass: number;
+  readonly status?: "proven" | "scoped";
+}
+
+export interface OriginalEntityFrameProfile {
+  readonly internalClass: number;
+  readonly render: {
+    readonly verticalOffset: number;
+    readonly pivotMode: "center" | "type-offset";
+  };
+}
+
+export function getOriginalEntityFrameProfile(visual: VisualBase): OriginalEntityFrameProfile | null {
+  const source = visual.originalSourceProfile;
+  if (!source) return null;
+
+  const profile = originalEntityTypeProfilesByClass[String(source.internalClass) as keyof typeof originalEntityTypeProfilesByClass] as OriginalEntityFrameProfile | undefined;
+  if (!profile) {
+    throw new Error(`Missing original source profile for internal class ${String(source.internalClass)} (${visual.id})`);
+  }
+  return profile;
+}
+
+export function resolveOriginalEntityFramePivot(visual: VisualBase, size: VisualSize): PivotSpec | null {
+  const profile = getOriginalEntityFrameProfile(visual);
+  if (!profile) return null;
+  if (!Number.isInteger(size.w) || size.w <= 0 || !Number.isInteger(size.h) || size.h <= 0) {
+    throw new RangeError(`Original source frame size must be positive integers; received ${size.w}x${size.h}`);
+  }
+  if (!Number.isFinite(profile.render.verticalOffset)) {
+    throw new RangeError(`Original source vertical offset must be finite for ${visual.id}`);
+  }
+
+  return {
+    anchor: {
+      x: Math.trunc(size.w / 2),
+      y: profile.render.pivotMode === "center"
+        ? Math.trunc(size.h / 2)
+        : size.h - profile.render.verticalOffset,
+    },
   };
 }
 
@@ -87,6 +135,8 @@ export interface TerrainVisual extends VisualBase {
 export interface AnimationClip {
   frames: readonly FrameRef[];
   fps: number;
+  /** Select source frames from the shared world tick, preserving global phase. */
+  sourceGlobalTickDivisor?: number;
   loop?: boolean;
   /** Draw this clip mirrored horizontally. Used by source sprites that only store five facings. */
   mirrorX?: boolean;

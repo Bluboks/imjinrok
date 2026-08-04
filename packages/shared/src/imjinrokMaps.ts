@@ -1,7 +1,7 @@
 import { resourceDefinitions, type BuiltInResourceDefinitionId, type FactionId, type TerrainType } from "./content.js";
-import { applyK01SourceTileVisuals, K01_SOURCE_RELATIVE_CELL_PROJECTION_LIFT_PX } from "./k01SourceTileVisuals.js";
+import { applyK01SourceTileVisuals } from "./k01SourceTileVisuals.js";
 import { applyK01SourceFogVisuals } from "./k01SourceFogVisuals.js";
-import { createBlankMap, getTileIndex, type MapDefinition, type ResourceNode, type SpawnPoint, type TileCell } from "./maps.js";
+import { createBlankMap, getTileIndex, K01_SOURCE_RASTER_COVERAGE_ASSET_KEY, type MapDefinition, type ResourceNode, type SpawnPoint, type TileCell } from "./maps.js";
 
 const FACTIONS: readonly FactionId[] = ["blue", "red", "green", "yellow"];
 const RANDOM_MAP_ID_PREFIX = "random-";
@@ -246,13 +246,16 @@ export function createImjinrokMapScaffold(mapId: string): MapDefinition | null {
     const groundLayer = map.layers[0];
     if (!groundLayer) throw new Error("K01 scaffold has no ground layer for source tile visual assignment.");
     applyK01SourceTileVisuals(groundLayer.tiles, map.width, map.height);
-    // Product surface adapter: the hash-bound K01 output-Y additions differ
-    // by seven pixels. Bilinear sampling remains an explicit web adaptation.
-    map.elevationProfile = {
-      stepHeight: K01_SOURCE_RELATIVE_CELL_PROJECTION_LIFT_PX,
-      sampling: "bilinear",
+    // K01 source placement offsets are visual raster coordinates only. Physical
+    // surface elevation remains the authored scaffold (all cells level 0).
+    map.terrainCompositionProfile = "source-raster";
+    map.sourceRasterClearColor = 0x000000;
+    map.sourceRasterCoverage = {
+      mode: "canonical-source-art",
+      assetKey: K01_SOURCE_RASTER_COVERAGE_ASSET_KEY,
+      placement: "selected-frame-offset",
+      evidenceStatus: "의도적 적응",
     };
-    map.terrainCompositionProfile = "source-raster-underlay";
     map.fogVisualProfileId = "imjinrok-source-fog-composite";
     applyK01SourceFogVisuals(groundLayer.tiles, map.width, map.height);
   }

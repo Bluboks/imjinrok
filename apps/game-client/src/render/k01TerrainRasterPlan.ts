@@ -16,6 +16,16 @@ export interface SourceTerrainRasterPlan {
   readonly drawOrder: "y-major then x-major";
   readonly regions: readonly SourceTerrainRasterRegion[];
   readonly cells: readonly { readonly x: number; readonly y: number }[];
+  /** Optional opaque RGB fill applied to each output region before replay. */
+  readonly clearColor: number | undefined;
+  readonly coverage: SourceTerrainRasterCoveragePlan | null;
+}
+
+export interface SourceTerrainRasterCoveragePlan {
+  readonly mode: "canonical-source-art" | "legacy-authored-underlay";
+  readonly assetKey?: string;
+  readonly placement: "selected-frame-offset" | "authored-per-cell";
+  readonly evidenceStatus?: "의도적 적응";
 }
 
 /**
@@ -25,7 +35,7 @@ export interface SourceTerrainRasterPlan {
  * non-overlapping output region.
  */
 export function createSourceTerrainRasterPlan(
-  map: Pick<MapDefinition, "width" | "height" | "layers" | "terrainCompositionProfile">,
+  map: Pick<MapDefinition, "width" | "height" | "layers" | "terrainCompositionProfile" | "sourceRasterClearColor" | "sourceRasterCoverage">,
   worldBounds: TerrainRasterWorldBounds,
   maxTextureSize: number,
 ): SourceTerrainRasterPlan | null {
@@ -34,6 +44,7 @@ export function createSourceTerrainRasterPlan(
   if (!Number.isInteger(maxTextureSize) || maxTextureSize <= 0) {
     throw new RangeError(`Source terrain raster maximum texture size must be a positive integer; received ${maxTextureSize}.`);
   }
+  assertSourceRasterClearColor(map.sourceRasterClearColor);
 
   const cells = [];
   for (let y = 0; y < map.height; y += 1) {
@@ -45,31 +56,22 @@ export function createSourceTerrainRasterPlan(
     drawOrder: "y-major then x-major",
     regions: partitionWorldBounds(worldBounds, maxTextureSize),
     cells,
+    clearColor: map.sourceRasterClearColor,
+    coverage: map.sourceRasterCoverage
+      ?? (map.terrainCompositionProfile === "source-raster-underlay"
+        ? { mode: "legacy-authored-underlay", placement: "authored-per-cell" }
+        : null),
   };
 }
 
 export function usesSourceTerrainRasterComposition(
-  map: Pick<MapDefinition, "width" | "height" | "layers" | "terrainCompositionProfile">,
+  map: Pick<MapDefinition, "width" | "height" | "layers" | "terrainCompositionProfile" | "sourceRasterClearColor" | "sourceRasterCoverage">,
 ): boolean {
   const tiles = map.layers[0]?.tiles;
   return (map.terrainCompositionProfile === "source-raster" || map.terrainCompositionProfile === "source-raster-underlay")
     && tiles !== undefined
     && tiles.length === map.width * map.height
     && tiles.every((tile) => tile.tilesetVisuals?.flatAssetKey !== undefined && tile.tilesetVisuals.flatArtworkEmbedsRelief === true);
-}
-
-export function usesSourceTerrainRasterUnderlay(
-  map: Pick<MapDefinition, "terrainCompositionProfile">,
-): boolean {
-  return map.terrainCompositionProfile === "source-raster-underlay";
-}
-
-/** Keeps the source-backed coverage layer on the same recovered surface as its selected frame. */
-export function alignSourceTerrainCoverageUnderlay<T extends { readonly sourcePixelOffset: { readonly x: number; readonly y: number } }>(
-  underlay: T,
-  selected: Pick<T, "sourcePixelOffset">,
-): T {
-  return { ...underlay, sourcePixelOffset: selected.sourcePixelOffset };
 }
 
 function partitionWorldBounds(bounds: TerrainRasterWorldBounds, maxTextureSize: number): SourceTerrainRasterRegion[] {
@@ -89,5 +91,12 @@ function assertRasterBounds(bounds: TerrainRasterWorldBounds): void {
     || !Number.isFinite(bounds.right) || !Number.isFinite(bounds.bottom)
     || bounds.right <= bounds.left || bounds.bottom <= bounds.top) {
     throw new RangeError("Source terrain raster bounds must be finite with positive width and height.");
+  }
+}
+
+function assertSourceRasterClearColor(clearColor: number | undefined): void {
+  if (clearColor === undefined) return;
+  if (!Number.isInteger(clearColor) || clearColor < 0 || clearColor > 0xffffff) {
+    throw new RangeError(`Source terrain raster clear color must be an integer RGB value from 0x000000 through 0xffffff; received ${clearColor}.`);
   }
 }

@@ -36,7 +36,9 @@ export function selectConstructionFrameIndex(progress: number, clip: AnimationCl
 }
 
 export function isBelowOriginalBuildingDamageThreshold(health: HealthValue): boolean {
-  return health.max > 0 && health.current * 100 < health.max * 50;
+  if (health.max <= 0) return false;
+  const threshold = Math.trunc(health.max * 50 / 100);
+  return health.current < threshold;
 }
 
 function validateProgressFrameThresholds(thresholds: readonly number[], frameCount: number): void {

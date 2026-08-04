@@ -40,6 +40,9 @@
 0x0041efa0 animation-state-1-frame-selector
 0x0041f380 animation-state-2-frame-selector
 0x0041fdb0 main-entity-render-path
+0x00421c50 building-renderer-class-switch
+0x00438930 screen-rect-clear-pivot-renderer
+0x00438aa0 screen-rect-centered-pivot-renderer
 0x004233f0 action-state-six-handler
 0x00423740 action-state-seven-handler
 0x004237d0 targeted-ability-validity-check

@@ -25,6 +25,7 @@ const RESOURCE_POINTER_TABLE = 0x004bc094;
 const ARGUMENT_INDEX = {
   spriteSlot: 0,
   baseFrame: 1,
+  renderVerticalOffset: 4,
   warExpense: 5,
   grainCost: 6,
   woodCost: 7,
@@ -35,9 +36,23 @@ const ARGUMENT_INDEX = {
 export const EXPECTED_EXECUTABLE_SHA256 =
   "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e";
 export const EXPECTED_SEEDS_SHA256 =
-  "8e7c8821e9c84c5d0877bb977b119b3b878271502b36bf75e7426b570507bfb7";
+  "386b0f4e86c3376f34fe2b50fedb7e45b762c30784d4ebcc0387aa6f431811b2";
 
 const CODE_ANCHORS = [
+  {
+    id: "type-definition-render-vertical-offset-argument-load",
+    va: 0x0045bd20,
+    bytes: "66 8b 44 24 14",
+    meaning:
+      "one-based writer argument 5 low WORD is loaded from stack +0x14",
+  },
+  {
+    id: "type-definition-render-vertical-offset-field-write",
+    va: 0x0045bd2e,
+    bytes: "66 89 41 0c",
+    meaning:
+      "the previously loaded one-based writer argument 5 low WORD is written to signed type record render vertical-offset field +0x0c",
+  },
   {
     id: "type-definition-sprite-slot-write",
     va: 0x0045bd0a,
@@ -55,7 +70,7 @@ const CODE_ANCHORS = [
     va: 0x0045bd29,
     bytes: "66 8b 54 24 18 66 89 41 0c 66 8b 44 24 1c 66 89 51 0e",
     meaning:
-      "argument 5 low WORD is loaded from stack +0x18 and written to signed type record war-expense field +0x0e",
+      "the adjacent low-WORD argument pipeline loads stack +0x18 and writes the following signed type record field +0x0e",
   },
   {
     id: "type-definition-grain-cost-argument-load-and-write",
@@ -224,6 +239,12 @@ export function extractEntityTypeCatalog({
       fields: {
         spriteSlot: "+0x04",
         baseFrame: "+0x06",
+        renderVerticalOffset: {
+          offset: "+0x0c",
+          width: "signed WORD",
+          writerArgumentOrdinal: 5,
+          writerArgumentIndex: ARGUMENT_INDEX.renderVerticalOffset,
+        },
         warExpense: {
           offset: "+0x0e",
           width: "signed WORD",
@@ -325,6 +346,10 @@ function buildTypeRecord({ buffer, image, nameCopies, typeCall }) {
           ARGUMENT_INDEX.woodCost,
         ),
       },
+      renderVerticalOffset: requireSignedWordArgument(
+        typeCall,
+        ARGUMENT_INDEX.renderVerticalOffset,
+      ),
     },
     name: {
       runtimePointer: toHex(namePointer),

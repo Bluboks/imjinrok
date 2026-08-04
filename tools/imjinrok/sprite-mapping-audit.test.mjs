@@ -130,11 +130,11 @@ test("sprite mapping audit is deterministic and current", (t) => {
 test("frame mappings stay quarantined outside statically proven scopes while identities are cataloged", () => {
   assert.deepEqual(report.summary, {
     visualCount: 26,
-    unitVisualCount: 15,
-    buildingVisualCount: 11,
-    stateMappingCount: 97,
-    clipCount: 713,
-    frameReferenceCount: 5_410,
+    unitVisualCount: 16,
+    buildingVisualCount: 10,
+    stateMappingCount: 112,
+    clipCount: 728,
+    frameReferenceCount: 5_472,
     missingFrameReferenceCount: 0,
     unverifiedVisualCount: 1,
     mixedVisualCount: 23,
@@ -142,14 +142,14 @@ test("frame mappings stay quarantined outside statically proven scopes while ide
     staticIdentityVisualCount: 25,
     ambiguousIdentityVisualCount: 0,
     unboundIdentityVisualCount: 1,
-    projectBindingCount: 25,
+    projectBindingCount: 24,
     projectBindingConflictCount: 0,
     portraitCueCount: 17,
     unverifiedPortraitCueCount: 0,
     k01EntityVisualCount: 22,
     k01RuntimeStateGapCount: 0,
     k01SelectionPortraitCount: 22,
-    findingCount: 78,
+    findingCount: 77,
   });
   assert.equal(report.schemaVersion, 4);
   assert.equal(report.k01EntityVisualCoverage.entries.length, 22);
@@ -458,7 +458,11 @@ test("frame mappings stay quarantined outside statically proven scopes while ide
     assert.equal(visual?.staticEvidence.sourcePath, sourcePath);
     assert.equal(visual?.staticEvidence.baseFrame, 7);
     assert.equal(visual?.staticEvidence.bodyStateMapping, "static-proven-base-frame");
-    assert.deepEqual(visual?.mappings.map((mapping) => mapping.state), ["idle"]);
+    assert.deepEqual(visual?.mappings.map((mapping) => mapping.state), [
+      "construction",
+      "damaged",
+      "idle",
+    ]);
   }
   const currentBeacon = report.visuals.find(
     (visual) => visual.visualId === "korean-signal-beacon",
@@ -703,7 +707,7 @@ test("frame mappings stay quarantined outside statically proven scopes while ide
     report.findings.filter(
       (finding) => finding.code === "building-health-frame-unverified",
     ).length,
-    9,
+    8,
   );
   assert.deepEqual(report.portraits.currentScenarioPortraitIds, [
     "J1",

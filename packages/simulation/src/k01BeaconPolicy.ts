@@ -3,6 +3,7 @@ import {
   k01ReinforcementOwnerAdapter,
   unitDefinitions,
 } from "../../shared/src/index.js";
+import { originalEntityTypeProfilesByClass } from "../../shared/src/originalEntityTypeProfiles.generated.js";
 import {
   admitCompletedK01ConstructionRuntime,
   admitK01NativeSourceEntityRuntime,
@@ -24,6 +25,15 @@ export const K01_BEACON_NATIVE_ORIGIN = Object.freeze({ x: 55, y: 53 });
 export const K01_BEACON_SCRIPT_LOADER_DEFAULT_RESULT = 1 as const;
 export const K01_BEACON_NATIVE_SOURCE_INDEX_BASE = 0x6000;
 export const K01_BEACON_CONSTRUCTION_SOURCE_INDEX_BASE = 0x5200;
+
+const K01_BEACON_BLOCKER_TYPE_FLAGS_MASK = 0x00020002;
+const K01_RELATION_TO_PLAYER_ID: Readonly<Record<number, string>> = Object.freeze({
+  0: "local-player",
+  1: "cpu-1",
+});
+const K01_ORIGINAL_ENTITY_PROFILE_BY_CLASS = new Map(
+  Object.entries(originalEntityTypeProfilesByClass).map(([originalClass, profile]) => [Number(originalClass), profile]),
+);
 
 export interface K01BeaconPolicyAdvanceOptions {
   /** Raw relation blocker result: zero permits the source scan. */
@@ -94,8 +104,8 @@ export function advanceK01BeaconPolicy(
 
   consumeConstructionEvents(world, run);
 
-  const blocker = options.blocker ?? 0;
   const currentOwnerRelation = options.currentOwnerRelation ?? K01_BEACON_ORIGINAL_OWNER_RELATION;
+  const blocker = options.blocker ?? deriveK01BeaconBlocker(world, run.source, currentOwnerRelation);
   if (blocker !== 0) {
     appendTrace(run, world.tick, { type: "scan-skipped-blocker", reason: `blocker=${String(blocker)}` });
   } else if (run.policy.triggerFlag !== 0) {
@@ -115,6 +125,60 @@ export function advanceK01BeaconPolicy(
     state: run.source,
   };
   return { state: run.source, matchedBeaconCount: run.matchedBeaconCount, nativeSuccessCount: run.nativeSuccessCount };
+}
+
+/**
+ * Reproduces FUN_00487fa0 over the source active list. Source records remain
+ * the scan authority, while semantic UnitState liveness prevents stale seeded
+ * health from keeping a removed or destroyed building in the blocker gate.
+ */
+function deriveK01BeaconBlocker(
+  world: WorldState,
+  source: K01SourceRuntimeState,
+  currentOwnerRelation: number,
+): number {
+  const currentPlayerId = resolveK01RelationPlayerId(currentOwnerRelation);
+  if (currentPlayerId === undefined || world.players[currentPlayerId] === undefined) {
+    return 1;
+  }
+
+  const recordsBySlot = new Map(source.entityRuntime.entities.map((record) => [record.slot, record]));
+  for (const slot of source.entityRuntime.activeList) {
+    const record = recordsBySlot.get(slot);
+    if (record === undefined || source.entityRuntime.activeTable[slot] === 0 || !record.active) {
+      continue;
+    }
+
+    const semanticUnit = world.units[record.semanticUnitId];
+    if (semanticUnit === undefined || semanticUnit.health.current <= 0) {
+      continue;
+    }
+
+    const profile = K01_ORIGINAL_ENTITY_PROFILE_BY_CLASS.get(record.originalClass);
+    if (profile === undefined || !Number.isInteger(profile.flags) || profile.flags < 0 || profile.flags > 0xffffffff) {
+      return 1;
+    }
+    if ((profile.flags & K01_BEACON_BLOCKER_TYPE_FLAGS_MASK) === 0) {
+      continue;
+    }
+    // A live semantic unit paired with a non-positive source health is an
+    // unresolved source/world mismatch. Do not let that ambiguity open the
+    // mission gate; only semantic death/removal may retire stale source data.
+    if (record.health <= 0) {
+      return 1;
+    }
+
+    const ownerPlayerId = resolveK01RelationPlayerId(record.ownerRelation);
+    if (ownerPlayerId === undefined || world.players[ownerPlayerId] === undefined) {
+      return 1;
+    }
+    const ownerTeamId = world.players[ownerPlayerId]?.teamId ?? ownerPlayerId;
+    const currentTeamId = world.players[currentPlayerId]?.teamId ?? currentPlayerId;
+    if (ownerTeamId !== currentTeamId) {
+      return 1;
+    }
+  }
+  return 0;
 }
 
 function consumeConstructionEvents(world: WorldState, run: MutablePolicyRun): void {
@@ -286,6 +350,10 @@ function resolveConstructionOwnerRelation(ownerId: string): number | undefined {
   if (ownerId === "local-player") return 0;
   if (ownerId === "cpu-1") return 1;
   return undefined;
+}
+
+function resolveK01RelationPlayerId(relation: number): string | undefined {
+  return K01_RELATION_TO_PLAYER_ID[relation];
 }
 
 function rejectionReason(source: K01SourceRuntimeState, record: K01SourceRuntimeState["entityRuntime"]["entities"][number], currentOwnerRelation: number): string {

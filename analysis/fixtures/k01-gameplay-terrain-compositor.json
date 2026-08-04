@@ -1,0 +1,39 @@
+{
+  "sources": {
+    "executableSha256": "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e",
+    "k01MapSize": 1097100,
+    "k01MapSha256": "43ec3a173032f74c12d3cce1db1078b076b651ed79070a0914673a5b65da99cb"
+  },
+  "functions": [
+    { "name": "FUN_004676e0", "bodyRange": "0x004676e0-0x00467ddc", "instructionCount": 507, "instructionSha256": "a1d0c6254193bc293f4010fcd81250c43549a5af500fda5b59c076b77888cbf3", "rawBodySha256": "0e65cedefd60f32f2c9258d93df2be1be8b8a891e9e6f8226684ae05e4b867b5" },
+    { "name": "FUN_00469510", "bodyRange": "0x00469510-0x00469916", "instructionCount": 341, "instructionSha256": "28849833f557b0f4863c88318828d72b8039639450bd42b5623927dd8ef036e3", "rawBodySha256": "1d05579e1c2179989bd1441cb54510de8df4ecb24157dac496fda7f3c6c8f9ce" },
+    { "name": "FUN_0044cc20", "bodyRange": "0x0044cc20-0x0044cccb", "instructionCount": 72, "instructionSha256": "027fcaf0c93f141968f67759f0e5674fbbc009d470fc77946e241c07256c83f0", "rawBodySha256": "2ccc49b35b30e1b7a02d9766efaac64b1d12b0e6627871c1cd3a49417a5f45c1" },
+    { "name": "FUN_00454250", "bodyRange": "0x00454250-0x004542dd", "instructionCount": 51, "instructionSha256": "e98c31b5b51966ff6762f0167db71234cba88158267c085e8398de10d51ec12c", "rawBodySha256": "a4c2f28f7eec824ffc374f7e116a7e550233d4be3e24b1e2ebbdb03394798075" }
+  ],
+  "compositor": {
+    "target": { "width": 640, "height": 384 },
+    "clip": { "left": 0, "top": 0, "right": 639, "bottom": 383 },
+    "clearIndex": 0,
+    "paletteEntry0Rgb": [0, 0, 0],
+    "payload": { "selectedFrameCount": 243, "payloadBytes": 254304, "payloadIndex0": 1165, "payloadIndexFe": 0, "rowParseFailures": 0 },
+    "vector": {
+      "camera": { "x": 0, "y": 0 },
+      "clearIndex": 0,
+      "cells": [
+        { "x": 0, "y": 0, "stem": "hill0", "frame": 39, "rawVerticalShiftPx": 16, "draw": { "left": 288, "top": 176 }, "payloadWrites": 512 },
+        { "x": 1, "y": 0, "stem": "hill0", "frame": 5, "rawVerticalShiftPx": 0, "draw": { "left": 320, "top": 208 }, "payloadWrites": 1024 },
+        { "x": 0, "y": 1, "stem": "hill0", "frame": 4, "rawVerticalShiftPx": 0, "draw": { "left": 256, "top": 208 }, "payloadWrites": 1024 },
+        { "x": 1, "y": 1, "stem": "hill0", "frame": 4, "rawVerticalShiftPx": 0, "draw": { "left": 288, "top": 224 }, "payloadWrites": 1024 }
+      ],
+      "totalPayloadWrites": 3584,
+      "overlapWrites": 0,
+      "crop": { "left": 256, "top": 176, "width": 128, "height": 96, "sha256": "1304d09631d687862568f784257bf83abc393c8e9b46288f17265c874e363c20" },
+      "pixels": { "320,192": 83, "320,207": 88, "320,208": 0, "320,223": 0, "320,224": 71 }
+    }
+  },
+  "channelDigests": {
+    "rawRasterVerticalShiftSha256": "76cc670258325ebc671d19b6f864768bf376328a7573ca7b29887c780e50b864",
+    "projectedJointSha256": "0e2123b96bf4aad8e09db38d60245abf655171198171c034734bbd59cee46bb6",
+    "placementSha256": "78d0d96e0157e60cf9d2e2e4325941510f8911dbc9a57422ad00220874ad406c"
+  }
+}

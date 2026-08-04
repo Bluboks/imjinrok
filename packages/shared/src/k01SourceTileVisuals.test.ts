@@ -5,9 +5,7 @@ import {
   K01_SOURCE_TILE_VISUAL_DIMENSIONS,
   K01_SOURCE_TILE_VISUAL_PLACEMENT_OFFSET_DIGEST,
   K01_SOURCE_TILE_VISUAL_PAIR_DIGEST,
-  K01_SOURCE_TILE_UNDERLAY_ASSET_KEY,
   K01_SOURCE_CELL_PROJECTION_OUTPUT_Y_ADDITIONS,
-  K01_SOURCE_RELATIVE_CELL_PROJECTION_LIFT_PX,
   K01_SOURCE_FOG_DIMENSIONS,
   K01_SOURCE_FOG_FAMILY_DIGEST,
   applyK01SourceFogVisuals,
@@ -20,7 +18,6 @@ import {
   getK01SourceTileFlatAssetKey,
   getK01SourceTileRawPlacementArgumentDelta,
   getK01SourceTilePlacementOffset,
-  getK01SourceTileUnderlayAssetKey,
   getK01SourceTileVisualAssets,
   getK01SourceFogFamilyIndex,
   getTileAt,
@@ -48,7 +45,6 @@ test("K01 source fog artifact preserves the exact x-major family stream and dist
 test("K01 source tile artifact preserves every hash-bound x-major source pair", () => {
   assertK01SourceTileVisualArtifact();
   assert.deepEqual(K01_SOURCE_CELL_PROJECTION_OUTPUT_Y_ADDITIONS, { base: 16, raised: 9 });
-  assert.equal(K01_SOURCE_RELATIVE_CELL_PROJECTION_LIFT_PX, 7);
   assert.deepEqual(K01_SOURCE_TILE_VISUAL_DIMENSIONS, { width: 60, height: 60 });
   assert.equal(K01_SOURCE_TILE_VISUAL_ARTIFACT.pairCount, 3600);
   assert.equal(getK01SourceTileVisualAssets().length, 243);
@@ -64,8 +60,6 @@ test("K01 source tile artifact preserves every hash-bound x-major source pair", 
   assert.equal(getK01SourceTileFlatAssetKey(59, 59), "k01-source:grss1:0018");
   assert.equal(getK01SourceTileRawPlacementArgumentDelta(0, 0), 16);
   assert.equal(getK01SourceTileRawPlacementArgumentDelta(0, 1), 0);
-  assert.equal(K01_SOURCE_TILE_UNDERLAY_ASSET_KEY, "k01-source:grss1:0000");
-  assert.equal(getK01SourceTileUnderlayAssetKey(0, 0), K01_SOURCE_TILE_UNDERLAY_ASSET_KEY);
   assert.deepEqual(getK01SourceTilePlacementOffset(0, 0), { x: 0, y: -16 });
   assert.deepEqual(getK01SourceTilePlacementOffset(0, 1), { x: 0, y: 0 });
   assert.deepEqual(getK01SourceTilePlacementOffset(59, 59), { x: 0, y: 0 });
@@ -91,20 +85,27 @@ test("only K01 applies source tile visuals after gameplay terrain mutations", ()
   assert.equal(sourceKeys?.length, 3600);
   assert.equal(new Set(sourceKeys).size, 243);
   assert.deepEqual(getTileAt(k01, 0, 0).tilesetVisuals?.sourcePixelOffset, { x: 0, y: -16 });
-  assert.equal(k01.layers[0]?.tiles.every((tile) => tile.tilesetVisuals?.underlayAssetKey === K01_SOURCE_TILE_UNDERLAY_ASSET_KEY), true);
+  assert.equal(getTileAt(k01, 0, 0).tilesetVisuals?.sourceRawRasterVerticalShiftPx, 16);
+  assert.equal(k01.layers[0]?.tiles.every((tile) => tile.tilesetVisuals?.underlayAssetKey === undefined), true);
   assert.deepEqual(getTileAt(k01, 0, 1).tilesetVisuals?.sourcePixelOffset, { x: 0, y: 0 });
+  assert.equal(getTileAt(k01, 0, 1).tilesetVisuals?.sourceRawRasterVerticalShiftPx, 0);
   assert.equal(getTileAt(k01, 45, 40).terrain, "shallowWater");
   assert.equal(getTileAt(k01, 45, 40).elevation, 0);
-  assert.equal(getTileAt(k01, 0, 0).elevation, 1);
+  assert.equal(getTileAt(k01, 0, 0).elevation, 0);
   assert.equal(getTileAt(k01, 6, 6).terrain, "grass");
   assert.equal(getTileAt(k01, 6, 6).elevation, 0);
   const elevations = k01.layers[0]?.tiles.map((tile) => tile.elevation) ?? [];
-  assert.equal(elevations.filter((level) => level === 0).length, 2865);
-  assert.equal(elevations.filter((level) => level === 1).length, 735);
+  assert.equal(elevations.filter((level) => level === 0).length, 3600);
+  assert.equal(elevations.filter((level) => level !== 0).length, 0);
   assert.equal(k01.layers[0]?.tiles.every((tile) => tile.tilesetVisuals?.flatArtworkEmbedsRelief === true), true);
-  assert.deepEqual(k01.elevationProfile, {
-    stepHeight: K01_SOURCE_RELATIVE_CELL_PROJECTION_LIFT_PX,
-    sampling: "bilinear",
+  assert.equal(k01.elevationProfile, undefined);
+  assert.equal(k01.terrainCompositionProfile, "source-raster");
+  assert.equal(k01.sourceRasterClearColor, 0x000000);
+  assert.deepEqual(k01.sourceRasterCoverage, {
+    mode: "canonical-source-art",
+    assetKey: "k01-source:grss1:0000",
+    placement: "selected-frame-offset",
+    evidenceStatus: "의도적 적응",
   });
   assert.equal(k02.layers.every((layer) => layer.tiles.every((tile) => tile.tilesetVisuals === undefined)), true);
   assert.equal(k01.fogVisualProfileId, "imjinrok-source-fog-composite");
@@ -119,4 +120,16 @@ test("K01 source visual assignment rejects incompatible product grids", () => {
   assert.ok(tiles);
   assert.throws(() => applyK01SourceTileVisuals(tiles, 2, 2), /require 60x60/u);
   assert.throws(() => applyK01SourceFogVisuals(tiles, 2, 2), /require 60x60/u);
+});
+
+test("source placement assignment never overwrites authored physical elevation", () => {
+  const map = createBlankMap({ width: 60, height: 60 });
+  const first = map.layers[0]?.tiles[0];
+  assert.ok(first);
+  first.elevation = 3;
+
+  applyK01SourceTileVisuals(map.layers[0]?.tiles ?? [], 60, 60);
+
+  assert.equal(map.layers[0]?.tiles[0]?.elevation, 3);
+  assert.deepEqual(map.layers[0]?.tiles[0]?.tilesetVisuals?.sourcePixelOffset, { x: 0, y: -16 });
 });

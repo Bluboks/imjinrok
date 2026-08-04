@@ -6,7 +6,7 @@
     "executablePath": "original/imjinrok2/imjinrok2.exe",
     "executableSha256": "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e",
     "seedsPath": "analysis/generated/imjinrok2/seeds.json",
-    "seedsSha256": "8e7c8821e9c84c5d0877bb977b119b3b878271502b36bf75e7426b570507bfb7",
+    "seedsSha256": "386b0f4e86c3376f34fe2b50fedb7e45b762c30784d4ebcc0387aa6f431811b2",
     "seedsSourceSha256": "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e",
     "ghidraSchemaVersion": 2
   },
@@ -21,6 +21,12 @@
     "fields": {
       "spriteSlot": "+0x04",
       "baseFrame": "+0x06",
+      "renderVerticalOffset": {
+        "offset": "+0x0c",
+        "width": "signed WORD",
+        "writerArgumentOrdinal": 5,
+        "writerArgumentIndex": 4
+      },
       "warExpense": {
         "offset": "+0x0e",
         "width": "signed WORD",
@@ -83,6 +89,26 @@
   },
   "codeAnchors": [
     {
+      "id": "type-definition-render-vertical-offset-argument-load",
+      "va": "0x0045bd20",
+      "bytes": "66 8b 44 24 14",
+      "meaning": "one-based writer argument 5 low WORD is loaded from stack +0x14",
+      "rawOffset": "0x0005bd20",
+      "expectedBytes": "66 8b 44 24 14",
+      "actualBytes": "66 8b 44 24 14",
+      "matched": true
+    },
+    {
+      "id": "type-definition-render-vertical-offset-field-write",
+      "va": "0x0045bd2e",
+      "bytes": "66 89 41 0c",
+      "meaning": "the previously loaded one-based writer argument 5 low WORD is written to signed type record render vertical-offset field +0x0c",
+      "rawOffset": "0x0005bd2e",
+      "expectedBytes": "66 89 41 0c",
+      "actualBytes": "66 89 41 0c",
+      "matched": true
+    },
+    {
       "id": "type-definition-sprite-slot-write",
       "va": "0x0045bd0a",
       "bytes": "66 89 41 04",
@@ -106,7 +132,7 @@
       "id": "type-definition-war-expense-argument-load-and-write",
       "va": "0x0045bd29",
       "bytes": "66 8b 54 24 18 66 89 41 0c 66 8b 44 24 1c 66 89 51 0e",
-      "meaning": "argument 5 low WORD is loaded from stack +0x18 and written to signed type record war-expense field +0x0e",
+      "meaning": "the adjacent low-WORD argument pipeline loads stack +0x18 and writes the following signed type record field +0x0e",
       "rawOffset": "0x0005bd29",
       "expectedBytes": "66 8b 54 24 18 66 89 41 0c 66 8b 44 24 1c 66 89 51 0e",
       "actualBytes": "66 8b 54 24 18 66 89 41 0c 66 8b 44 24 1c 66 89 51 0e",
@@ -245,7 +271,8 @@
           "warExpense": 0,
           "grainCost": 0,
           "woodCost": 0
-        }
+        },
+        "renderVerticalOffset": 0
       },
       "name": {
         "runtimePointer": "0x00aa4758",
@@ -273,7 +300,8 @@
           "warExpense": 13,
           "grainCost": 400,
           "woodCost": 0
-        }
+        },
+        "renderVerticalOffset": 14
       },
       "name": {
         "runtimePointer": "0x00aa5028",
@@ -301,7 +329,8 @@
           "warExpense": 13,
           "grainCost": 500,
           "woodCost": 0
-        }
+        },
+        "renderVerticalOffset": 6
       },
       "name": {
         "runtimePointer": "0x00aa5048",
@@ -329,7 +358,8 @@
           "warExpense": 15,
           "grainCost": 400,
           "woodCost": 160
-        }
+        },
+        "renderVerticalOffset": 5
       },
       "name": {
         "runtimePointer": "0x00aa50e8",
@@ -357,7 +387,8 @@
           "warExpense": 25,
           "grainCost": 1000,
           "woodCost": 1100
-        }
+        },
+        "renderVerticalOffset": 12
       },
       "name": {
         "runtimePointer": "0x00aa51a8",
@@ -385,7 +416,8 @@
           "warExpense": 35,
           "grainCost": 1800,
           "woodCost": 900
-        }
+        },
+        "renderVerticalOffset": 0
       },
       "name": {
         "runtimePointer": "0x00aa5288",
@@ -413,7 +445,8 @@
           "warExpense": 10,
           "grainCost": 800,
           "woodCost": 0
-        }
+        },
+        "renderVerticalOffset": 15
       },
       "name": {
         "runtimePointer": "0x00aa5368",
@@ -441,7 +474,8 @@
           "warExpense": 10,
           "grainCost": 500,
           "woodCost": 560
-        }
+        },
+        "renderVerticalOffset": 0
       },
       "name": {
         "runtimePointer": "0x00aa52e8",
@@ -469,7 +503,8 @@
           "warExpense": 25,
           "grainCost": 700,
           "woodCost": 640
-        }
+        },
+        "renderVerticalOffset": 11
       },
       "name": {
         "runtimePointer": "0x00aa51c8",
@@ -497,7 +532,8 @@
           "warExpense": 20,
           "grainCost": 900,
           "woodCost": 300
-        }
+        },
+        "renderVerticalOffset": 12
       },
       "name": {
         "runtimePointer": "0x00aa5148",
@@ -525,7 +561,8 @@
           "warExpense": 15,
           "grainCost": 700,
           "woodCost": 0
-        }
+        },
+        "renderVerticalOffset": 7
       },
       "name": {
         "runtimePointer": "0x00aa5088",
@@ -553,7 +590,8 @@
           "warExpense": 17,
           "grainCost": 600,
           "woodCost": 80
-        }
+        },
+        "renderVerticalOffset": 10
       },
       "name": {
         "runtimePointer": "0x00aa5108",
@@ -581,7 +619,8 @@
           "warExpense": 18,
           "grainCost": 900,
           "woodCost": 0
-        }
+        },
+        "renderVerticalOffset": 16
       },
       "name": {
         "runtimePointer": "0x00aa5168",
@@ -609,7 +648,8 @@
           "warExpense": 30,
           "grainCost": 750,
           "woodCost": 800
-        }
+        },
+        "renderVerticalOffset": 12
       },
       "name": {
         "runtimePointer": "0x00aa5228",
@@ -637,7 +677,8 @@
           "warExpense": 30,
           "grainCost": 1000,
           "woodCost": 1200
-        }
+        },
+        "renderVerticalOffset": 12
       },
       "name": {
         "runtimePointer": "0x00aa5268",
@@ -665,7 +706,8 @@
           "warExpense": 15,
           "grainCost": 700,
           "woodCost": 0
-        }
+        },
+        "renderVerticalOffset": 5
       },
       "name": {
         "runtimePointer": "0x00aa50c8",
@@ -693,7 +735,8 @@
           "warExpense": 35,
           "grainCost": 2000,
           "woodCost": 1000
-        }
+        },
+        "renderVerticalOffset": 0
       },
       "name": {
         "runtimePointer": "0x00aa52a8",
@@ -721,7 +764,8 @@
           "warExpense": 30,
           "grainCost": 1100,
           "woodCost": 1200
-        }
+        },
+        "renderVerticalOffset": 26
       },
       "name": {
         "runtimePointer": "0x00aa5468",
@@ -749,7 +793,8 @@
           "warExpense": 40,
           "grainCost": 1400,
           "woodCost": 1460
-        }
+        },
+        "renderVerticalOffset": 21
       },
       "name": {
         "runtimePointer": "0x00aa5488",
@@ -777,7 +822,8 @@
           "warExpense": 15,
           "grainCost": 500,
           "woodCost": 0
-        }
+        },
+        "renderVerticalOffset": 9
       },
       "name": {
         "runtimePointer": "0x00aa5188",
@@ -805,7 +851,8 @@
           "warExpense": 10,
           "grainCost": 800,
           "woodCost": 0
-        }
+        },
+        "renderVerticalOffset": 11
       },
       "name": {
         "runtimePointer": "0x00aa53c8",
@@ -833,7 +880,8 @@
           "warExpense": 15,
           "grainCost": 600,
           "woodCost": 100
-        }
+        },
+        "renderVerticalOffset": 13
       },
       "name": {
         "runtimePointer": "0x00aa5068",
@@ -861,7 +909,8 @@
           "warExpense": 10,
           "grainCost": 1200,
           "woodCost": 600
-        }
+        },
+        "renderVerticalOffset": 7
       },
       "name": {
         "runtimePointer": "0x00aa53a8",
@@ -889,7 +938,8 @@
           "warExpense": 30,
           "grainCost": 800,
           "woodCost": 900
-        }
+        },
+        "renderVerticalOffset": 14
       },
       "name": {
         "runtimePointer": "0x00aa51e8",
@@ -917,7 +967,8 @@
           "warExpense": 40,
           "grainCost": 1500,
           "woodCost": 1800
-        }
+        },
+        "renderVerticalOffset": 32
       },
       "name": {
         "runtimePointer": "0x00aa5208",
@@ -945,7 +996,8 @@
           "warExpense": 60,
           "grainCost": 1800,
           "woodCost": 2500
-        }
+        },
+        "renderVerticalOffset": 20
       },
       "name": {
         "runtimePointer": "0x00aa53e8",
@@ -973,7 +1025,8 @@
           "warExpense": 30,
           "grainCost": 1200,
           "woodCost": 1600
-        }
+        },
+        "renderVerticalOffset": 20
       },
       "name": {
         "runtimePointer": "0x00aa5408",
@@ -1001,7 +1054,8 @@
           "warExpense": 40,
           "grainCost": 3500,
           "woodCost": 3000
-        }
+        },
+        "renderVerticalOffset": 0
       },
       "name": {
         "runtimePointer": "0x00aa52c8",
@@ -1029,7 +1083,8 @@
           "warExpense": 50,
           "grainCost": 1000,
           "woodCost": 1700
-        }
+        },
+        "renderVerticalOffset": 30
       },
       "name": {
         "runtimePointer": "0x00aa5428",
@@ -1057,7 +1112,8 @@
           "warExpense": 30,
           "grainCost": 800,
           "woodCost": 1600
-        }
+        },
+        "renderVerticalOffset": 19
       },
       "name": {
         "runtimePointer": "0x00aa5448",
@@ -1085,7 +1141,8 @@
           "warExpense": 10,
           "grainCost": 800,
           "woodCost": 300
-        }
+        },
+        "renderVerticalOffset": 15
       },
       "name": {
         "runtimePointer": "0x00aa5388",
@@ -1113,7 +1170,8 @@
           "warExpense": 15,
           "grainCost": 1000,
           "woodCost": 1200
-        }
+        },
+        "renderVerticalOffset": 0
       },
       "name": {
         "runtimePointer": "0x00aa5308",
@@ -1141,7 +1199,8 @@
           "warExpense": 15,
           "grainCost": 1000,
           "woodCost": 1200
-        }
+        },
+        "renderVerticalOffset": 0
       },
       "name": {
         "runtimePointer": "0x00aa5328",
@@ -1169,7 +1228,8 @@
           "warExpense": 15,
           "grainCost": 800,
           "woodCost": 1300
-        }
+        },
+        "renderVerticalOffset": 0
       },
       "name": {
         "runtimePointer": "0x00aa5348",
@@ -1197,7 +1257,8 @@
           "warExpense": 15,
           "grainCost": 600,
           "woodCost": 200
-        }
+        },
+        "renderVerticalOffset": 8
       },
       "name": {
         "runtimePointer": "0x00aa5128",
@@ -1225,7 +1286,8 @@
           "warExpense": 15,
           "grainCost": 800,
           "woodCost": 200
-        }
+        },
+        "renderVerticalOffset": 3
       },
       "name": {
         "runtimePointer": "0x00aa50a8",
@@ -1253,7 +1315,8 @@
           "warExpense": 25,
           "grainCost": 700,
           "woodCost": 560
-        }
+        },
+        "renderVerticalOffset": 8
       },
       "name": {
         "runtimePointer": "0x00aa5248",
@@ -1281,7 +1344,8 @@
           "warExpense": 20,
           "grainCost": 1000,
           "woodCost": 1400
-        }
+        },
+        "renderVerticalOffset": 11
       },
       "name": {
         "runtimePointer": "0x00aa54a8",
@@ -1309,7 +1373,8 @@
           "warExpense": 30,
           "grainCost": 300,
           "woodCost": 300
-        }
+        },
+        "renderVerticalOffset": 16
       },
       "name": {
         "runtimePointer": "0x00aa5b28",
@@ -1337,7 +1402,8 @@
           "warExpense": 15,
           "grainCost": 3500,
           "woodCost": 3500
-        }
+        },
+        "renderVerticalOffset": 0
       },
       "name": {
         "runtimePointer": "0x00aa5ac8",
@@ -1365,7 +1431,8 @@
           "warExpense": 15,
           "grainCost": 1500,
           "woodCost": 1500
-        }
+        },
+        "renderVerticalOffset": 0
       },
       "name": {
         "runtimePointer": "0x00aa5a48",
@@ -1393,7 +1460,8 @@
           "warExpense": 10,
           "grainCost": 900,
           "woodCost": 900
-        }
+        },
+        "renderVerticalOffset": 0
       },
       "name": {
         "runtimePointer": "0x00aa59a8",
@@ -1421,7 +1489,8 @@
           "warExpense": 10,
           "grainCost": 900,
           "woodCost": 900
-        }
+        },
+        "renderVerticalOffset": 0
       },
       "name": {
         "runtimePointer": "0x00aa59c8",
@@ -1449,7 +1518,8 @@
           "warExpense": 15,
           "grainCost": 3000,
           "woodCost": 3000
-        }
+        },
+        "renderVerticalOffset": 0
       },
       "name": {
         "runtimePointer": "0x00aa5a28",
@@ -1477,7 +1547,8 @@
           "warExpense": 15,
           "grainCost": 3000,
           "woodCost": 3000
-        }
+        },
+        "renderVerticalOffset": 0
       },
       "name": {
         "runtimePointer": "0x00aa5948",
@@ -1505,7 +1576,8 @@
           "warExpense": 20,
           "grainCost": 3500,
           "woodCost": 3500
-        }
+        },
+        "renderVerticalOffset": 0
       },
       "name": {
         "runtimePointer": "0x00aa5988",
@@ -1533,7 +1605,8 @@
           "warExpense": 15,
           "grainCost": 2500,
           "woodCost": 2500
-        }
+        },
+        "renderVerticalOffset": 0
       },
       "name": {
         "runtimePointer": "0x00aa58e8",
@@ -1561,7 +1634,8 @@
           "warExpense": 10,
           "grainCost": 800,
           "woodCost": 800
-        }
+        },
+        "renderVerticalOffset": 0
       },
       "name": {
         "runtimePointer": "0x00aa5848",
@@ -1589,7 +1663,8 @@
           "warExpense": 10,
           "grainCost": 1500,
           "woodCost": 1500
-        }
+        },
+        "renderVerticalOffset": 0
       },
       "name": {
         "runtimePointer": "0x00aa5808",
@@ -1617,7 +1692,8 @@
           "warExpense": 15,
           "grainCost": 1500,
           "woodCost": 1500
-        }
+        },
+        "renderVerticalOffset": 0
       },
       "name": {
         "runtimePointer": "0x00aa5888",
@@ -1645,7 +1721,8 @@
           "warExpense": 15,
           "grainCost": 2000,
           "woodCost": 2000
-        }
+        },
+        "renderVerticalOffset": 0
       },
       "name": {
         "runtimePointer": "0x00aa58a8",
@@ -1673,7 +1750,8 @@
           "warExpense": 10,
           "grainCost": 1000,
           "woodCost": 1000
-        }
+        },
+        "renderVerticalOffset": 0
       },
       "name": {
         "runtimePointer": "0x00aa5908",
@@ -1701,7 +1779,8 @@
           "warExpense": 15,
           "grainCost": 1500,
           "woodCost": 1000
-        }
+        },
+        "renderVerticalOffset": 0
       },
       "name": {
         "runtimePointer": "0x00aa5568",
@@ -1729,7 +1808,8 @@
           "warExpense": 15,
           "grainCost": 1200,
           "woodCost": 900
-        }
+        },
+        "renderVerticalOffset": 0
       },
       "name": {
         "runtimePointer": "0x00aa5548",
@@ -1757,7 +1837,8 @@
           "warExpense": 15,
           "grainCost": 1000,
           "woodCost": 800
-        }
+        },
+        "renderVerticalOffset": 0
       },
       "name": {
         "runtimePointer": "0x00aa5528",
@@ -1785,7 +1866,8 @@
           "warExpense": 15,
           "grainCost": 1000,
           "woodCost": 500
-        }
+        },
+        "renderVerticalOffset": 0
       },
       "name": {
         "runtimePointer": "0x00aa55a8",
@@ -1813,7 +1895,8 @@
           "warExpense": 10,
           "grainCost": 600,
           "woodCost": 400
-        }
+        },
+        "renderVerticalOffset": 0
       },
       "name": {
         "runtimePointer": "0x00aa55c8",
@@ -1841,7 +1924,8 @@
           "warExpense": 10,
           "grainCost": 1000,
           "woodCost": 800
-        }
+        },
+        "renderVerticalOffset": 0
       },
       "name": {
         "runtimePointer": "0x00aa54c8",
@@ -1869,7 +1953,8 @@
           "warExpense": 15,
           "grainCost": 1000,
           "woodCost": 800
-        }
+        },
+        "renderVerticalOffset": 0
       },
       "name": {
         "runtimePointer": "0x00aa5508",
@@ -1897,7 +1982,8 @@
           "warExpense": 15,
           "grainCost": 800,
           "woodCost": 500
-        }
+        },
+        "renderVerticalOffset": 0
       },
       "name": {
         "runtimePointer": "0x00aa54e8",
@@ -1925,7 +2011,8 @@
           "warExpense": 20,
           "grainCost": 2000,
           "woodCost": 1200
-        }
+        },
+        "renderVerticalOffset": 0
       },
       "name": {
         "runtimePointer": "0x00aa5588",
@@ -1953,7 +2040,8 @@
           "warExpense": 10,
           "grainCost": 500,
           "woodCost": 400
-        }
+        },
+        "renderVerticalOffset": 0
       },
       "name": {
         "runtimePointer": "0x00aa5b08",
@@ -1981,7 +2069,8 @@
           "warExpense": 10,
           "grainCost": 630,
           "woodCost": 450
-        }
+        },
+        "renderVerticalOffset": 0
       },
       "name": {
         "runtimePointer": "0x00aa59e8",
@@ -2009,7 +2098,8 @@
           "warExpense": 20,
           "grainCost": 2500,
           "woodCost": 2000
-        }
+        },
+        "renderVerticalOffset": 0
       },
       "name": {
         "runtimePointer": "0x00aa5968",
@@ -2037,7 +2127,8 @@
           "warExpense": 15,
           "grainCost": 1500,
           "woodCost": 1300
-        }
+        },
+        "renderVerticalOffset": 0
       },
       "name": {
         "runtimePointer": "0x00aa58c8",
@@ -2065,7 +2156,8 @@
           "warExpense": 10,
           "grainCost": 800,
           "woodCost": 1000
-        }
+        },
+        "renderVerticalOffset": 0
       },
       "name": {
         "runtimePointer": "0x00aa5928",
@@ -2093,7 +2185,8 @@
           "warExpense": 20,
           "grainCost": 2600,
           "woodCost": 2400
-        }
+        },
+        "renderVerticalOffset": 0
       },
       "name": {
         "runtimePointer": "0x00aa5a88",
@@ -2121,7 +2214,8 @@
           "warExpense": 15,
           "grainCost": 1500,
           "woodCost": 1400
-        }
+        },
+        "renderVerticalOffset": 0
       },
       "name": {
         "runtimePointer": "0x00aa5a68",
@@ -2149,7 +2243,8 @@
           "warExpense": 10,
           "grainCost": 900,
           "woodCost": 1100
-        }
+        },
+        "renderVerticalOffset": 0
       },
       "name": {
         "runtimePointer": "0x00aa5a08",
@@ -2177,7 +2272,8 @@
           "warExpense": 10,
           "grainCost": 1000,
           "woodCost": 1000
-        }
+        },
+        "renderVerticalOffset": 0
       },
       "name": {
         "runtimePointer": "0x00aa5828",
@@ -2205,7 +2301,8 @@
           "warExpense": 15,
           "grainCost": 2000,
           "woodCost": 1500
-        }
+        },
+        "renderVerticalOffset": 0
       },
       "name": {
         "runtimePointer": "0x00aa5aa8",
@@ -2233,7 +2330,8 @@
           "warExpense": 10,
           "grainCost": 2000,
           "woodCost": 1500
-        }
+        },
+        "renderVerticalOffset": 0
       },
       "name": {
         "runtimePointer": "0x00aa5ae8",
@@ -2261,7 +2359,8 @@
           "warExpense": 10,
           "grainCost": 800,
           "woodCost": 1200
-        }
+        },
+        "renderVerticalOffset": 0
       },
       "name": {
         "runtimePointer": "0x00aa5868",
@@ -2289,7 +2388,8 @@
           "warExpense": 15,
           "grainCost": 2000,
           "woodCost": 1500
-        }
+        },
+        "renderVerticalOffset": 0
       },
       "name": {
         "runtimePointer": "0x00aa5b48",
@@ -2317,7 +2417,8 @@
           "warExpense": 10,
           "grainCost": 500,
           "woodCost": 500
-        }
+        },
+        "renderVerticalOffset": 12
       },
       "name": {
         "runtimePointer": "0x00aa5bc8",
@@ -2345,7 +2446,8 @@
           "warExpense": 0,
           "grainCost": 400,
           "woodCost": 0
-        }
+        },
+        "renderVerticalOffset": 23
       },
       "name": {
         "runtimePointer": "0x00aa55e8",
@@ -2373,7 +2475,8 @@
           "warExpense": 0,
           "grainCost": 400,
           "woodCost": 100
-        }
+        },
+        "renderVerticalOffset": 6
       },
       "name": {
         "runtimePointer": "0x00aa5608",
@@ -2401,7 +2504,8 @@
           "warExpense": 0,
           "grainCost": 400,
           "woodCost": 0
-        }
+        },
+        "renderVerticalOffset": 5
       },
       "name": {
         "runtimePointer": "0x00aa5628",
@@ -2429,7 +2533,8 @@
           "warExpense": 0,
           "grainCost": 400,
           "woodCost": 0
-        }
+        },
+        "renderVerticalOffset": 5
       },
       "name": {
         "runtimePointer": "0x00aa5648",
@@ -2457,7 +2562,8 @@
           "warExpense": 0,
           "grainCost": 400,
           "woodCost": 0
-        }
+        },
+        "renderVerticalOffset": 14
       },
       "name": {
         "runtimePointer": "0x00aa5668",
@@ -2485,7 +2591,8 @@
           "warExpense": 0,
           "grainCost": 400,
           "woodCost": 0
-        }
+        },
+        "renderVerticalOffset": 14
       },
       "name": {
         "runtimePointer": "0x00aa5688",
@@ -2513,7 +2620,8 @@
           "warExpense": 0,
           "grainCost": 400,
           "woodCost": 0
-        }
+        },
+        "renderVerticalOffset": 17
       },
       "name": {
         "runtimePointer": "0x00aa56c8",
@@ -2541,7 +2649,8 @@
           "warExpense": 0,
           "grainCost": 400,
           "woodCost": 0
-        }
+        },
+        "renderVerticalOffset": 10
       },
       "name": {
         "runtimePointer": "0x00aa56e8",
@@ -2569,7 +2678,8 @@
           "warExpense": 0,
           "grainCost": 400,
           "woodCost": 100
-        }
+        },
+        "renderVerticalOffset": 14
       },
       "name": {
         "runtimePointer": "0x00aa5708",
@@ -2597,7 +2707,8 @@
           "warExpense": 0,
           "grainCost": 400,
           "woodCost": 0
-        }
+        },
+        "renderVerticalOffset": 35
       },
       "name": {
         "runtimePointer": "0x00aa5728",
@@ -2625,7 +2736,8 @@
           "warExpense": 0,
           "grainCost": 400,
           "woodCost": 0
-        }
+        },
+        "renderVerticalOffset": 13
       },
       "name": {
         "runtimePointer": "0x00aa5748",
@@ -2653,7 +2765,8 @@
           "warExpense": 0,
           "grainCost": 400,
           "woodCost": 0
-        }
+        },
+        "renderVerticalOffset": 16
       },
       "name": {
         "runtimePointer": "0x00aa5768",
@@ -2681,7 +2794,8 @@
           "warExpense": 0,
           "grainCost": 400,
           "woodCost": 0
-        }
+        },
+        "renderVerticalOffset": 6
       },
       "name": {
         "runtimePointer": "0x00aa5788",
@@ -2709,7 +2823,8 @@
           "warExpense": 0,
           "grainCost": 400,
           "woodCost": 0
-        }
+        },
+        "renderVerticalOffset": 14
       },
       "name": {
         "runtimePointer": "0x00aa57a8",
@@ -2737,7 +2852,8 @@
           "warExpense": 0,
           "grainCost": 400,
           "woodCost": 100
-        }
+        },
+        "renderVerticalOffset": 13
       },
       "name": {
         "runtimePointer": "0x00aa57c8",
@@ -2765,7 +2881,8 @@
           "warExpense": 0,
           "grainCost": 400,
           "woodCost": 0
-        }
+        },
+        "renderVerticalOffset": 6
       },
       "name": {
         "runtimePointer": "0x00aa57e8",
@@ -2793,7 +2910,8 @@
           "warExpense": 0,
           "grainCost": 300,
           "woodCost": 300
-        }
+        },
+        "renderVerticalOffset": 19
       },
       "name": {
         "runtimePointer": "0x00aa5b68",
@@ -2821,7 +2939,8 @@
           "warExpense": 0,
           "grainCost": 300,
           "woodCost": 300
-        }
+        },
+        "renderVerticalOffset": 12
       },
       "name": {
         "runtimePointer": "0x00aa5ba8",
@@ -2849,7 +2968,8 @@
           "warExpense": 0,
           "grainCost": 400,
           "woodCost": 0
-        }
+        },
+        "renderVerticalOffset": 5
       },
       "name": {
         "runtimePointer": "0x00aa56a8",
@@ -2877,7 +2997,8 @@
           "warExpense": 0,
           "grainCost": 300,
           "woodCost": 300
-        }
+        },
+        "renderVerticalOffset": 2
       },
       "name": {
         "runtimePointer": "0x00aa5b88",

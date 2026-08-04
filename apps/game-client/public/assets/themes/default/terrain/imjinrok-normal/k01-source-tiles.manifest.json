@@ -13,6 +13,12 @@
     "cellCount": 3600,
     "uniqueAssetCount": 243
   },
+  "protocol": {
+    "fixture": "analysis/generated/k01-map-data-protocol.json",
+    "version": "map-data-protocol/v1",
+    "profileId": "k01-terrain-map-v1",
+    "mapSha256": "43ec3a173032f74c12d3cce1db1078b076b651ed79070a0914673a5b65da99cb"
+  },
   "productRenderingAdapter": {
     "imageGeometry": {
       "width": 64,
@@ -30,12 +36,12 @@
       }
     },
     "webPlacement": {
-      "underlayAssetKey": "k01-source:grss1:0000",
-      "choice": "all cells use the recovered top-edge source-image anchor (32,0); raw delta 0/16 becomes sourcePixelOffset.y 0/-16. Selected source frames compose in one global y-then-x raster order. A separate all-cell source-art coverage pass precedes selected frames only under the explicit source-raster-underlay product profile.",
-      "basis": "tools/imjinrok/k01-terrain-composition-coverage.test.mjs measures the complete emitted PNG mosaic with the recovered top-edge anchor, offset stream, and global raster order; it retains the coverage pass because selected-frame alpha has measured internal gaps.",
-      "evidenceStatus": "source-backed-adaptation"
+      "sourceRasterClearColor": "0x000000",
+      "choice": "native-exact mode retains selected source frames over an opaque black clear; the product adaptation may opt into one map-level canonical grss1 frame 0 coverage pass replayed for every cell before selected frames, using each selected frame's source placement offset.",
+      "basis": "The bounded compositor contract replays each selected YTL payload verbatim after clearing every output region to palette entry 0 (RGB 0,0,0); the source offset stream remains independent placement metadata.",
+      "evidenceStatus": "native source fact plus explicit product adaptation (의도적 적응)"
     },
-    "note": "The coverage pass is an explicit product adaptation, not an original draw-layer claim. The bounded draw rectangle establishes this top-edge placement adapter only. Original pixel pivot, clipping/mode behavior outside the bounded main raster, and full renderer parity remain unconfirmed."
+    "note": "The bounded draw rectangle establishes this top-edge placement adapter only. Original pixel pivot, clipping/mode behavior outside the bounded main raster, and full renderer parity remain unconfirmed."
   },
   "assets": [
     {

@@ -8,11 +8,11 @@
   "sourceFiles": [
     {
       "path": "packages/shared/src/themes.ts",
-      "sha256": "f801ff93e75d5dcf154fb96ff719e223096ce8282aca71c8256d507d69c98a82"
+      "sha256": "27d8d9583506d4cb00c10e9e649db0d61466af8cb6f34dee876524c9a68dc729"
     },
     {
       "path": "packages/shared/src/visuals.ts",
-      "sha256": "d0f6d0a097c52d657dff7d32c473b7808ea6c8aa2788f42cbb82eb192ebde3c5"
+      "sha256": "c5629392fbe672447ad21ec7fb4c208ea41acd5bba3c1218dc81846c73498d2e"
     },
     {
       "path": "packages/shared/src/content.ts",
@@ -20,7 +20,7 @@
     },
     {
       "path": "packages/shared/src/scenarios.ts",
-      "sha256": "b3ea68aafd617ccc7608b61bea410662f3022b0f217c5859fc30d874df3e3438"
+      "sha256": "63ba9d38e03a2bd04ce1d9a7dd628b3f52267de825a32afc689be4684ba78395"
     },
     {
       "path": "packages/shared/src/k01UnitAnimationCoverage.ts",
@@ -28,15 +28,15 @@
     },
     {
       "path": "tools/imjinrok/extract-k01-selection-portrait-bindings.mjs",
-      "sha256": "aa2e5bd099309e6f62c6f8cbf7fdf9f053d3a15d5bab497dc2b4d72af308e58e"
+      "sha256": "5eab912ff27227ff42cd0adde5b2391c79bffc8b99dcf78a4a2c9a852ebe9e68"
     },
     {
       "path": "apps/game-client/src/scenes/SkirmishScene.ts",
-      "sha256": "18ff1006846219d9b7b52b2587c2f45b4b91cf9a4ab704c0e3cbb2cedeb1e7f8"
+      "sha256": "f4d5debf234c549a48f548f391c4eecbedbb82f116a3e37e79171c694a0e0837"
     },
     {
       "path": "apps/game-client/src/scenes/MissionBriefingScene.ts",
-      "sha256": "94032d24fadbf8db06c2f777b88c08915ff78e5182a7b6fb11191bf04be6ee40"
+      "sha256": "d37e874af909119105dd406b933cfa2f7f62b92b69415f8417df4846ffaf09d5"
     },
     {
       "path": "apps/game-client/src/missionPortraits.ts",
@@ -108,11 +108,11 @@
     },
     {
       "path": "tools/imjinrok/extract-entity-type-catalog.mjs",
-      "sha256": "b1ea416055598b9ebfe84b2b7b1e48256b6215ba0feac9323441ee07d7e7a9af"
+      "sha256": "af5bb3445132893ce8042c8cb52a1ad70e311415ad6c9eded6b25beaf13338bb"
     },
     {
       "path": "analysis/generated/entity-type-catalog.json",
-      "sha256": "485344664b278c97a4ceed0756832abadbf2a71bd4a997b117b85c336d620708"
+      "sha256": "4cce8fd314848556433c5fd98263893919049b6be6a7a7e75988f628079c54da"
     },
     {
       "path": "tools/imjinrok/audit-sprite-mappings.mjs",
@@ -125,11 +125,11 @@
   ],
   "summary": {
     "visualCount": 26,
-    "unitVisualCount": 15,
-    "buildingVisualCount": 11,
-    "stateMappingCount": 97,
-    "clipCount": 713,
-    "frameReferenceCount": 5410,
+    "unitVisualCount": 16,
+    "buildingVisualCount": 10,
+    "stateMappingCount": 112,
+    "clipCount": 728,
+    "frameReferenceCount": 5472,
     "missingFrameReferenceCount": 0,
     "unverifiedVisualCount": 1,
     "mixedVisualCount": 23,
@@ -137,19 +137,19 @@
     "staticIdentityVisualCount": 25,
     "ambiguousIdentityVisualCount": 0,
     "unboundIdentityVisualCount": 1,
-    "projectBindingCount": 25,
+    "projectBindingCount": 24,
     "projectBindingConflictCount": 0,
     "portraitCueCount": 17,
     "unverifiedPortraitCueCount": 0,
     "k01EntityVisualCount": 22,
     "k01RuntimeStateGapCount": 0,
     "k01SelectionPortraitCount": 22,
-    "findingCount": 78
+    "findingCount": 77
   },
   "visuals": [
     {
       "visualId": "japanese-camp-advanced-tower",
-      "category": "building",
+      "category": "unit",
       "assetPath": "entities/japanese-camp-advanced-tower",
       "render": {
         "srcPxPerWu": 32,
@@ -172,7 +172,7 @@
         "status": "unverified",
         "identity": "unbound",
         "identityCandidates": [],
-        "bodyStateMapping": "unverified"
+        "animationStateMapping": "unverified"
       },
       "source": {
         "path": "original/imjinrok2/char/advtowerj.spr",
@@ -200,40 +200,6 @@
         }
       ],
       "mappings": [
-        {
-          "scope": "base",
-          "state": "construction",
-          "declaredFacings": [],
-          "clips": [
-            {
-              "facing": "default",
-              "frameFiles": [
-                "advtowerj_0000.png",
-                "advtowerj_0001.png",
-                "advtowerj_0002.png",
-                "advtowerj_0003.png",
-                "advtowerj_0004.png",
-                "advtowerj_0005.png",
-                "advtowerj_0006.png",
-                "advtowerj_0007.png",
-                "advtowerj_0008.png"
-              ],
-              "frameIndexes": [
-                0,
-                1,
-                2,
-                3,
-                4,
-                5,
-                6,
-                7,
-                8
-              ],
-              "mirrorX": false,
-              "missingFrames": []
-            }
-          ]
-        },
         {
           "scope": "base",
           "state": "idle",
@@ -269,8 +235,8 @@
         },
         "pivot": {
           "anchor": {
-            "x": 63,
-            "y": 86
+            "x": 62,
+            "y": 110
           }
         }
       },
@@ -316,6 +282,56 @@
       "mappings": [
         {
           "scope": "base",
+          "state": "construction",
+          "declaredFacings": [],
+          "clips": [
+            {
+              "facing": "default",
+              "frameFiles": [
+                "barrackj_0000.png",
+                "barrackj_0001.png",
+                "barrackj_0002.png",
+                "barrackj_0003.png",
+                "barrackj_0004.png",
+                "barrackj_0005.png",
+                "barrackj_0006.png",
+                "barrackj_0007.png"
+              ],
+              "frameIndexes": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            }
+          ]
+        },
+        {
+          "scope": "base",
+          "state": "damaged",
+          "declaredFacings": [],
+          "clips": [
+            {
+              "facing": "default",
+              "frameFiles": [
+                "barrackj_0008.png"
+              ],
+              "frameIndexes": [
+                8
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            }
+          ]
+        },
+        {
+          "scope": "base",
           "state": "idle",
           "declaredFacings": [],
           "clips": [
@@ -349,8 +365,8 @@
         },
         "pivot": {
           "anchor": {
-            "x": 57,
-            "y": 96
+            "x": 56,
+            "y": 123
           }
         }
       },
@@ -407,8 +423,7 @@
                 "firehousej_0004.png",
                 "firehousej_0005.png",
                 "firehousej_0006.png",
-                "firehousej_0007.png",
-                "firehousej_0008.png"
+                "firehousej_0007.png"
               ],
               "frameIndexes": [
                 0,
@@ -418,7 +433,24 @@
                 4,
                 5,
                 6,
-                7,
+                7
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            }
+          ]
+        },
+        {
+          "scope": "base",
+          "state": "damaged",
+          "declaredFacings": [],
+          "clips": [
+            {
+              "facing": "default",
+              "frameFiles": [
+                "firehousej_0008.png"
+              ],
+              "frameIndexes": [
                 8
               ],
               "mirrorX": false,
@@ -461,8 +493,8 @@
         },
         "pivot": {
           "anchor": {
-            "x": 55,
-            "y": 92
+            "x": 54,
+            "y": 117
           }
         }
       },
@@ -519,8 +551,7 @@
                 "millj_0004.png",
                 "millj_0005.png",
                 "millj_0006.png",
-                "millj_0007.png",
-                "millj_0008.png"
+                "millj_0007.png"
               ],
               "frameIndexes": [
                 0,
@@ -530,7 +561,24 @@
                 4,
                 5,
                 6,
-                7,
+                7
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            }
+          ]
+        },
+        {
+          "scope": "base",
+          "state": "damaged",
+          "declaredFacings": [],
+          "clips": [
+            {
+              "facing": "default",
+              "frameFiles": [
+                "millj_0008.png"
+              ],
+              "frameIndexes": [
                 8
               ],
               "mirrorX": false,
@@ -555,6 +603,78 @@
               "missingFrames": []
             }
           ]
+        },
+        {
+          "scope": "layer:completed-overlay",
+          "state": "damaged",
+          "declaredFacings": [],
+          "clips": [
+            {
+              "facing": "default",
+              "frameFiles": [
+                "millj_0009.png",
+                "millj_0010.png",
+                "millj_0011.png",
+                "millj_0012.png",
+                "millj_0013.png",
+                "millj_0014.png",
+                "millj_0015.png",
+                "millj_0016.png",
+                "millj_0017.png",
+                "millj_0018.png"
+              ],
+              "frameIndexes": [
+                9,
+                10,
+                11,
+                12,
+                13,
+                14,
+                15,
+                16,
+                17,
+                18
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            }
+          ]
+        },
+        {
+          "scope": "layer:completed-overlay",
+          "state": "idle",
+          "declaredFacings": [],
+          "clips": [
+            {
+              "facing": "default",
+              "frameFiles": [
+                "millj_0009.png",
+                "millj_0010.png",
+                "millj_0011.png",
+                "millj_0012.png",
+                "millj_0013.png",
+                "millj_0014.png",
+                "millj_0015.png",
+                "millj_0016.png",
+                "millj_0017.png",
+                "millj_0018.png"
+              ],
+              "frameIndexes": [
+                9,
+                10,
+                11,
+                12,
+                13,
+                14,
+                15,
+                16,
+                17,
+                18
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            }
+          ]
         }
       ]
     },
@@ -573,8 +693,8 @@
         },
         "pivot": {
           "anchor": {
-            "x": 36,
-            "y": 74
+            "x": 35,
+            "y": 98
           }
         }
       },
@@ -620,6 +740,56 @@
       "mappings": [
         {
           "scope": "base",
+          "state": "construction",
+          "declaredFacings": [],
+          "clips": [
+            {
+              "facing": "default",
+              "frameFiles": [
+                "towerj_0000.png",
+                "towerj_0001.png",
+                "towerj_0002.png",
+                "towerj_0003.png",
+                "towerj_0004.png",
+                "towerj_0005.png",
+                "towerj_0006.png",
+                "towerj_0007.png"
+              ],
+              "frameIndexes": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            }
+          ]
+        },
+        {
+          "scope": "base",
+          "state": "damaged",
+          "declaredFacings": [],
+          "clips": [
+            {
+              "facing": "default",
+              "frameFiles": [
+                "towerj_0008.png"
+              ],
+              "frameIndexes": [
+                8
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            }
+          ]
+        },
+        {
+          "scope": "base",
           "state": "idle",
           "declaredFacings": [],
           "clips": [
@@ -654,7 +824,7 @@
         "pivot": {
           "anchor": {
             "x": 33,
-            "y": 50
+            "y": 41
           }
         }
       },
@@ -3210,7 +3380,7 @@
         "pivot": {
           "anchor": {
             "x": 30,
-            "y": 52
+            "y": 50
           }
         }
       },
@@ -4530,7 +4700,7 @@
         "pivot": {
           "anchor": {
             "x": 60,
-            "y": 104
+            "y": 133
           }
         }
       },
@@ -4576,6 +4746,56 @@
       "mappings": [
         {
           "scope": "base",
+          "state": "construction",
+          "declaredFacings": [],
+          "clips": [
+            {
+              "facing": "default",
+              "frameFiles": [
+                "jhq_0000.png",
+                "jhq_0001.png",
+                "jhq_0002.png",
+                "jhq_0003.png",
+                "jhq_0004.png",
+                "jhq_0005.png",
+                "jhq_0006.png",
+                "jhq_0007.png"
+              ],
+              "frameIndexes": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            }
+          ]
+        },
+        {
+          "scope": "base",
+          "state": "damaged",
+          "declaredFacings": [],
+          "clips": [
+            {
+              "facing": "default",
+              "frameFiles": [
+                "jhq_0008.png"
+              ],
+              "frameIndexes": [
+                8
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            }
+          ]
+        },
+        {
+          "scope": "base",
           "state": "idle",
           "declaredFacings": [],
           "clips": [
@@ -4610,7 +4830,7 @@
         "pivot": {
           "anchor": {
             "x": 70,
-            "y": 100
+            "y": 91
           }
         }
       },
@@ -5930,7 +6150,7 @@
         "pivot": {
           "anchor": {
             "x": 40,
-            "y": 72
+            "y": 64
           }
         }
       },
@@ -7238,7 +7458,7 @@
         "pivot": {
           "anchor": {
             "x": 25,
-            "y": 44
+            "y": 45
           }
         }
       },
@@ -9866,7 +10086,7 @@
         "pivot": {
           "anchor": {
             "x": 35,
-            "y": 52
+            "y": 48
           }
         }
       },
@@ -10658,13 +10878,13 @@
       },
       "defaults": {
         "size": {
-          "w": 60,
-          "h": 60
+          "w": 56,
+          "h": 46
         },
         "pivot": {
           "anchor": {
-            "x": 30,
-            "y": 52
+            "x": 28,
+            "y": 41
           }
         }
       },
@@ -11960,7 +12180,7 @@
         "pivot": {
           "anchor": {
             "x": 64,
-            "y": 91
+            "y": 117
           }
         }
       },
@@ -12036,6 +12256,24 @@
         },
         {
           "scope": "base",
+          "state": "damaged",
+          "declaredFacings": [],
+          "clips": [
+            {
+              "facing": "default",
+              "frameFiles": [
+                "barrackk_0008.png"
+              ],
+              "frameIndexes": [
+                8
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            }
+          ]
+        },
+        {
+          "scope": "base",
           "state": "idle",
           "declaredFacings": [],
           "clips": [
@@ -12046,6 +12284,66 @@
               ],
               "frameIndexes": [
                 7
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            }
+          ]
+        },
+        {
+          "scope": "layer:completed-overlay",
+          "state": "damaged",
+          "declaredFacings": [],
+          "clips": [
+            {
+              "facing": "default",
+              "frameFiles": [
+                "barrackk_0009.png",
+                "barrackk_0010.png",
+                "barrackk_0011.png",
+                "barrackk_0012.png",
+                "barrackk_0013.png",
+                "barrackk_0014.png",
+                "barrackk_0015.png"
+              ],
+              "frameIndexes": [
+                9,
+                10,
+                11,
+                12,
+                13,
+                14,
+                15
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            }
+          ]
+        },
+        {
+          "scope": "layer:completed-overlay",
+          "state": "idle",
+          "declaredFacings": [],
+          "clips": [
+            {
+              "facing": "default",
+              "frameFiles": [
+                "barrackk_0009.png",
+                "barrackk_0010.png",
+                "barrackk_0011.png",
+                "barrackk_0012.png",
+                "barrackk_0013.png",
+                "barrackk_0014.png",
+                "barrackk_0015.png"
+              ],
+              "frameIndexes": [
+                9,
+                10,
+                11,
+                12,
+                13,
+                14,
+                15
               ],
               "mirrorX": false,
               "missingFrames": []
@@ -12070,7 +12368,7 @@
         "pivot": {
           "anchor": {
             "x": 42,
-            "y": 66
+            "y": 71
           }
         }
       },
@@ -12968,7 +13266,7 @@
         "pivot": {
           "anchor": {
             "x": 64,
-            "y": 98
+            "y": 85
           }
         }
       },
@@ -14287,8 +14585,8 @@
         },
         "pivot": {
           "anchor": {
-            "x": 66,
-            "y": 101
+            "x": 65,
+            "y": 131
           }
         }
       },
@@ -14429,7 +14727,7 @@
         "pivot": {
           "anchor": {
             "x": 57,
-            "y": 84
+            "y": 107
           }
         }
       },
@@ -14486,8 +14784,7 @@
                 "millk_0004.png",
                 "millk_0005.png",
                 "millk_0006.png",
-                "millk_0007.png",
-                "millk_0008.png"
+                "millk_0007.png"
               ],
               "frameIndexes": [
                 0,
@@ -14497,7 +14794,24 @@
                 4,
                 5,
                 6,
-                7,
+                7
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            }
+          ]
+        },
+        {
+          "scope": "base",
+          "state": "damaged",
+          "declaredFacings": [],
+          "clips": [
+            {
+              "facing": "default",
+              "frameFiles": [
+                "millk_0008.png"
+              ],
+              "frameIndexes": [
                 8
               ],
               "mirrorX": false,
@@ -14541,7 +14855,7 @@
         "pivot": {
           "anchor": {
             "x": 32,
-            "y": 44
+            "y": 43
           }
         }
       },
@@ -15873,7 +16187,7 @@
         "pivot": {
           "anchor": {
             "x": 40,
-            "y": 58
+            "y": 61
           }
         }
       },
@@ -16602,7 +16916,7 @@
         "pivot": {
           "anchor": {
             "x": 44,
-            "y": 66
+            "y": 71
           }
         }
       },
@@ -17946,7 +18260,7 @@
         "pivot": {
           "anchor": {
             "x": 57,
-            "y": 84
+            "y": 108
           }
         }
       },
@@ -18087,7 +18401,7 @@
         "pivot": {
           "anchor": {
             "x": 30,
-            "y": 52
+            "y": 46
           }
         }
       },
@@ -19418,8 +19732,8 @@
         },
         "pivot": {
           "anchor": {
-            "x": 69,
-            "y": 92
+            "x": 68,
+            "y": 118
           }
         }
       },
@@ -19465,6 +19779,56 @@
       "mappings": [
         {
           "scope": "base",
+          "state": "construction",
+          "declaredFacings": [],
+          "clips": [
+            {
+              "facing": "default",
+              "frameFiles": [
+                "advbarrackk_0000.png",
+                "advbarrackk_0001.png",
+                "advbarrackk_0002.png",
+                "advbarrackk_0003.png",
+                "advbarrackk_0004.png",
+                "advbarrackk_0005.png",
+                "advbarrackk_0006.png",
+                "advbarrackk_0007.png"
+              ],
+              "frameIndexes": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            }
+          ]
+        },
+        {
+          "scope": "base",
+          "state": "damaged",
+          "declaredFacings": [],
+          "clips": [
+            {
+              "facing": "default",
+              "frameFiles": [
+                "advbarrackk_0008.png"
+              ],
+              "frameIndexes": [
+                8
+              ],
+              "mirrorX": false,
+              "missingFrames": []
+            }
+          ]
+        },
+        {
+          "scope": "base",
           "state": "idle",
           "declaredFacings": [],
           "clips": [
@@ -19499,7 +19863,7 @@
         "pivot": {
           "anchor": {
             "x": 30,
-            "y": 52
+            "y": 45
           }
         }
       },
@@ -22676,7 +23040,7 @@
     "evidenceStatus": "static-proven-type-identities",
     "source": {
       "path": "analysis/generated/entity-type-catalog.json",
-      "sha256": "485344664b278c97a4ceed0756832abadbf2a71bd4a997b117b85c336d620708"
+      "sha256": "4cce8fd314848556433c5fd98263893919049b6be6a7a7e75988f628079c54da"
     },
     "summary": {
       "typeCount": 95,
@@ -22890,44 +23254,6 @@
         "originalGameplayName": "조선 방앗간",
         "internalClass": 48,
         "nameMatchesOriginal": true
-      },
-      {
-        "entityId": "japanese-camp-advanced-tower",
-        "projectDisplayName": "왜군 강화 망루",
-        "projectGameplayAdapter": {
-          "category": "building",
-          "actionIds": [
-            "stop",
-            "demolish"
-          ],
-          "footprint": {
-            "width": 2,
-            "height": 2,
-            "blocksMovement": true
-          },
-          "baseAttributes": {
-            "health": 920,
-            "mana": 0,
-            "movementSpeed": 0
-          },
-          "combat": {
-            "damage": 10,
-            "damageType": "fire",
-            "range": 8,
-            "cooldownTicks": 24,
-            "aggroRange": 8
-          },
-          "renderRadius": 8,
-          "selectionRadius": 8,
-          "hitRadius": 18,
-          "sightRadius": 9,
-          "minimapShape": "square",
-          "minimapRadius": 3.2,
-          "selectedMinimapRadius": 4.2
-        },
-        "visualId": "japanese-camp-advanced-tower",
-        "visualSourcePath": "original/imjinrok2/char/advtowerj.spr",
-        "identityStatus": "unbound"
       },
       {
         "entityId": "japanese-camp-barracks",
@@ -25771,10 +26097,10 @@
     {
       "severity": "blocking",
       "code": "building-health-frame-unverified",
-      "visualId": "japanese-camp-advanced-tower",
+      "visualId": "japanese-camp-barracks",
       "detail": "Idle/full-health and construction/damage semantics are inferred from frame positions.",
       "idleFrameIndexes": [
-        8
+        7
       ],
       "constructionFrameIndexes": [
         0,
@@ -25784,19 +26110,8 @@
         4,
         5,
         6,
-        7,
-        8
-      ]
-    },
-    {
-      "severity": "blocking",
-      "code": "building-health-frame-unverified",
-      "visualId": "japanese-camp-barracks",
-      "detail": "Idle/full-health and construction/damage semantics are inferred from frame positions.",
-      "idleFrameIndexes": [
         7
-      ],
-      "constructionFrameIndexes": []
+      ]
     },
     {
       "severity": "blocking",
@@ -25814,14 +26129,42 @@
         4,
         5,
         6,
-        7,
-        8
+        7
       ]
     },
     {
       "severity": "blocking",
       "code": "building-health-frame-unverified",
       "visualId": "japanese-camp-house",
+      "detail": "Idle/full-health and construction/damage semantics are inferred from frame positions.",
+      "idleFrameIndexes": [
+        7,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18
+      ],
+      "constructionFrameIndexes": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ]
+    },
+    {
+      "severity": "blocking",
+      "code": "building-health-frame-unverified",
+      "visualId": "japanese-camp-tower",
       "detail": "Idle/full-health and construction/damage semantics are inferred from frame positions.",
       "idleFrameIndexes": [
         7
@@ -25834,19 +26177,8 @@
         4,
         5,
         6,
-        7,
-        8
-      ]
-    },
-    {
-      "severity": "blocking",
-      "code": "building-health-frame-unverified",
-      "visualId": "japanese-camp-tower",
-      "detail": "Idle/full-health and construction/damage semantics are inferred from frame positions.",
-      "idleFrameIndexes": [
         7
-      ],
-      "constructionFrameIndexes": []
+      ]
     },
     {
       "severity": "blocking",
@@ -25856,7 +26188,16 @@
       "idleFrameIndexes": [
         7
       ],
-      "constructionFrameIndexes": []
+      "constructionFrameIndexes": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ]
     },
     {
       "severity": "blocking",
@@ -25864,7 +26205,14 @@
       "visualId": "korean-barracks",
       "detail": "Idle/full-health and construction/damage semantics are inferred from frame positions.",
       "idleFrameIndexes": [
-        7
+        7,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15
       ],
       "constructionFrameIndexes": [
         0,
@@ -25893,8 +26241,7 @@
         4,
         5,
         6,
-        7,
-        8
+        7
       ]
     },
     {
@@ -25905,7 +26252,16 @@
       "idleFrameIndexes": [
         7
       ],
-      "constructionFrameIndexes": []
+      "constructionFrameIndexes": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ]
     },
     {
       "severity": "blocking",

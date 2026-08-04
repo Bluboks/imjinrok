@@ -83,5 +83,7 @@ test("uses a strict below-50-percent boundary for completed building damage", ()
   assert.equal(isBelowOriginalBuildingDamageThreshold({ current: 1_500, max: 1_500 }), false);
   assert.equal(isBelowOriginalBuildingDamageThreshold({ current: 750, max: 1_500 }), false);
   assert.equal(isBelowOriginalBuildingDamageThreshold({ current: 749, max: 1_500 }), true);
+  assert.equal(isBelowOriginalBuildingDamageThreshold({ current: 50, max: 101 }), false);
+  assert.equal(isBelowOriginalBuildingDamageThreshold({ current: 49, max: 101 }), true);
   assert.equal(isBelowOriginalBuildingDamageThreshold({ current: 0, max: 0 }), false);
 });

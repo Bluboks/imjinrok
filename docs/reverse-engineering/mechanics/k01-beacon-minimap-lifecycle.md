@@ -51,7 +51,7 @@ actual compact-map primary gate producer/alias writer와 completion/destruction 
 | `original/imjinrok2/imjinrok2.exe` | 843,833 | `25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e` |
 | `analysis/generated/imjinrok2/functions.json` | 1,468,333 | `7e071fdfe425d22447780c265fe1d3fd271a1bedd1773682bebcb8ddc6d2e16e` |
 | `analysis/generated/imjinrok2/references.json` | 17,206,569 | `f64cfa6f04bc39573552f42a8b7bdd5b08fea1ba774d05865162d1d80daaf9a5` |
-| `analysis/generated/imjinrok2/seeds.json` | 9,112,063 | `8e7c8821e9c84c5d0877bb977b119b3b878271502b36bf75e7426b570507bfb7` |
+| `analysis/generated/imjinrok2/seeds.json` | 9,436,451 | `386b0f4e86c3376f34fe2b50fedb7e45b762c30784d4ebcc0387aa6f431811b2` |
 
 모든 generated artifact의 `sourceSha256`도 EXE hash와 같아야 한다. 전용 추출기
 [`extract-k01-beacon-minimap-lifecycle.mjs`](../../../tools/imjinrok/extract-k01-beacon-minimap-lifecycle.mjs),

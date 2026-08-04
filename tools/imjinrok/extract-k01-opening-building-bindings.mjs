@@ -13,7 +13,7 @@ import { extractOriginalSpriteTable } from "./extract-sprite-table.mjs";
 
 const repositoryRoot = resolve(fileURLToPath(new URL("../..", import.meta.url)));
 
-export const EXPECTED_ENTITY_CATALOG_SHA256 = "485344664b278c97a4ceed0756832abadbf2a71bd4a997b117b85c336d620708";
+export const EXPECTED_ENTITY_CATALOG_SHA256 = "4cce8fd314848556433c5fd98263893919049b6be6a7a7e75988f628079c54da";
 export const EXPECTED_K01_MAP_SHA256 = "43ec3a173032f74c12d3cce1db1078b076b651ed79070a0914673a5b65da99cb";
 
 const BUILDINGS = [

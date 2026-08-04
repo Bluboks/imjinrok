@@ -35,8 +35,8 @@ test("extracts the exact standard K01 mission-entry timer reset chain", () => {
   assert.equal(report.analysisStatus, "static-proven");
   assert.equal(report.reproductionStatus, "reproduction-complete");
   assert.equal(report.implementationStatus, "none");
-  assert.equal(report.canonicalAnalysis.seedCount, 199);
-  assert.equal(report.canonicalAnalysis.seedFunctionCount, 191);
+  assert.equal(report.canonicalAnalysis.seedCount, 202);
+  assert.equal(report.canonicalAnalysis.seedFunctionCount, 194);
   assert.equal(report.analyzedFunctions.length, 5);
   assert.equal(report.callEdges.length, 6);
   assert.equal(report.codeAnchors.length, 7);

@@ -1,0 +1,149 @@
+{
+  "schemaVersion": 1,
+  "sourceExecutableSha256": "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e",
+  "completeClasses": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32,
+    33,
+    34,
+    35,
+    36,
+    37,
+    38,
+    39,
+    40,
+    41,
+    42,
+    43,
+    44,
+    45,
+    46,
+    47,
+    48,
+    49,
+    50,
+    51,
+    52,
+    53,
+    54,
+    55,
+    56,
+    57,
+    58,
+    59,
+    60,
+    61,
+    62,
+    63,
+    64,
+    65,
+    66,
+    67,
+    68,
+    69,
+    70,
+    71,
+    72,
+    73,
+    74,
+    75,
+    76,
+    77,
+    78,
+    79,
+    80,
+    81,
+    82,
+    83,
+    84,
+    85,
+    86,
+    87,
+    88,
+    89,
+    90,
+    91,
+    92,
+    93,
+    94,
+    95
+  ],
+  "pivotVectors": [
+    {
+      "internalClass": 76,
+      "dimensions": [
+        128,
+        108
+      ],
+      "verticalOffset": 23,
+      "flags": 8914949,
+      "pivotMode": "type-offset",
+      "pivot": {
+        "x": 64,
+        "y": 85
+      }
+    },
+    {
+      "internalClass": 49,
+      "dimensions": [
+        131,
+        131
+      ],
+      "verticalOffset": 0,
+      "flags": 7405698,
+      "pivotMode": "type-offset",
+      "pivot": {
+        "x": 65,
+        "y": 131
+      }
+    }
+  ],
+  "buildingOverlayVectors": [
+    {
+      "internalClass": 50,
+      "frameRange": [
+        9,
+        15
+      ],
+      "sourceGlobalTickDivisor": 4
+    },
+    {
+      "internalClass": 57,
+      "frameRange": [
+        9,
+        18
+      ],
+      "sourceGlobalTickDivisor": 4
+    }
+  ]
+}

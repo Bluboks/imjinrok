@@ -45,7 +45,7 @@ binding을 쓰며 generic/mod profile은 glyph fallback이다. UI는 typed reque
 - EXE SHA-256:
   `25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e`
 - `seeds.json` SHA-256:
-  `8e7c8821e9c84c5d0877bb977b119b3b878271502b36bf75e7426b570507bfb7`
+  `386b0f4e86c3376f34fe2b50fedb7e45b762c30784d4ebcc0387aa6f431811b2`
 - `functions.json` SHA-256:
   `7e071fdfe425d22447780c265fe1d3fd271a1bedd1773682bebcb8ddc6d2e16e`
 - `references.json` SHA-256:

@@ -37,6 +37,20 @@ test("generic action grids retain glyph fallback without an opted-in source prof
   assert.deepEqual(resolveActionIconVisual(move!), { kind: "glyph", glyph: "M" });
 });
 
+test("enemy-only selections expose inspection without local command actions", () => {
+  const slots = getActionSlots([{ id: "enemy", kind: "barracks", commandable: false }], null);
+  assert.equal(slots.filter(({ actionId }) => actionId !== undefined).length, 0);
+});
+
+test("mixed selections admit actions only from local commandable entities", () => {
+  const slots = getActionSlots([
+    { id: "enemy", kind: "barracks", commandable: false },
+    { id: "worker", kind: "villager", commandable: true },
+  ], null);
+  assert.equal(slots.some(({ actionId }) => actionId === "move"), true);
+  assert.equal(slots.some(({ actionId }) => actionId === "demolish"), false);
+});
+
 test("completed buildings expose demolition while busy and demolishing buildings fail closed", () => {
   const completed = getActionSlots([{ id: "barracks", kind: "barracks" }], null)
     .find(({ actionId }) => actionId === "demolish");

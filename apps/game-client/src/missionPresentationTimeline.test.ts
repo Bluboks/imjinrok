@@ -1,10 +1,12 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { imjinrokK01Scenario } from "@shared";
+import { imjinrokK01Scenario, imjinrokK02Scenario } from "@shared";
 import {
   assertPresentationTimingPolicy,
   beginPresentationPause,
+  createMissionBriefingLineTransitionState,
   createMissionBriefingReplayState,
+  getMissionBriefingParticipantLineIndex,
   getMissionBriefingClickAction,
   getMissionBriefingIntroStage,
   getMissionBriefingPortraitScale,
@@ -12,8 +14,12 @@ import {
   getMissionBriefingTitleSequenceDurationMs,
   getMissionDialogueClickAction,
   getMissionDialoguePointerAdvance,
+  hasMissionBriefingLineRevealPending,
+  isMissionBriefingLineRevealPending,
   isPresentationExternallyPaused,
+  queueMissionBriefingLineTransition,
   requireMissionBriefingPresentationTimingPolicy,
+  revealMissionBriefingLineTransition,
   shouldResumePresentationPlayback,
 } from "./missionPresentationTimeline.js";
 
@@ -55,11 +61,40 @@ test("briefing replay restarts the source timeline and its dismissed dialogue st
   assert.equal(getMissionBriefingTitleFrameIndex(k01Policy, replay.introStartedAt, replay.introStartedAt, replay.introCompleted), 0);
 });
 
-test("portrait introduction uses calibrated policy duration without an FPS assumption", () => {
+test("portrait introduction uses the shared 24 Hz, twenty-step calibration", () => {
   assert.equal(getMissionBriefingPortraitScale(k01Policy, 1_000, 1_000), 0);
-  assert.equal(getMissionBriefingPortraitScale(k01Policy, 1_000, 1_119), 0);
-  assert.equal(getMissionBriefingPortraitScale(k01Policy, 1_000, 1_120), 0.05);
-  assert.equal(getMissionBriefingPortraitScale(k01Policy, 1_000, 3_400), 1);
+  assert.equal(getMissionBriefingPortraitScale(k01Policy, 1_000, 1_000 + (1_000 / 24) - 1), 0);
+  assert.equal(getMissionBriefingPortraitScale(k01Policy, 1_000, 1_000 + (1_000 / 24)), 0.05);
+  assert.equal(getMissionBriefingPortraitScale(k01Policy, 1_000, 1_000 + k01Policy.portraitIntroductionDurationMs + 1), 1);
+  assert.equal(k01Policy.portraitIntroductionDurationMs, 20 * (1_000 / 24));
+  assert.equal(imjinrokK02Scenario.briefing?.timing?.presentationPolicy?.portraitIntroductionDurationMs, k01Policy.portraitIntroductionDurationMs);
+});
+
+test("a delayed line keeps the current line and its participants visible until reveal", () => {
+  const initial = createMissionBriefingLineTransitionState(0);
+  const firstLine = queueMissionBriefingLineTransition(initial, 0, 1_000, 160);
+  assert.equal(firstLine.lineIndex, 0);
+  assert.equal(firstLine.lineVisible, false);
+  assert.equal(firstLine.pendingLineIndex, 0);
+  assert.equal(getMissionBriefingParticipantLineIndex(firstLine, false), null);
+
+  const active = queueMissionBriefingLineTransition(initial, 0, 1_000, 0);
+  const delayed = queueMissionBriefingLineTransition(active, 1, 2_000, 160);
+  assert.equal(delayed.lineIndex, 0);
+  assert.equal(delayed.lineVisible, true);
+  assert.equal(delayed.pendingLineIndex, 1);
+  assert.equal(delayed.lineRevealAt, 2_160);
+  assert.equal(hasMissionBriefingLineRevealPending(delayed), true);
+  assert.equal(isMissionBriefingLineRevealPending(delayed, 2_159), true);
+  assert.equal(isMissionBriefingLineRevealPending(delayed, 2_160), false);
+  assert.equal(getMissionBriefingParticipantLineIndex(delayed, false), 0);
+
+  const revealed = revealMissionBriefingLineTransition(delayed);
+  assert.equal(revealed.lineIndex, 1);
+  assert.equal(revealed.lineVisible, true);
+  assert.equal(revealed.pendingLineIndex, null);
+  assert.equal(hasMissionBriefingLineRevealPending(revealed), false);
+  assert.equal(getMissionBriefingParticipantLineIndex(revealed, false), 1);
 });
 
 test("presentation pauses distinguish self-owned playback pause from external pause", () => {

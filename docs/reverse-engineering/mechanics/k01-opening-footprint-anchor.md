@@ -40,8 +40,8 @@ skip하고, 유효 cell에는 **mask WORD OR 후 owner-grid WORD store** 순서�
 | 입력 | SHA-256 | 확인 범위 |
 | --- | --- | --- |
 | `original/imjinrok2/imjinrok2.exe` | `25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e` | type writer, creator, map loader/wrapper, action dispatcher, occupancy writer |
-| `analysis/generated/imjinrok2/seeds.json` | `8e7c8821e9c84c5d0877bb977b119b3b878271502b36bf75e7426b570507bfb7` | type initializer arguments 8/9와 call instruction text |
-| `analysis/generated/entity-type-catalog.json` | `485344664b278c97a4ceed0756832abadbf2a71bd4a997b117b85c336d620708` | class identity/name만 사용; sprite pixel dimensions는 footprint로 해석하지 않음 |
+| `analysis/generated/imjinrok2/seeds.json` | `386b0f4e86c3376f34fe2b50fedb7e45b762c30784d4ebcc0387aa6f431811b2` | type initializer arguments 8/9와 call instruction text |
+| `analysis/generated/entity-type-catalog.json` | `4cce8fd314848556433c5fd98263893919049b6be6a7a7e75988f628079c54da` | class identity/name만 사용; sprite pixel dimensions는 footprint로 해석하지 않음 |
 | `original/imjinrok2/stagemap/k01.map` | `43ec3a173032f74c12d3cce1db1078b076b651ed79070a0914673a5b65da99cb` | 60×60 map, source type/x/y/owner arrays와 15개 opening building records |
 
 함수 본체 계약은 다음과 같다. instruction count와 instruction SHA-256도 extractor가 검사한다.

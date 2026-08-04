@@ -8,7 +8,7 @@
 | --- | --- | --- |
 | 분석 | `정적 확정` | `FUN_00462b80` 8-byte-stride WORD initializer, `FUN_00464cc0`/`FUN_00464ea0` table reader의 두 branch, signed-word x/y guard와 `(x-y)<<5`/`(x+y)<<4`, 두 caller의 low-nibble branch, direct helper의 전체 return 분기, K01 `60×60` cell의 selector/lookup·object/frame fields |
 | 재현 | `재현 완료` | 3,600-cell x-major stream/digest·분포, 15-entry table-init byte replay와 reader vectors, base projection, low-nibble two/other, 네 map corner, helper의 synthetic positive/negative branch와 malformed/tampered input 거부 |
-| 구현 | `source-backed-adaptation` | hash-bound K01의 raw second-argument `0/16` delta stream을 `TileCell.elevation`의 base/one-raised discrete product level로 적응한다. bounded source raster는 `(32,0)` top-edge anchor와 `16→sourcePixelOffset.y=-16`을 소비하고 selected frame을 global y→x order로 replay한다. `grss1_0000` coverage pass는 measured alpha gap을 메우는 명시적 제품 적응이며 원본 layer 주장이 아니다. broader pivot/clip/palette와 원본 height 의미는 미확정이다. |
+| 구현 | `source-backed-adaptation` + `의도적 적응` | hash-bound K01의 raw second-argument `0/16` delta stream을 `TileCell.elevation`과 분리해 source placement offset `0/-16`으로만 소비한다. K01 authored/product physical surface는 의도적으로 neutral하여 3,600개 모두 `TileCell.elevation=0`이며, 이는 원본 physical elevation을 복원한 주장이 아니다. bounded source raster는 `(32,0)` top-edge anchor와 opaque black clear 뒤 selected frame global y→x replay를 사용한다. 별도의 map-level `sourceRasterCoverage` policy가 canonical `grss1_0000`을 먼저 replay하는 것은 의도적 적응이다. |
 
 이것은 기존 [K01 source tile object·frame selector](k01-source-tile-selector.md)의 **다음 placement 경계**다.
 기존 문서의 object/frame source identity와 3,600 pair frame-bound proof를 그대로 hash-bound로 재검증하지만,
@@ -151,8 +151,10 @@ drawTop  = screenY - verticalShift
 ```
 
 K01에서는 `lowNibble==2`인 2,865 cell의 `verticalShift`가 0이고 나머지 735 cell은 16이다. 이 범위는
-selected frame의 full-raster order와 bounded draw rectangle만 확정한다. frame pivot의 일반 의미, callee의
-clip/mode 분기, palette와 source alpha gap의 원인·원본 base fill은 아직 미확정이다.
+selected frame의 full-raster order와 bounded draw rectangle만 확정한다. default gameplay compositor의
+target `640×384`, clip `0..639/0..383`, mode-0 direct YTL blit, index-0 base clear와 `imjin2`/`night1`~`night4`
+palette entry-0 RGB(0,0,0)은 gameplay compositor fixture에서 정적 확정됐다. auxiliary/nondefault callee path, general frame
+pivot/axis, payload alpha semantics와 full renderer parity는 아직 미확정이다.
 
 ## K01 complete result
 
@@ -172,8 +174,9 @@ cell에는 나타나지 않는다**. K01 결과를 elevation, height, terrain �
 이 문서는 중립어 **placement-level selector**를 사용한다.
 
 제품 K01 adapter가 소비하는 별도 raw relative stream은 `FUN_00469510`의 `vertical subtract` 그대로다. SHA-256
-`76cc670258325ebc671d19b6f864768bf376328a7573ca7b29887c780e50b864`에서 `0:2865`, `16:735`이며, 이는 full
-original elevation parity가 아니라 map-authorable discrete surface level로의 **source-backed adaptation**이다.
+`76cc670258325ebc671d19b6f864768bf376328a7573ca7b29887c780e50b864`에서 `0:2865`, `16:735`이며, 이는
+physical surface height나 full-original elevation parity가 아니라 source image placement offset으로만 보존하는
+**source-backed adaptation**이다.
 
 fixture의 map-corner vector도 source value를 고정한다. `(0,0)`은 low nibble 1/object 0/frame 39/shift 16,
 `(0,1)`은 low nibble 2/object 0/frame 4/shift 0, `(59,59)`은 low nibble 2/object 31/frame 18/shift 0이다.
@@ -181,32 +184,23 @@ fixture의 map-corner vector도 source value를 고정한다. `(0,0)`은 low nib
 ## 제품 adapter 경계
 
 `export-k01-source-tile-visuals.mjs`는 canonical placement-evidence fixture를 다시 검증한 뒤 raw second-argument
-delta를 `0` 또는 `16`의 stream으로 보존한다. `0`은 2,865, `16`은 735개다. K01 adapter는 `16→TileCell.elevation=1`,
-`0→0`으로 명시적으로 적응하고 selected flat artwork에 `flatArtworkEmbedsRelief=true`를 남겨 generic overlay가 source
-relief를 이중 합성하지 않게 한다.
+delta를 `0` 또는 `16`의 stream으로 보존한다. `0`은 2,865, `16`은 735개다. 이 값은 `TileCell.elevation`이나
+bilinear ground contact로 변환하지 않는다. K01 scaffold의 authored/product physical surface는 의도적으로
+neutral하여 3,600개 모두 `TileCell.elevation=0`이다. 이는 원본 physical elevation을 복원했다는 뜻이 아니며,
+selected flat artwork의 visual metadata와 product physical surface는 별도 채널이다.
 
 `FUN_00466f20` 범위의 raster arithmetic에 맞춘 product source-image adapter는 `64×48`, anchor `(32,0)`을 쓴다.
-cell의 raw shift가 16이면 selected frame과 coverage frame 모두 `sourcePixelOffset.y=-16`을 받으며, shift 0은 offset 0이다.
-source raster plan은 tile chunk order를 사용하지 않고 output world rectangle을 non-overlapping pixel regions으로만 나눈 뒤,
-각 region에서 full selected stream을 global **y→x** order로 replay한다. 이 bounded order는 original caller에서 정적 확정됐지만,
-product region partition 자체는 scalable web adaptation이다.
+cell의 raw shift가 16이면 selected frame에 `sourcePixelOffset.y=-16`을, shift 0이면 offset 0을 부여한다. source raster
+plan은 tile chunk order를 사용하지 않고 output world rectangle을 non-overlapping pixel regions으로만 나눈 뒤, 각 region을
+먼저 opaque `sourceRasterClearColor=0x000000`으로 채우고 full selected stream을 global **y→x** order로 replay한다. 이
+bounded order는 original caller에서 정적 확정됐지만 product region partition 자체는 scalable web adaptation이다.
 
-`k01-terrain-composition-coverage.test.mjs`와 coordinate-complete diagnostic은 corrected 3,600-cell terrain domain에서
-selected frame alpha만으로 `74,771` uncovered pixels가 남음을 고정한다. 따라서 K01의 explicit
-`source-raster-underlay` profile은 모든 corrected coverage frame을 먼저 합성하고, 이후 selected stream을 y→x로 replay한다.
-같은 measured domain에서 underlay pass까지 포함하면 uncovered pixel은 `0`이다. `grss1_0000` 선택과 two-pass ordering은
-`source-backed-adaptation`이며 original renderer가 같은 base layer를 그렸다는 주장이 아니다.
-
-이 재현은 descriptor별 anchor 또는 alpha 총량만 보지 않고 최종 두-pass output mask를 직접 만든다. raw placement delta가
-다른 인접 edge는 `798`개이며, 그 양쪽 corrected diamond domain은 `965,632` pixels다. selected frame offset과 같은
-offset으로 underlay를 먼저 그리고 selected frame을 global y→x로 다시 그리면 이 boundary에서 uncovered pixel은 `0`이고,
-topmost-draw mask SHA-256은 `df44797cc4fa1786240f33fbb7ec79534033baa53bd1789ede4e8b751cb259cb`이다. 반대로 underlay를
-raw anchor에 남기는 이전 product composition은 전체 domain `5,139`, mixed boundary `4,430` uncovered pixels를 남긴다.
-이것은 web two-pass adapter의 seam regression이며 original renderer의 underlay 또는 terrain-height 의미를 새로 주장하지 않는다.
-
-explicit fog base도 `source-raster-underlay`일 때 selected frame의 corrected offset을 coverage frame에 복사한다. fog tint,
-alpha, visibility semantics와 source fog composite의 pivot은 원작에서 확정된 범위가 아니다. generic/mod map은 명시적
-profile이 없으면 기존 tile-chunk path를 유지한다.
+K01 제품 모드는 map-level `sourceRasterCoverage`에서 canonical `k01-source:grss1:0000`을 선언하고 모든 셀에
+selected frame의 source offset을 적용해 coverage pass를 먼저 replay한다. 이는 원본 draw-layer가 아니라 의도적 적응이며,
+native-exact 모드는 selected frame payload의 내부 빈칸을 검은 clear 영역으로 그대로 유지한다. generic/mod map은 필요할
+때만 별도의 coverage policy를 선택할 수 있다. explicit fog base 역시 source offset을 별도 placement metadata로만
+소비한다. fog tint, alpha, visibility semantics와 source fog composite의 pivot은
+원작에서 확정된 범위가 아니다.
 
 ## Reproduction and failure boundary
 
@@ -214,6 +208,8 @@ profile이 없으면 기존 tile-chunk path를 유지한다.
 pnpm imjinrok:extract-k01-tile-placement-elevation-evidence
 node --test tools/imjinrok/k01-tile-placement-elevation-evidence.test.mjs
 node --test tools/imjinrok/k01-terrain-composition-coverage.test.mjs
+pnpm imjinrok:extract-k01-gameplay-terrain-compositor
+node --test tools/imjinrok/k01-gameplay-terrain-compositor.test.mjs
 ```
 
 pure reference reproducer는 signed 16-bit x/y와 signed 32-bit raw argument를 받으며, `FUN_00464cc0` projection은
@@ -227,7 +223,9 @@ fog-family offset까지 닿지 못하는 malformed buffer, fraction/out-of-range
 
 - `FUN_0046d650` result의 사람용 height/elevation/terrain 의미와 writer/lifecycle은 미확정이다.
 - `DAT_00c06e86`의 `FUN_00462b80` direct init values는 복원했지만, alias/computed writer, complete lifetime/order와 human semantics은 미확정이다.
-- raw argument 1/2의 screen/world axis, exact pixel anchor/pivot, clipping/mode callee semantics은 미확정이다.
+- auxiliary/nondefault caller의 raw argument 1/2 screen/world axis, general pixel anchor/pivot, non-default
+  clipping/mode callee semantics은 미확정이다. 위의 default gameplay target/clip/mode-0 path는 별도 fixture로
+  제한적으로 확정했다.
 - 다른 map/theme의 table contents와 original renderer 전체, product renderer parity는 이 범위 밖이다.
 - `field_0x00032514`의 direct writer set과 alias/computed writer boundary는
   [별도 low-nibble writer 분석](k01-map-low-nibble-writers.md)을 따른다.

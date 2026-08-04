@@ -37,7 +37,7 @@ hash·jump table·reference·string·EXE는 오류로 중단한다.
 | --- | --- |
 | `SHA256SUMS` | `b74f06eca72e5d22695a907bd20b9f4dd459ead0d7224b0f05dbfbed9540bb3d` |
 | `manifest.json` | `f5f2d972d9447ecf052ce71359f02874bc081c63c19ff1fa5783f2fd62ed48dd` |
-| `seeds.json` | `8e7c8821e9c84c5d0877bb977b119b3b878271502b36bf75e7426b570507bfb7` |
+| `seeds.json` | `386b0f4e86c3376f34fe2b50fedb7e45b762c30784d4ebcc0387aa6f431811b2` |
 
 canonical count는 seed 주소 149개, 포함 함수 148개다.
 

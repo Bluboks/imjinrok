@@ -91,6 +91,7 @@ import {
   resolveOriginalSpeechLayout,
 } from "../originalSpeechLayout";
 import { selectConstructionFrameIndex } from "../originalBuildingVisualState";
+import { isSameUnitSelectionDoubleClick, resolveSelectionPolicy } from "../selectionPolicy.js";
 import { clampCameraCenterToWorldField } from "../cameraFieldClamp.js";
 import {
   decideControlGroupAssignmentOutcome,
@@ -172,10 +173,8 @@ import {
 } from "../render/chunkPolicy.js";
 import { runRenderTextureBatch } from "../render/renderTextureBatch.js";
 import {
-  alignSourceTerrainCoverageUnderlay,
   createSourceTerrainRasterPlan,
   usesSourceTerrainRasterComposition,
-  usesSourceTerrainRasterUnderlay,
   type SourceTerrainRasterPlan,
   type SourceTerrainRasterRegion,
 } from "../render/k01TerrainRasterPlan.js";
@@ -183,6 +182,7 @@ import { getEntityAnimationStateKey } from "../render/entityAnimationState.js";
 import { reconcileAuraIndicator } from "../render/auraIndicatorLifecycle.js";
 import { resolveAuraIndicatorPresentation } from "../render/auraIndicatorPresentation.js";
 import { resolveEntityAnimationSelection } from "../render/sourceOrientationAnimation.js";
+import { selectSourceGlobalFrameIndex } from "../render/animationFrameSelector.js";
 import {
   advanceEntityTerminalPlayback,
   createEntityTerminalPlayback,
@@ -268,6 +268,12 @@ import {
   type MouseInputAction,
   type MousePointerButton,
 } from "../input/mouseInputPolicy.js";
+import {
+  classifyDebugPresentationTarget,
+  decideDebugPresentationPointerAction,
+  type DebugPresentationPointerPhase,
+  type DebugPresentationPointerTargetKind,
+} from "../input/debugPresentationPointerPolicy.js";
 import { launchGameWithPreGameBriefing } from "../preGameBriefingLaunch.js";
 import {
   assertSourceFogGroundLayerFamilies,
@@ -551,6 +557,7 @@ interface TerrainDebugTileInfo {
   tileIndex: number;
   tilesetId: string | null;
   sourcePixelOffset: { x: number; y: number } | null;
+  sourceRawRasterVerticalShiftPx: number | null;
   fogFamily: number | null;
   visibility: TileVisibility;
   collision: string;
@@ -591,6 +598,7 @@ interface PendingBuildPlacement {
 
 interface UnitSelectionClickState {
   kind: UnitDefinitionId;
+  playerId: string;
   time: number;
 }
 
@@ -714,8 +722,12 @@ export class SkirmishScene extends Phaser.Scene {
   private lastIdleWorkerUnitId: string | null = null;
   private debugPresentationState: DebugPresentationState = readDebugPresentationState(getDebugPresentationStorage());
   private debugPresentationPanel: HTMLDivElement | null = null;
+  private debugPresentationCursor: HTMLDivElement | null = null;
   private readonly debugPresentationInputs = new Map<DebugPresentationToggle, HTMLInputElement>();
   private debugPresentationAbort: AbortController | null = null;
+  private debugPresentationPointerDownButton: MousePointerButton | null = null;
+  private debugPresentationPointerDownTarget: HTMLElement | null = null;
+  private debugPresentationPointerDownConsumed = false;
   private terrainDebugTooltip: HTMLDivElement | null = null;
   private debugPresentationGraphics: Phaser.GameObjects.Graphics | null = null;
   private hoveredTerrainDebugTile: GridPoint | null = null;
@@ -1016,11 +1028,15 @@ export class SkirmishScene extends Phaser.Scene {
         return;
       }
 
+      this.syncVirtualCursor(pointer, false);
+      if (this.routeDebugPresentationPointer("down", pointer)) {
+        return;
+      }
+
       if (this.isPointerInObjectiveTracker(pointer)) {
         return;
       }
 
-      this.syncVirtualCursor(pointer, false);
       if (!this.isScreenPointInWorldField(this.virtualCursorScreen)) {
         return;
       }
@@ -1044,6 +1060,10 @@ export class SkirmishScene extends Phaser.Scene {
       }
 
       this.syncVirtualCursor(pointer, true);
+      if (this.routeDebugPresentationPointer("move", pointer)) {
+        return;
+      }
+
       this.updateDragSelection();
     });
 
@@ -1057,11 +1077,15 @@ export class SkirmishScene extends Phaser.Scene {
         return;
       }
 
+      this.syncVirtualCursor(pointer, false);
+      if (this.routeDebugPresentationPointer("up", pointer)) {
+        return;
+      }
+
       if (this.isPointerInObjectiveTracker(pointer)) {
         return;
       }
 
-      this.syncVirtualCursor(pointer, false);
       this.applyMouseInputAction(pointer, this.resolveMouseInputAction(pointer, this.isDragSelecting));
     });
   }
@@ -1077,7 +1101,7 @@ export class SkirmishScene extends Phaser.Scene {
       button,
       dragging,
       hasPendingTargetAction: Boolean(this.pendingBuildPlacement || this.pendingTargetAction),
-      hasControllableSelection: this.getSelectedUnits().length > 0,
+      hasControllableSelection: this.getSelectedCommandableUnits().length > 0,
       hit: this.classifyMouseHitAtScreenPoint(this.virtualCursorScreen),
     });
   }
@@ -1133,8 +1157,9 @@ export class SkirmishScene extends Phaser.Scene {
     }
 
     const worldPoint = this.screenToWorldPoint(point);
-    if (this.findUnitAtWorldPoint(worldPoint.x, worldPoint.y)) {
-      return "friendly-selectable";
+    const hitUnit = this.findUnitAtWorldPoint(worldPoint.x, worldPoint.y);
+    if (hitUnit) {
+      return this.isEnemyPlayer(hitUnit.playerId) ? "enemy" : "friendly-selectable";
     }
     if (this.findVisibleEnemyUnitAtWorldPoint(worldPoint.x, worldPoint.y)) {
       return "enemy";
@@ -1159,6 +1184,73 @@ export class SkirmishScene extends Phaser.Scene {
 
   private isPointerInObjectiveTracker(pointer: Phaser.Input.Pointer): boolean {
     return this.objectiveTrackerBounds?.contains(pointer.x, pointer.y) ?? false;
+  }
+
+  private routeDebugPresentationPointer(phase: DebugPresentationPointerPhase, pointer: Phaser.Input.Pointer): boolean {
+    const hit = this.getDebugPresentationPointerTarget();
+    const locked = this.isPointerLocked || Boolean(this.input.mouse?.locked) || pointer.locked;
+    const button = this.getMousePointerButton(pointer) ?? (
+      phase === "up" ? this.debugPresentationPointerDownButton : null
+    );
+    const action = decideDebugPresentationPointerAction({
+      locked,
+      phase,
+      button,
+      target: hit.kind,
+      pressConsumed: this.debugPresentationPointerDownConsumed,
+      releaseMatchesPress: hit.interactive !== null && hit.interactive === this.debugPresentationPointerDownTarget,
+    });
+
+    if (phase === "down" && action === "consume") {
+      this.debugPresentationPointerDownConsumed = true;
+      this.debugPresentationPointerDownButton = button;
+      this.debugPresentationPointerDownTarget = button === "primary" ? hit.interactive : null;
+    }
+
+    if (phase === "up" && action !== "pass-through") {
+      if (action === "activate" && hit.interactive) {
+        hit.interactive.click();
+      }
+      this.debugPresentationPointerDownConsumed = false;
+      this.debugPresentationPointerDownButton = null;
+      this.debugPresentationPointerDownTarget = null;
+      this.isLeftMouseHeld = false;
+      this.cancelDragSelection();
+    }
+
+    return action !== "pass-through";
+  }
+
+  private getDebugPresentationPointerTarget(): {
+    kind: DebugPresentationPointerTargetKind;
+    interactive: HTMLElement | null;
+  } {
+    const panel = this.debugPresentationPanel;
+    if (!panel) {
+      return { kind: "outside", interactive: null };
+    }
+
+    const bounds = panel.getBoundingClientRect();
+    if (
+      this.virtualCursorScreen.x < bounds.left ||
+      this.virtualCursorScreen.x > bounds.right ||
+      this.virtualCursorScreen.y < bounds.top ||
+      this.virtualCursorScreen.y > bounds.bottom
+    ) {
+      return { kind: "outside", interactive: null };
+    }
+
+    const hit = document.elementFromPoint(this.virtualCursorScreen.x, this.virtualCursorScreen.y);
+    if (!hit || !panel.contains(hit)) {
+      return { kind: "outside", interactive: null };
+    }
+
+    const interactive = hit.closest<HTMLElement>("button, input, label");
+    const panelInteractive = interactive && panel.contains(interactive) ? interactive : null;
+    return {
+      kind: classifyDebugPresentationTarget(panelInteractive?.tagName ?? hit.tagName, true),
+      interactive: panelInteractive,
+    };
   }
 
   private isBlockingModalOpen(): boolean {
@@ -1225,87 +1317,92 @@ export class SkirmishScene extends Phaser.Scene {
       return;
     }
 
+    const commandableEntityIds = this.filterCommandableEntityIds(action.selectedEntityIds);
+    if (commandableEntityIds.length === 0) {
+      return;
+    }
+
     if (this.isPointTargetAction(action.actionId)) {
-      this.beginPointTargetAction(action.actionId, action.selectedEntityIds);
+      this.beginPointTargetAction(action.actionId, commandableEntityIds);
       return;
     }
 
     if (action.actionId === "stop") {
-      this.issueStopCommands(action.selectedEntityIds);
+      this.issueStopCommands(commandableEntityIds);
       return;
     }
 
     if (action.actionId === "train-villager") {
-      this.issueTrainUnit(action.selectedEntityIds, "villager", "train-villager");
+      this.issueTrainUnit(commandableEntityIds, "villager", "train-villager");
       return;
     }
 
     if (action.actionId === "train-swordsman") {
-      this.issueTrainUnit(action.selectedEntityIds, "swordsman", "train-swordsman");
+      this.issueTrainUnit(commandableEntityIds, "swordsman", "train-swordsman");
       return;
     }
 
     if (action.actionId === "train-archer") {
-      this.issueTrainUnit(action.selectedEntityIds, "archer", "train-archer");
+      this.issueTrainUnit(commandableEntityIds, "archer", "train-archer");
       return;
     }
 
     if (action.actionId === "research-loom") {
-      this.issueResearch(action.selectedEntityIds, "loom");
+      this.issueResearch(commandableEntityIds, "loom");
       return;
     }
 
     if (action.actionId === "cancel-production") {
-      this.issueCancelProduction(action.selectedEntityIds);
+      this.issueCancelProduction(commandableEntityIds);
       return;
     }
 
     if (action.actionId === "cancel-construction") {
-      this.issueCancelConstruction(action.selectedEntityIds);
+      this.issueCancelConstruction(commandableEntityIds);
       return;
     }
 
     if (action.actionId === "demolish") {
-      this.issueDemolishBuildings(action.selectedEntityIds);
+      this.issueDemolishBuildings(commandableEntityIds);
       return;
     }
 
     if (action.actionId === "build") {
-      this.beginBuildPlacement(action.selectedEntityIds, "house");
+      this.beginBuildPlacement(commandableEntityIds, "house");
       return;
     }
 
     if (action.actionId === "build-town-center") {
-      this.beginBuildPlacement(action.selectedEntityIds, "town-center");
+      this.beginBuildPlacement(commandableEntityIds, "town-center");
       return;
     }
 
     if (action.actionId === "build-barracks") {
-      this.beginBuildPlacement(action.selectedEntityIds, "barracks");
+      this.beginBuildPlacement(commandableEntityIds, "barracks");
       return;
     }
 
     if (action.actionId === "build-beacon") {
-      this.beginBuildPlacement(action.selectedEntityIds, "beacon");
+      this.beginBuildPlacement(commandableEntityIds, "beacon");
       return;
     }
 
     if (action.actionId === "set-gather") {
-      if (this.hasRallyPointBuildings(action.selectedEntityIds)) {
-        this.issueGatherRallyNearestCommands(action.selectedEntityIds);
+      if (this.hasRallyPointBuildings(commandableEntityIds)) {
+        this.issueGatherRallyNearestCommands(commandableEntityIds);
       } else {
-        this.issueGatherNearestCommands(action.selectedEntityIds);
+        this.issueGatherNearestCommands(commandableEntityIds);
       }
       return;
     }
 
     if (action.actionId === "town-bell") {
-      this.issueTownBellCommands(action.selectedEntityIds);
+      this.issueTownBellCommands(commandableEntityIds);
       return;
     }
 
     if (action.actionId === "hold") {
-      this.issueHoldPositionCommands(action.selectedEntityIds);
+      this.issueHoldPositionCommands(commandableEntityIds);
       return;
     }
   }
@@ -1329,6 +1426,11 @@ export class SkirmishScene extends Phaser.Scene {
     if (!locked && this.isLeftMouseHeld) {
       this.isLeftMouseHeld = false;
       this.cancelDragSelection();
+    }
+    if (!locked) {
+      this.debugPresentationPointerDownConsumed = false;
+      this.debugPresentationPointerDownButton = null;
+      this.debugPresentationPointerDownTarget = null;
     }
     this.publishVirtualCursor();
   }
@@ -1356,6 +1458,7 @@ export class SkirmishScene extends Phaser.Scene {
   }
 
   private handleShutdown(): void {
+    this.releasePointerLock();
     this.closeCheatInput();
     this.stopGameplayAudio();
     this.cancelDeferredThemeTextureLoading();
@@ -3676,7 +3779,7 @@ export class SkirmishScene extends Phaser.Scene {
 
     const focusUnits = entry.focusUnitIds
       .map((unitId) => this.worldState.units[unitId])
-      .filter((unit): unit is UnitState => unit !== undefined && this.isUnitSelectable(unit));
+      .filter((unit): unit is UnitState => unit !== undefined && this.isUnitInspectable(unit));
 
     if (focusUnits.length > 0) {
       this.selectUnits(focusUnits);
@@ -4038,9 +4141,14 @@ export class SkirmishScene extends Phaser.Scene {
     tooltip.className = "terrain-debug-tooltip";
     tooltip.hidden = true;
 
-    document.body.append(panel, tooltip);
+    const cursor = document.createElement("div");
+    cursor.className = "debug-presentation-cursor";
+    cursor.setAttribute("aria-hidden", "true");
+
+    document.body.append(panel, tooltip, cursor);
 
     this.debugPresentationPanel = panel;
+    this.debugPresentationCursor = cursor;
     this.terrainDebugTooltip = tooltip;
     this.refreshDebugPresentationPanel();
   }
@@ -4082,14 +4190,19 @@ export class SkirmishScene extends Phaser.Scene {
     this.debugPresentationAbort?.abort();
     this.debugPresentationAbort = null;
     this.debugPresentationPanel?.remove();
+    this.debugPresentationCursor?.remove();
     this.terrainDebugTooltip?.remove();
     this.debugPresentationGraphics?.destroy();
     this.debugPresentationPanel = null;
+    this.debugPresentationCursor = null;
     this.debugPresentationInputs.clear();
     this.terrainDebugTooltip = null;
     this.debugPresentationGraphics = null;
     this.hoveredTerrainDebugTile = null;
     this.debugPresentationOverlaySignature = "";
+    this.debugPresentationPointerDownConsumed = false;
+    this.debugPresentationPointerDownButton = null;
+    this.debugPresentationPointerDownTarget = null;
   }
 
   private requestPointerLock(): void {
@@ -4104,6 +4217,9 @@ export class SkirmishScene extends Phaser.Scene {
     }
 
     this.isPointerLocked = false;
+    this.debugPresentationPointerDownConsumed = false;
+    this.debugPresentationPointerDownButton = null;
+    this.debugPresentationPointerDownTarget = null;
     this.publishVirtualCursor();
   }
 
@@ -4129,10 +4245,18 @@ export class SkirmishScene extends Phaser.Scene {
   }
 
   private publishVirtualCursor(): void {
+    const locked = this.isPointerLocked || Boolean(this.input.mouse?.locked);
+    const cursorOverDebugPanel = this.getDebugPresentationPointerTarget().kind !== "outside";
+    if (this.debugPresentationCursor) {
+      this.debugPresentationCursor.style.left = `${this.virtualCursorScreen.x}px`;
+      this.debugPresentationCursor.style.top = `${this.virtualCursorScreen.y}px`;
+      this.debugPresentationCursor.style.display = locked && cursorOverDebugPanel ? "block" : "none";
+    }
+
     const cursor = {
       x: this.virtualCursorScreen.x,
       y: this.virtualCursorScreen.y,
-      locked: this.isPointerLocked,
+      locked,
     };
 
     this.registry.set(VIRTUAL_CURSOR_REGISTRY_KEY, cursor);
@@ -4541,7 +4665,7 @@ export class SkirmishScene extends Phaser.Scene {
       const liveUnitIds = unitIds.filter((unitId) => {
         const unit = this.worldState.units[unitId];
 
-        return unit !== undefined && this.isUnitSelectable(unit);
+        return unit !== undefined && this.isUnitCommandable(unit);
       });
 
       if (liveUnitIds.length > 0) {
@@ -4583,7 +4707,7 @@ export class SkirmishScene extends Phaser.Scene {
   }
 
   private assignControlGroup(group: number): void {
-    const unitIds = this.getSelectedUnits().map((unit) => unit.id);
+    const unitIds = this.getSelectedCommandableUnits().map((unit) => unit.id);
 
     if (decideControlGroupAssignmentOutcome(unitIds.length) === "clear") {
       this.controlGroups.delete(group);
@@ -4598,7 +4722,7 @@ export class SkirmishScene extends Phaser.Scene {
   }
 
   private addSelectionToControlGroup(group: number): void {
-    const selectedUnitIds = this.getSelectedUnits().map((unit) => unit.id);
+    const selectedUnitIds = this.getSelectedCommandableUnits().map((unit) => unit.id);
 
     if (selectedUnitIds.length === 0) {
       return;
@@ -4651,7 +4775,7 @@ export class SkirmishScene extends Phaser.Scene {
     for (const unitId of unitIds) {
       const unit = this.worldState.units[unitId];
 
-      if (!unit || !this.isUnitSelectable(unit)) {
+      if (!unit || !this.isUnitCommandable(unit)) {
         continue;
       }
 
@@ -4694,7 +4818,7 @@ export class SkirmishScene extends Phaser.Scene {
       return;
     }
 
-    const selectedIdleWorker = this.getSelectedUnits().find((unit) => this.isIdleWorker(unit));
+    const selectedIdleWorker = this.getSelectedCommandableUnits().find((unit) => this.isIdleWorker(unit));
     const anchorUnitId = this.lastIdleWorkerUnitId ?? selectedIdleWorker?.id ?? null;
     const anchorIndex = anchorUnitId ? idleWorkers.findIndex((unit) => unit.id === anchorUnitId) : -1;
     const nextWorker = idleWorkers[(anchorIndex + 1) % idleWorkers.length] ?? idleWorkers[0];
@@ -4742,7 +4866,7 @@ export class SkirmishScene extends Phaser.Scene {
 
   private isIdleWorker(unit: UnitState): boolean {
     return (
-      this.isUnitSelectable(unit) &&
+      this.isUnitCommandable(unit) &&
       unitCanPerformAction(unit.kind, "gather") &&
       unit.currentOrder === undefined &&
       unit.movementTarget === undefined &&
@@ -4761,7 +4885,7 @@ export class SkirmishScene extends Phaser.Scene {
     const definition = unitDefinitions[unit.kind];
 
     return (
-      this.isUnitSelectable(unit) &&
+      this.isUnitCommandable(unit) &&
       definition.category === "infantry" &&
       unitCanPerformAction(unit.kind, "attack-move") &&
       unit.construction === undefined
@@ -4873,19 +4997,22 @@ export class SkirmishScene extends Phaser.Scene {
     }
 
     const now = this.time.now;
-    const isDoubleClick =
-      this.lastUnitSelectionClick?.kind === unit.kind &&
-      now - this.lastUnitSelectionClick.time <= UNIT_DOUBLE_CLICK_SELECT_MS;
+    const isDoubleClick = isSameUnitSelectionDoubleClick(
+      this.lastUnitSelectionClick,
+      { kind: unit.kind, playerId: unit.playerId },
+      now,
+      UNIT_DOUBLE_CLICK_SELECT_MS,
+    );
 
     if (isDoubleClick) {
-      const visibleUnitsOfKind = this.getSelectableUnitsOfKindInView(unit.kind);
+      const visibleUnitsOfKind = this.getSelectableUnitsOfKindInView(unit.kind, unit.playerId);
 
       this.selectUnits(visibleUnitsOfKind.length > 0 ? visibleUnitsOfKind : [unit], { append: options.append === true });
     } else {
       this.selectUnits([unit], { append: options.append === true });
     }
 
-    this.lastUnitSelectionClick = { kind: unit.kind, time: now };
+    this.lastUnitSelectionClick = { kind: unit.kind, playerId: unit.playerId, time: now };
   }
 
   private selectUnitsInDragRectangle(options: { append?: boolean } = {}): void {
@@ -4895,7 +5022,7 @@ export class SkirmishScene extends Phaser.Scene {
 
     const rectangle = this.getScreenRectangle(this.dragStartScreen, this.dragCurrentScreen);
     const selectedUnits = Object.values(this.worldState.units).filter((unit) => {
-      if (!this.isUnitSelectable(unit)) {
+      if (!this.isUnitCommandable(unit)) {
         return false;
       }
 
@@ -4908,9 +5035,9 @@ export class SkirmishScene extends Phaser.Scene {
     this.lastUnitSelectionClick = null;
   }
 
-  private getSelectableUnitsOfKindInView(kind: UnitDefinitionId): UnitState[] {
+  private getSelectableUnitsOfKindInView(kind: UnitDefinitionId, ownerPlayerId: string): UnitState[] {
     return Object.values(this.worldState.units).filter((unit) => {
-      if (unit.kind !== kind || !this.isUnitSelectable(unit)) {
+      if (unit.kind !== kind || unit.playerId !== ownerPlayerId || !this.isUnitInspectable(unit)) {
         return false;
       }
 
@@ -4922,7 +5049,7 @@ export class SkirmishScene extends Phaser.Scene {
     const worldPoint = this.screenToWorldPoint(point);
     const enemyTarget = this.findVisibleEnemyUnitAtWorldPoint(worldPoint.x, worldPoint.y);
     const repairTarget = enemyTarget ? null : this.findRepairTargetAtWorldPoint(worldPoint.x, worldPoint.y);
-    const selectedUnits = this.getSelectedUnits();
+    const selectedUnits = this.getSelectedCommandableUnits();
     const repairWorkers = repairTarget
       ? selectedUnits.filter((unit) => unitCanPerformAction(unit.kind, "repair"))
       : [];
@@ -5435,7 +5562,7 @@ export class SkirmishScene extends Phaser.Scene {
     const commandableEntityIds = selectedEntityIds.filter((unitId) => {
       const unit = this.worldState.units[unitId];
 
-      return unit !== undefined && unitCanPerformAction(unit.kind, actionId);
+      return unit !== undefined && this.isUnitCommandable(unit) && unitCanPerformAction(unit.kind, actionId);
     });
 
     if (commandableEntityIds.length === 0) {
@@ -6181,13 +6308,7 @@ export class SkirmishScene extends Phaser.Scene {
   }
 
   private isPointerOverTerrainDebugPanel(): boolean {
-    if (!this.debugPresentationPanel) {
-      return false;
-    }
-
-    const hoveredElement = document.elementFromPoint(this.virtualCursorScreen.x, this.virtualCursorScreen.y);
-
-    return hoveredElement ? this.debugPresentationPanel.contains(hoveredElement) : false;
+    return this.getDebugPresentationPointerTarget().kind !== "outside";
   }
 
   private drawTerrainDebugHighlight(point: GridPoint): void {
@@ -6339,7 +6460,7 @@ export class SkirmishScene extends Phaser.Scene {
       assets.push(this.createExplicitTerrainDebugAssetInfo(`explicit elevation L${tile.elevation}`, explicitElevationVisual));
     } else if (!this.getTerrainElevationPresentation(point.x, point.y).rendersGenericElevation) {
       assets.push({
-        label: `source flat relief L${tile.elevation}`,
+        label: `source flat artwork (physical L${tile.elevation})`,
         visualId: explicitFlatVisual?.assetKey ?? null,
         slot: null,
         fileName: explicitFlatVisual ? `frame-${explicitFlatVisual.frame}` : null,
@@ -6368,6 +6489,7 @@ export class SkirmishScene extends Phaser.Scene {
       tileIndex: point.y * this.map.width + point.x,
       tilesetId: this.map.tilesetId ?? null,
       sourcePixelOffset: tile.tilesetVisuals?.sourcePixelOffset ?? null,
+      sourceRawRasterVerticalShiftPx: tile.tilesetVisuals?.sourceRawRasterVerticalShiftPx ?? null,
       fogFamily: tile.fogVisuals?.familyIndex ?? null,
       visibility: getTileVisibility(this.playerVisibility, point),
       collision: `terrain blocksMovement=${terrainDefinitions[tile.terrain].blocksMovement}; ${this.getTerrainDebugResourceOccupancy(tile.resource)}; profile ${this.map.movementCollisionProfileId ?? "default"}`,
@@ -6422,13 +6544,14 @@ export class SkirmishScene extends Phaser.Scene {
     const rows = document.createElement("div");
     rows.className = "terrain-debug-tooltip__rows";
     this.appendTerrainDebugRow(rows, "terrain", info.terrain);
-    this.appendTerrainDebugRow(rows, "elevation", String(info.elevation));
+    this.appendTerrainDebugRow(rows, "physical elevation", String(info.elevation));
     this.appendTerrainDebugRow(rows, "slot", info.transitionSlot ?? "flat");
     this.appendTerrainDebugRow(rows, "grid / index", `${info.point.x}, ${info.point.y} / ${info.tileIndex}`);
     const world = this.getGridGroundContactWorldPoint(info.point);
     const screen = this.worldToScreenPoint(new Phaser.Math.Vector2(world.x, world.y));
     this.appendTerrainDebugRow(rows, "world / screen", `${world.x.toFixed(1)}, ${world.y.toFixed(1)} / ${screen.x.toFixed(1)}, ${screen.y.toFixed(1)}`);
-    this.appendTerrainDebugRow(rows, "tileset / frame", `${info.tilesetId ?? "none"} / ${info.sourcePixelOffset ? `${info.sourcePixelOffset.x},${info.sourcePixelOffset.y}` : "none"}`);
+    this.appendTerrainDebugRow(rows, "source placement", `${info.tilesetId ?? "none"} / ${info.sourcePixelOffset ? `${info.sourcePixelOffset.x},${info.sourcePixelOffset.y}` : "none"}`);
+    this.appendTerrainDebugRow(rows, "source raw shift px", info.sourceRawRasterVerticalShiftPx === null ? "none" : String(info.sourceRawRasterVerticalShiftPx));
     this.appendTerrainDebugRow(rows, "fog / visibility", `${info.fogFamily ?? "none"} / ${TileVisibility[info.visibility] ?? info.visibility}`);
     this.appendTerrainDebugRow(rows, "movement", info.collision);
     this.appendTerrainDebugRow(rows, "theme", this.activeTheme.id);
@@ -6933,7 +7056,7 @@ export class SkirmishScene extends Phaser.Scene {
     const selectedUnits: UnitState[] = [];
 
     for (const unit of units) {
-      if (this.isUnitSelectable(unit)) {
+      if (this.isUnitInspectable(unit)) {
         this.selectedUnitIds.add(unit.id);
         selectedUnits.push(unit);
       }
@@ -6970,6 +7093,7 @@ export class SkirmishScene extends Phaser.Scene {
             mirrorX: portrait.mirrorX,
           }
           : undefined,
+        this.isUnitCommandable(unit),
       );
     });
 
@@ -6985,7 +7109,18 @@ export class SkirmishScene extends Phaser.Scene {
   }
 
   private getSelectedUnits(): UnitState[] {
-    return Object.values(this.worldState.units).filter((unit) => this.selectedUnitIds.has(unit.id) && this.isUnitSelectable(unit));
+    return Object.values(this.worldState.units).filter((unit) => this.selectedUnitIds.has(unit.id) && this.isUnitInspectable(unit));
+  }
+
+  private getSelectedCommandableUnits(): UnitState[] {
+    return this.getSelectedUnits().filter((unit) => this.isUnitCommandable(unit));
+  }
+
+  private filterCommandableEntityIds(unitIds: readonly string[]): string[] {
+    return unitIds.filter((unitId) => {
+      const unit = this.worldState.units[unitId];
+      return unit !== undefined && this.isUnitCommandable(unit);
+    });
   }
 
   private syncWorldFromTransport(force = false): void {
@@ -7031,7 +7166,7 @@ export class SkirmishScene extends Phaser.Scene {
     for (const selectedUnitId of this.selectedUnitIds) {
       const unit = this.worldState.units[selectedUnitId];
 
-      if (!unit || !this.isUnitSelectable(unit)) {
+      if (!unit || !this.isUnitInspectable(unit)) {
         this.selectedUnitIds.delete(selectedUnitId);
       }
     }
@@ -7040,7 +7175,7 @@ export class SkirmishScene extends Phaser.Scene {
       const liveTargetingUnitIds = this.pendingTargetAction.selectedEntityIds.filter((unitId) => {
         const unit = this.worldState.units[unitId];
 
-        return unit !== undefined && this.isUnitSelectable(unit) && unitCanPerformAction(unit.kind, this.pendingTargetAction!.actionId);
+        return unit !== undefined && this.isUnitCommandable(unit) && unitCanPerformAction(unit.kind, this.pendingTargetAction!.actionId);
       });
 
       if (liveTargetingUnitIds.length > 0) {
@@ -7062,7 +7197,7 @@ export class SkirmishScene extends Phaser.Scene {
     let selectedPriority = Number.POSITIVE_INFINITY;
 
     for (const unit of Object.values(this.worldState.units)) {
-      if (!this.isUnitSelectable(unit)) {
+      if (!this.isUnitInspectable(unit)) {
         continue;
       }
 
@@ -7444,8 +7579,23 @@ export class SkirmishScene extends Phaser.Scene {
     );
   }
 
-  private isUnitSelectable(unit: UnitState): boolean {
-    return unit.playerId === this.localPlayerId && this.isUnitVisibleToLocalPlayer(unit);
+  private getUnitSelectionRelationship(unit: UnitState): "local" | "allied" | "enemy" {
+    if (unit.playerId === this.localPlayerId) return "local";
+    return this.arePlayersAllied(this.localPlayerId, unit.playerId) ? "allied" : "enemy";
+  }
+
+  private isUnitInspectable(unit: UnitState): boolean {
+    return resolveSelectionPolicy({
+      relationship: this.getUnitSelectionRelationship(unit),
+      visible: this.isUnitVisibleToLocalPlayer(unit),
+    }).inspectable;
+  }
+
+  private isUnitCommandable(unit: UnitState): boolean {
+    return resolveSelectionPolicy({
+      relationship: this.getUnitSelectionRelationship(unit),
+      visible: this.isUnitVisibleToLocalPlayer(unit),
+    }).commandable;
   }
 
   private configureFogChunkGrid(): void {
@@ -7582,10 +7732,7 @@ export class SkirmishScene extends Phaser.Scene {
 
     if (explicitVisual) {
       if (explicitUnderlay) {
-        const coverageUnderlay = usesSourceTerrainRasterUnderlay(this.map)
-          ? alignSourceTerrainCoverageUnderlay(explicitUnderlay, explicitVisual)
-          : explicitUnderlay;
-        this.drawExplicitTileFog(renderTexture, bounds, coverageUnderlay, visibility, worldX, worldY, 0);
+        this.drawExplicitTileFog(renderTexture, bounds, explicitUnderlay, visibility, worldX, worldY, 0);
       } else {
         this.drawFallbackFogTile(renderTexture, bounds, fallbackTextureKey, worldX, worldY);
       }
@@ -7884,7 +8031,7 @@ export class SkirmishScene extends Phaser.Scene {
         this.getSourceTerrainRasterMaxTextureSize(),
       );
       if (sourceRasterPlan) {
-        this.redrawSourceTerrainRaster(sourceRasterPlan, usesSourceTerrainRasterUnderlay(this.map));
+        this.redrawSourceTerrainRaster(sourceRasterPlan, sourceRasterPlan.coverage);
         if (this.perfEnabled) console.timeEnd("terrain chunk bake");
         return;
       }
@@ -7940,34 +8087,63 @@ export class SkirmishScene extends Phaser.Scene {
   }
 
   /** Replays alpha-overlapping source frames in each output region's global order. */
-  private redrawSourceTerrainRaster(plan: SourceTerrainRasterPlan, useCoverageUnderlay: boolean): void {
+  private redrawSourceTerrainRaster(plan: SourceTerrainRasterPlan, coverage: SourceTerrainRasterPlan["coverage"] = plan.coverage): void {
+    const useCoverageUnderlay = coverage !== null;
     for (const region of plan.regions) {
       const renderTexture = this.add
         .renderTexture(region.left, region.top, region.width, region.height)
         .setOrigin(0, 0)
         .setDepth(region.top);
 
+      renderTexture.clear();
+      if (plan.clearColor !== undefined) {
+        renderTexture.fill(plan.clearColor, 1);
+      }
+
       runRenderTextureBatch(renderTexture, () => {
-        if (useCoverageUnderlay) {
+        if (useCoverageUnderlay && coverage?.mode === "canonical-source-art") {
+          const assetKey = coverage.assetKey;
+          if (!assetKey) throw new Error(`Source terrain coverage asset is missing for map '${this.map.id}' (profile '${this.map.terrainCompositionProfile ?? "none"}').`);
+          const coverageBase = resolveExplicitTileVisual(
+            CONTENT_REGISTRY,
+            this.map,
+            { tilesetVisuals: { flatAssetKey: assetKey, flatArtworkEmbedsRelief: true } },
+            "flat",
+          );
+          if (!coverageBase) throw new Error(`Source terrain coverage asset '${assetKey}' is unavailable for map '${this.map.id}' (profile '${this.map.terrainCompositionProfile ?? "none"}').`);
           for (const point of plan.cells) {
             const tile = getTileAt(this.map, point.x, point.y);
-            const underlay = resolveExplicitTileUnderlayVisual(CONTENT_REGISTRY, this.map, tile);
             const selected = resolveExplicitTileVisual(CONTENT_REGISTRY, this.map, tile, "flat");
-            if (!underlay || !selected) {
-              throw new Error(`Source terrain coverage fallback requires an explicit underlay at ${point.x},${point.y}.`);
-            }
-            const descriptor = alignSourceTerrainCoverageUnderlay(underlay, selected);
+            if (!selected) throw new Error(`Source terrain selected asset is unavailable at ${point.x},${point.y} for map '${this.map.id}' (profile '${this.map.terrainCompositionProfile ?? "none"}').`);
             const iso = cartToIso(point, this.map.tileWidth, this.map.tileHeight);
             const worldX = this.mapOrigin.x + iso.x;
             const worldY = this.mapOrigin.y + iso.y;
+            const underlay = { ...coverageBase, sourcePixelOffset: selected.sourcePixelOffset };
             const visualBounds = resolveExplicitTileVisualWorldBounds(
-              descriptor,
+              underlay,
               { x: worldX, y: worldY },
               this.map.tileWidth,
               this.map.tileHeight,
             );
             if (!this.sourceTerrainRegionIntersectsVisual(region, visualBounds)) continue;
-            this.drawExplicitTileVisual(renderTexture, { minX: region.left, minY: region.top }, descriptor, worldX, worldY, 0);
+            this.drawExplicitTileVisual(renderTexture, { minX: region.left, minY: region.top }, underlay, worldX, worldY, 0);
+          }
+        } else if (useCoverageUnderlay && coverage?.mode === "legacy-authored-underlay") {
+          for (const point of plan.cells) {
+            const tile = getTileAt(this.map, point.x, point.y);
+            const underlay = resolveExplicitTileUnderlayVisual(CONTENT_REGISTRY, this.map, tile);
+            if (!underlay) continue;
+            const iso = cartToIso(point, this.map.tileWidth, this.map.tileHeight);
+            const worldX = this.mapOrigin.x + iso.x;
+            const worldY = this.mapOrigin.y + iso.y;
+            const visualBounds = resolveExplicitTileVisualWorldBounds(
+              underlay,
+              { x: worldX, y: worldY },
+              this.map.tileWidth,
+              this.map.tileHeight,
+            );
+            if (!this.sourceTerrainRegionIntersectsVisual(region, visualBounds)) continue;
+            this.drawExplicitTileVisual(renderTexture, { minX: region.left, minY: region.top }, underlay, worldX, worldY, 0);
           }
         }
         for (const point of plan.cells) {
@@ -9520,7 +9696,7 @@ export class SkirmishScene extends Phaser.Scene {
     const facing = this.getUnitFacing(unit, renderable.lastFacing);
     const selection = visual ? this.getEntityAnimationSelection(unit, visual, facing) : null;
     const baseLayer = renderable.spriteLayers[0];
-    const selectedFrame = selection && baseLayer ? this.advanceEntityAnimation(baseLayer, selection, deltaMs) : null;
+    const selectedFrame = selection && baseLayer ? this.advanceEntityAnimation(baseLayer, selection, deltaMs, this.worldState.tick) : null;
     const frame = visual ? this.getLoadedEntityPresentationFrame(visual, selectedFrame) : null;
 
     renderable.lastFacing = facing;
@@ -9568,7 +9744,7 @@ export class SkirmishScene extends Phaser.Scene {
       }
 
       const selection = this.getEntityLayerAnimationSelection(unit, visual, visualLayer, facing);
-      const frame = selection ? this.advanceEntityAnimation(renderLayer, selection, deltaMs) : null;
+      const frame = selection ? this.advanceEntityAnimation(renderLayer, selection, deltaMs, this.worldState.tick) : null;
 
       if (!selection || !frame || !this.textures.exists(frame.textureKey)) {
         renderLayer.sprite.setVisible(false);
@@ -9723,7 +9899,12 @@ export class SkirmishScene extends Phaser.Scene {
     };
   }
 
-  private advanceEntityAnimation(renderable: EntityAnimationTracker, selection: EntityAnimationSelection, deltaMs: number): FrameRef | null {
+  private advanceEntityAnimation(
+    renderable: EntityAnimationTracker,
+    selection: EntityAnimationSelection,
+    deltaMs: number,
+    worldTick: number,
+  ): FrameRef | null {
     if (selection.clip.frames.length === 0) {
       return null;
     }
@@ -9731,6 +9912,12 @@ export class SkirmishScene extends Phaser.Scene {
     if (renderable.animationKey !== selection.key) {
       renderable.animationKey = selection.key;
       renderable.animationFrameIndex = 0;
+      renderable.animationFrameElapsedMs = 0;
+    }
+
+    const globalFrameIndex = selectSourceGlobalFrameIndex(selection.clip, worldTick);
+    if (globalFrameIndex !== null) {
+      renderable.animationFrameIndex = globalFrameIndex;
       renderable.animationFrameElapsedMs = 0;
     } else {
       this.advanceAnimationFrameIndex(renderable, selection.clip, deltaMs);

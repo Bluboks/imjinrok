@@ -18,7 +18,7 @@ K01에서 선택 가능한 원본 entity class가 단일 선택 패널에 어떤
 | 입력 | SHA-256 |
 | --- | --- |
 | `original/imjinrok2/imjinrok2.exe` | `25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e` |
-| `analysis/generated/imjinrok2/seeds.json` | `8e7c8821e9c84c5d0877bb977b119b3b878271502b36bf75e7426b570507bfb7` |
+| `analysis/generated/imjinrok2/seeds.json` | `386b0f4e86c3376f34fe2b50fedb7e45b762c30784d4ebcc0387aa6f431811b2` |
 | `original/imjinrok2/fnt/portrait.spr` | `1a124007c267f4fa8686475e31dcb57f0ea281513f4c5f213df1ee41df141885` |
 
 `fnt\portrait.spr` path pointer `0x004bd714`은 common loader table `0x004bc094`의 index 34다.

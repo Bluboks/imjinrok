@@ -33,6 +33,8 @@ export function validateMapDefinition(map: MapDefinition, registry: ContentRegis
     issues.push(issue("tileHeight", "Tile height must be positive."));
   }
   validateElevationProfile(map, issues);
+  validateSourceRasterComposition(map, issues);
+  validateSourceRasterCoverage(map, registry, issues);
 
   validateReference(map.tilesetId, registry.tilesets, "tilesetId", "tileset", issues);
   validateReference(map.environmentVisualProfileId, registry.environmentVisualProfiles, "environmentVisualProfileId", "environment visual profile", issues);
@@ -76,6 +78,44 @@ function validateElevationProfile(map: MapDefinition, issues: MapValidationIssue
   }
   if (profile.sampling !== undefined && !isSurfaceElevationSampling(profile.sampling)) {
     issues.push(issue("elevationProfile.sampling", "Elevation profile sampling must be 'bilinear' or 'nearest'."));
+  }
+}
+
+function validateSourceRasterComposition(map: MapDefinition, issues: MapValidationIssue[]): void {
+  if (map.sourceRasterClearColor === undefined) return;
+  if (map.terrainCompositionProfile !== "source-raster" && map.terrainCompositionProfile !== "source-raster-underlay") {
+    issues.push(issue("sourceRasterClearColor", "Source-raster clear color requires a source-raster composition profile."));
+    return;
+  }
+  if (!Number.isInteger(map.sourceRasterClearColor)
+    || map.sourceRasterClearColor < 0
+    || map.sourceRasterClearColor > 0xffffff) {
+    issues.push(issue("sourceRasterClearColor", "Source-raster clear color must be an integer RGB value from 0x000000 through 0xffffff."));
+  }
+}
+
+function validateSourceRasterCoverage(map: MapDefinition, registry: ContentRegistry, issues: MapValidationIssue[]): void {
+  const coverage = map.sourceRasterCoverage;
+  if (coverage === undefined) return;
+  if (typeof coverage !== "object" || coverage === null) {
+    issues.push(issue("sourceRasterCoverage", "Source-raster coverage must be an object."));
+    return;
+  }
+  if (map.terrainCompositionProfile !== "source-raster" && map.terrainCompositionProfile !== "source-raster-underlay") {
+    issues.push(issue("sourceRasterCoverage", "Source-raster coverage requires a source-raster composition profile."));
+  }
+  if (coverage.mode !== "canonical-source-art") issues.push(issue("sourceRasterCoverage.mode", "Source-raster coverage mode must be canonical-source-art."));
+  const assetKey = coverage.assetKey;
+  if (typeof assetKey !== "string") {
+    issues.push(issue("sourceRasterCoverage.assetKey", "Source-raster coverage assetKey must be a string."));
+  } else if (!assetKey.trim()) {
+    issues.push(issue("sourceRasterCoverage.assetKey", "Source-raster coverage assetKey is required."));
+  }
+  if (coverage.placement !== "selected-frame-offset") issues.push(issue("sourceRasterCoverage.placement", "Source-raster coverage placement must follow the selected frame offset."));
+  if (coverage.evidenceStatus !== "의도적 적응") issues.push(issue("sourceRasterCoverage.evidenceStatus", "Source-raster coverage must be labelled 의도적 적응."));
+  const tileset = map.tilesetId ? registry.tilesets[map.tilesetId] : undefined;
+  if (tileset && typeof assetKey === "string" && assetKey.trim() && !tileset.terrainAssets[assetKey]) {
+    issues.push(issue("sourceRasterCoverage.assetKey", `Unknown source-raster coverage asset '${assetKey}'.`));
   }
 }
 
@@ -177,6 +217,14 @@ function validateTileTilesetVisuals(
     }
     if (!Number.isFinite(selection.sourcePixelOffset.y)) {
       issues.push(issue(`${tilePath}.tilesetVisuals.sourcePixelOffset.y`, "Tile placement offset y must be finite."));
+    }
+  }
+  if (selection.sourceRawRasterVerticalShiftPx !== undefined) {
+    if (selection.flatAssetKey === undefined && selection.elevationAssetKey === undefined) {
+      issues.push(issue(`${tilePath}.tilesetVisuals.sourceRawRasterVerticalShiftPx`, "Raw source-raster shift requires a selected tile asset."));
+    }
+    if (!Number.isFinite(selection.sourceRawRasterVerticalShiftPx)) {
+      issues.push(issue(`${tilePath}.tilesetVisuals.sourceRawRasterVerticalShiftPx`, "Raw source-raster vertical shift must be finite."));
     }
   }
   if (selection.flatArtworkEmbedsRelief !== undefined && typeof selection.flatArtworkEmbedsRelief !== "boolean") {

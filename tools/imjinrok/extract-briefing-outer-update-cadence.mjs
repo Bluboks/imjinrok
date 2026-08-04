@@ -30,7 +30,7 @@ const DEFAULTS = Object.freeze({
   changeTitleFixturePath: "analysis/fixtures/changetitle-consumer-evidence-vectors.json",
 });
 
-const EXPECTED_SEEDS_SHA256 = "8e7c8821e9c84c5d0877bb977b119b3b878271502b36bf75e7426b570507bfb7";
+const EXPECTED_SEEDS_SHA256 = "386b0f4e86c3376f34fe2b50fedb7e45b762c30784d4ebcc0387aa6f431811b2";
 const EXPECTED_JUMP_TABLES_SHA256 = "0ae517eb172f61b974ca7a4411e64c1cc42065c462ed53b3065ab2da633dfe2f";
 
 const RAW_CODE_RANGES = [

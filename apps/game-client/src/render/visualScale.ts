@@ -1,4 +1,4 @@
-import type { FrameRef, PivotSpec, VisualBase, VisualSize } from "@shared";
+import { resolveOriginalEntityFramePivot, type FrameRef, type PivotSpec, type VisualBase, type VisualSize } from "@shared";
 
 /**
  * MVP reference: current 64x32 tile art is 2x1 world units, so 1 wu = 32 px.
@@ -24,6 +24,8 @@ export function getFrameSize(visual: VisualBase, frame: FrameRef): VisualSize {
 }
 
 export function getFramePivot(visual: VisualBase, frame: FrameRef): PivotSpec {
+  const sourcePivot = resolveOriginalEntityFramePivot(visual, getFrameSize(visual, frame));
+  if (sourcePivot) return sourcePivot;
   return frame.pivot ?? visual.defaults.pivot;
 }
 

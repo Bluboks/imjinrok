@@ -13,7 +13,7 @@
 | K01 palette step identity | `원본 기반` | bounded 8,640 admitted-update schedule과 `night1`~`night4` identity; product tick calibration은 별도 적응 |
 | light curve와 dawn/day/dusk/night simulation output | `의도적 적응` | opt-in fixed-tick curve |
 | K01 원본 tile source object/frame selector | `원본 사실` | `FUN_00469330`의 K01 normal source object/frame 범위; pixel placement와 terrain 의미는 별도 |
-| K01 exact visual export·map assignment | `source-backed project adaptation` | 243 normal PNG와 K01-only explicit flat asset assignment; hash-bound raw raster `0/16` second-argument stream은 source image offset `0/-16`으로 유지한다. 별도 cell-projection output-Y `+16/+9` relative difference `7`을 K01 `MapElevationProfile`의 base/one-raised ground-contact step으로 적응하고 emitted `grss1_0000` alpha/low-nibble coverage vector로 선택한 shared ground anchor·source-art footprint underlay 및 embedded-relief marker를 사용 |
+| K01 exact visual export·map assignment | `source-backed project adaptation` | 243 normal PNG와 K01-only explicit flat asset assignment; hash-bound raw raster `0/16` second-argument stream은 source image offset `0/-16`으로 유지한다. `TileCell.elevation`과 bilinear ground contact은 authored physical channel로 분리하고, K01 source raster는 `sourceRasterClearColor=0x000000` 뒤 global y→x selected replay를 사용한다. map-level canonical source-art coverage는 별도의 `의도적 적응` policy다. |
 
 ## 원본 source fact
 
@@ -86,12 +86,13 @@ K01은 `imjinrok-source-day-night-palette` profile과 generic `visualSteps` cont
    collection key만 명시적으로 사용할 수 있고, 선택하지 않은 surface는 기존 theme fallback을 유지한다. tile
    image geometry `(64×48, anchor 32,0)`, raw K01 second-placement-argument stream, source-canvas overhang chunk
    bounds는 product/mod renderer 계약이며 original tile canvas/pivot/placement parity 주장이 아니다. emitted-PNG
-   alpha coverage fixture는 per-cell web `y=-16` 해석의 low-nibble boundary seam을 반증하므로, K01 source art는
-   raw raster surface에서 map stream에 포함된 `grss1_0000` source-art `underlayAssetKey` 위에 합성한다. test는 이 PNG
-   alpha로 logical diamond 전체가 실제로 덮이는지를 재현한다. entity/building/projectile ground contact는 별도로 K01
-   `MapElevationProfile`의 7px step을 shared resolver로 소비한다. 이는 source-backed-adaptation이며 original renderer
-   layer parity 또는 physical terrain surface parity 주장이 아니다. 같은 shared contract는 explicit terrain/world bounds와
-   fog base/source composite가 함께 소비한다.
+   source art는 `sourceRasterClearColor=0x000000`인 전역 raster에서 selected frame을 y→x 순서로 재생한다. K01은
+   tile별 `underlayAssetKey` 분기 대신 map-level `sourceRasterCoverage`에 canonical
+   `k01-source:grss1:0000`을 선언하고 selected frame offset으로 coverage pass를 먼저 재생한다.
+   이는 `의도적 적응`이며 raw 0/16 값은 별도 source placement offset(`0/-16`)으로만 보존하고,
+   entity/building/projectile ground contact는 authored `TileCell.elevation`만 소비한다.
+   이는 source-backed-adaptation이며 original renderer layer parity 또는 physical terrain surface parity 주장이 아니다.
+   같은 shared contract는 explicit terrain/world bounds와 fog base/source composite가 함께 소비한다.
 2. resource: generic `resolveMapResourceVisual(registry, map, kind, state)`가 map-selected set의
    `resourceVisualSet.resources[kind]?.states[state]`를 반환한다. visual set ID가 없는 legacy map과
    매핑되지 않은 kind/state는 `null`이고 preload는 빈 배열이다. scene preload는 launch map 확정 전이므로

@@ -217,8 +217,13 @@ export function getActionSlots(
     return slots;
   }
 
-  const actionIds = getSelectionActionIds(selectedEntities);
-  const actions = actionIds.map((actionId) => toHudActionSlot(actionId, selectedEntities, playerEconomy, sourceIconProfile));
+  const commandableEntities = selectedEntities.filter((selection) => selection.commandable !== false);
+  if (commandableEntities.length === 0) {
+    return slots;
+  }
+
+  const actionIds = getSelectionActionIds(commandableEntities);
+  const actions = actionIds.map((actionId) => toHudActionSlot(actionId, commandableEntities, playerEconomy, sourceIconProfile));
 
   actions.forEach((action, index) => {
     slots[index] = action;

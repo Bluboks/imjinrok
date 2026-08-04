@@ -8,7 +8,7 @@
 
 ## 근거와 복구 범위
 
-EXE SHA-256은 `25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e`다. `gunj1.spr` SHA-256은 `e35c3dddfc4860d3e8ccbb7d86ecb006b11230e269d04091dcfa320dc116a7a8`다. canonical generated artifact는 EXE source SHA-256을 `functions.json`·`jump-tables.json`·`seeds.json`에 각각 기록하며, 현재 파일 SHA-256은 차례로 `7e071fdfe425d22447780c265fe1d3fd271a1bedd1773682bebcb8ddc6d2e16e`, `0ae517eb172f61b974ca7a4411e64c1cc42065c462ed53b3065ab2da633dfe2f`, `8e7c8821e9c84c5d0877bb977b119b3b878271502b36bf75e7426b570507bfb7`다. `FUN_004291d0`의 class-12 dispatch는 `0x0042a752`에 도달하고 inclusive `0x0042a752-0x0042a807` block은 seed instruction/call로 다음을 만든다.
+EXE SHA-256은 `25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e`다. `gunj1.spr` SHA-256은 `e35c3dddfc4860d3e8ccbb7d86ecb006b11230e269d04091dcfa320dc116a7a8`다. canonical generated artifact는 EXE source SHA-256을 `functions.json`·`jump-tables.json`·`seeds.json`에 각각 기록하며, 현재 파일 SHA-256은 차례로 `7e071fdfe425d22447780c265fe1d3fd271a1bedd1773682bebcb8ddc6d2e16e`, `0ae517eb172f61b974ca7a4411e64c1cc42065c462ed53b3065ab2da633dfe2f`, `386b0f4e86c3376f34fe2b50fedb7e45b762c30784d4ebcc0387aa6f431811b2`다. `FUN_004291d0`의 class-12 dispatch는 `0x0042a752`에 도달하고 inclusive `0x0042a752-0x0042a807` block은 seed instruction/call로 다음을 만든다.
 
 | state | helper | slot/resource | start/stride/phase |
 | ---: | --- | --- | --- |

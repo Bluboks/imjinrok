@@ -3,6 +3,7 @@ import {
   type GridPoint,
   type UnitDefinitionId,
 } from "../../shared/src/index.js";
+import { finalizeConstructionHealth } from "./construction.js";
 import type { UnitState, WorldState } from "./types.js";
 
 /**
@@ -114,11 +115,15 @@ export function pruneSimulationEvents(state: WorldState): void {
  * state, and the shared helper is used by both build and assisted-repair work
  * so a building cannot emit twice when multiple workers cross the boundary.
  */
-export function completeConstructionTransition(state: WorldState, building: UnitState): boolean {
+export function completeConstructionTransition(
+  state: WorldState,
+  building: UnitState,
+): boolean {
   if (!building.construction || building.construction.remainingTicks > 0) {
     return false;
   }
 
+  finalizeConstructionHealth(building);
   delete building.construction;
   appendConstructionCompletedEvent(state, building);
   return true;

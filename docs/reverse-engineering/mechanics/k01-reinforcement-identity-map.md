@@ -22,7 +22,7 @@ OOB, exact create와 occupancy의 정적 근거는
 | 입력 | SHA-256 | 확인 범위 |
 | --- | --- | --- |
 | `original/imjinrok2/imjinrok2.exe` | `25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e` | native descriptor 호출·배열 |
-| `analysis/generated/entity-type-catalog.json` | `485344664b278c97a4ceed0756832abadbf2a71bd4a997b117b85c336d620708` | class 이름·SPR slot/base/path |
+| `analysis/generated/entity-type-catalog.json` | `4cce8fd314848556433c5fd98263893919049b6be6a7a7e75988f628079c54da` | class 이름·SPR slot/base/path |
 | `analysis/generated/sprite-mapping-audit.json` | `106d6b6d799c467cc06cd3bfa9d15cf84efded3aeebaec24328c22e4c20c733d` | 네 project kind→class·source SPR binding, K01 adapter, class 13·14·82 scoped core-state animation과 관련 source provenance |
 | `apps/game-client/public/assets/themes/default/entities/japanese-gunner/gunj1.manifest.json` | `f156fab6f775bcf0df46a3f52356dcdbb86634447d9a674d6d9a39476178cae5` | audit가 가리키는 실제 conversion manifest, source `original/imjinrok2/char/gunj1.spr`, 선언 80 frames와 export 80개 |
 | `apps/game-client/public/assets/themes/default/entities/japanese-samurai/horseswordj1.manifest.json` | `4d2ef829d95a1b90c2e666757f29c948369e9f27c6b2b11aab992f18030bf9c9` | `horseswordj1.spr`, 80×80, 선언·export 90 frames |

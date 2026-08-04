@@ -52,23 +52,19 @@ test("moves continuously from a flat cell across a ramp onto an adjacent plateau
   ]);
 });
 
-test("K01 adapts its proven relative projection difference to a seven-pixel ground-contact lift", () => {
+test("K01 source placement offsets do not alter authored physical ground contact", () => {
   const map = createImjinrokMapScaffold("imjinrok-k01");
   assert.ok(map);
   const point = { x: 0, y: 0 };
   const tile = getTileAt(map, point.x, point.y);
-  assert.equal(tile.elevation, 1);
+  assert.equal(tile.elevation, 0);
   assert.deepEqual(tile.tilesetVisuals?.sourcePixelOffset, { x: 0, y: -16 });
 
-  const reliefGroundContact = resolveGridGroundContactWorldPosition(point, mapOrigin, map);
-  const bilinearRampGroundContact = resolveGridGroundContactWorldPosition({ x: 0, y: 0.5 }, mapOrigin, map);
-  tile.elevation = 0;
-  const flatGroundContact = resolveGridGroundContactWorldPosition(point, mapOrigin, map);
+  const sourceOffsetGroundContact = resolveGridGroundContactWorldPosition(point, mapOrigin, map);
+  const fractionalGroundContact = resolveGridGroundContactWorldPosition({ x: 0, y: 0.5 }, mapOrigin, map);
 
-  assert.deepEqual(reliefGroundContact, { x: 320, y: 153 });
-  assert.deepEqual(bilinearRampGroundContact, { x: 304, y: 164.5 });
-  assert.deepEqual(flatGroundContact, mapOrigin);
-  assert.equal(flatGroundContact.y - reliefGroundContact.y, 7);
+  assert.deepEqual(sourceOffsetGroundContact, mapOrigin);
+  assert.deepEqual(fractionalGroundContact, { x: 304, y: 168 });
 });
 
 test("rejects invalid grid and map-origin coordinates before producing a placement", () => {

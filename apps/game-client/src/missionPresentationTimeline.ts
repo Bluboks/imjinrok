@@ -5,6 +5,10 @@ import type {
 
 export const MISSION_BRIEFING_PORTRAIT_PROGRESS_STEP_PERCENT = 5;
 export const MISSION_BRIEFING_PORTRAIT_STEP_COUNT = 100 / MISSION_BRIEFING_PORTRAIT_PROGRESS_STEP_PERCENT;
+// The source dispatcher advances portrait progress by five percentage points
+// on each visit. Its wall-clock scheduler is not statically recovered; this
+// is the project's fixed 24 Hz presentation calibration, not a parity claim.
+export const MISSION_BRIEFING_PORTRAIT_STEP_MS = 1_000 / 24;
 
 export type MissionBriefingIntroStage = "playing" | "ready";
 export type MissionBriefingClickAction = "complete-intro" | "reveal-line" | "advance-line" | "dismiss-line" | "no-op";
@@ -49,6 +53,90 @@ export interface MissionBriefingReplayState {
   nextLineAt: null;
   lineScheduled: false;
   dismissed: false;
+}
+
+export interface MissionBriefingLineTransitionState {
+  lineIndex: number;
+  lineVisible: boolean;
+  pendingLineIndex: number | null;
+  lineRevealAt: number | null;
+}
+
+export function createMissionBriefingLineTransitionState(
+  lineIndex = 0,
+): MissionBriefingLineTransitionState {
+  return {
+    lineIndex,
+    lineVisible: false,
+    pendingLineIndex: null,
+    lineRevealAt: null,
+  };
+}
+
+/**
+ * Queues a line without replacing the currently visible line while a delay
+ * is pending. A zero delay commits the target line immediately.
+ */
+export function queueMissionBriefingLineTransition(
+  state: MissionBriefingLineTransitionState,
+  targetLineIndex: number,
+  time: number,
+  delayMs: number,
+): MissionBriefingLineTransitionState {
+  const normalizedDelayMs = Number.isFinite(delayMs) && delayMs > 0 ? Math.floor(delayMs) : 0;
+  if (normalizedDelayMs > 0) {
+    return {
+      ...state,
+      pendingLineIndex: targetLineIndex,
+      lineRevealAt: time + normalizedDelayMs,
+    };
+  }
+
+  return {
+    lineIndex: targetLineIndex,
+    lineVisible: true,
+    pendingLineIndex: null,
+    lineRevealAt: null,
+  };
+}
+
+export function revealMissionBriefingLineTransition(
+  state: MissionBriefingLineTransitionState,
+): MissionBriefingLineTransitionState {
+  if (state.pendingLineIndex === null) {
+    return state;
+  }
+
+  return {
+    lineIndex: state.pendingLineIndex,
+    lineVisible: true,
+    pendingLineIndex: null,
+    lineRevealAt: null,
+  };
+}
+
+export function isMissionBriefingLineRevealPending(
+  state: MissionBriefingLineTransitionState,
+  time: number,
+): boolean {
+  return state.pendingLineIndex !== null
+    && state.lineRevealAt !== null
+    && time < state.lineRevealAt;
+}
+
+/** A queued line remains click-revealable until the transition is committed. */
+export function hasMissionBriefingLineRevealPending(
+  state: MissionBriefingLineTransitionState,
+): boolean {
+  return state.pendingLineIndex !== null && state.lineRevealAt !== null;
+}
+
+/** Returns the line whose participants should remain rendered during a delay. */
+export function getMissionBriefingParticipantLineIndex(
+  state: MissionBriefingLineTransitionState,
+  dismissed: boolean,
+): number | null {
+  return dismissed || state.lineVisible ? state.lineIndex : null;
 }
 
 export function beginPresentationPause(playbackWasPaused: boolean): PresentationPauseOwnership {

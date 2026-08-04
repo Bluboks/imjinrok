@@ -27,8 +27,8 @@ const simulationSourceDirectory = dirname(fileURLToPath(import.meta.url));
 const catalogPath = join(simulationSourceDirectory, "../../../analysis/generated/entity-type-catalog.json");
 const vectorsPath = join(simulationSourceDirectory, "../../../analysis/fixtures/war-expense-capacity-vectors.json");
 const ORIGINAL_EXECUTABLE_SHA256 = "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e";
-const CATALOG_SHA256 = "485344664b278c97a4ceed0756832abadbf2a71bd4a997b117b85c336d620708";
-const VECTORS_SHA256 = "d5119a18166326fb9b6675cd0a24cc9222764df7f3a1328d8d4d226df62dda34";
+const CATALOG_SHA256 = "4cce8fd314848556433c5fd98263893919049b6be6a7a7e75988f628079c54da";
+const VECTORS_SHA256 = "98e5ea0e8e557e9370c917f633c36d6d971e9eaeec3371e749fbc0cb02f53dbc";
 
 function createFixture() {
   const state = createInitialWorldState(createBlankMap({ width: 32, height: 32 }), ["p1"]);

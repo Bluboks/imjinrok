@@ -15,7 +15,7 @@ const EXPECTED_EXE = {
 const EXPECTED_ARTIFACT_HASHES = {
   functions: "7e071fdfe425d22447780c265fe1d3fd271a1bedd1773682bebcb8ddc6d2e16e",
   references: "f64cfa6f04bc39573552f42a8b7bdd5b08fea1ba774d05865162d1d80daaf9a5",
-  seeds: "8e7c8821e9c84c5d0877bb977b119b3b878271502b36bf75e7426b570507bfb7",
+  seeds: "386b0f4e86c3376f34fe2b50fedb7e45b762c30784d4ebcc0387aa6f431811b2",
 };
 const ROOT = resolve(fileURLToPath(new URL("../..", import.meta.url)));
 const DEFAULT_PATHS = {

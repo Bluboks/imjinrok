@@ -720,7 +720,10 @@ export const imjinrokK01Scenario = {
         titleFrames: k01PresentationTitleFrames,
         lineDelayBeforeMsByVoiceId: { k01010: 160, k01040: 160 },
         defaultLineDurationMs: 5_500,
-        portraitIntroductionDurationMs: 2_400,
+        // Twenty 5% steps at the project's fixed 24 Hz presentation cadence.
+        // This is an intentional web adaptation; original wall-clock timing
+        // remains unresolved.
+        portraitIntroductionDurationMs: 20 * (1_000 / 24),
       },
     },
     lines: [
@@ -980,7 +983,9 @@ export const imjinrokK02Scenario = {
         titleFrames: k02PresentationTitleFrames,
         lineDelayBeforeMsByVoiceId: { k02010: 160, k02070: 160 },
         defaultLineDurationMs: 5_500,
-        portraitIntroductionDurationMs: 2_400,
+        // Keep every briefing participant on the same calibrated 24 Hz,
+        // twenty-step introduction timeline.
+        portraitIntroductionDurationMs: 20 * (1_000 / 24),
       },
     },
     lines: [

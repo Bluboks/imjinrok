@@ -4,13 +4,51 @@ import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { extractOriginalSpriteTable } from "../../../tools/imjinrok/extract-sprite-table.mjs";
-import { defaultTheme, getGridFacing, getThemeAssetUrl, getThemeFrameRefs, resolveEntityPortraitFrame } from "./index.js";
+import { assertThemeSourceProfiles, defaultTheme, getGridFacing, getThemeAssetUrl, getThemeFrameRefs, resolveEntityPortraitFrame } from "./index.js";
 import type { EntityVisual, Facing } from "./visuals.js";
 import type { ThemeDefinition } from "./themes.js";
 
 const repositoryRoot = join(dirname(fileURLToPath(import.meta.url)), "../../..");
 const defaultThemeAssetRoot = join(repositoryRoot, "apps/game-client/public/assets/themes/default");
 const originalExecutablePath = join(repositoryRoot, "original/imjinrok2/imjinrok2.exe");
+
+test("every gameplay-bound default-theme entity consumes a known generated source profile", () => {
+  assert.doesNotThrow(() => assertThemeSourceProfiles(defaultTheme));
+  const classes = Object.values(defaultTheme.entityBindings).map((visualId) => {
+    const visual = defaultTheme.visuals[visualId];
+    assert.equal(visual?.kind, "entity");
+    return visual?.kind === "entity" ? visual.originalSourceProfile?.internalClass : undefined;
+  });
+  assert.deepEqual(classes.filter((value): value is number => value !== undefined).sort((a, b) => a - b), [
+    2, 3, 4, 7, 11, 12, 13, 14, 16, 31, 48, 49, 50, 51, 52, 57, 58, 60, 62, 63, 76, 78, 82, 92,
+  ]);
+});
+
+test("generated common building profiles drive construction, damage, and continuous overlays", () => {
+  const barracks = defaultTheme.visuals["korean-barracks"] as EntityVisual;
+  const market = defaultTheme.visuals["japanese-camp-house"] as EntityVisual;
+  assert.deepEqual(barracks.states.construction?.clips.default?.progressFrameThresholds, [0, 10, 20, 30, 40, 50, 70, 100]);
+  assert.equal(barracks.states.damaged?.clips.default?.frames[0]?.fileName, "barrackk_0008.png");
+  assert.equal(market.states.damaged?.clips.default?.frames[0]?.fileName, "millj_0008.png");
+  const barracksOverlay = barracks.layers?.[0]?.states.idle?.clips.default;
+  const marketOverlay = market.layers?.[0]?.states.damaged?.clips.default;
+  assert.equal(barracksOverlay?.frames[0]?.fileName, "barrackk_0009.png");
+  assert.equal(barracksOverlay?.frames.length, 7);
+  assert.equal(barracksOverlay?.sourceGlobalTickDivisor, 4);
+  assert.equal(marketOverlay?.frames[0]?.fileName, "millj_0009.png");
+  assert.equal(marketOverlay?.frames.length, 10);
+  assert.equal(marketOverlay?.sourceGlobalTickDivisor, 4);
+});
+
+test("source profile application fails closed for unknown classes", () => {
+  const malformedTheme = structuredClone(defaultTheme) as ThemeDefinition;
+  const visualId = malformedTheme.entityBindings.villager;
+  const visual = malformedTheme.visuals[visualId];
+  assert.equal(visual?.kind, "entity");
+  if (visual?.kind !== "entity") return;
+  visual.originalSourceProfile = { internalClass: 999 };
+  assert.throws(() => assertThemeSourceProfiles(malformedTheme), /Unknown original entity internal class 999/u);
+});
 
 test("default theme entity bindings point to loadable source-converted assets", () => {
   assert.equal(defaultTheme.entityBindings.villager, "villager-korean-farmer");
@@ -28,7 +66,6 @@ test("default theme entity bindings point to loadable source-converted assets", 
   assert.equal(defaultTheme.entityBindings["japanese-camp-barracks"], "japanese-camp-barracks");
   assert.equal(defaultTheme.entityBindings["japanese-camp-tower"], "japanese-camp-tower");
   assert.equal(defaultTheme.entityBindings["japanese-camp-firehouse"], "japanese-camp-firehouse");
-  assert.equal(defaultTheme.entityBindings["japanese-camp-advanced-tower"], "japanese-camp-advanced-tower");
   assert.equal(defaultTheme.entityBindings["korean-training-command"], "korean-training-command");
   assert.equal(defaultTheme.entityBindings["japanese-hq"], "japanese-hq");
   assert.equal(defaultTheme.entityBindings["ryu-seong-ryong"], "korean-ryu-seong-ryong");
@@ -949,7 +986,6 @@ test("default theme maps source-exported building construction frames", () => {
       source: "original/imjinrok2/char/millk.spr",
       frameCount: 16,
       idleFrame: "millk_0007.png",
-      completeFrame: "millk_0008.png",
     },
     {
       binding: "barracks",
@@ -973,7 +1009,6 @@ test("default theme maps source-exported building construction frames", () => {
       source: "original/imjinrok2/char/millj.spr",
       frameCount: 36,
       idleFrame: "millj_0007.png",
-      completeFrame: "millj_0008.png",
     },
     {
       binding: "japanese-camp-firehouse",
@@ -981,14 +1016,6 @@ test("default theme maps source-exported building construction frames", () => {
       source: "original/imjinrok2/char/firehousej.spr",
       frameCount: 40,
       idleFrame: "firehousej_0007.png",
-      completeFrame: "firehousej_0008.png",
-    },
-    {
-      binding: "japanese-camp-advanced-tower",
-      manifestPath: "entities/japanese-camp-advanced-tower/advtowerj.manifest.json",
-      source: "original/imjinrok2/char/advtowerj.spr",
-      frameCount: 10,
-      idleFrame: "advtowerj_0008.png",
     },
   ] as const;
 
@@ -1001,13 +1028,13 @@ test("default theme maps source-exported building construction frames", () => {
     assert.equal(manifest.frameCount, expectation.frameCount);
     assert.equal(manifest.exportedFrames.length, expectation.frameCount);
     assert.equal(visual.states.idle?.clips.default?.frames[0]?.fileName, expectation.idleFrame);
-    assert.equal(visual.states.construction?.clips.default?.frames.length, expectation.constructionFrameCount ?? 9);
+    assert.equal(visual.states.construction?.clips.default?.frames.length, expectation.constructionFrameCount ?? 8);
     assert.equal(visual.states.construction?.clips.default?.frames[0]?.fileName.endsWith("_0000.png"), true);
     assert.equal(visual.states.construction?.clips.default?.frames.at(-1)?.fileName, expectation.completeFrame ?? expectation.idleFrame);
   }
 });
 
-test("default theme binds newly identified opening buildings to only their proven base frames", () => {
+test("default theme consumes generated construction/health profiles for every opening building", () => {
   const expectations = [
     {
       binding: "korean-training-command",
@@ -1046,9 +1073,8 @@ test("default theme binds newly identified opening buildings to only their prove
     assert.equal(manifest.source, expectation.source);
     assert.deepEqual({ width: manifest.width, height: manifest.height }, expectation.dimensions);
     assert.equal(visual.states.idle?.clips.default?.frames[0]?.fileName, expectation.idleFrame);
-    assert.equal(visual.states.construction, undefined);
-    assert.equal(visual.states.damaged, undefined);
-    assert.equal(visual.layers, undefined);
+    assert.equal(visual.states.construction?.clips.default?.frames.length, 8);
+    assert.equal(visual.states.damaged?.clips.default?.frames[0]?.fileName, `${expectation.idleFrame.slice(0, -8)}0008.png`);
   }
 });
 
@@ -1086,7 +1112,7 @@ test("default theme applies the statically recovered Korean beacon identity and 
   );
 });
 
-test("K01 Japanese camp building defaults do not infer unverified idle animations", () => {
+test("K01 Japanese camp building overlays follow generated continuous/special classifications", () => {
   const houseVisual = defaultTheme.visuals[defaultTheme.entityBindings["japanese-camp-house"]] as EntityVisual;
   const firehouseVisual = defaultTheme.visuals[defaultTheme.entityBindings["japanese-camp-firehouse"]] as EntityVisual;
 
@@ -1098,13 +1124,23 @@ test("K01 Japanese camp building defaults do not infer unverified idle animation
     firehouseVisual.states.idle?.clips.default?.frames.map((frame) => frame.fileName),
     ["firehousej_0007.png"],
   );
-  assert.equal(houseVisual.layers, undefined);
+  assert.equal(houseVisual.layers?.[0]?.states.idle?.clips.default?.frames.length, 10);
+  assert.equal(houseVisual.layers?.[0]?.states.damaged?.clips.default?.sourceGlobalTickDivisor, 4);
+  assert.equal(firehouseVisual.layers, undefined);
 });
 
-test("K01 Korean barracks default does not infer an unverified flag overlay", () => {
+test("K01 Korean barracks consumes its generated continuous overlay profile", () => {
   const visual = defaultTheme.visuals[defaultTheme.entityBindings.barracks] as EntityVisual;
 
-  assert.equal(visual.layers, undefined);
+  assert.equal(visual.layers?.[0]?.states.idle?.clips.default?.frames.length, 7);
+  assert.equal(visual.layers?.[0]?.states.damaged?.clips.default?.sourceGlobalTickDivisor, 4);
+});
+
+test("unresolved advanced Japanese tower remains quarantined and unbound", () => {
+  assert.equal(defaultTheme.entityBindings["japanese-camp-advanced-tower"], undefined);
+  const visual = defaultTheme.visuals["japanese-camp-advanced-tower"] as EntityVisual;
+  assert.equal(visual.originalSourceProfile, undefined);
+  assert.equal(visual.states.construction, undefined);
 });
 
 function readManifest(relativePath: string): {

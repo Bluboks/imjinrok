@@ -1,4 +1,5 @@
 import { K01_SOURCE_TILE_VISUAL_ARTIFACT } from "./generated/k01SourceTileVisualArtifact.js";
+import { getK01MapProtocolChannel } from "./mapDataProtocol.js";
 import type { TileCell } from "./maps.js";
 
 export const K01_SOURCE_TILE_VISUAL_DIMENSIONS = K01_SOURCE_TILE_VISUAL_ARTIFACT.dimensions;
@@ -19,16 +20,6 @@ export const K01_SOURCE_CELL_PROJECTION_OUTPUT_Y_ADDITIONS = {
   base: 16,
   raised: 9,
 } as const;
-/**
- * Product ground-contact adaptation derived from K01's `+16` versus `+9`
- * per-cell output-Y additions. The source artwork still uses its independent
- * raw raster `0/16` branch through `sourcePixelOffset`.
- */
-export const K01_SOURCE_RELATIVE_CELL_PROJECTION_LIFT_PX =
-  K01_SOURCE_CELL_PROJECTION_OUTPUT_Y_ADDITIONS.base - K01_SOURCE_CELL_PROJECTION_OUTPUT_Y_ADDITIONS.raised;
-/** Product-only alpha-coverage fallback; not an original draw-layer claim. */
-export const K01_SOURCE_TILE_UNDERLAY_ASSET_KEY = "k01-source:grss1:0000";
-
 export interface K01SourceTileVisualAsset {
   readonly assetKey: string;
   readonly stem: string;
@@ -101,11 +92,6 @@ export function getK01SourceTileVisualAssets(): readonly K01SourceTileVisualAsse
   return assets;
 }
 
-export function getK01SourceTileUnderlayAssetKey(x: number, y: number): string {
-  getK01SourceTileFlatAssetKey(x, y);
-  return K01_SOURCE_TILE_UNDERLAY_ASSET_KEY;
-}
-
 export function applyK01SourceTileVisuals(tiles: TileCell[], width: number, height: number): void {
   if (width !== K01_SOURCE_TILE_VISUAL_DIMENSIONS.width || height !== K01_SOURCE_TILE_VISUAL_DIMENSIONS.height) {
     throw new Error(`K01 source tile visuals require ${K01_SOURCE_TILE_VISUAL_DIMENSIONS.width}x${K01_SOURCE_TILE_VISUAL_DIMENSIONS.height}; received ${width}x${height}.`);
@@ -118,25 +104,22 @@ export function applyK01SourceTileVisuals(tiles: TileCell[], width: number, heig
       const tileIndex = y * width + x;
       const tile = tiles[tileIndex];
       if (!tile) throw new Error(`K01 source tile visual is missing product tile ${x},${y}.`);
+      const rawShift = getK01SourceTileRawPlacementArgumentDelta(x, y);
       tile.tilesetVisuals = {
         ...tile.tilesetVisuals,
         flatAssetKey: getK01SourceTileFlatAssetKey(x, y),
-        underlayAssetKey: getK01SourceTileUnderlayAssetKey(x, y),
         sourcePixelOffset: getK01SourceTilePlacementOffset(x, y),
+        sourceRawRasterVerticalShiftPx: rawShift,
         flatArtworkEmbedsRelief: true,
       };
-      // Product adaptation, not a claim that the source helper's human meaning
-      // is fully recovered: the hash-bound 0/16 stream becomes base/raised.
-      tile.elevation = getK01SourceTileRawPlacementArgumentDelta(x, y) === 16 ? 1 : 0;
     }
   }
 }
 
 export function assertK01SourceTileVisualArtifact(): void {
   if (K01_SOURCE_CELL_PROJECTION_OUTPUT_Y_ADDITIONS.base !== 16
-    || K01_SOURCE_CELL_PROJECTION_OUTPUT_Y_ADDITIONS.raised !== 9
-    || K01_SOURCE_RELATIVE_CELL_PROJECTION_LIFT_PX !== 7) {
-    throw new Error("K01 source cell-projection lift must remain the proven 16 minus 9 pixel difference.");
+    || K01_SOURCE_CELL_PROJECTION_OUTPUT_Y_ADDITIONS.raised !== 9) {
+    throw new Error("K01 source cell-projection output-Y additions changed from the hash-bound values.");
   }
   const { width, height } = K01_SOURCE_TILE_VISUAL_DIMENSIONS;
   if (!Number.isInteger(width) || !Number.isInteger(height) || width <= 0 || height <= 0) {
@@ -162,12 +145,22 @@ export function assertK01SourceTileVisualArtifact(): void {
     || placementOffsetYBytes.filter((value) => value === 0xf0).length !== offsetDistribution.negative16) {
     throw new Error("K01 source tile visual artifact placement-offset bytes do not match their distribution.");
   }
+  const protocolObjectBytes = getK01MapProtocolChannel("objectIndex");
+  const protocolFrameBytes = getK01MapProtocolChannel("frameIndex");
+  const protocolShiftBytes = getK01MapProtocolChannel("rawRasterVerticalShift");
+  if (protocolObjectBytes.length !== width * height || protocolFrameBytes.length !== width * height || protocolShiftBytes.length !== width * height) {
+    throw new Error("K01 source tile visual artifact protocol streams do not match the map dimensions.");
+  }
+  for (let index = 0; index < width * height; index += 1) {
+    if (pairBytes[index * 2] !== protocolObjectBytes[index] || pairBytes[index * 2 + 1] !== protocolFrameBytes[index]) {
+      throw new Error(`K01 source tile visual artifact diverges from map protocol at ordinal ${index}.`);
+    }
+    const expectedEncodedShift = protocolShiftBytes[index] === 16 ? 0xf0 : protocolShiftBytes[index];
+    if (placementOffsetYBytes[index] !== expectedEncodedShift) throw new Error(`K01 source tile placement shift diverges from map protocol at ordinal ${index}.`);
+  }
   const uniqueAssetKeys = new Set(assets.map((asset) => asset.assetKey));
   if (assets.length !== uniqueAssetKeys.size || assets.length !== 243) {
     throw new Error(`K01 source tile visual artifact requires 243 unique assets; received ${assets.length}.`);
-  }
-  if (!uniqueAssetKeys.has(K01_SOURCE_TILE_UNDERLAY_ASSET_KEY)) {
-    throw new Error(`K01 source tile visual artifact is missing underlay asset '${K01_SOURCE_TILE_UNDERLAY_ASSET_KEY}'.`);
   }
 }
 

@@ -22,7 +22,7 @@
 | --- | --- | --- |
 | `original/imjinrok2/imjinrok2.exe` | `25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e` | allocator/record/handle/active-list raw 근거 |
 | `original/imjinrok2/stagemap/k01.map` | `43ec3a173032f74c12d3cce1db1078b076b651ed79070a0914673a5b65da99cb` | opening source record order·좌표 |
-| `analysis/generated/entity-type-catalog.json` | `485344664b278c97a4ceed0756832abadbf2a71bd4a997b117b85c336d620708` | original class identity·footprint 범위 |
+| `analysis/generated/entity-type-catalog.json` | `4cce8fd314848556433c5fd98263893919049b6be6a7a7e75988f628079c54da` | original class identity·footprint 범위 |
 
 핵심 함수와 필드는 [source handle lifecycle](k01-source-handle-lifecycle.md)의 `0x00483a60`,
 `0x00483c50`, `0x00483aa0`, `+0x1b6/+0x1b8`, signed `+0x3e`, 그리고

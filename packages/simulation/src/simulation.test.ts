@@ -2148,6 +2148,15 @@ test("imjinrok K01 reinforcement preserves its static-proven requested coordinat
     { x: 53, y: 51 },
   );
 
+  // The native beacon gate only opens after qualifying hostile structures are
+  // removed; keep ordinary hostile soldiers in the semantic world so this
+  // scenario still proves that the occupied anchor does not relocate them.
+  for (const unit of Object.values(state.units)) {
+    if (unit.playerId === "cpu-1" && unitDefinitions[unit.kind].category === "building") {
+      delete state.units[unit.id];
+    }
+  }
+
   state.units["local-player-test-beacon"] = createUnitState(
     "local-player-test-beacon",
     "local-player",

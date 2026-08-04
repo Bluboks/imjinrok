@@ -23,13 +23,43 @@ export function updateConstructionHealth(unit: UnitState): void {
   updateConstructionHealthWithOptions(unit);
 }
 
-export function advanceConstructionHealth(unit: UnitState): void {
-  updateConstructionHealthWithOptions(unit, { preserveDamage: true });
+/**
+ * Advances construction health from the supplied prior progress boundary.
+ * Work can consume more than one construction tick (for example the fast
+ * production cheat), so assuming a one-tick delta leaves healthy buildings
+ * below full health when their construction marker is removed.
+ */
+export function advanceConstructionHealth(unit: UnitState, previousRemainingTicks?: number): void {
+  if (previousRemainingTicks === undefined) {
+    updateConstructionHealthWithOptions(unit, { preserveDamage: true });
+    return;
+  }
+
+  updateConstructionHealthWithOptions(unit, { preserveDamage: true, previousRemainingTicks });
+}
+
+/**
+ * Finalizes the health side of completion before the construction marker is
+ * removed. A healthy building is promoted to full health atomically; damage
+ * taken during construction remains below the completion target.
+ */
+export function finalizeConstructionHealth(unit: UnitState): void {
+  const construction = unit.construction;
+
+  if (!construction || construction.remainingTicks > 0) {
+    return;
+  }
+
+  const completionTargetHealth = getConstructionHealthAtRemainingTicks(unit, construction.remainingTicks);
+
+  if (unit.health.current >= completionTargetHealth) {
+    unit.health.current = completionTargetHealth;
+  }
 }
 
 function updateConstructionHealthWithOptions(
   unit: UnitState,
-  options: { preserveDamage?: boolean } = {},
+  options: { preserveDamage?: boolean; previousRemainingTicks?: number } = {},
 ): void {
   if (!unit.construction) {
     unit.health.current = unit.health.max;
@@ -43,7 +73,8 @@ function updateConstructionHealthWithOptions(
     return;
   }
 
-  const previousRemainingTicks = Math.min(unit.construction.totalTicks, unit.construction.remainingTicks + 1);
+  const previousRemainingTicks = options.previousRemainingTicks ??
+    Math.min(unit.construction.totalTicks, unit.construction.remainingTicks + 1);
   const previousTargetHealth = getConstructionHealthAtRemainingTicks(unit, previousRemainingTicks);
   const progressDelta = Math.max(0, targetHealth - previousTargetHealth);
 

@@ -13,42 +13,46 @@ const tileWidth = 64;
 const tileHeight = 32;
 const sourceHeight = 48;
 
-test("K01 source-raster final composition keeps mixed placement-level boundaries on their selected surfaces", (t) => {
+test("K01 source-raster replay retains mixed placement offsets over the opaque black clear", (t) => {
   const artifact = readArtifact();
   const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
   const assetByPair = new Map(manifest.assets.map((asset) => [`${asset.stem}:${asset.frame}`, asset]));
-  const assetByKey = new Map(manifest.assets.map((asset) => [asset.assetKey, asset]));
   const alphaByPair = new Map();
 
   for (const asset of manifest.assets) {
     alphaByPair.set(`${asset.stem}:${asset.frame}`, readPngAlpha(resolve(assetDirectory, asset.fileName)));
   }
-  const underlayAsset = assetByKey.get("k01-source:grss1:0000");
-  assert.ok(underlayAsset);
-  const underlayAlpha = alphaByPair.get(`${underlayAsset.stem}:${underlayAsset.frame}`);
-  assert.ok(underlayAlpha);
   const selectedOffsetY = (x, y) => rawDeltaY(artifact, x, y);
   const sourceRaster = measureComposition(artifact, assetByPair, alphaByPair, null, selectedOffsetY, null);
-  const adaptedRaster = measureComposition(artifact, assetByPair, alphaByPair, underlayAlpha, selectedOffsetY, selectedOffsetY);
-  const rawAnchorUnderlayRaster = measureComposition(artifact, assetByPair, alphaByPair, underlayAlpha, selectedOffsetY, () => 0);
 
   assert.equal(manifest.productRenderingAdapter?.imageGeometry?.footprintAnchor?.y, 0);
+  assert.equal(manifest.productRenderingAdapter?.webPlacement?.sourceRasterClearColor, "0x000000");
   assert.equal(sourceRaster.rawDeltaCellCount, 735);
   assert.equal(sourceRaster.mixedRawDeltaNeighborCount, 798);
-  assert.equal(sourceRaster.uncoveredFootprintPixels, 74771, "selected source frames retain measured alpha gaps in the corrected logical diamond coverage probe");
-  assert.equal(adaptedRaster.uncoveredFootprintPixels, 0, "the explicit source-art coverage pass must cover every corrected K01 terrain-domain pixel");
-  assert.equal(adaptedRaster.mixedBoundaryFootprintPixels, 965632);
-  assert.equal(adaptedRaster.mixedBoundaryUncoveredFootprintPixels, 0, "final source-raster composition must leave no hole at a mixed placement-level boundary");
-  assert.equal(rawAnchorUnderlayRaster.uncoveredFootprintPixels, 5139, "a raw-anchor coverage pass leaves holes outside the selected alpha footprint");
-  assert.equal(rawAnchorUnderlayRaster.mixedBoundaryUncoveredFootprintPixels, 4430, "a raw-anchor coverage pass leaves holes at mixed placement-level boundaries");
-  assert.equal(adaptedRaster.topmostDrawDigest, "df44797cc4fa1786240f33fbb7ec79534033baa53bd1789ede4e8b751cb259cb", "the two-pass product compositor must retain its global selected-frame order");
-  assert.notEqual(adaptedRaster.topmostDrawDigest, rawAnchorUnderlayRaster.topmostDrawDigest, "the final compositor output mask must distinguish aligned coverage from a raw-anchor underlay");
+  assert.equal(sourceRaster.uncoveredFootprintPixels, 74771, "selected source frames retain measured alpha gaps over the black clear");
 
-  t.diagnostic(JSON.stringify({
-    sourceRaster: summarizeCoverage(sourceRaster),
-    adaptedRaster: summarizeCoverage(adaptedRaster),
-    rawAnchorUnderlayRaster: summarizeCoverage(rawAnchorUnderlayRaster),
-  }));
+  t.diagnostic(JSON.stringify({ sourceRaster: summarizeCoverage(sourceRaster) }));
+});
+
+test("K01 product coverage policy is a map-level canonical source-art pass with zero gaps", (t) => {
+  const artifact = readArtifact();
+  const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
+  const assetByPair = new Map(manifest.assets.map((asset) => [`${asset.stem}:${asset.frame}`, asset]));
+  const alphaByPair = new Map();
+  for (const asset of manifest.assets) alphaByPair.set(`${asset.stem}:${asset.frame}`, readPngAlpha(resolve(assetDirectory, asset.fileName)));
+  const coverageAlpha = readPngAlpha(resolve(assetDirectory, "grss1_0000.png"));
+  const selectedOffsetY = (x, y) => rawDeltaY(artifact, x, y);
+  const product = measureComposition(artifact, assetByPair, alphaByPair, coverageAlpha, selectedOffsetY, selectedOffsetY);
+
+  assert.equal(product.uncoveredFootprintPixels, 0);
+  assert.equal(product.mixedBoundaryUncoveredFootprintPixels, 0);
+  assert.equal(manifest.productRenderingAdapter.webPlacement.evidenceStatus, "native source fact plus explicit product adaptation (의도적 적응)");
+  assert.equal(rawDeltaY(artifact, 15, 6), 0);
+  assert.equal(rawDeltaY(artifact, 14, 6), 0);
+  assert.equal(rawDeltaY(artifact, 16, 6), -16);
+  assert.equal(rawDeltaY(artifact, 15, 5), -16);
+  assert.equal(rawDeltaY(artifact, 15, 7), 0);
+  t.diagnostic(JSON.stringify({ productCoverage: summarizeCoverage(product), regressionTile: { rowMajorIndex: 375, x: 15, y: 6 } }));
 });
 
 function readArtifact() {

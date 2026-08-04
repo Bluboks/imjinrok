@@ -63,6 +63,14 @@ test("extracts every original entity type identity from static data flow", () =>
     width: "signed WORD",
     writerArgumentIndex: 7,
   });
+  assert.deepEqual(report.layout.fields.renderVerticalOffset, {
+    offset: "+0x0c",
+    width: "signed WORD",
+    writerArgumentOrdinal: 5,
+    writerArgumentIndex: 4,
+  });
+  assert.equal(report.types.find((type) => type.internalClass === 76)?.definition.renderVerticalOffset, 23);
+  assert.ok(report.types.every((type) => Number.isInteger(type.definition.renderVerticalOffset)));
   assert.match(
     report.layout.economySemanticProvenance.grainCost,
     /player \+0x08.*곡물이 부족합니다/u,

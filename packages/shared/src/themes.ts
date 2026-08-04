@@ -1,5 +1,6 @@
 import type { TerrainType } from "./content.js";
-import type { AnimationClip, EntityVisual, Facing, FrameRef, TerrainVisual, VisualBase, VisualDefinition } from "./visuals.js";
+import { resolveOriginalEntityFramePivot, type AnimationClip, type EntityVisual, type Facing, type FrameRef, type TerrainVisual, type VisualBase, type VisualDefinition } from "./visuals.js";
+import { originalBuildingVisualProfiles, originalEntityTypeProfilesByClass } from "./originalEntityTypeProfiles.generated.js";
 
 export interface ThemeDisplayProfile {
   policy: "world-constant" | "pixel-perfect";
@@ -341,144 +342,127 @@ const sourceFiveFacingStillClips = (
   return clips;
 };
 
-const buildingConstructionClip = (
+type OriginalBuildingProfile = (typeof originalBuildingVisualProfiles)[number];
+
+function getOriginalSourceProfile(internalClass: number) {
+  const profile = originalEntityTypeProfilesByClass[String(internalClass) as keyof typeof originalEntityTypeProfilesByClass];
+  if (!profile) {
+    throw new Error(`Unknown original entity internal class ${String(internalClass)}`);
+  }
+  return profile;
+}
+
+function getOriginalBuildingProfile(internalClass: number): OriginalBuildingProfile {
+  const profile = originalBuildingVisualProfiles.find((candidate) => candidate.internalClass === internalClass);
+  if (!profile) {
+    throw new Error(`Missing original building visual profile for internal class ${String(internalClass)}`);
+  }
+  return profile;
+}
+
+function sourceBuildingStates(
   visualId: string,
   stem: string,
-  completeFrameIndex = 8,
-  progressFrameThresholds?: readonly number[],
-): AnimationClip => ({
-  frames: entityFrameRange(visualId, stem, 0, completeFrameIndex + 1),
-  fps: 8,
-  loop: false,
-  ...(progressFrameThresholds ? { progressFrameThresholds } : {}),
-});
+  profile: OriginalBuildingProfile,
+): Pick<EntityVisual, "states" | "layers"> {
+  const construction = profile.construction;
+  const body = profile.completedBody;
+  if (construction.status !== "static-confirmed-generic-selector" || body.status !== "static-confirmed-generic-health-selector") {
+    throw new Error(`Original building state profile ${String(profile.internalClass)} is not resolved for runtime use`);
+  }
 
-const buildingOverlayClip = (visualId: string, stem: string, startFrame: number, frameCount: number, fps: number): AnimationClip => ({
-  frames: entityFrameRange(visualId, stem, startFrame, frameCount),
-  fps,
-  loop: true,
-});
-
-interface SourceBuildingVisualOptions {
-  id: string;
-  assetPath: string;
-  visualId: string;
-  stem: string;
-  size: { w: number; h: number };
-  pivot: { x: number; y: number };
-  completeFrameIndex?: number;
-  idleFrameStart?: number;
-  idleFrameCount?: number;
-  idleFps?: number;
-  idleOverlayFrameStart?: number;
-  idleOverlayFrameCount?: number;
-  idleOverlayFps?: number;
-  /** Exact fnt/portrait.spr frame for this selected entity, if one is in scope. */
-  selectionPortraitFrameIndex?: number;
-}
-
-const sourceBuildingEntityVisual = ({
-  id,
-  assetPath,
-  visualId,
-  stem,
-  size,
-  pivot,
-  completeFrameIndex = 8,
-  idleFrameStart = completeFrameIndex,
-  idleFrameCount = 1,
-  idleFps = 1,
-  idleOverlayFrameStart,
-  idleOverlayFrameCount = 0,
-  idleOverlayFps = 8,
-  selectionPortraitFrameIndex,
-}: SourceBuildingVisualOptions): EntityVisual => ({
-  id,
-  kind: "entity",
-  assetPath,
-  render: {
-    srcPxPerWu: 32,
-    filtering: "nearest",
-  },
-  defaults: {
-    size,
-    pivot: { anchor: pivot },
-  },
-  ...(selectionPortraitFrameIndex === undefined
-    ? {}
-    : { portrait: selectionPortrait(selectionPortraitFrameIndex) }),
-  states: {
-    idle: {
-      clips: {
-        default: { frames: entityFrameRange(visualId, stem, idleFrameStart, idleFrameCount), fps: idleFps, loop: true },
-      },
-    },
+  const frameStart = getOriginalSourceProfile(profile.internalClass).sprite.baseFrame - 7;
+  const frameCount = construction.phaseThresholds.length;
+  const frames = entityFrameRange(visualId, stem, frameStart, frameCount);
+  const states: EntityVisual["states"] = {
+    idle: { clips: { default: { frames: [entityFrame(visualId, stem, body.healthyFrame)], fps: 1, loop: true } } },
+    damaged: { clips: { default: { frames: [entityFrame(visualId, stem, body.damagedFrame)], fps: 1, loop: true } } },
     construction: {
       clips: {
-        default: buildingConstructionClip(visualId, stem, completeFrameIndex),
+        default: {
+          frames,
+          fps: 8,
+          loop: false,
+          progressFrameThresholds: construction.phaseThresholds,
+        },
       },
     },
-  },
-  ...(idleOverlayFrameStart !== undefined && idleOverlayFrameCount > 0
-    ? {
-        layers: [
-          {
-            id: "idle-overlay",
-            states: {
-              idle: {
-                clips: {
-                  default: buildingOverlayClip(visualId, stem, idleOverlayFrameStart, idleOverlayFrameCount, idleOverlayFps),
-                },
-              },
-            },
-          },
-        ],
-      }
-    : {}),
-});
+  };
 
-interface SourceBaseBuildingVisualOptions {
-  id: string;
-  assetPath: string;
-  visualId: string;
-  stem: string;
-  size: { w: number; h: number };
-  pivot: { x: number; y: number };
-  /** Exact fnt/portrait.spr frame for this selected building. */
-  selectionPortraitFrameIndex: number;
+  if (profile.overlay.category !== "continuous") {
+    return { states };
+  }
+
+  const { frameStart: overlayStart, frameCount: overlayCount, sourceGlobalTickDivisor } = profile.overlay;
+  if (!Number.isInteger(overlayStart) || !Number.isInteger(overlayCount) || !Number.isInteger(sourceGlobalTickDivisor)) {
+    throw new Error(`Continuous overlay profile ${String(profile.internalClass)} is missing frame/tick data`);
+  }
+  const overlayFrames = entityFrameRange(visualId, stem, overlayStart, overlayCount);
+  const overlayClip: AnimationClip = {
+    frames: overlayFrames,
+    fps: 1,
+    loop: true,
+    sourceGlobalTickDivisor,
+  };
+  return {
+    states,
+    layers: [{ id: "completed-overlay", states: {
+      idle: { clips: { default: overlayClip } },
+      damaged: { clips: { default: overlayClip } },
+    } }],
+  };
 }
 
-// This deliberately exposes only the catalog-proven base frame. Size comes directly from the
-// source SPR dimensions; the foot anchor is a project rendering adaptation, not source evidence.
-const sourceBaseBuildingEntityVisual = ({
+function sourceBuildingVisualFromProfile({
   id,
   assetPath,
   visualId,
   stem,
-  size,
-  pivot,
   selectionPortraitFrameIndex,
-}: SourceBaseBuildingVisualOptions): EntityVisual => ({
-  id,
-  kind: "entity",
-  assetPath,
-  render: {
-    srcPxPerWu: 32,
-    filtering: "nearest",
-  },
-  defaults: {
-    size,
-    pivot: { anchor: pivot },
-  },
-  portrait: selectionPortrait(selectionPortraitFrameIndex),
-  states: {
-    idle: {
-      clips: {
-        default: { frames: [entityFrame(visualId, stem, 7)], fps: 1, loop: true },
-      },
-    },
-  },
-});
+  originalClass,
+}: {
+  id: string;
+  assetPath: string;
+  visualId: string;
+  stem: string;
+  selectionPortraitFrameIndex?: number;
+  originalClass: number;
+}): EntityVisual {
+  const sourceProfile = getOriginalSourceProfile(originalClass);
+  const buildingProfile = getOriginalBuildingProfile(originalClass);
+  const stateProfile = sourceBuildingStates(visualId, stem, buildingProfile);
+  if (!Number.isInteger(sourceProfile.sprite.width) || sourceProfile.sprite.width <= 0 || !Number.isInteger(sourceProfile.sprite.height) || sourceProfile.sprite.height <= 0) {
+    throw new Error(`Original source profile ${String(originalClass)} has invalid dimensions`);
+  }
+  const sourceSize = { w: sourceProfile.sprite.width, h: sourceProfile.sprite.height };
+  const baseVisual: EntityVisual = {
+    id,
+    kind: "entity",
+    assetPath,
+    render: { srcPxPerWu: 32, filtering: "nearest" },
+    originalSourceProfile: { internalClass: originalClass, status: "proven" },
+    defaults: { size: sourceSize, pivot: { anchor: { x: 0, y: 0 } } },
+    ...(selectionPortraitFrameIndex === undefined ? {} : { portrait: selectionPortrait(selectionPortraitFrameIndex) }),
+    ...stateProfile,
+  };
+  const pivot = resolveOriginalEntityFramePivot(baseVisual, sourceSize);
+  if (!pivot) throw new Error(`Failed to resolve original pivot for ${id}`);
+  return { ...baseVisual, defaults: { size: sourceSize, pivot } };
+}
+
+function sourceProfiledVisual(visual: EntityVisual, originalClass: number): EntityVisual {
+  const profile = getOriginalSourceProfile(originalClass);
+  const originalSourceProfile = { internalClass: originalClass, status: "proven" as const };
+  if (!Number.isInteger(profile.sprite.width) || profile.sprite.width <= 0 || !Number.isInteger(profile.sprite.height) || profile.sprite.height <= 0) {
+    throw new Error(`Original source profile ${String(originalClass)} has invalid dimensions`);
+  }
+  const size = { w: profile.sprite.width, h: profile.sprite.height };
+  const pivot = resolveOriginalEntityFramePivot({ ...visual, originalSourceProfile }, size);
+  if (!pivot) {
+    throw new Error(`Failed to resolve original pivot for ${visual.id}`);
+  }
+  return { ...visual, originalSourceProfile, defaults: { ...visual.defaults, size, pivot } };
+}
 
 /**
  * Provisional hill0 slot map from the source asset naming notes.
@@ -1429,197 +1413,71 @@ export const ryuSeongRyongEntityVisual = {
   },
 } as const satisfies EntityVisual;
 
-export const townCenterEntityVisual = {
-  id: "korean-hq",
-  kind: "entity",
-  assetPath: "entities/town-center",
-  render: {
-    srcPxPerWu: 32,
-    filtering: "nearest",
-  },
-  defaults: {
-    size: { w: 131, h: 131 },
-    pivot: { anchor: { x: 66, y: 101 } },
-  },
-  portrait: selectionPortrait(52),
-  states: {
-    idle: {
-      clips: {
-        default: { frames: [entityFrame("town_center", "hqk", 7)], fps: 1, loop: true },
-      },
-    },
-    damaged: {
-      clips: {
-        default: { frames: [entityFrame("town_center", "hqk", 8)], fps: 1, loop: true },
-      },
-    },
-    construction: {
-      clips: {
-        default: buildingConstructionClip("town_center", "hqk", 7, [0, 10, 20, 30, 40, 50, 70, 100]),
-      },
-    },
-  },
-} as const satisfies EntityVisual;
+export const townCenterEntityVisual = sourceBuildingVisualFromProfile({ id: "korean-hq", assetPath: "entities/town-center", visualId: "town_center", stem: "hqk", selectionPortraitFrameIndex: 52, originalClass: 49 });
+export const houseEntityVisual = sourceBuildingVisualFromProfile({ id: "korean-mill-house-proxy", assetPath: "entities/house", visualId: "house", stem: "millk", selectionPortraitFrameIndex: 51, originalClass: 48 });
+export const barracksEntityVisual = sourceBuildingVisualFromProfile({ id: "korean-barracks", assetPath: "entities/barracks", visualId: "barracks", stem: "barrackk", selectionPortraitFrameIndex: 54, originalClass: 50 });
+export const beaconEntityVisual = sourceBuildingVisualFromProfile({ id: "korean-signal-beacon", assetPath: "entities/korean-signal-beacon", visualId: "beacon", stem: "firehousek", originalClass: 52 });
 
-export const houseEntityVisual = {
-  id: "korean-mill-house-proxy",
-  kind: "entity",
-  assetPath: "entities/house",
-  render: {
-    srcPxPerWu: 32,
-    filtering: "nearest",
-  },
-  defaults: {
-    size: { w: 114, h: 107 },
-    pivot: { anchor: { x: 57, y: 84 } },
-  },
-  portrait: selectionPortrait(51),
-  states: {
-    idle: {
-      clips: {
-        default: { frames: [entityFrame("house", "millk", 7)], fps: 1, loop: true },
-      },
-    },
-    construction: {
-      clips: {
-        default: buildingConstructionClip("house", "millk"),
-      },
-    },
-  },
-} as const satisfies EntityVisual;
-
-export const barracksEntityVisual = {
-  id: "korean-barracks",
-  kind: "entity",
-  assetPath: "entities/barracks",
-  render: {
-    srcPxPerWu: 32,
-    filtering: "nearest",
-  },
-  defaults: {
-    size: { w: 128, h: 117 },
-    pivot: { anchor: { x: 64, y: 91 } },
-  },
-  portrait: selectionPortrait(54),
-  states: {
-    idle: {
-      clips: {
-        default: { frames: [entityFrame("barracks", "barrackk", 7)], fps: 1, loop: true },
-      },
-    },
-    construction: {
-      clips: {
-        default: buildingConstructionClip("barracks", "barrackk", 7),
-      },
-    },
-  },
-} as const satisfies EntityVisual;
-
-export const beaconEntityVisual = {
-  id: "korean-signal-beacon",
-  kind: "entity",
-  assetPath: "entities/korean-signal-beacon",
-  render: {
-    srcPxPerWu: 32,
-    filtering: "nearest",
-  },
-  defaults: {
-    size: { w: 114, h: 108 },
-    pivot: { anchor: { x: 57, y: 84 } },
-  },
-  states: {
-    idle: {
-      clips: {
-        default: { frames: [entityFrame("beacon", "firehousek", 7)], fps: 1, loop: true },
-      },
-    },
-    damaged: {
-      clips: {
-        default: { frames: [entityFrame("beacon", "firehousek", 8)], fps: 1, loop: true },
-      },
-    },
-    construction: {
-      clips: {
-        default: buildingConstructionClip("beacon", "firehousek", 7, [0, 10, 20, 30, 40, 50, 70, 100]),
-      },
-    },
-  },
-} as const satisfies EntityVisual;
-
-export const japaneseCampHouseEntityVisual = sourceBuildingEntityVisual({
+export const japaneseCampHouseEntityVisual = sourceBuildingVisualFromProfile({
   id: "japanese-camp-house",
   assetPath: "entities/japanese-camp-house",
   visualId: "japanese_camp_house",
   stem: "millj",
-  size: { w: 109, h: 117 },
-  pivot: { x: 55, y: 92 },
-  // K01 class-57 catalog/base-frame evidence selects 7. Other building states remain unbound.
-  idleFrameStart: 7,
-  idleFrameCount: 1,
-  idleFps: 1,
+  originalClass: 57,
   selectionPortraitFrameIndex: 28,
 });
 
-export const japaneseCampBarracksEntityVisual = sourceBaseBuildingEntityVisual({
+export const japaneseCampBarracksEntityVisual = sourceBuildingVisualFromProfile({
   id: "japanese-camp-barracks",
   assetPath: "entities/japanese-camp-barracks",
   visualId: "japanese_camp_barracks",
   stem: "barrackj",
-  size: { w: 125, h: 110 },
-  pivot: { x: 63, y: 86 },
+  originalClass: 60,
   selectionPortraitFrameIndex: 22,
 });
 
-export const japaneseCampTowerEntityVisual = sourceBaseBuildingEntityVisual({
+export const japaneseCampTowerEntityVisual = sourceBuildingVisualFromProfile({
   id: "japanese-camp-tower",
   assetPath: "entities/japanese-camp-tower",
   visualId: "japanese_camp_tower",
   stem: "towerj",
-  size: { w: 71, h: 98 },
-  pivot: { x: 36, y: 74 },
+  originalClass: 63,
   selectionPortraitFrameIndex: 120,
 });
 
-export const japaneseCampFirehouseEntityVisual = sourceBuildingEntityVisual({
+export const japaneseCampFirehouseEntityVisual = sourceBuildingVisualFromProfile({
   id: "japanese-camp-firehouse",
   assetPath: "entities/japanese-camp-firehouse",
   visualId: "japanese_camp_firehouse",
   stem: "firehousej",
-  size: { w: 113, h: 123 },
-  pivot: { x: 57, y: 96 },
-  // K01 class-62 catalog/base-frame evidence selects 7. Other building states remain unbound.
-  idleFrameStart: 7,
-  idleFrameCount: 1,
-  idleFps: 1,
+  originalClass: 62,
   selectionPortraitFrameIndex: 24,
 });
 
-export const japaneseCampAdvancedTowerEntityVisual = sourceBuildingEntityVisual({
+export const japaneseCampAdvancedTowerEntityVisual = {
   id: "japanese-camp-advanced-tower",
+  kind: "entity",
   assetPath: "entities/japanese-camp-advanced-tower",
-  visualId: "japanese_camp_advanced_tower",
-  stem: "advtowerj",
-  size: { w: 75, h: 98 },
-  pivot: { x: 38, y: 74 },
-});
+  render: { srcPxPerWu: 32, filtering: "nearest" },
+  defaults: { size: { w: 75, h: 98 }, pivot: { anchor: { x: 38, y: 74 } } },
+  states: { idle: { clips: { default: { frames: [entityFrame("japanese_camp_advanced_tower", "advtowerj", 8)], fps: 1, loop: true } } } },
+} as const satisfies EntityVisual;
 
-export const koreanTrainingCommandEntityVisual = sourceBaseBuildingEntityVisual({
+export const koreanTrainingCommandEntityVisual = sourceBuildingVisualFromProfile({
   id: "korean-training-command",
   assetPath: "entities/korean-training-command",
   visualId: "korean_training_command",
   stem: "advbarrackk",
-  size: { w: 137, h: 118 },
-  pivot: { x: 69, y: 92 },
+  originalClass: 51,
   selectionPortraitFrameIndex: 44,
 });
 
-export const japaneseHqEntityVisual = sourceBaseBuildingEntityVisual({
+export const japaneseHqEntityVisual = sourceBuildingVisualFromProfile({
   id: "japanese-hq",
   assetPath: "entities/japanese-hq",
   visualId: "japanese_hq",
   stem: "jhq",
-  size: { w: 120, h: 133 },
-  pivot: { x: 60, y: 104 },
+  originalClass: 58,
   selectionPortraitFrameIndex: 26,
 });
 
@@ -1661,20 +1519,20 @@ export const defaultTheme = {
   },
   visuals: {
     hill0: hill0TerrainVisual,
-    "villager-korean-farmer": villagerEntityVisual,
-    "korean-swordsman": swordsmanEntityVisual,
-    "korean-monk": koreanMonkEntityVisual,
-    "japanese-swordsman": japaneseSwordsmanEntityVisual,
-    "korean-archer": archerEntityVisual,
-    "japanese-gunner": japaneseGunnerEntityVisual,
-    "japanese-farmer": japaneseFarmerEntityVisual,
-    "japanese-shrine-maiden": japaneseShrineMaidenEntityVisual,
-    "japanese-samurai": japaneseSamuraiEntityVisual,
-    "japanese-turtle-tank": japaneseTurtleTankEntityVisual,
-    "japanese-konishi": japaneseKonishiEntityVisual,
-    "korean-general-k4": generalK4EntityVisual,
-    "korean-gwon-yul": gwonYulEntityVisual,
-    "korean-ryu-seong-ryong": ryuSeongRyongEntityVisual,
+    "villager-korean-farmer": sourceProfiledVisual(villagerEntityVisual, 7),
+    "korean-swordsman": sourceProfiledVisual(swordsmanEntityVisual, 2),
+    "korean-monk": sourceProfiledVisual(koreanMonkEntityVisual, 11),
+    "japanese-swordsman": sourceProfiledVisual(japaneseSwordsmanEntityVisual, 3),
+    "korean-archer": sourceProfiledVisual(archerEntityVisual, 4),
+    "japanese-gunner": sourceProfiledVisual(japaneseGunnerEntityVisual, 12),
+    "japanese-farmer": sourceProfiledVisual(japaneseFarmerEntityVisual, 31),
+    "japanese-shrine-maiden": sourceProfiledVisual(japaneseShrineMaidenEntityVisual, 16),
+    "japanese-samurai": sourceProfiledVisual(japaneseSamuraiEntityVisual, 13),
+    "japanese-turtle-tank": sourceProfiledVisual(japaneseTurtleTankEntityVisual, 14),
+    "japanese-konishi": sourceProfiledVisual(japaneseKonishiEntityVisual, 82),
+    "korean-general-k4": sourceProfiledVisual(generalK4EntityVisual, 79),
+    "korean-gwon-yul": sourceProfiledVisual(gwonYulEntityVisual, 76),
+    "korean-ryu-seong-ryong": sourceProfiledVisual(ryuSeongRyongEntityVisual, 78),
     "korean-hq": townCenterEntityVisual,
     "korean-mill-house-proxy": houseEntityVisual,
     "korean-barracks": barracksEntityVisual,
@@ -1686,7 +1544,7 @@ export const defaultTheme = {
     "japanese-camp-advanced-tower": japaneseCampAdvancedTowerEntityVisual,
     "korean-training-command": koreanTrainingCommandEntityVisual,
     "japanese-hq": japaneseHqEntityVisual,
-    "korean-royal-cart": royalCartEntityVisual,
+    "korean-royal-cart": sourceProfiledVisual(royalCartEntityVisual, 92),
   },
   terrainBindings: {
     grass: { flat: "hill0", elevated: "hill0" },
@@ -1713,12 +1571,26 @@ export const defaultTheme = {
     "japanese-camp-barracks": "japanese-camp-barracks",
     "japanese-camp-tower": "japanese-camp-tower",
     "japanese-camp-firehouse": "japanese-camp-firehouse",
-    "japanese-camp-advanced-tower": "japanese-camp-advanced-tower",
     "korean-training-command": "korean-training-command",
     "japanese-hq": "japanese-hq",
     "royal-cart": "korean-royal-cart",
   },
 } as const satisfies ThemeDefinition;
+
+/** Fail-closed audit for every gameplay entity binding in a theme. */
+export function assertThemeSourceProfiles(theme: ThemeDefinition): void {
+  for (const [binding, visualId] of Object.entries(theme.entityBindings)) {
+    const visual = theme.visuals[visualId];
+    if (!visual || visual.kind !== "entity") {
+      throw new Error(`Gameplay entity binding ${binding} resolves to missing/non-entity visual ${visualId}`);
+    }
+    const source = visual.originalSourceProfile;
+    if (!source) {
+      throw new Error(`Gameplay entity visual ${visualId} (${binding}) has no original source profile`);
+    }
+    getOriginalSourceProfile(source.internalClass);
+  }
+}
 
 export interface ThemeFrameRef {
   visual: VisualDefinition;

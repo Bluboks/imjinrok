@@ -443,10 +443,10 @@ export function extractK01MissionTimerReset(options = {}) {
       `${label} canonical analysis source SHA-256`,
     );
   }
-  assertEqual(documents.manifest.seedCount, 199, "manifest seed count");
+  assertEqual(documents.manifest.seedCount, 202, "manifest seed count");
   assertEqual(
     documents.manifest.seedFunctionCount,
-    191,
+    194,
     "manifest seeded function count",
   );
 

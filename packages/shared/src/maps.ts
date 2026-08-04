@@ -32,6 +32,8 @@ export interface TileTilesetVisualSelection {
    * not assign a terrain or world-coordinate meaning to the source data.
    */
   sourcePixelOffset?: { x: number; y: number };
+  /** Optional raw source-raster shift retained independently from placement pixels. */
+  sourceRawRasterVerticalShiftPx?: number;
   /**
    * The selected flat artwork already contains relief. Renderers must not add
    * a generic elevation overlay for this tile unless an explicit overlay is
@@ -48,6 +50,21 @@ export interface TileTilesetVisualSelection {
 export interface TileFogVisualSelection {
   familyIndex?: number;
 }
+
+/**
+ * Explicit map-level source-raster coverage adaptation. This is not an
+ * original draw-layer claim: it is a product policy applied before selected
+ * source frames. The selected frame's source placement offset is retained for
+ * the coverage pass.
+ */
+export interface SourceRasterCoveragePolicy {
+  mode: "canonical-source-art";
+  assetKey: string;
+  placement: "selected-frame-offset";
+  evidenceStatus: "의도적 적응";
+}
+
+export const K01_SOURCE_RASTER_COVERAGE_ASSET_KEY = "k01-source:grss1:0000";
 
 export interface TileCell {
   terrain: TerrainType;
@@ -89,6 +106,12 @@ export interface MapDefinition {
   fogVisualProfileId?: string;
   /** Explicit alpha-compositing policy for source tile imagery. */
   terrainCompositionProfile?: "source-raster" | "source-raster-underlay";
+  sourceRasterCoverage?: SourceRasterCoveragePolicy;
+  /**
+   * Optional opaque RGB clear color for each source-raster output region.
+   * Leaving this absent preserves the renderer's transparent clear behavior.
+   */
+  sourceRasterClearColor?: number;
   environmentVisualProfileId?: string;
   resourceVisualSetId?: string;
   /**

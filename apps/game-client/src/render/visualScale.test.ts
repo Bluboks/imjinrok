@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import type { FrameRef, VisualBase } from "@shared";
-import { getGroundContactPlacement, getGroundContactPlacementAtLiftPixels } from "./visualScale.js";
+import { defaultTheme, type FrameRef, type VisualBase } from "@shared";
+import { getFramePivot, getGroundContactPlacement, getGroundContactPlacementAtLiftPixels } from "./visualScale.js";
 
 const visual: VisualBase = {
   id: "test-entity",
@@ -82,4 +82,30 @@ test("uses caller-resolved terrain lift pixels independently of source frame piv
     () => getGroundContactPlacementAtLiftPixels(visual, { textureKey: "terrain" }, { x: 0, y: 0 }, -1),
     /non-negative finite pixel value/u,
   );
+});
+
+test("source profiles compute class-76 anchors from each current frame size", () => {
+  const visual = defaultTheme.visuals["korean-gwon-yul"];
+  assert.equal(visual.kind, "entity");
+  if (visual.kind !== "entity") return;
+  assert.deepEqual(getFramePivot(visual, { textureKey: "gwon", size: { w: 128, h: 108 } }), {
+    anchor: { x: 64, y: 85 },
+  });
+  assert.deepEqual(getFramePivot(visual, { textureKey: "gwon-variant", size: { w: 129, h: 109 } }), {
+    anchor: { x: 64, y: 86 },
+  });
+});
+
+test("center-mode source profiles use truncated current frame centers", () => {
+  const visual: VisualBase = {
+    id: "center-source",
+    kind: "entity",
+    assetPath: "test",
+    render: { srcPxPerWu: 32 },
+    originalSourceProfile: { internalClass: 6 },
+    defaults: { size: { w: 96, h: 96 }, pivot: { anchor: { x: 0, y: 0 } } },
+  };
+  assert.deepEqual(getFramePivot(visual, { textureKey: "center", size: { w: 95, h: 97 } }), {
+    anchor: { x: 47, y: 48 },
+  });
 });

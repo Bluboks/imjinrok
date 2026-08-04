@@ -32,7 +32,7 @@ node tools/imjinrok/extract-k01-accepted-update-scheduler.mjs \
 | `analysis/generated/imjinrok2/functions.json` | 1,468,333 | `7e071fdfe425d22447780c265fe1d3fd271a1bedd1773682bebcb8ddc6d2e16e` |
 | `analysis/generated/imjinrok2/references.json` | 17,206,569 | `f64cfa6f04bc39573552f42a8b7bdd5b08fea1ba774d05865162d1d80daaf9a5` |
 | `analysis/generated/imjinrok2/jump-tables.json` | 607,724 | `0ae517eb172f61b974ca7a4411e64c1cc42065c462ed53b3065ab2da633dfe2f` |
-| `analysis/generated/imjinrok2/seeds.json` | 9,112,063 | `8e7c8821e9c84c5d0877bb977b119b3b878271502b36bf75e7426b570507bfb7` |
+| `analysis/generated/imjinrok2/seeds.json` | 9,436,451 | `386b0f4e86c3376f34fe2b50fedb7e45b762c30784d4ebcc0387aa6f431811b2` |
 
 `config.hq` 문자열은 EXE `0x004bb980`의 NUL 포함 bytes이며 SHA-256은
 `449c3469bb28cf424c82acaadb56b4f977d0b4aba5fa4d3824ebe4079fd2e836`다. generated artifact의
