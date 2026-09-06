@@ -15,19 +15,13 @@ test("extracts the hash-bound gameplay compositor and exact camera(0,0) vector",
   const first = extractK01GameplayTerrainCompositorEvidence();
   const second = extractK01GameplayTerrainCompositorEvidence();
   assert.deepEqual(first, second);
-  assert.equal(first.compositor.target.width, fixture.compositor.target.width);
-  assert.equal(first.compositor.target.height, fixture.compositor.target.height);
-  assert.deepEqual(first.compositor.clip, fixture.compositor.clip);
-  assert.equal(first.compositor.clear.index, fixture.compositor.clearIndex);
-  assert.deepEqual(first.compositor.clear.paletteEntryRgb, fixture.compositor.paletteEntry0Rgb);
-  assert.deepEqual(first.compositor.payload, fixture.compositor.payload);
-  const vector = {
-    ...first.compositor.vector,
-    cells: first.compositor.vector.cells.map(({ x, y, stem, frame, rawVerticalShiftPx, draw, payloadWrites }) => ({ x, y, stem, frame, rawVerticalShiftPx, draw, payloadWrites })),
-  };
-  assert.deepEqual(vector, fixture.compositor.vector);
+  assert.deepEqual(first, fixture);
+  assert.equal(first.compositor.target.width, 640);
+  assert.equal(first.compositor.target.height, 384);
+  assert.deepEqual(first.compositor.clip, { left: 0, top: 0, right: 639, bottom: 383 });
+  assert.equal(first.compositor.clear.index, 0);
+  assert.deepEqual(first.compositor.clear.paletteEntryRgb, [0, 0, 0]);
   assert.deepEqual(first.channelDigests, fixture.channelDigests);
-  assert.deepEqual(first.functions.map(({ name, bodyRange, instructionCount, instructionSha256, rawBodySha256 }) => ({ name, bodyRange, instructionCount, instructionSha256, rawBodySha256 })), fixture.functions);
   assert.equal(first.compositor.defaultBlitter.payloadIndex0Opaque, true);
   assert.equal(first.compositor.defaultBlitter.payloadIndexFeOpaqueIfPresent, true);
   assert.equal(first.compositor.defaultBlitter.skippedSpansRetainClear, true);
@@ -78,11 +72,22 @@ test("rejects tampered selected YTL, palette, generated artifact, and function m
   writeFileSync(alteredPalette, palette);
   assert.throws(() => extractK01GameplayTerrainCompositorEvidence({ originalRoot: sourceRoot }), /night3\.pal SHA-256 mismatch/u);
 
+  const baseline = extractK01GameplayTerrainCompositorEvidence();
   const alteredArtifact = join(directory, "k01SourceTileVisualArtifact.ts");
-  let artifact = readFileSync(resolve("packages/shared/src/generated/k01SourceTileVisualArtifact.ts"), "utf8");
+  const canonicalArtifact = readFileSync(resolve("packages/shared/src/generated/k01SourceTileVisualArtifact.ts"), "utf8");
+  let artifact = canonicalArtifact;
   artifact = artifact.replace(/(pairBytesBase64": ")([A-Za-z0-9+/])/, "$1B");
   writeFileSync(alteredArtifact, artifact);
   assert.throws(() => extractK01GameplayTerrainCompositorEvidence({ artifactPath: alteredArtifact }), /object stream|frame stream/u);
+
+  const placementMatch = canonicalArtifact.match(/("placementOffsetYBytesBase64":\s*")([^"]+)(")/u);
+  assert.ok(placementMatch, "generated artifact must expose the placement stream for the independence regression");
+  const placementByteCount = Buffer.from(placementMatch[2], "base64").length;
+  const placementOnlyArtifact = join(directory, "k01SourceTileVisualArtifact-placement-zero.ts");
+  const zeroPlacementArtifact = canonicalArtifact.replace(placementMatch[0], `${placementMatch[1]}${Buffer.alloc(placementByteCount).toString("base64")}${placementMatch[3]}`);
+  writeFileSync(placementOnlyArtifact, zeroPlacementArtifact);
+  const placementOnlyReport = extractK01GameplayTerrainCompositorEvidence({ artifactPath: placementOnlyArtifact });
+  assert.deepEqual(placementOnlyReport.compositor.vector, baseline.compositor.vector);
 
   const alteredFunctions = join(directory, "functions.json");
   let functions = readFileSync(resolve("analysis/generated/imjinrok2/functions.json"), "utf8");

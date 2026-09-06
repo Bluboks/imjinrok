@@ -23,9 +23,9 @@ const EXPECTED_CHANNEL_DIGESTS: Record<(typeof EXPECTED_CHANNEL_IDS)[number], st
   frameIndex: "7904f0413f370b288b7c7f1bc9113fd4fc856529d06849b7a47f3c86579b2297",
   fogFamily: "7a9fcc150cf0128af19d57f742a6c160c6b5b8b003a81c069fb3167427208f88",
   placementSelector: "5938e85f3671d6c464c1b3af9a429dbfc2cf1905a2f4943302660b458f91440b",
-  placementLookup: "967eedb2dc77a95e6270119ece23d9f47ca97c3b18ffa7d391d34e461b284f4c",
-  placementHelperResult: "e4331b4b5dff91084b34db4018c5905a016cdf9c0d74d02c0d5af88dabfc6bc6",
-  rawRasterVerticalShift: "76cc670258325ebc671d19b6f864768bf376328a7573ca7b29887c780e50b864",
+  placementLookup: "e7331ac9f6c848074249f9b44c2fa4da3b372afff01b8a34efa6695aa66d9260",
+  placementHelperResult: "bb5e2d1260addc719ba843e1582a3b5d889e585b7c5872f3a227c57388d4d770",
+  rawRasterVerticalShift: "4b58471674a5e89bb553cb995474a3847458eb9e295d68aef057439093b0fb52",
   passabilityPrimary: "c7ff06e4148c20ed8eeb1de8f409fd2a8068b3a716888879c92a98ec14149f68",
   passabilityAuxiliary: "097951c3f1a907741e797ba9873dc6f81f4686d0fecc1877059371bf7c0469b7",
 };

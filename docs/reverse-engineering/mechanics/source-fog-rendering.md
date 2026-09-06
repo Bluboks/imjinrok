@@ -8,7 +8,7 @@ callee의 제한된 draw-rectangle 보정, state별 호출과 subframe 합성에
 | 구분 | 상태 | 범위 |
 | --- | --- | --- |
 | 분석 | 정적 확정 | `fog0..14`/`black` loader record, 16-byte lookup, literal state `4`/`8`의 별도 mask 경로, caller isometric projection·six stack argument order, `FUN_0046a530`의 `arg1-32`/low-nibble helper vertical adjustment, `map+0x4a0c4+x*180+y` family byte→record, 3×2 six-subframe loop·frame algebra와 두 call path |
-| 재현 | 재현 완료 | EXE·SPR hash/header·atlas fields, K01 map hash·family/low-nibble/helper stream, VA/raw offset/hash·direct call edge, 16 lookup vector, projection/draw synthetic·K01 vector, record address·frame vector와 loop bound의 결정론 추출 |
+| 재현 | 재현 완료 | EXE·SPR hash/header·atlas fields, K01 map hash·family/low-nibble stream, VA/raw offset/hash·direct call edge, 16 lookup vector, corrected projection/draw K01 vectors, record/frame loop bound와 fail-closed inputs |
 | 구현 | 부분 이식·의도적 적응 | 15×14 `64×48` six-subframe composite와 K01 x-major family stream은 재현했다. lifecycle evidence가 뒷받침하는 literal `0`=visible, `4`=explored, `8`=unseen을 client가 부분 이식한다. product grid의 update lifecycle, alpha/tint, web chunk scheduling과 broader product placement는 명시적 적응 또는 미확정이다. |
 
 ## 고정 입력과 생성 산출물
@@ -65,8 +65,10 @@ runtime record payload의 사람용 자료구조 이름을 확정하는 주장�
    읽고 `0x3c`를 더한다. 결과는 `0x00bcdff8 + index * 0x0bf8` common record selection으로 이어진다.
 5. entry prologue는 `drawLeft = arg1 - 32`로 만든다. cell의 low nibble이 정확히 `2`인 in-bounds path는
    `0x0046a591→0x0046d650` helper result를 써 `drawTop = arg2 - (int16(helper)<<4)`로 만든다. 나머지 path는
-   `0x0046a5a9→0x0046d650`을 거쳐 `drawTop = arg2 - ((abs(int16(helper))+1)<<4)`로 만든다. K01 hash-bound
-   3,600 cell의 helper return은 모두 `0`이므로 low-nibble `2`는 0 px, 그 외는 16 px subtract다.
+   `0x0046a5a9→0x0046d650`을 거쳐 `drawTop = arg2 - ((abs(int16(helper))+1)<<4)`로 만든다. K01 corrected
+   helper/raw-shift arithmetic는 [K01 tile placement boundary](k01-tile-placement-elevation-boundary.md)의
+   `0x0046d69d..0x0046d6b4` derivation과 placement fixture를 단일 출처로 삼는다. 이전 all-helper-zero와
+   raw `0/16`만의 분류는 주소 산술을 누락한 기존 잘못된 계산의 측정값이다.
 6. state `4`는 `FUN_0044e3c0` call path, caller가 전달한 state `8`은 distinct
    `FUN_00452b30` call path를 사용한다. 각 path의 loop bound는 outer `< 3`, inner `< 2`이므로
    full tile은 6 subframe의 3×2 composite이다.
@@ -90,12 +92,13 @@ signed 16-bit input이라 K01 밖의 positive/negative branch를 synthetic vecto
 | synthetic projection | `(x,y,cameraX,cameraY)=(3,5,1,2)`, viewport `(10,20)-(109,79)` → `projected=(28,130)` |
 | synthetic low-nibble `2` | `projected=(200,100)`, helper `3` → `drawLeft=168`, `drawTop=52`, shift `48` |
 | synthetic other branch | `projected=(200,100)`, helper `-1` → `drawLeft=168`, `drawTop=68`, shift `32` |
-| K01 map vector | map camera `(13,8)`, explicit synthetic viewport `(0,0)-(639,479)`, cell `(0,0)` low nibble `1`/helper `0` → `projected=(160,-96)`, `draw=(128,-112)` |
-| K01 map vector | same camera/viewport, cell `(0,1)` low nibble `2`/helper `0` → `projected=(128,-80)`, `draw=(96,-80)` |
+| K01 map vector | map camera `(13,8)`, explicit synthetic viewport `(0,0)-(639,479)`, cell `(0,0)` low nibble `1`, selector `2`, lookup `14`, helper `1` → `projected=(160,-96)`, `draw=(128,-128)`, shift `32` |
+| K01 map vector | same camera/viewport, cell `(0,1)` low nibble `2`, selector `2`, lookup `15`, helper `2` → `projected=(128,-80)`, `draw=(96,-112)`, shift `32` |
 
 명시적인 `640×480` K01 vector viewport는 산술을 재현 가능하게 만들기 위한 입력이며, 해당 viewport global이
-`k01.map`에 저장된다는 주장이 아니다. K01 full stream은 helper `0:3600`, low nibble `1:735/2:2865`, vertical shift
-`0:2865/16:735`, stream SHA-256 `2f631bc0209fe72db3c4310b7602fb3fc84e23e871561152d450acbfbd0d7864`를 고정한다.
+`k01.map`에 저장된다는 주장이 아니다. K01 corrected raw-shift stream과 digest는
+[placement evidence fixture](../../../analysis/fixtures/k01-tile-placement-elevation-evidence.json)와 이 문서의
+fixture가 교차 고정한다. 이 stream은 placement correction의 canonical raw-shift domain을 소비한다.
 
 `64×48` six-subframe composite에 대해서 이 caller/callee 한정 placement는 **local image anchor**를 `(32,0)`으로 닫는다:
 `drawLeft=projectedX-32`, `drawTop=projectedY-rawVerticalShift`. 이는 renderer-wide pivot semantics, viewport ownership,
@@ -153,7 +156,7 @@ table-domain 밖의 mask와 caller-reachable `0..13` 밖의 selector는 helper�
   `explored`/`unseen`을 각각 literal `4`/`8` renderer path로 변환한다. 이 product-grid conversion은 source
   state 의미와 분리된 adapter boundary다. explored alpha `0.58`, `64×48` image의 product ground-contact placement와
   visibility update scheduler는 **source-backed adaptation**이다. 이번 caller/callee slice의 projected argument와 local
-  `(32,0)` anchor/`0|16` raw vertical shift는 정적 확정했지만, 그것만으로 full original surface clip/mode,
+  `(32,0)` anchor와 corrected raw vertical-shift domain은 정적 확정했지만, 그것만으로 full original surface clip/mode,
   renderer-wide pivot, alpha/blend 또는 web placement policy를 일반화하지 않는다.
 - source composite의 family/selector/six-frame identity는 보존한다. 현재 web adapter의 dark tint는 밝은
   source palette가 fog gap처럼 보이는 것을 막기 위한 제품 overlay policy이며 original palette/blend parity가 아니다.

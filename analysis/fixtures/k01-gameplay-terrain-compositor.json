@@ -1,39 +1,312 @@
 {
+  "question": "What exact black-clear, YTL payload, camera traversal, and default normal-tile blit contract is established by FUN_004676e0?",
+  "analysisStatus": "정적 확정 (bounded gameplay terrain viewport, indexed clear, palette entry 0, direct YTL row payload, and default blitter call edges)",
+  "reproductionStatus": "재현 완료 (hash-bound extractor, payload statistics, 2x2 camera(0,0) vector, crop digest/pixels, and fail-closed source hashes)",
+  "implementationStatus": "source-backed-adaptation",
   "sources": {
-    "executableSha256": "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e",
-    "k01MapSize": 1097100,
-    "k01MapSha256": "43ec3a173032f74c12d3cce1db1078b076b651ed79070a0914673a5b65da99cb"
+    "executable": {
+      "path": "original/imjinrok2/imjinrok2.exe",
+      "sha256": "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e"
+    },
+    "k01Map": {
+      "path": "original/imjinrok2/stagemap/k01.map",
+      "size": 1097100,
+      "sha256": "43ec3a173032f74c12d3cce1db1078b076b651ed79070a0914673a5b65da99cb"
+    },
+    "functions": {
+      "path": "analysis/generated/imjinrok2/functions.json",
+      "sourceSha256": "7e071fdfe425d22447780c265fe1d3fd271a1bedd1773682bebcb8ddc6d2e16e"
+    },
+    "placementFixture": {
+      "path": "analysis/fixtures/k01-tile-placement-elevation-evidence.json",
+      "sourceSha256": "f71796a7977daf5341c61eabb2944de2974dcc0e73abc213236e18429cc101af"
+    },
+    "projectionFixture": {
+      "path": "analysis/fixtures/k01-cell-projection-evidence.json",
+      "sourceSha256": "76afc886a247b484da9680d87b3cb15a3b50bc7cc31941b363d1df2499a4e536"
+    }
   },
   "functions": [
-    { "name": "FUN_004676e0", "bodyRange": "0x004676e0-0x00467ddc", "instructionCount": 507, "instructionSha256": "a1d0c6254193bc293f4010fcd81250c43549a5af500fda5b59c076b77888cbf3", "rawBodySha256": "0e65cedefd60f32f2c9258d93df2be1be8b8a891e9e6f8226684ae05e4b867b5" },
-    { "name": "FUN_00469510", "bodyRange": "0x00469510-0x00469916", "instructionCount": 341, "instructionSha256": "28849833f557b0f4863c88318828d72b8039639450bd42b5623927dd8ef036e3", "rawBodySha256": "1d05579e1c2179989bd1441cb54510de8df4ecb24157dac496fda7f3c6c8f9ce" },
-    { "name": "FUN_0044cc20", "bodyRange": "0x0044cc20-0x0044cccb", "instructionCount": 72, "instructionSha256": "027fcaf0c93f141968f67759f0e5674fbbc009d470fc77946e241c07256c83f0", "rawBodySha256": "2ccc49b35b30e1b7a02d9766efaac64b1d12b0e6627871c1cd3a49417a5f45c1" },
-    { "name": "FUN_00454250", "bodyRange": "0x00454250-0x004542dd", "instructionCount": 51, "instructionSha256": "e98c31b5b51966ff6762f0167db71234cba88158267c085e8398de10d51ec12c", "rawBodySha256": "a4c2f28f7eec824ffc374f7e116a7e550233d4be3e24b1e2ebbdb03394798075" }
+    {
+      "name": "FUN_004676e0",
+      "address": "0x004676e0",
+      "bodyRange": "0x004676e0-0x00467ddc",
+      "rawBodyByteRange": "0x004676e0-0x00467ddd (end exclusive)",
+      "bodySize": 1789,
+      "rawBodySha256": "0e65cedefd60f32f2c9258d93df2be1be8b8a891e9e6f8226684ae05e4b867b5",
+      "instructionCount": 507,
+      "instructionSha256": "a1d0c6254193bc293f4010fcd81250c43549a5af500fda5b59c076b77888cbf3",
+      "callees": [
+        "0x0044cc20",
+        "0x00469510"
+      ]
+    },
+    {
+      "name": "FUN_00469510",
+      "address": "0x00469510",
+      "bodyRange": "0x00469510-0x00469916",
+      "rawBodyByteRange": "0x00469510-0x00469917 (end exclusive)",
+      "bodySize": 1031,
+      "rawBodySha256": "1d05579e1c2179989bd1441cb54510de8df4ecb24157dac496fda7f3c6c8f9ce",
+      "instructionCount": 341,
+      "instructionSha256": "28849833f557b0f4863c88318828d72b8039639450bd42b5623927dd8ef036e3",
+      "callees": [
+        "0x00454250",
+        "0x004542e0",
+        "0x004547c0",
+        "0x00454960",
+        "0x0046d650"
+      ]
+    },
+    {
+      "name": "FUN_0044cc20",
+      "address": "0x0044cc20",
+      "bodyRange": "0x0044cc20-0x0044cccb",
+      "rawBodyByteRange": "0x0044cc20-0x0044cccc (end exclusive)",
+      "bodySize": 172,
+      "rawBodySha256": "2ccc49b35b30e1b7a02d9766efaac64b1d12b0e6627871c1cd3a49417a5f45c1",
+      "instructionCount": 72,
+      "instructionSha256": "027fcaf0c93f141968f67759f0e5674fbbc009d470fc77946e241c07256c83f0",
+      "callees": []
+    },
+    {
+      "name": "FUN_00454250",
+      "address": "0x00454250",
+      "bodyRange": "0x00454250-0x004542dd",
+      "rawBodyByteRange": "0x00454250-0x004542de (end exclusive)",
+      "bodySize": 142,
+      "rawBodySha256": "a4c2f28f7eec824ffc374f7e116a7e550233d4be3e24b1e2ebbdb03394798075",
+      "instructionCount": 51,
+      "instructionSha256": "e98c31b5b51966ff6762f0167db71234cba88158267c085e8398de10d51ec12c",
+      "callees": []
+    }
+  ],
+  "evidencePoints": [
+    {
+      "va": "0x004676f7",
+      "rawOffset": "0x000676f7",
+      "bytes": "68 80 01 00 00 68 80 02 00 00 68 74 6f c0 00",
+      "meaning": "FUN_004676e0 locks the 640x384 target."
+    },
+    {
+      "va": "0x0046773a",
+      "rawOffset": "0x0006773a",
+      "bytes": "68 7f 01 00 00 68 7f 02 00 00 6a 00 6a 00",
+      "meaning": "FUN_004676e0 installs clip edges 0..639 and 0..383."
+    },
+    {
+      "va": "0x00467b73",
+      "rawOffset": "0x00067b73",
+      "bytes": "e8 a8 50 fe ff",
+      "meaning": "FUN_004676e0 reaches FUN_0044cc20 for indexed clear/strip fill."
+    },
+    {
+      "va": "0x00467d69",
+      "rawOffset": "0x00067d69",
+      "bytes": "e8 a2 17 00 00",
+      "meaning": "FUN_004676e0 reaches FUN_00469510 for the default tile blitter path."
+    }
+  ],
+  "callEdges": [
+    {
+      "callSite": "0x00467b73",
+      "caller": "0x004676e0",
+      "callee": "0x0044cc20",
+      "bytes": "e8 a8 50 fe ff",
+      "label": "indexed clear/strip fill"
+    },
+    {
+      "callSite": "0x00467d69",
+      "caller": "0x004676e0",
+      "callee": "0x00469510",
+      "bytes": "e8 a2 17 00 00",
+      "label": "default normal-tile compositor"
+    }
   ],
   "compositor": {
-    "target": { "width": 640, "height": 384 },
-    "clip": { "left": 0, "top": 0, "right": 639, "bottom": 383 },
-    "clearIndex": 0,
-    "paletteEntry0Rgb": [0, 0, 0],
-    "payload": { "selectedFrameCount": 243, "payloadBytes": 254304, "payloadIndex0": 1165, "payloadIndexFe": 0, "rowParseFailures": 0 },
+    "target": {
+      "width": 640,
+      "height": 384
+    },
+    "clip": {
+      "left": 0,
+      "top": 0,
+      "right": 639,
+      "bottom": 383
+    },
+    "traversal": "y outer, x inner; y = cameraY - 13 .. cameraY + 12; x = cameraX - 13 .. cameraX + 12; in-bounds cells only",
+    "clear": {
+      "function": "FUN_0044cc20",
+      "index": 0,
+      "paletteEntryRgb": [
+        0,
+        0,
+        0
+      ],
+      "fullTargetAndStrips": true
+    },
+    "defaultBlitter": {
+      "selector": "FUN_00469510",
+      "directPayloadBlitter": "FUN_00454250",
+      "rowFormat": "[leftSkip: byte][payloadCount: byte][payload bytes...]",
+      "payloadBytesCopiedVerbatim": true,
+      "payloadIndex0Opaque": true,
+      "payloadIndexFeOpaqueIfPresent": true,
+      "exportTransparencySentinel": 254,
+      "skippedSpansRetainClear": true
+    },
+    "palettes": [
+      {
+        "fileName": "imjin2.pal",
+        "sha256": "5ba2c020e9bd89210a10550fb4baaee8ab8bb316d4a2c7e66bdb24c6c8c4323b",
+        "entry0Rgb": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "fileName": "night1.pal",
+        "sha256": "b085583412b8bb79bdf9b72d836881be37f6f36ad50d073db06bebd1c2670122",
+        "entry0Rgb": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "fileName": "night2.pal",
+        "sha256": "c45727bd8ffed04bf572da5ab38b14b7fcb819f540a15a2e5d13730357bda17d",
+        "entry0Rgb": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "fileName": "night3.pal",
+        "sha256": "4fe0c28dc64480c6f00876c5ee484e1b3caa77b3b63b27387c6cf7702c3d2f97",
+        "entry0Rgb": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "fileName": "night4.pal",
+        "sha256": "f8328d22007407df426dff9e489f43718e28772d03b3ddd5f663a5dd57156e95",
+        "entry0Rgb": [
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "selectedSourceFrames": 243,
+    "payload": {
+      "selectedFrameCount": 243,
+      "payloadBytes": 254304,
+      "payloadIndex0": 1165,
+      "payloadIndexFe": 0,
+      "rowParseFailures": 0
+    },
     "vector": {
-      "camera": { "x": 0, "y": 0 },
+      "camera": {
+        "x": 0,
+        "y": 0
+      },
       "clearIndex": 0,
       "cells": [
-        { "x": 0, "y": 0, "stem": "hill0", "frame": 39, "rawVerticalShiftPx": 16, "draw": { "left": 288, "top": 176 }, "payloadWrites": 512 },
-        { "x": 1, "y": 0, "stem": "hill0", "frame": 5, "rawVerticalShiftPx": 0, "draw": { "left": 320, "top": 208 }, "payloadWrites": 1024 },
-        { "x": 0, "y": 1, "stem": "hill0", "frame": 4, "rawVerticalShiftPx": 0, "draw": { "left": 256, "top": 208 }, "payloadWrites": 1024 },
-        { "x": 1, "y": 1, "stem": "hill0", "frame": 4, "rawVerticalShiftPx": 0, "draw": { "left": 288, "top": 224 }, "payloadWrites": 1024 }
+        {
+          "x": 0,
+          "y": 0,
+          "objectIndex": 0,
+          "stem": "hill0",
+          "frame": 39,
+          "rawVerticalShiftPx": 32,
+          "projected": {
+            "x": 320,
+            "y": 192
+          },
+          "draw": {
+            "left": 288,
+            "top": 160
+          },
+          "payloadWrites": 512
+        },
+        {
+          "x": 1,
+          "y": 0,
+          "objectIndex": 0,
+          "stem": "hill0",
+          "frame": 5,
+          "rawVerticalShiftPx": 32,
+          "projected": {
+            "x": 352,
+            "y": 208
+          },
+          "draw": {
+            "left": 320,
+            "top": 176
+          },
+          "payloadWrites": 1024
+        },
+        {
+          "x": 0,
+          "y": 1,
+          "objectIndex": 0,
+          "stem": "hill0",
+          "frame": 4,
+          "rawVerticalShiftPx": 32,
+          "projected": {
+            "x": 288,
+            "y": 208
+          },
+          "draw": {
+            "left": 256,
+            "top": 176
+          },
+          "payloadWrites": 1024
+        },
+        {
+          "x": 1,
+          "y": 1,
+          "objectIndex": 0,
+          "stem": "hill0",
+          "frame": 4,
+          "rawVerticalShiftPx": 32,
+          "projected": {
+            "x": 320,
+            "y": 224
+          },
+          "draw": {
+            "left": 288,
+            "top": 192
+          },
+          "payloadWrites": 1024
+        }
       ],
       "totalPayloadWrites": 3584,
       "overlapWrites": 0,
-      "crop": { "left": 256, "top": 176, "width": 128, "height": 96, "sha256": "1304d09631d687862568f784257bf83abc393c8e9b46288f17265c874e363c20" },
-      "pixels": { "320,192": 83, "320,207": 88, "320,208": 0, "320,223": 0, "320,224": 71 }
+      "crop": {
+        "left": 256,
+        "top": 176,
+        "width": 128,
+        "height": 96,
+        "sha256": "f0805d5c9c63f54dfdfb546ac04feef2b905c9202249eda2f9083edaf5ad3e99"
+      },
+      "pixels": {
+        "320,192": 71,
+        "320,207": 84,
+        "320,208": 71,
+        "320,223": 92,
+        "320,224": 0
+      }
     }
   },
   "channelDigests": {
-    "rawRasterVerticalShiftSha256": "76cc670258325ebc671d19b6f864768bf376328a7573ca7b29887c780e50b864",
-    "projectedJointSha256": "0e2123b96bf4aad8e09db38d60245abf655171198171c034734bbd59cee46bb6",
-    "placementSha256": "78d0d96e0157e60cf9d2e2e4325941510f8911dbc9a57422ad00220874ad406c"
+    "rawRasterVerticalShiftSha256": "4b58471674a5e89bb553cb995474a3847458eb9e295d68aef057439093b0fb52",
+    "projectedJointSha256": "4483d6b50a3bf13220c21e4aa7fcf5c7e10216010be45e6aee759dd4a6c14796",
+    "placementSha256": "510f65ea32bf993466e31126b0528dbd127175f3c6bb91ab42e20f3e6ed3c496"
   }
 }

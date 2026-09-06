@@ -55,7 +55,7 @@ test("K01 source placement offsets do not alter authored physical ground contact
   const point = { x: 0, y: 0 };
   const tile = getTileAt(map, point.x, point.y);
   assert.equal(tile.elevation, 0);
-  assert.deepEqual(tile.tilesetVisuals?.sourcePixelOffset, { x: 0, y: -16 });
+  assert.deepEqual(tile.tilesetVisuals?.sourcePixelOffset, { x: 0, y: -32 });
 
   const sourceOffsetGroundContact = resolveGridGroundContactWorldPosition(point, mapOrigin, map);
   const fractionalGroundContact = resolveGridGroundContactWorldPosition({ x: 0, y: 0.5 }, mapOrigin, map);

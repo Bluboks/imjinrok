@@ -27,10 +27,10 @@ test("K01 source raster keeps physical elevation neutral while retaining visual 
 
   assert.deepEqual(vector, {
     cellCount: 3_600,
-    sharedGroundContactFlatCount: 2_865,
-    zeroSourceOffsetCount: 2_865,
+    sharedGroundContactFlatCount: 1_331,
+    zeroSourceOffsetCount: 1_331,
     elevationCounts: { level0: 3_600, level1: 0 },
-    footprint: { left: -1_600, top: 144, right: 2_240, bottom: 2_096 },
+    footprint: { left: -1_600, top: 128, right: 2_240, bottom: 2_032 },
     flatCellEntity: {
       terrainSurface: { x: 288, y: 176 },
       entityGroundContact: { x: 288, y: 176 },

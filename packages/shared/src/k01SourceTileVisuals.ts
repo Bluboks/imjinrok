@@ -10,16 +10,6 @@ export const K01_SOURCE_TILE_IMAGE_GEOMETRY = {
   height: 48,
   footprintAnchor: { x: 32, y: 0 },
 } as const;
-/**
- * Hash-bound K01 `FUN_00464cc0` output-Y additions; see
- * `docs/reverse-engineering/mechanics/k01-cell-projection-output-tables.md`.
- * They are source projection values, not a recovered terrain-height or
- * image-pivot meaning.
- */
-export const K01_SOURCE_CELL_PROJECTION_OUTPUT_Y_ADDITIONS = {
-  base: 16,
-  raised: 9,
-} as const;
 export interface K01SourceTileVisualAsset {
   readonly assetKey: string;
   readonly stem: string;
@@ -31,6 +21,8 @@ export interface K01SourceTileVisualAsset {
 
 const pairBytes = decodeBase64(K01_SOURCE_TILE_VISUAL_ARTIFACT.pairBytesBase64);
 const placementOffsetYBytes = decodeBase64(K01_SOURCE_TILE_VISUAL_ARTIFACT.placementOffsetYBytesBase64);
+type K01SourceTileRawPlacementMagnitude = 0 | 16 | 32 | 48 | 64;
+type K01SourceTilePlacementOffsetY = 0 | -16 | -32 | -48 | -64;
 const assets = K01_SOURCE_TILE_VISUAL_ARTIFACT.assets;
 const assetKeyBySourcePair = new Map<string, string>(assets.map((asset) => [`${asset.stem}:${asset.frame}`, asset.assetKey]));
 const stemByObjectIndex = new Map<number, string>(
@@ -63,7 +55,7 @@ export function getK01SourceTileFlatAssetKey(x: number, y: number): string {
  * The hash-bound second raw placement-argument delta. This is retained as
  * source evidence, rather than being named as a web screen-axis adjustment.
  */
-export function getK01SourceTileRawPlacementArgumentDelta(x: number, y: number): 0 | 16 {
+export function getK01SourceTileRawPlacementArgumentDelta(x: number, y: number): K01SourceTileRawPlacementMagnitude {
   const { width, height } = K01_SOURCE_TILE_VISUAL_DIMENSIONS;
   if (!Number.isInteger(x) || !Number.isInteger(y) || x < 0 || x >= width || y < 0 || y >= height) {
     throw new RangeError(`K01 source tile coordinates outside 0..${width - 1},0..${height - 1}: ${x},${y}`);
@@ -72,11 +64,7 @@ export function getK01SourceTileRawPlacementArgumentDelta(x: number, y: number):
   if (encodedY === undefined) {
     throw new Error(`K01 source tile (${x},${y}) is outside the generated placement-offset stream.`);
   }
-  const rawDelta = encodedY > 0x7f ? -(encodedY - 0x100) : encodedY;
-  if (rawDelta !== 0 && rawDelta !== 16) {
-    throw new Error(`K01 source tile (${x},${y}) has unsupported raw placement delta ${rawDelta}.`);
-  }
-  return rawDelta;
+  return decodeRawPlacementMagnitude(encodedY, x, y);
 }
 
 /**
@@ -84,8 +72,10 @@ export function getK01SourceTileRawPlacementArgumentDelta(x: number, y: number):
  * anchor. Its bounded raw second-argument adjustment is retained as the
  * source-image y offset; broader original pivot/clip behavior is unresolved.
  */
-export function getK01SourceTilePlacementOffset(x: number, y: number): { readonly x: 0; readonly y: 0 | -16 } {
-  return { x: 0, y: getK01SourceTileRawPlacementArgumentDelta(x, y) === 16 ? -16 : 0 };
+export function getK01SourceTilePlacementOffset(x: number, y: number): { readonly x: 0; readonly y: K01SourceTilePlacementOffsetY } {
+  const rawDelta = getK01SourceTileRawPlacementArgumentDelta(x, y);
+  const offsetY = toPlacementOffsetY(rawDelta);
+  return { x: 0, y: offsetY };
 }
 
 export function getK01SourceTileVisualAssets(): readonly K01SourceTileVisualAsset[] {
@@ -117,10 +107,6 @@ export function applyK01SourceTileVisuals(tiles: TileCell[], width: number, heig
 }
 
 export function assertK01SourceTileVisualArtifact(): void {
-  if (K01_SOURCE_CELL_PROJECTION_OUTPUT_Y_ADDITIONS.base !== 16
-    || K01_SOURCE_CELL_PROJECTION_OUTPUT_Y_ADDITIONS.raised !== 9) {
-    throw new Error("K01 source cell-projection output-Y additions changed from the hash-bound values.");
-  }
   const { width, height } = K01_SOURCE_TILE_VISUAL_DIMENSIONS;
   if (!Number.isInteger(width) || !Number.isInteger(height) || width <= 0 || height <= 0) {
     throw new Error("K01 source tile visual artifact has invalid dimensions.");
@@ -138,12 +124,17 @@ export function assertK01SourceTileVisualArtifact(): void {
     throw new Error("K01 source tile visual artifact has an invalid placement-offset SHA-256 digest.");
   }
   const offsetDistribution = K01_SOURCE_TILE_VISUAL_ARTIFACT.placementOffsetYDistribution;
-  if (offsetDistribution.zero !== 2865 || offsetDistribution.negative16 !== 735) {
-    throw new Error("K01 source tile visual artifact has an invalid placement-offset distribution.");
+  const expectedDistribution = { zero: 1331, negative16: 617, negative32: 1335, negative48: 128, negative64: 189 } as const;
+  for (const [key, expectedCount] of Object.entries(expectedDistribution)) {
+    if (offsetDistribution[key as keyof typeof expectedDistribution] !== expectedCount) {
+      throw new Error("K01 source tile visual artifact has an invalid placement-offset distribution.");
+    }
   }
-  if (placementOffsetYBytes.filter((value) => value === 0).length !== offsetDistribution.zero
-    || placementOffsetYBytes.filter((value) => value === 0xf0).length !== offsetDistribution.negative16) {
-    throw new Error("K01 source tile visual artifact placement-offset bytes do not match their distribution.");
+  const expectedOffsetBytes = { zero: 0, negative16: 0xf0, negative32: 0xe0, negative48: 0xd0, negative64: 0xc0 } as const;
+  for (const [key, byte] of Object.entries(expectedOffsetBytes)) {
+    if (placementOffsetYBytes.filter((value) => value === byte).length !== offsetDistribution[key as keyof typeof offsetDistribution]) {
+      throw new Error("K01 source tile visual artifact placement-offset bytes do not match their distribution.");
+    }
   }
   const protocolObjectBytes = getK01MapProtocolChannel("objectIndex");
   const protocolFrameBytes = getK01MapProtocolChannel("frameIndex");
@@ -155,12 +146,51 @@ export function assertK01SourceTileVisualArtifact(): void {
     if (pairBytes[index * 2] !== protocolObjectBytes[index] || pairBytes[index * 2 + 1] !== protocolFrameBytes[index]) {
       throw new Error(`K01 source tile visual artifact diverges from map protocol at ordinal ${index}.`);
     }
-    const expectedEncodedShift = protocolShiftBytes[index] === 16 ? 0xf0 : protocolShiftBytes[index];
+    const rawShift = protocolShiftBytes[index];
+    if (rawShift === undefined) throw new Error(`K01 source tile protocol is missing raw shift at ordinal ${index}.`);
+    const expectedEncodedShift = encodeRawPlacementMagnitude(rawShift, index);
     if (placementOffsetYBytes[index] !== expectedEncodedShift) throw new Error(`K01 source tile placement shift diverges from map protocol at ordinal ${index}.`);
   }
   const uniqueAssetKeys = new Set(assets.map((asset) => asset.assetKey));
   if (assets.length !== uniqueAssetKeys.size || assets.length !== 243) {
     throw new Error(`K01 source tile visual artifact requires 243 unique assets; received ${assets.length}.`);
+  }
+}
+
+function decodeRawPlacementMagnitude(encodedByte: number, x: number, y: number): K01SourceTileRawPlacementMagnitude {
+  const rawDelta = encodedByte === 0 ? 0 : 0x100 - encodedByte;
+  switch (rawDelta) {
+    case 0:
+    case 16:
+    case 32:
+    case 48:
+    case 64:
+      return rawDelta;
+    default:
+      throw new Error(`K01 source tile (${x},${y}) has unsupported raw placement delta ${rawDelta}.`);
+  }
+}
+
+function encodeRawPlacementMagnitude(rawShift: number, index: number): number {
+  switch (rawShift) {
+    case 0:
+    case 16:
+    case 32:
+    case 48:
+    case 64:
+      return rawShift === 0 ? 0 : 0x100 - rawShift;
+    default:
+      throw new Error(`K01 source tile protocol has unsupported raw shift ${rawShift} at ordinal ${index}.`);
+  }
+}
+
+function toPlacementOffsetY(rawDelta: K01SourceTileRawPlacementMagnitude): K01SourceTilePlacementOffsetY {
+  switch (rawDelta) {
+    case 0: return 0;
+    case 16: return -16;
+    case 32: return -32;
+    case 48: return -48;
+    case 64: return -64;
   }
 }
 

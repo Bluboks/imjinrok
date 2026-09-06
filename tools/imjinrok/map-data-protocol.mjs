@@ -48,9 +48,9 @@ const K01_EXPECTED_CHANNEL_DIGESTS = Object.freeze({
   frameIndex: "7904f0413f370b288b7c7f1bc9113fd4fc856529d06849b7a47f3c86579b2297",
   fogFamily: "7a9fcc150cf0128af19d57f742a6c160c6b5b8b003a81c069fb3167427208f88",
   placementSelector: "5938e85f3671d6c464c1b3af9a429dbfc2cf1905a2f4943302660b458f91440b",
-  placementLookup: "967eedb2dc77a95e6270119ece23d9f47ca97c3b18ffa7d391d34e461b284f4c",
-  placementHelperResult: "e4331b4b5dff91084b34db4018c5905a016cdf9c0d74d02c0d5af88dabfc6bc6",
-  rawRasterVerticalShift: "76cc670258325ebc671d19b6f864768bf376328a7573ca7b29887c780e50b864",
+  placementLookup: "e7331ac9f6c848074249f9b44c2fa4da3b372afff01b8a34efa6695aa66d9260",
+  placementHelperResult: "bb5e2d1260addc719ba843e1582a3b5d889e585b7c5872f3a227c57388d4d770",
+  rawRasterVerticalShift: "4b58471674a5e89bb553cb995474a3847458eb9e295d68aef057439093b0fb52",
   passabilityPrimary: "c7ff06e4148c20ed8eeb1de8f409fd2a8068b3a716888879c92a98ec14149f68",
   passabilityAuxiliary: "097951c3f1a907741e797ba9873dc6f81f4686d0fecc1877059371bf7c0469b7",
 });
@@ -64,11 +64,11 @@ const DEFAULT_EVIDENCE_PATHS = Object.freeze({
 });
 const EXPECTED_EVIDENCE_FIXTURE_DIGESTS = Object.freeze({
   "analysis/fixtures/k01-source-tile-selector.json": "bb72fbca0a03b41dee11ce1fc3e7c50f0731d3654ef0c9b89afdd09cc26aa1f3",
-  "analysis/fixtures/k01-tile-placement-elevation-evidence.json": "c9daedbd269e0823ff0cb4331bfc08bf65e15409b0da91fd337437ea25b3391c",
-  "analysis/fixtures/source-fog-render-evidence.json": "bf8b76d850635ff9619277e5fdff9495e68c18fb6d183ba7f9b99be7974a8e78",
+  "analysis/fixtures/k01-tile-placement-elevation-evidence.json": "f71796a7977daf5341c61eabb2944de2974dcc0e73abc213236e18429cc101af",
+  "analysis/fixtures/source-fog-render-evidence.json": "c6e58504a17ca8104afcec500d6c9b18d8ec4ae37389a5e45e32aa1e5c8b249f",
   "analysis/fixtures/k01-map-passability-field.json": "f9a1f62f8b8f70c1506466b9b6bb0d144ef71b1e476fb3d6dda4998366d494da",
-  "analysis/fixtures/k01-gameplay-terrain-compositor.json": "0122865391b5182af1a7b1bc5182e52669e6fe64a5fdfa64d21644c8c420256c",
-  "analysis/fixtures/k01-cell-projection-evidence.json": "3d421eb1a1870dd09bf1b32fc82a16a059e5358a3eb123061ed50e833e925fff",
+  "analysis/fixtures/k01-gameplay-terrain-compositor.json": "002380c9804943b065ce6833a518dbc2554dd8d8e143287d005a8fdd0a46610c",
+  "analysis/fixtures/k01-cell-projection-evidence.json": "76afc886a247b484da9680d87b3cb15a3b50bc7cc31941b363d1df2499a4e536",
 });
 
 /**
@@ -96,9 +96,9 @@ export const K01_TERRAIN_MAP_PROFILE = Object.freeze({
     direct("frameIndex", 0x42234, "uint8", "FUN_00469330/FUN_00469510 selected YTL frame index"),
     direct("fogFamily", 0x4a0c4, "uint8", "runtime family selector byte; human fog meaning unresolved"),
     direct("placementSelector", 0x79824, "uint8", "FUN_0046d650 selector input; placement semantics unresolved"),
-    selector("placementLookup", 0x147d5, 0x1fa4, "uint8", "FUN_0046d650 selector-indexed lookup byte"),
+    selector("placementLookup", 0x51f54, 0x7e90, "uint8", "FUN_0046d650 selector-indexed lookup byte; final LEA arithmetic includes both x180 and selector180 factors"),
     derived("placementHelperResult", "int16", ["placementSelector", "placementLookup"], "FUN_0046d650 bounded helper return", { kind: "placement-helper", selector: "placementSelector", lookup: "placementLookup", rules: { outOfBounds: -1, lookup15: "selector", lookupNonzero: "selector - 1", lookupZero: 0 } }),
-    derived("rawRasterVerticalShift", "uint8", ["field_0x32514_low_nibble", "placementHelperResult"], "FUN_00469510 raw vertical shift magnitude 0/16; not physical elevation", { kind: "raw-raster-shift", lowNibble: "field_0x32514_low_nibble", helper: "placementHelperResult", branches: { lowNibble2: "helper << 4", other: "(abs(helper) + 1) << 4" } }),
+    derived("rawRasterVerticalShift", "uint8", ["field_0x32514_low_nibble", "placementHelperResult"], "FUN_00469510 raw vertical shift magnitude 0/16/32/48/64; not physical elevation", { kind: "raw-raster-shift", lowNibble: "field_0x32514_low_nibble", helper: "placementHelperResult", branches: { lowNibble2: "helper << 4", other: "(abs(helper) + 1) << 4" } }),
     direct("passabilityPrimary", 0xcc90c, "uint8", "bounded passability-gate primary field; human terrain meaning unresolved"),
     direct("passabilityAuxiliary", 0xdc62c, "uint8", "bounded passability-gate auxiliary field; human terrain meaning unresolved"),
   ],
@@ -324,8 +324,8 @@ function bindEvidence({ mapBuffer, mapPath, executablePath, header, channels, ev
   assertEqual(passability.values?.sha256, digestByCoordinateOrder(mapBuffer, 0xcc90c, header, "y-major"), "passability primary digest");
   assertEqual(passability.auxiliaryValues?.sha256, digestByCoordinateOrder(mapBuffer, 0xdc62c, header, "y-major"), "passability auxiliary digest");
 
-  assertEqual(compositor.sources?.k01MapSha256, sourceHashes.map.sha256, "compositor map hash");
-  assertEqual(compositor.sources?.executableSha256, sourceHashes.executable.sha256, "compositor executable hash");
+  assertEqual(compositor.sources?.k01Map?.sha256, sourceHashes.map.sha256, "compositor map hash");
+  assertEqual(compositor.sources?.executable?.sha256, sourceHashes.executable.sha256, "compositor executable hash");
   assertEqual(compositor.compositor?.target?.width, 640, "compositor target width");
   assertEqual(compositor.compositor?.target?.height, 384, "compositor target height");
   assertEqual(compositor.channelDigests?.rawRasterVerticalShiftSha256, channels.rawRasterVerticalShift.sha256, "compositor raw shift digest");

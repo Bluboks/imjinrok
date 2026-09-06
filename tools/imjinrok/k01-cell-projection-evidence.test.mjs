@@ -42,14 +42,17 @@ test("hash-bound extractor fixes output pointer order, all FUN_00464cc0 callers,
     ["0x0047301c", "0x00472f90"],
     ["0x00481e27", "0x00481c50"],
   ]);
-  assert.equal(report.outputYJointVector.stream.sha256, "0e2123b96bf4aad8e09db38d60245abf655171198171c034734bbd59cee46bb6");
+  assert.equal(report.outputYJointVector.stream.sha256, "4483d6b50a3bf13220c21e4aa7fcf5c7e10216010be45e6aee759dd4a6c14796");
   assert.deepEqual(report.outputYJointVector.lowNibbleFamilyCounts, {
     "1/1": 95, "1/2": 95, "1/3": 101, "1/4": 79, "1/5": 38, "1/6": 36, "1/7": 54,
     "1/8": 61, "1/9": 52, "1/10": 33, "1/11": 35, "1/12": 55, "1/14": 1, "2/0": 2865,
   });
-  assert.equal(report.outputYJointVector.joints.find(({ lowNibble, family }) => lowNibble === 2 && family === 0)?.outputYAdjustment, 16);
-  assert.equal(report.outputYJointVector.joints.find(({ lowNibble, family }) => lowNibble === 1 && family === 1)?.outputYAdjustment, 9);
-  assert.equal(report.outputYJointVector.joints.find(({ lowNibble, family }) => lowNibble === 1 && family === 1)?.rawRasterVerticalBranch, 16);
+  assert.equal(report.outputYJointVector.joints.find(({ lowNibble, family, helperReturn }) => lowNibble === 2 && family === 0 && helperReturn === 0)?.outputYAdjustment, 16);
+  assert.equal(report.outputYJointVector.joints.find(({ lowNibble, family, helperReturn }) => lowNibble === 1 && family === 1 && helperReturn === 0)?.outputYAdjustment, 9);
+  assert.equal(report.outputYJointVector.joints.find(({ lowNibble, family, helperReturn }) => lowNibble === 1 && family === 1 && helperReturn === 0)?.rawRasterVerticalBranch, 16);
+  assert.deepEqual(Object.fromEntries(report.outputYJointVector.joints.reduce((counts, { outputYAdjustment, count }) => counts.set(outputYAdjustment, (counts.get(outputYAdjustment) ?? 0) + count), new Map())), {
+    "-48": 156, "-39": 33, "-32": 41, "-23": 87, "-16": 1028, "-7": 307, "0": 309, "9": 308, "16": 1331,
+  });
 });
 
 test("K01 vector rejects malformed storage and non-K01 dimensions", () => {
@@ -85,5 +88,5 @@ test("CLI is deterministic with explicit canonical source paths", () => {
   assert.equal(first.status, 0, first.stderr);
   assert.equal(second.status, 0, second.stderr);
   assert.equal(first.stdout, second.stdout);
-  assert.equal(JSON.parse(first.stdout).outputYJointVector.stream.sha256, "0e2123b96bf4aad8e09db38d60245abf655171198171c034734bbd59cee46bb6");
+  assert.equal(JSON.parse(first.stdout).outputYJointVector.stream.sha256, "4483d6b50a3bf13220c21e4aa7fcf5c7e10216010be45e6aee759dd4a6c14796");
 });

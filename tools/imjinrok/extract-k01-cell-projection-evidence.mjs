@@ -126,7 +126,7 @@ export function extractK01CellProjectionEvidence({ executablePath = DEFAULT_EXEC
     },
     outputYJointVector: vector,
     rawCodeAnchors: opcodeAnchors,
-    residualBoundary: "The outputY additions are precomputed cell projection/outputY adjustments. The raw raster branch is separately 0 for low-nibble 2 and 16 otherwise; neither value alone proves gameplay terrain height, elevation, world-axis, or renderer-pivot semantics. Runtime table lifetime/order and alias/computed writers remain outside this unit.",
+    residualBoundary: "The outputY additions are precomputed cell projection/outputY adjustments. The raw raster branch is separately reproduced with the helper-dependent 0/16/32/48/64 shifts; neither stream alone proves gameplay terrain height, elevation, world-axis, or renderer-pivot semantics. Runtime table lifetime/order and alias/computed writers remain outside this unit.",
   };
 }
 
@@ -150,7 +150,9 @@ export function reproduceK01CellProjectionVector(mapBuffer) {
       const outputYBase = (x + y) << 4;
       const outputYAdjustment = result.outputY - outputYBase;
       const outputYBranch = lowNibble === 2 ? "low-nibble-equals-2" : "other-low-nibble";
-      const rawRasterVerticalBranch = lowNibble === 2 ? 0 : 16;
+      const rawRasterVerticalBranch = lowNibble === 2
+        ? result.placementLevel << 4
+        : (Math.abs(result.placementLevel) + 1) << 4;
       const key = `${lowNibble}/${family}/${runtimeWords[family]}/${result.placementLevel}/${outputYBranch}/${outputYAdjustment}/${rawRasterVerticalBranch}`;
       jointCounts.set(key, (jointCounts.get(key) ?? 0) + 1);
       stream.writeUInt8(lowNibble, ordinal * 8);
@@ -165,7 +167,11 @@ export function reproduceK01CellProjectionVector(mapBuffer) {
     const [lowNibble, family, runtimeWord, helperReturn, outputYBranch, outputYAdjustment, rawRasterVerticalBranch] = key.split("/");
     return { lowNibble: Number(lowNibble), family: Number(family), runtimeWord: Number(runtimeWord), helperReturn: Number(helperReturn), outputYBranch, outputYAdjustment: Number(outputYAdjustment), rawRasterVerticalBranch: Number(rawRasterVerticalBranch), count };
   }).sort((a, b) => a.lowNibble - b.lowNibble || a.family - b.family);
-  const lowNibbleFamilyCounts = Object.fromEntries(joints.map(({ lowNibble, family, count }) => [`${lowNibble}/${family}`, count]));
+  const lowNibbleFamilyCounts = {};
+  for (const { lowNibble, family, count } of joints) {
+    const key = `${lowNibble}/${family}`;
+    lowNibbleFamilyCounts[key] = (lowNibbleFamilyCounts[key] ?? 0) + count;
+  }
   return {
     coordinateOrder: "x-major: ordinal = x * height + y",
     dimensions: { width, height },
@@ -178,7 +184,7 @@ export function reproduceK01CellProjectionVector(mapBuffer) {
     },
     joints,
     lowNibbleFamilyCounts,
-    interpretation: "K01 has helperReturn 0 for every cell. Thus low-nibble 2/family 0 yields outputY base + 16, while low-nibble 1/family 1..14 yields outputY base + 9. Their precomputed outputY additions differ by 7; this remains distinct from the raw raster vertical branch 0/16.",
+    interpretation: "K01's corrected helper stream is retained in the joint vector. The observed outputY adjustment histogram is -48:156, -39:33, -32:41, -23:87, -16:1028, -7:307, 0:309, 9:308, and 16:1331; this precomputed projection stream remains distinct from the raw raster vertical shift stream 0/16/32/48/64.",
   };
 }
 

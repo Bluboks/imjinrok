@@ -21,7 +21,7 @@ test("K01 terrain diagnostic preserves every source/product coordinate and measu
   assert.deepEqual(readFileSync(firstOutput), readFileSync(secondOutput));
   assert.equal(first.cellCount, 3_600);
   assert.equal(first.cells.length, 3_600);
-  assert.equal(first.cellRecordsSha256, "5095713e2622497ec8b7a1f0caa4f78d6b1c8373ce5ed6ded35f7cadecd79333");
+  assert.equal(first.cellRecordsSha256, "582d9408e3fc067ced0234b09e6ca39690ab9ccefc414e5dcf2e46a3de8b84c9");
   assert.deepEqual(first.coordinateOrder, {
     source: "x-major: sourceOrdinal = x * height + y",
     product: "row-major: productOrdinal = y * width + x",
@@ -32,11 +32,11 @@ test("K01 terrain diagnostic preserves every source/product coordinate and measu
     height: 2120,
     drawOrder: "y-major then x-major",
     coverage: {
-      terrainDomainPixelCount: 3512320,
-      uncoveredPixelCount: 74771,
-      outerBoundaryTransparentPixelCount: 905,
-      internalHolePixelCount: 73866,
-      internalHoleBounds: { left: 3, top: 185, rightExclusive: 3485, bottomExclusive: 1919 },
+      terrainDomainPixelCount: 3530496,
+      uncoveredPixelCount: 5139,
+      outerBoundaryTransparentPixelCount: 709,
+      internalHolePixelCount: 4430,
+      internalHoleBounds: { left: 3, top: 169, rightExclusive: 3485, bottomExclusive: 1133 },
     },
   });
 
@@ -49,9 +49,9 @@ test("K01 terrain diagnostic preserves every source/product coordinate and measu
     sourceOrdinal: 0,
     productOrdinal: 0,
     sourcePair: { objectIndex: 0, frameIndex: 39, stem: "hill0", assetKey: "k01-source:hill0:0039" },
-    rawPlacement: { encodedByte: 240, argumentDeltaMagnitude: 16, argumentAdjustment: -16, productElevationLevel: 1 },
+    rawPlacement: { encodedByte: 224, argumentDeltaMagnitude: 32, argumentAdjustment: -32 },
     projectedGroundPoint: { x: 1920, y: 200 },
-    rasterDraw: { left: 1888, top: 184, width: 64, height: 48 },
+    rasterDraw: { left: 1888, top: 168, width: 64, height: 48 },
     pngAlpha: origin.pngAlpha,
   });
   assert.equal(origin.pngAlpha.bounds.left >= 0, true);

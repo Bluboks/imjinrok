@@ -59,38 +59,38 @@ test("extracts the hash-bound source fog render contract byte-identically", () =
   ]);
   assert.deepEqual(report.placement.k01.allCellDistribution, {
     cellCount: 3600,
-    helperReturn: { 0: 3600 },
+    helperReturn: { 0: 1639, 1: 616, 2: 1115, 3: 74, 4: 156 },
     lowNibble: { 1: 735, 2: 2865 },
-    verticalShift: { 0: 2865, 16: 735 },
-    streamSha256: "2f631bc0209fe72db3c4310b7602fb3fc84e23e871561152d450acbfbd0d7864",
+    verticalShift: { 0: 1331, 16: 617, 32: 1335, 48: 128, 64: 189 },
+    streamSha256: "f76633cb3803d2293fab5d19e2b9ba2966e4307e2189b61101740f35de4dff81",
   });
   assert.deepEqual(report.placement.localCompositePlacement, {
     compositeSize: { width: 64, height: 48 },
     imageAnchor: { x: 32, y: 0 },
     formula: "drawLeft = projectedX - 32; drawTop = projectedY - rawVerticalShift",
-    K01RawVerticalShift: { lowNibbleEquals2: 0, other: 16 },
+    K01RawVerticalShift: "derived per cell by the branch formulas above; observed values are 0, 16, 32, 48, and 64",
     boundary: "This caller/callee-local image anchor does not assign renderer-wide pivot semantics, viewport ownership, clip/mode, alpha/blend, or web placement policy.",
   });
   assert.deepEqual(report.placement.k01.vectors.map(({ input, projection, draw }) => ({ input, projection, draw })), [
     {
       input: { x: 0, y: 0, cameraX: 13, cameraY: 8, viewportLeft: 0, viewportRight: 639, viewportTop: 0, viewportBottom: 479 },
       projection: { projectedX: 160, projectedY: -96 },
-      draw: { x: 0, y: 0, lowNibble: 1, helperReturn: 0, placementBranch: "other-low-nibble", verticalShift: 16, drawLeft: 128, drawTop: -112 },
+      draw: { x: 0, y: 0, lowNibble: 1, helperReturn: 1, placementBranch: "other-low-nibble", verticalShift: 32, drawLeft: 128, drawTop: -128 },
     },
     {
       input: { x: 0, y: 1, cameraX: 13, cameraY: 8, viewportLeft: 0, viewportRight: 639, viewportTop: 0, viewportBottom: 479 },
       projection: { projectedX: 128, projectedY: -80 },
-      draw: { x: 0, y: 1, lowNibble: 2, helperReturn: 0, placementBranch: "low-nibble-equals-2", verticalShift: 0, drawLeft: 96, drawTop: -80 },
+      draw: { x: 0, y: 1, lowNibble: 2, helperReturn: 2, placementBranch: "low-nibble-equals-2", verticalShift: 32, drawLeft: 96, drawTop: -112 },
     },
     {
       input: { x: 6, y: 6, cameraX: 13, cameraY: 8, viewportLeft: 0, viewportRight: 639, viewportTop: 0, viewportBottom: 479 },
       projection: { projectedX: 160, projectedY: 96 },
-      draw: { x: 6, y: 6, lowNibble: 2, helperReturn: 0, placementBranch: "low-nibble-equals-2", verticalShift: 0, drawLeft: 128, drawTop: 96 },
+      draw: { x: 6, y: 6, lowNibble: 2, helperReturn: 2, placementBranch: "low-nibble-equals-2", verticalShift: 32, drawLeft: 128, drawTop: 64 },
     },
     {
       input: { x: 59, y: 59, cameraX: 13, cameraY: 8, viewportLeft: 0, viewportRight: 639, viewportTop: 0, viewportBottom: 479 },
       projection: { projectedX: 160, projectedY: 1792 },
-      draw: { x: 59, y: 59, lowNibble: 2, helperReturn: 0, placementBranch: "low-nibble-equals-2", verticalShift: 0, drawLeft: 128, drawTop: 1792 },
+      draw: { x: 59, y: 59, lowNibble: 2, helperReturn: 4, placementBranch: "low-nibble-equals-2", verticalShift: 64, drawLeft: 128, drawTop: 1728 },
     },
   ]);
   assert.deepEqual(report.callEdges, [

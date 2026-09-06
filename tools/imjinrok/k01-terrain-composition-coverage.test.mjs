@@ -27,9 +27,9 @@ test("K01 source-raster replay retains mixed placement offsets over the opaque b
 
   assert.equal(manifest.productRenderingAdapter?.imageGeometry?.footprintAnchor?.y, 0);
   assert.equal(manifest.productRenderingAdapter?.webPlacement?.sourceRasterClearColor, "0x000000");
-  assert.equal(sourceRaster.rawDeltaCellCount, 735);
-  assert.equal(sourceRaster.mixedRawDeltaNeighborCount, 798);
-  assert.equal(sourceRaster.uncoveredFootprintPixels, 74771, "selected source frames retain measured alpha gaps over the black clear");
+  assert.equal(sourceRaster.rawDeltaCellCount, 2269);
+  assert.equal(sourceRaster.mixedRawDeltaNeighborCount, 717);
+  assert.equal(sourceRaster.uncoveredFootprintPixels, 5139, "selected source frames retain measured alpha gaps over the black clear");
 
   t.diagnostic(JSON.stringify({ sourceRaster: summarizeCoverage(sourceRaster) }));
 });
@@ -47,11 +47,11 @@ test("K01 product coverage policy is a map-level canonical source-art pass with 
   assert.equal(product.uncoveredFootprintPixels, 0);
   assert.equal(product.mixedBoundaryUncoveredFootprintPixels, 0);
   assert.equal(manifest.productRenderingAdapter.webPlacement.evidenceStatus, "native source fact plus explicit product adaptation (의도적 적응)");
-  assert.equal(rawDeltaY(artifact, 15, 6), 0);
-  assert.equal(rawDeltaY(artifact, 14, 6), 0);
-  assert.equal(rawDeltaY(artifact, 16, 6), -16);
-  assert.equal(rawDeltaY(artifact, 15, 5), -16);
-  assert.equal(rawDeltaY(artifact, 15, 7), 0);
+  assert.equal(rawDeltaY(artifact, 15, 6), -32);
+  assert.equal(rawDeltaY(artifact, 14, 6), -32);
+  assert.equal(rawDeltaY(artifact, 16, 6), -32);
+  assert.equal(rawDeltaY(artifact, 15, 5), -32);
+  assert.equal(rawDeltaY(artifact, 15, 7), -32);
   t.diagnostic(JSON.stringify({ productCoverage: summarizeCoverage(product), regressionTile: { rowMajorIndex: 375, x: 15, y: 6 } }));
 });
 
@@ -137,9 +137,11 @@ function measureComposition(artifact, assetByPair, alphaByPair, underlayAlpha, s
 }
 
 function rawDeltaY(artifact, x, y) {
-  return artifact.placementOffsetYBytesBase64
-    ? (Buffer.from(artifact.placementOffsetYBytesBase64, "base64")[x * artifact.dimensions.height + y] === 0xf0 ? -16 : 0)
-    : 0;
+  const byte = Buffer.from(artifact.placementOffsetYBytesBase64, "base64")[x * artifact.dimensions.height + y];
+  assert.notEqual(byte, undefined, `K01 source placement stream must contain ${x},${y}`);
+  const magnitude = byte === 0 ? 0 : 0x100 - byte;
+  assert.ok(magnitude >= 0 && magnitude <= 64 && magnitude % 16 === 0, `unsupported placement byte 0x${byte.toString(16)}`);
+  return magnitude === 0 ? 0 : -magnitude;
 }
 
 function createCanvas(width, height) {

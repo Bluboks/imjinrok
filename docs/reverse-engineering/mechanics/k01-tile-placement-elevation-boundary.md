@@ -7,8 +7,8 @@
 | 구분 | 상태 | 범위 |
 | --- | --- | --- |
 | 분석 | `정적 확정` | `FUN_00462b80` 8-byte-stride WORD initializer, `FUN_00464cc0`/`FUN_00464ea0` table reader의 두 branch, signed-word x/y guard와 `(x-y)<<5`/`(x+y)<<4`, 두 caller의 low-nibble branch, direct helper의 전체 return 분기, K01 `60×60` cell의 selector/lookup·object/frame fields |
-| 재현 | `재현 완료` | 3,600-cell x-major stream/digest·분포, 15-entry table-init byte replay와 reader vectors, base projection, low-nibble two/other, 네 map corner, helper의 synthetic positive/negative branch와 malformed/tampered input 거부 |
-| 구현 | `source-backed-adaptation` + `의도적 적응` | hash-bound K01의 raw second-argument `0/16` delta stream을 `TileCell.elevation`과 분리해 source placement offset `0/-16`으로만 소비한다. K01 authored/product physical surface는 의도적으로 neutral하여 3,600개 모두 `TileCell.elevation=0`이며, 이는 원본 physical elevation을 복원한 주장이 아니다. bounded source raster는 `(32,0)` top-edge anchor와 opaque black clear 뒤 selected frame global y→x replay를 사용한다. 별도의 map-level `sourceRasterCoverage` policy가 canonical `grss1_0000`을 먼저 replay하는 것은 의도적 적응이다. |
+| 재현 | `재현 완료` | corrected 3,600-cell map replay, placement/projection/compositor fixture·digest, corner/synthetic vectors와 malformed/tampered input 거부 |
+| 구현 | `source-backed-adaptation` + `의도적 적응` | hash-bound K01의 corrected raw second-argument delta stream을 `TileCell.elevation`과 분리해 source placement offset으로만 소비한다. K01 authored/product physical surface는 의도적으로 neutral하여 3,600개 모두 `TileCell.elevation=0`이며, 이는 원본 physical elevation을 복원한 주장이 아니다. bounded source raster는 `(32,0)` top-edge anchor와 opaque black clear 뒤 selected frame global y→x replay를 사용한다. 별도의 map-level `sourceRasterCoverage` policy가 canonical `grss1_0000`을 먼저 replay하는 것은 의도적 적응이다. |
 
 이것은 기존 [K01 source tile object·frame selector](k01-source-tile-selector.md)의 **다음 placement 경계**다.
 기존 문서의 object/frame source identity와 3,600 pair frame-bound proof를 그대로 hash-bound로 재검증하지만,
@@ -39,6 +39,49 @@
 `FUN_00469510` entry stack에서 x/y는 `argument3`/`argument4`의 low signed word다. `argument1`의 fixed
 subtract와 `argument2`의 helper-derived subtract는 별도이다. 이 evidence는 raw argument가 screen/world의 어느 축인지
 정하지 않는다.
+
+## 2026-09 lookup arithmetic correction
+
+초기 문서의 `FUN_0046d650` lookup 식은 `0x0046d69d..0x0046d6b4`의 마지막 `LEA` 네 배를 반영하지
+않았다. 그 식으로 byte hash와 수식을 함께 재생하면 lookup이 K01 전수에서 0으로 고정되어 helper와
+raw shift가 모두 낮게 보인다. 이는 map 또는 PNG 손상이 아니라 주소 산술을 덜 복원한 **반증된 이전
+해석**이다.
+
+원본 명령어는 다음 순서로 selector, x, y와 map base를 합친다.
+
+| VA | 명령어가 고정하는 값 |
+| --- | --- |
+| `0x0046d69d` | `ESI = selector + selector*4` → selector `×5` |
+| `0x0046d6a0` | `ESI = ESI + ESI*8` → selector `×45` |
+| `0x0046d6a3` | `EDX = x + selector*180 + 0x749` |
+| `0x0046d6ab` | `EDX = EDX + EDX*4` → 중간 식 `×5` |
+| `0x0046d6ae` | `EDX = EDX + EDX*8` → 중간 식 `×45` |
+| `0x0046d6b1` | `EDX = y + EDX*4` → selector `×0x7e90`, x `×180`, base `0x51f54` |
+| `0x0046d6b4` | `BYTE [map + EDX]` 최종 lookup read |
+
+따라서 corrected lookup은 다음이다.
+
+```text
+lookup = uint8(map + 0x51f54 + selector*0x7e90 + x*180 + y)
+```
+
+이 correction의 분석 상태는 `정적 확정`이고, 이전 `0x147d5 + selector*0x1fa4` 식은 `반증됨`이다.
+독립 raw-map replay와 hash-bound fixture는 다음을 고정한다.
+
+| vector | selector | corrected lookup | helper return | raw shift |
+| --- | ---: | ---: | ---: | ---: |
+| `(x,y)=(0,0)` | `2` | `14` | `1` | `32` |
+| `(x,y)=(0,1)` | `2` | `15` | `2` | `32` |
+
+K01 3,600-cell corrected raw-shift histogram은 `0:1331, 16:617, 32:1335, 48:128, 64:189`이며,
+기존 baseline과 raw shift가 다른 cell은 `1,961`개다. selected-source logical-footprint diagnostic은
+uncovered `5,139`, mixed-boundary `3,918`, nonzero `2,269`, mixed-edge `717`을 독립 산출했지만, 이
+값들은 CPU alpha-vs-logical-diamond 측정이며 원본 runtime 증거나 full visual/browser parity가 아니다.
+재현 산출물은 [placement evidence fixture](../../../analysis/fixtures/k01-tile-placement-elevation-evidence.json),
+[cell projection fixture](../../../analysis/fixtures/k01-cell-projection-evidence.json),
+[fog render fixture](../../../analysis/fixtures/source-fog-render-evidence.json),
+[gameplay compositor fixture](../../../analysis/fixtures/k01-gameplay-terrain-compositor.json),
+[terrain diagnostic](../../../analysis/fixtures/k01-terrain-diagnostic.json)이다.
 
 `FUN_00464cc0`도 같은 signed bounds 뒤 output pair에 먼저 다음 값을 쓴다.
 
@@ -107,7 +150,7 @@ table의 lifetime·ordering 또는 사람용 의미를 확정하는 주장도 �
 ```text
 lowNibble = uint8(map + 0x32514 + x*180 + y) & 0x0f
 selector  = uint8(map + 0x79824 + x*180 + y)
-lookup    = uint8(map + 0x147d5 + selector*0x1fa4 + x*180 + y)
+lookup    = uint8(map + 0x51f54 + selector*0x7e90 + x*180 + y)
 
 FUN_0046d650(map, x, y):
   if x/y outside the signed bounds: return int16(-1)
@@ -150,8 +193,9 @@ drawLeft = screenX - 32
 drawTop  = screenY - verticalShift
 ```
 
-K01에서는 `lowNibble==2`인 2,865 cell의 `verticalShift`가 0이고 나머지 735 cell은 16이다. 이 범위는
-selected frame의 full-raster order와 bounded draw rectangle만 확정한다. default gameplay compositor의
+K01에서 corrected `rawShift`는 `0:1331, 16:617, 32:1335, 48:128, 64:189`이다. low-nibble/family
+분포는 유지되지만 이전 `0/16`만의 vertical-shift 주장은 폐기한다. 이 범위는 selected frame의
+full-raster order와 bounded draw rectangle만 확정한다. default gameplay compositor의
 target `640×384`, clip `0..639/0..383`, mode-0 direct YTL blit, index-0 base clear와 `imjin2`/`night1`~`night4`
 palette entry-0 RGB(0,0,0)은 gameplay compositor fixture에서 정적 확정됐다. auxiliary/nondefault callee path, general frame
 pivot/axis, payload alpha semantics와 full renderer parity는 아직 미확정이다.
@@ -159,38 +203,42 @@ pivot/axis, payload alpha semantics와 full renderer parity는 아직 미확정�
 ## K01 complete result
 
 compact fixture는 low nibble, helper selector/lookup/return, branch, shift, object, frame을 담은 cell당 8-byte
-x-major stream SHA-256 `78d0d96e0157e60cf9d2e2e4325941510f8911dbc9a57422ad00220874ad406c`를 고정한다. 전체 분포는 다음과 같다.
+x-major stream SHA-256 `510f65ea32bf993466e31126b0528dbd127175f3c6bb91ab42e20f3e6ed3c496`를 고정한다.
+전체 분포는 다음과 같다.
 
 | field/result | counts |
 | --- | --- |
 | helper selector | `0:1331`, `1:617`, `2:1335`, `3:128`, `4:189` |
-| helper lookup | `0:3600` |
-| helper return | `0:3600` |
+| helper lookup | `1:61, 2:38, 3:95, 4:54, 5:79, 6:1, 7:55, 8:36, 10:95, 11:35, 12:101, 13:52, 14:33, 15:2865`; stream SHA-256 `e7331ac9f6c848074249f9b44c2fa4da3b372afff01b8a34efa6695aa66d9260` |
+| helper return | `0:1639`, `1:616`, `2:1115`, `3:74`, `4:156` |
 | low nibble | `1:735`, `2:2865` |
-| vertical subtract | `0:2865`, `16:735` |
+| raw shift | `0:1331`, `16:617`, `32:1335`, `48:128`, `64:189`; stream SHA-256 `4b58471674a5e89bb553cb995474a3847458eb9e295d68aef057439093b0fb52` |
 
-따라서 helper의 양수·음수 branch는 byte에서 synthetic selector/lookup vector로 재현했지만, **해시를 고정한 K01
-cell에는 나타나지 않는다**. K01 결과를 elevation, height, terrain 또는 world coordinate라고 부를 근거는 없으며,
-이 문서는 중립어 **placement-level selector**를 사용한다.
+따라서 helper의 양수·음수 branch와 corrected K01 lookup은 분리해 기록한다. corrected K01 결과를
+elevation, height, terrain 또는 world coordinate라고 부를 근거는 없으며, 이 문서는 중립어
+**placement-level selector**를 사용한다. 이전 `helper return 0:3600` 및 그에 따른 `raw shift 0/16`은
+기존 잘못된 계산의 측정값이다.
 
-제품 K01 adapter가 소비하는 별도 raw relative stream은 `FUN_00469510`의 `vertical subtract` 그대로다. SHA-256
-`76cc670258325ebc671d19b6f864768bf376328a7573ca7b29887c780e50b864`에서 `0:2865`, `16:735`이며, 이는
-physical surface height나 full-original elevation parity가 아니라 source image placement offset으로만 보존하는
-**source-backed adaptation**이다.
+제품 K01 adapter가 소비하는 별도 raw relative stream은 corrected `FUN_00469510` second-argument adjustment를
+source image placement offset으로만 보존한다. 이 값은 physical surface height나
+full-original elevation parity가 아니라 **source-backed adaptation**이다.
 
-fixture의 map-corner vector도 source value를 고정한다. `(0,0)`은 low nibble 1/object 0/frame 39/shift 16,
-`(0,1)`은 low nibble 2/object 0/frame 4/shift 0, `(59,59)`은 low nibble 2/object 31/frame 18/shift 0이다.
+fixture의 map-corner vector도 source value를 고정한다. corrected `(0,0)`은 low nibble 1/object 0/frame 39,
+selector 2/lookup 14/helper 1/raw shift 32이고, `(0,1)`은 low nibble 2/object 0/frame 4,
+selector 2/lookup 15/helper 2/raw shift 32이다. `(59,59)`는 low nibble 2/object 31/frame 18,
+selector 4/lookup 15/helper 4/raw shift 64이다.
 
 ## 제품 adapter 경계
 
-`export-k01-source-tile-visuals.mjs`는 canonical placement-evidence fixture를 다시 검증한 뒤 raw second-argument
-delta를 `0` 또는 `16`의 stream으로 보존한다. `0`은 2,865, `16`은 735개다. 이 값은 `TileCell.elevation`이나
+`export-k01-source-tile-visuals.mjs`는 canonical placement-evidence fixture를 다시 검증한 뒤 corrected raw
+second-argument delta를 source placement metadata로 보존해야 한다. corrected domain은 `0`, `16`, `32`, `48`,
+`64`이며, 이 값은 `TileCell.elevation`이나
 bilinear ground contact로 변환하지 않는다. K01 scaffold의 authored/product physical surface는 의도적으로
 neutral하여 3,600개 모두 `TileCell.elevation=0`이다. 이는 원본 physical elevation을 복원했다는 뜻이 아니며,
 selected flat artwork의 visual metadata와 product physical surface는 별도 채널이다.
 
 `FUN_00466f20` 범위의 raster arithmetic에 맞춘 product source-image adapter는 `64×48`, anchor `(32,0)`을 쓴다.
-cell의 raw shift가 16이면 selected frame에 `sourcePixelOffset.y=-16`을, shift 0이면 offset 0을 부여한다. source raster
+cell의 corrected raw shift에 signed source offset을 부여한다. source raster
 plan은 tile chunk order를 사용하지 않고 output world rectangle을 non-overlapping pixel regions으로만 나눈 뒤, 각 region을
 먼저 opaque `sourceRasterClearColor=0x000000`으로 채우고 full selected stream을 global **y→x** order로 replay한다. 이
 bounded order는 original caller에서 정적 확정됐지만 product region partition 자체는 scalable web adaptation이다.

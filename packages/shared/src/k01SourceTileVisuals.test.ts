@@ -5,7 +5,6 @@ import {
   K01_SOURCE_TILE_VISUAL_DIMENSIONS,
   K01_SOURCE_TILE_VISUAL_PLACEMENT_OFFSET_DIGEST,
   K01_SOURCE_TILE_VISUAL_PAIR_DIGEST,
-  K01_SOURCE_CELL_PROJECTION_OUTPUT_Y_ADDITIONS,
   K01_SOURCE_FOG_DIMENSIONS,
   K01_SOURCE_FOG_FAMILY_DIGEST,
   applyK01SourceFogVisuals,
@@ -44,7 +43,6 @@ test("K01 source fog artifact preserves the exact x-major family stream and dist
 
 test("K01 source tile artifact preserves every hash-bound x-major source pair", () => {
   assertK01SourceTileVisualArtifact();
-  assert.deepEqual(K01_SOURCE_CELL_PROJECTION_OUTPUT_Y_ADDITIONS, { base: 16, raised: 9 });
   assert.deepEqual(K01_SOURCE_TILE_VISUAL_DIMENSIONS, { width: 60, height: 60 });
   assert.equal(K01_SOURCE_TILE_VISUAL_ARTIFACT.pairCount, 3600);
   assert.equal(getK01SourceTileVisualAssets().length, 243);
@@ -53,16 +51,28 @@ test("K01 source tile artifact preserves every hash-bound x-major source pair", 
   assert.equal(createHash("sha256").update(bytes).digest("hex"), K01_SOURCE_TILE_VISUAL_PAIR_DIGEST);
   const placementOffsetBytes = Buffer.from(K01_SOURCE_TILE_VISUAL_ARTIFACT.placementOffsetYBytesBase64, "base64");
   assert.equal(createHash("sha256").update(placementOffsetBytes).digest("hex"), K01_SOURCE_TILE_VISUAL_PLACEMENT_OFFSET_DIGEST);
-  assert.deepEqual(K01_SOURCE_TILE_VISUAL_ARTIFACT.placementOffsetYDistribution, { zero: 2865, negative16: 735 });
-  assert.equal(placementOffsetBytes.filter((value) => value === 0).length, 2865);
-  assert.equal(placementOffsetBytes.filter((value) => value === 0xf0).length, 735);
+  assert.deepEqual(K01_SOURCE_TILE_VISUAL_ARTIFACT.placementOffsetYDistribution, {
+    zero: 1331,
+    negative16: 617,
+    negative32: 1335,
+    negative48: 128,
+    negative64: 189,
+  });
+  assert.equal(placementOffsetBytes.filter((value) => value === 0).length, 1331);
+  assert.equal(placementOffsetBytes.filter((value) => value === 0xf0).length, 617);
+  assert.equal(placementOffsetBytes.filter((value) => value === 0xe0).length, 1335);
+  assert.equal(placementOffsetBytes.filter((value) => value === 0xd0).length, 128);
+  assert.equal(placementOffsetBytes.filter((value) => value === 0xc0).length, 189);
   assert.equal(getK01SourceTileFlatAssetKey(0, 0), "k01-source:hill0:0039");
   assert.equal(getK01SourceTileFlatAssetKey(59, 59), "k01-source:grss1:0018");
-  assert.equal(getK01SourceTileRawPlacementArgumentDelta(0, 0), 16);
-  assert.equal(getK01SourceTileRawPlacementArgumentDelta(0, 1), 0);
-  assert.deepEqual(getK01SourceTilePlacementOffset(0, 0), { x: 0, y: -16 });
-  assert.deepEqual(getK01SourceTilePlacementOffset(0, 1), { x: 0, y: 0 });
-  assert.deepEqual(getK01SourceTilePlacementOffset(59, 59), { x: 0, y: 0 });
+  assert.equal(getK01SourceTileRawPlacementArgumentDelta(0, 0), 32);
+  assert.equal(getK01SourceTileRawPlacementArgumentDelta(0, 1), 32);
+  assert.equal(getK01SourceTileRawPlacementArgumentDelta(0, 25), 48);
+  assert.equal(getK01SourceTileRawPlacementArgumentDelta(46, 49), 64);
+  assert.deepEqual(getK01SourceTilePlacementOffset(0, 0), { x: 0, y: -32 });
+  assert.deepEqual(getK01SourceTilePlacementOffset(0, 1), { x: 0, y: -32 });
+  assert.deepEqual(getK01SourceTilePlacementOffset(0, 33), { x: 0, y: 0 });
+  assert.deepEqual(getK01SourceTilePlacementOffset(59, 59), { x: 0, y: -64 });
   assert.throws(() => getK01SourceTileFlatAssetKey(60, 0), /outside/u);
   assert.throws(() => getK01SourceTilePlacementOffset(60, 0), /outside/u);
   const registry = createContentRegistry();
@@ -84,11 +94,11 @@ test("only K01 applies source tile visuals after gameplay terrain mutations", ()
 
   assert.equal(sourceKeys?.length, 3600);
   assert.equal(new Set(sourceKeys).size, 243);
-  assert.deepEqual(getTileAt(k01, 0, 0).tilesetVisuals?.sourcePixelOffset, { x: 0, y: -16 });
-  assert.equal(getTileAt(k01, 0, 0).tilesetVisuals?.sourceRawRasterVerticalShiftPx, 16);
+  assert.deepEqual(getTileAt(k01, 0, 0).tilesetVisuals?.sourcePixelOffset, { x: 0, y: -32 });
+  assert.equal(getTileAt(k01, 0, 0).tilesetVisuals?.sourceRawRasterVerticalShiftPx, 32);
   assert.equal(k01.layers[0]?.tiles.every((tile) => tile.tilesetVisuals?.underlayAssetKey === undefined), true);
-  assert.deepEqual(getTileAt(k01, 0, 1).tilesetVisuals?.sourcePixelOffset, { x: 0, y: 0 });
-  assert.equal(getTileAt(k01, 0, 1).tilesetVisuals?.sourceRawRasterVerticalShiftPx, 0);
+  assert.deepEqual(getTileAt(k01, 0, 1).tilesetVisuals?.sourcePixelOffset, { x: 0, y: -32 });
+  assert.equal(getTileAt(k01, 0, 1).tilesetVisuals?.sourceRawRasterVerticalShiftPx, 32);
   assert.equal(getTileAt(k01, 45, 40).terrain, "shallowWater");
   assert.equal(getTileAt(k01, 45, 40).elevation, 0);
   assert.equal(getTileAt(k01, 0, 0).elevation, 0);
@@ -131,5 +141,5 @@ test("source placement assignment never overwrites authored physical elevation",
   applyK01SourceTileVisuals(map.layers[0]?.tiles ?? [], 60, 60);
 
   assert.equal(map.layers[0]?.tiles[0]?.elevation, 3);
-  assert.deepEqual(map.layers[0]?.tiles[0]?.tilesetVisuals?.sourcePixelOffset, { x: 0, y: -16 });
+  assert.deepEqual(map.layers[0]?.tiles[0]?.tilesetVisuals?.sourcePixelOffset, { x: 0, y: -32 });
 });

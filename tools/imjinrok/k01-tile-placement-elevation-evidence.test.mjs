@@ -9,6 +9,7 @@ import test from "node:test";
 import {
   extractK01TilePlacementElevationEvidence,
   replayFUN00462b80RuntimeWordTableInitialization,
+  replayFUN0046d650LookupAddress,
   reproduceFUN00464cc0Projection,
   reproduceFUN00469510Placement,
   reproduceK01PlacementHelper,
@@ -29,13 +30,15 @@ test("hash-bound extractor reproduces all K01 placement/object/frame vectors", (
   const fixture = JSON.parse(readFileSync(fixturePath, "utf8"));
   assert.deepEqual(report, fixture);
   assert.equal(report.cellStream.count, 3600);
-  assert.equal(report.cellStream.sha256, "78d0d96e0157e60cf9d2e2e4325941510f8911dbc9a57422ad00220874ad406c");
-  assert.deepEqual(report.placement.helper.K01Distribution.placementLevel, { 0: 3600 });
-  assert.deepEqual(report.placement.lowNibbleBranch.K01Distribution.verticalShift, { 0: 2865, 16: 735 });
-  assert.deepEqual(report.cellProjection.K01Distribution.helperLookup, { 0: 3600 });
-  assert.deepEqual(report.cellProjection.K01Distribution.helperReturn, { 0: 3600 });
-  assert.deepEqual(report.cellProjection.K01Distribution.sourceBackedRawRelativeComponent.values, { 0: 2865, 16: 735 });
-  assert.equal(report.cellProjection.K01Distribution.sourceBackedRawRelativeComponent.sha256, "76cc670258325ebc671d19b6f864768bf376328a7573ca7b29887c780e50b864");
+  assert.equal(report.cellStream.sha256, "510f65ea32bf993466e31126b0528dbd127175f3c6bb91ab42e20f3e6ed3c496");
+  assert.deepEqual(report.placement.helper.K01Distribution.placementLevel, { 0: 1639, 1: 616, 2: 1115, 3: 74, 4: 156 });
+  assert.equal(report.placement.helper.K01Distribution.placementLookupStreamSha256, "e7331ac9f6c848074249f9b44c2fa4da3b372afff01b8a34efa6695aa66d9260");
+  assert.equal(report.placement.helper.K01Distribution.placementLevelStreamSha256, "5c14adcd99b36ea2c0e8dcd5e97fb7f367d0a1c99b2eea8ab52976e28b6a9133");
+  assert.deepEqual(report.placement.lowNibbleBranch.K01Distribution.verticalShift, { 0: 1331, 16: 617, 32: 1335, 48: 128, 64: 189 });
+  assert.deepEqual(report.cellProjection.K01Distribution.helperLookup, { 1: 61, 2: 38, 3: 95, 4: 54, 5: 79, 6: 1, 7: 55, 8: 36, 10: 95, 11: 35, 12: 101, 13: 52, 14: 33, 15: 2865 });
+  assert.deepEqual(report.cellProjection.K01Distribution.helperReturn, { 0: 1639, 1: 616, 2: 1115, 3: 74, 4: 156 });
+  assert.deepEqual(report.cellProjection.K01Distribution.sourceBackedRawRelativeComponent.values, { 0: 1331, 16: 617, 32: 1335, 48: 128, 64: 189 });
+  assert.equal(report.cellProjection.K01Distribution.sourceBackedRawRelativeComponent.sha256, "4b58471674a5e89bb553cb995474a3847458eb9e295d68aef057439093b0fb52");
   assert.equal(report.sources.sourceTileSelector.allK01ObjectFramesWithinValidatedSourceHeaders, true);
   assert.equal(report.sources.sourceTileSelector.pairStream.count, 3600);
   assert.deepEqual(report.sourceRaster, {
@@ -44,7 +47,7 @@ test("hash-bound extractor reproduces all K01 placement/object/frame vectors", (
     drawOrder: "y outer, x inner",
     baseScreenPoint: "screenX = (x - y) * 32 + map.width * 32; screenY = (x + y) * 16 + 200",
     dispatch: "FUN_00469510(argument1=screenX, argument2=screenY, argument3=x, argument4=y)",
-    drawRectangle: "drawLeft = argument1 - 32; drawTop = argument2 - verticalShift, where K01 verticalShift is 0 for lowNibble == 2 and 16 otherwise",
+    drawRectangle: "drawLeft = argument1 - 32; drawTop = argument2 - verticalShift, where verticalShift follows the branch formulas above",
     boundary: "This bounded full-map raster establishes draw order and rectangle arithmetic, not broader pivot, clip/mode, palette, or renderer parity semantics.",
   });
   assert.equal(report.sources.staticAnalysis.references.requiredCallEdges.some((edge) => edge.from === "0x00467160" && edge.to === "0x00469510"), true);
@@ -63,6 +66,15 @@ test("FUN_00462b80 byte replay fixes every indexed and adjacent WORD write", () 
     ...Array.from({ length: 14 }, (_, index) => ({ family: index + 1, wordOffset: (index + 1) * 8, value: 9 })),
   ]);
   assert.deepEqual(initialization.adjacentZeroWordWrites, { count: 15, firstWordOffset: -2, lastWordOffset: 110, strideBytes: 8, value: 0 });
+});
+
+test("FUN_0046d650 instruction-order address replay preserves the final x4 selector lookup stride", () => {
+  assert.equal(replayFUN0046d650LookupAddress({ selector: 2, x: 0, y: 0 }), 0x61c74);
+  assert.equal(replayFUN0046d650LookupAddress({ selector: 3, x: 0, y: 25 }), 0x69b1d);
+  assert.equal(replayFUN0046d650LookupAddress({ selector: 1, x: 0, y: 32 }), 0x59e04);
+  assert.equal(replayFUN0046d650LookupAddress({ selector: 0, x: 0, y: 33 }), 0x51f75);
+  assert.equal(replayFUN0046d650LookupAddress({ selector: 4, x: 46, y: 49 }), 0x73a1d);
+  assert.throws(() => replayFUN0046d650LookupAddress({ selector: 256, x: 0, y: 0 }), /unsigned byte/u);
 });
 
 test("shared runtime WORD-table reader contract preserves both low-nibble formulas", () => {
@@ -93,10 +105,10 @@ test("FUN_00464cc0 reproducer fixes bounded base projection and separates the un
     y: 1,
     fogFamily: 0,
     lowNibble: 2,
-    placementLevel: 0,
+    placementLevel: 2,
     outputX: -32,
-    outputY: 39,
-    relativeComponent: 16,
+    outputY: 7,
+    relativeComponent: -16,
   });
   assert.deepEqual(reproduceFUN00464cc0Projection(map, { x: 0, y: 0, runtimeWord: -3 }), {
     admitted: true,
@@ -104,10 +116,10 @@ test("FUN_00464cc0 reproducer fixes bounded base projection and separates the un
     y: 0,
     fogFamily: 10,
     lowNibble: 1,
-    placementLevel: 0,
+    placementLevel: 1,
     outputX: 0,
-    outputY: -3,
-    relativeComponent: 0,
+    outputY: -19,
+    relativeComponent: -16,
   });
   assert.deepEqual(reproduceFUN00464cc0Projection(map, { x: -1, y: 0 }), { admitted: false });
 });
@@ -120,12 +132,12 @@ test("pure FUN_00469510 reproducer keeps the low-nibble-two and other branches s
     storageOffset: 1,
     lowNibble: 2,
     placementSelector: 2,
-    placementLookup: 0,
-    placementLevel: 0,
+    placementLookup: 15,
+    placementLevel: 2,
     placementBranch: "low-nibble-equals-2",
-    verticalShift: 0,
+    verticalShift: 32,
     argument1AfterFixedSubtract: 18,
-    adjustedVerticalArgument2: 100,
+    adjustedVerticalArgument2: 68,
     objectIndex: 0,
     frameIndex: 4,
   });
@@ -135,12 +147,12 @@ test("pure FUN_00469510 reproducer keeps the low-nibble-two and other branches s
     storageOffset: 0,
     lowNibble: 1,
     placementSelector: 2,
-    placementLookup: 0,
-    placementLevel: 0,
+    placementLookup: 14,
+    placementLevel: 1,
     placementBranch: "other-low-nibble",
-    verticalShift: 16,
+    verticalShift: 32,
     argument1AfterFixedSubtract: 18,
-    adjustedVerticalArgument2: 84,
+    adjustedVerticalArgument2: 68,
     objectIndex: 0,
     frameIndex: 39,
   });
@@ -151,7 +163,7 @@ test("pure FUN_00469510 reproducer keeps the low-nibble-two and other branches s
   }
 });
 
-test("helper reproducer fixes every direct branch while recording that positive and negative values are synthetic, not K01 values", () => {
+test("helper reproducer fixes every direct branch and exercises synthetic out-of-bounds values", () => {
   assert.equal(reproducePlacementLevel(4, 15), 4);
   assert.equal(reproducePlacementLevel(4, 1), 3);
   assert.equal(reproducePlacementLevel(0, 1), -1);

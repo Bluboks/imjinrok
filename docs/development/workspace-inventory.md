@@ -7,11 +7,17 @@
 audit의 `git cherry`·range-diff 확인을 따른다. 이 문서 자체가 각 브랜치의 모든 커밋을 다시
 검증하는 감사 보고서는 아니다.
 
+이번 재개 기준 첫 통합 커밋은 `ad327a5` (`fix: preserve K01 source lifecycle and correct scheduler
+replay`)이며, 현재 uncommitted draft는 [K01 tile placement boundary](../reverse-engineering/mechanics/k01-tile-placement-elevation-boundary.md)의
+corrected lookup 산술과 hash-bound placement/projection/fog/compositor/terrain diagnostic을 반영한다.
+physical elevation은 neutral `0`으로 유지한다. 최신 게이트와 전체 K01 parity·browser 판정은
+[project status의 workspace 상태](../project-status.md)와 canonical mechanics 문서를 참조한다.
+
 ## 현재 worktree
 
 | 경로 | 브랜치 | HEAD | 상태 |
 | --- | --- | --- | --- |
-| `dev` | `dev` | `a6f9db6` | 현재 작업 기준 |
+| `dev` | `dev` | `ad327a5` | 현재 작업 기준 |
 | `master` | `master` | `37a9f2f` | `dev`보다 뒤처짐 |
 | `sprite` | `sprite` | `60c7206` | worktree 폴더가 없고 등록은 `prunable`; 보존 |
 

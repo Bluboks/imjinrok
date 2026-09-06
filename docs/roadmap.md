@@ -25,6 +25,10 @@ VM에서 원본 게임을 플레이하며 화면 변화를 따라가는 방식�
 - 2단계: 진행 중. [K01 원본 맵 데이터 추출 프로토콜 v1](reverse-engineering/mechanics/k01-map-data-extraction-protocol.md)의
   MAP/EXE 해시·60×60·11개 채널과 결정론 산출물을 고정했다. raw shift는 물리 elevation으로
   해석하지 않으며, canonical coverage와 neutral product elevation은 별도 의도적 적응이다.
+  `FUN_0046d650` lookup의 마지막 `LEA ... *4` 누락은 교정되어 `map+0x51f54+selector*0x7e90+x*180+y`와
+  corrected raw shift/outputY joint가 fixture로 재현됐다. 이전 `0x147d5/0x1fa4` 측정은 폐기하며,
+  physical elevation은 neutral `0`로 유지한다. 제한된 clean browser diagnostic은 page error 없이 대표
+  offset을 확인했지만 전체 browser scenario와 원본 full parity는 이 단계의 통과 조건이 아니다.
   [원본 엔티티 전수 시각 프로필](reverse-engineering/mechanics/original-entity-visual-profiles.md)은
   타입 95개와 building renderer 35개를 생성 프로필로 연결하고 공유 테마가 이를 소비한다.
   `SPEECH` 17개 초상화, 대화 레이아웃, class 2·13·76·78 핵심 비주얼과 두 조선 건물의
@@ -43,13 +47,21 @@ VM에서 원본 게임을 플레이하며 화면 변화를 따라가는 방식�
   사망·slot/reference 정리는 정적 확정·재현했다. 원본 identity·좌표·accepted update 단위의
   프로젝트 변환과 실제 opt-in 연결은 미확정이다.
 
-현재 draft는 source `triggerFlag === 1` objective completion, canonical semantic-unit removal과
+커밋된 K01 work는 source `triggerFlag === 1` objective completion, canonical semantic-unit removal과
 blocker·destroyed·rebuild·save 경계를 K01 scenario policy에 연결한다. focused source-removal
-`43/43`·scenario-policy `142/142`와 독립 blocked/remove/rebuild/save sequence는 통과했다. 불필요한
-기존 테스트 정리 전 전체 `pnpm test`도 `1,449/1,449` 통과했고 skip/fail은 없었다. 다음 남은 milestone은
+`43/43`·scenario-policy `142/142`와 독립 blocked/remove/rebuild/save sequence는 통과했다. 다음 남은 milestone은
 원본 source scheduler/update 단위와 movement·health/death lifecycle, result/presentation
 integration이며, 그 뒤 브리핑부터 승패까지의 K01 종단 적합성 시나리오를 검증한다. 이 단계들은
 K01 MVP 완료 판정과 별개로 남아 있다.
+
+### K01 placement correction checkpoint
+
+이번 재개 기준 커밋은 `ad327a5`이며, 현재 uncommitted draft는 [K01 tile placement boundary]
+(reverse-engineering/mechanics/k01-tile-placement-elevation-boundary.md)의 corrected lookup
+산술과 hash-bound placement/projection/fog/compositor/terrain diagnostic을 반영한다. 원본 입력
+hash와 corrected stream 근거는 해당 canonical mechanics 문서에 둔다. 최신 전체 게이트는
+[project status의 workspace 상태](project-status.md)에서 관리하며, 이 checkpoint는 K01 MVP
+완료나 browser/original full parity를 의미하지 않는다.
 
 ### K01 accepted-update 재개 게이트
 

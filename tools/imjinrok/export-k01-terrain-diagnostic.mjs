@@ -143,13 +143,11 @@ function assertArtifactAndManifest(artifact, manifest) {
 }
 
 function resolveRawPlacement(byte, x, y) {
-  if (byte === 0) {
-    return { encodedByte: 0, argumentDeltaMagnitude: 0, argumentAdjustment: 0, productElevationLevel: 0 };
+  const argumentDeltaMagnitude = byte === 0 ? 0 : 0x100 - byte;
+  if (argumentDeltaMagnitude < 0 || argumentDeltaMagnitude > 64 || argumentDeltaMagnitude % 16 !== 0) {
+    throw new Error(`K01 terrain diagnostic has unsupported raw placement byte 0x${byte.toString(16).padStart(2, "0")} at ${x},${y}.`);
   }
-  if (byte === 0xf0) {
-    return { encodedByte: 0xf0, argumentDeltaMagnitude: 16, argumentAdjustment: -16, productElevationLevel: 1 };
-  }
-  throw new Error(`K01 terrain diagnostic has unsupported raw placement byte 0x${byte.toString(16).padStart(2, "0")} at ${x},${y}.`);
+  return { encodedByte: byte, argumentDeltaMagnitude, argumentAdjustment: argumentDeltaMagnitude === 0 ? 0 : -argumentDeltaMagnitude };
 }
 
 function readPngAlpha(path) {

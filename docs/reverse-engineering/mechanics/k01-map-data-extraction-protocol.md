@@ -25,7 +25,7 @@ SSOT 선언과 생성 스트림은 [`map-data-protocol.mjs`](../../../tools/imji
 - `objectIndex`, `frameIndex`: `FUN_00469330/FUN_00469510`의 YTL object/frame 선택
 - `fogFamily`: `map + 0x4a0c4` family selector byte
 - `placementSelector`, `placementLookup`, `placementHelperResult`: bounded helper 입력/결과
-- `rawRasterVerticalShift`: 원본 draw path가 유지하는 0/16 raw shift (물리 elevation 아님)
+- `rawRasterVerticalShift`: corrected 원본 draw path가 유지하는 `0/16/32/48/64` raw shift (물리 elevation 아님)
 - `passabilityPrimary`, `passabilityAuxiliary`: bounded passability gate의 primary/auxiliary byte
 
 각 스트림에는 base64, byte count, SHA-256, 값 분포, 차원과 대표 벡터가 포함된다.
@@ -45,7 +45,7 @@ SSOT 선언과 생성 스트림은 [`map-data-protocol.mjs`](../../../tools/imji
 5. 스트림 digest·분포·대표 벡터를 기록하고 생성 산출물과 비교한다.
 
 생성은 기존 hash-bound source evidence fixture를 함께 검증한다. source-tile selector의
-object/frame 쌍 digest, placement의 raw shift와 cell digest, fog family stream,
+object/frame 쌍 digest, corrected placement의 raw shift와 cell digest, fog family stream,
 passability primary/auxiliary stream, gameplay compositor의 MAP/EXE와 channel digest,
 cell-projection의 output-Y joint digest를 교차 확인하고 fixture 경로·SHA-256만
 `evidenceBindings`에 기록한다. fixture가 stale하거나 source hash·dimensions·digest가
@@ -64,9 +64,11 @@ base64, byte length/digest/distribution/value-range 불일치는 모두 조용�
 ## 원본과 제품 경계
 
 bounded 원본 compositor에는 native coverage layer가 없으며 index 0/검정으로 target을 지우고 선택된 YTL row span을
-복사하므로 black gap이 관찰된다. native-exact source-raster 측정은 uncovered
-logical footprint 74,771 pixels(혼합 offset boundary 25,934 pixels)이다.
-이 사실은 `정적 확정` 범위로 유지한다.
+복사한다. 이전 `74,771` logical-footprint 및 `25,934` mixed-boundary gap 수치는 누락된 lookup 산술에
+기반한 기존 잘못된 계산의 측정값이므로 폐기한다. corrected CPU alpha-vs-logical-diamond coverage와
+regenerated diagnostic은 [K01 tile placement boundary](k01-tile-placement-elevation-boundary.md)와
+[K01 terrain diagnostic](../../../analysis/fixtures/k01-terrain-diagnostic.json)을 단일 출처로 삼으며,
+이 측정은 원본 runtime 증거나 full visual/browser parity가 아니다.
 
 웹 제품은 별도의 `SourceRasterCoveragePolicy`로만 hole-free coverage를 선택할 수
 있다. K01은 map/profile 수준에서 canonical `k01-source:grss1:0000`을 모든 셀에

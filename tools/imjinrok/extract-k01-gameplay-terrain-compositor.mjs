@@ -5,6 +5,7 @@ import { dirname, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { parseSpriteLikeHeader } from "./codec.mjs";
+import { reproduceFUN00469510Placement } from "./extract-k01-tile-placement-elevation-evidence.mjs";
 import { readPeImage, toHex } from "./pe-image.mjs";
 import { assertEqual, readVaRange, sha256, verifyEvidencePoint } from "./static-evidence.mjs";
 
@@ -73,7 +74,7 @@ export function extractK01GameplayTerrainCompositorEvidence({
   const artifact = parseGeneratedArtifact(artifactPath);
   const selected = collectSelectedFrames(map, artifact);
   const payload = collectYtlPayloadStats(originalRoot, selected);
-  const vector = reproduceTwoByTwoVector(originalRoot, artifact);
+  const vector = reproduceTwoByTwoVector(originalRoot, map, artifact);
   const palettes = collectPaletteEntryZero(originalRoot);
 
   return {
@@ -117,11 +118,18 @@ export function extractK01GameplayTerrainCompositorEvidence({
       vector,
     },
     channelDigests: {
-      rawRasterVerticalShiftSha256: placement.cellProjection?.K01Distribution?.sourceBackedRawRelativeComponent?.sha256 ?? "76cc670258325ebc671d19b6f864768bf376328a7573ca7b29887c780e50b864",
-      projectedJointSha256: projection.outputYJointVector?.stream?.sha256 ?? "0e2123b96bf4aad8e09db38d60245abf655171198171c034734bbd59cee46bb6",
-      placementSha256: placement.cellStream?.sha256 ?? "78d0d96e0157e60cf9d2e2e4325941510f8911dbc9a57422ad00220874ad406c",
+      rawRasterVerticalShiftSha256: requireChannelDigest(placement.cellProjection?.K01Distribution?.sourceBackedRawRelativeComponent?.sha256, "placement raw raster vertical shift"),
+      projectedJointSha256: requireChannelDigest(projection.outputYJointVector?.stream?.sha256, "projection outputY joint"),
+      placementSha256: requireChannelDigest(placement.cellStream?.sha256, "placement cell stream"),
     },
   };
+}
+
+function requireChannelDigest(value, label) {
+  if (typeof value !== "string" || !/^[0-9a-f]{64}$/u.test(value)) {
+    throw new Error(`${label} SHA-256 digest is missing or invalid`);
+  }
+  return value;
 }
 
 function verifyFunctions(records, executable, image) {
@@ -215,11 +223,10 @@ function collectYtlPayloadStats(originalRoot, selected) {
   return { selectedFrameCount: selected.length, payloadBytes, payloadIndex0, payloadIndexFe, rowParseFailures };
 }
 
-function reproduceTwoByTwoVector(originalRoot, artifact) {
+function reproduceTwoByTwoVector(originalRoot, map, artifact) {
   const target = Buffer.alloc(640 * 384, 0);
   const written = new Uint8Array(640 * 384);
   const pairBytes = Buffer.from(artifact.pairBytesBase64, "base64");
-  const rawOffsets = Buffer.from(artifact.placementOffsetYBytesBase64, "base64");
   const objectStems = artifact.objectStems;
   const cells = [];
   let totalWrites = 0;
@@ -229,9 +236,15 @@ function reproduceTwoByTwoVector(originalRoot, artifact) {
     const objectIndex = pairBytes[ordinal * 2];
     const frame = pairBytes[ordinal * 2 + 1];
     const stem = objectStems[String(objectIndex)];
-    const verticalShift = rawOffsets[ordinal] === 0xf0 ? 16 : 0;
     const projectedX = 320 + (x - y) * 32;
     const projectedY = 192 + (x + y) * 16;
+    const placement = reproduceFUN00469510Placement(map, {
+      argument1: projectedX,
+      verticalArgument2: projectedY,
+      x,
+      y,
+    });
+    const verticalShift = placement.verticalShift;
     const drawLeft = projectedX - 32;
     const drawTop = projectedY - verticalShift;
     const bytes = readFileSync(resolve(originalRoot, `tile/normal/${stem}.ytl`));

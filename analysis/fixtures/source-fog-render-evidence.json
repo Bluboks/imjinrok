@@ -593,17 +593,24 @@
       "allCellDistribution": {
         "cellCount": 3600,
         "helperReturn": {
-          "0": 3600
+          "0": 1639,
+          "1": 616,
+          "2": 1115,
+          "3": 74,
+          "4": 156
         },
         "lowNibble": {
           "1": 735,
           "2": 2865
         },
         "verticalShift": {
-          "0": 2865,
-          "16": 735
+          "0": 1331,
+          "16": 617,
+          "32": 1335,
+          "48": 128,
+          "64": 189
         },
-        "streamSha256": "2f631bc0209fe72db3c4310b7602fb3fc84e23e871561152d450acbfbd0d7864"
+        "streamSha256": "f76633cb3803d2293fab5d19e2b9ba2966e4307e2189b61101740f35de4dff81"
       },
       "vectors": [
         {
@@ -621,8 +628,8 @@
             "familyByte": 10,
             "lowNibble": 1,
             "placementSelector": 2,
-            "placementLookup": 0,
-            "helperReturn": 0
+            "placementLookup": 14,
+            "helperReturn": 1
           },
           "projection": {
             "projectedX": 160,
@@ -632,11 +639,11 @@
             "x": 0,
             "y": 0,
             "lowNibble": 1,
-            "helperReturn": 0,
+            "helperReturn": 1,
             "placementBranch": "other-low-nibble",
-            "verticalShift": 16,
+            "verticalShift": 32,
             "drawLeft": 128,
-            "drawTop": -112
+            "drawTop": -128
           }
         },
         {
@@ -654,8 +661,8 @@
             "familyByte": 0,
             "lowNibble": 2,
             "placementSelector": 2,
-            "placementLookup": 0,
-            "helperReturn": 0
+            "placementLookup": 15,
+            "helperReturn": 2
           },
           "projection": {
             "projectedX": 128,
@@ -665,11 +672,11 @@
             "x": 0,
             "y": 1,
             "lowNibble": 2,
-            "helperReturn": 0,
+            "helperReturn": 2,
             "placementBranch": "low-nibble-equals-2",
-            "verticalShift": 0,
+            "verticalShift": 32,
             "drawLeft": 96,
-            "drawTop": -80
+            "drawTop": -112
           }
         },
         {
@@ -687,8 +694,8 @@
             "familyByte": 0,
             "lowNibble": 2,
             "placementSelector": 2,
-            "placementLookup": 0,
-            "helperReturn": 0
+            "placementLookup": 15,
+            "helperReturn": 2
           },
           "projection": {
             "projectedX": 160,
@@ -698,11 +705,11 @@
             "x": 6,
             "y": 6,
             "lowNibble": 2,
-            "helperReturn": 0,
+            "helperReturn": 2,
             "placementBranch": "low-nibble-equals-2",
-            "verticalShift": 0,
+            "verticalShift": 32,
             "drawLeft": 128,
-            "drawTop": 96
+            "drawTop": 64
           }
         },
         {
@@ -720,8 +727,8 @@
             "familyByte": 0,
             "lowNibble": 2,
             "placementSelector": 4,
-            "placementLookup": 0,
-            "helperReturn": 0
+            "placementLookup": 15,
+            "helperReturn": 4
           },
           "projection": {
             "projectedX": 160,
@@ -731,11 +738,11 @@
             "x": 59,
             "y": 59,
             "lowNibble": 2,
-            "helperReturn": 0,
+            "helperReturn": 4,
             "placementBranch": "low-nibble-equals-2",
-            "verticalShift": 0,
+            "verticalShift": 64,
             "drawLeft": 128,
-            "drawTop": 1792
+            "drawTop": 1728
           }
         }
       ]
@@ -750,13 +757,10 @@
         "y": 0
       },
       "formula": "drawLeft = projectedX - 32; drawTop = projectedY - rawVerticalShift",
-      "K01RawVerticalShift": {
-        "lowNibbleEquals2": 0,
-        "other": 16
-      },
+      "K01RawVerticalShift": "derived per cell by the branch formulas above; observed values are 0, 16, 32, 48, and 64",
       "boundary": "This caller/callee-local image anchor does not assign renderer-wide pivot semantics, viewport ownership, clip/mode, alpha/blend, or web placement policy."
     },
-    "boundary": "K01's hash-bound helper return is 0 for every cell. The low-nibble==2 versus other arithmetic is static-confirmed/reproduced, but the helper's human meaning and any terrain/visibility interpretation remain unresolved."
+    "boundary": "The low-nibble==2 versus other arithmetic is static-confirmed/reproduced, but the corrected selector-indexed helper stream's human meaning and any terrain/visibility interpretation remain unresolved."
   },
   "composition": {
     "subframeGrid": {

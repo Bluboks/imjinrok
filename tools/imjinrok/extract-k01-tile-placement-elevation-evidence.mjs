@@ -28,8 +28,8 @@ const OBJECT_OFFSET = 0x3a3a4;
 const FRAME_OFFSET = 0x42234;
 const FOG_FAMILY_OFFSET = 0x4a0c4;
 const PLACEMENT_SELECTOR_OFFSET = 0x79824;
-const PLACEMENT_LOOKUP_OFFSET = 0x147d5;
-const PLACEMENT_SELECTOR_STRIDE = 0x1fa4;
+const PLACEMENT_LOOKUP_OFFSET = 0x51f54;
+const PLACEMENT_SELECTOR_STRIDE = 0x7e90;
 const RUNTIME_WORD_TABLE_ADDRESS = 0x00c06e86;
 const RUNTIME_WORD_TABLE_STRIDE = 8;
 const RUNTIME_WORD_TABLE_INITIALIZATION_END = 0x00c06efe;
@@ -71,7 +71,7 @@ const EVIDENCE_POINTS = [
   [0x004695e2, "66 0f b6 04 31 8d 34 7f", "FUN_00469510 reads the unsigned frame byte and scales the selected loader record"],
   [0x0046d650, "66 8b 44 24 04 53 66 85 c0 57 7c 20 0f bf d0 3b 91 a0 2d 00 00 7d 15 66 8b 44 24 10 66 85 c0 7c 0b 0f bf f8 3b b9 a4 2d 00 00 7c 09", "FUN_0046d650 reads signed-word x from stack argument 1 and y from argument 2, returning -1 outside map bounds"],
   [0x0046d685, "8d 84 92 01 36 00 00 56 8d 04 c0 8d 04 87 8a 1c 08", "FUN_0046d650 reads uint8 selector at map +0x79824+x*180+y"],
-  [0x0046d696, "8b c3 25 ff 00 00 00 8d 34 80 8d 34 f6 8d 94 b2 49 07 00 00 5e 8d 14 92 8d 14 d2 8d 14 97 8a 0c 0a", "FUN_0046d650 uses selector*0x1fa4 for lookup at map +0x147d5+selector*0x1fa4+x*180+y"],
+  [0x0046d696, "8b c3 25 ff 00 00 00 8d 34 80 8d 34 f6 8d 94 b2 49 07 00 00 5e 8d 14 92 8d 14 d2 8d 14 97 8a 0c 0a", "FUN_0046d650 scales the selector by 180*180 and reads lookup at map +0x51f54+selector*0x7e90+x*180+y; the final lea edx,[edi+edx*4] is part of this address calculation"],
   [0x0046d6b7, "80 f9 0f 75 0a 66 33 c0 5f 8a c3 5b c2 08 00 84 c9 74 06 5f 48 5b c2 08 00", "FUN_0046d650 returns selector for lookup 15, selector-1 for other nonzero lookup, otherwise 0"],
 ].map(([va, bytes, meaning]) => ({ va, bytes, meaning }));
 
@@ -126,6 +126,8 @@ export function extractK01TilePlacementElevationEvidence({
   const helperReturnCounts = countBy(cells, "placementLevel");
   const branchCounts = countBy(cells, "placementBranch");
   const shiftCounts = countBy(cells, "verticalShift");
+  const placementLookupStreamSha256 = sha256(Buffer.from(cells.map((cell) => cell.placementLookup)));
+  const helperReturnStreamSha256 = sha256(Buffer.from(cells.map((cell) => cell.placementLevel & 0xff)));
   const fogFamilyCounts = countBy(cells.map((cell) => ({ fogFamily: map[FOG_FAMILY_OFFSET + cell.storageOffset] })), "fogFamily");
   const runtimeWordTableInitialization = replayFUN00462b80RuntimeWordTableInitialization();
 
@@ -152,7 +154,7 @@ export function extractK01TilePlacementElevationEvidence({
       fields: {
         lowNibble: "uint8(map + 0x32514 + x * 180 + y) & 0x0f",
         placementSelector: "uint8(map + 0x79824 + x * 180 + y)",
-        placementLookup: "uint8(map + 0x147d5 + placementSelector * 0x1fa4 + x * 180 + y)",
+        placementLookup: "uint8(map + 0x51f54 + placementSelector * 0x7e90 + x * 180 + y)",
         objectIndex: "uint8(map + 0x3a3a4 + x * 180 + y)",
         frameIndex: "uint8(map + 0x42234 + x * 180 + y)",
       },
@@ -162,7 +164,13 @@ export function extractK01TilePlacementElevationEvidence({
         function: "FUN_0046d650",
         returnRule: "out-of-bounds => int16(-1); lookup == 15 => uint8(selector); lookup != 0 => int16(uint8(selector) - 1); otherwise => 0",
         neutralName: "placement-level selector",
-        K01Distribution: { placementSelector: selectorCounts, placementLookup: lookupCounts, placementLevel: helperReturnCounts },
+        K01Distribution: {
+          placementSelector: selectorCounts,
+          placementLookup: lookupCounts,
+          placementLevel: helperReturnCounts,
+          placementLookupStreamSha256,
+          placementLevelStreamSha256: helperReturnStreamSha256,
+        },
       },
       lowNibbleBranch: {
         trueCondition: "in-bounds && lowNibble == 2",
@@ -204,7 +212,7 @@ export function extractK01TilePlacementElevationEvidence({
       drawOrder: "y outer, x inner",
       baseScreenPoint: "screenX = (x - y) * 32 + map.width * 32; screenY = (x + y) * 16 + 200",
       dispatch: "FUN_00469510(argument1=screenX, argument2=screenY, argument3=x, argument4=y)",
-      drawRectangle: "drawLeft = argument1 - 32; drawTop = argument2 - verticalShift, where K01 verticalShift is 0 for lowNibble == 2 and 16 otherwise",
+      drawRectangle: "drawLeft = argument1 - 32; drawTop = argument2 - verticalShift, where verticalShift follows the branch formulas above",
       boundary: "This bounded full-map raster establishes draw order and rectangle arithmetic, not broader pivot, clip/mode, palette, or renderer parity semantics.",
     },
     cellProjection: {
@@ -216,11 +224,13 @@ export function extractK01TilePlacementElevationEvidence({
       lowNibbleRelativeComponent: {
         lowNibbleEquals2: "tableWord + 16 - (int16(FUN_0046d650(map, x, y)) << 4)",
         other: "tableWord - (abs(int16(FUN_0046d650(map, x, y))) << 4)",
-        boundary: "The table and raw-coordinate axis are not named as height/elevation. K01 helper lookup and return streams are all zero; the source-backed product adapter separately preserves FUN_00469510's raw 0/16 stream.",
+        boundary: "The table and raw-coordinate axis are not named as height/elevation. K01 helper lookup and return streams are reproduced from the full selector-indexed map region; the source-backed product adapter must preserve the resulting raw shift without assigning a physical terrain-height meaning.",
       },
       K01Distribution: {
         helperLookup: lookupCounts,
         helperReturn: helperReturnCounts,
+        helperLookupStreamSha256: placementLookupStreamSha256,
+        helperReturnStreamSha256,
         sourceBackedRawRelativeComponent: summarizeRawRelativeComponent(cells),
       },
     },
@@ -228,7 +238,7 @@ export function extractK01TilePlacementElevationEvidence({
     representativeCells: [[0, 0], [0, 1], [0, 59], [59, 0], [59, 59]].map(([x, y]) => cells.find((cell) => cell.x === x && cell.y === y)),
     rawCodeRanges: RAW_CODE_RANGES.map((range) => verifyRawCodeRange(executable, image, range)),
     evidencePoints: EVIDENCE_POINTS.map((point) => verifyEvidencePoint(executable, image, point)),
-    unresolvedBoundary: "K01's 3,600 helper lookups and returns are all zero, so this evidence does not justify calling the helper terrain elevation or height. FUN_00462b80's direct initialization writes recovered values for K01's observed families 0..14, but direct references alone do not exclude alias/computed writers or establish lifetime/order/semantics. It does not establish screen/world axis semantics, pixel anchor/pivot, human terrain/passability/fog meaning, other map/theme behavior, or product renderer parity.",
+    unresolvedBoundary: "The corrected K01 lookup and helper streams are a bounded map-data observation, not a proof that the helper is terrain elevation or height. FUN_00462b80's direct initialization writes recovered values for K01's observed families 0..14, but direct references alone do not exclude alias/computed writers or establish lifetime/order/semantics. It does not establish screen/world axis semantics, pixel anchor/pivot, human terrain/passability/fog meaning, other map/theme behavior, or product renderer parity.",
   };
 }
 
@@ -240,8 +250,28 @@ export function reproduceK01PlacementHelper(mapBuffer, x, y) {
   if (!isInBounds(header, x, y)) return -1;
   const storageOffset = x * X_STRIDE + y;
   const selector = mapBuffer[PLACEMENT_SELECTOR_OFFSET + storageOffset];
-  const lookup = mapBuffer[PLACEMENT_LOOKUP_OFFSET + selector * PLACEMENT_SELECTOR_STRIDE + storageOffset];
+  const lookup = mapBuffer[replayFUN0046d650LookupAddress({ selector, x, y })];
   return reproducePlacementLevel(selector, lookup);
+}
+
+/**
+ * Replays the address arithmetic instruction-by-instruction from
+ * FUN_0046d650. Keeping the intermediate values visible prevents the
+ * selector lookup from silently regressing to the old quarter-sized stride.
+ */
+export function replayFUN0046d650LookupAddress({ selector, x, y } = {}) {
+  assertUint8(selector, "selector");
+  assertSignedWord(x, "x");
+  assertSignedWord(y, "y");
+  const selectorMapOffset = (((x + x * 4 + 0x3601) * 9) * 4) + y;
+  const selectorMapOffsetExpected = 0x79824 + x * X_STRIDE + y;
+  if (selectorMapOffset !== selectorMapOffsetExpected) throw new Error("FUN_0046d650 selector address replay mismatch");
+  const selectorScaled = selector * 5;
+  const selectorScaledByNine = selectorScaled * 9;
+  const lookupOffset = ((x + selectorScaledByNine * 4 + 0x749) * 5 * 9 * 4) + y;
+  const canonicalOffset = PLACEMENT_LOOKUP_OFFSET + selector * PLACEMENT_SELECTOR_STRIDE + x * X_STRIDE + y;
+  if (lookupOffset !== canonicalOffset) throw new Error("FUN_0046d650 lookup address replay mismatch");
+  return lookupOffset;
 }
 
 /**
@@ -321,7 +351,7 @@ export function reproduceFUN00469510Placement(mapBuffer, { argument1, verticalAr
     storageOffset,
     lowNibble,
     placementSelector: mapBuffer[PLACEMENT_SELECTOR_OFFSET + storageOffset],
-    placementLookup: mapBuffer[PLACEMENT_LOOKUP_OFFSET + mapBuffer[PLACEMENT_SELECTOR_OFFSET + storageOffset] * PLACEMENT_SELECTOR_STRIDE + storageOffset],
+    placementLookup: mapBuffer[replayFUN0046d650LookupAddress({ selector: mapBuffer[PLACEMENT_SELECTOR_OFFSET + storageOffset], x, y })],
     placementLevel,
     placementBranch,
     verticalShift,
@@ -404,9 +434,9 @@ function summarizeRawRelativeComponent(cells) {
   return {
     coordinateOrder: "x-major: ordinal = x * height + y",
     count: bytes.length,
-    values: { 0: bytes.filter((value) => value === 0).length, 16: bytes.filter((value) => value === 16).length },
+    values: Object.fromEntries([...new Set(bytes)].sort((left, right) => left - right).map((value) => [value, bytes.filter((candidate) => candidate === value).length])),
     sha256: sha256(bytes),
-    interpretation: "FUN_00469510 K01 raw relative component retained for source-backed product elevation adaptation; not a full original height claim.",
+    interpretation: "FUN_00469510 K01 raw source-raster vertical shift retained as original relative placement data; not a physical terrain-height claim.",
   };
 }
 

@@ -19,8 +19,12 @@ test("K01 map-data protocol is deterministic and hash-bound", () => {
   const artifact = JSON.parse(readFileSync(artifactPath, "utf8"));
   validateProtocolArtifact(artifact);
   assert.deepEqual(artifact, first);
-  assert.equal(readProtocolCell(artifact, "rawRasterVerticalShift", 15, 6), 0);
-  assert.equal(readProtocolCell(artifact, "rawRasterVerticalShift", 16, 6), 16);
+  assert.deepEqual(
+    [[0, 0], [0, 25], [0, 32], [0, 33], [46, 49]].map(([x, y]) => readProtocolCell(artifact, "rawRasterVerticalShift", x, y)),
+    [32, 48, 16, 0, 64],
+  );
+  assert.equal(readProtocolCell(artifact, "rawRasterVerticalShift", 15, 6), 32);
+  assert.equal(readProtocolCell(artifact, "rawRasterVerticalShift", 16, 6), 32);
   assert.throws(() => readProtocolCell(artifact, "objectIndex", 60, 0), /outside/u);
   assert.doesNotThrow(() => verifyK01MapDataProtocolArtifact());
 });

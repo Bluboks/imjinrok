@@ -121,8 +121,8 @@
         9,
         9
       ],
-      "priorCellStreamSha256": "78d0d96e0157e60cf9d2e2e4325941510f8911dbc9a57422ad00220874ad406c",
-      "priorRawRasterVerticalStreamSha256": "76cc670258325ebc671d19b6f864768bf376328a7573ca7b29887c780e50b864"
+      "priorCellStreamSha256": "510f65ea32bf993466e31126b0528dbd127175f3c6bb91ab42e20f3e6ed3c496",
+      "priorRawRasterVerticalStreamSha256": "4b58471674a5e89bb553cb995474a3847458eb9e295d68aef057439093b0fb52"
     }
   },
   "functionRanges": [
@@ -233,9 +233,29 @@
         "helperReturnInt16LE",
         "outputYAdjustmentInt16LE"
       ],
-      "sha256": "0e2123b96bf4aad8e09db38d60245abf655171198171c034734bbd59cee46bb6"
+      "sha256": "4483d6b50a3bf13220c21e4aa7fcf5c7e10216010be45e6aee759dd4a6c14796"
     },
     "joints": [
+      {
+        "lowNibble": 1,
+        "family": 1,
+        "runtimeWord": 9,
+        "helperReturn": 2,
+        "outputYBranch": "other-low-nibble",
+        "outputYAdjustment": -23,
+        "rawRasterVerticalBranch": 48,
+        "count": 11
+      },
+      {
+        "lowNibble": 1,
+        "family": 1,
+        "runtimeWord": 9,
+        "helperReturn": 1,
+        "outputYBranch": "other-low-nibble",
+        "outputYAdjustment": -7,
+        "rawRasterVerticalBranch": 32,
+        "count": 42
+      },
       {
         "lowNibble": 1,
         "family": 1,
@@ -244,7 +264,17 @@
         "outputYBranch": "other-low-nibble",
         "outputYAdjustment": 9,
         "rawRasterVerticalBranch": 16,
-        "count": 95
+        "count": 42
+      },
+      {
+        "lowNibble": 1,
+        "family": 2,
+        "runtimeWord": 9,
+        "helperReturn": 1,
+        "outputYBranch": "other-low-nibble",
+        "outputYAdjustment": -7,
+        "rawRasterVerticalBranch": 32,
+        "count": 38
       },
       {
         "lowNibble": 1,
@@ -254,7 +284,37 @@
         "outputYBranch": "other-low-nibble",
         "outputYAdjustment": 9,
         "rawRasterVerticalBranch": 16,
-        "count": 95
+        "count": 35
+      },
+      {
+        "lowNibble": 1,
+        "family": 2,
+        "runtimeWord": 9,
+        "helperReturn": 2,
+        "outputYBranch": "other-low-nibble",
+        "outputYAdjustment": -23,
+        "rawRasterVerticalBranch": 48,
+        "count": 13
+      },
+      {
+        "lowNibble": 1,
+        "family": 2,
+        "runtimeWord": 9,
+        "helperReturn": 3,
+        "outputYBranch": "other-low-nibble",
+        "outputYAdjustment": -39,
+        "rawRasterVerticalBranch": 64,
+        "count": 9
+      },
+      {
+        "lowNibble": 1,
+        "family": 3,
+        "runtimeWord": 9,
+        "helperReturn": 2,
+        "outputYBranch": "other-low-nibble",
+        "outputYAdjustment": -23,
+        "rawRasterVerticalBranch": 48,
+        "count": 23
       },
       {
         "lowNibble": 1,
@@ -264,7 +324,37 @@
         "outputYBranch": "other-low-nibble",
         "outputYAdjustment": 9,
         "rawRasterVerticalBranch": 16,
-        "count": 101
+        "count": 36
+      },
+      {
+        "lowNibble": 1,
+        "family": 3,
+        "runtimeWord": 9,
+        "helperReturn": 1,
+        "outputYBranch": "other-low-nibble",
+        "outputYAdjustment": -7,
+        "rawRasterVerticalBranch": 32,
+        "count": 35
+      },
+      {
+        "lowNibble": 1,
+        "family": 3,
+        "runtimeWord": 9,
+        "helperReturn": 3,
+        "outputYBranch": "other-low-nibble",
+        "outputYAdjustment": -39,
+        "rawRasterVerticalBranch": 64,
+        "count": 7
+      },
+      {
+        "lowNibble": 1,
+        "family": 4,
+        "runtimeWord": 9,
+        "helperReturn": 1,
+        "outputYBranch": "other-low-nibble",
+        "outputYAdjustment": -7,
+        "rawRasterVerticalBranch": 32,
+        "count": 38
       },
       {
         "lowNibble": 1,
@@ -274,7 +364,17 @@
         "outputYBranch": "other-low-nibble",
         "outputYAdjustment": 9,
         "rawRasterVerticalBranch": 16,
-        "count": 79
+        "count": 40
+      },
+      {
+        "lowNibble": 1,
+        "family": 4,
+        "runtimeWord": 9,
+        "helperReturn": 2,
+        "outputYBranch": "other-low-nibble",
+        "outputYAdjustment": -23,
+        "rawRasterVerticalBranch": 48,
+        "count": 1
       },
       {
         "lowNibble": 1,
@@ -284,7 +384,37 @@
         "outputYBranch": "other-low-nibble",
         "outputYAdjustment": 9,
         "rawRasterVerticalBranch": 16,
-        "count": 38
+        "count": 21
+      },
+      {
+        "lowNibble": 1,
+        "family": 5,
+        "runtimeWord": 9,
+        "helperReturn": 1,
+        "outputYBranch": "other-low-nibble",
+        "outputYAdjustment": -7,
+        "rawRasterVerticalBranch": 32,
+        "count": 15
+      },
+      {
+        "lowNibble": 1,
+        "family": 5,
+        "runtimeWord": 9,
+        "helperReturn": 2,
+        "outputYBranch": "other-low-nibble",
+        "outputYAdjustment": -23,
+        "rawRasterVerticalBranch": 48,
+        "count": 1
+      },
+      {
+        "lowNibble": 1,
+        "family": 5,
+        "runtimeWord": 9,
+        "helperReturn": 3,
+        "outputYBranch": "other-low-nibble",
+        "outputYAdjustment": -39,
+        "rawRasterVerticalBranch": 64,
+        "count": 1
       },
       {
         "lowNibble": 1,
@@ -294,7 +424,47 @@
         "outputYBranch": "other-low-nibble",
         "outputYAdjustment": 9,
         "rawRasterVerticalBranch": 16,
-        "count": 36
+        "count": 10
+      },
+      {
+        "lowNibble": 1,
+        "family": 6,
+        "runtimeWord": 9,
+        "helperReturn": 1,
+        "outputYBranch": "other-low-nibble",
+        "outputYAdjustment": -7,
+        "rawRasterVerticalBranch": 32,
+        "count": 13
+      },
+      {
+        "lowNibble": 1,
+        "family": 6,
+        "runtimeWord": 9,
+        "helperReturn": 2,
+        "outputYBranch": "other-low-nibble",
+        "outputYAdjustment": -23,
+        "rawRasterVerticalBranch": 48,
+        "count": 8
+      },
+      {
+        "lowNibble": 1,
+        "family": 6,
+        "runtimeWord": 9,
+        "helperReturn": 3,
+        "outputYBranch": "other-low-nibble",
+        "outputYAdjustment": -39,
+        "rawRasterVerticalBranch": 64,
+        "count": 5
+      },
+      {
+        "lowNibble": 1,
+        "family": 7,
+        "runtimeWord": 9,
+        "helperReturn": 1,
+        "outputYBranch": "other-low-nibble",
+        "outputYAdjustment": -7,
+        "rawRasterVerticalBranch": 32,
+        "count": 22
       },
       {
         "lowNibble": 1,
@@ -304,7 +474,47 @@
         "outputYBranch": "other-low-nibble",
         "outputYAdjustment": 9,
         "rawRasterVerticalBranch": 16,
-        "count": 54
+        "count": 24
+      },
+      {
+        "lowNibble": 1,
+        "family": 7,
+        "runtimeWord": 9,
+        "helperReturn": 2,
+        "outputYBranch": "other-low-nibble",
+        "outputYAdjustment": -23,
+        "rawRasterVerticalBranch": 48,
+        "count": 5
+      },
+      {
+        "lowNibble": 1,
+        "family": 7,
+        "runtimeWord": 9,
+        "helperReturn": 3,
+        "outputYBranch": "other-low-nibble",
+        "outputYAdjustment": -39,
+        "rawRasterVerticalBranch": 64,
+        "count": 3
+      },
+      {
+        "lowNibble": 1,
+        "family": 8,
+        "runtimeWord": 9,
+        "helperReturn": 2,
+        "outputYBranch": "other-low-nibble",
+        "outputYAdjustment": -23,
+        "rawRasterVerticalBranch": 48,
+        "count": 9
+      },
+      {
+        "lowNibble": 1,
+        "family": 8,
+        "runtimeWord": 9,
+        "helperReturn": 1,
+        "outputYBranch": "other-low-nibble",
+        "outputYAdjustment": -7,
+        "rawRasterVerticalBranch": 32,
+        "count": 28
       },
       {
         "lowNibble": 1,
@@ -314,7 +524,17 @@
         "outputYBranch": "other-low-nibble",
         "outputYAdjustment": 9,
         "rawRasterVerticalBranch": 16,
-        "count": 61
+        "count": 24
+      },
+      {
+        "lowNibble": 1,
+        "family": 9,
+        "runtimeWord": 9,
+        "helperReturn": 1,
+        "outputYBranch": "other-low-nibble",
+        "outputYAdjustment": -7,
+        "rawRasterVerticalBranch": 32,
+        "count": 22
       },
       {
         "lowNibble": 1,
@@ -324,7 +544,37 @@
         "outputYBranch": "other-low-nibble",
         "outputYAdjustment": 9,
         "rawRasterVerticalBranch": 16,
-        "count": 52
+        "count": 24
+      },
+      {
+        "lowNibble": 1,
+        "family": 9,
+        "runtimeWord": 9,
+        "helperReturn": 3,
+        "outputYBranch": "other-low-nibble",
+        "outputYAdjustment": -39,
+        "rawRasterVerticalBranch": 64,
+        "count": 3
+      },
+      {
+        "lowNibble": 1,
+        "family": 9,
+        "runtimeWord": 9,
+        "helperReturn": 2,
+        "outputYBranch": "other-low-nibble",
+        "outputYAdjustment": -23,
+        "rawRasterVerticalBranch": 48,
+        "count": 3
+      },
+      {
+        "lowNibble": 1,
+        "family": 10,
+        "runtimeWord": 9,
+        "helperReturn": 1,
+        "outputYBranch": "other-low-nibble",
+        "outputYAdjustment": -7,
+        "rawRasterVerticalBranch": 32,
+        "count": 14
       },
       {
         "lowNibble": 1,
@@ -334,7 +584,37 @@
         "outputYBranch": "other-low-nibble",
         "outputYAdjustment": 9,
         "rawRasterVerticalBranch": 16,
-        "count": 33
+        "count": 9
+      },
+      {
+        "lowNibble": 1,
+        "family": 10,
+        "runtimeWord": 9,
+        "helperReturn": 2,
+        "outputYBranch": "other-low-nibble",
+        "outputYAdjustment": -23,
+        "rawRasterVerticalBranch": 48,
+        "count": 6
+      },
+      {
+        "lowNibble": 1,
+        "family": 10,
+        "runtimeWord": 9,
+        "helperReturn": 3,
+        "outputYBranch": "other-low-nibble",
+        "outputYAdjustment": -39,
+        "rawRasterVerticalBranch": 64,
+        "count": 4
+      },
+      {
+        "lowNibble": 1,
+        "family": 11,
+        "runtimeWord": 9,
+        "helperReturn": 1,
+        "outputYBranch": "other-low-nibble",
+        "outputYAdjustment": -7,
+        "rawRasterVerticalBranch": 32,
+        "count": 14
       },
       {
         "lowNibble": 1,
@@ -344,7 +624,37 @@
         "outputYBranch": "other-low-nibble",
         "outputYAdjustment": 9,
         "rawRasterVerticalBranch": 16,
-        "count": 35
+        "count": 20
+      },
+      {
+        "lowNibble": 1,
+        "family": 11,
+        "runtimeWord": 9,
+        "helperReturn": 3,
+        "outputYBranch": "other-low-nibble",
+        "outputYAdjustment": -39,
+        "rawRasterVerticalBranch": 64,
+        "count": 1
+      },
+      {
+        "lowNibble": 1,
+        "family": 12,
+        "runtimeWord": 9,
+        "helperReturn": 2,
+        "outputYBranch": "other-low-nibble",
+        "outputYAdjustment": -23,
+        "rawRasterVerticalBranch": 48,
+        "count": 7
+      },
+      {
+        "lowNibble": 1,
+        "family": 12,
+        "runtimeWord": 9,
+        "helperReturn": 1,
+        "outputYBranch": "other-low-nibble",
+        "outputYAdjustment": -7,
+        "rawRasterVerticalBranch": 32,
+        "count": 26
       },
       {
         "lowNibble": 1,
@@ -354,7 +664,7 @@
         "outputYBranch": "other-low-nibble",
         "outputYAdjustment": 9,
         "rawRasterVerticalBranch": 16,
-        "count": 55
+        "count": 22
       },
       {
         "lowNibble": 1,
@@ -370,11 +680,51 @@
         "lowNibble": 2,
         "family": 0,
         "runtimeWord": 0,
+        "helperReturn": 2,
+        "outputYBranch": "low-nibble-equals-2",
+        "outputYAdjustment": -16,
+        "rawRasterVerticalBranch": 32,
+        "count": 1028
+      },
+      {
+        "lowNibble": 2,
+        "family": 0,
+        "runtimeWord": 0,
+        "helperReturn": 3,
+        "outputYBranch": "low-nibble-equals-2",
+        "outputYAdjustment": -32,
+        "rawRasterVerticalBranch": 48,
+        "count": 41
+      },
+      {
+        "lowNibble": 2,
+        "family": 0,
+        "runtimeWord": 0,
         "helperReturn": 0,
         "outputYBranch": "low-nibble-equals-2",
         "outputYAdjustment": 16,
         "rawRasterVerticalBranch": 0,
-        "count": 2865
+        "count": 1331
+      },
+      {
+        "lowNibble": 2,
+        "family": 0,
+        "runtimeWord": 0,
+        "helperReturn": 1,
+        "outputYBranch": "low-nibble-equals-2",
+        "outputYAdjustment": 0,
+        "rawRasterVerticalBranch": 16,
+        "count": 309
+      },
+      {
+        "lowNibble": 2,
+        "family": 0,
+        "runtimeWord": 0,
+        "helperReturn": 4,
+        "outputYBranch": "low-nibble-equals-2",
+        "outputYAdjustment": -48,
+        "rawRasterVerticalBranch": 64,
+        "count": 156
       }
     ],
     "lowNibbleFamilyCounts": {
@@ -393,7 +743,7 @@
       "1/14": 1,
       "2/0": 2865
     },
-    "interpretation": "K01 has helperReturn 0 for every cell. Thus low-nibble 2/family 0 yields outputY base + 16, while low-nibble 1/family 1..14 yields outputY base + 9. Their precomputed outputY additions differ by 7; this remains distinct from the raw raster vertical branch 0/16."
+    "interpretation": "K01's corrected helper stream is retained in the joint vector. The observed outputY adjustment histogram is -48:156, -39:33, -32:41, -23:87, -16:1028, -7:307, 0:309, 9:308, and 16:1331; this precomputed projection stream remains distinct from the raw raster vertical shift stream 0/16/32/48/64."
   },
   "rawCodeAnchors": [
     {
@@ -421,5 +771,5 @@
       "meaning": "It passes local outputX/outputY storage to FUN_00464cc0, then compares the squared distance using both returned coordinates."
     }
   ],
-  "residualBoundary": "The outputY additions are precomputed cell projection/outputY adjustments. The raw raster branch is separately 0 for low-nibble 2 and 16 otherwise; neither value alone proves gameplay terrain height, elevation, world-axis, or renderer-pivot semantics. Runtime table lifetime/order and alias/computed writers remain outside this unit."
+  "residualBoundary": "The outputY additions are precomputed cell projection/outputY adjustments. The raw raster branch is separately reproduced with the helper-dependent 0/16/32/48/64 shifts; neither stream alone proves gameplay terrain height, elevation, world-axis, or renderer-pivot semantics. Runtime table lifetime/order and alias/computed writers remain outside this unit."
 }

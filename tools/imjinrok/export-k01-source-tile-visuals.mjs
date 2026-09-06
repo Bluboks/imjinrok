@@ -114,7 +114,7 @@ export function exportK01SourceTileVisuals(options = {}) {
       imageGeometry: { width: 64, height: 48, footprintAnchor: { x: 32, y: 0 } },
       rawPlacementArgumentDelta: {
         source: "FUN_00469330/FUN_00469510 K01 second raw placement argument adjustment. Its screen/world axis and pixel pivot are unresolved.",
-        values: { zero: 2865, positive16: 735 },
+        values: placementArgumentDistribution(placementOffsetYBytes),
       },
       webPlacement: {
         sourceRasterClearColor: "0x000000",
@@ -160,13 +160,47 @@ function collectPairs(protocol) {
 function collectPlacementOffsetYBytes(protocol, placementEvidence) {
   const rawShiftBytes = Buffer.from(protocol.channels.rawRasterVerticalShift.valuesBase64, "base64");
   const bytes = Buffer.from(rawShiftBytes);
-  for (let index = 0; index < bytes.length; index += 1) bytes[index] = bytes[index] === 16 ? 0xf0 : bytes[index];
-  const zero = bytes.filter((value) => value === 0).length;
-  const negative16 = bytes.filter((value) => value === 0xf0).length;
-  assertEqual(zero, placementEvidence.placement.lowNibbleBranch.K01Distribution.verticalShift[0], "K01 placement zero-offset count");
-  assertEqual(negative16, placementEvidence.placement.lowNibbleBranch.K01Distribution.verticalShift[16], "K01 placement negative-16-offset count");
-  if (zero + negative16 !== bytes.length) throw new Error("K01 placement offset stream contains an unsupported value.");
+  const expectedDistribution = placementEvidence.placement.lowNibbleBranch.K01Distribution.verticalShift;
+  const actualCounts = new Map();
+  for (const rawShift of rawShiftBytes) actualCounts.set(rawShift, (actualCounts.get(rawShift) ?? 0) + 1);
+  for (let index = 0; index < bytes.length; index += 1) {
+    const rawShift = bytes[index];
+    if (!Number.isInteger(rawShift) || rawShift < 0 || rawShift > 64 || rawShift % 16 !== 0) {
+      throw new Error(`K01 placement offset stream contains unsupported raw shift ${rawShift} at ordinal ${index}.`);
+    }
+    bytes[index] = encodeSignedPlacementShift(rawShift);
+  }
+  for (const [rawShift, count] of actualCounts) assertEqual(count, expectedDistribution[rawShift], `K01 placement shift ${rawShift} count`);
+  if (bytes.length !== Object.values(expectedDistribution).reduce((sum, count) => sum + count, 0)) {
+    throw new Error("K01 placement offset stream count does not match the evidence distribution.");
+  }
   return bytes;
+}
+
+function encodeSignedPlacementShift(rawShift) {
+  return rawShift === 0 ? 0 : 0x100 - rawShift;
+}
+
+function placementOffsetDistribution(bytes) {
+  const distribution = { zero: 0, negative16: 0, negative32: 0, negative48: 0, negative64: 0 };
+  for (const byte of bytes) {
+    const rawShift = byte === 0 ? 0 : 0x100 - byte;
+    const key = rawShift === 0 ? "zero" : `negative${rawShift}`;
+    if (!(key in distribution)) throw new Error(`K01 placement offset stream contains unsupported encoded byte 0x${byte.toString(16).padStart(2, "0")}.`);
+    distribution[key] += 1;
+  }
+  return distribution;
+}
+
+function placementArgumentDistribution(bytes) {
+  const distribution = { zero: 0, positive16: 0, positive32: 0, positive48: 0, positive64: 0 };
+  for (const byte of bytes) {
+    const rawShift = byte === 0 ? 0 : 0x100 - byte;
+    const key = rawShift === 0 ? "zero" : `positive${rawShift}`;
+    if (!(key in distribution)) throw new Error(`K01 placement argument stream contains unsupported encoded byte 0x${byte.toString(16).padStart(2, "0")}.`);
+    distribution[key] += 1;
+  }
+  return distribution;
 }
 
 function renderArtifact(selector, pairBytes, placementOffsetYBytes, assets) {
@@ -178,10 +212,7 @@ function renderArtifact(selector, pairBytes, placementOffsetYBytes, assets) {
     pairBytesBase64: pairBytes.toString("base64"),
     placementOffsetYStreamSha256: sha256(placementOffsetYBytes),
     placementOffsetYBytesBase64: placementOffsetYBytes.toString("base64"),
-    placementOffsetYDistribution: {
-      zero: placementOffsetYBytes.filter((value) => value === 0).length,
-      negative16: placementOffsetYBytes.filter((value) => value === 0xf0).length,
-    },
+    placementOffsetYDistribution: placementOffsetDistribution(placementOffsetYBytes),
     objectStems,
     assets: assets.map(({ assetKey, stem, frame, fileName, sourcePath, sourceSha256 }) => ({ assetKey, stem, frame, fileName, sourcePath, sourceSha256 })),
   }, null, 2)} as const;\n`;

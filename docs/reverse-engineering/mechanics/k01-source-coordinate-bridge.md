@@ -13,7 +13,7 @@ locomotion/projectile source unit이 닫히지 않은 상태에서 `GridPoint` �
 | 구분 | 상태 | 의미 |
 | --- | --- | --- |
 | 분석 | `정적 확정` (닫힌 subset) | 아래 함수·데이터 범위, signed/unsigned WORD 연산, K01 map/descriptor/route 범위 |
-| 재현 | `재현 완료` | 정상·경계·실패 vector와 provenance/fixture 변조 거부 |
+| 재현 | `재현 완료` | 정상·경계·실패 vector, corrected placement lookup replay와 provenance/fixture 변조 거부 |
 | 구현 | `없음` | production package/app과 runtime adapter는 변경하지 않음 |
 
 재현 산출물은 [`k01-source-coordinate-bridge-evidence.json`](../../../analysis/fixtures/k01-source-coordinate-bridge-evidence.json)이며,
@@ -46,7 +46,10 @@ schema, 각 vector의 실제 replay 결과를 다시 비교하므로 한 필드�
 
 Map field offsets are independently separated: low nibble `+0x32514`, fog-family/table index `+0x4a0c4`,
 object `+0x3a3a4`, frame `+0x42234`, placement selector `+0x79824`, placement lookup
-`+0x147d5 + selector*0x1fa4`. The x-major ordinal is `x*180+y`; it is not a product row-major alias.
+`+0x51f54 + selector*0x7e90`. The x-major ordinal is `x*180+y`; it is not a product row-major alias.
+The prior `+0x147d5 + selector*0x1fa4` lookup omitted the final `LEA ... *4` in
+`FUN_0046d650:0x0046d69d..0x0046d6b4` and is retracted; the complete derivation is canonicalized in the
+[K01 tile placement boundary](k01-tile-placement-elevation-boundary.md).
 
 ## Exact transforms and non-transforms
 
@@ -86,6 +89,8 @@ object `+0x3a3a4`, frame `+0x42234`, placement selector `+0x79824`, placement lo
   route index and update count; rejected negative and `32768` inputs;
 - source→semantic and semantic→source directions separately; unresolved domains return an explicit
   rejection contract instead of a guessed transform.
+- corrected placement vectors: `(0,0)` has selector `2`, lookup `14`, helper `1`, raw shift `32`; `(0,1)` has
+  selector `2`, lookup `15`, helper `2`, raw shift `32`.
 
 ## Function/data flow and exact ranges
 
@@ -132,9 +137,9 @@ ground-contact, fractional rounding 또는 universal scale도 추가하지 않�
 
 ## Rejected hypotheses and unresolved work
 
-- `+0x4a0c4` runtime WORD adjustment, helper return, raw `0/16` branch를 terrain height/elevation 또는
-  pixel pivot으로 부르지 않는다. K01 helper lookup/return stream은 모두 zero이며 table lifetime/order도
-  별도 질문이다.
+- `+0x4a0c4` runtime WORD adjustment, corrected helper return, raw shift branch를 terrain height/elevation
+  또는 pixel pivot으로 부르지 않는다. 이전 all-zero helper replay는 lookup 주소 산술 누락으로 반증됐으며,
+  corrected helper/raw-shift evidence와 diagnostic은 [K01 tile placement boundary](k01-tile-placement-elevation-boundary.md)를 따른다.
 - Exact placement의 raw owner, project coordinate/visual adapter, create-return 이후 movement/pathfinding은 닫히지 않았다. Source opening footprint 자체는 [K01 opening footprint anchor](k01-opening-footprint-anchor.md)에서 닫혔다.
 - Locomotion `+0x1bc/+0x1be`의 source unit, `+0x4ee/+0x4ea` producer range, interpolation/occupancy,
   source update→24 Hz/FPS는 미확정이다.

@@ -9,7 +9,7 @@ vector는 무엇인가?**
 | 구분 | 상태 | 범위 |
 | --- | --- | --- |
 | 분석 | `정적 확정` | `FUN_00464cc0`의 callee-cleaned four-argument output 순서, `FUN_004648e0`의 x-major cell별 두 output table write, `FUN_00481c50`의 nested cell call과 y-only overwrite, `FUN_004653d0`의 반환 좌표 squared-distance consumer, K01 3,600 cell joint vector |
-| 재현 | `재현 완료` | EXE/map/generated JSON hash, complete body·call edge·opcode anchor, table initializer cross-check, K01 joint stream/digest와 malformed/tampered input rejection |
+| 재현 | `재현 완료` | EXE/map/generated JSON hash, complete body·call edge·opcode anchor, table initializer cross-check, corrected K01 joint stream/digest와 malformed/tampered input rejection |
 | 구현 | `없음` | 제품 runtime 또는 terrain/elevation policy를 변경하지 않았다. |
 
 이 문서는 [tile placement-level·object/frame boundary](k01-tile-placement-elevation-boundary.md)의
@@ -82,33 +82,17 @@ outputY = 0x008633c4 + 4*y
 
 ## K01 outputY joint vector
 
-기존 table initializer replay는 `DAT_00c06e86`에서 family 0=`0`, family 1..14=`9`를 만든다.
-K01의 `FUN_0046d650` helper return은 모든 3,600 cell에서 0이다. 따라서 `FUN_00464cc0` outputY addition은 다음
-두 case로 닫힌다.
+기존 outputY joint table은 `FUN_0046d650` lookup 주소의 마지막 `LEA ... *4`를 누락해 helper를 전부
+0으로 만들었다. 따라서 기존의 outputY `+16/+9` 단일 분류와 raw `0/16` 비교는 **반증된 기존 잘못된
+계산의 측정값**이다. 정확한 instruction derivation, corrected corner vectors와 canonical diagnostic은
+[K01 tile placement-level·object/frame boundary](k01-tile-placement-elevation-boundary.md)를 단일 출처로 삼는다.
 
-| low nibble | family | runtime WORD | helper | outputY branch | outputY addition | raw raster vertical branch | count |
-| ---: | ---: | ---: | ---: | --- | ---: | ---: | ---: |
-| 2 | 0 | 0 | 0 | low-nibble-equals-2 | `+16` | 0 | 2,865 |
-| 1 | 1 | 9 | 0 | other | `+9` | 16 | 95 |
-| 1 | 2 | 9 | 0 | other | `+9` | 16 | 95 |
-| 1 | 3 | 9 | 0 | other | `+9` | 16 | 101 |
-| 1 | 4 | 9 | 0 | other | `+9` | 16 | 79 |
-| 1 | 5 | 9 | 0 | other | `+9` | 16 | 38 |
-| 1 | 6 | 9 | 0 | other | `+9` | 16 | 36 |
-| 1 | 7 | 9 | 0 | other | `+9` | 16 | 54 |
-| 1 | 8 | 9 | 0 | other | `+9` | 16 | 61 |
-| 1 | 9 | 9 | 0 | other | `+9` | 16 | 52 |
-| 1 | 10 | 9 | 0 | other | `+9` | 16 | 33 |
-| 1 | 11 | 9 | 0 | other | `+9` | 16 | 35 |
-| 1 | 12 | 9 | 0 | other | `+9` | 16 | 55 |
-| 1 | 14 | 9 | 0 | other | `+9` | 16 | 1 |
-
-family 13은 K01 vector에 없다. cell당 8-byte x-major stream
-`lowNibble, family, runtimeWord int16 LE, helperReturn int16 LE, outputYAdjustment int16 LE`의 SHA-256은
-`0e2123b96bf4aad8e09db38d60245abf655171198171c034734bbd59cee46bb6`다.
-
-중요하게, outputY addition의 `+16` 대 `+9` 차이는 **7**이다. 이는 raw raster branch의 `0` 대 `16`과 다른
-관측량이다. 어느 쪽도 이 문서만으로 gameplay terrain height, elevation, world-axis 또는 rendering pivot을 뜻하지 않는다.
+독립 corrected replay의 outputY addition histogram은 `-48:156, -39:33, -32:41, -23:87, -16:1028,
+-7:307, 0:309, 9:308, 16:1331`이다. outputY joint stream SHA-256은
+`4483d6b50a3bf13220c21e4aa7fcf5c7e10216010be45e6aee759dd4a6c14796`이며, 이 수치는 terrain
+height/elevation, world-axis 또는 rendering pivot을 뜻하지 않는다. 전체 selector-indexed lookup와
+placement-level/raw-shift stream은 [placement evidence fixture](../../../analysis/fixtures/k01-tile-placement-elevation-evidence.json)에
+보존한다.
 
 ## 재현과 실패 경계
 

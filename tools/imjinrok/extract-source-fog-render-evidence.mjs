@@ -30,8 +30,8 @@ const CALLER_SELECTOR_DOMAIN = Array.from({ length: 14 }, (_value, index) => ind
 const FAMILY_BYTE_MAP_OFFSET = 0x4a0c4;
 const LOW_NIBBLE_MAP_OFFSET = 0x32514;
 const PLACEMENT_SELECTOR_MAP_OFFSET = 0x79824;
-const PLACEMENT_LOOKUP_MAP_OFFSET = 0x147d5;
-const PLACEMENT_LOOKUP_SELECTOR_STRIDE = 0x1fa4;
+const PLACEMENT_LOOKUP_MAP_OFFSET = 0x51f54;
+const PLACEMENT_LOOKUP_SELECTOR_STRIDE = 0x7e90;
 const MAP_X_STRIDE = 180;
 const EXPECTED_K01_MAP = { size: 1_097_100, sha256: "43ec3a173032f74c12d3cce1db1078b076b651ed79070a0914673a5b65da99cb", width: 60, height: 60 };
 const K01_PLACEMENT_VIEWPORT = { left: 0, right: 639, top: 0, bottom: 479 };
@@ -141,7 +141,7 @@ export function reproduceFogCallerProjection({
 /**
  * Pure reference for FUN_0046a530's caller-visible draw rectangle adjustment.
  * The helper result is explicit because this extractor only establishes the
- * K01 all-zero result distribution, not its human meaning or runtime owner.
+ * K01 selector-indexed result distribution, not its human meaning or runtime owner.
  */
 export function reproduceFogCompositorPlacement({ projectedX, projectedY, x, y, lowNibble, helperReturn } = {}) {
   assertSignedInt32(projectedX, "projectedX");
@@ -260,10 +260,10 @@ export function extractSourceFogRenderEvidence({
         compositeSize: { width: 64, height: 48 },
         imageAnchor: { x: 32, y: 0 },
         formula: "drawLeft = projectedX - 32; drawTop = projectedY - rawVerticalShift",
-        K01RawVerticalShift: { lowNibbleEquals2: 0, other: 16 },
+        K01RawVerticalShift: "derived per cell by the branch formulas above; observed values are 0, 16, 32, 48, and 64",
         boundary: "This caller/callee-local image anchor does not assign renderer-wide pivot semantics, viewport ownership, clip/mode, alpha/blend, or web placement policy.",
       },
-      boundary: "K01's hash-bound helper return is 0 for every cell. The low-nibble==2 versus other arithmetic is static-confirmed/reproduced, but the helper's human meaning and any terrain/visibility interpretation remain unresolved.",
+      boundary: "The low-nibble==2 versus other arithmetic is static-confirmed/reproduced, but the corrected selector-indexed helper stream's human meaning and any terrain/visibility interpretation remain unresolved.",
     },
     composition: {
       subframeGrid: { columns: 3, rows: 2, subframeCount: 6 },
