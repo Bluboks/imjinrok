@@ -68,14 +68,18 @@ test("registry rejects policies without callable availability evaluators", () =>
   const registry = new MinimapAvailabilityPolicyRegistry();
 
   assert.throws(
-    () => registry.register({ id: "mod:invalid-evaluator", isEnabled: true } as unknown as Parameters<typeof registry.register>[0]),
+    () => {
+      // @ts-expect-error The failure-path fixture intentionally supplies a non-callable evaluator.
+      registry.register({ id: "mod:invalid-evaluator", isEnabled: true });
+    },
     /Minimap availability policy 'mod:invalid-evaluator' must define an isEnabled function/,
   );
 });
 
 test("evaluation rejects policies that return non-boolean availability states", () => {
   const registry = new MinimapAvailabilityPolicyRegistry();
-  registry.register({ id: "mod:invalid-result", isEnabled: () => "enabled" as unknown as boolean });
+  // @ts-expect-error The failure-path fixture intentionally returns a non-boolean state.
+  registry.register({ id: "mod:invalid-result", isEnabled: () => "enabled" });
 
   assert.throws(
     () => evaluateMinimapAvailability({ minimapAvailabilityPolicyId: "mod:invalid-result" }, context({}), registry),

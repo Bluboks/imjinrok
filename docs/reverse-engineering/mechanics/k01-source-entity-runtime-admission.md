@@ -16,6 +16,20 @@
 명시해야 한다. T01 policy는 이 adapter를 accepted-update event cursor와 함께 호출하며, 이는
 원본 trigger timing을 주장하지 않는 명시적 프로젝트 adaptation이다.
 
+## semantic unit removal integration
+
+`removeUnitFromWorld`는 semantic unit과 참조를 지우기 전에 선택된 source profile의 순수
+`removeSemanticUnit` hook을 검증된 clone에 적용한다. K01 hook은 semantic ID에서 현재 active handle을
+찾아 확인된 release 경로를 호출하므로 active table/list, reuse age, retired record와 해당 slot이 아직
+소유한 occupancy만 정리한다. 이후 native 후행 owner가 덮어쓴 cell은 보존된다. hook의 throw 또는
+반환 state/envelope 검증 실패는 unit·참조·source envelope를 함께 commit하지 않는다.
+
+이는 source release mechanics를 사용하는 프로젝트의 intentional-adaptation이다. movement ownership과
+정확한 health/death timeline은 이 변경으로 확정하지 않으며, 원본 death scheduler는 여전히 미해결이다.
+기존 save의 semantic unit 없는 orphan source record를 사후 조정하지 않고, 이후 canonical helper를 통한
+제거부터 source lifecycle을 정리한다. profile hook이 없는 generic/custom world는 source state 의미를
+그대로 유지한다.
+
 ## source 근거
 
 | 입력 | SHA-256 | 사용 범위 |

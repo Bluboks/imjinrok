@@ -255,7 +255,8 @@ test("simulation port rejects malformed fixed-width inputs loudly", () => {
   assert.throws(
     () =>
       resolveOriginalRyuProjectileImpact({
-        targetActive: 1 as unknown as boolean,
+        // @ts-expect-error Intentional malformed runtime input exercises boolean validation.
+        targetActive: 1,
         targetGenerationMatches: true,
         payload: 45,
         defenseBase: 0,

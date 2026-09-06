@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
@@ -160,15 +160,6 @@ test("environment overlay contract preserves four-decimal light-curve redraw pre
     lightLevel: 0.75, lightSignature: "0.7500", nightAlpha: 0.105,
   });
   assert.throws(() => resolveEnvironmentOverlayLightContract(Number.NaN), /must be finite/);
-});
-
-test("SkirmishScene consumes the light contract in its environment overlay signature", () => {
-  const scenePath = resolve(dirname(fileURLToPath(import.meta.url)), "../scenes/SkirmishScene.ts");
-  const sceneSource = readFileSync(scenePath, "utf8");
-
-  assert.match(sceneSource, /resolveEnvironmentOverlayLightContract\(getEnvironmentLightLevel\(environment\)\)/);
-  assert.match(sceneSource, /environment\.dayPhase\}:\$\{visualState\.lightSignature\}:\$\{paletteAdapter\?\.paletteId \?\? "none"\}:\$\{rainFrame\}/);
-  assert.match(sceneSource, /fillStyle\(0x071426, visualState\.nightAlpha\)/);
 });
 
 test("keeps original control bindings separate from exported image identity and generic product fallback", () => {

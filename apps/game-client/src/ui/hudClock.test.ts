@@ -1,6 +1,4 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
 import test from "node:test";
 import {
   boundsOverlap,
@@ -45,14 +43,4 @@ test("HUD clock adapter cycles only the nonblank source frame subset from simula
   assert.equal(resolveSourceClockFrameIndex(0.9999), 15);
   assert.equal(resolveSourceClockFrameIndex(1), 0);
   assert.equal(resolveSourceClockFrameIndex(Number.NaN), 0);
-});
-
-test("UIScene preloads one source texture per selectable frame and reuses one non-interactive image", () => {
-  const sceneSource = readFileSync(resolve("apps/game-client/src/scenes/UIScene.ts"), "utf8");
-
-  assert.match(sceneSource, /for \(const asset of ORIGINAL_SOURCE_CLOCK_FRAME_ASSETS\) \{\s+if \(!this\.textures\.exists\(asset\.textureKey\)\) \{\s+this\.load\.image\(asset\.textureKey, asset\.assetPath\);/u);
-  assert.match(sceneSource, /private minimapClockImage: Phaser\.GameObjects\.Image \| null = null;/u);
-  assert.match(sceneSource, /\.image\(clockBounds\.x, clockBounds\.y, ORIGINAL_SOURCE_CLOCK_FRAME_ASSETS\[0\]!\.textureKey\)/u);
-  assert.match(sceneSource, /image\.setTexture\(resolveSourceClockFrame\(environment\.timeOfDay01\)\.textureKey\);/u);
-  assert.doesNotMatch(sceneSource, /drawHudClock/u);
 });

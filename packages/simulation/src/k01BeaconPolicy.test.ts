@@ -15,6 +15,7 @@ import {
 import { createImjinrokMapScaffold, createBlankMap, imjinrokK01Scenario, k01ReinforcementAdapter, unitDefinitions } from "../../shared/src/index.js";
 import { createUnitState } from "./entities.js";
 import { appendConstructionCompletedEvent } from "./events.js";
+import { removeUnitFromWorld } from "./units.js";
 
 function createK01World() {
   const map = createImjinrokMapScaffold(imjinrokK01Scenario.mapId);
@@ -31,7 +32,7 @@ function appendBeaconCompletion(state: ReturnType<typeof createK01World>, id: st
 function removeOpeningHostileBuildings(state: ReturnType<typeof createK01World>): void {
   for (const unit of Object.values(state.units)) {
     if (unit.playerId === "cpu-1" && unitDefinitions[unit.kind].category === "building") {
-      delete state.units[unit.id];
+      removeUnitFromWorld(state, unit.id);
     }
   }
 }
@@ -153,6 +154,52 @@ test("default K01 blocker holds the beacon gate for opening hostile buildings, t
   assert.equal(unblocked.matchedBeaconCount, 1);
   assert.equal(unblocked.nativeSuccessCount, 9);
   assert.equal((state.sourceRuntimeProfile?.state as K01SourceRuntimeState).policies.beacon.triggerFlag, 1);
+});
+
+test("removing a beacon after a blocked scan prevents its retired source record from opening the gate", () => {
+  const state = createK01World();
+  appendBeaconCompletion(state, "local-player-removed-while-blocked", { x: 20, y: 20 });
+
+  const blocked = advanceK01BeaconPolicy(state);
+  assert.equal(blocked.matchedBeaconCount, 0);
+  assert.equal(blocked.nativeSuccessCount, 0);
+  assert.equal(removeUnitFromWorld(state, "local-player-removed-while-blocked"), true);
+  removeOpeningHostileBuildings(state);
+
+  const unblocked = advanceK01BeaconPolicy(state);
+  assert.equal(unblocked.matchedBeaconCount, 0);
+  assert.equal(unblocked.nativeSuccessCount, 0);
+  assert.equal(Object.values(state.units).filter((unit) => unit.id.includes("k0120-reinforcement")).length, 0);
+  assert.equal((state.sourceRuntimeProfile?.state as K01SourceRuntimeState).policies.beacon.triggerFlag, 0);
+});
+
+test("a replacement beacon at the same position admits and triggers exactly one native wave after JSON restore", () => {
+  const state = createK01World();
+  appendBeaconCompletion(state, "local-player-old-beacon", { x: 20, y: 20 });
+  assert.equal(advanceK01BeaconPolicy(state).matchedBeaconCount, 0, "opening buildings keep the first beacon blocked");
+  assert.equal(removeUnitFromWorld(state, "local-player-old-beacon"), true);
+  removeOpeningHostileBuildings(state);
+
+  const restored = JSON.parse(JSON.stringify(toWorldSnapshot(state))) as ReturnType<typeof createK01World>;
+  appendBeaconCompletion(restored, "local-player-rebuilt-beacon", { x: 20, y: 20 });
+  const first = advanceK01BeaconPolicy(restored);
+  assert.equal(first.matchedBeaconCount, 1);
+  assert.equal(first.nativeSuccessCount, 9);
+  assert.equal(Object.values(restored.units).filter((unit) => unit.id.includes("k0120-reinforcement")).length, 9);
+
+  const source = restored.sourceRuntimeProfile?.state as K01SourceRuntimeState;
+  assert.equal(source.entityRuntime.entities.filter((record) => record.semanticUnitId === "local-player-old-beacon" && record.active).length, 0);
+  assert.equal(source.entityRuntime.entities.filter((record) => record.semanticUnitId === "local-player-rebuilt-beacon" && record.active).length, 1);
+
+  const afterWave = advanceK01BeaconPolicy(restored);
+  assert.equal(afterWave.matchedBeaconCount, 0);
+  assert.equal(afterWave.nativeSuccessCount, 0);
+  assert.equal(Object.values(restored.units).filter((unit) => unit.id.includes("k0120-reinforcement")).length, 9);
+  const roundTripped = JSON.parse(JSON.stringify(toWorldSnapshot(restored))) as ReturnType<typeof createK01World>;
+  const afterRestore = advanceK01BeaconPolicy(roundTripped);
+  assert.equal(afterRestore.matchedBeaconCount, 0);
+  assert.equal(afterRestore.nativeSuccessCount, 0);
+  assert.equal(Object.values(roundTripped.units).filter((unit) => unit.id.includes("k0120-reinforcement")).length, 9);
 });
 
 test("ordinary hostile soldiers with non-qualifying flags do not block an otherwise clear K01 gate", () => {

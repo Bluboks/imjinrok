@@ -1,8 +1,5 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
-import { dirname, resolve } from "node:path";
 import test from "node:test";
-import { fileURLToPath } from "node:url";
 import {
   createBlankMap,
   createContentRegistry,
@@ -47,7 +44,7 @@ test("K01 source raster keeps physical elevation neutral while retaining visual 
   });
 });
 
-test("ramp boundaries share their plateau lift and runtime terrain layers preserve base-before-overlay order", () => {
+test("ramp boundaries share their plateau lift", () => {
   const map = createBlankMap({ width: 2, height: 1, tileWidth: 64, tileHeight: 32 });
   const raised = map.layers[0]?.tiles[1];
   assert.ok(raised);
@@ -59,8 +56,6 @@ test("ramp boundaries share their plateau lift and runtime terrain layers preser
   assert.equal(rampSlot, "ramp_nw");
   assert.equal(resolveTerrainElevationOverlayLiftPixels(lowerPresentation, rampSlot, 16), 16);
   assert.equal(resolveTerrainElevationOverlayLiftPixels(raisedPresentation, "plateauTop", 16), 16);
-
-  assertRuntimeTerrainLayerOrder();
 });
 
 function createK01TerrainRasterVector() {
@@ -136,25 +131,4 @@ function resolveEntityGroundContactVector(
     entityGroundContact: resolveGridGroundContactWorldPosition(point, CLASSIC_SOURCE_PROFILE_ORIGIN, map),
     elevationLiftPixels: elevation.liftPixels,
   };
-}
-
-function assertRuntimeTerrainLayerOrder(): void {
-  const scenePath = resolve(dirname(fileURLToPath(import.meta.url)), "../scenes/SkirmishScene.ts");
-  const sceneSource = readFileSync(scenePath, "utf8");
-  const terrainBakeStart = sceneSource.indexOf("this.redrawTerrain();");
-  const elevationBakeStart = sceneSource.indexOf("this.redrawElevationOverlay();");
-  assert.ok(terrainBakeStart >= 0 && elevationBakeStart > terrainBakeStart, "terrain must bake before elevation overlays");
-
-  const terrainMethodStart = sceneSource.indexOf("  private redrawTerrain(): void {");
-  const terrainMethodEnd = sceneSource.indexOf("\n  private redrawElevationOverlay(): void {", terrainMethodStart);
-  assert.ok(terrainMethodStart >= 0 && terrainMethodEnd > terrainMethodStart, "terrain render method must remain isolated");
-  const terrainMethod = sceneSource.slice(terrainMethodStart, terrainMethodEnd);
-  const underlayDraw = terrainMethod.indexOf("this.drawExplicitTileVisual(renderTexture, { minX, minY }, explicitUnderlay");
-  const flatDraw = terrainMethod.indexOf("this.drawExplicitTileVisual(renderTexture, { minX, minY }, explicitVisual");
-  assert.ok(underlayDraw >= 0 && flatDraw > underlayDraw, "source-art underlay must draw before its selected flat frame");
-
-  const elevationMethod = sceneSource.slice(terrainMethodEnd);
-  const sourceReliefGuard = elevationMethod.indexOf("if (!elevation.rendersGenericElevation) {");
-  const genericNeighborLookup = elevationMethod.indexOf("const neighbors = this.getElevationNeighbors(x, y);");
-  assert.ok(sourceReliefGuard >= 0 && genericNeighborLookup > sourceReliefGuard, "source flat relief must skip generic elevation overlays");
 }

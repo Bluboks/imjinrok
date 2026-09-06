@@ -23,6 +23,8 @@ import {
 } from "./extract-k01-mode-reachability.mjs";
 import {
   extractK01MissionResultLifecycle,
+  runDistinctRawTickResultCommit,
+  runK01MissionDispatcher,
 } from "./extract-k01-mission-result-lifecycle.mjs";
 import {
   extractK01ProjectilePoolCadence,
@@ -98,7 +100,9 @@ const CODE_ANCHORS = [
   ["stage-one-main-state-entry", 0x004600cb, "e8 a0 56 fe ff e8 0b db 02 00 e8 f6 56 fe ff 66 89 3d c8 df 4b 00", "main state 1 enters standard mission startup and then stores continuation state 3"],
   ["stage-one-k01-case", 0x0048d410, "0f bf 44 24 04 48 56 83 f8 1b 8b f1 0f 87 f8 00 00 00 ff 24 85 98 d5 48 00 8b ce e8 10 03 00 00", "signed stage selector case 1 reaches the K01 map source copier"],
   ["state-three-scheduler-call", 0x0045fd5d, "e8 5e 7e fe ff", "raw main state 3 calls the accepted-update scheduler"],
+  ["early-transition-before-pre-update", 0x00447be0, "66 83 3d 30 6e c0 00 01 75 2e 66 83 3d c8 df 4b 00 03 75 24 6a 02 e8 75 7c 02 00 68 b8 20 5e 00 e8 ab 84 ff ff 83 c4 08 66 c7 05 c8 df 4b 00 16 00 66 33 c0 83 c4 08 c3", "transition guard and main state 3 write main state 0x16 before pre-update"],
   ["pre-update-result-call", 0x00447c18, "e8 a3 e8 ff ff 83 f8 01 0f 84 ce 00 00 00", "pre-update returns one and rejects the scheduler attempt before wall-clock acceptance"],
+  ["pre-update-mode-one-boundary", 0x00446506, "66 39 3d 2e 6e c0 00 75 08 5f 33 c0 5d 83 c4 20 c3", "remaining pre-update result is ignored when command gate mode is exactly one"],
   ["result-wrapper-order", 0x004481d0, "a1 80 5f 7c 00 8b 0d 80 27 55 00 3b c1 74 44 a3 80 27 55 00 e8 c7 5b 04 00", "raw global tick is compared, cached first on a distinct value, then mission dispatch is called"],
   ["timer-before-stage", 0x0048ddb0, "b8 01 00 00 00 56 66 39 05 34 6e c0 00 75 05 66 33 c0 5e c3 66 39 05 7c 62 7c 00", "dispatcher pre-gates and timer resolution precede signed stage dispatch"],
   ["accepted-pool-call", 0x00447c85, "a1 80 5f 7c 00 40 83 f8 14 a3 80 5f 7c 00 72 23 75 11 8b 0d 04 2e 88 00 51 e8 dd b3 ff ff 83 c4 04 eb 10 8b 15 04 2e 88 00 52 50 e8 fb b3 ff ff 83 c4 08 e8 a3 f6 ff ff", "an accepted step increments the raw tick and calls the outer entity/projectile updater once"],
@@ -298,11 +302,18 @@ export function extractK01AcceptedUpdateScheduler(options = {}) {
       },
       rejectionOrder: [
         "state-23 mode != 1 (main-loop gate only)",
-        "scheduler transition branch",
+        "scheduler transition guard == 1 with main state 3 writes main state 0x16 before pre-update",
         "pre-update result == 1",
         "clock gate == 0",
         "command readiness == 0 when command gate mode == 0",
       ],
+      trackedPostState: {
+        rawGlobalTick: "input DWORD 0x007c5f80; increment/store at 0x00447c85-0x00447c8e only on accepted pass",
+        cachedGlobalTick: "input/cache DWORD 0x00552780; distinct wrapper writes raw input before dispatcher, including later clock/command rejection",
+        acceptedStepCounter: "input DWORD 0x007c5f84; final increment at 0x00447cee only on accepted pass",
+        nextMainStateWord: "input result/state WORD preserved on ordinary rejection; result-code-write selects 0x18/0x1a, early transition selects 0x16",
+        scope: "bounded replay post-state; helper side effects outside these fields remain at the supplied boundary",
+      },
       sourceBound: true,
     },
     vectors: createVectors(),
@@ -376,10 +387,14 @@ export function replayAcceptedUpdate({
   rawGlobalTick,
   cachedGlobalTick,
   transitionGuardWord = 0,
-  preUpdateResultAx = 0,
-  preGateResultAx = 0,
+  gateC06e34 = 0,
+  gate7c627c = 0,
+  gate7c627e = 0,
+  winTimer = 0,
+  lossTimer = 0,
+  resultClock = 0,
   dispatcherResultAx = 0,
-  timerResolverResult = 0,
+  preUpdateResult = 0,
   clockGateResult = 1,
   commandGateModeWord = 1,
   commandReadinessResult = 1,
@@ -394,10 +409,14 @@ export function replayAcceptedUpdate({
   dword(rawGlobalTick, "rawGlobalTick");
   dword(cachedGlobalTick, "cachedGlobalTick");
   word(transitionGuardWord, "transitionGuardWord");
-  word(preUpdateResultAx, "preUpdateResultAx");
-  word(preGateResultAx, "preGateResultAx");
+  word(gateC06e34, "gateC06e34");
+  word(gate7c627c, "gate7c627c");
+  word(gate7c627e, "gate7c627e");
+  dword(winTimer, "winTimer");
+  dword(lossTimer, "lossTimer");
+  dword(resultClock, "resultClock");
   word(dispatcherResultAx, "dispatcherResultAx");
-  word(timerResolverResult, "timerResolverResult");
+  dword(preUpdateResult, "preUpdateResult");
   dword(clockGateResult, "clockGateResult");
   word(commandGateModeWord, "commandGateModeWord");
   dword(commandReadinessResult, "commandReadinessResult");
@@ -408,46 +427,76 @@ export function replayAcceptedUpdate({
 
   const events = [];
   if (mainStateWord !== 3 && mainStateWord !== 23) {
-    return rejected(events, "main-state-not-scheduler");
+    return rejected(events, "main-state-not-scheduler", {
+      rawGlobalTick,
+      cachedGlobalTick,
+      acceptedStepCounter,
+      nextMainStateWord: mainStateWord,
+    });
   }
   if (mainStateWord === 23) {
     events.push({ kind: "state-23-mode-read", value: state23ModeWord });
-    if (state23ModeWord !== 1) return rejected(events, "state-23-mode-reject");
+    if (state23ModeWord !== 1) {
+      return rejected(events, "state-23-mode-reject", {
+        rawGlobalTick,
+        cachedGlobalTick,
+        acceptedStepCounter,
+        nextMainStateWord: mainStateWord,
+      });
+    }
   }
   events.push({ kind: "call", target: "0x00447bc0" });
-  events.push({ kind: "call", target: "0x004464c0" });
   if (transitionGuardWord === 1 && mainStateWord === 3) {
-    events.push({ kind: "scheduler-reject", reason: "early-transition" });
-    return rejected(events, "early-transition");
+    events.push({ kind: "call", target: "0x0046f870" });
+    events.push({ kind: "call", target: "0x004400b0" });
+    events.push({ kind: "result-code-write", address: "0x004bdfc8", value: 0x16 });
+    return rejected(events, "early-transition", {
+      rawGlobalTick,
+      cachedGlobalTick,
+      acceptedStepCounter,
+      nextMainStateWord: 0x16,
+    });
   }
+  events.push({ kind: "call", target: "0x004464c0" });
   events.push({ kind: "call", target: "0x004481d0" });
-  if (rawGlobalTick !== cachedGlobalTick) {
-    events.push({ kind: "raw-tick-cache-write", value: rawGlobalTick });
-    events.push({ kind: "call", target: "0x0048ddb0" });
-    if (preGateResultAx !== 0) {
-      events.push({ kind: "dispatcher-pre-gate-result", value: preGateResultAx });
-    } else if (timerResolverResult !== 0) {
-      events.push({ kind: "call", target: "0x0048d6f0" });
-      events.push({ kind: "timer-result", value: timerResolverResult });
-    } else if (dispatcherResultAx === 0 || dispatcherResultAx === 1 || dispatcherResultAx === 0xffff) {
-      events.push({ kind: "call", target: "0x0048d6f0" });
-      if (stageSelector !== 1) return rejected(events, "non-k01-stage");
-      events.push({ kind: "call", target: "0x0048a5c0" });
-    }
-    if (preGateResultAx === 1 || preGateResultAx === 0xffff || dispatcherResultAx === 1 || dispatcherResultAx === 0xffff || timerResolverResult === 1 || timerResolverResult === 0xffff) {
-      events.push({ kind: "result-commit", value: preGateResultAx || dispatcherResultAx || timerResolverResult });
-      events.push({ kind: "call", target: "0x00446420" });
-      return rejected(events, "pre-update-result");
-    }
+  const wrapper = runDistinctRawTickResultCommit({
+    rawGlobalTick,
+    cachedGlobalTick,
+    runDispatcher: () => runK01MissionDispatcher({
+      gateC06e34,
+      gate7c627c,
+      gate7c627e,
+      winTimer,
+      lossTimer,
+      resultClock,
+      stageSelector,
+      runK01Updater: () => ({ returnAx: dispatcherResultAx, events: [] }),
+    }),
+  });
+  events.push(...wrapper.events);
+  const nextMainStateWord = resultCodeState(events, mainStateWord);
+  const wrapperState = {
+    rawGlobalTick,
+    cachedGlobalTick: wrapper.cachedGlobalTick,
+    acceptedStepCounter,
+    nextMainStateWord,
+  };
+  if (wrapper.returnValue === 1) {
+    return rejected(events, "pre-update-result", wrapperState);
   }
-  if (preUpdateResultAx === 1) return rejected(events, "pre-update-result");
+  if (commandGateModeWord !== 1 && preUpdateResult === 1) {
+    return rejected(events, "pre-update-result", wrapperState);
+  }
   events.push({ kind: "call", target: "0x00447e10" });
-  if (clockGateResult === 0) return rejected(events, "clock-gate-reject");
+  if (clockGateResult === 0) return rejected(events, "clock-gate-reject", wrapperState);
   if (commandGateModeWord === 0) {
     events.push({ kind: "command-readiness", value: commandReadinessResult });
-    if (commandReadinessResult === 0) return rejected(events, "command-readiness-reject");
+    if (commandReadinessResult === 0) {
+      return rejected(events, "command-readiness-reject", wrapperState);
+    }
   }
-  events.push({ kind: "raw-tick-increment", value: (rawGlobalTick + 1) >>> 0 });
+  const nextRawGlobalTick = (rawGlobalTick + 1) >>> 0;
+  events.push({ kind: "raw-tick-increment", value: nextRawGlobalTick });
   events.push({ kind: "call", target: "0x00447360" });
   events.push({ kind: "entity-update-pass", count: activeEntityCount, target: "0x0043c9c0" });
   events.push({ kind: "projectile-pool-pass", pool: "A", slots: 100, activeCalls: projectilePoolAActiveCount, target: "0x00410cc0" });
@@ -455,34 +504,438 @@ export function replayAcceptedUpdate({
   return {
     accepted: true,
     rejection: null,
+    rawGlobalTick: nextRawGlobalTick,
+    cachedGlobalTick: wrapper.cachedGlobalTick,
     acceptedStepCounter: (acceptedStepCounter + 1) >>> 0,
+    nextMainStateWord,
     projectilePoolCallCount: 1,
     entityUpdateCallCount: activeEntityCount,
     events,
   };
 }
 
+const ZERO_DISPATCH_EVENTS = [
+  { kind: "call", target: "0x00447bc0" },
+  { kind: "call", target: "0x004464c0" },
+  { kind: "call", target: "0x004481d0" },
+  { kind: "global-tick-cache-write", value: 1 },
+  { kind: "mission-dispatcher-call" },
+  { kind: "pre-gate-read", gate: "0x00c06e34", value: 0 },
+  { kind: "pre-gate-read", gate: "0x007c627c", value: 0 },
+  { kind: "pre-gate-read", gate: "0x007c627e", value: 0 },
+  { kind: "timer-resolver-call" },
+  { kind: "timer-read", timer: "win", value: 0 },
+  { kind: "timer-read", timer: "loss", value: 0 },
+  { kind: "stage-dispatch", stageSelector: 1, target: "0x0048a5c0" },
+];
+const ZERO_DISPATCH_EVENTS_TICK7 = ZERO_DISPATCH_EVENTS.map((event) =>
+  event.kind === "global-tick-cache-write" ? { ...event, value: 7 } : event,
+);
+const ZERO_DISPATCH_EVENTS_TICK5 = ZERO_DISPATCH_EVENTS.map((event) =>
+  event.kind === "global-tick-cache-write" ? { ...event, value: 5 } : event,
+);
+const ZERO_DISPATCH_EVENTS_TICK_MAX = ZERO_DISPATCH_EVENTS.map((event) =>
+  event.kind === "global-tick-cache-write" ? { ...event, value: 0xffffffff } : event,
+);
+
+const SCHEDULER_VECTOR_DEFINITIONS = [
+  {
+    id: "gate-c06e34-suppresses-forced-results-and-timer",
+    input: {
+      rawGlobalTick: 1,
+      cachedGlobalTick: 0,
+      gateC06e34: 1,
+      gate7c627c: 1,
+      gate7c627e: 1,
+      winTimer: 1,
+      lossTimer: 1,
+      resultClock: 3000,
+    },
+    expected: {
+      accepted: true,
+      rejection: null,
+      rawGlobalTick: 2,
+      cachedGlobalTick: 1,
+      acceptedStepCounter: 1,
+      nextMainStateWord: 3,
+      projectilePoolCallCount: 1,
+      entityUpdateCallCount: 0,
+      events: [
+        { kind: "call", target: "0x00447bc0" },
+        { kind: "call", target: "0x004464c0" },
+        { kind: "call", target: "0x004481d0" },
+        { kind: "global-tick-cache-write", value: 1 },
+        { kind: "mission-dispatcher-call" },
+        { kind: "pre-gate-read", gate: "0x00c06e34", value: 1 },
+        { kind: "call", target: "0x00447e10" },
+        { kind: "raw-tick-increment", value: 2 },
+        { kind: "call", target: "0x00447360" },
+        { kind: "entity-update-pass", count: 0, target: "0x0043c9c0" },
+        { kind: "projectile-pool-pass", pool: "A", slots: 100, activeCalls: 0, target: "0x00410cc0" },
+        { kind: "projectile-pool-pass", pool: "B", slots: 60, activeCalls: 0, target: "0x00401440" },
+      ],
+    },
+  },
+  {
+    id: "forced-win-before-forced-loss",
+    input: { rawGlobalTick: 1, cachedGlobalTick: 0, gate7c627c: 1, gate7c627e: 1, lossTimer: 2000, resultClock: 5000 },
+    expected: {
+      accepted: false,
+      rejection: "pre-update-result",
+      rawGlobalTick: 1,
+      cachedGlobalTick: 1,
+      acceptedStepCounter: 0,
+      nextMainStateWord: 0x18,
+      projectilePoolCallCount: 0,
+      entityUpdateCallCount: 0,
+      events: [
+        { kind: "call", target: "0x00447bc0" },
+        { kind: "call", target: "0x004464c0" },
+        { kind: "call", target: "0x004481d0" },
+        { kind: "global-tick-cache-write", value: 1 },
+        { kind: "mission-dispatcher-call" },
+        { kind: "pre-gate-read", gate: "0x00c06e34", value: 0 },
+        { kind: "pre-gate-read", gate: "0x007c627c", value: 1 },
+        { kind: "raw-word-write", address: "0x007c6614", value: 1 },
+        { kind: "result-code-write", address: "0x004bdfc8", value: 0x18 },
+        { kind: "final-result-call", target: "0x00446420" },
+        { kind: "scheduler-reject", reason: "pre-update-result" },
+      ],
+    },
+  },
+  {
+    id: "mature-loss-before-hypothetical-updater-win",
+    input: { rawGlobalTick: 1, cachedGlobalTick: 0, lossTimer: 1, resultClock: 3002, dispatcherResultAx: 1, activeEntityCount: 3 },
+    expected: {
+      accepted: false,
+      rejection: "pre-update-result",
+      rawGlobalTick: 1,
+      cachedGlobalTick: 1,
+      acceptedStepCounter: 0,
+      nextMainStateWord: 0x1a,
+      projectilePoolCallCount: 0,
+      entityUpdateCallCount: 0,
+      events: [
+        { kind: "call", target: "0x00447bc0" },
+        { kind: "call", target: "0x004464c0" },
+        { kind: "call", target: "0x004481d0" },
+        { kind: "global-tick-cache-write", value: 1 },
+        { kind: "mission-dispatcher-call" },
+        { kind: "pre-gate-read", gate: "0x00c06e34", value: 0 },
+        { kind: "pre-gate-read", gate: "0x007c627c", value: 0 },
+        { kind: "pre-gate-read", gate: "0x007c627e", value: 0 },
+        { kind: "timer-resolver-call" },
+        { kind: "timer-read", timer: "win", value: 0 },
+        { kind: "timer-read", timer: "loss", value: 1 },
+        { kind: "timer-distance", timer: "loss", delta: 3001, absoluteBits: 3001, absoluteSigned: 3001 },
+        { kind: "timer-result-global-flag-write", address: "0x0055299c", value: 1 },
+        { kind: "result-code-write", address: "0x004bdfc8", value: 0x1a },
+        { kind: "final-result-call", target: "0x00446420" },
+        { kind: "scheduler-reject", reason: "pre-update-result" },
+      ],
+    },
+  },
+  {
+    id: "win-timer-precedence",
+    input: { rawGlobalTick: 1, cachedGlobalTick: 0, winTimer: 1, lossTimer: 1, resultClock: 3002 },
+    expected: {
+      accepted: false,
+      rejection: "pre-update-result",
+      rawGlobalTick: 1,
+      cachedGlobalTick: 1,
+      acceptedStepCounter: 0,
+      nextMainStateWord: 0x18,
+      projectilePoolCallCount: 0,
+      entityUpdateCallCount: 0,
+      events: [
+        { kind: "call", target: "0x00447bc0" },
+        { kind: "call", target: "0x004464c0" },
+        { kind: "call", target: "0x004481d0" },
+        { kind: "global-tick-cache-write", value: 1 },
+        { kind: "mission-dispatcher-call" },
+        { kind: "pre-gate-read", gate: "0x00c06e34", value: 0 },
+        { kind: "pre-gate-read", gate: "0x007c627c", value: 0 },
+        { kind: "pre-gate-read", gate: "0x007c627e", value: 0 },
+        { kind: "timer-resolver-call" },
+        { kind: "timer-read", timer: "win", value: 1 },
+        { kind: "timer-distance", timer: "win", delta: 3001, absoluteBits: 3001, absoluteSigned: 3001 },
+        { kind: "timer-result-global-flag-write", address: "0x0055299c", value: 1 },
+        { kind: "raw-word-write", address: "0x007c6614", value: 1 },
+        { kind: "result-code-write", address: "0x004bdfc8", value: 0x18 },
+        { kind: "final-result-call", target: "0x00446420" },
+        { kind: "scheduler-reject", reason: "pre-update-result" },
+      ],
+    },
+  },
+  {
+    id: "direct-updater-result-no-timer-flag",
+    input: { rawGlobalTick: 1, cachedGlobalTick: 0, dispatcherResultAx: 1 },
+    expected: {
+      accepted: false,
+      rejection: "pre-update-result",
+      rawGlobalTick: 1,
+      cachedGlobalTick: 1,
+      acceptedStepCounter: 0,
+      nextMainStateWord: 0x18,
+      projectilePoolCallCount: 0,
+      entityUpdateCallCount: 0,
+      events: [
+        ...ZERO_DISPATCH_EVENTS,
+        { kind: "raw-word-write", address: "0x007c6614", value: 1 },
+        { kind: "result-code-write", address: "0x004bdfc8", value: 0x18 },
+        { kind: "final-result-call", target: "0x00446420" },
+        { kind: "scheduler-reject", reason: "pre-update-result" },
+      ],
+    },
+  },
+  {
+    id: "same-tick-ignores-all-injected-results",
+    input: { rawGlobalTick: 7, cachedGlobalTick: 7, gate7c627c: 1, lossTimer: 1, resultClock: 3000, dispatcherResultAx: 0xffff },
+    expected: {
+      accepted: true,
+      rejection: null,
+      rawGlobalTick: 8,
+      cachedGlobalTick: 7,
+      acceptedStepCounter: 1,
+      nextMainStateWord: 3,
+      projectilePoolCallCount: 1,
+      entityUpdateCallCount: 0,
+      events: [
+        { kind: "call", target: "0x00447bc0" },
+        { kind: "call", target: "0x004464c0" },
+        { kind: "call", target: "0x004481d0" },
+        { kind: "call", target: "0x00447e10" },
+        { kind: "raw-tick-increment", value: 8 },
+        { kind: "call", target: "0x00447360" },
+        { kind: "entity-update-pass", count: 0, target: "0x0043c9c0" },
+        { kind: "projectile-pool-pass", pool: "A", slots: 100, activeCalls: 0, target: "0x00410cc0" },
+        { kind: "projectile-pool-pass", pool: "B", slots: 60, activeCalls: 0, target: "0x00401440" },
+      ],
+    },
+  },
+  {
+    id: "early-transition-before-pre-update",
+    input: { rawGlobalTick: 1, cachedGlobalTick: 0, transitionGuardWord: 1 },
+    expected: {
+      accepted: false,
+      rejection: "early-transition",
+      rawGlobalTick: 1,
+      cachedGlobalTick: 0,
+      acceptedStepCounter: 0,
+      nextMainStateWord: 0x16,
+      projectilePoolCallCount: 0,
+      entityUpdateCallCount: 0,
+      events: [
+        { kind: "call", target: "0x00447bc0" },
+        { kind: "call", target: "0x0046f870" },
+        { kind: "call", target: "0x004400b0" },
+        { kind: "result-code-write", address: "0x004bdfc8", value: 0x16 },
+        { kind: "scheduler-reject", reason: "early-transition" },
+      ],
+    },
+  },
+  {
+    id: "clock-reject-retains-distinct-cache",
+    input: { rawGlobalTick: 7, cachedGlobalTick: 6, clockGateResult: 0 },
+    expected: {
+      accepted: false,
+      rejection: "clock-gate-reject",
+      rawGlobalTick: 7,
+      cachedGlobalTick: 7,
+      acceptedStepCounter: 0,
+      nextMainStateWord: 3,
+      projectilePoolCallCount: 0,
+      entityUpdateCallCount: 0,
+      events: [
+        ...ZERO_DISPATCH_EVENTS_TICK7,
+        { kind: "call", target: "0x00447e10" },
+        { kind: "scheduler-reject", reason: "clock-gate-reject" },
+      ],
+    },
+  },
+  {
+    id: "raw-and-counter-dword-wrap",
+    input: { rawGlobalTick: 0xffffffff, cachedGlobalTick: 0xfffffffe, acceptedStepCounter: 0xffffffff },
+    expected: {
+      accepted: true,
+      rejection: null,
+      rawGlobalTick: 0,
+      cachedGlobalTick: 0xffffffff,
+      acceptedStepCounter: 0,
+      nextMainStateWord: 3,
+      projectilePoolCallCount: 1,
+      entityUpdateCallCount: 0,
+      events: [
+        ...ZERO_DISPATCH_EVENTS_TICK_MAX,
+        { kind: "call", target: "0x00447e10" },
+        { kind: "raw-tick-increment", value: 0 },
+        { kind: "call", target: "0x00447360" },
+        { kind: "entity-update-pass", count: 0, target: "0x0043c9c0" },
+        { kind: "projectile-pool-pass", pool: "A", slots: 100, activeCalls: 0, target: "0x00410cc0" },
+        { kind: "projectile-pool-pass", pool: "B", slots: 60, activeCalls: 0, target: "0x00401440" },
+      ],
+    },
+  },
+  {
+    id: "non-result-ax-wrapper-boundary",
+    input: { rawGlobalTick: 1, cachedGlobalTick: 0, dispatcherResultAx: 0x1234, activeEntityCount: 1, projectilePoolAActiveCount: 2, projectilePoolBActiveCount: 1 },
+    expected: {
+      accepted: true,
+      rejection: null,
+      rawGlobalTick: 2,
+      cachedGlobalTick: 1,
+      acceptedStepCounter: 1,
+      nextMainStateWord: 3,
+      projectilePoolCallCount: 1,
+      entityUpdateCallCount: 1,
+      events: [
+        ...ZERO_DISPATCH_EVENTS,
+        { kind: "call", target: "0x00447e10" },
+        { kind: "raw-tick-increment", value: 2 },
+        { kind: "call", target: "0x00447360" },
+        { kind: "entity-update-pass", count: 1, target: "0x0043c9c0" },
+        { kind: "projectile-pool-pass", pool: "A", slots: 100, activeCalls: 2, target: "0x00410cc0" },
+        { kind: "projectile-pool-pass", pool: "B", slots: 60, activeCalls: 1, target: "0x00401440" },
+      ],
+    },
+  },
+  {
+    id: "pre-update-result-requires-exact-dword-one",
+    input: { rawGlobalTick: 1, cachedGlobalTick: 0, preUpdateResult: 0x10001, commandGateModeWord: 0 },
+    expected: {
+      accepted: true,
+      rejection: null,
+      rawGlobalTick: 2,
+      cachedGlobalTick: 1,
+      acceptedStepCounter: 1,
+      nextMainStateWord: 3,
+      projectilePoolCallCount: 1,
+      entityUpdateCallCount: 0,
+      events: [
+        ...ZERO_DISPATCH_EVENTS,
+        { kind: "call", target: "0x00447e10" },
+        { kind: "command-readiness", value: 1 },
+        { kind: "raw-tick-increment", value: 2 },
+        { kind: "call", target: "0x00447360" },
+        { kind: "entity-update-pass", count: 0, target: "0x0043c9c0" },
+        { kind: "projectile-pool-pass", pool: "A", slots: 100, activeCalls: 0, target: "0x00410cc0" },
+        { kind: "projectile-pool-pass", pool: "B", slots: 60, activeCalls: 0, target: "0x00401440" },
+      ],
+    },
+  },
+  {
+    id: "pre-update-result-ignored-in-exact-mode-one",
+    input: { rawGlobalTick: 1, cachedGlobalTick: 0, preUpdateResult: 1, commandGateModeWord: 1 },
+    expected: {
+      accepted: true,
+      rejection: null,
+      rawGlobalTick: 2,
+      cachedGlobalTick: 1,
+      acceptedStepCounter: 1,
+      nextMainStateWord: 3,
+      projectilePoolCallCount: 1,
+      entityUpdateCallCount: 0,
+      events: [
+        ...ZERO_DISPATCH_EVENTS,
+        { kind: "call", target: "0x00447e10" },
+        { kind: "raw-tick-increment", value: 2 },
+        { kind: "call", target: "0x00447360" },
+        { kind: "entity-update-pass", count: 0, target: "0x0043c9c0" },
+        { kind: "projectile-pool-pass", pool: "A", slots: 100, activeCalls: 0, target: "0x00410cc0" },
+        { kind: "projectile-pool-pass", pool: "B", slots: 60, activeCalls: 0, target: "0x00401440" },
+      ],
+    },
+  },
+  {
+    id: "pre-update-result-exact-one-mode-zero-rejects",
+    input: { rawGlobalTick: 1, cachedGlobalTick: 0, preUpdateResult: 1, commandGateModeWord: 0 },
+    expected: {
+      accepted: false,
+      rejection: "pre-update-result",
+      rawGlobalTick: 1,
+      cachedGlobalTick: 1,
+      acceptedStepCounter: 0,
+      nextMainStateWord: 3,
+      projectilePoolCallCount: 0,
+      entityUpdateCallCount: 0,
+      events: [
+        ...ZERO_DISPATCH_EVENTS,
+        { kind: "scheduler-reject", reason: "pre-update-result" },
+      ],
+    },
+  },
+  {
+    id: "command-readiness-reject-retains-cache-and-counter",
+    input: { rawGlobalTick: 5, cachedGlobalTick: 4, commandGateModeWord: 0, commandReadinessResult: 0, acceptedStepCounter: 17 },
+    expected: {
+      accepted: false,
+      rejection: "command-readiness-reject",
+      rawGlobalTick: 5,
+      cachedGlobalTick: 5,
+      acceptedStepCounter: 17,
+      nextMainStateWord: 3,
+      projectilePoolCallCount: 0,
+      entityUpdateCallCount: 0,
+      events: [
+        ...ZERO_DISPATCH_EVENTS_TICK5,
+        { kind: "call", target: "0x00447e10" },
+        { kind: "command-readiness", value: 0 },
+        { kind: "scheduler-reject", reason: "command-readiness-reject" },
+      ],
+    },
+  },
+];
+
 function createVectors() {
-  const modeSelector = [0, 1, 2, 3, 4].map((selector) => selectOriginalBaseInterval({ modeWord: 0, selector }));
-  const sameTick = replayAcceptedUpdate({ rawGlobalTick: 7, cachedGlobalTick: 7, activeEntityCount: 2 });
-  const nextTick = replayAcceptedUpdate({ rawGlobalTick: 8, cachedGlobalTick: 7, activeEntityCount: 2 });
-  const accepted = replayAcceptedUpdate({ rawGlobalTick: 1, cachedGlobalTick: 0, activeEntityCount: 3, projectilePoolAActiveCount: 2, projectilePoolBActiveCount: 1 });
-  const resultBeforePass = replayAcceptedUpdate({ rawGlobalTick: 2, cachedGlobalTick: 1, dispatcherResultAx: 1, activeEntityCount: 3 });
+  const definitions = [
+    {
+      id: "config-open-failure-default-selector",
+      input: { configLoadSucceeded: false },
+      expected: { selector: 2, source: "initializer-after-load-failure" },
+      replay: replayColdStartSelector,
+    },
+    {
+      id: "config-success-retains-selector",
+      input: { configLoadSucceeded: true, persistedSelector: 3 },
+      expected: { selector: 3, source: "config-hq-transfer" },
+      replay: replayColdStartSelector,
+    },
+    {
+      id: "selector-0-through-4",
+      input: { modeWord: 0, selector: [0, 1, 2, 3, 4] },
+      expected: [64, 60, 50, 40, 30],
+      replay: ({ selector }) => selector.map((value) => selectOriginalBaseInterval({ modeWord: 0, selector: value })),
+    },
+    {
+      id: "mode-one-bypasses-selector",
+      input: { modeWord: 1, selector: 0xffffffff },
+      expected: 50,
+      replay: selectOriginalBaseInterval,
+    },
+    {
+      id: "mode-non-one-uses-selector",
+      input: { modeWord: 0, selector: 3 },
+      expected: 40,
+      replay: selectOriginalBaseInterval,
+    },
+    {
+      id: "guard-reject-and-accept",
+      input: [
+        { previousModeWord: 0, guardWord: 0, argumentWord: 1 },
+        { previousModeWord: 1, guardWord: 1, argumentWord: 1 },
+      ],
+      expected: [{ modeWord: 1, guardAccepted: true, write: 1 }, { modeWord: 0, guardAccepted: false, write: 0 }],
+      replay: (values) => values.map((value) => replayModeGuard(value)).map(({ modeWord, guardAccepted, write }) => ({ modeWord, guardAccepted, write })),
+    },
+  ];
   return [
-    { id: "config-open-failure-default-selector", result: replayColdStartSelector({ configLoadSucceeded: false }), expected: { selector: 2, source: "initializer-after-load-failure" } },
-    { id: "config-success-retains-selector", result: replayColdStartSelector({ configLoadSucceeded: true, persistedSelector: 3 }), expected: { selector: 3, source: "config-hq-transfer" } },
-    { id: "selector-0-through-4", result: modeSelector, expected: [64, 60, 50, 40, 30] },
-    { id: "mode-one-bypasses-selector", result: selectOriginalBaseInterval({ modeWord: 1, selector: 0xffffffff }), expected: 50 },
-    { id: "mode-non-one-uses-selector", result: selectOriginalBaseInterval({ modeWord: 0, selector: 3 }), expected: 40 },
-    { id: "guard-reject-and-accept", result: [replayModeGuard({ previousModeWord: 0, guardWord: 0, argumentWord: 1 }), replayModeGuard({ previousModeWord: 1, guardWord: 1, argumentWord: 1 })].map(({ modeWord, guardAccepted, write }) => ({ modeWord, guardAccepted, write })), expected: [{ modeWord: 1, guardAccepted: true, write: 1 }, { modeWord: 0, guardAccepted: false, write: 0 }] },
-    { id: "same-raw-tick-skips-result-dispatch", result: sameTick.events.filter(({ target }) => target === "0x0048ddb0").length, expected: 0 },
-    { id: "next-distinct-raw-tick-dispatches-result", result: nextTick.events.filter(({ target }) => target === "0x0048ddb0").length, expected: 1 },
-    { id: "dispatcher-pre-gate-skips-k01", result: replayAcceptedUpdate({ rawGlobalTick: 9, cachedGlobalTick: 8, preGateResultAx: 1 }).events.filter(({ target }) => target === "0x0048a5c0").length, expected: 0 },
-    { id: "accepted-step-pool-once", result: { poolCalls: accepted.projectilePoolCallCount, entityCalls: accepted.entityUpdateCallCount }, expected: { poolCalls: 1, entityCalls: 3 } },
-    { id: "result-before-entity-and-pool", result: [resultBeforePass.events.findIndex(({ target }) => target === "0x0048a5c0"), resultBeforePass.events.findIndex(({ target }) => target === "0x00447360")], expected: [6, -1] },
-    { id: "raw-tick-wrap-distinct", result: replayAcceptedUpdate({ rawGlobalTick: 0, cachedGlobalTick: 0xffffffff }).events.filter(({ kind }) => kind === "raw-tick-cache-write").length, expected: 1 },
-    { id: "clock-gate-boundary-reject", result: replayAcceptedUpdate({ rawGlobalTick: 4, cachedGlobalTick: 3, clockGateResult: 0 }).rejection, expected: "clock-gate-reject" },
-    { id: "command-gate-boundary-reject", result: replayAcceptedUpdate({ rawGlobalTick: 5, cachedGlobalTick: 4, commandGateModeWord: 0, commandReadinessResult: 0 }).rejection, expected: "command-readiness-reject" },
+    ...definitions.map(({ id, input, expected, replay }) => ({ id, input, result: replay(input), expected })),
+    ...SCHEDULER_VECTOR_DEFINITIONS.map(({ id, input, expected }) => ({
+      id,
+      input,
+      result: replayAcceptedUpdate(input),
+      expected,
+    })),
   ];
 }
 
@@ -522,9 +975,27 @@ function validateAnchor(buffer, image, { id, va, bytes, meaning }) {
   return { id, va: `0x${va.toString(16).padStart(8, "0")}`, rawOffset: `0x${offset.toString(16)}`, bytes, meaning, matched: true };
 }
 
-function rejected(events, reason) {
+function resultCodeState(events, fallback) {
+  let state = fallback;
+  for (const event of events) {
+    if (event.kind === "result-code-write") state = event.value;
+  }
+  return state;
+}
+
+function rejected(events, reason, state) {
   events.push({ kind: "scheduler-reject", reason });
-  return { accepted: false, rejection: reason, acceptedStepCounter: undefined, projectilePoolCallCount: 0, entityUpdateCallCount: 0, events };
+  return {
+    accepted: false,
+    rejection: reason,
+    rawGlobalTick: state.rawGlobalTick,
+    cachedGlobalTick: state.cachedGlobalTick,
+    acceptedStepCounter: state.acceptedStepCounter,
+    nextMainStateWord: state.nextMainStateWord,
+    projectilePoolCallCount: 0,
+    entityUpdateCallCount: 0,
+    events,
+  };
 }
 
 function hash(value) {

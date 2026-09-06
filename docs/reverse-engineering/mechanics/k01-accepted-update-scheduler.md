@@ -10,8 +10,9 @@ pool, result resolver가 어떤 순서와 횟수로 호출되는가?
   pre-update result wrapper→K01 dispatcher, entity/projectile outer call과 direct mode/guard
   writer 경계에 한정한다.
 - 재현 상태: `재현 완료` — config failure/success, selector `0..4`, mode `1`/non-`1`, guard
-  zero/nonzero, same/distinct raw tick, accepted/rejected gate, wrap, result-before-pool과
-  pool count를 독립 fixture로 재현한다.
+  zero/nonzero, same/distinct raw tick, dispatcher pre-gates/timers/updater boundary, accepted/
+  rejected gate, wrap, cross-invocation cache/counter/state, result-before-pool과 pool count를
+  독립 fixture로 재현한다.
 - 구현 상태: `없음` — production simulation/app과 runtime clock adapter는 변경하지 않았다.
 
 독립 추출기 [`extract-k01-accepted-update-scheduler.mjs`](../../../tools/imjinrok/extract-k01-accepted-update-scheduler.mjs)와
@@ -63,14 +64,24 @@ node tools/imjinrok/extract-k01-accepted-update-scheduler.mjs \
    `FUN_0043f4f0` writes selector `DWORD object+0x14 = 0x00634acc` to `2`. Success transfers
    `0x1d4` bytes into the object, so persisted bytes covering `+0x14` are retained. The transfer
    callee is kept neutral; config validity is not inferred.
-4. `FUN_00447bc0` first calls `FUN_004464c0`. Its first relevant call is
+4. `FUN_00447bc0` first checks the transition branch at `0x00447be0`. When the transition guard
+   WORD is exactly `1` while main state is `3`, it writes main state `0x16` and returns before
+   `FUN_004464c0`; this is an early transition rejection with no result dispatcher or entity/
+   projectile pass. Only the other path calls `FUN_004464c0`. Its first relevant call is
    `FUN_004481d0`, which compares raw tick `0x007c5f80` with cache `0x00552780`; equal ticks skip
-   mission dispatch, while a distinct tick writes the cache before calling `FUN_0048ddb0`.
-5. `FUN_0048ddb0` checks its three WORD pre-gates, then calls `FUN_0048d6f0` (win-first/loss
-   timer resolver). Only a zero timer result reaches signed stage selector `1` and
-   `FUN_0048a5c0`.
-6. If the pre-update result is not `1`, the scheduler reaches `FUN_00447e10`. Only an accepted
-   wall-clock/command-gate path increments raw tick and calls `FUN_00447360` once.
+   every dispatcher input, while a distinct tick writes the cache before calling `FUN_0048ddb0`.
+5. `FUN_0048ddb0` checks its three WORD pre-gates (`0x00c06e34`, `0x007c627c`, and
+   `0x007c627e`). Any taken pre-gate returns immediately with `AX=0`, `1`, or `0xffff`; only
+   returned `AX=1/0xffff` reaches the wrapper's result commit. When no pre-gate is taken, the
+   function calls `FUN_0048d6f0` (win-first/loss timer resolver). Only a zero timer result then
+   reaches signed selector `1` and `FUN_0048a5c0`. `dispatcherResultAx`는 K01 handler 호출
+   경계에 공급하는 AX 값이다. 실제 K01 updater의 확인된 반환은 `0/1`이며, `0xffff`·`0x1234`
+   같은 주입값은 wrapper 분기 검증용으로만 사용하고 K01 자연 반환으로 주장하지 않는다.
+6. When the distinct wrapper returns zero, the remaining pre-update projection uses exact DWORD
+   `preUpdateResult == 1` only when the command gate WORD is not exactly `1`; the source
+   `0x00446506` branch ignores that projection in exact mode `1`. The scheduler then reaches
+   `FUN_00447e10`. Only an accepted wall-clock/command-gate path increments raw tick and calls
+   `FUN_00447360` once.
 7. `FUN_00447360` performs its active entity loop (`FUN_0043c9c0`) and then its raw projectile
    passes: pool A checks 100 slots and calls `FUN_00410cc0` for active records; pool B checks 60
    slots and calls `FUN_00401440`. Cleanup calls are conditional on each updater returning zero.
@@ -87,10 +98,10 @@ The resulting accepted-step order is:
 
 ```text
 FUN_00447bc0
-  → FUN_004464c0
+  → early transition guard (state 3 + guard 1: write 0x16 and return)
+  → FUN_004464c0 (otherwise)
     → FUN_004481d0 (same-tick skip OR cache-write → FUN_0048ddb0)
-      → FUN_0048d6f0 (timer result)
-        → FUN_0048a5c0 (K01 stage 1, at most once per distinct raw tick)
+      → pre-gate/timer result commit OR FUN_0048a5c0 (K01 stage 1, distinct raw tick only)
   → FUN_00447e10 (accepted gate)
   → FUN_00447360 (exactly once)
     → entity updates
@@ -98,10 +109,14 @@ FUN_00447bc0
     → projectile pool B (60 slots)
 ```
 
-When K01 updater or timer resolution returns `AX=1/0xffff`, `FUN_004481d0` commits result state
-and calls `FUN_00446420`; `FUN_004464c0` returns `1`, so that scheduler attempt has zero entity and
-projectile passes. A same raw tick can still proceed to the wall-clock gate, but does not invoke the
-mission resolver again.
+When a dispatcher pre-gate, timer resolution, or K01 updater returns `AX=1/0xffff`,
+`FUN_004481d0` commits result state and calls `FUN_00446420`; `FUN_004464c0` returns `1`, so that
+scheduler attempt has zero entity and projectile passes. A same raw tick can still proceed to the
+wall-clock gate, but does not invoke the mission resolver or consume any injected dispatcher values
+again. The replay carries four bounded post-state fields across invocations: raw tick
+`0x007c5f80`, cached tick `0x00552780`, accepted-step counter `0x007c5f84`, and the next result/
+main-state WORD. The wrapper cache survives clock or command rejection; raw tick and counter advance
+only on an accepted pass, with DWORD wrap.
 
 ## mode·guard boundary
 
@@ -125,9 +140,13 @@ The fixture and test cover:
 - guard zero/nonzero with argument `1`, argument `2` no-write;
 - same raw tick skip and next distinct tick dispatch;
 - raw tick `0xffffffff→0` wrap as a distinct value;
-- pre-gate, timer, pre-update, wall-clock and command-readiness rejection;
+- three dispatcher pre-gates, win-first/loss timer, early transition, mode-conditioned pre-update,
+  wall-clock and command-readiness rejection;
 - accepted entity count, exactly one outer projectile call, 100/60 slot pass counts;
-- result resolver/updater before entity/projectile order and result-path pool count `0`.
+- result resolver/updater before entity/projectile order and result-path pool count `0`;
+- literal input/output event traces for forced-gate precedence, mature timer precedence, same-tick
+  suppression, cache retention across invocations, DWORD wrap, updater AX boundary, and the exact
+  `preUpdateResult` comparison.
 
 Tamper tests mutate only a target EXE or generated artifact while preserving all other inputs. The
 canonical source/artifact hash check fails first, so upstream provenance is not silently replaced by
@@ -135,11 +154,13 @@ a target mutation.
 
 ## proposed adapter contract and residual risk
 
-An eventual isolated adapter may accept raw mode/selector/tick fields, scheduler gate outcomes,
-active entity records, and projectile slot snapshots, then emit an ordered source-update trace,
-entity count, pool-pass count, and raw result code. It must not invent a fixed-Hz multiplier, map raw
-clock units to project time, or assign project identity to original slot/reference values until those
-boundaries receive separate static evidence.
+The extractor and fixture remain analysis-only. They accept raw mode/selector/tick fields,
+dispatcher gate/timer values, scheduler gate outcomes, and boundary counts, then emit an ordered
+source-update trace and bounded post-state. They do not alter gameplay integration, invent a fixed-Hz
+multiplier, map raw clock units to project time, or assign project identity to original slot/reference
+values until those boundaries receive separate static evidence. The accepted-step counter and result
+state fields are tracked only at the exact source writes named above; helper side effects outside this
+bounded contract remain unresolved.
 
 관련 세부 근거는 [clock mode producers](k01-clock-mode-producers.md), [cold-start selector](k01-clock-selector-initialization.md),
 [projectile cadence](k01-projectile-pool-cadence.md), [mission result lifecycle](k01-mission-result-lifecycle.md),

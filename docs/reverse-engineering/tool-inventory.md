@@ -132,8 +132,7 @@
   `campaign-runtime-trace-plan.test.mjs`,
   `campaign-x64dbg-script.test.mjs`,
   `ui-runtime-trace-plan.test.mjs`,
-  `ui-x64dbg-script.test.mjs`,
-  `ui-callsite-debugger-script.test.mjs`
+  `ui-x64dbg-script.test.mjs`
 - 실행·제어:
   `run-campaign-headless-init-capture.ps1`,
   `run-campaign-x32dbg-target-launch.ps1`,

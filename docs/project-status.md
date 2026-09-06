@@ -1,12 +1,44 @@
 # 프로젝트 상태
 
-기준일: 2026-08-01
+기준일: 2026-09-06
+기준 커밋: `a6f9db6` (`feat: integrate source-backed K01 mechanics and visuals`)
 
 ## 요약
 
-현재 저장소는 기능이 풍부한 웹 RTS 프로토타입이다. 실행 가능한 기능의 수와 원작 일치 수준은 별개다.
+현재 저장소는 기능이 풍부한 웹 RTS 프로토타입이며, 실행 가능한 기능의 수와 원작 일치 수준은
+별개다. 전체 게임 또는 K01 MVP를 완료 판정할 단계는 아니다.
+
+현재 구현된 source-backed 범위는 다음 문서를 단일 출처로 삼는다.
+
+- [K01 원본 맵 데이터 추출 프로토콜 v1](reverse-engineering/mechanics/k01-map-data-extraction-protocol.md)은
+  60×60 K01에서 원본이 읽는 11개 채널과 해시·실패 게이트를 고정한다. `rawRasterVerticalShift`는
+  원본 raw shift로만 보존하며 물리적 고도를 추론하지 않는다. 웹의 hole-free coverage와 neutral
+  product elevation은 별도 `의도적 적응`이다.
+- [원본 엔티티 전수 시각 프로필](reverse-engineering/mechanics/original-entity-visual-profiles.md)은
+  원본 타입 95개와 building renderer 35개를 생성 프로필로 연결한다. 공유 테마 경로는 확인된
+  source profile을 소비하며 복잡한 overlay와 미확정 gameplay 의미는 별도 범위다.
+- [K01 source entity runtime·admission](reverse-engineering/mechanics/k01-source-entity-runtime-admission.md)은
+  v3 source runtime의 slot·generation·occupancy 상태를 정의한다. K01 opening seed와 완성
+  봉화대의 명시적 construction adapter, K0120 native reinforcement admission이 production
+  경로에 연결되어 있다.
+- [K01 봉화대 완성·K0120 native trigger](reverse-engineering/mechanics/k01-beacon-k0120-trigger.md)와
+  `packages/simulation/src/k01BeaconPolicy.ts`는 source admission에서 native 증원까지의
+  좁은 정책을 연결한다. 원본 전체 scheduler·movement·death/release·result 수명주기는 아직
+  이 정책에 연결되지 않았다.
+- [K01 시나리오 목표 source policy adapter](development/k01-scenario-policy-adapter.md)는 source
+  `triggerFlag === 1`만 `build-beacon` objective completion으로 투영하고, legacy K0120 scripted
+  spawn은 source profile에서 소비 처리한다. 이 projection은 의도적 웹 적응이며 result timing과
+  전체 scenario lifecycle parity를 확정하지 않는다.
+
+상태 표기는 `구현`, `의도적 적응`, `미해결`을 분리한다. 구현은 source runtime/admission, 맵
+protocol 산출물, source visual profile 소비와 기존 K01 기능의 제한된 포팅을 뜻한다. 의도적
+적응은 raw map shift를 elevation으로 바꾸지 않는 정책, coverage underlay, project owner/identity,
+24 Hz presentation 같은 웹 경계를 뜻한다. 미해결은 source scheduler/update 단위의 runtime 연결,
+movement·death/release·result lifecycle과 브리핑부터 승패까지의 종단 scenario 통합이다.
+
+이미 확인한 제한 범위의 세부 근거:
 K0110 briefing outer update cadence도 message-vs-idle 분기, state-0x14 call chain, strict delay 경계와 one-record progression까지 정적 복원·재현했지만 exact wall-clock/fps와 CHANGETITLE sprite compositor는 미확정이다.
-전체 게임이 원작과 일치한다고 완료 판정할 단계는 아니다. 제한된 단위 중 브리핑 `SPEECH` 초상화와
+제한된 단위 중 브리핑 `SPEECH` 초상화와
 대화 핵심 레이아웃은 정적 복원·재현·이식을 완료했다. 내부 클래스 2는 원본 `조선 창병`과
 `swordk.spr`로 식별했으며 상태 1 일반 이동 방향·미러를 `move`·`walk`에 이식했다. 조선 본영은
 건설·정상·반파 본체 프레임까지 정적 복원·재현·이식했다. 또한 내부 클래스 1~95의 원본 명칭,
@@ -46,7 +78,7 @@ unsigned DWORD 50/2000 strict poll, `0x8c→0x96→0x1c` relay와 external/stage
 `REP STOSD`가 `[0x007c5ed8,0x00843980)`을 0으로 채워 win/loss timer를 초기화하는 순서도
 정적 복원·재현했다.
 native 증원의 원본 class·SPR와 K01 60×60 요청 좌표 9개도 교차 확인했다. source slot allocator·generation·validity·release의
-범위 한정 lifecycle도 정적 분석·재현했지만 production에는 연결하지 않았다. K01 전용 adapter는
+범위 한정 lifecycle은 v3 source runtime admission으로 production에 연결했다. K01 전용 adapter는
 class 12·13·14·82 아홉 record를 각각 `japanese-gunner`, `japanese-samurai`,
 `japanese-turtle-tank`, `japanese-konishi`의 exact static identity/source binding으로 연결했다.
 class 12 `japanese-gunner`의 상태 8/1/4/7 frame·8방향·mirror, class 13 `japanese-samurai`의 상태 8/1/4/7 frame·8방향·mirror와 class 14
@@ -58,18 +90,45 @@ transient destruction은 정적 확정·재현했지만 runtime에는 이식하�
 class 82 `japanese-konishi`의 상태 8/1/4/7도 세 source SPR의 grid frame·mirror를
 정적 확정·이식했다. K01 action만 in-bounds 요청 좌표를 terrain/passability·occupancy·open-point
 탐색 없이 생성하는 exact-position 정책을 부분 이식했다. 원본 1,200-slot pool, generation,
-explicit occupancy-owner grid와 이후 movement는 포팅하지 않았다. 별도 [K01 occupancy-owner transition]
+explicit occupancy-owner grid는 v3 source runtime admission이 보존하며, 이후 scheduler와 movement는
+포팅하지 않았다. 별도 [K01 occupancy-owner transition]
 (reverse-engineering/mechanics/k01-occupancy-owner-transition.md)은 native create→action-1
 clear/helper/writer, movement `0x32` coordinate commit, death retain/release와 active-gate 실패 뒤
-stale owner 가능성을 20개 hash-bound vector로 정적 확정·재현했으며 production에는 연결하지 않았다.
+stale owner 가능성을 20개 hash-bound vector로 정적 확정·재현했으며, 해당 후속 transition은
+production에 연결하지 않았다.
 class 12 state 2는 원본 movement variant까지만 정적 확정했으며 사람용 환경 의미와 project policy는 이식하지 않았다.
 raw owner `1`→`cpu-1`, objective trigger와 attack-move도 프로젝트 적응이다. raw clock→24 Hz와
 result transition/identity policy mapping도 없어 승패 수명주기는 runtime에 연결하지 않았다.
 K01 opening building footprint는 별도 [K01 opening footprint anchor](reverse-engineering/mechanics/k01-opening-footprint-anchor.md)에서
 class 48/49/50/51/57/58/60/62/63의 15개 source record, type `+0x14/+0x16` width/height,
 centered anchor와 mask→slot-owner write/OOB 순서를 정적 확정·8개 vector로 재현했다. 이는 sprite
-pixel dimensions, pivot, raw owner/player 의미, project coordinate adapter 또는 production occupancy
-연결을 뜻하지 않는다.
+pixel dimensions, pivot, raw owner/player 의미 또는 project coordinate adapter를 확정하지 않는다.
+K01 source runtime opening seed가 source-confirmed footprint를 제한적으로 소비하는 것과 일반
+product occupancy·movement lifecycle은 별도 경계다.
+
+## 현재 workspace 상태
+
+workspace audit 기준으로 현재 `dev`의 기준 커밋은 `a6f9db6`이며, 기존 17개 Codex 작업 브랜치의
+변경은 `dev`에 통합된 상태다. 별도 sprite 작업 브랜치의 15개 5월 커밋은 통합하지 않고 보존한다.
+이는 2026-08-01의 명시적 `sprite는 그냥 둘게` 선택을 따른다. `master`는 `dev`보다 뒤처져 있고,
+작업 디렉터리 정리나 sprite 브랜치 삭제는 이 상태 기록의 범위가 아니다.
+
+현재 working draft에는 source-profile removal hook과 source trigger→`build-beacon` objective
+projection adapter가 포함되어 있다. focused source-removal `43/43`·scenario-policy `142/142`와
+독립 blocked/remove/rebuild/save sequence는 통과했다. 불필요한 기존 테스트를 정리하기 전 전체
+`pnpm test` 검증은 `1,449/1,449` 통과, skip/fail 0이었다. 이는 정리 전 검증 시점의 결과이며,
+같은 시점의 typecheck와 game/editor/server build 및 static verification도 통과했다. 이후 전체
+원작 패리티나 브라우저 UI 검증을 뜻하지 않는다. 테스트 정리 후 최종 `pnpm test`는
+`1,427/1,427` 통과, fail/skip 0이었고 typecheck도 exit 0이었다.
+
+### K01 accepted-update 재개 상태
+
+이번 재개는 [K01 accepted source-update scheduler 경계](reverse-engineering/mechanics/k01-accepted-update-scheduler.md)를
+기준으로 연구 replay의 결과 우선순위·조기 전환·호출 간 raw 상태 반환 보정을 완료·재현한 단계다.
+이 bounded 보정은 production scheduler·world timing·gameplay·visual에는 연결하지 않는다.
+mode/guard producer lifetime과 clock/identity projection을 확정하기 전에는 production 통합으로
+넘어가지 않으며, K01 종단·browser 검증도 미완료다. 최종 현재 검증은 `pnpm test` 1,429/1,429
+통과·fail/skip 0, typecheck와 static verification exit 0이다.
 
 ## 단기 목표
 
@@ -89,9 +148,9 @@ K02는 이 단기 MVP의 완료 조건이 아니다. 기존 K02 프로토타입�
 | 영역 | 현재 구현 | 원본 분석 | 재현 검증 | 현재 판정 |
 | --- | --- | --- | --- | --- |
 | 원본 PE·주소 변환 | 고정 Ghidra 파이프라인 존재 | 일반 참조·점프 테이블 포함 | 2회 생성 해시 일치 | 정적 분석 1단계 완료 |
-| 스크립트·맵·SPR·YAV 파서 | 도구 존재 | 원본 파일 기반 | 파서별 편차 있음 | 재감사 후 유지 |
-| 엔티티 정체·자원 | 고유 연결 표시 이름 반영, 봉화대·K01 영웅 자원 수정 | 클래스 1~95 명칭·슬롯·기본 프레임·flags·경로 전수 확정 | 연속성·대표 타입·공유 경로·입력 해시 테스트 | 타입 정체 정적 확정, 행동·수치 의미는 별도 |
-| K01 캠페인 | 처음부터 결과까지 프로토타입, native 증원 9개 exact static identity/source adapter와 K01-only exact-position create 부분 이식 | 표준 entry timer reset, 봉화대→K0120, native class/요청 좌표·slot/OOB/exact create·1×1 occupancy overwrite, source handle allocator/generation/validity/release 범위, occupancy-owner transition의 create/movement/death/release 경계, opening building 15-record footprint/anchor, class 13·14·82 scoped 핵심 animation와 class-14 16-ring/destruction, latch→timer→commit, result presentation→final route 범위 확정 | 요청 좌표·slot/경계/overlap/WORD-wrap·source handle 19-vector·occupancy-owner 20-vector·opening footprint 8-vector·exact static identity/source 9/9, class 13·14·82 grid frame/direction, class-14 turn/effect, native effect·timer·presentation·route 경계 재현 | 단기 팬 리마스터 MVP, class 14 generic Facing/runtime tick, opening building project sprite/pivot/coordinate adapter, 증원 stats/behavior·raw owner/player 의미, 전체 entity mega-struct와 모든 writer/alias, 원본 occupancy-owner 저장 모델의 production 연결·이후 scheduler/movement integration, raw clock/result policy 미완료 |
+| 스크립트·맵·SPR·YAV 파서 | 도구와 K01 map-data-protocol/v1 산출물 존재 | 원본 파일·MAP/EXE 해시와 11개 K01 채널·helper arithmetic 고정 | 결정론 JSON/TS·tamper/truncate/dimension/coordinate 실패 벡터 | protocol 구현; terrain/elevation/compositor 의미는 별도 |
+| 엔티티 정체·시각 프로필 | 생성된 source profile을 공유 테마가 소비; 95개 타입·35개 building renderer 프로필 연결 | 클래스 1~95 명칭·슬롯·기본 프레임·flags·경로와 source dimension/pivot 규칙 확정 | 프로필 생성기·벡터·해시/헤더 검증 | source visual profile 범위 구현; 복잡한 overlay와 gameplay 의미는 별도 |
+| K01 캠페인 | source runtime v3가 opening seed·completed beacon adapter·native reinforcement admission을 보존하고, beacon policy와 [scenario policy adapter](development/k01-scenario-policy-adapter.md)가 source trigger→objective/native effect를 연결 | 표준 entry timer reset, 봉화대→K0120, native class/요청 좌표·slot/OOB/exact create·1×1 occupancy overwrite, source handle allocator/generation/validity/release 범위, occupancy-owner transition의 create/movement/death/release 경계, opening building 15-record footprint/anchor, class 13·14·82 scoped 핵심 animation와 class-14 16-ring/destruction, latch→timer→commit, result presentation→final route 범위 확정 | 기존 벡터와 새 objective projection boundary vectors가 문서·테스트에 추가됨; focused source-removal `43/43`·scenario-policy `142/142`와 독립 blocked/remove/rebuild/save sequence 통과. 불필요한 기존 테스트 정리 전 전체 `pnpm test`는 `1,449/1,449` 통과 | admission·좁은 beacon/objective projection은 구현; source scheduler/movement/death/release/result lifecycle과 종단 K01 시나리오는 미완료 |
 | K02 캠페인 | 프로토타입 존재 | 제한적 | 원본 재현 없음 | K01 이후로 연기 |
 | 전투 | 프로토타입, 유성룡 좌표 accepted subset `0..32767` 독립 계산 부분 이식 | K01 영웅 phase·피해·대상·사거리·투사체와 signed-health 사망·slot/reference 수명주기 확정 | 대상·투사체·scheduler 및 사망 phase·delay·stale reference 경계 재현 | 독립 단위 부분 이식; identity/좌표/24 Hz exact mapping과 opt-in 사망 정책 대기 |
 | 전투 | 프로토타입 구현 존재 | K01 일반 공격 phase·회복, action 40 소유권 이전, action 59 loop-carried full DWORD와 fixed reset·tracking·subtype 16 same-slot subtype 1 전환·mode 2 kind 2, generic mode 1 kind 2 열거/callback 입력, subtype 12 kind 9 및 direct full-generation/writer gate 경계 확정 | 일반 공격 제한 범위와 class 78 선택·pending 충돌·subtype 12/16 flight/종료·generic enumeration 입력/call 경계·선택 buffer/health write 부분 재현 | K01 영웅 제한 범위 부분 재현, generic K01 mode 1 producer 미확정, 자동 마법은 분석-only |
@@ -99,7 +158,7 @@ K02는 이 단기 MVP의 완료 조건이 아니다. 기존 K02 프로토타입�
 | AI | 구현 존재 | 체계적 함수 지도 없음 | 원본 재현 없음 | 미검증 |
 | 생산·건설·연구 | 구현 존재 | 본영·봉화대 표시 상태만 복원 | 표시 프레임 재현 | 메커니즘은 미검증 |
 | 애니메이션 | 조선 창병 일반 이동, class 7·31 carry/carry-idle와 generic `gather`의 original state-10 source-layout adapter, class 7 `build`/`repair`의 original state-11 source-layout adapter, class 13 일본 사무라이와 권율·유성룡 idle·일반 이동·공격·사망 이식 | 클래스 2 상태 1·2 이동, class 7·31 source-created creation-default state 4→state-8 idle fallback·state 8·1·7·10·11·16, raw action substate 8의 state-16 fast-start/cadence numeric boundary, 클래스 13·76·78 상태 1·4·7·8과 영웅 사망 phase/update-unit 수명 확정 | 방향·phase·상태별 슬롯·flags·class 7·31 state-4 fallback·nonzero/resource-work 96-vector·state-16 numeric cadence·사망 완료/해제 경계 테스트 | state-4 이후 mutation/reachability·combat meaning, state 11/16 product mapping·사람용 의미·selector identity와 원본 update→FPS/24 Hz, opt-in 사망 수명 이식 미확정. class-7 `build`/`repair`는 state-11 의미가 아닌 의도적 source-layout adapter |
-| 건물 상태 이미지 | 조선 본영·봉화대 건설 0~7·정상 7·반파 8 이식 | 클래스 49·52 정체와 공통 건물 진행도·체력 분기 확정 | 모든 진행도·50% 체력 경계 테스트 | 두 건물 본체 범위 원본 기반, 나머지 7개 미검증 |
+| 건물 상태 이미지 | 조선 본영·봉화대 건설 0~7·정상 7·반파 8 이식; 35 building renderer source profiles는 공유 테마가 소비 | 클래스 49·52 정체와 공통 건물 진행도·체력 분기, 35개 renderer profile 범위 확정 | 본영·봉화대 진행도·50% 체력 경계와 profile 생성 벡터 | 두 K01 본체 state 범위는 원본 기반; 나머지 K01 construction/overlay/compositor와 gameplay state는 미해결 |
 | 브리핑 초상화 | 17개 ID·`hero.spr` 프레임 이식; source raw delay/frame words are metadata-only and the web scene consumes an explicit calibrated intentional-adaptation timing policy | 파서→조회→프레임 표→그리기 정적 확정; K0110 strict `>`·one-record idle-visit order is preserved without exact wall-clock claim | 추출기·클라이언트 교차 테스트와 raw-vs-calibrated policy vectors | portraits/source labels 원본 기반; briefing wall-clock/FPS는 미확정, timing policy는 의도적 적응 |
 | `SPEECH` 대화 레이아웃 | 숫자 슬롯·초상화·대사 공통 배치 이식. K01 브리핑의 blank→완성 frame fade, 초상화 첫 등장 motion, 대화 중 simulation pause와 전면 click advance는 웹 포트 연출 | 640×480 슬롯 4개와 대사 좌표 정적 확정 | 추출기·배율 변환 테스트, 포트 timeline·pause ownership 단위 테스트 | 좌표·초상화 frame은 원본 기반; 도입·pause·입력 연출은 의도적 적응 |
 | K0110 outer update cadence | production 변경 없음 | `PeekMessageA` idle path→state `0x14`→briefing queue, one-record/strict delay·TITLE/OBJECTIVE/SPEECH ordering 정적 확정 | hash-bound extractor·fixture·tamper/progression tests | exact wall-clock/fps와 CHANGETITLE compositor 미확정 |
@@ -131,50 +190,20 @@ K02는 이 단기 MVP의 완료 조건이 아니다. 기존 K02 프로토타입�
 
 ## 현재 최우선 작업
 
-1. K01 native 증원의 class 14 generic Facing/runtime tick mapping과 원본 slot/generation/occupancy-owner 저장 모델의 이후 소비·movement를 독립 복원
-2. 원본 raw clock/entity-update 단위와 24 Hz·identity의 exact opt-in integration policy를 별도 설계
-3. K01 HUD, 선택 패널, 목표·진행 표시와 미션 대화 전체 레이아웃을 정적으로 복원
-4. K01에 등장하는 나머지 건물·유닛의 정체·상태·방향 매핑을 독립 복원
-5. 브리핑부터 승패 결과까지 K01 종단 적합성 시나리오를 통과
+1. [K01 시나리오 목표 source policy adapter](development/k01-scenario-policy-adapter.md)의
+   source `triggerFlag === 1` objective completion, canonical semantic-unit removal, blocker·
+   destroyed·rebuild·save 경계를 현재 K01 흐름에 연결했다. focused source-removal `43/43`·
+   scenario-policy `142/142`와 독립 sequence를 통과했다. 불필요한 기존 테스트 정리 전 전체
+   `pnpm test`는 `1,449/1,449` 통과, skip/fail 0이었다.
+2. 원본 source scheduler/update 단위와 movement·health/death lifecycle의 남은 production 연결,
+   그리고 result/presentation integration을 복원한다.
+3. 원본 raw clock/entity-update 단위와 24 Hz·identity의 exact opt-in integration policy를
+   별도 설계한다.
+4. K01의 브리핑부터 승패까지 종단 적합성 시나리오를 정의하고 검증한다. K01 MVP 완료 판정은
+   이 단계 이후다.
 
 사용자가 설명한 “완성 봉화가 하나라도 있으면 미니맵 enable, 마지막 봉화 제거 시 disable”은
 별도 `user-reported/unverified` 정적 분석 후속 질문이다. 현재 K01 raw effect나 원본 확정
 수명주기로 소급하지 않는다.
-1. subtype `0x0c`/`0x10`의 bounded flight·종료와 generic mode 1 kind 2 enumeration/call 입력
-   경계 뒤 consumer callback whole result, K01 mode 1 producer, 재경로 좌표 결과·
-   death/reference invalidation과 `FUN_00464cc0` map field 의미를 정적으로 닫기
-2. K01 일반 공격의 공격 전 대상 유효성·탐색·사거리와 원본 전역 틱 시간 단위를 닫기
-3. K01 봉화대·증원·영웅 보호·승패 경로를 합성 입력으로 재현
-4. K01 HUD, 선택 패널, 목표·진행 표시와 미션 대화 전체 레이아웃을 정적으로 복원 — 공통 임무
-   목표 모달 자체와 `0x3f0` handler 반환 생산 경로, K01 인덱스 1→K0110 목표 텍스트 결합은
-   복원했고 state `0x16`의 direct 생산, 목표 컨트롤 입력, ordered overwrite 뒤 dispatcher의
-   목표 모달 소비·reset까지 연결했다. 프로젝트에서는 K01 HUD objective button을 명시적 적응
-   trigger로 삼아 semantic action을 `UIScene`의 독립 presenter에 한 번 전달한다. 검증된 raster·
-   geometry·K0110 text·strict release와 renderer의 유효 base 폭 300은 원본 기반이다. GDI
-   `Arial`/height 12/HANGEUL_CHARSET 요청과 CP949 space wrap 제어는 복원했지만 실제 Windows
-   font realization·K0110 glyph metrics는 보존 입력에 없어 font family/size·Canvas 측정·
-   Korean wrap·backdrop·Escape·responsive blocker는 의도적 적응이다. 설치 매체 font
-   provenance 조사는 중단한다. 선택 panel로 탐색한 `FUN_004a84e0`의 네 slot은 후속 producer
-   분석에서 SPEECH 화자 portrait/label lifecycle로 확정됐고 kind는 화자 index 변경
-   boolean이므로 건설·생산·연구 결합 가설은 반증됐다. gameplay 선택 UI의 실제 owner/producer,
-   이어 selection 없음의 seven-slot owner와 별도로 action 115의 payload `0`이 field
-   `0x266` exact-one reservation 성공에서만 add/assign bookkeeping을 수행하며 non-one
-   bypass는 이를 건너뛰고 common player/type writes에 합류한 뒤 state WORD exact `1`에서
-   state `0x0f` direct start 또는 non-one one-entry queue append를 수행하고, right-release
-   payload `1`은 matching queue removal without caller refund 또는 no-match refund/bookkeeping
-   경로로 소비됨을 확정했다. selected action queue-count marker와 produced type 76
-   (`조선 권율`) state handoff/dispatch boundary도 정적으로 닫았다. `FUN_0042de00`의
-   progress/completion/post-dispatch 전체 결과는 미재현이다. 별도 player record `+0x254e`
-   WORD gate는 selection-count-zero slot 1의 actions `63/64`로 제어되고, action/type table
-   전수 교집합이 정확히 16개 named-hero production action이라 영웅 queue 우선순위 toggle로
-   정적 확정했다. control/hit·gate write·filtered/FIFO removal은 범위 한정 재현했다.
-   action 115 후보는 사용자가 기억한 right-click persistent reservation을 확정하지 않는다.
-   인접 player-global magic auto-use gate·actions `61/62`·9-class 영향 집합도 정적으로
-   확정했고 control/hit·writer·consumer admission을 부분 재현했다. class별 cadence·target·
-   delivery 전체 효과, remembered pinning의 실제 action/owner, deeper redelivery와
-   production state update, gameplay-panel의 전체 화면상 정체, 원본 dismiss visual·sound와
-   HUD 루트 좌표계는 남음
-5. K01에 등장하는 나머지 건물·유닛의 정체·상태·방향 매핑을 독립 복원
-6. 브리핑부터 승패 결과까지 K01 종단 적합성 시나리오를 통과
 
 세부 단계와 통과 조건은 [로드맵](roadmap.md)에 정의한다.

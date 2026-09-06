@@ -22,33 +22,43 @@ VM에서 원본 게임을 플레이하며 화면 변화를 따라가는 방식�
   `유지`, `재검증`, `보관`으로 분류했다.
 - 1단계: 완료. 고정 도구 설치, 원본 해시 강제, 함수·호출 관계·문자열·일반 메모리 참조·간접
   분기·점프 테이블·seed CFG·명령어·디컴파일 내보내기와 2회 결정론 검증을 완료했다.
-- 2단계: 진행 중. 초기 스프라이트 매핑 감사에서 16개 엔티티 비주얼을 `미검증`으로 격리했다.
-  이후 `SPEECH` 초상화 17개와 핵심 대화 레이아웃, 조선 본영의 건설·정상·반파 본체 프레임을
-  정적 복원·테스트·이식했다. 내부 클래스 2는 `조선 창병`으로 식별했으며 상태 1·2가 이동
-  비주얼임을 확인하고 상태 1 일반 이동의 방향·미러를 이식했다. 내부 클래스 1~95의 원본 정체와 자원
-  경로도 전수 복원했으며, 잘못 연결된 조선 봉화대를 `firehousek.spr`와 본체 frame 0~8로
-  교체했다. K01 권율·유성룡도 전용 `generalk11/12/13.spr`·`generalk31/32.spr`와 상태 8
-  idle·1 일반 이동·4 공격·7 사망의 프레임·방향·미러를 복원해 사명대사 공유 비주얼과 임시
-  상태 프레임을 제거했다. 두 영웅의 일반 공격 효과 phase·사이클 종료·회복 카운터도 정적
-  복원했으며 권율 직접 피해와 유성룡 subtype `0x0c`의 생성·보수적인 port accepted 좌표 subset
-  `0..32767` 비행·도착 충돌·effect kind `9` WORD 피해·raw 적용 gate·실패 경로까지 재현했다.
-  원본 caller 전체 signed-WORD 좌표 범위와 원본 좌표·틱의 프로젝트 변환은 다음 전투 통합
-  경계에 남아 있다.
-- 3단계: 진행 중. K01 raw-relation blocker→1,200-slot 완성 봉화대 scan→flag·K0120
-  busy·loader `0/1` 무검사·void start→native 증원·raw post-effect→조건부 post-state 반환
-  범위와, general/영웅 loss latch→strict timer→dispatcher→distinct raw-tick commit 범위를
-  정적 확정·재현했다. commit된 `0x18/0x1a` 뒤 shared teardown, win/loss SPR·YAV
-  initializer, unsigned cadence/completion, relay와 external/stage final route도 정적
-  확정·재현했다. 표준 main state 1의 broad DWORD zero fill이 win/loss timer를 지운 뒤
-  stage 1 K01 map source를 선택하는 반개구간·순서도 정적 확정·재현했다.
-  native class/SPR와 K01 요청 좌표는 9개 모두 확인했고 class 12·13·14·82를 고유 kind의
-  exact static identity/source binding으로 연결했다. descriptor의 slot 선택·OOB·exact create·1×1
-  mode-1 occupancy overwrite도 정적 확정·재현했고 K01 action에 exact-position create를 부분 이식했다.
-  trigger flag의 전체 reset lifecycle, 증원 행동·animation, 원본 1,200-slot/generation/occupancy-owner
-  저장 모델의 이후 소비·movement와 raw clock/result/asset transition mapping은 남아 있다.
+- 2단계: 진행 중. [K01 원본 맵 데이터 추출 프로토콜 v1](reverse-engineering/mechanics/k01-map-data-extraction-protocol.md)의
+  MAP/EXE 해시·60×60·11개 채널과 결정론 산출물을 고정했다. raw shift는 물리 elevation으로
+  해석하지 않으며, canonical coverage와 neutral product elevation은 별도 의도적 적응이다.
+  [원본 엔티티 전수 시각 프로필](reverse-engineering/mechanics/original-entity-visual-profiles.md)은
+  타입 95개와 building renderer 35개를 생성 프로필로 연결하고 공유 테마가 이를 소비한다.
+  `SPEECH` 17개 초상화, 대화 레이아웃, class 2·13·76·78 핵심 비주얼과 두 조선 건물의
+  construction/normal/damaged 본체는 계속 source-backed 범위다. 나머지 상태·overlay·행동 의미는
+  각 mechanics 문서의 범위를 따른다.
+- 3단계: 진행 중. [K01 source entity runtime·admission](reverse-engineering/mechanics/k01-source-entity-runtime-admission.md)의
+  v3 state가 opening seed, completed-construction adapter, native 1×1 reinforcement admission과
+  semantic-unit removal hook을
+  production source SSOT로 보존한다. [K01 beacon policy](../packages/simulation/src/k01BeaconPolicy.ts)는
+  blocker·trigger flag·K0120 busy/loader/start·native descriptor effect·post-state 반환을 한
+  accepted update 경계에서 연결하고, [K01 scenario policy adapter](development/k01-scenario-policy-adapter.md)는
+  source trigger를 `build-beacon` objective에 투영하며 legacy scripted spawn을 소비 처리한다.
+  원본 source scheduler·movement·death/release·result parity와 종단 K01 scenario는 아직 완료하지
+  않았다.
 - 4단계: 부분 진행. K01 영웅의 대상 검색·사거리, 공격 phase·피해·투사체와 signed-health
   사망·slot/reference 정리는 정적 확정·재현했다. 원본 identity·좌표·accepted update 단위의
   프로젝트 변환과 실제 opt-in 연결은 미확정이다.
+
+현재 draft는 source `triggerFlag === 1` objective completion, canonical semantic-unit removal과
+blocker·destroyed·rebuild·save 경계를 K01 scenario policy에 연결한다. focused source-removal
+`43/43`·scenario-policy `142/142`와 독립 blocked/remove/rebuild/save sequence는 통과했다. 불필요한
+기존 테스트 정리 전 전체 `pnpm test`도 `1,449/1,449` 통과했고 skip/fail은 없었다. 다음 남은 milestone은
+원본 source scheduler/update 단위와 movement·health/death lifecycle, result/presentation
+integration이며, 그 뒤 브리핑부터 승패까지의 K01 종단 적합성 시나리오를 검증한다. 이 단계들은
+K01 MVP 완료 판정과 별개로 남아 있다.
+
+### K01 accepted-update 재개 게이트
+
+[K01 accepted source-update scheduler 경계](reverse-engineering/mechanics/k01-accepted-update-scheduler.md)의 연구 replay
+보정은 bounded 연구 범위에서 완료·재현되었다. 통과 조건은 raw input→ordered calls·writes→next state의 source trace 일치,
+rejection 시 cache 보존, 같은 tick의 dispatcher 재호출 방지, source mapping과 의도적 web adaptation의
+분리다. 다음은 raw mode/guard producer lifetime→clock/identity projection contract를 확정한 뒤 production
+scheduler/update·movement-health/death·result/presentation 연결로 진행하는 순서이며, K01 종단·browser 검증은
+그 이후다.
 
 ## K01 MVP 완료 조건
 
@@ -110,6 +120,10 @@ VM에서 원본 게임을 플레이하며 화면 변화를 따라가는 방식�
 사용자에게 직접 드러난 오매핑을 우선 차단하기 위해 다음 세 질문을 병행하지 않고 순서대로 푼다.
 
 0. 전체 타입 정체 카탈로그 — 완료: 클래스 1~95의 원본 이름·슬롯·기본 프레임·flags·SPR 경로
+   - 시각 프로필 확장 — 완료 범위: 95개 타입의 source header/dimension/vertical offset/pivot profile과
+     35개 building renderer profile을 생성하고 공유 theme 경로에서 소비한다. 복잡한 overlay와
+     runtime frame dimension은 원본 기반 프로필에 보존하되 일반 gameplay 의미와 compositor는
+     별도 범위로 둔다. 상세 규칙과 생성 명령은 [원본 엔티티 전수 시각 프로필](reverse-engineering/mechanics/original-entity-visual-profiles.md)에 둔다.
 1. 유닛 한 종류의 엔티티 종류·행동·방향→프레임 식 — 부분 완료: 내부 클래스 2는
    `조선 창병`·슬롯 100으로 식별, 상태 1·2 이동 의미와 방향식 완료, 상태 1 일반 이동 이식;
    상태 2 통합·특수 분기 base·idle·전투는 미확정
@@ -210,6 +224,9 @@ dismiss visual·sound는 남아 있다.
 
 현재 완료한 하위 단위:
 
+- source runtime v3의 opening seed·completed beacon construction adapter·native reinforcement
+  admission과 beacon policy의 accepted-update event cursor 연결. 이 adapter의 construction timing은
+  명시적인 `intentional-adaptation`이며 원본 source record 생성 시점을 주장하지 않는다.
 - 봉화대 trigger의 blocker·flag scan gate, active/owner/class/progress match
 - match 선행 flag write, script busy와 무검사 loader `0/1`·void start
 - 같은 scan 복수 match의 native block 반복

@@ -17,6 +17,8 @@
 
 - [프로젝트 상태](project-status.md): 구현과 원작 검증 상태의 요약
 - [로드맵](roadmap.md): 정적 분석부터 이식까지의 단계와 통과 조건
+- [개발 workspace inventory](development/workspace-inventory.md): K01 작업 재개 시점의 worktree·통합·보존 기록
+- [K01 scenario policy adapter](development/k01-scenario-policy-adapter.md): source trigger와 K01 objective lifecycle의 bounded 연결
 - [원본과 포팅 구현의 경계](architecture/original-vs-port.md): 무엇이 원본 사실이고 무엇이 프로젝트 설계인지 구분
 - [지형·환경·자원 시각 계약](architecture/terrain-environment-resource-contract.md): 모딩 registry와 원본 source catalog의 경계
 - [K01 게임플레이 음성 source adapter](development/k01-gameplay-audio-adapter.md): source-backed 제품 cue와 미확정 identity의 coverage 경계

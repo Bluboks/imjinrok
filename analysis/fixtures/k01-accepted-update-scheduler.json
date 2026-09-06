@@ -751,11 +751,27 @@
       "matched": true
     },
     {
+      "id": "early-transition-before-pre-update",
+      "va": "0x00447be0",
+      "rawOffset": "0x47be0",
+      "bytes": "66 83 3d 30 6e c0 00 01 75 2e 66 83 3d c8 df 4b 00 03 75 24 6a 02 e8 75 7c 02 00 68 b8 20 5e 00 e8 ab 84 ff ff 83 c4 08 66 c7 05 c8 df 4b 00 16 00 66 33 c0 83 c4 08 c3",
+      "meaning": "transition guard and main state 3 write main state 0x16 before pre-update",
+      "matched": true
+    },
+    {
       "id": "pre-update-result-call",
       "va": "0x00447c18",
       "rawOffset": "0x47c18",
       "bytes": "e8 a3 e8 ff ff 83 f8 01 0f 84 ce 00 00 00",
       "meaning": "pre-update returns one and rejects the scheduler attempt before wall-clock acceptance",
+      "matched": true
+    },
+    {
+      "id": "pre-update-mode-one-boundary",
+      "va": "0x00446506",
+      "rawOffset": "0x46506",
+      "bytes": "66 39 3d 2e 6e c0 00 75 08 5f 33 c0 5d 83 c4 20 c3",
+      "meaning": "remaining pre-update result is ignored when command gate mode is exactly one",
       "matched": true
     },
     {
@@ -975,16 +991,26 @@
     },
     "rejectionOrder": [
       "state-23 mode != 1 (main-loop gate only)",
-      "scheduler transition branch",
+      "scheduler transition guard == 1 with main state 3 writes main state 0x16 before pre-update",
       "pre-update result == 1",
       "clock gate == 0",
       "command readiness == 0 when command gate mode == 0"
     ],
+    "trackedPostState": {
+      "rawGlobalTick": "input DWORD 0x007c5f80; increment/store at 0x00447c85-0x00447c8e only on accepted pass",
+      "cachedGlobalTick": "input/cache DWORD 0x00552780; distinct wrapper writes raw input before dispatcher, including later clock/command rejection",
+      "acceptedStepCounter": "input DWORD 0x007c5f84; final increment at 0x00447cee only on accepted pass",
+      "nextMainStateWord": "input result/state WORD preserved on ordinary rejection; result-code-write selects 0x18/0x1a, early transition selects 0x16",
+      "scope": "bounded replay post-state; helper side effects outside these fields remain at the supplied boundary"
+    },
     "sourceBound": true
   },
   "vectors": [
     {
       "id": "config-open-failure-default-selector",
+      "input": {
+        "configLoadSucceeded": false
+      },
       "result": {
         "selector": 2,
         "source": "initializer-after-load-failure"
@@ -996,6 +1022,10 @@
     },
     {
       "id": "config-success-retains-selector",
+      "input": {
+        "configLoadSucceeded": true,
+        "persistedSelector": 3
+      },
       "result": {
         "selector": 3,
         "source": "config-hq-transfer"
@@ -1007,6 +1037,16 @@
     },
     {
       "id": "selector-0-through-4",
+      "input": {
+        "modeWord": 0,
+        "selector": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ]
+      },
       "result": [
         64,
         60,
@@ -1024,16 +1064,36 @@
     },
     {
       "id": "mode-one-bypasses-selector",
+      "input": {
+        "modeWord": 1,
+        "selector": 4294967295
+      },
       "result": 50,
       "expected": 50
     },
     {
       "id": "mode-non-one-uses-selector",
+      "input": {
+        "modeWord": 0,
+        "selector": 3
+      },
       "result": 40,
       "expected": 40
     },
     {
       "id": "guard-reject-and-accept",
+      "input": [
+        {
+          "previousModeWord": 0,
+          "guardWord": 0,
+          "argumentWord": 1
+        },
+        {
+          "previousModeWord": 1,
+          "guardWord": 1,
+          "argumentWord": 1
+        }
+      ],
       "result": [
         {
           "modeWord": 1,
@@ -1060,56 +1120,2268 @@
       ]
     },
     {
-      "id": "same-raw-tick-skips-result-dispatch",
-      "result": 0,
-      "expected": 0
-    },
-    {
-      "id": "next-distinct-raw-tick-dispatches-result",
-      "result": 1,
-      "expected": 1
-    },
-    {
-      "id": "dispatcher-pre-gate-skips-k01",
-      "result": 0,
-      "expected": 0
-    },
-    {
-      "id": "accepted-step-pool-once",
+      "id": "gate-c06e34-suppresses-forced-results-and-timer",
+      "input": {
+        "rawGlobalTick": 1,
+        "cachedGlobalTick": 0,
+        "gateC06e34": 1,
+        "gate7c627c": 1,
+        "gate7c627e": 1,
+        "winTimer": 1,
+        "lossTimer": 1,
+        "resultClock": 3000
+      },
       "result": {
-        "poolCalls": 1,
-        "entityCalls": 3
+        "accepted": true,
+        "rejection": null,
+        "rawGlobalTick": 2,
+        "cachedGlobalTick": 1,
+        "acceptedStepCounter": 1,
+        "nextMainStateWord": 3,
+        "projectilePoolCallCount": 1,
+        "entityUpdateCallCount": 0,
+        "events": [
+          {
+            "kind": "call",
+            "target": "0x00447bc0"
+          },
+          {
+            "kind": "call",
+            "target": "0x004464c0"
+          },
+          {
+            "kind": "call",
+            "target": "0x004481d0"
+          },
+          {
+            "kind": "global-tick-cache-write",
+            "value": 1
+          },
+          {
+            "kind": "mission-dispatcher-call"
+          },
+          {
+            "kind": "pre-gate-read",
+            "gate": "0x00c06e34",
+            "value": 1
+          },
+          {
+            "kind": "call",
+            "target": "0x00447e10"
+          },
+          {
+            "kind": "raw-tick-increment",
+            "value": 2
+          },
+          {
+            "kind": "call",
+            "target": "0x00447360"
+          },
+          {
+            "kind": "entity-update-pass",
+            "count": 0,
+            "target": "0x0043c9c0"
+          },
+          {
+            "kind": "projectile-pool-pass",
+            "pool": "A",
+            "slots": 100,
+            "activeCalls": 0,
+            "target": "0x00410cc0"
+          },
+          {
+            "kind": "projectile-pool-pass",
+            "pool": "B",
+            "slots": 60,
+            "activeCalls": 0,
+            "target": "0x00401440"
+          }
+        ]
       },
       "expected": {
-        "poolCalls": 1,
-        "entityCalls": 3
+        "accepted": true,
+        "rejection": null,
+        "rawGlobalTick": 2,
+        "cachedGlobalTick": 1,
+        "acceptedStepCounter": 1,
+        "nextMainStateWord": 3,
+        "projectilePoolCallCount": 1,
+        "entityUpdateCallCount": 0,
+        "events": [
+          {
+            "kind": "call",
+            "target": "0x00447bc0"
+          },
+          {
+            "kind": "call",
+            "target": "0x004464c0"
+          },
+          {
+            "kind": "call",
+            "target": "0x004481d0"
+          },
+          {
+            "kind": "global-tick-cache-write",
+            "value": 1
+          },
+          {
+            "kind": "mission-dispatcher-call"
+          },
+          {
+            "kind": "pre-gate-read",
+            "gate": "0x00c06e34",
+            "value": 1
+          },
+          {
+            "kind": "call",
+            "target": "0x00447e10"
+          },
+          {
+            "kind": "raw-tick-increment",
+            "value": 2
+          },
+          {
+            "kind": "call",
+            "target": "0x00447360"
+          },
+          {
+            "kind": "entity-update-pass",
+            "count": 0,
+            "target": "0x0043c9c0"
+          },
+          {
+            "kind": "projectile-pool-pass",
+            "pool": "A",
+            "slots": 100,
+            "activeCalls": 0,
+            "target": "0x00410cc0"
+          },
+          {
+            "kind": "projectile-pool-pass",
+            "pool": "B",
+            "slots": 60,
+            "activeCalls": 0,
+            "target": "0x00401440"
+          }
+        ]
       }
     },
     {
-      "id": "result-before-entity-and-pool",
-      "result": [
-        6,
-        -1
-      ],
-      "expected": [
-        6,
-        -1
-      ]
+      "id": "forced-win-before-forced-loss",
+      "input": {
+        "rawGlobalTick": 1,
+        "cachedGlobalTick": 0,
+        "gate7c627c": 1,
+        "gate7c627e": 1,
+        "lossTimer": 2000,
+        "resultClock": 5000
+      },
+      "result": {
+        "accepted": false,
+        "rejection": "pre-update-result",
+        "rawGlobalTick": 1,
+        "cachedGlobalTick": 1,
+        "acceptedStepCounter": 0,
+        "nextMainStateWord": 24,
+        "projectilePoolCallCount": 0,
+        "entityUpdateCallCount": 0,
+        "events": [
+          {
+            "kind": "call",
+            "target": "0x00447bc0"
+          },
+          {
+            "kind": "call",
+            "target": "0x004464c0"
+          },
+          {
+            "kind": "call",
+            "target": "0x004481d0"
+          },
+          {
+            "kind": "global-tick-cache-write",
+            "value": 1
+          },
+          {
+            "kind": "mission-dispatcher-call"
+          },
+          {
+            "kind": "pre-gate-read",
+            "gate": "0x00c06e34",
+            "value": 0
+          },
+          {
+            "kind": "pre-gate-read",
+            "gate": "0x007c627c",
+            "value": 1
+          },
+          {
+            "kind": "raw-word-write",
+            "address": "0x007c6614",
+            "value": 1
+          },
+          {
+            "kind": "result-code-write",
+            "address": "0x004bdfc8",
+            "value": 24
+          },
+          {
+            "kind": "final-result-call",
+            "target": "0x00446420"
+          },
+          {
+            "kind": "scheduler-reject",
+            "reason": "pre-update-result"
+          }
+        ]
+      },
+      "expected": {
+        "accepted": false,
+        "rejection": "pre-update-result",
+        "rawGlobalTick": 1,
+        "cachedGlobalTick": 1,
+        "acceptedStepCounter": 0,
+        "nextMainStateWord": 24,
+        "projectilePoolCallCount": 0,
+        "entityUpdateCallCount": 0,
+        "events": [
+          {
+            "kind": "call",
+            "target": "0x00447bc0"
+          },
+          {
+            "kind": "call",
+            "target": "0x004464c0"
+          },
+          {
+            "kind": "call",
+            "target": "0x004481d0"
+          },
+          {
+            "kind": "global-tick-cache-write",
+            "value": 1
+          },
+          {
+            "kind": "mission-dispatcher-call"
+          },
+          {
+            "kind": "pre-gate-read",
+            "gate": "0x00c06e34",
+            "value": 0
+          },
+          {
+            "kind": "pre-gate-read",
+            "gate": "0x007c627c",
+            "value": 1
+          },
+          {
+            "kind": "raw-word-write",
+            "address": "0x007c6614",
+            "value": 1
+          },
+          {
+            "kind": "result-code-write",
+            "address": "0x004bdfc8",
+            "value": 24
+          },
+          {
+            "kind": "final-result-call",
+            "target": "0x00446420"
+          },
+          {
+            "kind": "scheduler-reject",
+            "reason": "pre-update-result"
+          }
+        ]
+      }
     },
     {
-      "id": "raw-tick-wrap-distinct",
-      "result": 1,
-      "expected": 1
+      "id": "mature-loss-before-hypothetical-updater-win",
+      "input": {
+        "rawGlobalTick": 1,
+        "cachedGlobalTick": 0,
+        "lossTimer": 1,
+        "resultClock": 3002,
+        "dispatcherResultAx": 1,
+        "activeEntityCount": 3
+      },
+      "result": {
+        "accepted": false,
+        "rejection": "pre-update-result",
+        "rawGlobalTick": 1,
+        "cachedGlobalTick": 1,
+        "acceptedStepCounter": 0,
+        "nextMainStateWord": 26,
+        "projectilePoolCallCount": 0,
+        "entityUpdateCallCount": 0,
+        "events": [
+          {
+            "kind": "call",
+            "target": "0x00447bc0"
+          },
+          {
+            "kind": "call",
+            "target": "0x004464c0"
+          },
+          {
+            "kind": "call",
+            "target": "0x004481d0"
+          },
+          {
+            "kind": "global-tick-cache-write",
+            "value": 1
+          },
+          {
+            "kind": "mission-dispatcher-call"
+          },
+          {
+            "kind": "pre-gate-read",
+            "gate": "0x00c06e34",
+            "value": 0
+          },
+          {
+            "kind": "pre-gate-read",
+            "gate": "0x007c627c",
+            "value": 0
+          },
+          {
+            "kind": "pre-gate-read",
+            "gate": "0x007c627e",
+            "value": 0
+          },
+          {
+            "kind": "timer-resolver-call"
+          },
+          {
+            "kind": "timer-read",
+            "timer": "win",
+            "value": 0
+          },
+          {
+            "kind": "timer-read",
+            "timer": "loss",
+            "value": 1
+          },
+          {
+            "kind": "timer-distance",
+            "timer": "loss",
+            "delta": 3001,
+            "absoluteBits": 3001,
+            "absoluteSigned": 3001
+          },
+          {
+            "kind": "timer-result-global-flag-write",
+            "address": "0x0055299c",
+            "value": 1
+          },
+          {
+            "kind": "result-code-write",
+            "address": "0x004bdfc8",
+            "value": 26
+          },
+          {
+            "kind": "final-result-call",
+            "target": "0x00446420"
+          },
+          {
+            "kind": "scheduler-reject",
+            "reason": "pre-update-result"
+          }
+        ]
+      },
+      "expected": {
+        "accepted": false,
+        "rejection": "pre-update-result",
+        "rawGlobalTick": 1,
+        "cachedGlobalTick": 1,
+        "acceptedStepCounter": 0,
+        "nextMainStateWord": 26,
+        "projectilePoolCallCount": 0,
+        "entityUpdateCallCount": 0,
+        "events": [
+          {
+            "kind": "call",
+            "target": "0x00447bc0"
+          },
+          {
+            "kind": "call",
+            "target": "0x004464c0"
+          },
+          {
+            "kind": "call",
+            "target": "0x004481d0"
+          },
+          {
+            "kind": "global-tick-cache-write",
+            "value": 1
+          },
+          {
+            "kind": "mission-dispatcher-call"
+          },
+          {
+            "kind": "pre-gate-read",
+            "gate": "0x00c06e34",
+            "value": 0
+          },
+          {
+            "kind": "pre-gate-read",
+            "gate": "0x007c627c",
+            "value": 0
+          },
+          {
+            "kind": "pre-gate-read",
+            "gate": "0x007c627e",
+            "value": 0
+          },
+          {
+            "kind": "timer-resolver-call"
+          },
+          {
+            "kind": "timer-read",
+            "timer": "win",
+            "value": 0
+          },
+          {
+            "kind": "timer-read",
+            "timer": "loss",
+            "value": 1
+          },
+          {
+            "kind": "timer-distance",
+            "timer": "loss",
+            "delta": 3001,
+            "absoluteBits": 3001,
+            "absoluteSigned": 3001
+          },
+          {
+            "kind": "timer-result-global-flag-write",
+            "address": "0x0055299c",
+            "value": 1
+          },
+          {
+            "kind": "result-code-write",
+            "address": "0x004bdfc8",
+            "value": 26
+          },
+          {
+            "kind": "final-result-call",
+            "target": "0x00446420"
+          },
+          {
+            "kind": "scheduler-reject",
+            "reason": "pre-update-result"
+          }
+        ]
+      }
     },
     {
-      "id": "clock-gate-boundary-reject",
-      "result": "clock-gate-reject",
-      "expected": "clock-gate-reject"
+      "id": "win-timer-precedence",
+      "input": {
+        "rawGlobalTick": 1,
+        "cachedGlobalTick": 0,
+        "winTimer": 1,
+        "lossTimer": 1,
+        "resultClock": 3002
+      },
+      "result": {
+        "accepted": false,
+        "rejection": "pre-update-result",
+        "rawGlobalTick": 1,
+        "cachedGlobalTick": 1,
+        "acceptedStepCounter": 0,
+        "nextMainStateWord": 24,
+        "projectilePoolCallCount": 0,
+        "entityUpdateCallCount": 0,
+        "events": [
+          {
+            "kind": "call",
+            "target": "0x00447bc0"
+          },
+          {
+            "kind": "call",
+            "target": "0x004464c0"
+          },
+          {
+            "kind": "call",
+            "target": "0x004481d0"
+          },
+          {
+            "kind": "global-tick-cache-write",
+            "value": 1
+          },
+          {
+            "kind": "mission-dispatcher-call"
+          },
+          {
+            "kind": "pre-gate-read",
+            "gate": "0x00c06e34",
+            "value": 0
+          },
+          {
+            "kind": "pre-gate-read",
+            "gate": "0x007c627c",
+            "value": 0
+          },
+          {
+            "kind": "pre-gate-read",
+            "gate": "0x007c627e",
+            "value": 0
+          },
+          {
+            "kind": "timer-resolver-call"
+          },
+          {
+            "kind": "timer-read",
+            "timer": "win",
+            "value": 1
+          },
+          {
+            "kind": "timer-distance",
+            "timer": "win",
+            "delta": 3001,
+            "absoluteBits": 3001,
+            "absoluteSigned": 3001
+          },
+          {
+            "kind": "timer-result-global-flag-write",
+            "address": "0x0055299c",
+            "value": 1
+          },
+          {
+            "kind": "raw-word-write",
+            "address": "0x007c6614",
+            "value": 1
+          },
+          {
+            "kind": "result-code-write",
+            "address": "0x004bdfc8",
+            "value": 24
+          },
+          {
+            "kind": "final-result-call",
+            "target": "0x00446420"
+          },
+          {
+            "kind": "scheduler-reject",
+            "reason": "pre-update-result"
+          }
+        ]
+      },
+      "expected": {
+        "accepted": false,
+        "rejection": "pre-update-result",
+        "rawGlobalTick": 1,
+        "cachedGlobalTick": 1,
+        "acceptedStepCounter": 0,
+        "nextMainStateWord": 24,
+        "projectilePoolCallCount": 0,
+        "entityUpdateCallCount": 0,
+        "events": [
+          {
+            "kind": "call",
+            "target": "0x00447bc0"
+          },
+          {
+            "kind": "call",
+            "target": "0x004464c0"
+          },
+          {
+            "kind": "call",
+            "target": "0x004481d0"
+          },
+          {
+            "kind": "global-tick-cache-write",
+            "value": 1
+          },
+          {
+            "kind": "mission-dispatcher-call"
+          },
+          {
+            "kind": "pre-gate-read",
+            "gate": "0x00c06e34",
+            "value": 0
+          },
+          {
+            "kind": "pre-gate-read",
+            "gate": "0x007c627c",
+            "value": 0
+          },
+          {
+            "kind": "pre-gate-read",
+            "gate": "0x007c627e",
+            "value": 0
+          },
+          {
+            "kind": "timer-resolver-call"
+          },
+          {
+            "kind": "timer-read",
+            "timer": "win",
+            "value": 1
+          },
+          {
+            "kind": "timer-distance",
+            "timer": "win",
+            "delta": 3001,
+            "absoluteBits": 3001,
+            "absoluteSigned": 3001
+          },
+          {
+            "kind": "timer-result-global-flag-write",
+            "address": "0x0055299c",
+            "value": 1
+          },
+          {
+            "kind": "raw-word-write",
+            "address": "0x007c6614",
+            "value": 1
+          },
+          {
+            "kind": "result-code-write",
+            "address": "0x004bdfc8",
+            "value": 24
+          },
+          {
+            "kind": "final-result-call",
+            "target": "0x00446420"
+          },
+          {
+            "kind": "scheduler-reject",
+            "reason": "pre-update-result"
+          }
+        ]
+      }
     },
     {
-      "id": "command-gate-boundary-reject",
-      "result": "command-readiness-reject",
-      "expected": "command-readiness-reject"
+      "id": "direct-updater-result-no-timer-flag",
+      "input": {
+        "rawGlobalTick": 1,
+        "cachedGlobalTick": 0,
+        "dispatcherResultAx": 1
+      },
+      "result": {
+        "accepted": false,
+        "rejection": "pre-update-result",
+        "rawGlobalTick": 1,
+        "cachedGlobalTick": 1,
+        "acceptedStepCounter": 0,
+        "nextMainStateWord": 24,
+        "projectilePoolCallCount": 0,
+        "entityUpdateCallCount": 0,
+        "events": [
+          {
+            "kind": "call",
+            "target": "0x00447bc0"
+          },
+          {
+            "kind": "call",
+            "target": "0x004464c0"
+          },
+          {
+            "kind": "call",
+            "target": "0x004481d0"
+          },
+          {
+            "kind": "global-tick-cache-write",
+            "value": 1
+          },
+          {
+            "kind": "mission-dispatcher-call"
+          },
+          {
+            "kind": "pre-gate-read",
+            "gate": "0x00c06e34",
+            "value": 0
+          },
+          {
+            "kind": "pre-gate-read",
+            "gate": "0x007c627c",
+            "value": 0
+          },
+          {
+            "kind": "pre-gate-read",
+            "gate": "0x007c627e",
+            "value": 0
+          },
+          {
+            "kind": "timer-resolver-call"
+          },
+          {
+            "kind": "timer-read",
+            "timer": "win",
+            "value": 0
+          },
+          {
+            "kind": "timer-read",
+            "timer": "loss",
+            "value": 0
+          },
+          {
+            "kind": "stage-dispatch",
+            "stageSelector": 1,
+            "target": "0x0048a5c0"
+          },
+          {
+            "kind": "raw-word-write",
+            "address": "0x007c6614",
+            "value": 1
+          },
+          {
+            "kind": "result-code-write",
+            "address": "0x004bdfc8",
+            "value": 24
+          },
+          {
+            "kind": "final-result-call",
+            "target": "0x00446420"
+          },
+          {
+            "kind": "scheduler-reject",
+            "reason": "pre-update-result"
+          }
+        ]
+      },
+      "expected": {
+        "accepted": false,
+        "rejection": "pre-update-result",
+        "rawGlobalTick": 1,
+        "cachedGlobalTick": 1,
+        "acceptedStepCounter": 0,
+        "nextMainStateWord": 24,
+        "projectilePoolCallCount": 0,
+        "entityUpdateCallCount": 0,
+        "events": [
+          {
+            "kind": "call",
+            "target": "0x00447bc0"
+          },
+          {
+            "kind": "call",
+            "target": "0x004464c0"
+          },
+          {
+            "kind": "call",
+            "target": "0x004481d0"
+          },
+          {
+            "kind": "global-tick-cache-write",
+            "value": 1
+          },
+          {
+            "kind": "mission-dispatcher-call"
+          },
+          {
+            "kind": "pre-gate-read",
+            "gate": "0x00c06e34",
+            "value": 0
+          },
+          {
+            "kind": "pre-gate-read",
+            "gate": "0x007c627c",
+            "value": 0
+          },
+          {
+            "kind": "pre-gate-read",
+            "gate": "0x007c627e",
+            "value": 0
+          },
+          {
+            "kind": "timer-resolver-call"
+          },
+          {
+            "kind": "timer-read",
+            "timer": "win",
+            "value": 0
+          },
+          {
+            "kind": "timer-read",
+            "timer": "loss",
+            "value": 0
+          },
+          {
+            "kind": "stage-dispatch",
+            "stageSelector": 1,
+            "target": "0x0048a5c0"
+          },
+          {
+            "kind": "raw-word-write",
+            "address": "0x007c6614",
+            "value": 1
+          },
+          {
+            "kind": "result-code-write",
+            "address": "0x004bdfc8",
+            "value": 24
+          },
+          {
+            "kind": "final-result-call",
+            "target": "0x00446420"
+          },
+          {
+            "kind": "scheduler-reject",
+            "reason": "pre-update-result"
+          }
+        ]
+      }
+    },
+    {
+      "id": "same-tick-ignores-all-injected-results",
+      "input": {
+        "rawGlobalTick": 7,
+        "cachedGlobalTick": 7,
+        "gate7c627c": 1,
+        "lossTimer": 1,
+        "resultClock": 3000,
+        "dispatcherResultAx": 65535
+      },
+      "result": {
+        "accepted": true,
+        "rejection": null,
+        "rawGlobalTick": 8,
+        "cachedGlobalTick": 7,
+        "acceptedStepCounter": 1,
+        "nextMainStateWord": 3,
+        "projectilePoolCallCount": 1,
+        "entityUpdateCallCount": 0,
+        "events": [
+          {
+            "kind": "call",
+            "target": "0x00447bc0"
+          },
+          {
+            "kind": "call",
+            "target": "0x004464c0"
+          },
+          {
+            "kind": "call",
+            "target": "0x004481d0"
+          },
+          {
+            "kind": "call",
+            "target": "0x00447e10"
+          },
+          {
+            "kind": "raw-tick-increment",
+            "value": 8
+          },
+          {
+            "kind": "call",
+            "target": "0x00447360"
+          },
+          {
+            "kind": "entity-update-pass",
+            "count": 0,
+            "target": "0x0043c9c0"
+          },
+          {
+            "kind": "projectile-pool-pass",
+            "pool": "A",
+            "slots": 100,
+            "activeCalls": 0,
+            "target": "0x00410cc0"
+          },
+          {
+            "kind": "projectile-pool-pass",
+            "pool": "B",
+            "slots": 60,
+            "activeCalls": 0,
+            "target": "0x00401440"
+          }
+        ]
+      },
+      "expected": {
+        "accepted": true,
+        "rejection": null,
+        "rawGlobalTick": 8,
+        "cachedGlobalTick": 7,
+        "acceptedStepCounter": 1,
+        "nextMainStateWord": 3,
+        "projectilePoolCallCount": 1,
+        "entityUpdateCallCount": 0,
+        "events": [
+          {
+            "kind": "call",
+            "target": "0x00447bc0"
+          },
+          {
+            "kind": "call",
+            "target": "0x004464c0"
+          },
+          {
+            "kind": "call",
+            "target": "0x004481d0"
+          },
+          {
+            "kind": "call",
+            "target": "0x00447e10"
+          },
+          {
+            "kind": "raw-tick-increment",
+            "value": 8
+          },
+          {
+            "kind": "call",
+            "target": "0x00447360"
+          },
+          {
+            "kind": "entity-update-pass",
+            "count": 0,
+            "target": "0x0043c9c0"
+          },
+          {
+            "kind": "projectile-pool-pass",
+            "pool": "A",
+            "slots": 100,
+            "activeCalls": 0,
+            "target": "0x00410cc0"
+          },
+          {
+            "kind": "projectile-pool-pass",
+            "pool": "B",
+            "slots": 60,
+            "activeCalls": 0,
+            "target": "0x00401440"
+          }
+        ]
+      }
+    },
+    {
+      "id": "early-transition-before-pre-update",
+      "input": {
+        "rawGlobalTick": 1,
+        "cachedGlobalTick": 0,
+        "transitionGuardWord": 1
+      },
+      "result": {
+        "accepted": false,
+        "rejection": "early-transition",
+        "rawGlobalTick": 1,
+        "cachedGlobalTick": 0,
+        "acceptedStepCounter": 0,
+        "nextMainStateWord": 22,
+        "projectilePoolCallCount": 0,
+        "entityUpdateCallCount": 0,
+        "events": [
+          {
+            "kind": "call",
+            "target": "0x00447bc0"
+          },
+          {
+            "kind": "call",
+            "target": "0x0046f870"
+          },
+          {
+            "kind": "call",
+            "target": "0x004400b0"
+          },
+          {
+            "kind": "result-code-write",
+            "address": "0x004bdfc8",
+            "value": 22
+          },
+          {
+            "kind": "scheduler-reject",
+            "reason": "early-transition"
+          }
+        ]
+      },
+      "expected": {
+        "accepted": false,
+        "rejection": "early-transition",
+        "rawGlobalTick": 1,
+        "cachedGlobalTick": 0,
+        "acceptedStepCounter": 0,
+        "nextMainStateWord": 22,
+        "projectilePoolCallCount": 0,
+        "entityUpdateCallCount": 0,
+        "events": [
+          {
+            "kind": "call",
+            "target": "0x00447bc0"
+          },
+          {
+            "kind": "call",
+            "target": "0x0046f870"
+          },
+          {
+            "kind": "call",
+            "target": "0x004400b0"
+          },
+          {
+            "kind": "result-code-write",
+            "address": "0x004bdfc8",
+            "value": 22
+          },
+          {
+            "kind": "scheduler-reject",
+            "reason": "early-transition"
+          }
+        ]
+      }
+    },
+    {
+      "id": "clock-reject-retains-distinct-cache",
+      "input": {
+        "rawGlobalTick": 7,
+        "cachedGlobalTick": 6,
+        "clockGateResult": 0
+      },
+      "result": {
+        "accepted": false,
+        "rejection": "clock-gate-reject",
+        "rawGlobalTick": 7,
+        "cachedGlobalTick": 7,
+        "acceptedStepCounter": 0,
+        "nextMainStateWord": 3,
+        "projectilePoolCallCount": 0,
+        "entityUpdateCallCount": 0,
+        "events": [
+          {
+            "kind": "call",
+            "target": "0x00447bc0"
+          },
+          {
+            "kind": "call",
+            "target": "0x004464c0"
+          },
+          {
+            "kind": "call",
+            "target": "0x004481d0"
+          },
+          {
+            "kind": "global-tick-cache-write",
+            "value": 7
+          },
+          {
+            "kind": "mission-dispatcher-call"
+          },
+          {
+            "kind": "pre-gate-read",
+            "gate": "0x00c06e34",
+            "value": 0
+          },
+          {
+            "kind": "pre-gate-read",
+            "gate": "0x007c627c",
+            "value": 0
+          },
+          {
+            "kind": "pre-gate-read",
+            "gate": "0x007c627e",
+            "value": 0
+          },
+          {
+            "kind": "timer-resolver-call"
+          },
+          {
+            "kind": "timer-read",
+            "timer": "win",
+            "value": 0
+          },
+          {
+            "kind": "timer-read",
+            "timer": "loss",
+            "value": 0
+          },
+          {
+            "kind": "stage-dispatch",
+            "stageSelector": 1,
+            "target": "0x0048a5c0"
+          },
+          {
+            "kind": "call",
+            "target": "0x00447e10"
+          },
+          {
+            "kind": "scheduler-reject",
+            "reason": "clock-gate-reject"
+          }
+        ]
+      },
+      "expected": {
+        "accepted": false,
+        "rejection": "clock-gate-reject",
+        "rawGlobalTick": 7,
+        "cachedGlobalTick": 7,
+        "acceptedStepCounter": 0,
+        "nextMainStateWord": 3,
+        "projectilePoolCallCount": 0,
+        "entityUpdateCallCount": 0,
+        "events": [
+          {
+            "kind": "call",
+            "target": "0x00447bc0"
+          },
+          {
+            "kind": "call",
+            "target": "0x004464c0"
+          },
+          {
+            "kind": "call",
+            "target": "0x004481d0"
+          },
+          {
+            "kind": "global-tick-cache-write",
+            "value": 7
+          },
+          {
+            "kind": "mission-dispatcher-call"
+          },
+          {
+            "kind": "pre-gate-read",
+            "gate": "0x00c06e34",
+            "value": 0
+          },
+          {
+            "kind": "pre-gate-read",
+            "gate": "0x007c627c",
+            "value": 0
+          },
+          {
+            "kind": "pre-gate-read",
+            "gate": "0x007c627e",
+            "value": 0
+          },
+          {
+            "kind": "timer-resolver-call"
+          },
+          {
+            "kind": "timer-read",
+            "timer": "win",
+            "value": 0
+          },
+          {
+            "kind": "timer-read",
+            "timer": "loss",
+            "value": 0
+          },
+          {
+            "kind": "stage-dispatch",
+            "stageSelector": 1,
+            "target": "0x0048a5c0"
+          },
+          {
+            "kind": "call",
+            "target": "0x00447e10"
+          },
+          {
+            "kind": "scheduler-reject",
+            "reason": "clock-gate-reject"
+          }
+        ]
+      }
+    },
+    {
+      "id": "raw-and-counter-dword-wrap",
+      "input": {
+        "rawGlobalTick": 4294967295,
+        "cachedGlobalTick": 4294967294,
+        "acceptedStepCounter": 4294967295
+      },
+      "result": {
+        "accepted": true,
+        "rejection": null,
+        "rawGlobalTick": 0,
+        "cachedGlobalTick": 4294967295,
+        "acceptedStepCounter": 0,
+        "nextMainStateWord": 3,
+        "projectilePoolCallCount": 1,
+        "entityUpdateCallCount": 0,
+        "events": [
+          {
+            "kind": "call",
+            "target": "0x00447bc0"
+          },
+          {
+            "kind": "call",
+            "target": "0x004464c0"
+          },
+          {
+            "kind": "call",
+            "target": "0x004481d0"
+          },
+          {
+            "kind": "global-tick-cache-write",
+            "value": 4294967295
+          },
+          {
+            "kind": "mission-dispatcher-call"
+          },
+          {
+            "kind": "pre-gate-read",
+            "gate": "0x00c06e34",
+            "value": 0
+          },
+          {
+            "kind": "pre-gate-read",
+            "gate": "0x007c627c",
+            "value": 0
+          },
+          {
+            "kind": "pre-gate-read",
+            "gate": "0x007c627e",
+            "value": 0
+          },
+          {
+            "kind": "timer-resolver-call"
+          },
+          {
+            "kind": "timer-read",
+            "timer": "win",
+            "value": 0
+          },
+          {
+            "kind": "timer-read",
+            "timer": "loss",
+            "value": 0
+          },
+          {
+            "kind": "stage-dispatch",
+            "stageSelector": 1,
+            "target": "0x0048a5c0"
+          },
+          {
+            "kind": "call",
+            "target": "0x00447e10"
+          },
+          {
+            "kind": "raw-tick-increment",
+            "value": 0
+          },
+          {
+            "kind": "call",
+            "target": "0x00447360"
+          },
+          {
+            "kind": "entity-update-pass",
+            "count": 0,
+            "target": "0x0043c9c0"
+          },
+          {
+            "kind": "projectile-pool-pass",
+            "pool": "A",
+            "slots": 100,
+            "activeCalls": 0,
+            "target": "0x00410cc0"
+          },
+          {
+            "kind": "projectile-pool-pass",
+            "pool": "B",
+            "slots": 60,
+            "activeCalls": 0,
+            "target": "0x00401440"
+          }
+        ]
+      },
+      "expected": {
+        "accepted": true,
+        "rejection": null,
+        "rawGlobalTick": 0,
+        "cachedGlobalTick": 4294967295,
+        "acceptedStepCounter": 0,
+        "nextMainStateWord": 3,
+        "projectilePoolCallCount": 1,
+        "entityUpdateCallCount": 0,
+        "events": [
+          {
+            "kind": "call",
+            "target": "0x00447bc0"
+          },
+          {
+            "kind": "call",
+            "target": "0x004464c0"
+          },
+          {
+            "kind": "call",
+            "target": "0x004481d0"
+          },
+          {
+            "kind": "global-tick-cache-write",
+            "value": 4294967295
+          },
+          {
+            "kind": "mission-dispatcher-call"
+          },
+          {
+            "kind": "pre-gate-read",
+            "gate": "0x00c06e34",
+            "value": 0
+          },
+          {
+            "kind": "pre-gate-read",
+            "gate": "0x007c627c",
+            "value": 0
+          },
+          {
+            "kind": "pre-gate-read",
+            "gate": "0x007c627e",
+            "value": 0
+          },
+          {
+            "kind": "timer-resolver-call"
+          },
+          {
+            "kind": "timer-read",
+            "timer": "win",
+            "value": 0
+          },
+          {
+            "kind": "timer-read",
+            "timer": "loss",
+            "value": 0
+          },
+          {
+            "kind": "stage-dispatch",
+            "stageSelector": 1,
+            "target": "0x0048a5c0"
+          },
+          {
+            "kind": "call",
+            "target": "0x00447e10"
+          },
+          {
+            "kind": "raw-tick-increment",
+            "value": 0
+          },
+          {
+            "kind": "call",
+            "target": "0x00447360"
+          },
+          {
+            "kind": "entity-update-pass",
+            "count": 0,
+            "target": "0x0043c9c0"
+          },
+          {
+            "kind": "projectile-pool-pass",
+            "pool": "A",
+            "slots": 100,
+            "activeCalls": 0,
+            "target": "0x00410cc0"
+          },
+          {
+            "kind": "projectile-pool-pass",
+            "pool": "B",
+            "slots": 60,
+            "activeCalls": 0,
+            "target": "0x00401440"
+          }
+        ]
+      }
+    },
+    {
+      "id": "non-result-ax-wrapper-boundary",
+      "input": {
+        "rawGlobalTick": 1,
+        "cachedGlobalTick": 0,
+        "dispatcherResultAx": 4660,
+        "activeEntityCount": 1,
+        "projectilePoolAActiveCount": 2,
+        "projectilePoolBActiveCount": 1
+      },
+      "result": {
+        "accepted": true,
+        "rejection": null,
+        "rawGlobalTick": 2,
+        "cachedGlobalTick": 1,
+        "acceptedStepCounter": 1,
+        "nextMainStateWord": 3,
+        "projectilePoolCallCount": 1,
+        "entityUpdateCallCount": 1,
+        "events": [
+          {
+            "kind": "call",
+            "target": "0x00447bc0"
+          },
+          {
+            "kind": "call",
+            "target": "0x004464c0"
+          },
+          {
+            "kind": "call",
+            "target": "0x004481d0"
+          },
+          {
+            "kind": "global-tick-cache-write",
+            "value": 1
+          },
+          {
+            "kind": "mission-dispatcher-call"
+          },
+          {
+            "kind": "pre-gate-read",
+            "gate": "0x00c06e34",
+            "value": 0
+          },
+          {
+            "kind": "pre-gate-read",
+            "gate": "0x007c627c",
+            "value": 0
+          },
+          {
+            "kind": "pre-gate-read",
+            "gate": "0x007c627e",
+            "value": 0
+          },
+          {
+            "kind": "timer-resolver-call"
+          },
+          {
+            "kind": "timer-read",
+            "timer": "win",
+            "value": 0
+          },
+          {
+            "kind": "timer-read",
+            "timer": "loss",
+            "value": 0
+          },
+          {
+            "kind": "stage-dispatch",
+            "stageSelector": 1,
+            "target": "0x0048a5c0"
+          },
+          {
+            "kind": "call",
+            "target": "0x00447e10"
+          },
+          {
+            "kind": "raw-tick-increment",
+            "value": 2
+          },
+          {
+            "kind": "call",
+            "target": "0x00447360"
+          },
+          {
+            "kind": "entity-update-pass",
+            "count": 1,
+            "target": "0x0043c9c0"
+          },
+          {
+            "kind": "projectile-pool-pass",
+            "pool": "A",
+            "slots": 100,
+            "activeCalls": 2,
+            "target": "0x00410cc0"
+          },
+          {
+            "kind": "projectile-pool-pass",
+            "pool": "B",
+            "slots": 60,
+            "activeCalls": 1,
+            "target": "0x00401440"
+          }
+        ]
+      },
+      "expected": {
+        "accepted": true,
+        "rejection": null,
+        "rawGlobalTick": 2,
+        "cachedGlobalTick": 1,
+        "acceptedStepCounter": 1,
+        "nextMainStateWord": 3,
+        "projectilePoolCallCount": 1,
+        "entityUpdateCallCount": 1,
+        "events": [
+          {
+            "kind": "call",
+            "target": "0x00447bc0"
+          },
+          {
+            "kind": "call",
+            "target": "0x004464c0"
+          },
+          {
+            "kind": "call",
+            "target": "0x004481d0"
+          },
+          {
+            "kind": "global-tick-cache-write",
+            "value": 1
+          },
+          {
+            "kind": "mission-dispatcher-call"
+          },
+          {
+            "kind": "pre-gate-read",
+            "gate": "0x00c06e34",
+            "value": 0
+          },
+          {
+            "kind": "pre-gate-read",
+            "gate": "0x007c627c",
+            "value": 0
+          },
+          {
+            "kind": "pre-gate-read",
+            "gate": "0x007c627e",
+            "value": 0
+          },
+          {
+            "kind": "timer-resolver-call"
+          },
+          {
+            "kind": "timer-read",
+            "timer": "win",
+            "value": 0
+          },
+          {
+            "kind": "timer-read",
+            "timer": "loss",
+            "value": 0
+          },
+          {
+            "kind": "stage-dispatch",
+            "stageSelector": 1,
+            "target": "0x0048a5c0"
+          },
+          {
+            "kind": "call",
+            "target": "0x00447e10"
+          },
+          {
+            "kind": "raw-tick-increment",
+            "value": 2
+          },
+          {
+            "kind": "call",
+            "target": "0x00447360"
+          },
+          {
+            "kind": "entity-update-pass",
+            "count": 1,
+            "target": "0x0043c9c0"
+          },
+          {
+            "kind": "projectile-pool-pass",
+            "pool": "A",
+            "slots": 100,
+            "activeCalls": 2,
+            "target": "0x00410cc0"
+          },
+          {
+            "kind": "projectile-pool-pass",
+            "pool": "B",
+            "slots": 60,
+            "activeCalls": 1,
+            "target": "0x00401440"
+          }
+        ]
+      }
+    },
+    {
+      "id": "pre-update-result-requires-exact-dword-one",
+      "input": {
+        "rawGlobalTick": 1,
+        "cachedGlobalTick": 0,
+        "preUpdateResult": 65537,
+        "commandGateModeWord": 0
+      },
+      "result": {
+        "accepted": true,
+        "rejection": null,
+        "rawGlobalTick": 2,
+        "cachedGlobalTick": 1,
+        "acceptedStepCounter": 1,
+        "nextMainStateWord": 3,
+        "projectilePoolCallCount": 1,
+        "entityUpdateCallCount": 0,
+        "events": [
+          {
+            "kind": "call",
+            "target": "0x00447bc0"
+          },
+          {
+            "kind": "call",
+            "target": "0x004464c0"
+          },
+          {
+            "kind": "call",
+            "target": "0x004481d0"
+          },
+          {
+            "kind": "global-tick-cache-write",
+            "value": 1
+          },
+          {
+            "kind": "mission-dispatcher-call"
+          },
+          {
+            "kind": "pre-gate-read",
+            "gate": "0x00c06e34",
+            "value": 0
+          },
+          {
+            "kind": "pre-gate-read",
+            "gate": "0x007c627c",
+            "value": 0
+          },
+          {
+            "kind": "pre-gate-read",
+            "gate": "0x007c627e",
+            "value": 0
+          },
+          {
+            "kind": "timer-resolver-call"
+          },
+          {
+            "kind": "timer-read",
+            "timer": "win",
+            "value": 0
+          },
+          {
+            "kind": "timer-read",
+            "timer": "loss",
+            "value": 0
+          },
+          {
+            "kind": "stage-dispatch",
+            "stageSelector": 1,
+            "target": "0x0048a5c0"
+          },
+          {
+            "kind": "call",
+            "target": "0x00447e10"
+          },
+          {
+            "kind": "command-readiness",
+            "value": 1
+          },
+          {
+            "kind": "raw-tick-increment",
+            "value": 2
+          },
+          {
+            "kind": "call",
+            "target": "0x00447360"
+          },
+          {
+            "kind": "entity-update-pass",
+            "count": 0,
+            "target": "0x0043c9c0"
+          },
+          {
+            "kind": "projectile-pool-pass",
+            "pool": "A",
+            "slots": 100,
+            "activeCalls": 0,
+            "target": "0x00410cc0"
+          },
+          {
+            "kind": "projectile-pool-pass",
+            "pool": "B",
+            "slots": 60,
+            "activeCalls": 0,
+            "target": "0x00401440"
+          }
+        ]
+      },
+      "expected": {
+        "accepted": true,
+        "rejection": null,
+        "rawGlobalTick": 2,
+        "cachedGlobalTick": 1,
+        "acceptedStepCounter": 1,
+        "nextMainStateWord": 3,
+        "projectilePoolCallCount": 1,
+        "entityUpdateCallCount": 0,
+        "events": [
+          {
+            "kind": "call",
+            "target": "0x00447bc0"
+          },
+          {
+            "kind": "call",
+            "target": "0x004464c0"
+          },
+          {
+            "kind": "call",
+            "target": "0x004481d0"
+          },
+          {
+            "kind": "global-tick-cache-write",
+            "value": 1
+          },
+          {
+            "kind": "mission-dispatcher-call"
+          },
+          {
+            "kind": "pre-gate-read",
+            "gate": "0x00c06e34",
+            "value": 0
+          },
+          {
+            "kind": "pre-gate-read",
+            "gate": "0x007c627c",
+            "value": 0
+          },
+          {
+            "kind": "pre-gate-read",
+            "gate": "0x007c627e",
+            "value": 0
+          },
+          {
+            "kind": "timer-resolver-call"
+          },
+          {
+            "kind": "timer-read",
+            "timer": "win",
+            "value": 0
+          },
+          {
+            "kind": "timer-read",
+            "timer": "loss",
+            "value": 0
+          },
+          {
+            "kind": "stage-dispatch",
+            "stageSelector": 1,
+            "target": "0x0048a5c0"
+          },
+          {
+            "kind": "call",
+            "target": "0x00447e10"
+          },
+          {
+            "kind": "command-readiness",
+            "value": 1
+          },
+          {
+            "kind": "raw-tick-increment",
+            "value": 2
+          },
+          {
+            "kind": "call",
+            "target": "0x00447360"
+          },
+          {
+            "kind": "entity-update-pass",
+            "count": 0,
+            "target": "0x0043c9c0"
+          },
+          {
+            "kind": "projectile-pool-pass",
+            "pool": "A",
+            "slots": 100,
+            "activeCalls": 0,
+            "target": "0x00410cc0"
+          },
+          {
+            "kind": "projectile-pool-pass",
+            "pool": "B",
+            "slots": 60,
+            "activeCalls": 0,
+            "target": "0x00401440"
+          }
+        ]
+      }
+    },
+    {
+      "id": "pre-update-result-ignored-in-exact-mode-one",
+      "input": {
+        "rawGlobalTick": 1,
+        "cachedGlobalTick": 0,
+        "preUpdateResult": 1,
+        "commandGateModeWord": 1
+      },
+      "result": {
+        "accepted": true,
+        "rejection": null,
+        "rawGlobalTick": 2,
+        "cachedGlobalTick": 1,
+        "acceptedStepCounter": 1,
+        "nextMainStateWord": 3,
+        "projectilePoolCallCount": 1,
+        "entityUpdateCallCount": 0,
+        "events": [
+          {
+            "kind": "call",
+            "target": "0x00447bc0"
+          },
+          {
+            "kind": "call",
+            "target": "0x004464c0"
+          },
+          {
+            "kind": "call",
+            "target": "0x004481d0"
+          },
+          {
+            "kind": "global-tick-cache-write",
+            "value": 1
+          },
+          {
+            "kind": "mission-dispatcher-call"
+          },
+          {
+            "kind": "pre-gate-read",
+            "gate": "0x00c06e34",
+            "value": 0
+          },
+          {
+            "kind": "pre-gate-read",
+            "gate": "0x007c627c",
+            "value": 0
+          },
+          {
+            "kind": "pre-gate-read",
+            "gate": "0x007c627e",
+            "value": 0
+          },
+          {
+            "kind": "timer-resolver-call"
+          },
+          {
+            "kind": "timer-read",
+            "timer": "win",
+            "value": 0
+          },
+          {
+            "kind": "timer-read",
+            "timer": "loss",
+            "value": 0
+          },
+          {
+            "kind": "stage-dispatch",
+            "stageSelector": 1,
+            "target": "0x0048a5c0"
+          },
+          {
+            "kind": "call",
+            "target": "0x00447e10"
+          },
+          {
+            "kind": "raw-tick-increment",
+            "value": 2
+          },
+          {
+            "kind": "call",
+            "target": "0x00447360"
+          },
+          {
+            "kind": "entity-update-pass",
+            "count": 0,
+            "target": "0x0043c9c0"
+          },
+          {
+            "kind": "projectile-pool-pass",
+            "pool": "A",
+            "slots": 100,
+            "activeCalls": 0,
+            "target": "0x00410cc0"
+          },
+          {
+            "kind": "projectile-pool-pass",
+            "pool": "B",
+            "slots": 60,
+            "activeCalls": 0,
+            "target": "0x00401440"
+          }
+        ]
+      },
+      "expected": {
+        "accepted": true,
+        "rejection": null,
+        "rawGlobalTick": 2,
+        "cachedGlobalTick": 1,
+        "acceptedStepCounter": 1,
+        "nextMainStateWord": 3,
+        "projectilePoolCallCount": 1,
+        "entityUpdateCallCount": 0,
+        "events": [
+          {
+            "kind": "call",
+            "target": "0x00447bc0"
+          },
+          {
+            "kind": "call",
+            "target": "0x004464c0"
+          },
+          {
+            "kind": "call",
+            "target": "0x004481d0"
+          },
+          {
+            "kind": "global-tick-cache-write",
+            "value": 1
+          },
+          {
+            "kind": "mission-dispatcher-call"
+          },
+          {
+            "kind": "pre-gate-read",
+            "gate": "0x00c06e34",
+            "value": 0
+          },
+          {
+            "kind": "pre-gate-read",
+            "gate": "0x007c627c",
+            "value": 0
+          },
+          {
+            "kind": "pre-gate-read",
+            "gate": "0x007c627e",
+            "value": 0
+          },
+          {
+            "kind": "timer-resolver-call"
+          },
+          {
+            "kind": "timer-read",
+            "timer": "win",
+            "value": 0
+          },
+          {
+            "kind": "timer-read",
+            "timer": "loss",
+            "value": 0
+          },
+          {
+            "kind": "stage-dispatch",
+            "stageSelector": 1,
+            "target": "0x0048a5c0"
+          },
+          {
+            "kind": "call",
+            "target": "0x00447e10"
+          },
+          {
+            "kind": "raw-tick-increment",
+            "value": 2
+          },
+          {
+            "kind": "call",
+            "target": "0x00447360"
+          },
+          {
+            "kind": "entity-update-pass",
+            "count": 0,
+            "target": "0x0043c9c0"
+          },
+          {
+            "kind": "projectile-pool-pass",
+            "pool": "A",
+            "slots": 100,
+            "activeCalls": 0,
+            "target": "0x00410cc0"
+          },
+          {
+            "kind": "projectile-pool-pass",
+            "pool": "B",
+            "slots": 60,
+            "activeCalls": 0,
+            "target": "0x00401440"
+          }
+        ]
+      }
+    },
+    {
+      "id": "pre-update-result-exact-one-mode-zero-rejects",
+      "input": {
+        "rawGlobalTick": 1,
+        "cachedGlobalTick": 0,
+        "preUpdateResult": 1,
+        "commandGateModeWord": 0
+      },
+      "result": {
+        "accepted": false,
+        "rejection": "pre-update-result",
+        "rawGlobalTick": 1,
+        "cachedGlobalTick": 1,
+        "acceptedStepCounter": 0,
+        "nextMainStateWord": 3,
+        "projectilePoolCallCount": 0,
+        "entityUpdateCallCount": 0,
+        "events": [
+          {
+            "kind": "call",
+            "target": "0x00447bc0"
+          },
+          {
+            "kind": "call",
+            "target": "0x004464c0"
+          },
+          {
+            "kind": "call",
+            "target": "0x004481d0"
+          },
+          {
+            "kind": "global-tick-cache-write",
+            "value": 1
+          },
+          {
+            "kind": "mission-dispatcher-call"
+          },
+          {
+            "kind": "pre-gate-read",
+            "gate": "0x00c06e34",
+            "value": 0
+          },
+          {
+            "kind": "pre-gate-read",
+            "gate": "0x007c627c",
+            "value": 0
+          },
+          {
+            "kind": "pre-gate-read",
+            "gate": "0x007c627e",
+            "value": 0
+          },
+          {
+            "kind": "timer-resolver-call"
+          },
+          {
+            "kind": "timer-read",
+            "timer": "win",
+            "value": 0
+          },
+          {
+            "kind": "timer-read",
+            "timer": "loss",
+            "value": 0
+          },
+          {
+            "kind": "stage-dispatch",
+            "stageSelector": 1,
+            "target": "0x0048a5c0"
+          },
+          {
+            "kind": "scheduler-reject",
+            "reason": "pre-update-result"
+          }
+        ]
+      },
+      "expected": {
+        "accepted": false,
+        "rejection": "pre-update-result",
+        "rawGlobalTick": 1,
+        "cachedGlobalTick": 1,
+        "acceptedStepCounter": 0,
+        "nextMainStateWord": 3,
+        "projectilePoolCallCount": 0,
+        "entityUpdateCallCount": 0,
+        "events": [
+          {
+            "kind": "call",
+            "target": "0x00447bc0"
+          },
+          {
+            "kind": "call",
+            "target": "0x004464c0"
+          },
+          {
+            "kind": "call",
+            "target": "0x004481d0"
+          },
+          {
+            "kind": "global-tick-cache-write",
+            "value": 1
+          },
+          {
+            "kind": "mission-dispatcher-call"
+          },
+          {
+            "kind": "pre-gate-read",
+            "gate": "0x00c06e34",
+            "value": 0
+          },
+          {
+            "kind": "pre-gate-read",
+            "gate": "0x007c627c",
+            "value": 0
+          },
+          {
+            "kind": "pre-gate-read",
+            "gate": "0x007c627e",
+            "value": 0
+          },
+          {
+            "kind": "timer-resolver-call"
+          },
+          {
+            "kind": "timer-read",
+            "timer": "win",
+            "value": 0
+          },
+          {
+            "kind": "timer-read",
+            "timer": "loss",
+            "value": 0
+          },
+          {
+            "kind": "stage-dispatch",
+            "stageSelector": 1,
+            "target": "0x0048a5c0"
+          },
+          {
+            "kind": "scheduler-reject",
+            "reason": "pre-update-result"
+          }
+        ]
+      }
+    },
+    {
+      "id": "command-readiness-reject-retains-cache-and-counter",
+      "input": {
+        "rawGlobalTick": 5,
+        "cachedGlobalTick": 4,
+        "commandGateModeWord": 0,
+        "commandReadinessResult": 0,
+        "acceptedStepCounter": 17
+      },
+      "result": {
+        "accepted": false,
+        "rejection": "command-readiness-reject",
+        "rawGlobalTick": 5,
+        "cachedGlobalTick": 5,
+        "acceptedStepCounter": 17,
+        "nextMainStateWord": 3,
+        "projectilePoolCallCount": 0,
+        "entityUpdateCallCount": 0,
+        "events": [
+          {
+            "kind": "call",
+            "target": "0x00447bc0"
+          },
+          {
+            "kind": "call",
+            "target": "0x004464c0"
+          },
+          {
+            "kind": "call",
+            "target": "0x004481d0"
+          },
+          {
+            "kind": "global-tick-cache-write",
+            "value": 5
+          },
+          {
+            "kind": "mission-dispatcher-call"
+          },
+          {
+            "kind": "pre-gate-read",
+            "gate": "0x00c06e34",
+            "value": 0
+          },
+          {
+            "kind": "pre-gate-read",
+            "gate": "0x007c627c",
+            "value": 0
+          },
+          {
+            "kind": "pre-gate-read",
+            "gate": "0x007c627e",
+            "value": 0
+          },
+          {
+            "kind": "timer-resolver-call"
+          },
+          {
+            "kind": "timer-read",
+            "timer": "win",
+            "value": 0
+          },
+          {
+            "kind": "timer-read",
+            "timer": "loss",
+            "value": 0
+          },
+          {
+            "kind": "stage-dispatch",
+            "stageSelector": 1,
+            "target": "0x0048a5c0"
+          },
+          {
+            "kind": "call",
+            "target": "0x00447e10"
+          },
+          {
+            "kind": "command-readiness",
+            "value": 0
+          },
+          {
+            "kind": "scheduler-reject",
+            "reason": "command-readiness-reject"
+          }
+        ]
+      },
+      "expected": {
+        "accepted": false,
+        "rejection": "command-readiness-reject",
+        "rawGlobalTick": 5,
+        "cachedGlobalTick": 5,
+        "acceptedStepCounter": 17,
+        "nextMainStateWord": 3,
+        "projectilePoolCallCount": 0,
+        "entityUpdateCallCount": 0,
+        "events": [
+          {
+            "kind": "call",
+            "target": "0x00447bc0"
+          },
+          {
+            "kind": "call",
+            "target": "0x004464c0"
+          },
+          {
+            "kind": "call",
+            "target": "0x004481d0"
+          },
+          {
+            "kind": "global-tick-cache-write",
+            "value": 5
+          },
+          {
+            "kind": "mission-dispatcher-call"
+          },
+          {
+            "kind": "pre-gate-read",
+            "gate": "0x00c06e34",
+            "value": 0
+          },
+          {
+            "kind": "pre-gate-read",
+            "gate": "0x007c627c",
+            "value": 0
+          },
+          {
+            "kind": "pre-gate-read",
+            "gate": "0x007c627e",
+            "value": 0
+          },
+          {
+            "kind": "timer-resolver-call"
+          },
+          {
+            "kind": "timer-read",
+            "timer": "win",
+            "value": 0
+          },
+          {
+            "kind": "timer-read",
+            "timer": "loss",
+            "value": 0
+          },
+          {
+            "kind": "stage-dispatch",
+            "stageSelector": 1,
+            "target": "0x0048a5c0"
+          },
+          {
+            "kind": "call",
+            "target": "0x00447e10"
+          },
+          {
+            "kind": "command-readiness",
+            "value": 0
+          },
+          {
+            "kind": "scheduler-reject",
+            "reason": "command-readiness-reject"
+          }
+        ]
+      }
     }
   ],
   "linkedEvidence": {

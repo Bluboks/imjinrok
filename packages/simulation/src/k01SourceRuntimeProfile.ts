@@ -94,6 +94,8 @@ export interface SourceRuntimeProfile {
   readonly stateVersion: number;
   /** Optional process-local initial-placement policy selected with this profile. */
   readonly initialPlacementPolicyId?: string;
+  /** Optional pure semantic-unit removal adapter for this profile's state. */
+  readonly removeSemanticUnit?: (state: Record<string, unknown>, unitId: string) => Record<string, unknown>;
   createInitialState(): Record<string, unknown>;
   validateState(state: unknown): void;
   cloneState(state: unknown): Record<string, unknown>;
@@ -148,6 +150,11 @@ const k01SourceRuntimeProfile: SourceRuntimeProfile = {
   validateState: validateK01SourceRuntimeState,
   cloneState(value) {
     return cloneK01SourceRuntimeState(value);
+  },
+  removeSemanticUnit(value, unitId) {
+    validateK01SourceRuntimeState(value);
+    const handle = getK01SourceEntityHandleBySemanticUnitId(value, unitId);
+    return handle === undefined ? value : releaseK01SourceEntity(value, handle);
   },
 };
 
@@ -277,6 +284,33 @@ export function createSourceRuntimeProfileEnvelope(profileId: string): SourceRun
     stateVersion: profile.stateVersion,
     state: clonedState,
   };
+}
+
+/**
+ * Runs a profile's optional semantic-unit removal adapter against an isolated
+ * validated clone. The returned envelope is validated and cloned again so a
+ * failed or malformed extension result cannot mutate the caller's world.
+ */
+export function removeSourceRuntimeProfileUnit(
+  envelope: SourceRuntimeProfileEnvelope | undefined,
+  unitId: string,
+): SourceRuntimeProfileEnvelope | undefined {
+  if (envelope === undefined) {
+    return undefined;
+  }
+
+  const isolated = cloneSourceRuntimeProfileEnvelope(envelope);
+  const profile = requireSourceRuntimeProfile(isolated.profileId);
+  if (profile.removeSemanticUnit === undefined) {
+    return isolated;
+  }
+
+  const nextState = profile.removeSemanticUnit(isolated.state, unitId);
+  return cloneSourceRuntimeProfileEnvelope({
+    profileId: isolated.profileId,
+    stateVersion: isolated.stateVersion,
+    state: nextState,
+  });
 }
 
 /**
@@ -412,6 +446,9 @@ function validateProfileDefinition(profile: SourceRuntimeProfile): void {
 
   if (typeof profile.createInitialState !== "function" || typeof profile.validateState !== "function" || typeof profile.cloneState !== "function") {
     throw new TypeError(`Source runtime profile '${profile.id}' must provide executable state boundaries.`);
+  }
+  if (profile.removeSemanticUnit !== undefined && typeof profile.removeSemanticUnit !== "function") {
+    throw new TypeError(`Source runtime profile '${profile.id}' removeSemanticUnit must be a function when provided.`);
   }
 }
 

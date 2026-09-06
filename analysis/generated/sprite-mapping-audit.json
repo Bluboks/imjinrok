@@ -32,7 +32,7 @@
     },
     {
       "path": "apps/game-client/src/scenes/SkirmishScene.ts",
-      "sha256": "f4d5debf234c549a48f548f391c4eecbedbb82f116a3e37e79171c694a0e0837"
+      "sha256": "762710c97e443e1675c83a441483fd7ef1083249031b1b2ffb978c1bd7ed7dc3"
     },
     {
       "path": "apps/game-client/src/scenes/MissionBriefingScene.ts",

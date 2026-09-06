@@ -13,6 +13,7 @@ import { createUnitState } from "./entities.js";
 import { applyNavigationRoute, findNavigationRouteForUnit } from "./navigation.js";
 import { getFootprintTiles, validateBuildingPlacement } from "./placement.js";
 import { applyCompletedResearchToUnit } from "./research.js";
+import { resolveK01SourceObjectiveCompletion } from "./k01ScenarioPolicy.js";
 import { isTilePassableForUnit } from "./terrain.js";
 import type {
   ObjectiveRuntimeState,
@@ -664,6 +665,11 @@ export function completeScenarioRuntime(state: WorldState, status: "victory" | "
 function isObjectiveComplete(state: WorldState, objective: ObjectiveRuntimeState): boolean {
   if (!areObjectiveCompletionRequirementsMet(state, objective)) {
     return false;
+  }
+
+  const sourceCompletion = resolveK01SourceObjectiveCompletion(state, objective.id);
+  if (sourceCompletion !== undefined) {
+    return sourceCompletion;
   }
 
   switch (objective.type) {

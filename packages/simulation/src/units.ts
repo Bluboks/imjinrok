@@ -1,4 +1,5 @@
 import type { UnitState, WorldState } from "./types.js";
+import { removeSourceRuntimeProfileUnit } from "./k01SourceRuntimeProfile.js";
 
 export function iterateUnitsOrdered(state: WorldState): UnitState[] {
   return Object.keys(state.units)
@@ -12,6 +13,10 @@ export function removeUnitFromWorld(state: WorldState, unitId: string): boolean 
     return false;
   }
 
+  const nextSourceRuntimeProfile = removeSourceRuntimeProfileUnit(state.sourceRuntimeProfile, unitId);
+  if (nextSourceRuntimeProfile !== undefined) {
+    state.sourceRuntimeProfile = nextSourceRuntimeProfile;
+  }
   delete state.units[unitId];
   clearUnitReferences(state, unitId);
   return true;

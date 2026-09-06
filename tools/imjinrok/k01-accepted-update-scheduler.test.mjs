@@ -19,6 +19,7 @@ const paths = {
   jumpTablesPath: resolve(root, "analysis/generated/imjinrok2/jump-tables.json"),
   seedsPath: resolve(root, "analysis/generated/imjinrok2/seeds.json"),
 };
+const fixturePath = resolve(root, "analysis/fixtures/k01-accepted-update-scheduler.json");
 
 test("binds stage-one producer chain and accepted-step call order to static provenance", () => {
   const report = extractK01AcceptedUpdateScheduler(paths);
@@ -41,10 +42,11 @@ test("binds stage-one producer chain and accepted-step call order to static prov
   ]);
   assert.equal(report.acceptedStep.invocationCounts.outerProjectilePool, "one FUN_00447360 call per accepted scheduler step");
   assert.equal(report.acceptedStep.invocationCounts.projectilePoolA, "one forward pass over 100 raw slots per FUN_00447360 call");
-  assert.equal(report.codeAnchors.length, 11);
+  assert.equal(report.codeAnchors.length, 13);
   assert.ok(report.codeAnchors.every((anchor) => anchor.matched));
   assert.equal(report.callEdges.length, 19);
   for (const vector of report.vectors) assert.deepEqual(vector.result, vector.expected, vector.id);
+  assert.equal(readFileSync(fixturePath, "utf8"), `${JSON.stringify(report, null, 2)}\n`);
 });
 
 test("replays mode/guard, stage reachability, repeated ticks, wrap, and accepted counts", () => {
@@ -71,18 +73,90 @@ test("replays mode/guard, stage reachability, repeated ticks, wrap, and accepted
   assert.equal(replayModeGuard({ previousModeWord: 1, guardWord: 9, argumentWord: 1 }).modeWord, 0);
 
   const sameTick = replayAcceptedUpdate({ rawGlobalTick: 0xffffffff, cachedGlobalTick: 0xffffffff });
-  assert.equal(sameTick.events.some(({ target }) => target === "0x0048ddb0"), false);
+  assert.equal(sameTick.events.some(({ kind }) => kind === "mission-dispatcher-call"), false);
   const wrappedDistinct = replayAcceptedUpdate({ rawGlobalTick: 0, cachedGlobalTick: 0xffffffff, activeEntityCount: 2 });
-  assert.equal(wrappedDistinct.events.filter(({ kind }) => kind === "raw-tick-cache-write").length, 1);
+  assert.equal(wrappedDistinct.events.filter(({ kind }) => kind === "global-tick-cache-write").length, 1);
   assert.equal(wrappedDistinct.projectilePoolCallCount, 1);
   assert.equal(wrappedDistinct.entityUpdateCallCount, 2);
   const result = replayAcceptedUpdate({ rawGlobalTick: 3, cachedGlobalTick: 2, dispatcherResultAx: 0xffff });
   assert.equal(result.accepted, false);
   assert.equal(result.projectilePoolCallCount, 0);
-  assert.equal(result.events.findIndex(({ target }) => target === "0x0048a5c0") >= 0, true);
+  assert.equal(result.events.findIndex(({ kind, target }) => kind === "stage-dispatch" && target === "0x0048a5c0") >= 0, true);
   assert.equal(result.events.findIndex(({ target }) => target === "0x00447360"), -1);
+  assert.equal(result.nextMainStateWord, 0x1a);
   assert.throws(() => replayAcceptedUpdate({ rawGlobalTick: 1, cachedGlobalTick: 0, clockGateResult: -1 }), /clockGateResult/);
   assert.throws(() => replayModeGuard({ previousModeWord: 0, guardWord: -1, argumentWord: 1 }), /guardWord/);
+  assert.throws(() => replayAcceptedUpdate({ rawGlobalTick: 1, cachedGlobalTick: 0, stageSelector: 2 }), /only stageSelector 1/);
+  const unrelatedState = replayAcceptedUpdate({ mainStateWord: 2, rawGlobalTick: 1, cachedGlobalTick: 0, acceptedStepCounter: 9 });
+  assert.deepEqual(
+    {
+      accepted: unrelatedState.accepted,
+      rejection: unrelatedState.rejection,
+      rawGlobalTick: unrelatedState.rawGlobalTick,
+      cachedGlobalTick: unrelatedState.cachedGlobalTick,
+      acceptedStepCounter: unrelatedState.acceptedStepCounter,
+      nextMainStateWord: unrelatedState.nextMainStateWord,
+    },
+    { accepted: false, rejection: "main-state-not-scheduler", rawGlobalTick: 1, cachedGlobalTick: 0, acceptedStepCounter: 9, nextMainStateWord: 2 },
+  );
+  const state23Rejected = replayAcceptedUpdate({ mainStateWord: 23, state23ModeWord: 0, rawGlobalTick: 1, cachedGlobalTick: 0, acceptedStepCounter: 9 });
+  assert.deepEqual(
+    {
+      accepted: state23Rejected.accepted,
+      rejection: state23Rejected.rejection,
+      rawGlobalTick: state23Rejected.rawGlobalTick,
+      cachedGlobalTick: state23Rejected.cachedGlobalTick,
+      acceptedStepCounter: state23Rejected.acceptedStepCounter,
+      nextMainStateWord: state23Rejected.nextMainStateWord,
+    },
+    { accepted: false, rejection: "state-23-mode-reject", rawGlobalTick: 1, cachedGlobalTick: 0, acceptedStepCounter: 9, nextMainStateWord: 23 },
+  );
+});
+
+test("retains wrapper cache across rejection and replays cross-invocation state", () => {
+  const clockRejected = replayAcceptedUpdate({ rawGlobalTick: 7, cachedGlobalTick: 6, clockGateResult: 0 });
+  assert.deepEqual(
+    {
+      rawGlobalTick: clockRejected.rawGlobalTick,
+      cachedGlobalTick: clockRejected.cachedGlobalTick,
+      acceptedStepCounter: clockRejected.acceptedStepCounter,
+      nextMainStateWord: clockRejected.nextMainStateWord,
+    },
+    { rawGlobalTick: 7, cachedGlobalTick: 7, acceptedStepCounter: 0, nextMainStateWord: 3 },
+  );
+
+  const sameTickAccepted = replayAcceptedUpdate({
+    rawGlobalTick: clockRejected.rawGlobalTick,
+    cachedGlobalTick: clockRejected.cachedGlobalTick,
+    acceptedStepCounter: clockRejected.acceptedStepCounter,
+    gate7c627c: 1,
+  });
+  assert.equal(sameTickAccepted.events.some(({ kind }) => kind === "mission-dispatcher-call"), false);
+  assert.deepEqual(
+    {
+      rawGlobalTick: sameTickAccepted.rawGlobalTick,
+      cachedGlobalTick: sameTickAccepted.cachedGlobalTick,
+      acceptedStepCounter: sameTickAccepted.acceptedStepCounter,
+    },
+    { rawGlobalTick: 8, cachedGlobalTick: 7, acceptedStepCounter: 1 },
+  );
+
+  const nextDistinct = replayAcceptedUpdate({
+    rawGlobalTick: sameTickAccepted.rawGlobalTick,
+    cachedGlobalTick: sameTickAccepted.cachedGlobalTick,
+    acceptedStepCounter: sameTickAccepted.acceptedStepCounter,
+  });
+  assert.equal(nextDistinct.events.some(({ kind }) => kind === "mission-dispatcher-call"), true);
+});
+
+test("applies remaining pre-update result only outside exact command mode one", () => {
+  const modeOne = replayAcceptedUpdate({ rawGlobalTick: 1, cachedGlobalTick: 0, commandGateModeWord: 1, preUpdateResult: 1 });
+  assert.equal(modeOne.accepted, true);
+  const modeZero = replayAcceptedUpdate({ rawGlobalTick: 1, cachedGlobalTick: 0, commandGateModeWord: 0, preUpdateResult: 1 });
+  assert.equal(modeZero.rejection, "pre-update-result");
+  assert.equal(modeZero.events.some(({ target }) => target === "0x00447e10"), false);
+  const widened = replayAcceptedUpdate({ rawGlobalTick: 1, cachedGlobalTick: 0, commandGateModeWord: 0, preUpdateResult: 0x10001 });
+  assert.equal(widened.accepted, true);
 });
 
 test("uses canonical repository-relative provenance across alternate absolute roots", () => {
