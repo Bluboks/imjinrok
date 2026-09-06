@@ -215,6 +215,15 @@ import {
   resolveSelectedEnvironmentPalette,
 } from "../render/environmentPaletteVisualResolver.js";
 import { resolveGridGroundContactWorldPosition } from "../render/gridGroundContactPosition.js";
+import {
+  resolveBuildingPlacementGeometry,
+  type BuildingPlacementGeometry,
+} from "../render/buildingPlacementGeometry.js";
+import {
+  adaptSourceFogUnseenPixels,
+  getSourceFogUnseenTextureKey,
+  resolveSourceFogChunkDepth,
+} from "../render/sourceFogPixelAdapter.js";
 import { getAssetScale, getFrameOrigin, getGroundContactPlacement, REFERENCE_PX_PER_WU, RENDER_DEPTH_BIAS } from "../render/visualScale.js";
 import {
   resolveTerrainElevationOverlayLiftPixels,
@@ -288,6 +297,7 @@ import {
   SOURCE_FOG_COMPOSITE_ASSETS,
   type FogVisibility,
   type SourceFogComposite,
+  type SourceFogLayerPlan,
 } from "../ui/sourceFogAndCommandAssets.js";
 import { shouldPublishSerializableView } from "../ui/serializableViewPublication.js";
 import {
@@ -344,6 +354,21 @@ const MAX_CAMERA_ZOOM = MINIMAP_ZOOM_MAX;
 const MAX_CLIENT_PRODUCTION_QUEUE_SIZE = 5;
 const CHEAT_INPUT_MAX_LENGTH = 32;
 const UNIT_SPRITE_GROUND_CONTACT = { x: 0, y: 0 } as const;
+
+function boundsFromPoints(points: readonly Phaser.Math.Vector2[]): Phaser.Geom.Rectangle {
+  if (points.length === 0) {
+    return new Phaser.Geom.Rectangle();
+  }
+
+  const xs = points.map((point) => point.x);
+  const ys = points.map((point) => point.y);
+  const minX = Math.min(...xs);
+  const minY = Math.min(...ys);
+  const maxX = Math.max(...xs);
+  const maxY = Math.max(...ys);
+
+  return new Phaser.Geom.Rectangle(minX, minY, maxX - minX, maxY - minY);
+}
 
 function getDebugPresentationStorage(): Storage | undefined {
   try {
@@ -483,6 +508,8 @@ interface UnitRenderable {
   healthBarBack: Phaser.GameObjects.Graphics;
   healthBarFill: Phaser.GameObjects.Graphics;
   auraIndicator: Phaser.GameObjects.Graphics | undefined;
+  localSpriteOffset: GridPoint;
+  sourceBuildingGeometry: BuildingPlacementGeometry | undefined;
   lastFacing: Facing;
   terminalKind: UnitDefinitionId;
   terminalSourceOrientation?: UnitState["sourceOrientation"];
@@ -627,6 +654,7 @@ export class SkirmishScene extends Phaser.Scene {
   private readonly terrainRenderStamps = new Map<string, Phaser.GameObjects.Image>();
   private readonly elevationFogStamps = new Map<string, Phaser.GameObjects.Image>();
   private readonly sourceFogStamps = new Map<string, Phaser.GameObjects.Image>();
+  private readonly sourceFogDerivedTextureKeys = new Set<string>();
   private readonly elevationOverlays: Phaser.GameObjects.Image[] = [];
   private readonly fogChunks: (Phaser.GameObjects.RenderTexture | null)[] = [];
   private readonly knownResourceViews = new Map<string, KnownResourceView>();
@@ -6759,6 +6787,18 @@ export class SkirmishScene extends Phaser.Scene {
   }
 
   private getUnitSelectionScreenBounds(unit: UnitState): Phaser.Geom.Rectangle {
+    if (this.isSourceBuildingUnit(unit)) {
+      const renderable = this.unitRenderables.get(unit.id);
+      const spriteBounds = renderable?.sprite?.visible ? renderable.sprite.getBounds() : null;
+      if (spriteBounds) {
+        return this.worldBoundsToScreenBounds(spriteBounds);
+      }
+
+      const geometry = this.getSourceBuildingGeometry(unit);
+      const points = geometry.footprintPolygon.map((point) => this.worldToScreenPoint(new Phaser.Math.Vector2(point.x, point.y)));
+      return boundsFromPoints(points);
+    }
+
     const position = this.getUnitScreenPosition(unit);
     const radius = unitDefinitions[unit.kind].selectionRadius;
     const zoom = this.cameras.main.zoom;
@@ -6768,6 +6808,18 @@ export class SkirmishScene extends Phaser.Scene {
     const bottom = radius * 1.3 * zoom + padding;
 
     return new Phaser.Geom.Rectangle(position.x - halfWidth, position.y - top, halfWidth * 2, top + bottom);
+  }
+
+  private worldBoundsToScreenBounds(bounds: Phaser.Geom.Rectangle): Phaser.Geom.Rectangle {
+    const topLeft = this.worldToScreenPoint(new Phaser.Math.Vector2(bounds.left, bounds.top));
+    const bottomRight = this.worldToScreenPoint(new Phaser.Math.Vector2(bounds.right, bounds.bottom));
+
+    return new Phaser.Geom.Rectangle(
+      Math.min(topLeft.x, bottomRight.x),
+      Math.min(topLeft.y, bottomRight.y),
+      Math.abs(bottomRight.x - topLeft.x),
+      Math.abs(bottomRight.y - topLeft.y),
+    );
   }
 
   private getHudTop(): number {
@@ -7202,14 +7254,13 @@ export class SkirmishScene extends Phaser.Scene {
       }
 
       const unitPosition = this.getUnitWorldPosition(unit);
-      const radius = unitDefinitions[unit.kind].hitRadius;
       const deltaX = worldX - unitPosition.x;
       const deltaY = worldY - unitPosition.y;
       const distanceSq = deltaX * deltaX + deltaY * deltaY;
       const priority = this.getFriendlySelectionPriority(unit);
 
       if (
-        distanceSq <= radius * radius &&
+        this.containsUnitWorldPoint(unit, worldX, worldY) &&
         (priority < selectedPriority || (priority === selectedPriority && distanceSq < selectedDistanceSq))
       ) {
         selectedUnit = unit;
@@ -7241,12 +7292,11 @@ export class SkirmishScene extends Phaser.Scene {
       }
 
       const unitPosition = this.getUnitWorldPosition(unit);
-      const radius = unitDefinitions[unit.kind].hitRadius;
       const deltaX = worldX - unitPosition.x;
       const deltaY = worldY - unitPosition.y;
       const distanceSq = deltaX * deltaX + deltaY * deltaY;
 
-      if (distanceSq <= radius * radius && distanceSq < selectedDistanceSq) {
+      if (this.containsUnitWorldPoint(unit, worldX, worldY) && distanceSq < selectedDistanceSq) {
         selectedUnit = unit;
         selectedDistanceSq = distanceSq;
       }
@@ -7265,12 +7315,11 @@ export class SkirmishScene extends Phaser.Scene {
       }
 
       const unitPosition = this.getUnitWorldPosition(unit);
-      const radius = unitDefinitions[unit.kind].hitRadius;
       const deltaX = worldX - unitPosition.x;
       const deltaY = worldY - unitPosition.y;
       const distanceSq = deltaX * deltaX + deltaY * deltaY;
 
-      if (distanceSq <= radius * radius && distanceSq < selectedDistanceSq) {
+      if (this.containsUnitWorldPoint(unit, worldX, worldY) && distanceSq < selectedDistanceSq) {
         selectedUnit = unit;
         selectedDistanceSq = distanceSq;
       }
@@ -7486,6 +7535,67 @@ export class SkirmishScene extends Phaser.Scene {
     return this.getGridPointWorldPosition(unit.position);
   }
 
+  private isSourceBuildingUnit(unit: UnitState): boolean {
+    return unitDefinitions[unit.kind].category === "building" && this.getEntityVisual(unit.kind)?.originalSourceProfile !== undefined;
+  }
+
+  private getSourceBuildingGeometry(unit: UnitState): BuildingPlacementGeometry {
+    if (!this.isSourceBuildingUnit(unit)) {
+      throw new Error(`Source building geometry requested for non-source building ${unit.kind}`);
+    }
+
+    return resolveBuildingPlacementGeometry({
+      position: unit.position,
+      footprint: unitDefinitions[unit.kind].footprint,
+      mapOrigin: this.mapOrigin,
+      map: this.map,
+    });
+  }
+
+  private containsUnitWorldPoint(unit: UnitState, worldX: number, worldY: number): boolean {
+    if (this.isSourceBuildingUnit(unit)) {
+      const renderable = this.unitRenderables.get(unit.id);
+      const spriteBounds = renderable?.sprite?.visible ? renderable.sprite.getBounds() : null;
+      if (spriteBounds) {
+        return spriteBounds.contains(worldX, worldY);
+      }
+
+      const geometry = this.getSourceBuildingGeometry(unit);
+      return Phaser.Geom.Polygon.Contains(
+        new Phaser.Geom.Polygon(geometry.footprintPolygon.map((point) => new Phaser.Geom.Point(point.x, point.y))),
+        worldX,
+        worldY,
+      );
+    }
+
+    const position = this.getUnitWorldPosition(unit);
+    const radius = unitDefinitions[unit.kind].hitRadius;
+    return Phaser.Math.Distance.Squared(worldX, worldY, position.x, position.y) <= radius * radius;
+  }
+
+  private getSourceBuildingLocalBodyBounds(renderable: UnitRenderable): Phaser.Geom.Rectangle {
+    const spriteBounds = renderable.sprite?.visible ? renderable.sprite.getBounds() : null;
+    if (spriteBounds) {
+      return new Phaser.Geom.Rectangle(
+        spriteBounds.left - renderable.container.x,
+        spriteBounds.top - renderable.container.y,
+        spriteBounds.width,
+        spriteBounds.height,
+      );
+    }
+
+    const geometry = renderable.sourceBuildingGeometry;
+    if (!geometry) {
+      return new Phaser.Geom.Rectangle();
+    }
+
+    const points = geometry.footprintPolygon.map((point) => new Phaser.Math.Vector2(
+      point.x - geometry.semanticCenterWorld.x,
+      point.y - geometry.semanticCenterWorld.y,
+    ));
+    return boundsFromPoints(points);
+  }
+
   private getGridPointWorldPosition(point: GridPoint): Phaser.Math.Vector2 {
     const groundContact = resolveGridGroundContactWorldPosition(point, this.mapOrigin, this.map);
 
@@ -7684,30 +7794,40 @@ export class SkirmishScene extends Phaser.Scene {
       for (let y = bounds.chunkY; y <= bounds.maxY; y += 1) {
         for (let x = bounds.chunkX; x <= bounds.maxX; x += 1) {
           const visibility = this.getFogVisibilityAt(x, y);
-
-          if (visibility === TileVisibility.Visible) {
-            continue;
-          }
-
-          const textureKey = this.fogTextureKeys.get(visibility);
-
-          if (!textureKey) {
-            continue;
-          }
-
           const iso = cartToIso({ x, y }, this.map.tileWidth, this.map.tileHeight);
           const worldX = this.mapOrigin.x + iso.x;
           const worldY = this.mapOrigin.y + iso.y;
-          // Every tile first receives its shared-ground-contact coverage. An
-          // elevation frame is an additional, potentially transparent layer;
-          // it must not replace the base footprint below ramps or corners.
-          this.drawBaseFogTile(renderTexture, bounds, textureKey, visibility, x, y, worldX, worldY);
-          this.drawElevationFogTile(renderTexture, bounds, visibility, x, y, worldX, worldY);
+          const sourcePlan = this.resolveSourceFogLayerPlanAt(x, y, visibility);
+          let tileDrawn = false;
 
-          this.drawSourceFogComposite(renderTexture, bounds, visibility, x, y, worldX, worldY);
+          if (sourcePlan.drawBaseFog) {
+            const textureKey = this.fogTextureKeys.get(visibility);
+            if (textureKey) {
+              // Every tile first receives its shared-ground-contact coverage.
+              // An elevation frame is an additional, potentially transparent
+              // layer; it must not replace the base footprint below ramps or
+              // corners.
+              this.drawBaseFogTile(renderTexture, bounds, textureKey, visibility, x, y, worldX, worldY);
+              this.drawElevationFogTile(renderTexture, bounds, visibility, x, y, worldX, worldY);
+              tileDrawn = true;
+            }
+          }
 
-          hasFog = true;
-          tileDrawCount += 1;
+          const sourceCompositeCount = this.drawSourceFogComposites(
+            renderTexture,
+            bounds,
+            sourcePlan.composites,
+            x,
+            y,
+            worldX,
+            worldY,
+          );
+          if (sourceCompositeCount > 0) tileDrawn = true;
+
+          if (tileDrawn) {
+            hasFog = true;
+            tileDrawCount += 1;
+          }
         }
       }
     });
@@ -7764,19 +7884,13 @@ export class SkirmishScene extends Phaser.Scene {
     renderTexture.batchDraw(textureKey, worldX - bounds.minX - halfWidth - 1, worldY - bounds.minY - halfHeight - 1);
   }
 
-  private drawSourceFogComposite(
-    renderTexture: Phaser.GameObjects.RenderTexture,
-    bounds: FogChunkBounds,
-    visibility: TileVisibility,
-    x: number,
-    y: number,
-    worldX: number,
-    worldY: number,
-  ): void {
+  private resolveSourceFogLayerPlanAt(x: number, y: number, visibility: TileVisibility): SourceFogLayerPlan {
     const tile = getTileAt(this.map, x, y);
     const elevation = this.getTerrainElevationPresentation(x, y);
-    if (!shouldRenderSourceFogComposite(elevation)) return;
-    const sourcePlan = resolveSourceFogLayerPlan(
+    if (!shouldRenderSourceFogComposite(elevation)) {
+      return { drawBaseFog: visibility !== TileVisibility.Visible, composites: [] };
+    }
+    return resolveSourceFogLayerPlan(
       this.map.fogVisualProfileId,
       tile.fogVisuals?.familyIndex,
       this.toSourceFogVisibility(visibility),
@@ -7789,24 +7903,35 @@ export class SkirmishScene extends Phaser.Scene {
         (neighborX, neighborY) => this.toSourceFogVisibility(this.getFogVisibilityAt(neighborX, neighborY)),
       ),
     );
+  }
 
-    // redrawFogChunk always draws the base fog first. The source plan only
-    // supplies a boundary composite, including when mask 0/15 omits one.
-    if (!sourcePlan.drawBaseFog || !sourcePlan.composite) return;
-    const source = sourcePlan.composite;
-    requireSourceTexture(source, (textureKey) => this.textures.exists(textureKey));
-    const placement = resolveTileImagePlacement(
-      {
-        imageGeometry: SOURCE_FOG_COMPOSITE_IMAGE_GEOMETRY,
-        ...(tile.tilesetVisuals?.sourcePixelOffset
-          ? { sourcePixelOffset: tile.tilesetVisuals.sourcePixelOffset }
-          : {}),
-      },
-      { x: worldX, y: worldY },
-      this.map.tileWidth,
-      this.map.tileHeight,
-    );
-    renderTexture.batchDraw(this.getSourceFogStamp(source), placement.position.x - bounds.minX, placement.position.y - bounds.minY);
+  private drawSourceFogComposites(
+    renderTexture: Phaser.GameObjects.RenderTexture,
+    bounds: FogChunkBounds,
+    composites: readonly SourceFogComposite[],
+    x: number,
+    y: number,
+    worldX: number,
+    worldY: number,
+  ): number {
+    if (composites.length === 0) return 0;
+    const tile = getTileAt(this.map, x, y);
+    for (const source of composites) {
+      requireSourceTexture(source, (textureKey) => this.textures.exists(textureKey));
+      const placement = resolveTileImagePlacement(
+        {
+          imageGeometry: SOURCE_FOG_COMPOSITE_IMAGE_GEOMETRY,
+          ...(tile.tilesetVisuals?.sourcePixelOffset
+            ? { sourcePixelOffset: tile.tilesetVisuals.sourcePixelOffset }
+            : {}),
+        },
+        { x: worldX, y: worldY },
+        this.map.tileWidth,
+        this.map.tileHeight,
+      );
+      renderTexture.batchDraw(this.getSourceFogStamp(source), placement.position.x - bounds.minX, placement.position.y - bounds.minY);
+    }
+    return composites.length;
   }
 
   private getFogVisibilityAt(x: number, y: number): TileVisibility {
@@ -7823,11 +7948,14 @@ export class SkirmishScene extends Phaser.Scene {
   }
 
   private getSourceFogStamp(source: SourceFogComposite): Phaser.GameObjects.Image {
-    const stampKey = `${source.textureKey}:${source.alpha}`;
+    const textureKey = source.sourceStateValue === 8
+      ? this.ensureSourceFogUnseenTexture(source.textureKey)
+      : source.textureKey;
+    const stampKey = `${textureKey}:${source.alpha}`;
     const existing = this.sourceFogStamps.get(stampKey);
     if (existing) return existing;
 
-    const stamp = this.make.image({ x: 0, y: 0, key: source.textureKey, add: false });
+    const stamp = this.make.image({ x: 0, y: 0, key: textureKey, add: false });
     const placement = resolveTileImagePlacement(
       { imageGeometry: SOURCE_FOG_COMPOSITE_IMAGE_GEOMETRY },
       { x: 0, y: 0 },
@@ -7841,9 +7969,34 @@ export class SkirmishScene extends Phaser.Scene {
       .setOrigin(placement.origin.x, placement.origin.y)
       .setScale(placement.scale)
       .setAlpha(source.alpha)
-      .setTint(SOURCE_FOG_OVERLAY_TINT);
+      .setTint(source.sourceStateValue === 8 ? 0xffffff : SOURCE_FOG_OVERLAY_TINT);
     this.sourceFogStamps.set(stampKey, stamp);
     return stamp;
+  }
+
+  private ensureSourceFogUnseenTexture(sourceTextureKey: string): string {
+    const derivedTextureKey = getSourceFogUnseenTextureKey(sourceTextureKey);
+    if (this.textures.exists(derivedTextureKey)) return derivedTextureKey;
+
+    const sourceImage = this.textures.get(sourceTextureKey).getSourceImage();
+    if (sourceImage instanceof Phaser.GameObjects.RenderTexture) {
+      throw new Error(`Source fog unseen adapter requires an image or canvas source: ${sourceTextureKey}`);
+    }
+    const width = sourceImage.width;
+    const height = sourceImage.height;
+    if (!Number.isInteger(width) || width <= 0 || !Number.isInteger(height) || height <= 0) {
+      throw new Error(`Source fog texture has invalid source dimensions: ${sourceTextureKey}`);
+    }
+    const derivedTexture = this.textures.createCanvas(derivedTextureKey, width, height);
+    if (!derivedTexture) throw new Error(`Failed to create derived source fog texture: ${derivedTextureKey}`);
+    derivedTexture.context.clearRect(0, 0, width, height);
+    derivedTexture.context.drawImage(sourceImage, 0, 0, width, height);
+    const imageData = derivedTexture.context.getImageData(0, 0, width, height);
+    imageData.data.set(adaptSourceFogUnseenPixels(imageData.data, SOURCE_FOG_OVERLAY_TINT));
+    derivedTexture.context.putImageData(imageData, 0, 0);
+    derivedTexture.refresh();
+    this.sourceFogDerivedTextureKeys.add(derivedTextureKey);
+    return derivedTextureKey;
   }
 
   private drawElevationFogTile(
@@ -7955,6 +8108,11 @@ export class SkirmishScene extends Phaser.Scene {
     const minY = flatMinY - this.terrainFogLiftPaddingPx;
     const maxRight = visualBounds.right + 2;
     const maxBottom = visualBounds.bottom + 2;
+    const depth = resolveSourceFogChunkDepth(
+      flatMinY,
+      this.terrainChunks.map((chunk) => chunk.depth),
+      usesSourceTerrainRasterComposition(this.map),
+    );
 
     return {
       chunkX,
@@ -7965,7 +8123,7 @@ export class SkirmishScene extends Phaser.Scene {
       minY,
       width: Math.ceil(maxRight - minX),
       height: Math.ceil(maxBottom - minY),
-      depth: flatMinY + 1,
+      depth,
     };
   }
 
@@ -8492,6 +8650,10 @@ export class SkirmishScene extends Phaser.Scene {
   private disposeSourceFogStamps(): void {
     this.sourceFogStamps.forEach((stamp) => stamp.destroy());
     this.sourceFogStamps.clear();
+    for (const textureKey of this.sourceFogDerivedTextureKeys) {
+      if (this.textures.exists(textureKey)) this.textures.remove(textureKey);
+    }
+    this.sourceFogDerivedTextureKeys.clear();
   }
 
   private applyVisualTextureFilter(visual: TerrainVisual, frame: FrameRef): void {
@@ -9247,7 +9409,7 @@ export class SkirmishScene extends Phaser.Scene {
       .setTexture(firstFrame.textureKey, firstFrame.frameName)
       .setFlipX(presentation.clip.mirrorX ?? false)
       .setVisible(true);
-    this.applyUnitSpriteGroundContactPlacement(baseLayer.sprite, visual, firstFrame);
+    this.applyUnitSpriteGroundContactPlacement(baseLayer.sprite, visual, firstFrame, renderable.localSpriteOffset);
 
     const terminalId = `${unitId}:terminal:${this.nextTerminalUnitRenderableId}`;
     this.nextTerminalUnitRenderableId += 1;
@@ -9282,7 +9444,7 @@ export class SkirmishScene extends Phaser.Scene {
 
       if (!frameMatches) {
         sprite.setTexture(frame.textureKey, frame.frameName);
-        this.applyUnitSpriteGroundContactPlacement(sprite, terminal.visual, frame);
+        this.applyUnitSpriteGroundContactPlacement(sprite, terminal.visual, frame, terminal.renderable.localSpriteOffset);
       }
 
       sprite.setFlipX(terminal.presentation.clip.mirrorX ?? false);
@@ -9334,7 +9496,9 @@ export class SkirmishScene extends Phaser.Scene {
       const unitPosition = this.getUnitWorldPosition(unit);
       const visual = this.getEntityVisual(unit.kind);
       const hasConstructionVisual = visual?.states.construction !== undefined;
-      renderable.container.setPosition(unitPosition.x, unitPosition.y).setDepth(unitPosition.y + 20);
+      const spriteGroundContactY = renderable.sourceBuildingGeometry?.projectedSpriteGroundContact.y ?? unitPosition.y;
+      const depth = renderable.sourceBuildingGeometry ? spriteGroundContactY + RENDER_DEPTH_BIAS.entity : unitPosition.y + RENDER_DEPTH_BIAS.entity;
+      renderable.container.setPosition(unitPosition.x, unitPosition.y).setDepth(depth);
       renderable.container.setAlpha((unit.construction || unit.demolition) && !hasConstructionVisual ? 0.68 : 1);
       renderable.selectionRing.setVisible(this.selectedUnitIds.has(unit.id));
       renderable.terminalKind = unit.kind;
@@ -9361,13 +9525,14 @@ export class SkirmishScene extends Phaser.Scene {
     sprite: Phaser.GameObjects.Image,
     visual: EntityVisual,
     frame: FrameRef,
+    localSpriteOffset: GridPoint = { x: 0, y: 0 },
   ): void {
     const placement = getGroundContactPlacement(visual, frame, UNIT_SPRITE_GROUND_CONTACT);
 
     sprite
       .setOrigin(placement.origin.x, placement.origin.y)
       .setScale(placement.scale)
-      .setPosition(placement.position.x, placement.position.y);
+      .setPosition(placement.position.x + localSpriteOffset.x, placement.position.y + localSpriteOffset.y);
   }
 
   private createUnitRenderable(unit: UnitState): UnitRenderable {
@@ -9380,17 +9545,27 @@ export class SkirmishScene extends Phaser.Scene {
     const healthBarBack = this.add.graphics();
     const healthBarFill = this.add.graphics();
     const visual = this.getEntityVisual(unit.kind);
+    const sourceBuildingGeometry = this.isSourceBuildingUnit(unit) ? this.getSourceBuildingGeometry(unit) : undefined;
+    const localSourceFootprintPolygon = sourceBuildingGeometry?.footprintPolygon.map((point) => new Phaser.Geom.Point(
+      point.x - sourceBuildingGeometry.semanticCenterWorld.x,
+      point.y - sourceBuildingGeometry.semanticCenterWorld.y,
+    ));
+    const localSpriteOffset = sourceBuildingGeometry?.localSpriteOffset ?? { x: 0, y: 0 };
     const initialFacing = this.getUnitFacing(unit);
     const selection = visual ? this.getEntityAnimationSelection(unit, visual, initialFacing) : null;
     const frame = this.getLoadedEntityPresentationFrame(visual, selection?.clip.frames[0] ?? null);
 
     selectionRing.lineStyle(2, 0xf3dd8f, 1);
-    selectionRing.strokeEllipse(
-      0,
-      0,
-      Math.max(radius * 3.2, definition.footprint.width * this.map.tileWidth * 0.82),
-      Math.max(radius * 1.8, definition.footprint.height * this.map.tileHeight * 0.9),
-    );
+    if (localSourceFootprintPolygon) {
+      selectionRing.strokePoints(localSourceFootprintPolygon, true);
+    } else {
+      selectionRing.strokeEllipse(
+        0,
+        0,
+        Math.max(radius * 3.2, definition.footprint.width * this.map.tileWidth * 0.82),
+        Math.max(radius * 1.8, definition.footprint.height * this.map.tileHeight * 0.9),
+      );
+    }
 
     if (visual && frame && this.textures.exists(frame.textureKey)) {
       const sprite = this.add.image(0, 0, frame.textureKey, frame.frameName);
@@ -9404,7 +9579,7 @@ export class SkirmishScene extends Phaser.Scene {
       }];
 
       this.textures.get(frame.textureKey).setFilter(Phaser.Textures.FilterMode.NEAREST);
-      this.applyUnitSpriteGroundContactPlacement(sprite, visual, frame);
+      this.applyUnitSpriteGroundContactPlacement(sprite, visual, frame, localSpriteOffset);
       sprite.setFlipX(selection?.clip.mirrorX ?? false);
       for (const visualLayer of visual.layers ?? []) {
         const layerSelection = this.getEntityLayerAnimationSelection(unit, visual, visualLayer, initialFacing);
@@ -9417,7 +9592,7 @@ export class SkirmishScene extends Phaser.Scene {
         const layerSprite = this.add.image(0, 0, layerFrame.textureKey, layerFrame.frameName);
 
         this.textures.get(layerFrame.textureKey).setFilter(Phaser.Textures.FilterMode.NEAREST);
-        this.applyUnitSpriteGroundContactPlacement(layerSprite, visual, layerFrame);
+        this.applyUnitSpriteGroundContactPlacement(layerSprite, visual, layerFrame, localSpriteOffset);
         layerSprite.setFlipX(layerSelection?.clip.mirrorX ?? false);
         spriteLayers.push({
           id: visualLayer.id,
@@ -9428,9 +9603,11 @@ export class SkirmishScene extends Phaser.Scene {
         });
       }
       teamBadge.fillStyle(color, 0.9);
-      teamBadge.fillCircle(0, 7, Math.max(3, Math.min(radius * 0.55, 5)));
+      const badgeX = sourceBuildingGeometry ? localSpriteOffset.x : 0;
+      const badgeY = sourceBuildingGeometry ? localSpriteOffset.y + 7 : 7;
+      teamBadge.fillCircle(badgeX, badgeY, Math.max(3, Math.min(radius * 0.55, 5)));
       teamBadge.lineStyle(1, 0x071112, 0.95);
-      teamBadge.strokeCircle(0, 7, Math.max(3, Math.min(radius * 0.55, 5)));
+      teamBadge.strokeCircle(badgeX, badgeY, Math.max(3, Math.min(radius * 0.55, 5)));
       container.add([selectionRing, ...spriteLayers.map((layer) => layer.sprite), teamBadge, damageFlash, healthBarBack, healthBarFill]);
       return {
         container,
@@ -9442,6 +9619,8 @@ export class SkirmishScene extends Phaser.Scene {
         healthBarBack,
         healthBarFill,
         auraIndicator: undefined,
+        localSpriteOffset,
+        sourceBuildingGeometry,
         lastFacing: initialFacing,
         terminalKind: unit.kind,
         terminalSourceOrientation: unit.sourceOrientation ? { ...unit.sourceOrientation } : undefined,
@@ -9452,9 +9631,15 @@ export class SkirmishScene extends Phaser.Scene {
 
     const body = this.add.graphics();
     body.fillStyle(color, 1);
-    body.fillCircle(0, 0, radius);
-    body.lineStyle(2, 0x102125, 0.9);
-    body.strokeCircle(0, 0, radius);
+    if (localSourceFootprintPolygon) {
+      body.fillPoints(localSourceFootprintPolygon, true);
+      body.lineStyle(2, 0x102125, 0.9);
+      body.strokePoints(localSourceFootprintPolygon, true);
+    } else {
+      body.fillCircle(0, 0, radius);
+      body.lineStyle(2, 0x102125, 0.9);
+      body.strokeCircle(0, 0, radius);
+    }
     container.add([selectionRing, body, damageFlash, healthBarBack, healthBarFill]);
     return {
       container,
@@ -9464,6 +9649,8 @@ export class SkirmishScene extends Phaser.Scene {
       healthBarBack,
       healthBarFill,
       auraIndicator: undefined,
+      localSpriteOffset,
+      sourceBuildingGeometry,
       lastFacing: initialFacing,
       terminalKind: unit.kind,
       terminalSourceOrientation: unit.sourceOrientation ? { ...unit.sourceOrientation } : undefined,
@@ -9519,19 +9706,23 @@ export class SkirmishScene extends Phaser.Scene {
     }
 
     const definition = unitDefinitions[unit.kind];
+    const sourceBodyBounds = renderable.sourceBuildingGeometry ? this.getSourceBuildingLocalBodyBounds(renderable) : null;
     const width = Math.max(30, definition.renderRadius * 3.4, definition.footprint.width * 16);
-    const y = -Math.max(24, definition.renderRadius * 2.6, definition.footprint.height * 14);
+    const y = renderable.sourceBuildingGeometry
+      ? sourceBodyBounds!.top - 6
+      : -Math.max(24, definition.renderRadius * 2.6, definition.footprint.height * 14);
+    const x = sourceBodyBounds ? sourceBodyBounds.centerX - width / 2 : -width / 2;
     const fillColor = healthRatio > 0.55 ? 0x75b46f : healthRatio > 0.25 ? 0xd0b46a : 0xd36b52;
 
     renderable.healthBarBack
       .fillStyle(0x071112, 0.82)
-      .fillRoundedRect(-width / 2, y, width, 5, 2)
+      .fillRoundedRect(x, y, width, 5, 2)
       .lineStyle(1, 0x102125, 0.92)
-      .strokeRoundedRect(-width / 2, y, width, 5, 2);
+      .strokeRoundedRect(x, y, width, 5, 2);
 
     renderable.healthBarFill
       .fillStyle(fillColor, 0.95)
-      .fillRoundedRect(-width / 2 + 1, y + 1, Math.max(2, (width - 2) * healthRatio), 3, 1);
+      .fillRoundedRect(x + 1, y + 1, Math.max(2, (width - 2) * healthRatio), 3, 1);
   }
 
   private redrawUnitDamageFlash(renderable: UnitRenderable, unit: UnitState): void {
@@ -9543,6 +9734,19 @@ export class SkirmishScene extends Phaser.Scene {
 
     const definition = unitDefinitions[unit.kind];
     const remaining = Phaser.Math.Clamp((renderable.damageFlashUntil - this.time.now) / 180, 0, 1);
+    if (renderable.sourceBuildingGeometry) {
+      const points = renderable.sourceBuildingGeometry.footprintPolygon.map((point) => new Phaser.Geom.Point(
+        point.x - renderable.sourceBuildingGeometry!.semanticCenterWorld.x,
+        point.y - renderable.sourceBuildingGeometry!.semanticCenterWorld.y,
+      ));
+      renderable.damageFlash
+        .lineStyle(2, 0xf17c63, 0.2 + remaining * 0.58)
+        .strokePoints(points, true)
+        .fillStyle(0xf17c63, 0.04 + remaining * 0.12)
+        .fillPoints(points, true);
+      return;
+    }
+
     const width = Math.max(definition.renderRadius * 2.9, definition.footprint.width * 18);
     const height = Math.max(definition.renderRadius * 1.8, definition.footprint.height * 12);
 
@@ -9724,7 +9928,7 @@ export class SkirmishScene extends Phaser.Scene {
     renderable.sprite
       .setTexture(frame.textureKey, frame.frameName)
       .setFlipX(selection?.clip.mirrorX ?? false);
-    this.applyUnitSpriteGroundContactPlacement(renderable.sprite, visual, frame);
+    this.applyUnitSpriteGroundContactPlacement(renderable.sprite, visual, frame, renderable.localSpriteOffset);
     this.updateUnitRenderableSpriteLayers(renderable, unit, visual, facing, deltaMs);
   }
 
@@ -9762,7 +9966,7 @@ export class SkirmishScene extends Phaser.Scene {
       }
 
       renderLayer.sprite.setTexture(frame.textureKey, frame.frameName);
-      this.applyUnitSpriteGroundContactPlacement(renderLayer.sprite, visual, frame);
+      this.applyUnitSpriteGroundContactPlacement(renderLayer.sprite, visual, frame, renderable.localSpriteOffset);
     }
   }
 

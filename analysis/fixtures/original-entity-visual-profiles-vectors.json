@@ -128,6 +128,17 @@
       }
     }
   ],
+  "dimensionProvenance": {
+    "footprintFields": [
+      "entity+0x1e3 signed BYTE",
+      "entity+0x1e4 signed BYTE"
+    ],
+    "pixelFields": [
+      "entity+0x1da signed WORD",
+      "entity+0x1dc signed WORD"
+    ],
+    "sourceHeaderDimensionsRemainStaticRepresentative": true
+  },
   "buildingOverlayVectors": [
     {
       "internalClass": 50,

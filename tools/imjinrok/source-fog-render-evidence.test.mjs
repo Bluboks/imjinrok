@@ -6,9 +6,12 @@ import test from "node:test";
 
 import {
   extractSourceFogRenderEvidence,
+  reproduceFogCellDispatch,
   lookupFogNeighborMask,
   reproduceFogCallerProjection,
   reproduceFogCompositorPlacement,
+  reproduceFogState8LutValue,
+  reproduceFogState8PaletteRemap,
   reproduceFogSubframeIndices,
 } from "./extract-source-fog-render-evidence.mjs";
 
@@ -36,6 +39,85 @@ test("extracts the hash-bound source fog render contract byte-identically", () =
   assert.deepEqual(report.composition.subframeGrid, { columns: 3, rows: 2, subframeCount: 6 });
   assert.deepEqual(report.callerContract.separateNeighborStateValues, [4, 8]);
   assert.deepEqual(report.callerContract.argumentOrder, ["projectedX", "projectedY", "cellX", "cellY", "literalState", "lookupSelector"]);
+  assert.equal(report.callerContract.dispatch.lowNibbleAddress, "map + 0x32514 + x * 180 + y");
+  assert.equal(report.callerContract.dispatch.centerStateAddress, "0x007d4d5e + x * 180 + y");
+  assert.deepEqual(report.callerContract.dispatch.syntheticVectors.map(({ id, output }) => ({ id, output })), [
+    {
+      id: "visible-center-ordered-state4-then-state8",
+      output: {
+        centerState: 0,
+        lowNibble: 1,
+        branch: "center-state-0-boundary",
+        baseCall: null,
+        passes: [
+          { state: 4, mask: 3, selector: 2, skipped: false, skipReason: null },
+          { state: 8, mask: 10, selector: 3, skipped: false, skipReason: null },
+        ],
+        calls: [{ state: 4, mask: 3, selector: 2 }, { state: 8, mask: 10, selector: 3 }],
+      },
+    },
+    {
+      id: "explored-center-only-state8",
+      output: {
+        centerState: 4,
+        lowNibble: 1,
+        branch: "center-nonzero-state-8-boundary",
+        baseCall: null,
+        passes: [{ state: 8, mask: 10, selector: 3, skipped: false, skipReason: null }],
+        calls: [{ state: 8, mask: 10, selector: 3 }],
+      },
+    },
+    {
+      id: "unseen-center-base-path",
+      output: {
+        centerState: 8,
+        lowNibble: 1,
+        branch: "center-state-8-base",
+        baseCall: { function: "FUN_00469510", state: 8, selector: 1 },
+        passes: [],
+        calls: [],
+      },
+    },
+    {
+      id: "zero-low-nibble-skips-all",
+      output: {
+        centerState: 0,
+        lowNibble: 0,
+        branch: "low-nibble-zero",
+        baseCall: null,
+        passes: [],
+        calls: [],
+      },
+    },
+    {
+      id: "all-neighbor-mask-omits-edge-calls",
+      output: {
+        centerState: 0,
+        lowNibble: 1,
+        branch: "center-state-0-boundary",
+        baseCall: null,
+        passes: [
+          { state: 4, mask: 15, selector: null, skipped: true, skipReason: "mask-all-neighbors" },
+          { state: 8, mask: 0, selector: null, skipped: true, skipReason: "mask-zero" },
+        ],
+        calls: [],
+      },
+    },
+  ]);
+  assert.deepEqual(report.state8PaletteRemap.channelTables.map(({ channel, limit, entryCount, allEntriesEqualMinimum }) => ({ channel, limit, entryCount, allEntriesEqualMinimum })), [
+    { channel: "red", limit: 32, entryCount: 1024, allEntriesEqualMinimum: true },
+    { channel: "green", limit: 64, entryCount: 4096, allEntriesEqualMinimum: true },
+    { channel: "blue", limit: 32, entryCount: 1024, allEntriesEqualMinimum: true },
+  ]);
+  assert.deepEqual(report.state8PaletteRemap.representative, {
+    source: { red: 8, green: 40, blue: 30 },
+    destination: { red: 24, green: 48, blue: 16 },
+    remapped: { red: 8, green: 40, blue: 16 },
+    packed565: 17680,
+    packed565Formula: "(red << 11) | (green << 5) | blue",
+    finalPaletteLookup: { address: "object + 0x19a0", entryStride: 2, output: "destination indexed byte" },
+  });
+  assert.match(report.state8PaletteRemap.boundedInterpretation, /intensity cap/u);
   assert.deepEqual(report.callerContract.projection.callerRange, { label: "FUN_00468600 caller range within FUN_00467de0", address: "0x00468600" });
   assert.deepEqual(report.callerContract.projection.syntheticVectors, [
     {
@@ -96,8 +178,10 @@ test("extracts the hash-bound source fog render contract byte-identically", () =
   assert.deepEqual(report.callEdges, [
     { from: "0x00468864", to: "0x0046a530", bytes: "e8 c7 1c 00 00", label: "state-4 caller dispatch" },
     { from: "0x00468982", to: "0x0046a530", bytes: "e8 a9 1b 00 00", label: "state-8 caller dispatch" },
+    { from: "0x00468731", to: "0x00469510", bytes: "e8 da 0d 00 00", label: "center-state-8 base path" },
     { from: "0x0046a591", to: "0x0046d650", bytes: "e8 ba 30 00 00", label: "low-nibble-equals-2 placement helper" },
     { from: "0x0046a5a9", to: "0x0046d650", bytes: "e8 a2 30 00 00", label: "other-low-nibble placement helper" },
+    { from: "0x0044b158", to: "0x0044b680", bytes: "e8 23 05 00 00", label: "palette LUT initializer" },
   ]);
   assert.deepEqual(report.frameSelection.vectors, [
     { selector: 0, frames: [0, 1, 32, 33, 64, 65] },
@@ -129,6 +213,41 @@ test("reproduces the byte-proven six-subframe selector formula only for caller-r
   assert.throws(() => reproduceFogSubframeIndices(-1), /0\.\.13/u);
   assert.throws(() => reproduceFogSubframeIndices(14), /0\.\.13/u);
   assert.throws(() => reproduceFogSubframeIndices(1.5), /0\.\.13/u);
+});
+
+test("replays center-state and low-nibble dispatch guards in source order", () => {
+  const neighbors = { top: 4, bottom: 0, left: 0, right: 8, topLeft: 0, topRight: 0, bottomLeft: 0, bottomRight: 0 };
+  assert.deepEqual(reproduceFogCellDispatch({ centerState: 0, lowNibble: 1, neighbors }).calls, [
+    { state: 4, mask: 3, selector: 2 },
+    { state: 8, mask: 10, selector: 3 },
+  ]);
+  assert.deepEqual(reproduceFogCellDispatch({ centerState: 4, lowNibble: 1, neighbors }).calls, [{ state: 8, mask: 10, selector: 3 }]);
+  assert.deepEqual(reproduceFogCellDispatch({ centerState: 8, lowNibble: 1, neighbors }), {
+    centerState: 8,
+    lowNibble: 1,
+    branch: "center-state-8-base",
+    baseCall: { function: "FUN_00469510", state: 8, selector: 1 },
+    passes: [],
+    calls: [],
+  });
+  assert.deepEqual(reproduceFogCellDispatch({ centerState: 0, lowNibble: 0, neighbors }).calls, []);
+  assert.deepEqual(reproduceFogCellDispatch({ centerState: 0, lowNibble: 1, neighbors: { top: 4, bottom: 4, left: 4, right: 4, topLeft: 4, topRight: 4, bottomLeft: 4, bottomRight: 4 } }).calls, []);
+});
+
+test("replays state-8 channel LUTs exhaustively and preserves the native palette boundary", () => {
+  for (const limit of [32, 64]) {
+    for (let destination = 0; destination < limit; destination += 1) {
+      for (let source = 0; source < limit; source += 1) {
+        assert.equal(reproduceFogState8LutValue({ source, destination, limit }), Math.min(source, destination));
+      }
+    }
+  }
+  assert.deepEqual(reproduceFogState8PaletteRemap({ source: { red: 8, green: 40, blue: 30 }, destination: { red: 24, green: 48, blue: 16 } }), {
+    source: { red: 8, green: 40, blue: 30 },
+    destination: { red: 24, green: 48, blue: 16 },
+    remapped: { red: 8, green: 40, blue: 16 },
+    packed565: 17680,
+  });
 });
 
 test("lookup helper accepts only the byte-proven table domain", () => {
@@ -165,6 +284,10 @@ test("caller and compositor reproducers fail closed for malformed or outside-con
   assert.throws(() => reproduceFogCallerProjection({ x: 0, y: 0, cameraX: 0, cameraY: 0, viewportLeft: 0, viewportRight: 0x80000000, viewportTop: 0, viewportBottom: 1 }), /signed 32-bit/u);
   assert.throws(() => reproduceFogCompositorPlacement({ projectedX: 0, projectedY: 0, x: 0, y: 0, lowNibble: 16, helperReturn: 0 }), /0\.\.15/u);
   assert.throws(() => reproduceFogCompositorPlacement({ projectedX: 0, projectedY: 0, x: 0, y: 0, lowNibble: 2, helperReturn: 0x8000 }), /signed 16-bit/u);
+  assert.throws(() => reproduceFogCellDispatch({ centerState: 0, lowNibble: 1, neighbors: {} }), /unsigned byte/u);
+  assert.throws(() => reproduceFogCellDispatch({ centerState: 0, lowNibble: 16, neighbors: { top: 0, bottom: 0, left: 0, right: 0, topLeft: 0, topRight: 0, bottomLeft: 0, bottomRight: 0 } }), /0\.\.15/u);
+  assert.throws(() => reproduceFogState8LutValue({ source: 32, destination: 0, limit: 32 }), /0\.\.31/u);
+  assert.throws(() => reproduceFogState8PaletteRemap({ source: { red: 0, green: 0, blue: 0 }, destination: { red: 0, green: 64, blue: 0 } }), /0\.\.63/u);
 });
 
 test("rejects a changed original executable before emitting evidence", (t) => {

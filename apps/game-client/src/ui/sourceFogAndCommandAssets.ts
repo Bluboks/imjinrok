@@ -15,6 +15,11 @@ export interface SourceFogComposite {
   readonly alpha: number;
 }
 
+export interface SourceFogLayerPlan {
+  readonly drawBaseFog: boolean;
+  readonly composites: readonly SourceFogComposite[];
+}
+
 export interface SourceCommandIcon {
   readonly textureKey: string;
   readonly assetPath: string;
@@ -283,22 +288,23 @@ export function resolveSourceCommandIconProfileForScenario(
 }
 
 /**
- * Returns a source composite only when a map explicitly selected the profile.
- * Source lifecycle evidence identifies literal 4 as explored and 8 as unseen.
- * This adapter converts product-grid visibility to those source literals; alpha
- * and web-map coordinate interpretation remain deliberate adaptations.
+ * Returns one source edge composite for an explicitly selected non-visible
+ * target state. The center-state dispatch and ordering belong to the layer
+ * planner below. Source lifecycle evidence identifies literal 4 as explored
+ * and 8 as unseen; alpha and web-map coordinate interpretation remain
+ * deliberate adaptations.
  */
 export function resolveSourceFogComposite(
   profileId: string | undefined,
   familyIndex: number | undefined,
-  visibility: FogVisibility,
+  targetVisibility: Exclude<FogVisibility, "visible">,
   neighborVisibility: (neighbor: SourceFogNeighbor) => FogVisibility,
 ): SourceFogComposite | null {
-  if (profileId === undefined || visibility === "visible") return null;
+  if (profileId === undefined) return null;
   assertSourceFogVisualProfile(profileId);
   assertFamilyIndex(familyIndex);
-  const sourceStateValue = visibility === "explored" ? 4 : 8;
-  const mask = buildSourceFogCornerMask(visibility, neighborVisibility);
+  const sourceStateValue = targetVisibility === "explored" ? 4 : 8;
+  const mask = buildSourceFogCornerMask(targetVisibility, neighborVisibility);
   if (mask === 0 || mask === 15) return null;
   const selector = SOURCE_FOG_LOOKUP[mask];
   if (selector === undefined || !SOURCE_FOG_SELECTOR_DOMAIN.has(selector)) {
@@ -311,7 +317,7 @@ export function resolveSourceFogComposite(
     selector,
     sourceFrameIndices: reproduceSourceFogFrameIndices(selector),
     sourceStateValue,
-    alpha: visibility === "explored" ? 0.58 : 1,
+    alpha: targetVisibility === "explored" ? 0.58 : 1,
   };
 }
 
@@ -322,15 +328,23 @@ export function resolveSourceFogComposite(
 export function resolveSourceFogLayerPlan(
   profileId: string | undefined,
   familyIndex: number | undefined,
-  visibility: FogVisibility,
+  centerVisibility: FogVisibility,
   neighborVisibility: (neighbor: SourceFogNeighbor) => FogVisibility,
-): { readonly drawBaseFog: boolean; readonly composite: SourceFogComposite | null } {
-  if (visibility === "visible") {
-    return { drawBaseFog: false, composite: null };
+): SourceFogLayerPlan {
+  if (profileId !== undefined) {
+    assertSourceFogVisualProfile(profileId);
+    assertFamilyIndex(familyIndex);
   }
+  const targetStates: readonly (Exclude<FogVisibility, "visible">)[] = centerVisibility === "visible"
+    ? ["explored", "unseen"]
+    : centerVisibility === "explored"
+      ? ["unseen"]
+      : [];
   return {
-    drawBaseFog: true,
-    composite: resolveSourceFogComposite(profileId, familyIndex, visibility, neighborVisibility),
+    drawBaseFog: centerVisibility !== "visible",
+    composites: targetStates
+      .map((targetVisibility) => resolveSourceFogComposite(profileId, familyIndex, targetVisibility, neighborVisibility))
+      .filter((composite): composite is SourceFogComposite => composite !== null),
   };
 }
 

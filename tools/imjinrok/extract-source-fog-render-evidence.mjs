@@ -27,6 +27,7 @@ const FOG_ATLAS_HEIGHT_OFFSET = 0x0bd0;
 const FOG_ATLAS_COLUMNS = 32;
 const FOG_HALF_COLUMNS = 16;
 const CALLER_SELECTOR_DOMAIN = Array.from({ length: 14 }, (_value, index) => index);
+const FOG_STATE8_CHANNEL_LIMITS = { red: 32, green: 64, blue: 32 };
 const FAMILY_BYTE_MAP_OFFSET = 0x4a0c4;
 const LOW_NIBBLE_MAP_OFFSET = 0x32514;
 const PLACEMENT_SELECTOR_MAP_OFFSET = 0x79824;
@@ -56,18 +57,27 @@ const FOG_SOURCE_HASHES = [
 
 const RAW_CODE_RANGES = [
   ["FUN_00467de0", 0x00467de0, 0x004689ce, "1a2c8ddfb7e2801514c0848d1c7ecb18628df35b5cf4785ecd2507c2b5a74604"],
+  ["FUN_00467de0 center/low-nibble dispatch window", 0x004686e2, 0x00468987, "7fc7126448394a8f9c93ceba2f5b74a375ce4b47b82f6a24d23c3f2bdc80ddca"],
   ["FUN_0046a530", 0x0046a530, 0x0046a8e8, "b4dc5ba4f0d8be3cac135ccfd02a372173dfcf01dad79f262cf8468572ea8e7a"],
   ["FUN_00467de0 caller projection window", 0x00468634, 0x004686aa, "5a88c41d80dfd2f871d90266fbf3e9a5c978a6cdaa7575d15b337c94bd0a7849"],
   ["FUN_0046a530 placement prologue and vertical adjustment", 0x0046a530, 0x0046a5c8, "23bbcbfa9bc0ec79a979e3271a3251b8eab669d4a7767ae0de86054016284813"],
+  ["FUN_00452b30 state-8 palette remap", 0x00452b30, 0x00452c96, "3dd28a807d474960f9578c724c01523853b404071b9856d7f3c692b9250a3f55"],
+  ["FUN_0044b680 palette LUT initializer", 0x0044b680, 0x0044b734, "ed47b21cd562a59214d614d4490cdbd2192382d3e1599498ce00f9cdad885e90"],
 ].map(([id, start, endExclusive, digest]) => ({ id, start, endExclusive, sha256: digest }));
 
 const EVIDENCE = [
+  [0x004686e2, "8d 84 ad 5d 16 00 00 8d 04 c0 8d 0c 82 8a 04 31", "FUN_00467de0 derives the low-nibble map address as map+0x32514+x*180+y before the center-state and neighbor-mask dispatch."],
+  [0x004686f2, "24 0f 66 0f be c0 66 85 c0 0f 84 86 02 00 00", "The low nibble from map+0x32514+x*180+y is masked to 0..15; zero jumps directly to the end of this cell's fog dispatch pass."],
+  [0x0046870f, "8a 80 5e 4d 7d 00 66 0f be c8 66 83 f9 08 75 1c", "The center fog byte at 0x007d4d5e+x*180+y is sign-extended and compared with literal state 8."],
+  [0x0046871f, "8b 54 24 18 8b 44 24 14 6a 01 6a 08 52 50 57 53 8b ce e8 da 0d 00 00 e9 4c 02 00 00", "Center state 8 calls FUN_00469510 with literal selector 1 and state 8, then jumps past both edge-mask paths to the cell-pass continuation."],
+  [0x0046873b, "84 c0 0f 85 26 01 00 00", "For a nonzero center state other than 8, the zero-state-4 mask path is skipped and control enters the state-8 mask path; center state 0 falls through to state 4 first."],
   [0x00468634, "66 8b 8e 9c 2d 00 00 66 8b be 98 2d 00 00 8b 54 24 18 8b 44 24 14 8b 2d 00 40 aa 00 8b d9 2b df 2b da 03 d8 a1 08 40 aa 00 2b c5 c1 e3 05 40 89 5c 24 28 99 2b c2 8b d8 8b 44 24 28 d1 fb 03 e8 a1 0c 40 aa 00 03 dd 8b 6c 24 14 8b d5 2b d7 2b d1 8b 4c 24 18 03 d1 8b 0d 04 40 aa 00 2b c1 c1 e2 04 40 89 54 24 28 99 2b c2 8b 54 24 28 8b f8 03 ca d1 ff 03 f9", "FUN_00467de0 reads cell x/y from [esp+0x14]/[esp+0x18], camera tile x/y from map+0x2d98/+0x2d9c, and forms the two viewport-centered isometric projected arguments."],
   [0x00468848, "0f bf c0 8b 54 24 18 66 0f b6 88 c4 f9 4b 00 8b 44 24 14 51 6a 04 52 50 57 53 8b ce e8 c7 1c 00 00", "The state-4 dispatch pushes lookup selector, literal 4, cell y, cell x, projected y, then projected x before the direct call to FUN_0046a530."],
   [0x00468966, "0f bf c0 8b 54 24 18 66 0f b6 88 c4 f9 4b 00 8b 44 24 14 51 6a 08 52 50 57 53 8b ce e8 a9 1b 00 00", "The state-8 dispatch preserves the same six-argument ordering and changes only the literal state to 8."],
   [0x0046a530, "83 ec 30 8b 44 24 34 53 8b 5c 24 44 55 56 57 8b 7c 24 4c 8d 68 e0", "FUN_0046a530 reads argument 1 as projected x, saves argument 3 as cell x after its register saves, and derives draw-left as projected x minus 32."],
   [0x0046a587, "66 3d 02 00 75 18 53 57 8b ce e8 ba 30 00 00 8b 4c 24 48 c1 e0 04 2b c8 89 4c 24 44 eb 23 53 57 8b ce e8 a2 30 00 00 0f bf c0 99 33 c2 2b c2 40 c1 e0 04 8b d0 8b 44 24 48 2b c2 89 44 24 44 8b c8", "FUN_0046a530 takes the low-nibble-equals-2 branch only in-bounds, calls FUN_0046d650(map, cellX, cellY), subtracts helper<<4 there, and otherwise subtracts (abs(int16(helper))+1)<<4 from argument 2."],
   [0x00468743, "8d 4a ff 33 c0 85 c9 7c 12 8b 4c 24 1c 80 b9 5d 4d 7d 00 04 75 05 b8 03 00 00 00 8b 8e a4 2d 00 00 42 3b d1 7d 0f 8b 54 24 1c 80 ba 5f 4d 7d 00 04 75 02 0c 0c", "FUN_00467de0 begins the state-4 neighbor mask and sets the vertical-neighbor bit pairs only after in-bounds checks."],
+  [0x0046883d, "66 85 c0 74 27 66 3d 0f 00 74 21", "The state-4 mask path skips both mask zero and mask 0x0f before its lookup and compositor call."],
   [0x00468842, "66 3d 0f 00 74 21 0f bf c0 8b 54 24 18 66 0f b6 88 c4 f9 4b 00 8b 44 24 14 51 6a 04 52 50 57 53 8b ce e8 c7 1c 00 00", "The nonzero/non-0x0f state-4 mask indexes 0x004bf9c4, then calls FUN_0046a530 with literal state 4."],
   [0x00468869, "0f bf 4c 24 18 33 c0 8d 51 ff 85 d2 89 54 24 10 7c 12 8b 54 24 1c 80 ba 5d 4d 7d 00 08 75 05 b8 03 00 00 00", "FUN_00467de0 starts a separate mask accumulation path by comparing neighbors to literal state 8."],
   [0x0046895b, "66 85 c0 74 27 66 3d 0f 00 74 21 0f bf c0 8b 54 24 18 66 0f b6 88 c4 f9 4b 00 8b 44 24 14 51 6a 08 52 50 57 53 8b ce e8 a9 1b 00 00", "The nonzero/non-0x0f state-8 mask uses the same lookup table and calls FUN_0046a530 with literal state 8."],
@@ -81,11 +91,109 @@ const EVIDENCE = [
   [0x0046a79a, "8b 54 24 44 89 7c 24 18 0f bf c9 0f bf c5 8d 4c 39 ff 89 54 24 20", "The non-state-4 branch initializes a distinct composition path."],
   [0x0046a850, "52 8b 54 24 24 50 8b 44 24 18 51 52 50 b9 18 94 55 00 e8 c9 82 fe ff", "The distinct non-state-4 composition path calls FUN_00452b30 after the common preceding path succeeds."],
   [0x0046a889, "66 83 f9 02 89 4c 24 54 89 54 24 4c 89 7c 24 10 0f 8c 35 ff ff ff 0f bf 4c 24 1c 8b 7c 24 14 8b 54 24 48 03 f9 42 89 7c 24 14 8b 7c 24 18 03 f9 8b 4c 24 1c 89 7c 24 18 8b 7c 24 20 03 f9 66 83 fa 03 89 54 24 48 89 7c 24 20 0f 8c db fe ff ff", "The non-state-4 path also has inner <2 and outer <3 loop bounds, but its call target differs from the state-4 path."],
+  [0x00452b89, "8a 04 18 3c fe 75 19 46 0f bf c6 66 0f b6 04 18 03 d0 46", "FUN_00452b30 reads the source indexed pixel at 0x00452b89; source byte 0xfe enters its encoded skip/run path before ordinary palette remapping."],
+  [0x00452bb9, "8a 1a 8b f3 33 db 8d 14 71 8d 3c 16 8d 14 41 8a 9c 10 a0 19 02 00 8d 2c 10 33 d2 8a 97 a0 19 02 00 c1 e2 05 03 d3 33 db 8a 9f a1 19 02 00", "FUN_00452b30 reads the destination indexed pixel and source/destination palette channel bytes from object+0x219a0 with a three-byte palette stride, then indexes the red/blue 32x32 LUT at object+0x864a0."],
+  [0x00452bef, "8b fb 33 db 8a 9d a1 19 02 00 66 8b 6c 24 24 c1 e7 06 03 fb 33 db c1 e2 06 0f bf bc 79 a0 6c 08 00 03 d7 8d bc 71 6c 66 01 00 c1 e2 05 8a 9c 3e 36 b3 00 00 8d b4 41 6c 66 01 00 8b fb 33 db 8a 9c 30 36 b3 00 00 8b 74 24 10 c1 e7 05 03 fb 8b 5c 24 2c 0f bf 84 79 a0 64 08 00 03 d0 8b 44 24 14 8b 7c 24 1c", "FUN_00452b30 indexes the green 64x64 LUT at object+0x86ca0 and the blue 32x32 LUT at object+0x864a0, combines the three remapped channels into a packed 5:6:5 index, and prepares the final palette lookup."],
+  [0x00452c54, "8a 94 51 a0 19 00 00 88 10", "The state-8 path maps the packed 5:6:5 index through object+0x19a0 (two-byte table stride) and writes the resulting byte to the destination pixel."],
+  [0x0044b680, "53 55 56 57 33 ff 8d 81 a0 64 08 00 33 f6 8b e8 66 3b fe 8b c7 7f 02 8b c6 66 3b fe 8b df 7c 02 8b de 0f bf d0 b8 20 00 00 00 2b c2 99 83 e2 1f 03 c2 8b d7 c1 f8 05 0f af c3 66 3b fe 7c 02 8b d6 03 d0 46 66 89 55 00 83 c5 02 66 83 fe 20 7c bf", "FUN_0044b680 fills object+0x864a0 as a 32x32 WORD table using max/min channel values and the limit 0x20; valid entries equal the minimum channel value."],
+  [0x0044b6dc, "8d 81 a0 6c 08 00 33 c9 8b d8 66 3b f1 8b c6 7f 02 8b c1 66 3b f1 8b fe 7c 02 8b f9 0f bf d0 b8 40 00 00 00 2b c2 99 83 e2 3f 03 c2 8b d6 c1 f8 06 0f af c7 66 3b f1 7c 02 8b d1 03 d0 41 66 89 13 83 c3 02 66 83 f9 40 7c c0 46 8b c3 66 83 fe 40 7c b3 5f 5e 5d 5b c3", "FUN_0044b680 fills object+0x86ca0 as a 64x64 WORD table using the same max/min arithmetic and the limit 0x40; valid entries equal the minimum channel value."],
 ].map(([va, bytes, meaning]) => ({ va, bytes, meaning }));
 
 export function lookupFogNeighborMask(mask) {
   if (!Number.isInteger(mask) || mask < 0 || mask >= 16) throw new RangeError("fog neighbor mask must be an integer in 0..15");
   return FOG_MASK_LOOKUP[mask];
+}
+
+/**
+ * Pure replay of the state-8 blitter's channel LUT initializer. The source
+ * uses sign-adjusted arithmetic right shift (the power-of-two equivalent of
+ * truncation toward zero), but every valid channel pair is nonnegative and
+ * below its table limit, so truncation is explicit here rather than relying
+ * on bitwise coercion.
+ */
+export function reproduceFogState8LutValue({ source, destination, limit } = {}) {
+  if (!Number.isInteger(limit) || ![32, 64].includes(limit)) throw new RangeError("fog state-8 LUT limit must be 32 or 64");
+  for (const [value, label] of [[source, "source"], [destination, "destination"]]) {
+    if (!Number.isInteger(value) || value < 0 || value >= limit) throw new RangeError(`${label} must be an integer in 0..${limit - 1}`);
+  }
+  const maximum = Math.max(source, destination);
+  const minimum = Math.min(source, destination);
+  const quotient = Math.trunc((limit - maximum) / limit);
+  return minimum + quotient * minimum;
+}
+
+/**
+ * Pure channel/pixel reference for the state-8 indexed-pixel remap. The
+ * final object+0x19a0 palette-index lookup is intentionally left as an
+ * explicit boundary because its runtime palette lifecycle is not closed by
+ * this evidence unit.
+ */
+export function reproduceFogState8PaletteRemap({ source, destination } = {}) {
+  if (!source || typeof source !== "object" || !destination || typeof destination !== "object") {
+    throw new TypeError("source and destination channel objects are required");
+  }
+  const remapped = {};
+  for (const channel of Object.keys(FOG_STATE8_CHANNEL_LIMITS)) {
+    const limit = FOG_STATE8_CHANNEL_LIMITS[channel];
+    remapped[channel] = reproduceFogState8LutValue({ source: source[channel], destination: destination[channel], limit });
+  }
+  const packed565 = (remapped.red << 11) | (remapped.green << 5) | remapped.blue;
+  return { source: { ...source }, destination: { ...destination }, remapped, packed565 };
+}
+
+/**
+ * Pure replay of FUN_00467de0's low-nibble and center-state dispatch guards.
+ * Direction labels describe the eight neighboring inputs to this reference;
+ * they do not assign a human meaning to the source bit positions.
+ */
+export function reproduceFogCellDispatch({ centerState, lowNibble, neighbors } = {}) {
+  assertByte(centerState, "centerState");
+  if (!Number.isInteger(lowNibble) || lowNibble < 0 || lowNibble > 15) {
+    throw new RangeError("lowNibble must be an integer in 0..15");
+  }
+  if (!neighbors || typeof neighbors !== "object") throw new TypeError("neighbors must be an object");
+  const directions = [
+    ["top", 0x03], ["bottom", 0x0c], ["left", 0x05], ["right", 0x0a],
+    ["topLeft", 0x01], ["topRight", 0x02], ["bottomLeft", 0x04], ["bottomRight", 0x08],
+  ];
+  for (const [direction] of directions) assertByte(neighbors[direction], `neighbors.${direction}`);
+
+  const makePass = (state) => {
+    const mask = directions.reduce((value, [direction, bit]) => (
+      neighbors[direction] === state ? value | bit : value
+    ), 0);
+    const skipped = mask === 0 || mask === 0x0f;
+    return {
+      state,
+      mask,
+      selector: skipped ? null : lookupFogNeighborMask(mask),
+      skipped,
+      skipReason: skipped ? (mask === 0 ? "mask-zero" : "mask-all-neighbors") : null,
+    };
+  };
+
+  if (lowNibble === 0) {
+    return { centerState, lowNibble, branch: "low-nibble-zero", baseCall: null, passes: [], calls: [] };
+  }
+  if (centerState === 8) {
+    return {
+      centerState,
+      lowNibble,
+      branch: "center-state-8-base",
+      baseCall: { function: "FUN_00469510", state: 8, selector: 1 },
+      passes: [],
+      calls: [],
+    };
+  }
+  const passes = centerState === 0 ? [makePass(4), makePass(8)] : [makePass(8)];
+  return {
+    centerState,
+    lowNibble,
+    branch: centerState === 0 ? "center-state-0-boundary" : "center-nonzero-state-8-boundary",
+    baseCall: null,
+    passes,
+    calls: passes.filter(({ skipped }) => !skipped).map(({ state, mask, selector }) => ({ state, mask, selector })),
+  };
 }
 
 export function reproduceFogSubframeIndices(selector) {
@@ -188,9 +296,9 @@ export function extractSourceFogRenderEvidence({
   assertEqual(JSON.stringify([...lookupBytes]), JSON.stringify(FOG_MASK_LOOKUP), "fog neighbor lookup vector");
 
   return {
-    question: "What source-backed fog resource, neighbor-lookup, caller projection/argument ordering, placement adjustment, and six-subframe composition contract do FUN_00467de0 and FUN_0046a530 establish?",
-    analysisStatus: "정적 확정 (resource family, lookup, caller projection/argument ordering, bounded placement arithmetic, six-subframe composition, and frame algebra only)",
-    reproductionStatus: "재현 완료 (hash-bound extraction, resource records, lookup/frame/placement vectors, loop bounds, and fail-closed reference inputs)",
+    question: "What source-backed fog resource, low-nibble/center-state dispatch, neighbor lookup, caller projection/argument ordering, placement adjustment, six-subframe composition, and state-8 palette remap contract do FUN_00467de0, FUN_0046a530, and FUN_00452b30 establish?",
+    analysisStatus: "정적 확정 (resource family, low-nibble/center-state dispatch, lookup, caller projection/argument ordering, bounded placement arithmetic, six-subframe composition, state-8 palette/LUT arithmetic, and frame algebra only)",
+    reproductionStatus: "재현 완료 (hash-bound extraction, resource records, dispatch/LUT/frame/placement vectors, exhaustive 32x32/64x64 LUT replay, loop bounds, and fail-closed reference inputs)",
     implementationStatus: "없음",
     sources: {
       executable: { path: relative(repositoryRoot, executablePath), sha256: EXPECTED_EXECUTABLE_SHA256 },
@@ -224,6 +332,23 @@ export function extractSourceFogRenderEvidence({
       skippedMaskValues: [0, 15],
       lookupThenCompositorCall: true,
       argumentOrder: ["projectedX", "projectedY", "cellX", "cellY", "literalState", "lookupSelector"],
+      dispatch: {
+        byteRange: "0x004686e2-0x00468987 (end exclusive)",
+        lowNibbleAddress: "map + 0x32514 + x * 180 + y",
+        centerStateAddress: "0x007d4d5e + x * 180 + y",
+        lowNibbleZero: "skip all center/base and edge-mask calls for this cell pass",
+        centerStateZero: "run state-4 edge mask then state-8 edge mask in that order",
+        centerStateNonzeroExcept8: "skip state-4 edge mask and run state-8 edge mask",
+        centerState8: "call FUN_00469510 with literal state 8 and selector 1, then skip both edge-mask paths",
+        maskConstruction: { state4: "neighbor byte equals 4", state8: "neighbor byte equals 8" },
+        syntheticVectors: [
+          { id: "visible-center-ordered-state4-then-state8", input: { centerState: 0, lowNibble: 1, neighbors: { top: 4, bottom: 0, left: 0, right: 8, topLeft: 0, topRight: 0, bottomLeft: 0, bottomRight: 0 } }, output: reproduceFogCellDispatch({ centerState: 0, lowNibble: 1, neighbors: { top: 4, bottom: 0, left: 0, right: 8, topLeft: 0, topRight: 0, bottomLeft: 0, bottomRight: 0 } }) },
+          { id: "explored-center-only-state8", input: { centerState: 4, lowNibble: 1, neighbors: { top: 4, bottom: 0, left: 0, right: 8, topLeft: 0, topRight: 0, bottomLeft: 0, bottomRight: 0 } }, output: reproduceFogCellDispatch({ centerState: 4, lowNibble: 1, neighbors: { top: 4, bottom: 0, left: 0, right: 8, topLeft: 0, topRight: 0, bottomLeft: 0, bottomRight: 0 } }) },
+          { id: "unseen-center-base-path", input: { centerState: 8, lowNibble: 1, neighbors: { top: 4, bottom: 0, left: 0, right: 8, topLeft: 0, topRight: 0, bottomLeft: 0, bottomRight: 0 } }, output: reproduceFogCellDispatch({ centerState: 8, lowNibble: 1, neighbors: { top: 4, bottom: 0, left: 0, right: 8, topLeft: 0, topRight: 0, bottomLeft: 0, bottomRight: 0 } }) },
+          { id: "zero-low-nibble-skips-all", input: { centerState: 0, lowNibble: 0, neighbors: { top: 4, bottom: 0, left: 0, right: 8, topLeft: 0, topRight: 0, bottomLeft: 0, bottomRight: 0 } }, output: reproduceFogCellDispatch({ centerState: 0, lowNibble: 0, neighbors: { top: 4, bottom: 0, left: 0, right: 8, topLeft: 0, topRight: 0, bottomLeft: 0, bottomRight: 0 } }) },
+          { id: "all-neighbor-mask-omits-edge-calls", input: { centerState: 0, lowNibble: 1, neighbors: { top: 4, bottom: 4, left: 4, right: 4, topLeft: 4, topRight: 4, bottomLeft: 4, bottomRight: 4 } }, output: reproduceFogCellDispatch({ centerState: 0, lowNibble: 1, neighbors: { top: 4, bottom: 4, left: 4, right: 4, topLeft: 4, topRight: 4, bottomLeft: 4, bottomRight: 4 } }) },
+        ],
+      },
       projection: {
         callerRange: { label: "FUN_00468600 caller range within FUN_00467de0", address: "0x00468600" },
         callerWindow: { function: "FUN_00467de0", byteRange: "0x00468634-0x004686aa (end exclusive)" },
@@ -271,6 +396,7 @@ export function extractSourceFogRenderEvidence({
       state8: { stateValue: 8, blitFunction: "FUN_00452b30" },
       boundary: "The byte-proven branch distinguishes literal state 4 from the non-4 path reached by caller literal state 8; no human visibility meaning is assigned.",
     },
+    state8PaletteRemap: extractState8PaletteEvidence(),
     frameSelection: {
       resourceHeaderOffsets: { frameWidth: "0x04", frameHeight: "0x08", frameCount: "0x0c", atlasWidth: "0x0bcc", atlasHeight: "0x0bd0" },
       normalFogAtlas: { frameWidth: 32, frameHeight: 16, frameCount: 96, atlasWidth: 1024, atlasHeight: 48, atlasColumns: FOG_ATLAS_COLUMNS, halfColumns: FOG_HALF_COLUMNS },
@@ -285,10 +411,12 @@ export function extractSourceFogRenderEvidence({
     callEdges: [
       verifyDirectCall(executable, image, { from: 0x00468864, to: 0x0046a530, label: "state-4 caller dispatch" }),
       verifyDirectCall(executable, image, { from: 0x00468982, to: 0x0046a530, label: "state-8 caller dispatch" }),
+      verifyDirectCall(executable, image, { from: 0x00468731, to: 0x00469510, label: "center-state-8 base path" }),
       verifyDirectCall(executable, image, { from: 0x0046a591, to: 0x0046d650, label: "low-nibble-equals-2 placement helper" }),
       verifyDirectCall(executable, image, { from: 0x0046a5a9, to: 0x0046d650, label: "other-low-nibble placement helper" }),
+      verifyDirectCall(executable, image, { from: 0x0044b158, to: 0x0044b680, label: "palette LUT initializer" }),
     ],
-    unresolvedBoundary: "The arithmetic in this caller/compositor slice is static-confirmed and reproduced, but state 4/8 human meaning, visibility mapping, alpha/tint, web chunk scheduling, generic map-file provenance, family-byte runtime producer/lifetime, helper human meaning, and original renderer-wide pivot/placement semantics remain unresolved or explicit product adaptation. K01's hash-bound static byte distribution is recorded only as a bounded map-data observation. The frame algebra is confined to the caller-proven selector domain and normal fog header contract; it does not assign a human meaning to either state or selector.",
+    unresolvedBoundary: "The arithmetic in this caller/compositor/state-8 palette slice is static-confirmed and reproduced, but state 4/8 human meaning, visibility mapping, browser alpha/opacity equivalence, runtime palette lifecycle, final object+0x19a0 palette-index contents, web chunk scheduling, generic map-file provenance, family-byte runtime producer/lifetime, helper human meaning, and original renderer-wide pivot/placement semantics remain unresolved or explicit product adaptation. K01's hash-bound static byte distribution is recorded only as a bounded map-data observation. The frame algebra is confined to the caller-proven selector domain and normal fog header contract; it does not assign a human meaning to either state or selector.",
   };
 }
 
@@ -393,6 +521,49 @@ function countEntries(counts) {
   return Object.fromEntries([...counts.entries()].sort(([left], [right]) => left - right));
 }
 
+function extractState8PaletteEvidence() {
+  const channelTables = Object.entries(FOG_STATE8_CHANNEL_LIMITS).map(([channel, limit]) => {
+    const values = [];
+    let allEntriesEqualMinimum = true;
+    for (let destination = 0; destination < limit; destination += 1) {
+      for (let source = 0; source < limit; source += 1) {
+        const value = reproduceFogState8LutValue({ source, destination, limit });
+        values.push(value);
+        if (value !== Math.min(source, destination)) allEntriesEqualMinimum = false;
+      }
+    }
+    return {
+      channel,
+      limit,
+      dimensions: { destination: limit, source: limit },
+      entryCount: limit * limit,
+      valuesSha256: sha256(Buffer.from(values)),
+      allEntriesEqualMinimum,
+    };
+  });
+  const representative = reproduceFogState8PaletteRemap({
+    source: { red: 8, green: 40, blue: 30 },
+    destination: { red: 24, green: 48, blue: 16 },
+  });
+  return {
+    compositor: { function: "FUN_00452b30", byteRange: "0x00452b30-0x00452c96 (end exclusive)" },
+    paletteChannels: { address: "object + 0x219a0", stride: 3, order: ["red", "green", "blue"] },
+    channelTables: [
+      { ...channelTables.find(({ channel }) => channel === "red"), address: "object + 0x864a0" },
+      { ...channelTables.find(({ channel }) => channel === "green"), address: "object + 0x86ca0" },
+      { ...channelTables.find(({ channel }) => channel === "blue"), address: "object + 0x864a0" },
+    ],
+    formula: "maximum=max(source,destination); minimum=min(source,destination); q=trunc((limit-maximum)/limit); output=minimum+q*minimum",
+    representative: {
+      ...representative,
+      packed565Formula: "(red << 11) | (green << 5) | blue",
+      finalPaletteLookup: { address: "object + 0x19a0", entryStride: 2, output: "destination indexed byte" },
+    },
+    boundedInterpretation: "For valid channel pairs, the LUT output caps each destination channel at the source channel minimum; an opaque gray source therefore acts as an intensity cap, not a uniformly dark opaque overlay.",
+    boundary: "The source maps indexed pixels through palette channel bytes, the 32x32/64x64 channel LUTs, a packed 5:6:5 index, and an object+0x19a0 lookup. Browser alpha/opacity is not claimed equivalent to this native remap.",
+  };
+}
+
 function readSignedWord(buffer, offset, label) {
   if (offset < 0 || offset + 2 > buffer.length) throw new RangeError(`${label} at 0x${offset.toString(16)} exceeds map size`);
   return buffer.readInt16LE(offset);
@@ -409,6 +580,12 @@ function verifyDirectCall(executable, image, { from, to, label }) {
 function assertSignedWord(value, label) {
   if (!Number.isInteger(value) || value < -0x8000 || value > 0x7fff) {
     throw new RangeError(`${label} must be a signed 16-bit integer`);
+  }
+}
+
+function assertByte(value, label) {
+  if (!Number.isInteger(value) || value < 0 || value > 0xff) {
+    throw new RangeError(`${label} must be an unsigned byte`);
   }
 }
 

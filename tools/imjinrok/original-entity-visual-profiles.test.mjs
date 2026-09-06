@@ -36,6 +36,8 @@ test("extracts complete type pivots and the two-stage building switch map", () =
   assert.ok(report.types.every((type) => type.render.verticalOffsetField === "+0x0c" && type.render.writerArgumentOrdinal === 5));
   assert.ok(report.types.every((type) => (type.flags & 0x00020002) !== 0 ? type.blockerMaskMatch : !type.blockerMaskMatch));
   assert.ok(report.renderer.codeAnchors.every((anchor) => anchor.matched));
+  assert.equal(report.renderer.nativeDimensionFields.footprintWidth, "entity +0x1e3 signed BYTE (far occupied-cell extent; not SPR pixel width)");
+  assert.equal(report.renderer.nativeDimensionFields.pixelWidth, "entity +0x1da signed WORD copied from SPR slot table globals +0x88c0bc with stride 0xbf8");
 
   assert.equal(report.buildingRenderer.switchTables.destinationTableEntryCount, 15);
   assert.equal(report.buildingRenderer.switchTables.selectorTableEntryCount, 55);
@@ -87,4 +89,9 @@ test("generated report and fixture remain deterministic", () => {
     { internalClass: 50, frameRange: [9, 15], sourceGlobalTickDivisor: 4 },
     { internalClass: 57, frameRange: [9, 18], sourceGlobalTickDivisor: 4 },
   ]);
+  assert.deepEqual(fixture.dimensionProvenance, {
+    footprintFields: ["entity+0x1e3 signed BYTE", "entity+0x1e4 signed BYTE"],
+    pixelFields: ["entity+0x1da signed WORD", "entity+0x1dc signed WORD"],
+    sourceHeaderDimensionsRemainStaticRepresentative: true,
+  });
 });

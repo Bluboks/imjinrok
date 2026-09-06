@@ -1,7 +1,7 @@
 # 프로젝트 상태
 
 기준일: 2026-09-06
-기준 커밋: `ad327a5` (`fix: preserve K01 source lifecycle and correct scheduler replay`)
+기준 커밋: `fd5daf5` (`fix: correct K01 terrain placement lookup arithmetic`)
 
 ## 요약
 
@@ -21,9 +21,20 @@
   `746,496` RGBA pixel·0 mismatch는 별도 독립 diagnostic이며, K01 physical elevation은 계속 neutral `0`이고
   canonical coverage는 별도 product adaptation이다. 제한된 clean browser diagnostic은 대표 offset과 page error 부재를 확인했지만,
   전체 browser scenario와 원본 full parity는 미완료다.
+- [원본 fog renderer 경계](reverse-engineering/mechanics/source-fog-rendering.md)는 low-nibble `0` early skip,
+  center state `0`의 state `4`→`8` ordered boundary dispatch, center state `4`의 state `8` boundary dispatch,
+  center state `8`의 base path와 state-8 indexed-pixel palette/LUT remap을 추가로 고정한다. 따라서 product `visible`
+  center가 항상 fog composite 없는 상태라는 설명은 폐기한다. K01 base tile coverage/underlay는 유지하고,
+  explored silhouette와 unseen gradient opacity는 native palette/alpha parity가 아닌 명시적 product adaptation으로
+  분리한다. 전체 renderer·visibility gameplay parity는 아직 미완료다.
 - [원본 엔티티 전수 시각 프로필](reverse-engineering/mechanics/original-entity-visual-profiles.md)은
   원본 타입 95개와 building renderer 35개를 생성 프로필로 연결한다. 공유 테마 경로는 확인된
   source profile을 소비하며 복잡한 overlay와 미확정 gameplay 의미는 별도 범위다.
+- [원본 building placement evidence](reverse-engineering/mechanics/source-building-placement.md)는
+  native signed center/footprint far-cell formula와 SPR slot pixel-dimension source를 분리해 고정한다.
+  product building renderer는 실제 interaction footprint의 elevation-aware far contact와 polygon을
+  semantic-center container에 적용하며, native cell-cache producer/lifetime과 native footprint extents는
+  아직 product parity 범위가 아니다.
 - [K01 source entity runtime·admission](reverse-engineering/mechanics/k01-source-entity-runtime-admission.md)은
   v3 source runtime의 slot·generation·occupancy 상태를 정의한다. K01 opening seed와 완성
   봉화대의 명시적 construction adapter, K0120 native reinforcement admission이 production
@@ -115,21 +126,38 @@ product occupancy·movement lifecycle은 별도 경계다.
 
 ## 현재 workspace 상태
 
-workspace audit 기준으로 현재 `dev`의 기준 커밋은 `ad327a5`이며, 기존 17개 Codex 작업 브랜치의
+workspace audit 기준으로 현재 `dev`의 기준 커밋은 `fd5daf5`이며, 기존 17개 Codex 작업 브랜치의
 변경은 `dev`에 통합된 상태다. 별도 sprite 작업 브랜치의 15개 5월 커밋은 통합하지 않고 보존한다.
 이는 2026-08-01의 명시적 `sprite는 그냥 둘게` 선택을 따른다. `master`는 `dev`보다 뒤처져 있고,
 작업 디렉터리 정리나 sprite 브랜치 삭제는 이 상태 기록의 범위가 아니다.
 
-이번 재개 기준 첫 통합 커밋 `ad327a5` 이전 K01 작업의 기준 검증은 `pnpm test` `1,429/1,429`
-통과·fail/skip 0이었다. 현재 uncommitted draft는 placement correction만 포함하며, corrected fixture와
-product golden을 반영한 최종 검증은 `pnpm test` `1,430/1,430` 통과·fail/skip 0, `pnpm typecheck`
-exit 0, `pnpm imjinrok:verify-static-analysis` exit 0으로 확인했다. 이는 전체 K01 parity 또는
-end-to-end browser validation을 뜻하지 않는다.
+`fd5daf5`에 포함된 placement correction의 기준 검증은 `pnpm test` `1,430/1,430` 통과·fail/skip 0,
+`pnpm typecheck` exit 0, `pnpm imjinrok:verify-static-analysis` exit 0으로 확인했다. building placement
+작업 이전의 historical fog-only draft는 source fog dispatch evidence와 bounded client fog rendering
+correction만 포함했으며, 그 게이트 결과는 아래 current combined workspace 수치와 구분한다.
+안정화된 fog draft 전체 게이트는 `pnpm test` `1,435/1,435` 통과·fail/cancelled/skipped 0,
+duration `68,227ms`, `pnpm typecheck` exit 0, `pnpm imjinrok:verify-static-analysis` exit 0으로 확인했다.
+이후 building placement/source-anchor와 sprite-audit provenance를 포함한 현재 combined workspace draft는
+`pnpm test` `1,442/1,442` 통과·fail/cancelled/skipped 0, duration `71,842ms`,
+`pnpm typecheck` exit 0, `pnpm imjinrok:verify-static-analysis` exit 0으로 확인했다. 앞의
+`1,435/1,435` 수치는 fog-only draft의 historical gate로 유지한다.
+
+현재 draft의 제한된 browser pass는 controlled visibility injection에서 edge-only visible chunk의 state-8
+selector 3, 이웃 dirty halo의 이전 edge 제거, opaque terrain 위 fog-0 depth, derived texture cleanup
+`32/32`와 fresh browser error 부재를 확인했고 server 응답은 `200`이었다. 이 pass는 bounded client
+rendering evidence이며 full K01 scenario 또는 native renderer parity를 뜻하지 않는다.
+
+building placement의 별도 bounded browser pass는 source-profile building만 native far-cell 원칙을
+product actual footprint에 적용해 HQ/house/barracks의 local offset `(0,64)/(0,32)/(0,32)`와
+semantic center 보존, body·enemy target·box selection hit, zoom 뒤 bounds를 확인했다. HQ는
+controlled probe에서 source frames `0/8`을 명시적으로 preload한 뒤 healthy `7`, damaged `8`,
+construction `0`의 서로 다른 texture가 모두 bottom `368`과 stable pick을 유지했다. 이 frame preload는
+probe 조건이며 raw startup의 frame-7-only loading과 native asset lifecycle을 검증한 주장이 아니다.
 
 커밋된 K01 work에는 source-profile removal hook과 source trigger→`build-beacon` objective projection adapter가
 포함되어 있다. focused source-removal `43/43`·scenario-policy `142/142`와
 독립 blocked/remove/rebuild/save sequence는 통과했다. 이 기록은 committed prior work의 provenance이며,
-최신 placement correction 검증 결과는 위 workspace 상태의 `1,430/1,430` gate를 따른다.
+placement correction의 `1,430/1,430` gate는 `fd5daf5`에 귀속된다.
 
 ### K01 accepted-update 재개 상태
 
@@ -159,6 +187,7 @@ K02는 이 단기 MVP의 완료 조건이 아니다. 기존 K02 프로토타입�
 | 원본 PE·주소 변환 | 고정 Ghidra 파이프라인 존재 | 일반 참조·점프 테이블 포함 | 2회 생성 해시 일치 | 정적 분석 1단계 완료 |
 | 스크립트·맵·SPR·YAV 파서 | 도구와 K01 map-data-protocol/v1 산출물 존재 | 원본 파일·MAP/EXE 해시와 11개 K01 채널·helper arithmetic 고정 | 결정론 JSON/TS·tamper/truncate/dimension/coordinate 실패 벡터 | protocol 구현; terrain/elevation/compositor 의미는 별도 |
 | 엔티티 정체·시각 프로필 | 생성된 source profile을 공유 테마가 소비; 95개 타입·35개 building renderer 프로필 연결 | 클래스 1~95 명칭·슬롯·기본 프레임·flags·경로와 source dimension/pivot 규칙 확정 | 프로필 생성기·벡터·해시/헤더 검증 | source visual profile 범위 구현; 복잡한 overlay와 gameplay 의미는 별도 |
+| building placement/selection geometry | source building visual이 있는 building만 actual product footprint far contact/polygon, sprite local offset·depth·bounds selection을 소비; generic/mobile 경로 유지 | native far occupied-cell formula와 separate runtime SPR pixel-dimension fields 정적 확정 | source replay vectors·geometry golden/elevation tests·game-client typecheck | native cell-cache producer/lifetime·native footprint extents·full compositor/occupancy parity 미해결 |
 | K01 캠페인 | source runtime v3가 opening seed·completed beacon adapter·native reinforcement admission을 보존하고, beacon policy와 [scenario policy adapter](development/k01-scenario-policy-adapter.md)가 source trigger→objective/native effect를 연결 | 표준 entry timer reset, 봉화대→K0120, native class/요청 좌표·slot/OOB/exact create·1×1 occupancy overwrite, source handle allocator/generation/validity/release 범위, occupancy-owner transition의 create/movement/death/release 경계, opening building 15-record footprint/anchor, class 13·14·82 scoped 핵심 animation와 class-14 16-ring/destruction, latch→timer→commit, result presentation→final route 범위 확정 | 기존 벡터와 새 objective projection boundary vectors가 문서·테스트에 추가됨; focused source-removal·scenario-policy와 독립 blocked/remove/rebuild/save sequence 통과. 최신 전체 게이트는 workspace 상태에 기록 | admission·좁은 beacon/objective projection은 구현; source scheduler/movement/death/release/result lifecycle과 종단 K01 시나리오는 미완료 |
 | K02 캠페인 | 프로토타입 존재 | 제한적 | 원본 재현 없음 | K01 이후로 연기 |
 | 전투 | 프로토타입, 유성룡 좌표 accepted subset `0..32767` 독립 계산 부분 이식 | K01 영웅 phase·피해·대상·사거리·투사체와 signed-health 사망·slot/reference 수명주기 확정 | 대상·투사체·scheduler 및 사망 phase·delay·stale reference 경계 재현 | 독립 단위 부분 이식; identity/좌표/24 Hz exact mapping과 opt-in 사망 정책 대기 |

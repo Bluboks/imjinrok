@@ -1,0 +1,403 @@
+{
+  "schemaVersion": 1,
+  "sourceExecutableSha256": "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e",
+  "vectors": [
+    {
+      "id": "3x3-far-cell",
+      "operation": "place",
+      "input": {
+        "x": 5,
+        "y": 4,
+        "width": 3,
+        "height": 3,
+        "pixelWidth": 131,
+        "pixelHeight": 131,
+        "runtimeOffsetX": 0,
+        "runtimeOffsetY": 0,
+        "signedByte16": 0,
+        "typeOffset": 0,
+        "flags": 0,
+        "viewportProjected": {
+          "x": 1000,
+          "y": 2000
+        }
+      },
+      "expected": {
+        "farCell": {
+          "x": 6,
+          "y": 5
+        },
+        "footprint": {
+          "width": 3,
+          "height": 3
+        },
+        "pixelDimensions": {
+          "width": 131,
+          "height": 131
+        },
+        "runtimeFields": {
+          "centerX": 5,
+          "centerY": 4,
+          "footprintWidth": 3,
+          "footprintHeight": 3,
+          "pixelWidth": 131,
+          "pixelHeight": 131,
+          "runtimeOffsetX": 0,
+          "runtimeOffsetY": 0
+        },
+        "projected": {
+          "x": 1000,
+          "y": 2000
+        },
+        "pivot": "type-offset",
+        "output": {
+          "screenX": 935,
+          "screenY": 1869
+        },
+        "projectionPath": "FUN_00438930->FUN_00465010"
+      },
+      "expectedSha256": "396f5a65e08f2659683a77d143f1e369185224387a10bf8e12895d3923434824"
+    },
+    {
+      "id": "3x2-far-cell",
+      "operation": "place",
+      "input": {
+        "x": 5,
+        "y": 4,
+        "width": 3,
+        "height": 2,
+        "pixelWidth": 131,
+        "pixelHeight": 131,
+        "runtimeOffsetX": 0,
+        "runtimeOffsetY": 0,
+        "signedByte16": 0,
+        "typeOffset": 0,
+        "flags": 0,
+        "viewportProjected": {
+          "x": 1000,
+          "y": 2000
+        }
+      },
+      "expected": {
+        "farCell": {
+          "x": 6,
+          "y": 4
+        },
+        "footprint": {
+          "width": 3,
+          "height": 2
+        },
+        "pixelDimensions": {
+          "width": 131,
+          "height": 131
+        },
+        "runtimeFields": {
+          "centerX": 5,
+          "centerY": 4,
+          "footprintWidth": 3,
+          "footprintHeight": 2,
+          "pixelWidth": 131,
+          "pixelHeight": 131,
+          "runtimeOffsetX": 0,
+          "runtimeOffsetY": 0
+        },
+        "projected": {
+          "x": 1000,
+          "y": 2000
+        },
+        "pivot": "type-offset",
+        "output": {
+          "screenX": 935,
+          "screenY": 1869
+        },
+        "projectionPath": "FUN_00438930->FUN_00465010"
+      },
+      "expectedSha256": "5eefe254cfd89f4ed7f4e182c5399a9ba9ff76067cad179f4e29b7a3c37a98fd"
+    },
+    {
+      "id": "2x2-far-cell",
+      "operation": "place",
+      "input": {
+        "x": 5,
+        "y": 4,
+        "width": 2,
+        "height": 2,
+        "pixelWidth": 131,
+        "pixelHeight": 131,
+        "runtimeOffsetX": 0,
+        "runtimeOffsetY": 0,
+        "signedByte16": 0,
+        "typeOffset": 0,
+        "flags": 0,
+        "viewportProjected": {
+          "x": 1000,
+          "y": 2000
+        }
+      },
+      "expected": {
+        "farCell": {
+          "x": 5,
+          "y": 4
+        },
+        "footprint": {
+          "width": 2,
+          "height": 2
+        },
+        "pixelDimensions": {
+          "width": 131,
+          "height": 131
+        },
+        "runtimeFields": {
+          "centerX": 5,
+          "centerY": 4,
+          "footprintWidth": 2,
+          "footprintHeight": 2,
+          "pixelWidth": 131,
+          "pixelHeight": 131,
+          "runtimeOffsetX": 0,
+          "runtimeOffsetY": 0
+        },
+        "projected": {
+          "x": 1000,
+          "y": 2000
+        },
+        "pivot": "type-offset",
+        "output": {
+          "screenX": 935,
+          "screenY": 1869
+        },
+        "projectionPath": "FUN_00438930->FUN_00465010"
+      },
+      "expectedSha256": "778e1d9dbc70a316dee47a49d5636eb50dafba6dd2a174a63045e7cd0c0e6c8f"
+    },
+    {
+      "id": "1x1-far-cell",
+      "operation": "place",
+      "input": {
+        "x": 5,
+        "y": 4,
+        "width": 1,
+        "height": 1,
+        "pixelWidth": 131,
+        "pixelHeight": 131,
+        "runtimeOffsetX": 0,
+        "runtimeOffsetY": 0,
+        "signedByte16": 0,
+        "typeOffset": 0,
+        "flags": 0,
+        "viewportProjected": {
+          "x": 1000,
+          "y": 2000
+        }
+      },
+      "expected": {
+        "farCell": {
+          "x": 5,
+          "y": 4
+        },
+        "footprint": {
+          "width": 1,
+          "height": 1
+        },
+        "pixelDimensions": {
+          "width": 131,
+          "height": 131
+        },
+        "runtimeFields": {
+          "centerX": 5,
+          "centerY": 4,
+          "footprintWidth": 1,
+          "footprintHeight": 1,
+          "pixelWidth": 131,
+          "pixelHeight": 131,
+          "runtimeOffsetX": 0,
+          "runtimeOffsetY": 0
+        },
+        "projected": {
+          "x": 1000,
+          "y": 2000
+        },
+        "pivot": "type-offset",
+        "output": {
+          "screenX": 935,
+          "screenY": 1869
+        },
+        "projectionPath": "FUN_00438930->FUN_00465010"
+      },
+      "expectedSha256": "9277cd2ef0ec14ab638f40b85af3e85b127c08d2dbc6f8bab26ef687fdd074ab"
+    },
+    {
+      "id": "centered-pivot-with-runtime-offsets",
+      "operation": "place",
+      "input": {
+        "x": 5,
+        "y": 4,
+        "width": 3,
+        "height": 3,
+        "pixelWidth": 131,
+        "pixelHeight": 131,
+        "runtimeOffsetX": -17,
+        "runtimeOffsetY": 23,
+        "signedByte16": -4,
+        "typeOffset": 0,
+        "flags": 8,
+        "viewportProjected": {
+          "x": -321,
+          "y": 222
+        }
+      },
+      "expected": {
+        "farCell": {
+          "x": 6,
+          "y": 5
+        },
+        "footprint": {
+          "width": 3,
+          "height": 3
+        },
+        "pixelDimensions": {
+          "width": 131,
+          "height": 131
+        },
+        "runtimeFields": {
+          "centerX": 5,
+          "centerY": 4,
+          "footprintWidth": 3,
+          "footprintHeight": 3,
+          "pixelWidth": 131,
+          "pixelHeight": 131,
+          "runtimeOffsetX": -17,
+          "runtimeOffsetY": 23
+        },
+        "projected": {
+          "x": -321,
+          "y": 222
+        },
+        "pivot": "center",
+        "output": {
+          "screenX": -403,
+          "screenY": 176
+        },
+        "projectionPath": "FUN_00438930->FUN_00465010"
+      },
+      "expectedSha256": "7f4d78fadf693190d228c0ed11417f90717efc9d65836fede1ff463b3a049397"
+    },
+    {
+      "id": "type-offset-pivot-with-runtime-offsets",
+      "operation": "place",
+      "input": {
+        "x": 5,
+        "y": 4,
+        "width": 3,
+        "height": 3,
+        "pixelWidth": 131,
+        "pixelHeight": 131,
+        "runtimeOffsetX": -17,
+        "runtimeOffsetY": 23,
+        "signedByte16": -4,
+        "typeOffset": 11,
+        "flags": 0,
+        "viewportProjected": {
+          "x": -321,
+          "y": 222
+        }
+      },
+      "expected": {
+        "farCell": {
+          "x": 6,
+          "y": 5
+        },
+        "footprint": {
+          "width": 3,
+          "height": 3
+        },
+        "pixelDimensions": {
+          "width": 131,
+          "height": 131
+        },
+        "runtimeFields": {
+          "centerX": 5,
+          "centerY": 4,
+          "footprintWidth": 3,
+          "footprintHeight": 3,
+          "pixelWidth": 131,
+          "pixelHeight": 131,
+          "runtimeOffsetX": -17,
+          "runtimeOffsetY": 23
+        },
+        "projected": {
+          "x": -321,
+          "y": 222
+        },
+        "pivot": "type-offset",
+        "output": {
+          "screenX": -403,
+          "screenY": 121
+        },
+        "projectionPath": "FUN_00438930->FUN_00465010"
+      },
+      "expectedSha256": "6bd28d288a786911a2ac4a0782314a136943c96a2ac9d5f340ddbb09799f926a"
+    },
+    {
+      "id": "cached-far-cell",
+      "operation": "place",
+      "input": {
+        "x": 5,
+        "y": 4,
+        "width": 3,
+        "height": 3,
+        "pixelWidth": 131,
+        "pixelHeight": 131,
+        "runtimeOffsetX": 0,
+        "runtimeOffsetY": 0,
+        "signedByte16": 0,
+        "typeOffset": 0,
+        "flags": 0,
+        "viewportProjected": {
+          "x": 1000,
+          "y": 2000
+        },
+        "projectionPath": "FUN_00438aa0->cached-cell-tables",
+        "cachedProjected": {
+          "x": 333,
+          "y": -222
+        }
+      },
+      "expected": {
+        "farCell": {
+          "x": 6,
+          "y": 5
+        },
+        "footprint": {
+          "width": 3,
+          "height": 3
+        },
+        "pixelDimensions": {
+          "width": 131,
+          "height": 131
+        },
+        "runtimeFields": {
+          "centerX": 5,
+          "centerY": 4,
+          "footprintWidth": 3,
+          "footprintHeight": 3,
+          "pixelWidth": 131,
+          "pixelHeight": 131,
+          "runtimeOffsetX": 0,
+          "runtimeOffsetY": 0
+        },
+        "projected": {
+          "x": 333,
+          "y": -222
+        },
+        "pivot": "type-offset",
+        "output": {
+          "screenX": 268,
+          "screenY": -353
+        },
+        "projectionPath": "FUN_00438aa0->cached-cell-tables"
+      },
+      "expectedSha256": "b8fb5b49912d43dac7fd992562d3ab156d823c69028e44fb65b15725d34a6d7a"
+    }
+  ]
+}

@@ -1,5 +1,5 @@
 // GENERATED FILE - DO NOT EDIT. Regenerate with tools/imjinrok/extract-original-entity-visual-profiles.mjs.
-// generatorSha256: b5ee60f61a7f1a410bbb05885e09ad50aa23adb12c9c52bc51ae1b29565d530c
+// generatorSha256: 8c2a1c857de6718ab307a03a500dba20f5ff224bf022f462bfd2880c2c14c6b0
 // executableSha256: 25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e
 // outputPath: packages/shared/src/originalEntityTypeProfiles.generated.ts
 

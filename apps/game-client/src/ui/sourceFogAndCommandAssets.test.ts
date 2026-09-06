@@ -75,21 +75,41 @@ test("source fog uses the exact corner bits, lookup, and six-frame algebra behin
   assert.ok(unseenComposite);
   assert.equal(exploredComposite.sourceStateValue, 4);
   assert.equal(unseenComposite.sourceStateValue, 8);
-  assert.equal(resolveSourceFogComposite(IMJINROK_SOURCE_FOG_PROFILE_ID, 0, "visible", () => "visible"), null);
   for (const visibility of ["unseen", "explored"] as const) {
     assert.deepEqual(resolveSourceFogLayerPlan(IMJINROK_SOURCE_FOG_PROFILE_ID, 0, visibility, () => "visible"), {
       drawBaseFog: true,
-      composite: null,
+      composites: [],
     });
     assert.deepEqual(resolveSourceFogLayerPlan(IMJINROK_SOURCE_FOG_PROFILE_ID, 0, visibility, () => visibility), {
       drawBaseFog: true,
-      composite: null,
+      composites: [],
     });
   }
+  const visibleBoundary = resolveSourceFogLayerPlan(
+    IMJINROK_SOURCE_FOG_PROFILE_ID,
+    0,
+    "visible",
+    (neighbor) => neighbor === "top" ? "explored" : neighbor === "right" ? "unseen" : "visible",
+  );
+  assert.equal(visibleBoundary.drawBaseFog, false);
+  assert.deepEqual(
+    visibleBoundary.composites.map(({ sourceStateValue, selector }) => ({ sourceStateValue, selector })),
+    [{ sourceStateValue: 4, selector: 2 }, { sourceStateValue: 8, selector: 3 }],
+  );
+  assert.deepEqual(
+    resolveSourceFogLayerPlan(IMJINROK_SOURCE_FOG_PROFILE_ID, 0, "explored", (neighbor) => neighbor === "right" ? "unseen" : "visible").composites
+      .map(({ sourceStateValue, selector }) => ({ sourceStateValue, selector })),
+    [{ sourceStateValue: 8, selector: 3 }],
+  );
+  assert.deepEqual(resolveSourceFogLayerPlan(IMJINROK_SOURCE_FOG_PROFILE_ID, 0, "unseen", () => "unseen"), {
+    drawBaseFog: true,
+    composites: [],
+  });
   assert.deepEqual(resolveSourceFogLayerPlan(IMJINROK_SOURCE_FOG_PROFILE_ID, 0, "visible", () => "visible"), {
     drawBaseFog: false,
-    composite: null,
+    composites: [],
   });
+  assert.deepEqual(resolveSourceFogLayerPlan(IMJINROK_SOURCE_FOG_PROFILE_ID, 0, "visible", () => "unseen").composites, []);
   assert.deepEqual(reproduceSourceFogFrameIndices(13), [26, 27, 58, 59, 90, 91]);
   assert.throws(() => reproduceSourceFogFrameIndices(14), /0\.\.13/);
 });
@@ -123,6 +143,8 @@ test("source fog local anchor keeps base and raised K01 draw tops at ground and 
 
 test("source fog keeps the generic fallback and malformed opt-ins fail loudly", () => {
   assert.equal(resolveSourceFogComposite(undefined, undefined, "unseen", () => "unseen"), null);
+  assert.throws(() => resolveSourceFogLayerPlan("missing-profile", 0, "unseen", () => "unseen"), /Unknown source fog visual profile/);
+  assert.throws(() => resolveSourceFogLayerPlan(IMJINROK_SOURCE_FOG_PROFILE_ID, undefined, "unseen", () => "unseen"), /family index/);
   assert.throws(() => assertSourceFogVisualProfile("missing-profile"), /Unknown source fog visual profile/);
   assert.throws(() => assertSourceFogFamilyIndex(undefined), /family index/);
   assert.throws(() => assertSourceFogFamilyIndex(15), /0\.\.14/);

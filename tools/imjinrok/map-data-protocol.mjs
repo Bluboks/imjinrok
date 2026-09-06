@@ -65,7 +65,7 @@ const DEFAULT_EVIDENCE_PATHS = Object.freeze({
 const EXPECTED_EVIDENCE_FIXTURE_DIGESTS = Object.freeze({
   "analysis/fixtures/k01-source-tile-selector.json": "bb72fbca0a03b41dee11ce1fc3e7c50f0731d3654ef0c9b89afdd09cc26aa1f3",
   "analysis/fixtures/k01-tile-placement-elevation-evidence.json": "f71796a7977daf5341c61eabb2944de2974dcc0e73abc213236e18429cc101af",
-  "analysis/fixtures/source-fog-render-evidence.json": "c6e58504a17ca8104afcec500d6c9b18d8ec4ae37389a5e45e32aa1e5c8b249f",
+  "analysis/fixtures/source-fog-render-evidence.json": "b71e85ecc62241e413718d57d392f0185f1e478b72cafe9a26aadd7c9ab16e76",
   "analysis/fixtures/k01-map-passability-field.json": "f9a1f62f8b8f70c1506466b9b6bb0d144ef71b1e476fb3d6dda4998366d494da",
   "analysis/fixtures/k01-gameplay-terrain-compositor.json": "002380c9804943b065ce6833a518dbc2554dd8d8e143287d005a8fdd0a46610c",
   "analysis/fixtures/k01-cell-projection-evidence.json": "76afc886a247b484da9680d87b3cb15a3b50bc7cc31941b363d1df2499a4e536",

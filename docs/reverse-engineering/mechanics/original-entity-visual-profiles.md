@@ -17,7 +17,7 @@ TypeScript 소비 표면은
 - 각 타입은 numeric flags, source SPR path/hash/header dimensions/frame count, signed type-record
   `+0x0c` vertical offset, low-byte flags bit `0x08` pivot split을 가진다.
 - `FUN_0045bd20`의 writer argument 5를 `FUN_0045bd2e`가 signed WORD type-record `+0x0c`에 저장한다.
-- `FUN_00438930`/`FUN_00438aa0`의 dimension reads와 bit `0x08` branch에 따라 static representative
+- `FUN_00438930`/`FUN_00438aa0`의 runtime footprint reads, SPR slot pixel-dimension loads, and bit `0x08` branch에 따라 static representative
   pivot은 다음으로 계산한다.
 
   ```text
@@ -26,8 +26,15 @@ TypeScript 소비 표면은
   ```
 
 Runtime entity fields, elevation, clipping, and current frame dimensions are deliberately not folded into
-the static representative pivot; the generated profile exposes `verticalOffset` and `pivotMode` for that
-runtime calculation.
+the static representative pivot; the generated profile exposes `verticalOffset`, `pivotMode`, and the
+dimension provenance for that runtime calculation. The `+0x1e3/+0x1e4` bytes are signed occupied-cell
+extents used to derive the far cell. They are not SPR pixel dimensions. Native pixel width/height are
+signed WORDs at runtime `entity +0x1da/+0x1dc`, copied from the SPR slot table with stride `0xbf8` at
+globals `+0x88c0bc/+0x88c0c0`. The existing local pivot formula remains valid for those pixel dimensions.
+
+The bounded source placement replay and its explicit vectors are documented in
+[`source-building-placement.md`](source-building-placement.md); its cached projection words are kept
+separate from the K01 cell-projection evidence.
 
 ## Building selector
 

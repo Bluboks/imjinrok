@@ -1,7 +1,7 @@
 {
-  "question": "What source-backed fog resource, neighbor-lookup, caller projection/argument ordering, placement adjustment, and six-subframe composition contract do FUN_00467de0 and FUN_0046a530 establish?",
-  "analysisStatus": "정적 확정 (resource family, lookup, caller projection/argument ordering, bounded placement arithmetic, six-subframe composition, and frame algebra only)",
-  "reproductionStatus": "재현 완료 (hash-bound extraction, resource records, lookup/frame/placement vectors, loop bounds, and fail-closed reference inputs)",
+  "question": "What source-backed fog resource, low-nibble/center-state dispatch, neighbor lookup, caller projection/argument ordering, placement adjustment, six-subframe composition, and state-8 palette remap contract do FUN_00467de0, FUN_0046a530, and FUN_00452b30 establish?",
+  "analysisStatus": "정적 확정 (resource family, low-nibble/center-state dispatch, lookup, caller projection/argument ordering, bounded placement arithmetic, six-subframe composition, state-8 palette/LUT arithmetic, and frame algebra only)",
+  "reproductionStatus": "재현 완료 (hash-bound extraction, resource records, dispatch/LUT/frame/placement vectors, exhaustive 32x32/64x64 LUT replay, loop bounds, and fail-closed reference inputs)",
   "implementationStatus": "없음",
   "sources": {
     "executable": {
@@ -464,6 +464,205 @@
       "literalState",
       "lookupSelector"
     ],
+    "dispatch": {
+      "byteRange": "0x004686e2-0x00468987 (end exclusive)",
+      "lowNibbleAddress": "map + 0x32514 + x * 180 + y",
+      "centerStateAddress": "0x007d4d5e + x * 180 + y",
+      "lowNibbleZero": "skip all center/base and edge-mask calls for this cell pass",
+      "centerStateZero": "run state-4 edge mask then state-8 edge mask in that order",
+      "centerStateNonzeroExcept8": "skip state-4 edge mask and run state-8 edge mask",
+      "centerState8": "call FUN_00469510 with literal state 8 and selector 1, then skip both edge-mask paths",
+      "maskConstruction": {
+        "state4": "neighbor byte equals 4",
+        "state8": "neighbor byte equals 8"
+      },
+      "syntheticVectors": [
+        {
+          "id": "visible-center-ordered-state4-then-state8",
+          "input": {
+            "centerState": 0,
+            "lowNibble": 1,
+            "neighbors": {
+              "top": 4,
+              "bottom": 0,
+              "left": 0,
+              "right": 8,
+              "topLeft": 0,
+              "topRight": 0,
+              "bottomLeft": 0,
+              "bottomRight": 0
+            }
+          },
+          "output": {
+            "centerState": 0,
+            "lowNibble": 1,
+            "branch": "center-state-0-boundary",
+            "baseCall": null,
+            "passes": [
+              {
+                "state": 4,
+                "mask": 3,
+                "selector": 2,
+                "skipped": false,
+                "skipReason": null
+              },
+              {
+                "state": 8,
+                "mask": 10,
+                "selector": 3,
+                "skipped": false,
+                "skipReason": null
+              }
+            ],
+            "calls": [
+              {
+                "state": 4,
+                "mask": 3,
+                "selector": 2
+              },
+              {
+                "state": 8,
+                "mask": 10,
+                "selector": 3
+              }
+            ]
+          }
+        },
+        {
+          "id": "explored-center-only-state8",
+          "input": {
+            "centerState": 4,
+            "lowNibble": 1,
+            "neighbors": {
+              "top": 4,
+              "bottom": 0,
+              "left": 0,
+              "right": 8,
+              "topLeft": 0,
+              "topRight": 0,
+              "bottomLeft": 0,
+              "bottomRight": 0
+            }
+          },
+          "output": {
+            "centerState": 4,
+            "lowNibble": 1,
+            "branch": "center-nonzero-state-8-boundary",
+            "baseCall": null,
+            "passes": [
+              {
+                "state": 8,
+                "mask": 10,
+                "selector": 3,
+                "skipped": false,
+                "skipReason": null
+              }
+            ],
+            "calls": [
+              {
+                "state": 8,
+                "mask": 10,
+                "selector": 3
+              }
+            ]
+          }
+        },
+        {
+          "id": "unseen-center-base-path",
+          "input": {
+            "centerState": 8,
+            "lowNibble": 1,
+            "neighbors": {
+              "top": 4,
+              "bottom": 0,
+              "left": 0,
+              "right": 8,
+              "topLeft": 0,
+              "topRight": 0,
+              "bottomLeft": 0,
+              "bottomRight": 0
+            }
+          },
+          "output": {
+            "centerState": 8,
+            "lowNibble": 1,
+            "branch": "center-state-8-base",
+            "baseCall": {
+              "function": "FUN_00469510",
+              "state": 8,
+              "selector": 1
+            },
+            "passes": [],
+            "calls": []
+          }
+        },
+        {
+          "id": "zero-low-nibble-skips-all",
+          "input": {
+            "centerState": 0,
+            "lowNibble": 0,
+            "neighbors": {
+              "top": 4,
+              "bottom": 0,
+              "left": 0,
+              "right": 8,
+              "topLeft": 0,
+              "topRight": 0,
+              "bottomLeft": 0,
+              "bottomRight": 0
+            }
+          },
+          "output": {
+            "centerState": 0,
+            "lowNibble": 0,
+            "branch": "low-nibble-zero",
+            "baseCall": null,
+            "passes": [],
+            "calls": []
+          }
+        },
+        {
+          "id": "all-neighbor-mask-omits-edge-calls",
+          "input": {
+            "centerState": 0,
+            "lowNibble": 1,
+            "neighbors": {
+              "top": 4,
+              "bottom": 4,
+              "left": 4,
+              "right": 4,
+              "topLeft": 4,
+              "topRight": 4,
+              "bottomLeft": 4,
+              "bottomRight": 4
+            }
+          },
+          "output": {
+            "centerState": 0,
+            "lowNibble": 1,
+            "branch": "center-state-0-boundary",
+            "baseCall": null,
+            "passes": [
+              {
+                "state": 4,
+                "mask": 15,
+                "selector": null,
+                "skipped": true,
+                "skipReason": "mask-all-neighbors"
+              },
+              {
+                "state": 8,
+                "mask": 0,
+                "selector": null,
+                "skipped": true,
+                "skipReason": "mask-zero"
+              }
+            ],
+            "calls": []
+          }
+        }
+      ]
+    },
     "projection": {
       "callerRange": {
         "label": "FUN_00468600 caller range within FUN_00467de0",
@@ -778,6 +977,86 @@
     },
     "boundary": "The byte-proven branch distinguishes literal state 4 from the non-4 path reached by caller literal state 8; no human visibility meaning is assigned."
   },
+  "state8PaletteRemap": {
+    "compositor": {
+      "function": "FUN_00452b30",
+      "byteRange": "0x00452b30-0x00452c96 (end exclusive)"
+    },
+    "paletteChannels": {
+      "address": "object + 0x219a0",
+      "stride": 3,
+      "order": [
+        "red",
+        "green",
+        "blue"
+      ]
+    },
+    "channelTables": [
+      {
+        "channel": "red",
+        "limit": 32,
+        "dimensions": {
+          "destination": 32,
+          "source": 32
+        },
+        "entryCount": 1024,
+        "valuesSha256": "a72f750ee861b80cd397b85030c7c873473a67ba243c256bd2a4cb5af5235680",
+        "allEntriesEqualMinimum": true,
+        "address": "object + 0x864a0"
+      },
+      {
+        "channel": "green",
+        "limit": 64,
+        "dimensions": {
+          "destination": 64,
+          "source": 64
+        },
+        "entryCount": 4096,
+        "valuesSha256": "e12cfee1777aa44c81d7ff782cc35153ad042f069e4ee28d891c580e69ada064",
+        "allEntriesEqualMinimum": true,
+        "address": "object + 0x86ca0"
+      },
+      {
+        "channel": "blue",
+        "limit": 32,
+        "dimensions": {
+          "destination": 32,
+          "source": 32
+        },
+        "entryCount": 1024,
+        "valuesSha256": "a72f750ee861b80cd397b85030c7c873473a67ba243c256bd2a4cb5af5235680",
+        "allEntriesEqualMinimum": true,
+        "address": "object + 0x864a0"
+      }
+    ],
+    "formula": "maximum=max(source,destination); minimum=min(source,destination); q=trunc((limit-maximum)/limit); output=minimum+q*minimum",
+    "representative": {
+      "source": {
+        "red": 8,
+        "green": 40,
+        "blue": 30
+      },
+      "destination": {
+        "red": 24,
+        "green": 48,
+        "blue": 16
+      },
+      "remapped": {
+        "red": 8,
+        "green": 40,
+        "blue": 16
+      },
+      "packed565": 17680,
+      "packed565Formula": "(red << 11) | (green << 5) | blue",
+      "finalPaletteLookup": {
+        "address": "object + 0x19a0",
+        "entryStride": 2,
+        "output": "destination indexed byte"
+      }
+    },
+    "boundedInterpretation": "For valid channel pairs, the LUT output caps each destination channel at the source channel minimum; an opaque gray source therefore acts as an intensity cap, not a uniformly dark opaque overlay.",
+    "boundary": "The source maps indexed pixels through palette channel bytes, the 32x32/64x64 channel LUTs, a packed 5:6:5 index, and an object+0x19a0 lookup. Browser alpha/opacity is not claimed equivalent to this native remap."
+  },
   "frameSelection": {
     "resourceHeaderOffsets": {
       "frameWidth": "0x04",
@@ -861,6 +1140,11 @@
       "bodySha256": "1a2c8ddfb7e2801514c0848d1c7ecb18628df35b5cf4785ecd2507c2b5a74604"
     },
     {
+      "id": "FUN_00467de0 center/low-nibble dispatch window",
+      "byteRange": "0x004686e2-0x00468987 (end exclusive)",
+      "bodySha256": "7fc7126448394a8f9c93ceba2f5b74a375ce4b47b82f6a24d23c3f2bdc80ddca"
+    },
+    {
       "id": "FUN_0046a530",
       "byteRange": "0x0046a530-0x0046a8e8 (end exclusive)",
       "bodySha256": "b4dc5ba4f0d8be3cac135ccfd02a372173dfcf01dad79f262cf8468572ea8e7a"
@@ -874,9 +1158,49 @@
       "id": "FUN_0046a530 placement prologue and vertical adjustment",
       "byteRange": "0x0046a530-0x0046a5c8 (end exclusive)",
       "bodySha256": "23bbcbfa9bc0ec79a979e3271a3251b8eab669d4a7767ae0de86054016284813"
+    },
+    {
+      "id": "FUN_00452b30 state-8 palette remap",
+      "byteRange": "0x00452b30-0x00452c96 (end exclusive)",
+      "bodySha256": "3dd28a807d474960f9578c724c01523853b404071b9856d7f3c692b9250a3f55"
+    },
+    {
+      "id": "FUN_0044b680 palette LUT initializer",
+      "byteRange": "0x0044b680-0x0044b734 (end exclusive)",
+      "bodySha256": "ed47b21cd562a59214d614d4490cdbd2192382d3e1599498ce00f9cdad885e90"
     }
   ],
   "evidencePoints": [
+    {
+      "va": "0x004686e2",
+      "rawOffset": "0x000686e2",
+      "bytes": "8d 84 ad 5d 16 00 00 8d 04 c0 8d 0c 82 8a 04 31",
+      "meaning": "FUN_00467de0 derives the low-nibble map address as map+0x32514+x*180+y before the center-state and neighbor-mask dispatch."
+    },
+    {
+      "va": "0x004686f2",
+      "rawOffset": "0x000686f2",
+      "bytes": "24 0f 66 0f be c0 66 85 c0 0f 84 86 02 00 00",
+      "meaning": "The low nibble from map+0x32514+x*180+y is masked to 0..15; zero jumps directly to the end of this cell's fog dispatch pass."
+    },
+    {
+      "va": "0x0046870f",
+      "rawOffset": "0x0006870f",
+      "bytes": "8a 80 5e 4d 7d 00 66 0f be c8 66 83 f9 08 75 1c",
+      "meaning": "The center fog byte at 0x007d4d5e+x*180+y is sign-extended and compared with literal state 8."
+    },
+    {
+      "va": "0x0046871f",
+      "rawOffset": "0x0006871f",
+      "bytes": "8b 54 24 18 8b 44 24 14 6a 01 6a 08 52 50 57 53 8b ce e8 da 0d 00 00 e9 4c 02 00 00",
+      "meaning": "Center state 8 calls FUN_00469510 with literal selector 1 and state 8, then jumps past both edge-mask paths to the cell-pass continuation."
+    },
+    {
+      "va": "0x0046873b",
+      "rawOffset": "0x0006873b",
+      "bytes": "84 c0 0f 85 26 01 00 00",
+      "meaning": "For a nonzero center state other than 8, the zero-state-4 mask path is skipped and control enters the state-8 mask path; center state 0 falls through to state 4 first."
+    },
     {
       "va": "0x00468634",
       "rawOffset": "0x00068634",
@@ -912,6 +1236,12 @@
       "rawOffset": "0x00068743",
       "bytes": "8d 4a ff 33 c0 85 c9 7c 12 8b 4c 24 1c 80 b9 5d 4d 7d 00 04 75 05 b8 03 00 00 00 8b 8e a4 2d 00 00 42 3b d1 7d 0f 8b 54 24 1c 80 ba 5f 4d 7d 00 04 75 02 0c 0c",
       "meaning": "FUN_00467de0 begins the state-4 neighbor mask and sets the vertical-neighbor bit pairs only after in-bounds checks."
+    },
+    {
+      "va": "0x0046883d",
+      "rawOffset": "0x0006883d",
+      "bytes": "66 85 c0 74 27 66 3d 0f 00 74 21",
+      "meaning": "The state-4 mask path skips both mask zero and mask 0x0f before its lookup and compositor call."
     },
     {
       "va": "0x00468842",
@@ -990,6 +1320,42 @@
       "rawOffset": "0x0006a889",
       "bytes": "66 83 f9 02 89 4c 24 54 89 54 24 4c 89 7c 24 10 0f 8c 35 ff ff ff 0f bf 4c 24 1c 8b 7c 24 14 8b 54 24 48 03 f9 42 89 7c 24 14 8b 7c 24 18 03 f9 8b 4c 24 1c 89 7c 24 18 8b 7c 24 20 03 f9 66 83 fa 03 89 54 24 48 89 7c 24 20 0f 8c db fe ff ff",
       "meaning": "The non-state-4 path also has inner <2 and outer <3 loop bounds, but its call target differs from the state-4 path."
+    },
+    {
+      "va": "0x00452b89",
+      "rawOffset": "0x00052b89",
+      "bytes": "8a 04 18 3c fe 75 19 46 0f bf c6 66 0f b6 04 18 03 d0 46",
+      "meaning": "FUN_00452b30 reads the source indexed pixel at 0x00452b89; source byte 0xfe enters its encoded skip/run path before ordinary palette remapping."
+    },
+    {
+      "va": "0x00452bb9",
+      "rawOffset": "0x00052bb9",
+      "bytes": "8a 1a 8b f3 33 db 8d 14 71 8d 3c 16 8d 14 41 8a 9c 10 a0 19 02 00 8d 2c 10 33 d2 8a 97 a0 19 02 00 c1 e2 05 03 d3 33 db 8a 9f a1 19 02 00",
+      "meaning": "FUN_00452b30 reads the destination indexed pixel and source/destination palette channel bytes from object+0x219a0 with a three-byte palette stride, then indexes the red/blue 32x32 LUT at object+0x864a0."
+    },
+    {
+      "va": "0x00452bef",
+      "rawOffset": "0x00052bef",
+      "bytes": "8b fb 33 db 8a 9d a1 19 02 00 66 8b 6c 24 24 c1 e7 06 03 fb 33 db c1 e2 06 0f bf bc 79 a0 6c 08 00 03 d7 8d bc 71 6c 66 01 00 c1 e2 05 8a 9c 3e 36 b3 00 00 8d b4 41 6c 66 01 00 8b fb 33 db 8a 9c 30 36 b3 00 00 8b 74 24 10 c1 e7 05 03 fb 8b 5c 24 2c 0f bf 84 79 a0 64 08 00 03 d0 8b 44 24 14 8b 7c 24 1c",
+      "meaning": "FUN_00452b30 indexes the green 64x64 LUT at object+0x86ca0 and the blue 32x32 LUT at object+0x864a0, combines the three remapped channels into a packed 5:6:5 index, and prepares the final palette lookup."
+    },
+    {
+      "va": "0x00452c54",
+      "rawOffset": "0x00052c54",
+      "bytes": "8a 94 51 a0 19 00 00 88 10",
+      "meaning": "The state-8 path maps the packed 5:6:5 index through object+0x19a0 (two-byte table stride) and writes the resulting byte to the destination pixel."
+    },
+    {
+      "va": "0x0044b680",
+      "rawOffset": "0x0004b680",
+      "bytes": "53 55 56 57 33 ff 8d 81 a0 64 08 00 33 f6 8b e8 66 3b fe 8b c7 7f 02 8b c6 66 3b fe 8b df 7c 02 8b de 0f bf d0 b8 20 00 00 00 2b c2 99 83 e2 1f 03 c2 8b d7 c1 f8 05 0f af c3 66 3b fe 7c 02 8b d6 03 d0 46 66 89 55 00 83 c5 02 66 83 fe 20 7c bf",
+      "meaning": "FUN_0044b680 fills object+0x864a0 as a 32x32 WORD table using max/min channel values and the limit 0x20; valid entries equal the minimum channel value."
+    },
+    {
+      "va": "0x0044b6dc",
+      "rawOffset": "0x0004b6dc",
+      "bytes": "8d 81 a0 6c 08 00 33 c9 8b d8 66 3b f1 8b c6 7f 02 8b c1 66 3b f1 8b fe 7c 02 8b f9 0f bf d0 b8 40 00 00 00 2b c2 99 83 e2 3f 03 c2 8b d6 c1 f8 06 0f af c7 66 3b f1 7c 02 8b d1 03 d0 41 66 89 13 83 c3 02 66 83 f9 40 7c c0 46 8b c3 66 83 fe 40 7c b3 5f 5e 5d 5b c3",
+      "meaning": "FUN_0044b680 fills object+0x86ca0 as a 64x64 WORD table using the same max/min arithmetic and the limit 0x40; valid entries equal the minimum channel value."
     }
   ],
   "callEdges": [
@@ -1006,6 +1372,12 @@
       "label": "state-8 caller dispatch"
     },
     {
+      "from": "0x00468731",
+      "to": "0x00469510",
+      "bytes": "e8 da 0d 00 00",
+      "label": "center-state-8 base path"
+    },
+    {
       "from": "0x0046a591",
       "to": "0x0046d650",
       "bytes": "e8 ba 30 00 00",
@@ -1016,7 +1388,13 @@
       "to": "0x0046d650",
       "bytes": "e8 a2 30 00 00",
       "label": "other-low-nibble placement helper"
+    },
+    {
+      "from": "0x0044b158",
+      "to": "0x0044b680",
+      "bytes": "e8 23 05 00 00",
+      "label": "palette LUT initializer"
     }
   ],
-  "unresolvedBoundary": "The arithmetic in this caller/compositor slice is static-confirmed and reproduced, but state 4/8 human meaning, visibility mapping, alpha/tint, web chunk scheduling, generic map-file provenance, family-byte runtime producer/lifetime, helper human meaning, and original renderer-wide pivot/placement semantics remain unresolved or explicit product adaptation. K01's hash-bound static byte distribution is recorded only as a bounded map-data observation. The frame algebra is confined to the caller-proven selector domain and normal fog header contract; it does not assign a human meaning to either state or selector."
+  "unresolvedBoundary": "The arithmetic in this caller/compositor/state-8 palette slice is static-confirmed and reproduced, but state 4/8 human meaning, visibility mapping, browser alpha/opacity equivalence, runtime palette lifecycle, final object+0x19a0 palette-index contents, web chunk scheduling, generic map-file provenance, family-byte runtime producer/lifetime, helper human meaning, and original renderer-wide pivot/placement semantics remain unresolved or explicit product adaptation. K01's hash-bound static byte distribution is recorded only as a bounded map-data observation. The frame algebra is confined to the caller-proven selector domain and normal fog header contract; it does not assign a human meaning to either state or selector."
 }

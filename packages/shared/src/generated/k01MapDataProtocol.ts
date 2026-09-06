@@ -1146,7 +1146,7 @@ export const K01_MAP_DATA_PROTOCOL = {
     },
     "fog": {
       "path": "analysis/fixtures/source-fog-render-evidence.json",
-      "sourceSha256": "c6e58504a17ca8104afcec500d6c9b18d8ec4ae37389a5e45e32aa1e5c8b249f",
+      "sourceSha256": "b71e85ecc62241e413718d57d392f0185f1e478b72cafe9a26aadd7c9ab16e76",
       "familySha256": "7a9fcc150cf0128af19d57f742a6c160c6b5b8b003a81c069fb3167427208f88"
     },
     "passability": {
