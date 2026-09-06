@@ -14,7 +14,7 @@ import { applyNavigationRoute, findNavigationRouteForUnit } from "./navigation.j
 import { getUnitFootprintTiles, resolveEffectiveFootprint } from "./footprints.js";
 import { validateBuildingPlacement } from "./placement.js";
 import { applyCompletedResearchToUnit } from "./research.js";
-import { resolveK01SourceObjectiveCompletion } from "./k01ScenarioPolicy.js";
+import { resolveK01SourceObjectiveCompletion, resolveK01SourceProtectObjectiveFailure } from "./k01ScenarioPolicy.js";
 import { isTilePassableForUnit } from "./terrain.js";
 import type {
   ObjectiveRuntimeState,
@@ -605,14 +605,16 @@ export function evaluateScenarioRuntime(state: WorldState): void {
     return;
   }
 
-  if (isPrimaryPlayerDefeated(state)) {
+  const sourceOwnsMissionResult = state.sourceRuntimeProfile?.profileId === "k01:source-runtime";
+
+  if (!sourceOwnsMissionResult && isPrimaryPlayerDefeated(state)) {
     completeScenario(state, "defeat");
     return;
   }
 
   for (const objective of Object.values(state.scenario.objectives)) {
     if (objective.status === "failed") {
-      if ((objective.required || objective.defeatOnFailure) && isObjectiveFailureDefeatReady(state, objective)) {
+      if (!sourceOwnsMissionResult && (objective.required || objective.defeatOnFailure) && isObjectiveFailureDefeatReady(state, objective)) {
         completeScenario(state, "defeat");
         return;
       }
@@ -627,7 +629,7 @@ export function evaluateScenarioRuntime(state: WorldState): void {
     if (isObjectiveFailed(state, objective)) {
       failObjective(state, objective);
 
-      if (objective.required || objective.defeatOnFailure) {
+      if (!sourceOwnsMissionResult && (objective.required || objective.defeatOnFailure)) {
         if (isObjectiveFailureDefeatReady(state, objective)) {
           completeScenario(state, "defeat");
           return;
@@ -645,6 +647,7 @@ export function evaluateScenarioRuntime(state: WorldState): void {
   const requiredObjectives = Object.values(state.scenario.objectives).filter((objective) => objective.required);
 
   if (
+    !sourceOwnsMissionResult &&
     state.scenario.completionMode === "objectives" &&
     requiredObjectives.length > 0 &&
     requiredObjectives.every((objective) => objective.status === "completed" || isObjectiveSatisfiedAtVictory(state, objective))
@@ -692,8 +695,11 @@ function isObjectiveComplete(state: WorldState, objective: ObjectiveRuntimeState
 
 function isObjectiveFailed(state: WorldState, objective: ObjectiveRuntimeState): boolean {
   switch (objective.type) {
+    case "protect-units": {
+      const sourceFailure = resolveK01SourceProtectObjectiveFailure(state, objective.targetKind);
+      return sourceFailure ?? countMatchingUnits(state, objective) < getRequiredCount(objective);
+    }
     case "move-unit-to-area":
-    case "protect-units":
       return countMatchingUnits(state, objective) < getRequiredCount(objective);
     case "survive":
     case "defeat-opponents":

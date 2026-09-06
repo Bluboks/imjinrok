@@ -1,6 +1,10 @@
 # K01 미션 결과 latch·timer·commit 수명주기
 
-For K01, in what exact order and under what raw conditions does FUN_0048a5c0 first latch DWORD 0x00843740 for the general-presence and protected-hero failures, how can its beacon post-state return bypass the hero checks, how does FUN_0048d6f0 resolve DWORD 0x0084373c/0x00843740 across the strict 0x7d0 boundary, signed DWORD subtraction/absolute-value overflow and simultaneous timers, and how do FUN_0048ddb0 and FUN_004481d0 gate, notify, and commit the final result once per distinct raw global tick?
+이 문서는 K01 general-presence와 보호 영웅 loss latch, beacon post-state bypass,
+`FUN_0048d6f0`의 strict 2000 ms timer resolver, distinct raw-global-tick result commit의 순서와
+raw 조건을 기록한다. source timer는 [K01 result clock](k01-result-clock.md)에 기록한
+`timeGetTime` millisecond result clock을 독립적으로 사용하며, 별도 raw global tick은 dispatcher
+cache key로 남는다.
 
 ## 범위와 상태
 
@@ -8,8 +12,12 @@ For K01, in what exact order and under what raw conditions does FUN_0048a5c0 fir
   공통 timer resolver, dispatcher의 K01 분기, raw global tick별 result commit 범위
 - 재현 상태: `재현 완료` — raw active list, full reference, zero sentinel, strict timer 경계,
   wrap·signed overflow, 동시 timer, pre-gate, distinct-tick 정상·경계·실패 벡터
-- 구현 상태: `없음` — 원본 raw clock·결과 전환·identity를 프로젝트 24 Hz·정책에 연결하는
-  exact mapping이 없으므로 integration gate를 닫았다.
+- 구현 상태: `bounded product integration` — `k01MissionResult.ts`가 unsigned DWORD timer
+  arithmetic, strict `>2000`, signed-absolute overflow, win-first priority, latch order와
+  distinct raw-tick cache를 pure kernel으로 보존한다. `k01MissionResultPolicy.ts`는 source
+  profile v5와 local/headless clock adapter를 연결한다. project epoch와 cadence는
+  [K01 scenario policy adapter](../../development/k01-scenario-policy-adapter.md)에 기록한
+  intentional product adaptation이다.
 
 이 문서는 K01 결과 판정의 raw 반환과 write/call 순서를 다룬다. 결과 화면, 사람용 승패 연출,
 초 단위 지연, generic simulation의 결과 정책은 범위 밖이다.
@@ -192,23 +200,30 @@ global tick 값에서는 final result path를 다시 호출하지 않는다.
 - 실패: unsigned/signed 폭 위반, K01 외 stage 입력, stale source, seed/call edge/reference/
   jump-table/EXE 변조
 
-## 현재 프로젝트와 integration gate
+## 현재 프로젝트와 integration boundary
 
-원본 result clock과 raw global tick의 초·24 Hz 변환, original slot/reference와 프로젝트
-identity, 결과 code와 generic campaign state transition의 exact policy mapping이 없다.
-따라서 runtime/packages/apps/scenario를 수정하지 않았다.
+현재 production은 source result state를 `K01_SOURCE_RUNTIME_PROFILE_ID`의 v5 envelope 안
+`policies.result` sibling으로 보존한다. accepted world tick의 첫 단계에서 result policy를
+실행하고, mature result는 generic construction/movement 전에 scenario status를 commit한다.
+K01의 general presence와 class 76/78 hero checks는 generated source flags, ordered active-list
+identity와 semantic liveness를 결합한 bounded product projection이다. 이는 raw owner-list,
+full scheduler, death/release 또는 original result presentation parity를 주장하지 않는다.
 
-향후 이 규칙은 generic superset을 좁히지 않고 모든 mapping이 별도로 정적 확정·재현된 뒤에만
-isolated opt-in original-K01 policy로 연결할 수 있다.
+`LocalSessionTransport`는 frame마다 real elapsed milliseconds를 한 번 sample해 result clock에
+누적하고 playback speed와 pause commit을 분리한다. App pause 동안 clock은 누적되지만 accepted
+tick이 없어 result commit은 지연된다. Headless `advanceWorldTick`의 24 Hz sample은 deterministic
+test adapter이며 native cadence가 아니다. v4 legacy save는 한 번 정규화한다. epoch-1 clock을
+legacy world tick과 failed K01 protect objective에서 backdate하고, post-state가 없는 running
+K0120 trigger는 pending loaded/running dialogue state로 복원한다.
 
 ## 남은 불확실성과 다음 질문
 
 - 표준 main state 1의 mission-entry reset은
   [K01 표준 미션 진입 timer reset](k01-mission-timer-reset.md)에서 정적 확정·재현했다.
   다른 진입·reset topology의 전수 범위는 별도다.
-- result clock `0x00882e04`와 raw global tick `0x007c5f80`의 단위·생산 관계
+- raw global tick `0x007c5f80`의 scheduler cadence와 source result clock과의 presentation relationship
 - `FUN_00480180/0x00480300` 내부와 final destination별 후속 lifecycle
-- 원본 result transition을 프로젝트 generic campaign 결과로 옮기는 identity/policy mapping
+- bounded adapter 범위를 넘는 full source scheduler/death/release와 result presentation parity
 
 `FUN_00446420` 이후 presentation과 final route는
 [K01 결과 presentation과 post-result 전환](k01-final-result-transition.md)에서 별도

@@ -9,7 +9,7 @@ import { applyAuraAttackDamage, defaultAuraProfileRegistry, refreshAuraEffects, 
 import { arePlayersAllied, arePlayersEnemies } from "./diplomacy.js";
 import { createUnitState } from "./entities.js";
 import { getEnvironmentSightMultiplier, updateEnvironment } from "./environment.js";
-import { applyNavigationRoute, clearNavigationRoute, findNavigationRouteForUnit, findPathForUnit } from "./navigation.js";
+import { applyNavigationRoute, clearNavigationRoute, findNavigationRouteForUnit, findPathForUnit, isNavigationMobileObstructionPresent } from "./navigation.js";
 import {
   canUnitOccupyPosition,
   createMovementReservationForState,
@@ -26,7 +26,7 @@ import { advanceUnitOrientationForProjectTarget, getSourceOrientationProfileForU
 import { getIdleCombatPolicy } from "./idleCombatPolicy.js";
 import { createCurrentVisibilityResolver, getAttackTargetAuthorityPolicy, isAttackTargetAuthorized, type AttackTargetAuthorityPolicy } from "./attackTargetAuthorityPolicy.js";
 import { tryExecutePlayerAutoAbility } from "./autoAbilityPolicy.js";
-import { advanceK01BeaconPolicy } from "./k01BeaconPolicy.js";
+import { advanceK01MissionResultPolicy } from "./k01MissionResultPolicy.js";
 import { advanceProjectileSystem, PRODUCT_PROJECTILE_REGISTRY, type ProjectileRegistry } from "./projectiles.js";
 import {
   resolveCombatProjectileImpacts,
@@ -49,10 +49,22 @@ export interface AdvanceWorldTickOptions {
   projectileRegistry?: ProjectileRegistry;
   /** Optional caller-owned aura registry for a mod or isolated simulation. */
   auraProfileRegistry?: AuraProfileRegistry;
+  /** Explicit absolute K01 result-clock sample for a local wall-clock adapter. */
+  k01ResultClockMilliseconds?: number;
+  /** Fractional part carried by the same local wall-clock sample. */
+  k01ResultClockRemainder?: number;
 }
 
 export function advanceWorldTick(state: WorldState, options: AdvanceWorldTickOptions = {}): void {
   if (state.scenario.status !== "running") {
+    return;
+  }
+
+  const resultAdvance = advanceK01MissionResultPolicy(state, {
+    ...(options.k01ResultClockMilliseconds !== undefined ? { k01ResultClockMilliseconds: options.k01ResultClockMilliseconds } : {}),
+    ...(options.k01ResultClockRemainder !== undefined ? { k01ResultClockRemainder: options.k01ResultClockRemainder } : {}),
+  });
+  if (resultAdvance.result !== 0) {
     return;
   }
 
@@ -89,12 +101,6 @@ export function advanceWorldTick(state: WorldState, options: AdvanceWorldTickOpt
       advanceUnitConstruction(state, unit);
       advanceUnitRepair(state, unit);
     }
-  }
-
-  // Source-profile policies run once at the accepted-update boundary after
-  // construction events are appended, before later systems observe this tick.
-  if (state.sourceRuntimeProfile?.profileId === "k01:source-runtime") {
-    advanceK01BeaconPolicy(state);
   }
 
   // Aura effects are a live, derived snapshot: movement, owner teams, and
@@ -476,6 +482,12 @@ function advanceUnitMovement(
 
   if (!target || unit.movementSpeed <= 0) {
     if (!target) {
+      if (isNavigationMobileObstructionPresent(state, unit)) {
+        unit.movementBlocked = true;
+        return;
+      }
+
+      delete unit.movementBlocked;
       // Only a recorded blocked-goal terminal proves that the missing
       // waypoint is a completed terminal. Legacy orders without navigation
       // must hydrate a route before any completion/follow-up decision.
@@ -501,11 +513,13 @@ function advanceUnitMovement(
   // blocker may leave on a later tick; keeping this waypoint prevents repeated
   // whole-map searches while preserving the occupied source footprint.
   if (!canUnitOccupyPosition(state, unit, target)) {
+    unit.movementBlocked = true;
     return;
   }
 
   if (!reserveUnitPositionForState(state, movementReservation, unit, target)) {
     repathBlockedMovementWaypoint(state, unit);
+    unit.movementBlocked = true;
     return;
   }
 
@@ -515,6 +529,7 @@ function advanceUnitMovement(
 
   if (distance <= TARGET_EPSILON) {
     unit.position = { ...target };
+    delete unit.movementBlocked;
     advanceMovementWaypoint(state, unit);
     applyConditionalTravelFollowUp(state, unit);
     return;
@@ -524,6 +539,7 @@ function advanceUnitMovement(
 
   if (step >= distance) {
     unit.position = { ...target };
+    delete unit.movementBlocked;
     advanceMovementWaypoint(state, unit);
     applyConditionalTravelFollowUp(state, unit);
     return;
@@ -533,6 +549,7 @@ function advanceUnitMovement(
     x: unit.position.x + (deltaX / distance) * step,
     y: unit.position.y + (deltaY / distance) * step,
   };
+  delete unit.movementBlocked;
   applyConditionalTravelFollowUp(state, unit);
 }
 

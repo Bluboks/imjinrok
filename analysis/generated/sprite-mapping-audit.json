@@ -20,7 +20,7 @@
     },
     {
       "path": "packages/shared/src/scenarios.ts",
-      "sha256": "c91039110aecc45725cbe72fbb692ca52a9de976655192cfe8804b65a9e05df4"
+      "sha256": "31d4593c5ad1639da4ca13d88becca8d2b338d9134275ef37a89158a6e9b7534"
     },
     {
       "path": "packages/shared/src/k01UnitAnimationCoverage.ts",
@@ -32,7 +32,7 @@
     },
     {
       "path": "apps/game-client/src/scenes/SkirmishScene.ts",
-      "sha256": "92eecace7db0ee5ab99fddc5155cc7a053f52f716d4abf7e1295412b212cf985"
+      "sha256": "decbbbfffcd4b19b22417fa4450a5f047ce9768e5009594465c0ac56e4ad1562"
     },
     {
       "path": "apps/game-client/src/scenes/MissionBriefingScene.ts",

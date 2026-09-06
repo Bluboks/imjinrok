@@ -16,7 +16,6 @@ import {
   imjinrokCampaignScenarios,
   imjinrokK01Scenario,
   imjinrokK02Scenario,
-  imjinrokOriginalMissionResultDelayTicks,
   k01SourceOpeningAdapter,
   k01ReinforcementAdapter,
   k01ReinforcementOwnerAdapter,
@@ -126,7 +125,7 @@ test("imjinrok K01 and K02 retain source battle script beats", () => {
   assert.equal(imjinrokK01Scenario.completionMode, "scripted");
   assert.equal(k01OpeningDialogue?.focusPoint, undefined);
   assert.deepEqual(k01ReinforcementDialogue?.focusPoint, { x: 55, y: 53 });
-  assert.equal(k01ReinforcementDialogue?.completeScenarioOnEnd, "victory");
+  assert.equal(k01ReinforcementDialogue?.completeScenarioOnEnd, undefined);
   assert.deepEqual(k01ReinforcementEvent?.trigger, {
     type: "objective-status",
     objectiveId: "build-beacon",
@@ -239,8 +238,8 @@ test("imjinrok K01 and K02 retain source battle script beats", () => {
     },
   );
   assert.equal(k01Objectives.has("defeat-forward-japanese"), false);
-  assert.equal(k01Objectives.get("protect-ryu-seong-ryong")?.defeatDelayTicks, imjinrokOriginalMissionResultDelayTicks);
-  assert.equal(k01Objectives.get("protect-gwon-yul")?.defeatDelayTicks, imjinrokOriginalMissionResultDelayTicks);
+  assert.equal(k01Objectives.get("protect-ryu-seong-ryong")?.defeatDelayTicks, undefined);
+  assert.equal(k01Objectives.get("protect-gwon-yul")?.defeatDelayTicks, undefined);
   assert.equal(k01Objectives.get("withdraw-after-reinforcements")?.type, "custom");
   assert.equal(k01Objectives.get("withdraw-after-reinforcements")?.required, true);
   assert.equal(k01Objectives.get("withdraw-after-reinforcements")?.visibleAfterObjectiveId, "build-beacon");

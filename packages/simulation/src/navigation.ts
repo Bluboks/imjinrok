@@ -136,17 +136,32 @@ export function applyNavigationRoute(unit: UnitState, route: NavigationRoute): v
 
   if (nextTarget) {
     unit.movementTarget = { ...nextTarget };
+    delete unit.movementBlocked;
   } else if (route.terminalReason === "mobile-obstruction") {
-    // A concrete resolved endpoint keeps legacy observers aware of a pending
-    // mobile wait; the ordinary waypoint array remains free of sentinels.
-    unit.movementTarget = { ...route.resolvedGoal };
+    // Keep the strategic destination as the wait state. Encoding the current
+    // tile as a waypoint makes the tick loop repeatedly "arrive" at itself,
+    // which looks like movement and needlessly re-enters route search.
+    delete unit.movementTarget;
+    unit.movementBlocked = true;
   } else {
     delete unit.movementTarget;
+    delete unit.movementBlocked;
   }
 }
 
 export function clearNavigationRoute(unit: UnitState): void {
   delete unit.navigation;
+  delete unit.movementBlocked;
+}
+
+/** Checks a retained mobile-obstruction intent without running pathfinding. */
+export function isNavigationMobileObstructionPresent(state: WorldState, unit: UnitState): boolean {
+  if (unit.navigation?.terminalReason !== "mobile-obstruction") {
+    return false;
+  }
+
+  const blocker = getRequestedBlockingGroup(state, unit, unit.navigation.requestedGoal, {});
+  return blocker?.classification === "mobile";
 }
 
 function findPathWithCoreAStar(

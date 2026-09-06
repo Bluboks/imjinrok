@@ -2,9 +2,17 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { createBlankMap } from "../../shared/src/index.js";
 import { createUnitState } from "./entities.js";
-import { findPathForUnit } from "./navigation.js";
+import {
+  CORE_A_STAR_PATHFINDER_ID,
+  SOURCE_GREEDY_LOCAL_ADAPTER_PATHFINDER_ID,
+  coreAStarPathfinder,
+  findPathForUnit,
+  sourceGreedyLocalAdapterPathfinder,
+} from "./navigation.js";
+import { issueCommand } from "./commands.js";
+import { registerPathfinder } from "./pathfinderRegistry.js";
 import { advanceWorldTick } from "./tick.js";
-import { createInitialWorldState } from "./world.js";
+import { createInitialWorldState, toWorldSnapshot } from "./world.js";
 import type { UnitState, WorldState } from "./types.js";
 
 test("pathfinding treats every blocking entity footprint as an obstacle", () => {
@@ -82,13 +90,96 @@ test("a blocked waypoint remains pending and re-enters after its blocker is remo
 
   assert.deepEqual(mover.position, { x: 1, y: 3 });
   assert.deepEqual(mover.movementTarget, { x: 2, y: 3 });
+  assert.equal(mover.movementBlocked, true);
   assert.equal(mover.currentOrder?.type, "move");
 
   delete state.units[blocker.id];
   advanceWorldTick(state);
 
   assert.deepEqual(mover.position, { x: 2, y: 3 });
+  assert.equal(mover.movementBlocked, undefined);
   assertUniqueGroundContactTiles(state);
+});
+
+test("empty mobile-obstruction routes wait without repeated searches across both pathfinders and resume after save/load", () => {
+  const profiles = [
+    [CORE_A_STAR_PATHFINDER_ID, coreAStarPathfinder],
+    [SOURCE_GREEDY_LOCAL_ADAPTER_PATHFINDER_ID, sourceGreedyLocalAdapterPathfinder],
+  ] as const;
+
+  for (const [profileId, pathfinder] of profiles) {
+    const calls = { count: 0 };
+    const countingId = `test:blocked-wait-${profileId.replaceAll(/[^a-z0-9]+/gi, "-")}`;
+    registerPathfinder({
+      id: countingId,
+      findPath(state, unit, target, options) {
+        calls.count += 1;
+        return pathfinder.findPath(state, unit, target, options);
+      },
+    });
+
+    const state = createCollisionState();
+    state.pathfindingProfileId = countingId;
+    const mover = addUnit(state, "mover", { x: 2, y: 3 });
+    const blocker = addUnit(state, "blocker", { x: 3, y: 3 });
+    blocker.playerId = "p2";
+
+    const result = issueCommand(state, {
+      sessionId: "test-session",
+      playerId: "p1",
+      issuedAtTick: state.tick,
+      command: { type: "move", unitId: mover.id, target: blocker.position },
+    });
+    assert.equal(result.ok, true, profileId);
+    assert.equal(mover.movementTarget, undefined);
+    assert.equal(mover.navigation?.terminalReason, "mobile-obstruction");
+    assert.equal(mover.movementBlocked, true);
+
+    const callsAfterCommand = calls.count;
+    for (let tick = 0; tick < 40; tick += 1) {
+      advanceWorldTick(state);
+      assert.equal(mover.movementTarget, undefined, `${profileId}:tick ${tick}`);
+      assert.equal(mover.movementBlocked, true, `${profileId}:tick ${tick}`);
+    }
+    assert.equal(calls.count, callsAfterCommand, `${profileId}:blocked wait must not retry pathfinding`);
+
+    const restored = JSON.parse(JSON.stringify(toWorldSnapshot(state))) as WorldState;
+    delete restored.units[blocker.id];
+    for (let tick = 0; tick < 40; tick += 1) {
+      advanceWorldTick(restored);
+      if (restored.units[mover.id]?.position.x === 3 && restored.units[mover.id]?.position.y === 3) {
+        break;
+      }
+    }
+    const restoredMover = restored.units[mover.id]!;
+    assert.deepEqual(restoredMover.position, { x: 3, y: 3 }, `${profileId}:resumed destination`);
+    assert.equal(restoredMover.movementBlocked, undefined, `${profileId}:resumed movement clears blocked state`);
+    assert.equal(restoredMover.currentOrder, undefined, `${profileId}:resumed move completes`);
+  }
+});
+
+test("a mobile wait does not survive when a static entity replaces its requested goal", () => {
+  const state = createCollisionState();
+  const mover = addUnit(state, "mover", { x: 2, y: 3 });
+  const mobileBlocker = addUnit(state, "mobile-blocker", { x: 3, y: 3 });
+  mobileBlocker.playerId = "p2";
+
+  assert.equal(issueCommand(state, {
+    sessionId: "test-session",
+    playerId: "p1",
+    issuedAtTick: state.tick,
+    command: { type: "move", unitId: mover.id, target: mobileBlocker.position },
+  }).ok, true);
+  advanceWorldTick(state);
+  assert.equal(mover.navigation?.terminalReason, "mobile-obstruction");
+  assert.equal(mover.movementBlocked, true);
+
+  delete state.units[mobileBlocker.id];
+  state.units["static-blocker"] = createUnitState("static-blocker", "p2", "house", { x: 3, y: 3 });
+  advanceWorldTick(state);
+
+  assert.notEqual(mover.navigation?.terminalReason, "mobile-obstruction");
+  assert.equal(mover.movementBlocked, undefined);
 });
 
 test("group movement can replan around claimed waypoints without producing duplicate occupancy", () => {

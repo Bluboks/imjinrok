@@ -1,15 +1,20 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { createBlankMap, defaultMap, defaultSkirmishScenario, imjinrokK01Scenario, imjinrokK02Scenario, type ScenarioDefinition } from "@shared";
+import { createBlankMap, createImjinrokMapScaffold, defaultMap, defaultSkirmishScenario, imjinrokK01Scenario, imjinrokK02Scenario, type ScenarioDefinition } from "@shared";
 import {
   createInitialWorldState,
+  allocateK01SourceEntityRuntime,
+  createK01SourceRuntimeState,
   K01_SOURCE_RUNTIME_PROFILE_ID,
+  K01_SOURCE_RUNTIME_LEGACY_RESULT_STATE_VERSION,
+  K01_SOURCE_RUNTIME_STATE_VERSION,
   PRODUCT_IMMEDIATE_PROJECTILE_PROFILE,
   PRODUCT_PROJECTILE_REGISTRY,
   spawnProjectile,
   type K01SourceRuntimeState,
   type ProjectileRegistry,
   type WorldSnapshot,
+  getK01MissionResultClockSample,
 } from "@simulation";
 import {
   createCampaignMissionLaunchContext,
@@ -23,6 +28,89 @@ import {
 } from "./session.js";
 import { NetworkClient } from "./net/NetworkClient.js";
 import { createSessionTransport, LocalSessionTransport } from "./net/SessionTransport.js";
+import { removeUnitFromWorld } from "../../../packages/simulation/src/units.js";
+
+test("local K01 result clock uses real elapsed time through timestamp zero and ignores playback speed", () => {
+  const map = createImjinrokMapScaffold(imjinrokK01Scenario.mapId);
+  assert.ok(map);
+  const world = createInitialWorldState(map, ["local-player", "cpu-1"], imjinrokK01Scenario);
+  const transport = new LocalSessionTransport(world);
+
+  transport.update(0, 0);
+  transport.update(100, 0);
+  assert.equal(getK01MissionResultClockSample(world)?.clockMilliseconds, 101);
+  const tickBeforePause = world.tick;
+
+  transport.setPaused(true);
+  transport.setPlaybackSpeed(4);
+  transport.update(200, 0);
+  assert.equal(getK01MissionResultClockSample(world)?.clockMilliseconds, 201);
+
+  transport.update(300, 0);
+  assert.equal(getK01MissionResultClockSample(world)?.clockMilliseconds, 301);
+  assert.equal(world.tick, tickBeforePause);
+});
+
+test("local K01 result clock stays wall-clock based while unpaused playback runs at 4x", () => {
+  const map = createImjinrokMapScaffold(imjinrokK01Scenario.mapId);
+  assert.ok(map);
+  const normalWorld = createInitialWorldState(map, ["local-player", "cpu-1"], imjinrokK01Scenario);
+  const fastWorld = createInitialWorldState(map, ["local-player", "cpu-1"], imjinrokK01Scenario);
+  const normalTransport = new LocalSessionTransport(normalWorld);
+  const fastTransport = new LocalSessionTransport(fastWorld);
+
+  normalTransport.update(0, 0);
+  fastTransport.update(0, 0);
+  fastTransport.setPlaybackSpeed(4);
+  normalTransport.update(1_000, 0);
+  fastTransport.update(1_000, 0);
+
+  assert.deepEqual(getK01MissionResultClockSample(fastWorld), getK01MissionResultClockSample(normalWorld));
+  assert.equal(getK01MissionResultClockSample(fastWorld)?.clockMilliseconds, 1_001);
+  assert.equal(fastWorld.tick, normalWorld.tick * 4);
+});
+
+test("local K01 wall clock advances during pause and loss wins before completed dialogue", () => {
+  const map = createImjinrokMapScaffold(imjinrokK01Scenario.mapId);
+  assert.ok(map);
+  const world = createInitialWorldState(map, ["local-player", "cpu-1"], imjinrokK01Scenario);
+  const source = world.sourceRuntimeProfile?.state as K01SourceRuntimeState;
+  for (const hero of source.entityRuntime.entities.filter((entity) => entity.originalClass === 76 || entity.originalClass === 78)) {
+    removeUnitFromWorld(world, hero.semanticUnitId);
+  }
+  const transport = new LocalSessionTransport(world);
+
+  transport.update(0, 0);
+  transport.setPlaybackSpeed(4);
+  transport.update(500, 0);
+  assert.equal(getK01MissionResultClockSample(world)?.clockMilliseconds, 501);
+  assert.equal(world.sourceRuntimeProfile?.state.policies.result.lossTimer, 501);
+  assert.equal(world.scenario.status, "running");
+
+  transport.setPaused(true);
+  transport.update(2500, 0);
+  assert.equal(getK01MissionResultClockSample(world)?.clockMilliseconds, 2501);
+  assert.equal(world.scenario.status, "running");
+
+  const envelope = world.sourceRuntimeProfile;
+  assert.ok(envelope);
+  const currentSource = envelope.state as K01SourceRuntimeState;
+  world.sourceRuntimeProfile = {
+    ...envelope,
+    state: {
+      ...currentSource,
+      policies: {
+        ...currentSource.policies,
+        beacon: { ...currentSource.policies.beacon, triggerFlag: 1, scriptBusy: true, scriptPostState: 1 },
+      },
+    },
+  };
+  assert.equal(transport.completeMissionScript("script/K0120"), true);
+  transport.setPaused(false);
+  transport.update(2601, 0);
+
+  assert.equal(world.scenario.status, "defeat");
+});
 
 test("control group quick-save data is normalized", () => {
   assert.deepEqual(
@@ -184,6 +272,84 @@ test("K01 quick-save and local SessionTransport preserve the opaque profile enve
     state: { acceptedUpdateCount: 0, entities: [] },
   };
   assert.equal(normalizeSavedWorldSnapshot(malformed), null);
+});
+
+test("quick-load normalization migrates legacy K01 beacon footprints before restoring gameplay state", () => {
+  const map = createBlankMap({ id: imjinrokK01Scenario.mapId });
+  const snapshot = createInitialWorldState(map, ["local-player"], imjinrokK01Scenario) as WorldSnapshot;
+  const allocated = allocateK01SourceEntityRuntime({
+    ...createK01SourceRuntimeState(),
+    occupancy: { width: map.width, height: map.height, ownerSlots: Array.from({ length: map.width * map.height }, () => 0) },
+  }, {
+    semanticUnitId: "legacy-save-beacon",
+    sourceRecordIndex: 0x5201,
+    originalClass: 52,
+    ownerRelation: 0,
+    progress: 0x64,
+    health: 760,
+    position: { x: 3, y: 3 },
+    footprint: { width: 1, height: 1, evidence: "project-adaptation" },
+  });
+  const ownerSlots = [...allocated.state.occupancy.ownerSlots];
+  ownerSlots[3 * map.width + 3] = allocated.handle.slot;
+  const legacyProfileState = {
+    ...allocated.state,
+    occupancy: { ...allocated.state.occupancy, ownerSlots },
+    policies: { beacon: allocated.state.policies.beacon },
+  };
+  const legacySave = structuredClone(snapshot);
+  legacySave.sourceRuntimeProfile = {
+    profileId: K01_SOURCE_RUNTIME_PROFILE_ID,
+    stateVersion: 3,
+    state: JSON.parse(JSON.stringify(legacyProfileState)),
+  };
+
+  const normalized = normalizeSavedWorldSnapshot(legacySave);
+  assert.ok(normalized);
+  assert.equal(normalized.sourceRuntimeProfile?.stateVersion, K01_SOURCE_RUNTIME_STATE_VERSION);
+  const migrated = normalized.sourceRuntimeProfile?.state as K01SourceRuntimeState;
+  assert.equal(migrated.policies.result.legacyMigrationPending, false);
+  const record = migrated.entityRuntime.entities.find((entity) => entity.semanticUnitId === "legacy-save-beacon");
+  assert.deepEqual(record?.footprint, { width: 3, height: 3, evidence: "static-confirmed" });
+  assert.equal(migrated.occupancy.ownerSlots.filter((owner) => owner === allocated.handle.slot).length, 9);
+});
+
+test("quick-load normalization migrates an actual v4 K01 result state and rejects invalid legacy clocks", () => {
+  const map = createBlankMap({ id: imjinrokK01Scenario.mapId });
+  const snapshot = createInitialWorldState(map, ["local-player"], imjinrokK01Scenario) as WorldSnapshot;
+  snapshot.tick = 48;
+  const failedObjective = snapshot.scenario.objectives["protect-ryu-seong-ryong"];
+  assert.ok(failedObjective);
+  failedObjective.status = "failed";
+  failedObjective.failedAtTick = 24;
+  const source = snapshot.sourceRuntimeProfile;
+  assert.ok(source);
+  const legacyState = structuredClone(source.state) as K01SourceRuntimeState & { policies: Record<string, unknown> };
+  legacyState.policies.beacon = {
+    ...legacyState.policies.beacon,
+    triggerFlag: 1,
+    scriptBusy: false,
+    scriptPostState: 0,
+  };
+  delete legacyState.policies.result;
+  snapshot.sourceRuntimeProfile = {
+    profileId: K01_SOURCE_RUNTIME_PROFILE_ID,
+    stateVersion: K01_SOURCE_RUNTIME_LEGACY_RESULT_STATE_VERSION,
+    state: legacyState as never,
+  };
+  const invalidLegacy = structuredClone(snapshot);
+  invalidLegacy.tick = -1;
+
+  const normalized = normalizeSavedWorldSnapshot(snapshot);
+  assert.ok(normalized);
+  const migrated = normalized.sourceRuntimeProfile?.state as K01SourceRuntimeState;
+  assert.equal(migrated.policies.result.clockMilliseconds, 2_001);
+  assert.equal(migrated.policies.result.lossTimer, 1_001);
+  assert.equal(migrated.policies.result.legacyMigrationPending, false);
+  assert.equal(migrated.policies.beacon.scriptBusy, true);
+  assert.equal(migrated.policies.beacon.scriptPostState, 1);
+
+  assert.equal(normalizeSavedWorldSnapshot(invalidLegacy), null);
 });
 
 test("quick-load world snapshots preserve timed weather overrides", () => {

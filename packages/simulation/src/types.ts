@@ -144,6 +144,8 @@ export interface UnitState {
   movementSpeed: number;
   movementTarget?: GridPoint;
   movementPath?: GridPoint[];
+  /** True only after movement was denied by a current occupancy/reservation blocker. */
+  movementBlocked?: boolean;
   navigation?: UnitNavigationState;
   currentOrder?: UnitOrderState;
   attackCooldownTicks?: number;

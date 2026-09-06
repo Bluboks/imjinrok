@@ -4,9 +4,14 @@ import {
   validateK01SourceRuntimeState,
   validateSourceRuntimeProfileEnvelope,
 } from "./k01SourceRuntimeProfile.js";
+import { evaluateK01HeroAlive } from "./k01BeaconPolicy.js";
 import type { WorldState } from "./types.js";
 
 const K01_BUILD_BEACON_OBJECTIVE_ID = "build-beacon";
+const K01_PROTECTED_HERO_CLASS_BY_KIND = {
+  "gwon-yul": 76,
+  "ryu-seong-ryong": 78,
+} as const;
 
 /**
  * Projects the source K0120 trigger into the pending K01 objective contract.
@@ -31,4 +36,28 @@ export function resolveK01SourceObjectiveCompletion(
   validateSourceRuntimeProfileEnvelope(envelope);
   validateK01SourceRuntimeState(envelope.state);
   return envelope.state.policies.beacon.triggerFlag === 1;
+}
+
+/** Projects source hero liveness into the two K01 protect objectives. */
+export function resolveK01SourceProtectObjectiveFailure(
+  state: WorldState,
+  targetKind: string | undefined,
+): boolean | undefined {
+  const originalClass = targetKind === undefined
+    ? undefined
+    : K01_PROTECTED_HERO_CLASS_BY_KIND[targetKind as keyof typeof K01_PROTECTED_HERO_CLASS_BY_KIND];
+  const envelope = state.sourceRuntimeProfile;
+  if (originalClass === undefined || envelope?.profileId !== K01_SOURCE_RUNTIME_PROFILE_ID) {
+    return undefined;
+  }
+
+  if (envelope.stateVersion !== K01_SOURCE_RUNTIME_STATE_VERSION) {
+    throw new RangeError(
+      `K01 source runtime protect projection requires state version ${K01_SOURCE_RUNTIME_STATE_VERSION}; received ${String(envelope.stateVersion)}.`,
+    );
+  }
+
+  validateSourceRuntimeProfileEnvelope(envelope);
+  validateK01SourceRuntimeState(envelope.state);
+  return !evaluateK01HeroAlive(state, envelope.state, originalClass);
 }

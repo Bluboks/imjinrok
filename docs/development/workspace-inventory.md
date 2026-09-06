@@ -1,15 +1,17 @@
 # 개발 workspace inventory
 
-기준일: 2026-09-06
+기준일: 2026-09-07
 기준 workspace: `/home/agent/coding/imjinrok/dev`
 
 이 문서는 K01 작업 재개 시점의 Git worktree와 보존 대상을 기록한다. 통합 여부는 workspace
 audit의 `git cherry`·range-diff 확인을 따른다. 이 문서 자체가 각 브랜치의 모든 커밋을 다시
 검증하는 감사 보고서는 아니다.
 
-현재 기준 커밋은 `0021479` (`fix: correct source fog and building placement geometry`)이며, 현재
-uncommitted draft의 source footprint 범위와 경계는 [source building placement mechanics](../reverse-engineering/mechanics/source-building-placement.md)와
-[K01 opening footprint anchor](../reverse-engineering/mechanics/k01-opening-footprint-anchor.md)에 기록한다.
+현재 기준 커밋은 `8ba228b` (`fix: unify K01 source building footprints across gameplay and rendering`)이며,
+현재 uncommitted draft의 source footprint·legacy save migration·movement blocked-wait·result policy 범위와 경계는
+[source building placement mechanics](../reverse-engineering/mechanics/source-building-placement.md),
+[K01 opening footprint anchor](../reverse-engineering/mechanics/k01-opening-footprint-anchor.md)와
+[K01 검증 기록](k01-verification-2026-09-07.md)에 기록한다.
 최신 게이트와 전체 K01 parity·browser 판정은 [project status의 workspace 상태](../project-status.md)와
 canonical mechanics 문서를 참조한다.
 
@@ -17,7 +19,7 @@ canonical mechanics 문서를 참조한다.
 
 | 경로 | 브랜치 | HEAD | 상태 |
 | --- | --- | --- | --- |
-| `dev` | `dev` | `0021479` | 현재 작업 기준 |
+| `dev` | `dev` | `8ba228b` | 현재 작업 기준; uncommitted K01 migration·movement·result·parity draft |
 | `master` | `master` | `37a9f2f` | `dev`보다 뒤처짐 |
 | `sprite` | `sprite` | `60c7206` | worktree 폴더가 없고 등록은 `prunable`; 보존 |
 

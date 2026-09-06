@@ -28,13 +28,17 @@ import {
   type K01NativeSourceEntityAdmissionOutcome,
   type K01SourceEntityHandle,
   type K01SourceEntityRecord,
+  type K01SourceEntityFootprint,
   type K01SourceEntityRuntimeState,
   type K01SourceOccupancyState,
   type K01SourceOpeningSeedRequest,
   type K01SourceRuntimeStateV2,
 } from "./k01SourceEntityRuntime.js";
+import { getFootprintTiles } from "./footprints.js";
+import { k01SourceFootprintByOriginalClass } from "../../shared/src/index.js";
 import type { SourceRuntimeProfileEnvelope } from "./types.js";
 import { createK01BeaconPolicyState } from "./k01BeaconPolicyState.js";
+import { createK01MissionResultState } from "./k01MissionResult.js";
 export {
   K01_BEACON_POLICY_STATE_VERSION,
   cloneK01BeaconPolicyState,
@@ -43,13 +47,35 @@ export {
   type K01BeaconPolicyState,
   type K01BeaconPolicyTraceEntry,
 } from "./k01BeaconPolicyState.js";
+export {
+  K01_MISSION_RESULT_CLOCK_EPOCH_MILLISECONDS,
+  K01_MISSION_RESULT_POLICY_STATE_VERSION,
+  K01_MISSION_RESULT_TIMER_THRESHOLD_MILLISECONDS,
+  advanceK01MissionResult,
+  advanceK01MissionResultClock,
+  cloneK01MissionResultState,
+  createK01MissionResultState,
+  patchK01MissionResultState,
+  resolveK01MissionTimers,
+  validateK01MissionResultState,
+  type AdvanceK01MissionResultInput,
+  type AdvanceK01MissionResultOutput,
+  type K01BeaconResult,
+  type K01MissionResultState,
+  type K01MissionResultStatePatch,
+  type K01MissionTimerResolution,
+} from "./k01MissionResult.js";
 
 /** Stable process-local selector for the first source-runtime profile. */
 export const K01_SOURCE_RUNTIME_PROFILE_ID = "k01:source-runtime";
-export const K01_SOURCE_RUNTIME_STATE_VERSION = 3;
+export const K01_SOURCE_RUNTIME_STATE_VERSION = 5;
 export const K01_SOURCE_RUNTIME_LEGACY_STATE_VERSION = 1;
 /** A02 entity-runtime state before the T01 policy namespace was added. */
 export const K01_SOURCE_RUNTIME_ENTITY_STATE_VERSION = 2;
+/** T01 state with legacy 1×1 completed-beacon records. */
+export const K01_SOURCE_RUNTIME_LEGACY_FOOTPRINT_STATE_VERSION = 3;
+/** T01 state before the result-clock namespace was added. */
+export const K01_SOURCE_RUNTIME_LEGACY_RESULT_STATE_VERSION = 4;
 export {
   K01_SOURCE_ENTITY_SLOT_MAX,
   K01_SOURCE_ENTITY_SLOT_MIN,
@@ -82,6 +108,7 @@ export type {
   K01NativeSourceEntityAdmissionOutcome,
   K01SourceEntityHandle,
   K01SourceEntityRecord,
+  K01SourceEntityFootprint,
   K01SourceEntityRuntimeState,
   K01SourceEntityRuntimeState as K01SourceEntityRuntime,
   K01SourceOccupancyState,
@@ -328,9 +355,14 @@ export function migrateK01SourceRuntimeStateV1(value: unknown): K01SourceRuntime
   if (value.entities.length !== 0) {
     throw new Error("K01 source runtime v1 migration rejected non-empty entities: class/owner/coordinate/identity fields are unavailable.");
   }
+  const initialState = createK01SourceRuntimeStateV2();
   return {
-    ...createK01SourceRuntimeStateV2(),
+    ...initialState,
     acceptedUpdateCount: value.acceptedUpdateCount,
+    policies: {
+      ...initialState.policies,
+      result: createK01MissionResultState({ legacyMigrationPending: true }),
+    },
   };
 }
 
@@ -341,7 +373,93 @@ export function migrateK01SourceRuntimeStateV2(value: unknown): K01SourceRuntime
   assertExactKeys(value, ["acceptedUpdateCount", "entityRuntime", "occupancy"], "K01 source runtime v2 state");
   const candidate = {
     ...value,
-    policies: { beacon: createK01BeaconPolicyState() },
+    policies: { beacon: createK01BeaconPolicyState(), result: createK01MissionResultState({ legacyMigrationPending: true }) },
+  };
+  validateK01SourceRuntimeStateV2(candidate);
+  return cloneK01SourceRuntimeState(candidate);
+}
+
+/**
+ * Migrates the v3 save representation of completed beacons. Earlier saves
+ * serialized a construction-completed class-52 record as a 1×1
+ * project-adaptation record even though the static source footprint is 3×3.
+ *
+ * This is deliberately a source-history compatibility adapter, not a replay
+ * of construction or occupancy updates. Every owner cell already present in
+ * the save is preserved, including stale claims and claims belonging to
+ * another legacy beacon. Only empty in-bounds cells in an active legacy
+ * beacon's new footprint are claimed. Out-of-bounds cells are skipped, which
+ * matches the bounded native owner-writer behavior and keeps edge saves
+ * loadable without inventing an outside-map owner.
+ */
+export function migrateK01SourceRuntimeStateV3(value: unknown): K01SourceRuntimeState {
+  const state = cloneK01SourceRuntimeStateWithLegacyResult(value, "K01 source runtime v3 state");
+  const legacyBeacons = state.entityRuntime.entities.filter(isLegacyBeaconRecord);
+  if (legacyBeacons.length === 0) {
+    return state;
+  }
+
+  const sourceFootprint = requireK01BeaconSourceFootprint();
+  const activeBeacons = legacyBeacons.filter((record) => record.active);
+  for (const record of activeBeacons) {
+    if (state.occupancy.width === 0 || state.occupancy.height === 0) {
+      throw new Error(
+        `K01 legacy beacon migration cannot place active '${record.semanticUnitId}': source occupancy dimensions are empty.`,
+      );
+    }
+  }
+
+  const ownerSlots = [...state.occupancy.ownerSlots];
+
+  const entities = state.entityRuntime.entities.map((record) => {
+    if (!isLegacyBeaconRecord(record)) {
+      return record;
+    }
+
+    return {
+      ...record,
+      footprint: { ...sourceFootprint },
+    };
+  });
+
+  for (const record of activeBeacons) {
+    for (const tile of getK01BeaconMigrationTiles(record.position, sourceFootprint)) {
+      if (!isOccupancyTileInBounds(state.occupancy.width, state.occupancy.height, tile.x, tile.y)) {
+        continue;
+      }
+      const index = tile.y * state.occupancy.width + tile.x;
+      if (ownerSlots[index] === 0) {
+        ownerSlots[index] = record.slot;
+      }
+    }
+  }
+
+  return cloneK01SourceRuntimeState({
+    ...state,
+    entityRuntime: {
+      ...state.entityRuntime,
+      entities,
+    },
+    occupancy: {
+      ...state.occupancy,
+      ownerSlots,
+    },
+  });
+}
+
+/** Explicit v4 → v5 migration. The result namespace did not exist in v4;
+ * preserve all source state and mark the one-time world-aware clock adapter. */
+export function migrateK01SourceRuntimeStateV4(value: unknown): K01SourceRuntimeState {
+  assertPlainRecord(value, "K01 source runtime v4 state");
+  assertExactKeys(value, ["acceptedUpdateCount", "entityRuntime", "occupancy", "policies"], "K01 source runtime v4 state");
+  assertPlainRecord(value.policies, "K01 source runtime v4 policies");
+  assertExactKeys(value.policies, ["beacon"], "K01 source runtime v4 policies");
+  const candidate = {
+    ...value,
+    policies: {
+      beacon: value.policies.beacon,
+      result: createK01MissionResultState({ legacyMigrationPending: true }),
+    },
   };
   validateK01SourceRuntimeStateV2(candidate);
   return cloneK01SourceRuntimeState(candidate);
@@ -361,10 +479,25 @@ export function migrateSourceRuntimeProfileEnvelope(value: unknown): SourceRunti
     };
   }
   if (value.stateVersion === K01_SOURCE_RUNTIME_ENTITY_STATE_VERSION) {
+    const migratedState = migrateK01SourceRuntimeStateV3(migrateK01SourceRuntimeStateV2(value.state));
     return {
       profileId: K01_SOURCE_RUNTIME_PROFILE_ID,
       stateVersion: K01_SOURCE_RUNTIME_STATE_VERSION,
-      state: cloneK01SourceRuntimeState(migrateK01SourceRuntimeStateV2(value.state)),
+      state: cloneK01SourceRuntimeState(migratedState),
+    };
+  }
+  if (value.stateVersion === K01_SOURCE_RUNTIME_LEGACY_FOOTPRINT_STATE_VERSION) {
+    return {
+      profileId: K01_SOURCE_RUNTIME_PROFILE_ID,
+      stateVersion: K01_SOURCE_RUNTIME_STATE_VERSION,
+      state: cloneK01SourceRuntimeState(migrateK01SourceRuntimeStateV3(value.state)),
+    };
+  }
+  if (value.stateVersion === K01_SOURCE_RUNTIME_LEGACY_RESULT_STATE_VERSION) {
+    return {
+      profileId: K01_SOURCE_RUNTIME_PROFILE_ID,
+      stateVersion: K01_SOURCE_RUNTIME_STATE_VERSION,
+      state: cloneK01SourceRuntimeState(migrateK01SourceRuntimeStateV4(value.state)),
     };
   }
   throw new Error(`Unsupported K01 source runtime migration version ${String(value.stateVersion)}.`);
@@ -390,7 +523,10 @@ export function cloneSourceRuntimeProfileEnvelope(value: unknown): SourceRuntime
 
   if (
     profile.id === K01_SOURCE_RUNTIME_PROFILE_ID &&
-    (value.stateVersion === K01_SOURCE_RUNTIME_LEGACY_STATE_VERSION || value.stateVersion === K01_SOURCE_RUNTIME_ENTITY_STATE_VERSION)
+    (value.stateVersion === K01_SOURCE_RUNTIME_LEGACY_STATE_VERSION ||
+      value.stateVersion === K01_SOURCE_RUNTIME_ENTITY_STATE_VERSION ||
+      value.stateVersion === K01_SOURCE_RUNTIME_LEGACY_FOOTPRINT_STATE_VERSION ||
+      value.stateVersion === K01_SOURCE_RUNTIME_LEGACY_RESULT_STATE_VERSION)
   ) {
     return migrateSourceRuntimeProfileEnvelope(value);
   }
@@ -432,6 +568,61 @@ export function validateK01SourceRuntimeState(value: unknown): asserts value is 
 
 function cloneK01SourceRuntimeState(value: unknown): K01SourceRuntimeState {
   return cloneK01SourceRuntimeStateV2(value);
+}
+
+/**
+ * v3/v4 saves contain the beacon policy but predate the result namespace.
+ * Add the namespace before invoking the current strict validator so a real
+ * old-shaped save is accepted without weakening v5 validation.
+ */
+function cloneK01SourceRuntimeStateWithLegacyResult(value: unknown, label: string): K01SourceRuntimeState {
+  assertPlainRecord(value, label);
+  const policies = value.policies;
+  if (policies && typeof policies === "object" && !Array.isArray(policies)) {
+    const policyRecord = policies as Record<string, unknown>;
+    if (!Object.hasOwn(policyRecord, "result")) {
+      assertExactKeys(policyRecord, ["beacon"], `${label} policies`);
+      return cloneK01SourceRuntimeState({
+        ...value,
+        policies: {
+          beacon: policyRecord.beacon,
+          result: createK01MissionResultState({ legacyMigrationPending: true }),
+        },
+      });
+    }
+  }
+
+  return cloneK01SourceRuntimeState(value);
+}
+
+function isLegacyBeaconRecord(record: K01SourceEntityRecord): boolean {
+  return record.originalClass === 52 &&
+    record.footprint.width === 1 &&
+    record.footprint.height === 1 &&
+    record.footprint.evidence === "project-adaptation";
+}
+
+function requireK01BeaconSourceFootprint(): K01SourceEntityFootprint {
+  const footprint = k01SourceFootprintByOriginalClass[52];
+  if (footprint === undefined || footprint.width !== 3 || footprint.height !== 3 || footprint.evidence !== "static-confirmed") {
+    throw new Error("K01 legacy beacon migration requires a static-confirmed 3×3 class-52 footprint.");
+  }
+  return { ...footprint };
+}
+
+function getK01BeaconMigrationTiles(
+  position: K01SourceEntityRecord["position"],
+  footprint: K01SourceEntityFootprint,
+): readonly K01SourceEntityRecord["position"][] {
+  return getFootprintTiles(position, {
+    width: footprint.width,
+    height: footprint.height,
+    blocksMovement: true,
+  }, "source-center");
+}
+
+function isOccupancyTileInBounds(width: number, height: number, x: number, y: number): boolean {
+  return x >= 0 && x < width && y >= 0 && y < height;
 }
 
 function validateProfileDefinition(profile: SourceRuntimeProfile): void {

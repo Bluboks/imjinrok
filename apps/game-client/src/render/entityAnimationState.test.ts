@@ -78,6 +78,29 @@ test("only pending movement state selects move or walk clips", () => {
   );
 });
 
+test("blocked travel intent suppresses walk animation until displacement resumes", () => {
+  const visual = visualWithStates("move", "walk", "carry-idle", "gather", "idle");
+  const mobileWait = {
+    requestedGoal: { x: 4, y: 3 },
+    resolvedGoal: { x: 2, y: 3 },
+    terminalReason: "mobile-obstruction",
+  } as const;
+
+  assert.equal(
+    getEntityAnimationStateKey(unit({ navigation: mobileWait }), visual),
+    "move",
+  );
+  assert.equal(
+    getEntityAnimationStateKey(unit({ navigation: mobileWait, movementBlocked: true }), visual),
+    "idle",
+  );
+  assert.equal(
+    getEntityAnimationStateKey(unit({ currentOrder: gatherOrder, movementTarget: { x: 2, y: 3 }, movementBlocked: true }), visual),
+    "idle",
+    "a blocked worker keeps travel intent and does not fall through to work animation",
+  );
+});
+
 test("stationary gathering falls back when a visual has no gather state", () => {
   const visualWithCarryIdle = visualWithStates("carry-idle", "idle");
   const visualWithOnlyIdle = visualWithStates("idle");

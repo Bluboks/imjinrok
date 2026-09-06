@@ -65,6 +65,74 @@ interface MutablePolicyRun {
 }
 
 /**
+ * Product liveness bridge for the source general-presence predicate. The
+ * source record and generated original-class flags remain the authority;
+ * semantic units only retire stale or destroyed records.
+ */
+export function evaluateK01GeneralPresence(
+  world: WorldState,
+  source: K01SourceRuntimeState,
+  currentOwnerRelation = K01_BEACON_ORIGINAL_OWNER_RELATION,
+): boolean {
+  const recordsBySlot = new Map(source.entityRuntime.entities.map((record) => [record.slot, record]));
+
+  for (const slot of source.entityRuntime.activeList) {
+    const record = recordsBySlot.get(slot);
+    if (record === undefined || source.entityRuntime.activeTable[slot] === 0 || !record.active || record.health <= 0 || record.ownerRelation !== currentOwnerRelation) {
+      continue;
+    }
+
+    const profile = K01_ORIGINAL_ENTITY_PROFILE_BY_CLASS.get(record.originalClass);
+    if (profile === undefined || !Number.isInteger(profile.flags) || profile.flags < 0 || profile.flags > 0xffffffff) {
+      throw new Error(`K01 general-presence adapter has unsupported original class metadata ${String(record.originalClass)}.`);
+    }
+    if ((profile.flags & K01_BEACON_BLOCKER_TYPE_FLAGS_MASK) === 0) {
+      continue;
+    }
+
+    const semanticUnit = world.units[record.semanticUnitId];
+    if (semanticUnit !== undefined && semanticUnit.health.current > 0) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+/**
+ * Bounded class-76/78 hero liveness adapter. Active-list order is the
+ * deterministic source identity adapter; any valid live matching record is
+ * sufficient for liveness.
+ */
+export function evaluateK01HeroAlive(
+  world: WorldState,
+  source: K01SourceRuntimeState,
+  originalClass: 76 | 78,
+  currentOwnerRelation = K01_BEACON_ORIGINAL_OWNER_RELATION,
+): boolean {
+  const recordsBySlot = new Map(source.entityRuntime.entities.map((record) => [record.slot, record]));
+  for (const slot of source.entityRuntime.activeList) {
+    const record = recordsBySlot.get(slot);
+    if (
+      record === undefined ||
+      source.entityRuntime.activeTable[slot] === 0 ||
+      !record.active ||
+      record.health <= 0 ||
+      record.ownerRelation !== currentOwnerRelation ||
+      record.originalClass !== originalClass
+    ) {
+      continue;
+    }
+
+    const semanticUnit = world.units[record.semanticUnitId];
+    if (semanticUnit !== undefined && semanticUnit.health.current > 0) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
  * Consumes ConstructionCompleted events and runs the narrow K0120 source
  * policy at one accepted update boundary. No objective, dialogue, or result
  * state is touched here.
@@ -88,7 +156,11 @@ export function advanceK01BeaconPolicy(
   }
 
   const run: MutablePolicyRun = {
-    source: { ...source, acceptedUpdateCount: nextAcceptedUpdateCount, policies: { beacon: policy } },
+    source: {
+      ...source,
+      acceptedUpdateCount: nextAcceptedUpdateCount,
+      policies: { ...source.policies, beacon: policy },
+    },
     policy,
     matchedBeaconCount: 0,
     nativeSuccessCount: 0,
@@ -117,6 +189,9 @@ export function advanceK01BeaconPolicy(
     scanSourceEntities(world, run, currentOwnerRelation, options.scriptLoaderResult ?? K01_BEACON_SCRIPT_LOADER_DEFAULT_RESULT);
   }
 
+  if (options.scriptPostState !== undefined) {
+    run.policy = { ...run.policy, scriptPostState: options.scriptPostState };
+  }
   const returnValue = run.policy.triggerFlag === 1 && run.policy.scriptPostState === 0 ? 1 : 0;
   run.policy = { ...run.policy, lastReturnValue: returnValue };
   if (run.policy.triggerFlag === 1) {
@@ -356,6 +431,13 @@ function scanSourceEntities(
       appendTrace(run, world.tick, { type: "script-load-request", slot: record.slot });
       run.policy = { ...run.policy, lastLoaderResult: loaderResult };
       appendTrace(run, world.tick, { type: "script-load-result", slot: record.slot, loaderResult });
+      if (loaderResult === 1) {
+        run.policy = {
+          ...run.policy,
+          scriptBusy: true,
+          ...(run.policy.scriptPostState === 0 ? { scriptPostState: 1 } : {}),
+        };
+      }
       appendTrace(run, world.tick, { type: "script-start-request", slot: record.slot });
     }
     run.source = withPolicy(run.source, run.policy);

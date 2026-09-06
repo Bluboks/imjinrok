@@ -11,6 +11,12 @@ import {
   validateK01BeaconPolicyState,
   type K01BeaconPolicyState,
 } from "./k01BeaconPolicyState.js";
+import {
+  cloneK01MissionResultState,
+  createK01MissionResultState,
+  validateK01MissionResultState,
+  type K01MissionResultState,
+} from "./k01MissionResult.js";
 
 export const K01_SOURCE_ENTITY_TABLE_SIZE = 1200;
 export const K01_SOURCE_ENTITY_SLOT_MIN = 1;
@@ -87,7 +93,10 @@ export interface K01SourceRuntimeStateV2 {
   readonly acceptedUpdateCount: number;
   readonly entityRuntime: K01SourceEntityRuntimeState;
   readonly occupancy: K01SourceOccupancyState;
-  readonly policies: { readonly beacon: K01BeaconPolicyState };
+  readonly policies: {
+    readonly beacon: K01BeaconPolicyState;
+    readonly result: K01MissionResultState;
+  };
 }
 
 interface MutableK01SourceEntityRuntimeState {
@@ -196,7 +205,7 @@ export function createK01SourceRuntimeStateV2(): K01SourceRuntimeStateV2 {
     acceptedUpdateCount: 0,
     entityRuntime: createEmptyK01EntityRuntimeState(),
     occupancy: createEmptyK01OccupancyState(),
-    policies: { beacon: createK01BeaconPolicyState() },
+    policies: { beacon: createK01BeaconPolicyState(), result: createK01MissionResultState() },
   };
 }
 
@@ -217,7 +226,10 @@ export function cloneK01SourceRuntimeStateV2(value: unknown): K01SourceRuntimeSt
       height: state.occupancy.height,
       ownerSlots: [...state.occupancy.ownerSlots],
     },
-    policies: { beacon: cloneK01BeaconPolicyState(state.policies.beacon) },
+    policies: {
+      beacon: cloneK01BeaconPolicyState(state.policies.beacon),
+      result: cloneK01MissionResultState(state.policies.result),
+    },
   };
 }
 
@@ -229,8 +241,9 @@ export function validateK01SourceRuntimeStateV2(value: unknown): asserts value i
   validateEntityRuntime(value.entityRuntime);
   validateOccupancy(value.occupancy, value.entityRuntime);
   assertPlainRecord(value.policies, "K01 source runtime policies");
-  assertExactKeys(value.policies, ["beacon"], "K01 source runtime policies");
+  assertExactKeys(value.policies, ["beacon", "result"], "K01 source runtime policies");
   validateK01BeaconPolicyState(value.policies.beacon);
+  validateK01MissionResultState(value.policies.result);
 }
 
 export function updateK01SourceRuntimeStateV2(

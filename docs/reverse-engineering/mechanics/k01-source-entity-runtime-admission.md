@@ -4,11 +4,11 @@
 
 - 분석 근거: `정적 확정`인 1,200-slot allocator·generation·handle validity·active-list release와
   owner-grid write/clear의 좁은 범위만 사용한다.
-- 재현: production state v3의 allocator age/tie/wrap, generation wrap, stale handle, swap-last
+- 재현: source profile v5의 entityRuntime allocator age/tie/wrap, generation wrap, stale handle, swap-last
   release, source/adapted footprint, collision/OOB 및 save/load vectors로 고정한다.
-- 구현: A01 profile envelope를 v3 `entityRuntime`/`occupancy` 계층으로 확장했다. K01 opening seed와
-  명시적 completed-construction adapter는 T01 K0120 policy가 source SSOT로 소비하며, 일반
-  entity admission과 native 1×1 overwrite admission의 경계를 분리한다. dialogue/result/UI는
+- 구현: A01 profile envelope는 current v5이며, 그 안의 `entityRuntime`/`occupancy` 계층은 K01 opening seed와
+  명시적 completed-construction adapter를 보존한다. T01 K0120 policy가 source SSOT로 소비하며, 일반
+  entity admission과 native 1×1 overwrite admission의 경계를 분리한다. dialogue와 result policy는 sibling namespace로 이 계층을 보존하며, raw UI/compositor는
   이 계층에 연결하지 않는다.
 
 `ConstructionCompleted` 시점에 class 52 봉화대를 admission하는 것은 원본에서 source record가 더
@@ -59,7 +59,7 @@ K01 opening semantic IDs와 source order는 `packages/shared/src/scenarios.ts`�
 [opening footprint anchor](k01-opening-footprint-anchor.md)의 범위만 사용한다. mobile/hero의 1×1은
 원본 전체 footprint를 확정한 것이 아니라 `project-adaptation`이다.
 
-## v3 profile schema와 실패 경계
+## source profile schema와 실패 경계
 
 `entityRuntime`은 generation counter, 1,200-entry active table, active-list order, 1,200-entry
 signed reuse-age table, slot-sorted records를 단일 SSOT로 보존한다. 각 slot에는 현재 record가
@@ -74,7 +74,7 @@ reuse-age 결과를 보존한 채 OOB를 건너뛰며, 성공 시 기존 owner c
 활성 record의 semantic ID/source index만 현재 mapping으로 취급해 각각 전역 유일해야 하며,
 inactive retired record의 stale fields는 slot당 하나의 record invariant 아래 보존할 수 있다.
 
-A01 v1은 class/owner/coordinate/semantic mapping이 없으므로 빈 `entities`만 v3로 명시적으로
+A01 v1은 class/owner/coordinate/semantic mapping이 없으므로 빈 `entities`만 current v5 envelope로 명시적으로
 이동한다. A02 v2는 general `entityRuntime`/`occupancy`를 보존하고 빈 beacon policy namespace를
 추가한다. non-empty v1 save는 필드를 추측하지 않고 거부한다.
 
@@ -104,8 +104,8 @@ selection/reuse-age와 in-bounds activation/generation/mapping/table/list를 분
 reuse-age만 남기고, slot 0은 즉시 descriptor loop를 중단하며, native 1×1 occupancy는 후행 owner로
 overwrite한다. 각 failure는 policy trace에 남고 semantic unit은 만들지 않는다. script busy, loader
 `0/1`, void start와 native descriptor effects는 서로 독립된 trace boundary다. loader 결과는
-diagnostic outcome이지 trigger authority가 아니다. dialogue, objective, mission result와 source raw
-global writes는 이 구현 범위에 없다.
+diagnostic outcome이지 trigger authority가 아니다. dialogue와 objective는 source policy adapter가 소비하고, mission result는 sibling result policy가
+소비한다. source raw global writes와 full compositor는 이 구현 범위에 없다.
 
 K01의 legacy `k01-reinforcement-wave` scripted event는 K01 source profile에서만 consumed/no-op으로
 처리하여 duplicate spawn을 막는다. generic worlds와 profile-absent scenarios는 이 policy 및
@@ -113,8 +113,24 @@ namespace를 생성하지 않는다.
 
 ### legacy save boundary
 
-이전 v3 save에 이미 저장된 completed beacon은 당시의 `1×1` `project-adaptation` raw record와 owner
-history를 그대로 보존할 수 있다. 현재 resolver는 해당 semantic beacon의 derived gameplay footprint를
-`3×3`으로 계산하지만, 과거 movement/overwrite/lifecycle history를 안전하게 재구성할 수 없으므로
-serialized record를 일괄 migration하지 않는다. 새 construction admission과 새 save는 static-confirmed
-class-52 `3×3` record를 사용한다.
+현재 profile state는 v5다. v4 envelope는 result namespace 주입을 기다리는 legacy shape다. v3 save의 completed beacon record가 정확히 class `52`, footprint
+`1×1`, evidence `project-adaptation`이면 save/load clone 경계의
+`migrateK01SourceRuntimeStateV3`가 footprint metadata를 static-confirmed `3×3`으로 바꾼다.
+이 변환은 과거 movement/overwrite/lifecycle history를 재생하지 않는다. 기존 occupancy의 모든
+owner cell(다른 legacy beacon과 foreign owner 포함)은 보존하고, active record의 새 3×3 범위에서
+입력 시점에 비어 있던 in-bounds cell만 canonical slot 순서로 채운다. inactive record는 새 cell을
+주장하지 않으며, map edge의 out-of-bounds cell은 원본 per-cell skip처럼 건너뛴다. active map이
+비어 있는 malformed state는 설명적 예외로 거부한다.
+
+allocator generation/active table/list/reuse age, policy flags·cursor·trace·accepted count와 source
+record order는 그대로 보존하며, 변환 중 trigger/effect를 재실행하지 않는다. 이미 v5인 state와
+현재 static-confirmed `3×3` record는 idempotent하게 그대로 유지한다. release는 변환으로 추가된
+동일 slot의 3×3 owner cell을 지우되 foreign owner와 footprint 밖의 stale history는 보존한다.
+이는 source occupancy history를 복원할 수 없는 legacy save에 대한 명시적
+`intentional-adaptation`이며 원본 save format의 완전한 재생을 뜻하지 않는다.
+
+구현은 `packages/simulation/src/k01SourceRuntimeProfile.ts`의 v3/v4→v5 migration이고, focused
+vectors는 같은 파일의 테스트와 `apps/game-client/src/session.test.ts`의 public normalizer 경계를
+검증한다. `normalizeSavedWorldSnapshot`의 nullable parser는 malformed legacy input을 `null`로
+거부하며, 정확한 원인은 `cloneSourceRuntimeProfileEnvelope` throwing owner API와
+`SessionTransport` restore 경계에서 유지된다. 이 migration은 새 error UX를 추가하지 않는다.

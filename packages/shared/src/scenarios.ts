@@ -319,8 +319,6 @@ const missionScriptCpuStartingResources: ResourceAmountSet = {
   stone: 0,
 };
 
-export const imjinrokOriginalMissionResultDelayTicks = 0x7d0;
-
 // Source-derived K02 opens inside Hanseong, with Pyongyang structures already present.
 // The K0220 executable handler creates the royal cart separately at 6,71 on the opening tick.
 const k02SourceHanseongEvacuationStart: StartingUnitDefinition[] = [
@@ -838,7 +836,6 @@ export const imjinrokK01Scenario = {
       count: 1,
       required: false,
       defeatOnFailure: true,
-      defeatDelayTicks: imjinrokOriginalMissionResultDelayTicks,
     },
     {
       id: "protect-gwon-yul",
@@ -850,7 +847,6 @@ export const imjinrokK01Scenario = {
       count: 1,
       required: false,
       defeatOnFailure: true,
-      defeatDelayTicks: imjinrokOriginalMissionResultDelayTicks,
     },
   ],
   missionDialogues: [
@@ -888,7 +884,6 @@ export const imjinrokK01Scenario = {
       trigger: { type: "objective-status", objectiveId: "build-beacon", status: "completed" },
       // The original K0120 handler calls the camera helper with x=55, y=53 before the retreat dialogue.
       focusPoint: { x: 55, y: 53 },
-      completeScenarioOnEnd: "victory",
       lines: [
         {
           speaker: "권율",

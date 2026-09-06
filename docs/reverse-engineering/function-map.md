@@ -132,7 +132,7 @@
 | `0x0045bd00` | `FUN_0045bd00`, `0x0045bd00-0x0045bef8` | 1 / 103 | stride `0x14c` 타입 정의 레코드 writer | slot·base frame·이름·footprint `+0x14/+0x16` 필드 정적 확정 |
 | `0x0045bf50` | `FUN_0045bf50`, `0x0045bf50-0x0045efb9` | 1 / 5,100 | 전체 엔티티 타입 정의 초기화 | class 1~95 슬롯·기본 프레임·flags·이름 포인터와 K01 class 12/13/14/82 1×1·bit `0x08` clear 정적 확정 |
 | `0x0045f9c0` | `FUN_0045f9c0`, `0x0045f9c0-0x004607ac` | 209 / 801 | main Windows message loop와 state switch | scheduler와 result `0x18..0x1d`, `0x8c/0x96` relay·final route 범위 정적 확정 |
-| `0x0045f9c0` (outer-loop slice) | `FUN_0045f9c0`, `0x0045f9c0-0x004607ac` | 801 | `PeekMessageA(remove=0)` present branch dispatch/restart; idle `timeGetTime` sample 뒤 signed-WORD state switch `0x14` | K0110 outer cadence의 message-vs-idle boundary 정적 확정 |
+| `0x0045f9c0` (outer-loop slice) | `FUN_0045f9c0`, `0x0045f9c0-0x004607ac` | 801 | `PeekMessageA(remove=0)` present branch dispatch/restart; idle `timeGetTime` sample이 DWORD `0x00882e04` result clock을 갱신한 뒤 signed-WORD state switch `0x14` | WINMM import의 millisecond source와 K0110 outer message-vs-idle boundary 정적 확정 |
 | `0x00460ba0` | `FUN_00460ba0`, `0x00460ba0-0x00460e20` | 17 / 144 | ECX base에서 `0x1f6aa` DWORD zero fill 후 후속 raw 초기화 | 표준 mission entry의 `[0x007c5ed8,0x00843980)` prefix 범위 정적 확정 |
 | `0x004610e0` | `FUN_004610e0`, `0x004610e0-0x004611fd` | ? / 91 | fog dirty clear·state age 후 active entity sight recomputation | mode WORD 1 및 raw `+0x1ec`의 `4→0`/`0→4` branches와 `FUN_00439260` iteration 정적 확정; `+0x1ec` 사람용 의미 미확정 |
 | `0x00461570` | `FUN_00461570`, `0x00461570-0x00461590` | 1 / 6 | raw enable·좌표 DWORD writer | K01 call의 `0x00843674/78/7c = 1/55/53` 정적 확정; consumer 의미 미확정 |
@@ -197,7 +197,7 @@
 | `0x004833f0` | `FUN_004833f0`, `0x004833f0-0x004834c5` | 74 | previous-record cleanup, key/advance gate에서만 실행 | 별도 GetAsyncKeyState gate와 queue progression 분리 |
 | `0x00443440` | `FUN_00443440`, `0x00443440-0x00443464` | 10 명령어 | resource subobject image free | image release 후 caller-owned pointer zero 정적 확정 |
 | `0x004434a0` | `FUN_004434a0`, `0x004434a0-0x0044357e` | 77 명령어 | source path image loader | image resource type check와 `resource+0xbf4` store/failure log 정적 확정 |
-| `0x00482010` | `FUN_00482010`, `0x00482010-0x00482146` | 101 명령어 | script teardown entry | shutdown 호출, record payload free, CHANGETITLE image release 정적 확정 |
+| `0x00482010` | `FUN_00482010`, `0x00482010-0x00482146` | 101 명령어 | script teardown entry | K01 actual context `+8 == 1` stop call 뒤 resource cleanup과 `+4 = 0` clear, `Sleep(1000)` tail 정적 확정 |
 | `0x004823d0` | `FUN_004823d0`, `0x004823d0-0x004824b6` | 78 명령어 | script shutdown resource cleanup | objective→title clear order, remaining resource free, `Sleep(1000)` 정적 확정 |
 | `0x004a84e0` | `FUN_004a84e0`, `0x004a84e0-0x004a8606` | 103 명령어 | scratch surface overlay compositor | objective then title text rectangles blit; `owner+0xc14` direct read edge는 미확인 |
 | `0x00483500` | `FUN_00483500`, `0x00483500-0x00483657` | 107 명령어 | record readiness | case 3 unsigned wrap elapsed strict `>`/field clear 정적 확정 |
@@ -211,6 +211,7 @@
 | `0x00488080` | `FUN_00488080`, `0x00488080-0x004880e4` | 7 / 32 | active list의 positive record·`+0x74` mask·signed owner equality 검사 | K01 general-presence raw predicate 정적 확정; 사람용 관계 의미 미확정 |
 | `0x00488420` | `FUN_00488420`, `0x00488420-0x004884b5` | 11 / 59 | signed-WORD descriptor entity creator | class-zero 종료, allocate-before-bounds, slot-zero failure, signed OOB create skip·continue와 prior creation 유지 정적 확정 |
 | `0x004885e0` | `FUN_004885e0`, `0x004885e0-0x0048866f` | 7 / 53 | owner/class 목록의 positive-record full reference 선택 | K01 76·78 alive-check 연결 정적 확정 |
+| `0x004888b0` | `FUN_004888b0`, `0x004888b0-0x00488935` | 27 | K01 actual context consumer (`ECX=0x00bcbe08`) | `+4` getter→`FUN_004824c0`→`+8` getter, clear 시 `FUN_00482010` 호출; K01 callsite `0x0048a6e8`가 general presence update보다 선행 |
 | `0x0048a731` | `FUN_0048a5c0`, `0x0048a5c0-0x0048a878` | 32 / 181 | K01 raw-relation/flag gate→봉화대 scan→K0120/native effect→post-state 반환 | 같은 scan 복수 match·loader 0/1 무검사·void start·ignored descriptor-helper failure 포함 범위 정적 확정 |
 | `0x0048a812` | `FUN_0048a5c0`, `0x0048a5c0-0x0048a878` | 32 / 181 | K01 general→beacon→class 76/78 loss latch와 direct AX 1 | zero sentinel·first-write order와 K01 win-timer direct write 부재 정적 확정 |
 | `0x0048d410` | `FUN_0048d410`, `0x0048d410-0x0048d594` | 31 / 110 | signed stage map-source dispatcher | stage 1→`0x0048d740` K01 source copy 범위 정적 확정 |
@@ -236,7 +237,7 @@
 | `0x0048d610` | `FUN_0048d610`, `0x0048d610-0x0048d650` | 7 / 24 | 국가·단계별 임무 레코드 선택 | 국가 1→K01 레코드 경로 정적 확정 |
 | `0x0048d660` | `FUN_0048d660`, `0x0048d660-0x0048d681` | 6 / 13 | 국가별 단계 수 반환 | 국가 1·2는 8, 국가 3은 7로 정적 확정 |
 | `0x0048d690` | `FUN_0048d690`, `0x0048d690-0x0048d6e4` | 7 / 22 | 국가별 offset을 적용해 signed WORD `DAT_0088afcc` 기록 | 한국 캠페인 1단계→인덱스 1 정적 확정 |
-| `0x0048d6f0` | `FUN_0048d6f0`, `0x0048d6f0-0x0048d73a` | 7 / 31 | 공통 미션 결과 타이머 판정 | 모든 반환 경로와 시간 단위 |
+| `0x0048d6f0` | `FUN_0048d6f0`, `0x0048d6f0-0x0048d73a` | 7 / 31 | 공통 미션 결과 타이머 판정 | WINMM `timeGetTime` millisecond result clock, zero sentinel·DWORD wrap·signed abs overflow와 strict `>0x7d0` |
 | `0x0048dbe0` | `FUN_0048dbe0`, `0x0048dbe0-0x0048dda9` | 21 / 147 | `DAT_0088afcc` 기반 임무 map 로드 | K01 map 결합 정적 확정 |
 | `0x0048ddb0` | `FUN_0048ddb0`, `0x0048ddb0-0x0048deca` | 36 / 105 | `DAT_0088afcc` 기반 임무 handler dispatch | 인덱스 1→`FUN_0048a5c0` 정적 확정 |
 | `0x0048dde0` | `FUN_0048ddb0`, `0x0048ddb0-0x0048deca` | 36 / 105 | 미션 결과 소비·전환 | 호출 주기와 후속 함수 |

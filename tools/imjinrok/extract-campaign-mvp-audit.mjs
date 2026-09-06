@@ -60,6 +60,8 @@ function readAuditContext(repositoryRoot) {
     ),
     scenarioSource: readText(repositoryRoot, "packages/shared/src/scenarios.ts"),
     scenarioTests: readText(repositoryRoot, "packages/shared/src/scenarios.test.ts"),
+    sourceResultPolicy: readText(repositoryRoot, "packages/simulation/src/k01MissionResultPolicy.ts"),
+    sourceResultPolicyTests: readText(repositoryRoot, "packages/simulation/src/k01MissionResultPolicy.test.ts"),
     simulationTests: readText(repositoryRoot, "packages/simulation/src/simulation.test.ts"),
     runtimeNotes: readText(repositoryRoot, ARCHIVED_RUNTIME_NOTES_PATH),
   };
@@ -108,18 +110,26 @@ function auditScenarioImplementation(context) {
       "id: \"build-beacon\"",
       "id: \"withdraw-after-reinforcements\"",
       "id: \"k01-reinforcement-wave\"",
-      "completeScenarioOnEnd: \"victory\"",
-      "imjinrokOriginalMissionResultDelayTicks = 0x7d0",
-      "defeatDelayTicks: imjinrokOriginalMissionResultDelayTicks",
     ]),
     ...textEvidence(context.scenarioTests, "packages/shared/src/scenarios.test.ts", [
       "imjinrok K01 starts with a source-derived established Joseon base",
       "sourceScript === \"script/K0115\"",
       "sourceScript === \"script/K0120\"",
       "protect-ryu-seong-ryong",
-      "defeatDelayTicks, imjinrokOriginalMissionResultDelayTicks",
+      "k01ReinforcementDialogue?.completeScenarioOnEnd, undefined",
+      "k01Objectives.get(\"protect-ryu-seong-ryong\")?.defeatDelayTicks, undefined",
       "readSourceSpeechLines(\"K0110\", { includeSpeechSlot: true, includeDelayBefore: true })",
       "readSourceBriefingMetadata(\"K0110\")",
+    ]),
+    ...textEvidence(context.sourceResultPolicy, "packages/simulation/src/k01MissionResultPolicy.ts", [
+      "advanceK01MissionResultPolicy(",
+      "clockMilliseconds",
+      "completeK01MissionScript(",
+    ]),
+    ...textEvidence(context.sourceResultPolicyTests, "packages/simulation/src/k01MissionResultPolicy.test.ts", [
+      "result clock keeps fractional elapsed time between transport samples",
+      "K0120 completion clears source flags and the next boundary owns victory",
+      "matured timer commits before beacon and entity updates",
     ]),
   ];
 

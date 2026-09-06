@@ -35,16 +35,17 @@ VM에서 원본 게임을 플레이하며 화면 변화를 따라가는 방식�
   construction/normal/damaged 본체는 계속 source-backed 범위다. 나머지 상태·overlay·행동 의미는
   각 mechanics 문서의 범위를 따른다.
 - 3단계: 진행 중. [K01 source entity runtime·admission](reverse-engineering/mechanics/k01-source-entity-runtime-admission.md)의
-  v3 state가 opening seed, completed-construction adapter, native 1×1 reinforcement admission과
-  semantic-unit removal hook을
-  production source SSOT로 보존한다. [K01 beacon policy](../packages/simulation/src/k01BeaconPolicy.ts)는
+  v5 source runtime state가 opening seed, completed-construction adapter, native reinforcement admission과
+  v3/v4 legacy save migration, semantic-unit removal hook, sibling result namespace를 production source SSOT로 보존한다.
+  [K01 beacon policy](../packages/simulation/src/k01BeaconPolicy.ts)는
   blocker·trigger flag·K0120 busy/loader/start·native descriptor effect·post-state 반환을 한
   accepted update 경계에서 연결하고, [K01 scenario policy adapter](development/k01-scenario-policy-adapter.md)는
-  source trigger를 `build-beacon` objective에 투영하며 legacy scripted spawn을 소비 처리한다.
+  source trigger를 `build-beacon` objective에 투영하며 legacy scripted spawn을 소비 처리한다. result policy는
+  real elapsed millisecond clock, strict timer/latch/commit order, K0120 completion 후 next-boundary result를 연결한다.
   opening 15 records와 동적 class 52를 포함한 10개 source building class의 source-center extent가
   placement·collision·range·build work·client geometry에 통합되며, completed beacon은 stale owner를
-  제한적으로 정리하는 intentional-adaptation bridge를 사용한다. 원본 source scheduler·full movement·
-  death/release·result parity와 종단 K01 scenario는 아직 완료하지 않았다.
+  제한적으로 정리하는 intentional-adaptation bridge를 사용한다. 원본 source scheduler·full movement·death/release·presentation parity와 자연스러운 종단 K01 scenario는
+  아직 완료하지 않았다.
 - 4단계: 부분 진행. K01 영웅의 대상 검색·사거리, 공격 phase·피해·투사체와 signed-health
   사망·slot/reference 정리는 정적 확정·재현했다. 원본 identity·좌표·accepted update 단위의
   프로젝트 변환과 실제 opt-in 연결은 미확정이다.
@@ -61,10 +62,11 @@ K01 MVP 완료 판정과 별개로 남아 있다.
 정적으로 확인된 class 48/49/50/51/52/57/58/60/62/63의 logical extent와 source-center anchor를
 shared resolver가 simulation과 client의 실제 interaction 경계에 전달한다. 이 checkpoint는 source
 cell-cache producer/lifetime, native owner overwrite의 전체 소비, source mobile movement sync를
-닫지 않는다. 새 건설은 class 52의 3×3 source record를 저장하지만, 기존 v3 save의 1×1
-`project-adaptation` beacon record는 owner/lifecycle history를 안전하게 복원할 수 없어 migration하지
-않는다. 기존 save도 derived gameplay footprint는 3×3을 사용하므로 serialized raw record와 gameplay
-resolver 사이의 legacy 경계를 문서화한다.
+닫지 않는다. 새 건설은 class 52의 3×3 source record를 저장한다. 기존 v3 save의 class-52 `1×1`
+`project-adaptation` beacon record는 load clone 경계에서 static-confirmed `3×3` metadata로 자동 변환하고,
+기존 foreign/same-slot owner history와 allocator/policy cursor를 보존한다. active record의 입력 시점
+빈 in-bounds cell만 canonical slot 순서로 채우며, inactive record는 새 cell을 주장하지 않는다. 이는
+원본 save replay가 아닌 명시적 compatibility adaptation이다. 차분·브라우저 범위는 [K01 검증 기록](development/k01-verification-2026-09-07.md)에 둔다.
 
 ### K01 placement correction checkpoint
 
@@ -82,9 +84,9 @@ K01 MVP 완료나 browser/original full parity를 의미하지 않는다.
 [K01 accepted source-update scheduler 경계](reverse-engineering/mechanics/k01-accepted-update-scheduler.md)의 연구 replay
 보정은 bounded 연구 범위에서 완료·재현되었다. 통과 조건은 raw input→ordered calls·writes→next state의 source trace 일치,
 rejection 시 cache 보존, 같은 tick의 dispatcher 재호출 방지, source mapping과 의도적 web adaptation의
-분리다. 다음은 raw mode/guard producer lifetime→clock/identity projection contract를 확정한 뒤 production
-scheduler/update·movement-health/death·result/presentation 연결로 진행하는 순서이며, K01 종단·browser 검증은
-그 이후다.
+분리다. result policy와 v5 save boundary는 production에 연결되었다. 다음은 raw mode/guard producer lifetime과
+clock/identity projection의 native 관계, scheduler/update·movement-health/death·presentation parity를
+분리해 검증하는 순서이며, K01 종단·browser 검증은 제한 범위로만 기록한다.
 
 ## K01 MVP 완료 조건
 
@@ -250,8 +252,9 @@ dismiss visual·sound는 남아 있다.
 
 현재 완료한 하위 단위:
 
-- source runtime v3의 opening seed·completed beacon construction adapter·native reinforcement
-  admission과 beacon policy의 accepted-update event cursor 연결. 이 adapter의 construction timing은
+- source runtime v5의 opening seed·completed beacon construction adapter·native reinforcement
+  admission·v3/v4 legacy save migration·result namespace와 beacon policy의 accepted-update event cursor 연결. 이
+  adapter의 construction timing은
   명시적인 `intentional-adaptation`이며 원본 source record 생성 시점을 주장하지 않는다.
 - 봉화대 trigger의 blocker·flag scan gate, active/owner/class/progress match
 - match 선행 flag write, script busy와 무검사 loader `0/1`·void start
@@ -279,7 +282,7 @@ dismiss visual·sound는 남아 있다.
 - final destination `0x140/0x64/0x10/0x20/raw WORD`별 후속 lifecycle
 - class 12 state-2 project policy, class 14 generic Facing/runtime transient tick mapping, 네 class 행동·stats,
   raw owner, 원본 1,200-slot/generation/occupancy-owner 저장 모델의 이후 소비·movement/pathfinding
-- raw clocks와 프로젝트 24 Hz·result/asset/identity policy의 exact mapping
+- native scheduler와 project 24 Hz·result/asset/identity policy의 exact mapping 및 full presentation parity
 
 별도 후속 질문:
 

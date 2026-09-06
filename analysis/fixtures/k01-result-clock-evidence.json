@@ -1,0 +1,915 @@
+{
+  "question": "What exact original DWORD result clock is sampled by the main idle loop, how is its script-run flag sourced for K01, and what bounded downstream result gates consume the sample?",
+  "evidenceStatus": "static-confirmed-bounded-result-clock-and-script-flag-source",
+  "reproductionStatus": "reproduction-complete",
+  "integrationStatus": "gated-no-native-24hz-or-wall-clock-policy",
+  "source": {
+    "executable": {
+      "path": "original/imjinrok2/imjinrok2.exe",
+      "sha256": "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e"
+    },
+    "generatedArtifacts": {
+      "functions": {
+        "path": "analysis/generated/imjinrok2/functions.json",
+        "byteLength": 1468333,
+        "sha256": "7e071fdfe425d22447780c265fe1d3fd271a1bedd1773682bebcb8ddc6d2e16e"
+      },
+      "references": {
+        "path": "analysis/generated/imjinrok2/references.json",
+        "byteLength": 17206569,
+        "sha256": "f64cfa6f04bc39573552f42a8b7bdd5b08fea1ba774d05865162d1d80daaf9a5"
+      },
+      "seeds": {
+        "path": "analysis/generated/imjinrok2/seeds.json",
+        "byteLength": 9436451,
+        "sha256": "386b0f4e86c3376f34fe2b50fedb7e45b762c30784d4ebcc0387aa6f431811b2"
+      }
+    }
+  },
+  "imports": {
+    "timeGetTime": {
+      "dll": "WINMM.dll",
+      "name": "timeGetTime",
+      "hint": 152,
+      "iatVa": "0x004b7270",
+      "lookupRva": "0x000b9996"
+    },
+    "sleep": {
+      "dll": "KERNEL32.dll",
+      "name": "Sleep",
+      "hint": 662,
+      "iatVa": "0x004b7168",
+      "lookupRva": "0x000b9360"
+    },
+    "timeGetTimeSemantics": {
+      "type": "DWORD",
+      "unit": "milliseconds since system start",
+      "wrap": "modulo 2^32",
+      "precision": "system-dependent; no fixed native Hz claim",
+      "documentation": "https://learn.microsoft.com/en-us/windows/win32/api/timeapi/nf-timeapi-timegettime"
+    }
+  },
+  "analyzedFunctions": [
+    {
+      "entry": "0x0045f9c0",
+      "name": "FUN_0045f9c0",
+      "bodySize": 3565,
+      "bodyRanges": [
+        "0x0045f9c0-0x004607ac"
+      ],
+      "instructionCount": 801,
+      "instructionSha256": "b694ee213a1b5f189ed7455e00690dcb29d970eca6ea87ef1f59c42c611cfb24"
+    },
+    {
+      "entry": "0x00482340",
+      "name": "FUN_00482340",
+      "bodySize": 77,
+      "bodyRanges": [
+        "0x00482340-0x0048238c"
+      ],
+      "instructionCount": 22,
+      "instructionSha256": "0f33a0727962c95b37e0fc232b1b921a85fe450b61dc295f73e316bc9cbdc35d"
+    },
+    {
+      "entry": "0x00482390",
+      "name": "FUN_00482390",
+      "bodySize": 4,
+      "bodyRanges": [
+        "0x00482390-0x00482393"
+      ],
+      "instructionCount": 2,
+      "instructionSha256": "0f019498e796041d4448ab24729aef7f664c3ce9d648fa54ddbe4eefc6a502ab"
+    },
+    {
+      "entry": "0x004823a0",
+      "name": "FUN_004823a0",
+      "bodySize": 4,
+      "bodyRanges": [
+        "0x004823a0-0x004823a3"
+      ],
+      "instructionCount": 2,
+      "instructionSha256": "89917ca0f56c10aa67814cd5318e7dc1c9f1dd3e7b94e915eda062024850563e"
+    },
+    {
+      "entry": "0x004823d0",
+      "name": "FUN_004823d0",
+      "bodySize": 231,
+      "bodyRanges": [
+        "0x004823d0-0x004824b6"
+      ],
+      "instructionCount": 78,
+      "instructionSha256": "bf77645626bb9b349beb9538b839627be0d0a05a4bf409a552793ca726c9e7c5"
+    },
+    {
+      "entry": "0x004824c0",
+      "name": "FUN_004824c0",
+      "bodySize": 204,
+      "bodyRanges": [
+        "0x004824c0-0x0048258b"
+      ],
+      "instructionCount": 62,
+      "instructionSha256": "95f05a63f15937b7c68e7af68969cb1af50005fe2d2030b9319268fb19961281"
+    },
+    {
+      "entry": "0x0048a5c0",
+      "name": "FUN_0048a5c0",
+      "bodySize": 697,
+      "bodyRanges": [
+        "0x0048a5c0-0x0048a878"
+      ],
+      "instructionCount": 181,
+      "instructionSha256": "c2a0e73fb0e208846f77187fa11310cdd4177f62c6fbd61732d822f513115791"
+    },
+    {
+      "entry": "0x00482180",
+      "name": "FUN_00482180",
+      "bodySize": 373,
+      "bodyRanges": [
+        "0x00482180-0x004822f4"
+      ],
+      "instructionCount": 114,
+      "instructionSha256": "acf831ee8a608862cb7c64595f3a90b7799a967b1c9b7b38b0da9fe6e1b20f8c"
+    },
+    {
+      "entry": "0x004888b0",
+      "name": "FUN_004888b0",
+      "bodySize": 134,
+      "bodyRanges": [
+        "0x004888b0-0x00488935"
+      ],
+      "instructionCount": 27,
+      "instructionSha256": "c1d0633e74c828fdec79d86d00a83f2b50873092e4f1dc6ed3e58ae1d88fa2ab"
+    },
+    {
+      "entry": "0x00482010",
+      "name": "FUN_00482010",
+      "bodySize": 311,
+      "bodyRanges": [
+        "0x00482010-0x00482146"
+      ],
+      "instructionCount": 101,
+      "instructionSha256": "f498d313ccfd6c08016c2e612d0b579736fe8ada1348dc6d5a8fd4630a174ebd"
+    }
+  ],
+  "seededFunctions": [
+    {
+      "entry": "0x0045f9c0",
+      "bodyRange": "0x0045f9c0-0x004607ac",
+      "byteRange": "0x0045f9c0-0x004607ad (end exclusive)",
+      "blockCount": 209,
+      "instructionCount": 801,
+      "bodySha256": "7081ada042adc4fa3a7d7b838f717c52bbd63fae2c45be566b0351cfd12dc022"
+    },
+    {
+      "entry": "0x004824c0",
+      "bodyRange": "0x004824c0-0x0048258b",
+      "byteRange": "0x004824c0-0x0048258c (end exclusive)",
+      "blockCount": 16,
+      "instructionCount": 62,
+      "bodySha256": "e3702a7856d2015dd125ebac0e5d52bf45476df74df70928beeebce1b657aa28"
+    }
+  ],
+  "rawCodeRanges": [
+    {
+      "id": "main-message-queue-and-gate",
+      "byteRange": "0x0045fc88-0x0045fd02 (end exclusive)",
+      "bodySha256": "48f824c120c214dfc793df3e8fe4c1fda9af00ef9f7ccc71e9048c1c09a104cf"
+    },
+    {
+      "id": "main-result-clock-sample-and-pre-dispatch",
+      "byteRange": "0x0045fd02-0x0045fd36 (end exclusive)",
+      "bodySha256": "24f4cb133ecc36340ade50b10cf0ec5e463fc3660d720035d3c0f9ce5e24ce24"
+    },
+    {
+      "id": "main-state-dispatch-entry",
+      "byteRange": "0x0045fd36-0x0045fd63 (end exclusive)",
+      "bodySha256": "043510726fef4410724c6785a48732ea7eb9a72a527f702a183acb77e35cc47b"
+    },
+    {
+      "id": "script-run-flag-function",
+      "byteRange": "0x00482340-0x0048238d (end exclusive)",
+      "bodySha256": "b141a423aa35bb79fe7532a6874929c54f62fed2706addbabefd8a3469beddae"
+    },
+    {
+      "id": "script-stop-function",
+      "byteRange": "0x004823d0-0x004824b7 (end exclusive)",
+      "bodySha256": "55e726a80d109c3a79ef1f7930ffbc1567203d9ebea5c794447167c59840a003"
+    },
+    {
+      "id": "script-record-consumer",
+      "byteRange": "0x004824c0-0x0048258c (end exclusive)",
+      "bodySha256": "e3702a7856d2015dd125ebac0e5d52bf45476df74df70928beeebce1b657aa28"
+    },
+    {
+      "id": "script-loader-function",
+      "byteRange": "0x00482180-0x004822f5 (end exclusive)",
+      "bodySha256": "e36885f3f9cce298d6ca89a85c606cdeb280cfaac6fe2a1a35752bb1ba8fd178"
+    },
+    {
+      "id": "k01-script-context-consumer",
+      "byteRange": "0x004888b0-0x00488936 (end exclusive)",
+      "bodySha256": "19fe96bcb4b2f818b672fe0e842dfcaf121cc95d3ffb36de64339ffac1df6380"
+    },
+    {
+      "id": "k01-script-context-cleanup",
+      "byteRange": "0x00482010-0x00482147 (end exclusive)",
+      "bodySha256": "1b6026efd4dc1dc53dc4a01f3f1335043508d8fb0a970058e396d627df9499e5"
+    }
+  ],
+  "codeAnchors": [
+    {
+      "va": "0x0045fc88",
+      "rawOffset": "0x0005fc88",
+      "bytes": "55 55 55 8d 4c 24 20 55 51 ff 15 44 72 4b 00 85 c0 74 2e",
+      "meaning": "PeekMessageA is checked before the idle branch; a queued message takes the dispatch path and the loop restarts before result-clock sampling"
+    },
+    {
+      "va": "0x0045fd02",
+      "rawOffset": "0x0005fd02",
+      "bytes": "8b 15 04 2e 88 00 89 15 b0 c0 88 00 ff 15 70 72 4b 00 a3 04 2e 88 00",
+      "meaning": "idle path copies the old result-clock DWORD to 0x0088c0b0, calls the timeGetTime IAT, and stores the returned DWORD at 0x00882e04"
+    },
+    {
+      "va": "0x0045fd36",
+      "rawOffset": "0x0005fd36",
+      "bytes": "0f bf 05 c8 df 4b 00 83 f8 28 0f 8f be 06 00 00 0f 84 a5 06 00 00 48 83 f8 22 0f 87 32 ff ff ff",
+      "meaning": "signed main-state dispatch follows the clock sample and includes the original state 3/23 branches"
+    },
+    {
+      "va": "0x00482340",
+      "rawOffset": "0x00082340",
+      "bytes": "56 8b f1 8b 46 04 85 c0 74 41 8b 46 08 85 c0 75 3a 6a 00 b9 80 36 5e 00 e8 d3 5d 02 00 b9 80 36 5e 00 e8 39 5e 02 00 c7 46 08 01 00 00 00 66 c7 86 18 0c 00 00 00 00 c7 46 0c 00 00 00 00 33 c0 81 c6 20 0c 00 00 89 06 89 46 04 5e c3",
+      "meaning": "script-run helper requires object+0x4 nonzero and object+0x8 zero, then sets object+0x8 to one and clears its run metadata fields"
+    },
+    {
+      "va": "0x004823d0",
+      "rawOffset": "0x000823d0",
+      "bytes": "56 8b f1 57 33 ff 83 7e 04 01 75 10 83 7e 08 01 75 03 89 7e 08 66 89 be 18 0c 00 00",
+      "meaning": "script-stop helper clears object+0x8 only when object+0x4 and object+0x8 are both exactly one, then continues cleanup"
+    },
+    {
+      "va": "0x004824a7",
+      "rawOffset": "0x000824a7",
+      "bytes": "7e 14 68 e8 03 00 00 ff 15 68 71 4b 00 5f 5e c3",
+      "meaning": "stop helper performs additional cleanup, pushes Sleep(1000), and returns after the projected run-flag clear"
+    },
+    {
+      "va": "0x0048256e",
+      "rawOffset": "0x0008256e",
+      "bytes": "75 13 83 f8 01 75 0e 8b 46 0c 85 c0 75 07 8b ce e8 4d fe ff ff",
+      "meaning": "completed-record readiness path calls script-stop only when readiness is one and object+0xc is zero"
+    },
+    {
+      "va": "0x0048a775",
+      "rawOffset": "0x0008a775",
+      "bytes": "b9 08 be bc 00 66 89 35 dc 38 84 00 e8 1a 7c ff ff 85 c0 75 19 68 38 2f 4c 00 b9 08 be bc 00 e8 e7 79 ff ff b9 08 be bc 00 e8 9d 7b ff ff",
+      "meaning": "K01 calls the +0x4 getter at 0x0048a781; a nonzero result marks script-busy and skips the K0120 start call"
+    },
+    {
+      "va": "0x0048a7f2",
+      "rawOffset": "0x0008a7f2",
+      "bytes": "66 39 35 dc 38 84 00 75 17 b9 08 be bc 00 e8 8b 7b ff ff 85 c0 75 09 66 8b c6 5e 5d 83 c4 50 c3",
+      "meaning": "after the K01 scan, the +0x8 getter at 0x0048a800 gates the direct return-one path"
+    },
+    {
+      "va": "0x0048218f",
+      "rawOffset": "0x0008218f",
+      "bytes": "8b 46 04 85 c0 74 05 e8 75 fe ff ff 8b 9c 24 10 10 00 00 8b ce 53",
+      "meaning": "script loader checks object+0x4 and clears/replaces an existing loaded script before its new load attempt"
+    },
+    {
+      "va": "0x004822c5",
+      "rawOffset": "0x000822c5",
+      "bytes": "68 18 94 55 00 e8 71 8d fc ff 83 c4 10 c7 46 04 01 00 00 00 66 c7 06 01 00 66 c7 46 02 01 00 5f 5e b8 01 00 00 00 5b 81 c4 00 10 00 00 c2",
+      "meaning": "successful script loader path sets object+0x4 to one and returns one after initializing its loaded record"
+    },
+    {
+      "va": "0x0048a6e8",
+      "rawOffset": "0x0008a6e8",
+      "bytes": "e8 c3 e1 ff ff a1 80 5f 7c 00 3b c5 77 11 33 d2 b9 c8 00 00 00 f7 f1 85 d2 0f 85 69 01 00 00",
+      "meaning": "K01 calls the script-context consumer before the general source/presence update at 0x0048a707"
+    },
+    {
+      "va": "0x004888b0",
+      "rawOffset": "0x000888b0",
+      "bytes": "b9 08 be bc 00 e8 e6 9a ff ff 83 f8 01 75 76",
+      "meaning": "K01 script-context consumer reads object+0x4 through FUN_004823a0 and gates the completed-record consumer on readiness one"
+    },
+    {
+      "va": "0x004888c4",
+      "rawOffset": "0x000888c4",
+      "bytes": "e8 f7 9b ff ff",
+      "meaning": "the K01 script-context consumer calls FUN_004824c0 using the same 0x00bcbe08 context"
+    },
+    {
+      "va": "0x00488919",
+      "rawOffset": "0x00088919",
+      "bytes": "e8 72 9a ff ff 85 c0 75 13 b9 08 be bc 00",
+      "meaning": "after consuming records, K01 reads object+0x8 and enters cleanup only when the projected run flag is clear"
+    },
+    {
+      "va": "0x00488927",
+      "rawOffset": "0x00088927",
+      "bytes": "e8 e4 96 ff ff 66 c7 05 2e 6e c0 00 00 00",
+      "meaning": "the K01 script-context consumer calls FUN_00482010 to finish the loaded-context cleanup"
+    },
+    {
+      "va": "0x00482010",
+      "rawOffset": "0x00082010",
+      "bytes": "55 56 8b f1 83 7e 08 01 75 05 e8 b1 03 00 00",
+      "meaning": "FUN_00482010 checks object+0x8 and calls FUN_004823d0 when the script is still running before its remaining cleanup"
+    },
+    {
+      "va": "0x0048212c",
+      "rawOffset": "0x0008212c",
+      "bytes": "8b ce e8 1d 0f 00 00 66 89 ae 18 0c 00 00 66 89 ae 1a 0c 00 00 89 6e 04 5e 5d c3",
+      "meaning": "FUN_00482010 calls FUN_00483050, clears record counters, and finally clears object+0x4 before returning"
+    }
+  ],
+  "callEdges": [
+    {
+      "callsite": "0x0048257e",
+      "caller": "0x004824c0",
+      "callee": "0x004823d0",
+      "type": "UNCONDITIONAL_CALL"
+    },
+    {
+      "callsite": "0x0048de12",
+      "caller": "0x0048ddb0",
+      "callee": "0x0048a5c0",
+      "type": "UNCONDITIONAL_CALL"
+    },
+    {
+      "callsite": "0x0048a6e3",
+      "caller": "0x0048a5c0",
+      "callee": "0x00482340",
+      "type": "UNCONDITIONAL_CALL"
+    },
+    {
+      "callsite": "0x0048a794",
+      "caller": "0x0048a5c0",
+      "callee": "0x00482180",
+      "type": "UNCONDITIONAL_CALL"
+    },
+    {
+      "callsite": "0x0048a781",
+      "caller": "0x0048a5c0",
+      "callee": "0x004823a0",
+      "type": "UNCONDITIONAL_CALL"
+    },
+    {
+      "callsite": "0x0048a79e",
+      "caller": "0x0048a5c0",
+      "callee": "0x00482340",
+      "type": "UNCONDITIONAL_CALL"
+    },
+    {
+      "callsite": "0x0048a800",
+      "caller": "0x0048a5c0",
+      "callee": "0x00482390",
+      "type": "UNCONDITIONAL_CALL"
+    },
+    {
+      "callsite": "0x0048a6e8",
+      "caller": "0x0048a5c0",
+      "callee": "0x004888b0",
+      "type": "UNCONDITIONAL_CALL"
+    },
+    {
+      "callsite": "0x004888b5",
+      "caller": "0x004888b0",
+      "callee": "0x004823a0",
+      "type": "UNCONDITIONAL_CALL"
+    },
+    {
+      "callsite": "0x004888c4",
+      "caller": "0x004888b0",
+      "callee": "0x004824c0",
+      "type": "UNCONDITIONAL_CALL"
+    },
+    {
+      "callsite": "0x00488919",
+      "caller": "0x004888b0",
+      "callee": "0x00482390",
+      "type": "UNCONDITIONAL_CALL"
+    },
+    {
+      "callsite": "0x00488927",
+      "caller": "0x004888b0",
+      "callee": "0x00482010",
+      "type": "UNCONDITIONAL_CALL"
+    },
+    {
+      "callsite": "0x0048201a",
+      "caller": "0x00482010",
+      "callee": "0x004823d0",
+      "type": "UNCONDITIONAL_CALL"
+    },
+    {
+      "callsite": "0x0048212e",
+      "caller": "0x00482010",
+      "callee": "0x00483050",
+      "type": "UNCONDITIONAL_CALL"
+    }
+  ],
+  "referenceSets": {
+    "mainResultClock": {
+      "entries": [
+        {
+          "site": "0x0045fd02",
+          "caller": "0x0045f9c0",
+          "target": "0x00882e04",
+          "type": "READ"
+        },
+        {
+          "site": "0x0045fd14",
+          "caller": "0x0045f9c0",
+          "target": "0x00882e04",
+          "type": "WRITE"
+        },
+        {
+          "site": "0x0045fd62",
+          "caller": "0x0045f9c0",
+          "target": "0x00882e04",
+          "type": "READ"
+        }
+      ],
+      "sha256": "2fc3e2c8bf4fff945a973fec584344d8b223f6bed5cb4d8491a73712401abd19"
+    },
+    "directResultClockWrites": {
+      "entries": [
+        {
+          "site": "0x0045fd14",
+          "caller": "0x0045f9c0",
+          "target": "0x00882e04",
+          "type": "WRITE"
+        }
+      ],
+      "sha256": "e1eaea242e6fc3ab23e784cab2a11f094b8c3997bc9eb2615b1d4dc2b31851cc",
+      "statement": "The canonical direct WRITE inventory has one entry: main idle sample 0x0045fd14 -> DWORD 0x00882e04."
+    }
+  },
+  "fields": {
+    "resultClock": "DWORD 0x00882e04; overwritten by main idle timeGetTime sample",
+    "previousClockCopy": "DWORD 0x0088c0b0 receives the prior 0x00882e04 value at 0x0045fd08",
+    "rawGlobalTick": "DWORD 0x007c5f80; separate from result clock and used by result commit gating",
+    "scriptContext": {
+      "base": "ECX = 0x00bcbe08",
+      "readiness": "DWORD +0x4",
+      "runFlag": "DWORD +0x8",
+      "completionReady": "DWORD +0xc"
+    }
+  },
+  "mainLoop": {
+    "queueAndGate": "PeekMessageA drains queued messages first; the main gate repeats while WORD 0x00c06e24 is nonzero or (when DWORD 0x00634c90 is zero) the signed state is outside accepted states {3, 23, 24, 26}. A nonzero 0x00634c90 therefore overrides the state list and permits the sample after the queue is empty.",
+    "sampleOrder": [
+      "read 0x00882e04",
+      "write prior value to 0x0088c0b0",
+      "call WINMM.dll!timeGetTime through IAT 0x004b7270",
+      "write returned DWORD to 0x00882e04",
+      "dispatch the signed main state"
+    ],
+    "stateDispatchFollowsSample": true,
+    "sourceBoundary": "The loop and state dispatch are static evidence; no fixed native update frequency is inferred."
+  },
+  "scriptFlagLifecycle": {
+    "loader": {
+      "function": "FUN_00482180",
+      "success": "loader success writes object+0x4 = 1 and returns one",
+      "failure": "when K01 has object+0x4 == 0, loader zero returns before the success write; K01 does not use the loader return as its run gate",
+      "k01Callsite": "0x0048a794"
+    },
+    "run": {
+      "function": "FUN_00482340",
+      "preconditions": [
+        "object+0x4 != 0",
+        "object+0x8 == 0"
+      ],
+      "writes": [
+        "object+0x8 = 1",
+        "object+0xc18 = 0",
+        "object+0xc = 0",
+        "object+0xc20 = 0",
+        "object+0xc24 = 0"
+      ]
+    },
+    "stop": {
+      "function": "FUN_004823d0",
+      "preconditions": [
+        "object+0x4 == 1",
+        "object+0x8 == 1"
+      ],
+      "projectedWrite": "object+0x8 = 0",
+      "beyondProjection": "The stop routine continues resource and record cleanup and calls Sleep(1000) through KERNEL32.dll!Sleep; those effects are not collapsed into the run flag."
+    },
+    "completionChain": {
+      "contextFunction": "FUN_004888b0",
+      "k01Callsite": "0x0048a6e8",
+      "context": "ECX = 0x00bcbe08",
+      "order": [
+        "FUN_004823a0 checks object+0x4 before FUN_004824c0 consumes completed records",
+        "FUN_00482390 checks object+0x8 after the consumer",
+        "when object+0x8 is clear, FUN_00482010 performs loaded-context cleanup",
+        "FUN_00482010 calls FUN_004823d0 when object+0x8 is one and clears object+0x4 at its tail"
+      ],
+      "cleanupFunction": "FUN_00482010",
+      "cleanupProjectedWrite": "object+0x4 = 0",
+      "cleanupTail": "FUN_00483050 and record-counter cleanup precede the object+0x4 clear at 0x00482141"
+    },
+    "readinessConsumer": {
+      "function": "FUN_004824c0",
+      "branch": "When the completed-record index reaches the count, readiness is one, and object+0xc is zero, it calls FUN_004823d0; K01 reaches this consumer through FUN_004888b0."
+    },
+    "k01": {
+      "function": "FUN_0048a5c0",
+      "contextConsumer": "FUN_004888b0 at callsite 0x0048a6e8, before the general source/presence update at 0x0048a707",
+      "busyGetter": "FUN_004823a0 reads object+0x4 at callsite 0x0048a781",
+      "postGetter": "FUN_00482390 reads object+0x8 at callsite 0x0048a800",
+      "startCalls": [
+        "0x0048a6e3",
+        "0x0048a79e"
+      ],
+      "directReturn": "After the K01 scan, exact runFlag zero permits AX one; nonzero runFlag continues the later failure/hero checks."
+    }
+  },
+  "scriptFlagVectors": [
+    {
+      "id": "successful-load",
+      "input": {
+        "loaderReturn": 1,
+        "readinessBefore": 0,
+        "runFlagBefore": 0,
+        "loadRequested": true,
+        "startRequested": false,
+        "completedRecordReady": false,
+        "completionGate": 0
+      },
+      "result": {
+        "loader": {
+          "returnValue": 1,
+          "readinessBefore": 0,
+          "readinessAfter": 1,
+          "loaderCalled": true,
+          "source": "loader-success-writes-object-plus-0x4"
+        },
+        "readiness": 0,
+        "runFlag": 0,
+        "stopped": false,
+        "cleanedUp": true,
+        "events": [
+          {
+            "kind": "loader",
+            "returnValue": 1,
+            "readinessBefore": 0,
+            "readinessAfter": 1,
+            "loaderCalled": true,
+            "source": "loader-success-writes-object-plus-0x4"
+          },
+          {
+            "kind": "cleanup",
+            "function": "FUN_00482010",
+            "projectedWrite": "object+0x4 = 0",
+            "runFlag": 0
+          }
+        ]
+      }
+    },
+    {
+      "id": "successful-load-starts-script",
+      "input": {
+        "loaderReturn": 1,
+        "readinessBefore": 0,
+        "runFlagBefore": 0,
+        "loadRequested": true,
+        "startRequested": true,
+        "completedRecordReady": false,
+        "completionGate": 0
+      },
+      "result": {
+        "loader": {
+          "returnValue": 1,
+          "readinessBefore": 0,
+          "readinessAfter": 1,
+          "loaderCalled": true,
+          "source": "loader-success-writes-object-plus-0x4"
+        },
+        "readiness": 1,
+        "runFlag": 1,
+        "stopped": false,
+        "cleanedUp": false,
+        "events": [
+          {
+            "kind": "loader",
+            "returnValue": 1,
+            "readinessBefore": 0,
+            "readinessAfter": 1,
+            "loaderCalled": true,
+            "source": "loader-success-writes-object-plus-0x4"
+          },
+          {
+            "kind": "run",
+            "precondition": "object+0x4 != 0 && object+0x8 == 0",
+            "runFlag": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "loader-zero-leaves-readiness-unset",
+      "input": {
+        "loaderReturn": 0,
+        "readinessBefore": 0,
+        "runFlagBefore": 0,
+        "loadRequested": true,
+        "startRequested": true,
+        "completedRecordReady": false,
+        "completionGate": 0
+      },
+      "result": {
+        "loader": {
+          "returnValue": 0,
+          "readinessBefore": 0,
+          "readinessAfter": 0,
+          "loaderCalled": true,
+          "source": "loader-zero-return-before-success-write"
+        },
+        "readiness": 0,
+        "runFlag": 0,
+        "stopped": false,
+        "cleanedUp": false,
+        "events": [
+          {
+            "kind": "loader",
+            "returnValue": 0,
+            "readinessBefore": 0,
+            "readinessAfter": 0,
+            "loaderCalled": true,
+            "source": "loader-zero-return-before-success-write"
+          },
+          {
+            "kind": "run-skipped",
+            "reason": "loader-not-ready",
+            "runFlag": 0
+          }
+        ]
+      }
+    },
+    {
+      "id": "busy-start-does-not-restart",
+      "input": {
+        "loaderReturn": 1,
+        "readinessBefore": 1,
+        "runFlagBefore": 1,
+        "loadRequested": true,
+        "startRequested": true,
+        "completedRecordReady": false,
+        "completionGate": 0
+      },
+      "result": {
+        "loader": null,
+        "readiness": 1,
+        "runFlag": 1,
+        "stopped": false,
+        "cleanedUp": false,
+        "events": [
+          {
+            "kind": "load-skipped",
+            "reason": "already-loaded",
+            "loaderCalled": false,
+            "readiness": 1
+          },
+          {
+            "kind": "run-skipped",
+            "reason": "already-loaded-context",
+            "runFlag": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "final-record-stops-and-sleeps",
+      "input": {
+        "loaderReturn": 1,
+        "readinessBefore": 1,
+        "runFlagBefore": 1,
+        "loadRequested": false,
+        "startRequested": false,
+        "completedRecordReady": true,
+        "completionGate": 0
+      },
+      "result": {
+        "loader": null,
+        "readiness": 0,
+        "runFlag": 0,
+        "stopped": true,
+        "cleanedUp": true,
+        "events": [
+          {
+            "kind": "load-skipped",
+            "reason": "already-loaded",
+            "loaderCalled": false,
+            "readiness": 1
+          },
+          {
+            "kind": "stop",
+            "precondition": "record-ready && object+0xc == 0",
+            "runFlag": 0,
+            "sleepMs": 1000
+          },
+          {
+            "kind": "cleanup",
+            "function": "FUN_00482010",
+            "projectedWrite": "object+0x4 = 0",
+            "runFlag": 0
+          }
+        ]
+      }
+    }
+  ],
+  "downstream": {
+    "sourceModule": "tools/imjinrok/extract-k01-mission-result-lifecycle.mjs",
+    "timerResolver": {
+      "helper": "resolveMissionTimers",
+      "thresholdMilliseconds": 2000,
+      "comparison": "signed absolute DWORD delta > 2000; equality remains immature",
+      "vectors": [
+        {
+          "id": "strict-2000-remains-immature",
+          "input": {
+            "winTimer": 1,
+            "lossTimer": 0,
+            "resultClock": 2001
+          },
+          "result": {
+            "result": 0,
+            "events": [
+              {
+                "kind": "timer-read",
+                "timer": "win",
+                "value": 1
+              },
+              {
+                "kind": "timer-distance",
+                "timer": "win",
+                "delta": 2000,
+                "absoluteBits": 2000,
+                "absoluteSigned": 2000
+              },
+              {
+                "kind": "timer-read",
+                "timer": "loss",
+                "value": 0
+              }
+            ]
+          }
+        },
+        {
+          "id": "strict-2001-matures",
+          "input": {
+            "winTimer": 1,
+            "lossTimer": 0,
+            "resultClock": 2002
+          },
+          "result": {
+            "result": 1,
+            "events": [
+              {
+                "kind": "timer-read",
+                "timer": "win",
+                "value": 1
+              },
+              {
+                "kind": "timer-distance",
+                "timer": "win",
+                "delta": 2001,
+                "absoluteBits": 2001,
+                "absoluteSigned": 2001
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "distinctRawTickGate": {
+      "helper": "runDistinctRawTickResultCommit",
+      "rule": "equal rawGlobalTick and cachedGlobalTick skips the dispatcher; a distinct tick writes the cache before dispatcher evaluation",
+      "vectors": [
+        {
+          "id": "same-tick-skips-dispatch",
+          "input": {
+            "rawGlobalTick": 7,
+            "cachedGlobalTick": 7
+          },
+          "result": {
+            "returnValue": 0,
+            "cachedGlobalTick": 7,
+            "events": []
+          },
+          "dispatches": 0
+        },
+        {
+          "id": "distinct-tick-caches-before-dispatch",
+          "input": {
+            "rawGlobalTick": 8,
+            "cachedGlobalTick": 7
+          },
+          "result": {
+            "returnValue": 0,
+            "cachedGlobalTick": 8,
+            "events": [
+              {
+                "kind": "global-tick-cache-write",
+                "value": 8
+              },
+              {
+                "kind": "mission-dispatcher-call"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "unitBoundary": "The result clock and raw global tick are separate DWORD values. No native 24 Hz conversion, fixed FPS, or project adapter is claimed here."
+  },
+  "testVectors": [
+    {
+      "id": "idle-samples-unsigned-milliseconds",
+      "input": {
+        "previousClock": 100,
+        "unsignedSample": 151,
+        "messageQueuePending": false,
+        "mainGateBlocked": false
+      },
+      "result": {
+        "sampled": true,
+        "reason": "idle-gate-passed",
+        "previousClock": 100,
+        "unsignedSample": 151,
+        "resultClock": 151,
+        "elapsed": 51,
+        "wrapped": false
+      }
+    },
+    {
+      "id": "queued-message-does-not-sample",
+      "input": {
+        "previousClock": 100,
+        "unsignedSample": 151,
+        "messageQueuePending": true,
+        "mainGateBlocked": false
+      },
+      "result": {
+        "sampled": false,
+        "reason": "message-queue",
+        "previousClock": 100,
+        "unsignedSample": null,
+        "resultClock": 100,
+        "elapsed": null,
+        "wrapped": false
+      }
+    },
+    {
+      "id": "main-gate-does-not-sample",
+      "input": {
+        "previousClock": 100,
+        "unsignedSample": 151,
+        "messageQueuePending": false,
+        "mainGateBlocked": true
+      },
+      "result": {
+        "sampled": false,
+        "reason": "main-gate",
+        "previousClock": 100,
+        "unsignedSample": null,
+        "resultClock": 100,
+        "elapsed": null,
+        "wrapped": false
+      }
+    },
+    {
+      "id": "dword-wrap-sample",
+      "input": {
+        "previousClock": 4294967294,
+        "unsignedSample": 1,
+        "messageQueuePending": false,
+        "mainGateBlocked": false
+      },
+      "result": {
+        "sampled": true,
+        "reason": "idle-gate-passed",
+        "previousClock": 4294967294,
+        "unsignedSample": 1,
+        "resultClock": 1,
+        "elapsed": 3,
+        "wrapped": true
+      }
+    }
+  ],
+  "uncertainties": [
+    "timeGetTime precision is variable and the main message/gate loop does not establish a fixed wall-clock frequency",
+    "0x00882e04 result-clock units are bounded to the imported millisecond API; relationship to project 24 Hz remains an integration policy boundary",
+    "stop-routine resource cleanup beyond the projected object+0x8/object+0x4 transitions and Sleep(1000) is retained as raw behavior but not modeled by the bounded flag replay",
+    "the full script/compositor/scheduler state machines are outside this evidence unit"
+  ]
+}
+

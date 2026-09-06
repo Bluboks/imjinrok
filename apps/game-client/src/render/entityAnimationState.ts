@@ -12,6 +12,8 @@ export type EntityAnimationStateUnit = Pick<
   | "health"
   | "movementPath"
   | "movementTarget"
+  | "movementBlocked"
+  | "navigation"
 >;
 
 export function getEntityAnimationStateKey(
@@ -32,18 +34,21 @@ export function getEntityAnimationStateKey(
     candidates.push("attack");
   }
 
-  const isMoving = unit.movementTarget !== undefined || (unit.movementPath?.length ?? 0) > 0;
+  const hasTravelIntent = unit.movementTarget !== undefined ||
+    (unit.movementPath?.length ?? 0) > 0 ||
+    unit.navigation?.terminalReason === "mobile-obstruction";
+  const isMoving = hasTravelIntent && unit.movementBlocked !== true;
   const isCarryingResource = (unit.carriedResource?.amount ?? 0) > 0;
 
-  if (!isMoving && unit.currentOrder?.type === "repair") {
+  if (!hasTravelIntent && unit.currentOrder?.type === "repair") {
     candidates.push("repair", "build");
   }
 
-  if (!isMoving && unit.currentOrder?.type === "build") {
+  if (!hasTravelIntent && unit.currentOrder?.type === "build") {
     candidates.push("build");
   }
 
-  if (!isMoving && unit.currentOrder?.type === "gather") {
+  if (!hasTravelIntent && unit.currentOrder?.type === "gather") {
     candidates.push("gather");
   }
 

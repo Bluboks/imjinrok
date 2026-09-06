@@ -1,5 +1,5 @@
 import { resourceDefinitions, type CommandEnvelope, type MapDefinition, type ResourceDefinition, type ScenarioDefinition } from "@shared";
-import { advanceWorldTick, cloneSourceRuntimeProfileEnvelope, completeScenarioRuntime, CORE_CURRENT_VISIBILITY_SKIRMISH_AI_PERCEPTION_POLICY_ID, createInitialWorldState, createPlayerResearchState, createProjectileSystemState, issueCommand as issueWorldCommand, normalizeSimulationEventState, parseSerializedProjectileImpactLog, parseSerializedProjectileSystemState, PRODUCT_PROJECTILE_REGISTRY, SIM_TICK_SECONDS, SkirmishAiController, type IssueCommandResult, type ProjectileRegistry, type ScenarioStatus, type SkirmishAiControllerOptions, type WorldSnapshot, type WorldState } from "@simulation";
+import { advanceK01MissionResultClockElapsed, advanceWorldTick, cloneSourceRuntimeProfileEnvelope, completeK01MissionScript, completeScenarioRuntime, CORE_CURRENT_VISIBILITY_SKIRMISH_AI_PERCEPTION_POLICY_ID, createInitialWorldState, createPlayerResearchState, createProjectileSystemState, getK01MissionResultClockSample, issueCommand as issueWorldCommand, normalizeK01MissionResultStateForWorld, normalizeSimulationEventState, parseSerializedProjectileImpactLog, parseSerializedProjectileSystemState, PRODUCT_PROJECTILE_REGISTRY, SIM_TICK_SECONDS, SkirmishAiController, type IssueCommandResult, type ProjectileRegistry, type ScenarioStatus, type SkirmishAiControllerOptions, type WorldSnapshot, type WorldState } from "@simulation";
 import type { GameLaunchContext } from "../session.js";
 import { NetworkClient } from "./NetworkClient.js";
 
@@ -30,6 +30,7 @@ export interface SessionTransport {
   setPaused(paused: boolean): void;
   setPlaybackSpeed(speed: number): void;
   forceScenarioResult(status: Extract<ScenarioStatus, "victory" | "defeat">): boolean;
+  completeMissionScript(sourceScript: string): boolean;
   update(time: number, delta: number): void;
   issueCommand(envelope: CommandEnvelope): Promise<IssueCommandResult> | IssueCommandResult;
   dispose(): void;
@@ -37,7 +38,7 @@ export interface SessionTransport {
 
 export class LocalSessionTransport implements SessionTransport {
   readonly isRemote = false;
-  private lastTickAt = 0;
+  private lastTickAt: number | null = null;
   private tickAccumulatorMs = 0;
   private paused = false;
   private playbackSpeed = 1;
@@ -60,7 +61,7 @@ export class LocalSessionTransport implements SessionTransport {
 
   replaceSnapshot(snapshot: WorldSnapshot, scenario?: ScenarioDefinition): boolean {
     this.worldState = normalizeWorldSnapshot(snapshot, scenario, this.mapMetadataSource);
-    this.lastTickAt = 0;
+    this.lastTickAt = null;
     this.tickAccumulatorMs = 0;
     return true;
   }
@@ -102,12 +103,23 @@ export class LocalSessionTransport implements SessionTransport {
     return completed;
   }
 
+  completeMissionScript(sourceScript: string): boolean {
+    return completeK01MissionScript(this.worldState, sourceScript);
+  }
+
   update(time: number, delta = 0): void {
-    const elapsedMs = this.lastTickAt === 0 ? delta : time - this.lastTickAt;
+    const elapsedMs = this.lastTickAt === null ? delta : time - this.lastTickAt;
 
     this.lastTickAt = time;
 
-    if (this.paused || this.stopForTerminalScenario()) {
+    if (this.stopForTerminalScenario()) {
+      this.tickAccumulatorMs = 0;
+      return;
+    }
+
+    advanceK01MissionResultClockElapsed(this.worldState, elapsedMs);
+
+    if (this.paused) {
       this.tickAccumulatorMs = 0;
       return;
     }
@@ -119,7 +131,14 @@ export class LocalSessionTransport implements SessionTransport {
     }
 
     while (this.tickAccumulatorMs >= SIM_TICK_MILLISECONDS) {
-      advanceWorldTick(this.worldState, { projectileRegistry: this.projectileRegistry });
+      const resultClock = getK01MissionResultClockSample(this.worldState);
+      advanceWorldTick(this.worldState, {
+        projectileRegistry: this.projectileRegistry,
+        ...(resultClock === undefined ? {} : {
+          k01ResultClockMilliseconds: resultClock.clockMilliseconds,
+          k01ResultClockRemainder: resultClock.submillisecondRemainder,
+        }),
+      });
 
       if (this.stopForTerminalScenario()) {
         break;
@@ -194,6 +213,10 @@ export class RemoteSessionTransport implements SessionTransport {
   }
 
   forceScenarioResult(_status: Extract<ScenarioStatus, "victory" | "defeat">): boolean {
+    return false;
+  }
+
+  completeMissionScript(_sourceScript: string): boolean {
     return false;
   }
 
@@ -275,6 +298,7 @@ function normalizeWorldSnapshot(
   const sourceRuntimeProfile = normalizeRuntimeSourceRuntimeProfile(normalized.sourceRuntimeProfile);
   if (sourceRuntimeProfile !== undefined) {
     normalized.sourceRuntimeProfile = sourceRuntimeProfile;
+    normalizeK01MissionResultStateForWorld(normalized);
   }
   normalized.lastAcceptedCommand ??= null;
   hydrateScenarioObjectiveMetadata(normalized, scenario);

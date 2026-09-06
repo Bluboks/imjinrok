@@ -12,6 +12,7 @@ import {
 } from "@shared";
 import {
   createProjectileSystemState,
+  normalizeK01MissionResultStateForWorld,
   normalizeSimulationEventState,
   parseSourceRuntimeProfileEnvelope,
   parseSerializedProjectileImpactLog,
@@ -19,6 +20,7 @@ import {
   type PlayerVisibilityState,
   type SkirmishAiDifficulty,
   type WorldSnapshot,
+  type WorldState,
 } from "@simulation";
 
 export const QUICK_SAVE_VERSION = 4;
@@ -281,6 +283,11 @@ export function normalizeSavedWorldSnapshot(snapshot: unknown): WorldSnapshot | 
 
   if (sourceRuntimeProfile !== undefined) {
     candidate.sourceRuntimeProfile = sourceRuntimeProfile;
+    try {
+      normalizeK01MissionResultStateForWorld(candidate as WorldState);
+    } catch {
+      return null;
+    }
   }
 
   return candidate as WorldSnapshot;

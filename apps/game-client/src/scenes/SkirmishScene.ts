@@ -2432,6 +2432,23 @@ export class SkirmishScene extends Phaser.Scene {
 
   private restoreActiveMissionDialogue(savedDialogue: SerializedMissionDialogueState | undefined): void {
     if (!savedDialogue) {
+      const sourceState = this.worldState.sourceRuntimeProfile?.state as {
+        policies?: { beacon?: { triggerFlag?: number; scriptBusy?: boolean; scriptPostState?: number } };
+      } | undefined;
+      if (
+        this.worldState.scenario.status === "running" &&
+        this.worldState.sourceRuntimeProfile?.profileId === "k01:source-runtime" &&
+        sourceState?.policies?.beacon?.triggerFlag === 1 &&
+        sourceState.policies.beacon.scriptBusy === true &&
+        sourceState.policies.beacon.scriptPostState === 1
+      ) {
+        const pendingDialogue = this.launchContext?.scenario?.missionDialogues?.find(
+          (dialogue) => dialogue.sourceScript === "script/K0120",
+        );
+        if (pendingDialogue) {
+          this.triggeredMissionDialogueIds.delete(pendingDialogue.id);
+        }
+      }
       return;
     }
 
@@ -2760,7 +2777,19 @@ export class SkirmishScene extends Phaser.Scene {
   private completeScenarioAfterMissionDialogue(dialogue: ScenarioMissionDialogueDefinition): void {
     const status = dialogue.completeScenarioOnEnd;
 
-    if (!status || !this.sessionTransport || this.sessionTransport.isRemote || this.worldState.scenario.status !== "running") {
+    if (!this.sessionTransport || this.sessionTransport.isRemote || this.worldState.scenario.status !== "running") {
+      return;
+    }
+
+    if (dialogue.sourceScript === "script/K0120" && this.worldState.sourceRuntimeProfile?.profileId === "k01:source-runtime") {
+      if (this.sessionTransport.completeMissionScript(dialogue.sourceScript)) {
+        this.syncWorldFromTransport(true);
+        this.publishGamePlayback();
+      }
+      return;
+    }
+
+    if (!status) {
       return;
     }
 

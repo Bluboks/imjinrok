@@ -10,6 +10,7 @@ import {
 } from "../../shared/src/index.js";
 import {
   advanceWorldTick,
+  completeK01MissionScript,
   createInitialWorldState,
   evaluateScenarioRuntime,
   toWorldSnapshot,
@@ -122,6 +123,12 @@ test("K01 source trigger completes the pending objective, consumes the legacy ev
   assert.equal(saved.scenario.scriptedEvents["k01-reinforcement-wave"]?.status, "executed");
   assert.equal(saved.scenario.status, "running");
   assert.equal(getK01SourceState(saved).policies.beacon.triggerFlag, 1);
+  assert.equal(getK01SourceState(saved).policies.beacon.scriptBusy, true);
+  assert.equal(getK01SourceState(saved).policies.beacon.scriptPostState, 1);
+  assert.equal(completeK01MissionScript(saved, "script/K0120"), true);
+  advanceWorldTick(saved);
+  assert.equal(saved.scenario.status, "victory");
+  assert.equal(countReinforcements(saved), 9);
 });
 
 test("removing a blocked beacon before the gate opens leaves the source objective pending", () => {
@@ -160,7 +167,7 @@ test("source objective projection validates the current K01 envelope only for it
   };
   assert.throws(
     () => resolveK01SourceObjectiveCompletion(malformedVersion, "build-beacon"),
-    /requires state version 3/,
+    new RegExp(`requires state version ${K01_SOURCE_RUNTIME_STATE_VERSION}`),
   );
 
   const malformedState = createK01World();
@@ -197,6 +204,21 @@ test("source objective completion still honors prerequisites and does not rewrit
 
   assert.equal(inconsistentSave.scenario.objectives["build-beacon"]?.status, "completed");
   assert.equal(inconsistentSave.scenario.scriptedEvents["k01-reinforcement-wave"]?.status, "pending");
+});
+
+test("K01 protect failure follows source hero liveness when the semantic record remains", () => {
+  const state = createK01World();
+  const source = getK01SourceState(state);
+  const hero = source.entityRuntime.entities.find((entity) => entity.originalClass === 78 && entity.active);
+  assert.ok(hero);
+  const semanticHero = state.units[hero.semanticUnitId];
+  assert.ok(semanticHero);
+  semanticHero.health.current = 0;
+
+  evaluateScenarioRuntime(state);
+
+  assert.equal(state.scenario.objectives["protect-ryu-seong-ryong"]?.status, "failed");
+  assert.equal(state.scenario.status, "running");
 });
 
 test("source-less build-building objectives retain generic completion", () => {
