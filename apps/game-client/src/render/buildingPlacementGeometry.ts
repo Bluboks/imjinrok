@@ -1,4 +1,4 @@
-import { getFootprintTiles } from "@simulation";
+import { getFootprintTiles, type FootprintAnchor } from "@simulation";
 import type { FootprintDefinition, GridPoint, MapDefinition } from "@shared";
 import { resolveGridGroundContactWorldPosition } from "./gridGroundContactPosition.js";
 
@@ -16,6 +16,7 @@ export interface BuildingPlacementGeometry {
 export interface BuildingPlacementGeometryInput {
   position: GridPoint;
   footprint: FootprintDefinition;
+  anchor?: FootprintAnchor;
   mapOrigin: GridPoint;
   map: MapDefinition;
 }
@@ -27,10 +28,11 @@ export interface BuildingPlacementGeometryInput {
 export function resolveBuildingPlacementGeometry({
   position,
   footprint,
+  anchor = "project-center",
   mapOrigin,
   map,
 }: BuildingPlacementGeometryInput): BuildingPlacementGeometry {
-  const actualTiles = getFootprintTiles(position, footprint);
+  const actualTiles = getFootprintTiles(position, footprint, anchor);
   if (actualTiles.length === 0) {
     throw new RangeError("Building placement geometry requires a positive footprint and finite position.");
   }

@@ -1,4 +1,5 @@
 import {
+  k01SourceFootprintByOriginalClass,
   k01ReinforcementAdapter,
   k01ReinforcementOwnerAdapter,
   unitDefinitions,
@@ -10,6 +11,7 @@ import {
   validateK01SourceRuntimeState,
   type K01SourceRuntimeState,
 } from "./k01SourceRuntimeProfile.js";
+import { getEntityBlockingTiles } from "./collision.js";
 import {
   cloneK01BeaconPolicyState,
   type K01BeaconPolicyState,
@@ -17,6 +19,7 @@ import {
 } from "./k01BeaconPolicyState.js";
 import type { ConstructionCompletedEvent } from "./events.js";
 import { createUnitState } from "./entities.js";
+import { getUnitFootprintTiles } from "./footprints.js";
 import type { WorldState } from "./types.js";
 
 export const K01_BEACON_ORIGINAL_CLASS = 52;
@@ -214,14 +217,15 @@ function consumeConstructionEvents(world: WorldState, run: MutablePolicyRun): vo
       continue;
     }
     try {
-      const admitted = admitCompletedK01ConstructionRuntime(run.source, {
+      const preparedSource = prepareK01BeaconConstructionSource(world, run.source, event.position, building.id);
+      const admitted = admitCompletedK01ConstructionRuntime(preparedSource, {
         semanticUnitId: building.id,
         sourceRecordIndex,
         originalClass: K01_BEACON_ORIGINAL_CLASS,
         ownerRelation,
         health: clampSourceHealth(building.health.current),
         position: event.position,
-        footprint: { width: 1, height: 1, evidence: "project-adaptation" },
+        footprint: requireK01BeaconSourceFootprint(),
         timingClassification: "intentional-adaptation",
       });
       run.source = admitted.state;
@@ -239,6 +243,85 @@ function consumeConstructionEvents(world: WorldState, run: MutablePolicyRun): vo
       });
     }
   }
+}
+
+/**
+ * The source occupancy mirror is intentionally adapted at construction
+ * completion because semantic movement does not yet update every raw cell.
+ * Clear only stale owner cells proven to belong to a live semantic unit whose
+ * current effective footprint no longer covers the cell. Unknown owners,
+ * missing semantic units, and current occupants remain blockers.
+ */
+function prepareK01BeaconConstructionSource(
+  world: WorldState,
+  source: K01SourceRuntimeState,
+  position: { readonly x: number; readonly y: number },
+  semanticUnitId: string,
+): K01SourceRuntimeState {
+  const requestedTiles = getUnitFootprintTiles(world, "beacon", position);
+  if (requestedTiles.length === 0) {
+    return source;
+  }
+
+  const currentBlockers = getEntityBlockingTiles(world, semanticUnitId);
+  const currentBlocker = requestedTiles.find((tile) => currentBlockers.has(toTileKey(tile)));
+  if (currentBlocker !== undefined) {
+    throw new Error(`K01 beacon source footprint overlaps current semantic occupancy at (${currentBlocker.x},${currentBlocker.y}).`);
+  }
+
+  const occupancy = source.occupancy;
+  const ownerSlots = [...occupancy.ownerSlots];
+  const recordsBySlot = new Map(source.entityRuntime.entities.map((record) => [record.slot, record]));
+
+  for (const tile of requestedTiles) {
+    if (tile.x < 0 || tile.x >= occupancy.width || tile.y < 0 || tile.y >= occupancy.height) {
+      continue;
+    }
+
+    const index = tile.y * occupancy.width + tile.x;
+    const ownerSlot = ownerSlots[index];
+    if (ownerSlot === undefined || ownerSlot === 0) {
+      continue;
+    }
+
+    const record = recordsBySlot.get(ownerSlot);
+    const semanticUnit = record !== undefined &&
+      source.entityRuntime.activeTable[ownerSlot] !== 0 &&
+      record.active
+      ? world.units[record.semanticUnitId]
+      : undefined;
+    if (semanticUnit === undefined) {
+      continue;
+    }
+
+    const currentTiles = getUnitFootprintTiles(world, semanticUnit.kind, semanticUnit.position);
+    if (currentTiles.length === 0) {
+      continue;
+    }
+    if (!currentTiles.some((currentTile) => currentTile.x === tile.x && currentTile.y === tile.y)) {
+      ownerSlots[index] = 0;
+    }
+  }
+
+  return {
+    ...source,
+    occupancy: {
+      ...occupancy,
+      ownerSlots,
+    },
+  };
+}
+
+function toTileKey(tile: { readonly x: number; readonly y: number }): string {
+  return `${tile.x},${tile.y}`;
+}
+
+function requireK01BeaconSourceFootprint() {
+  const footprint = k01SourceFootprintByOriginalClass[K01_BEACON_ORIGINAL_CLASS];
+  if (footprint === undefined || footprint.width !== 3 || footprint.height !== 3 || footprint.evidence !== "static-confirmed") {
+    throw new Error("K01 beacon source footprint evidence is missing or invalid.");
+  }
+  return footprint;
 }
 
 function scanSourceEntities(

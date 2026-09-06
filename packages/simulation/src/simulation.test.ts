@@ -33,7 +33,7 @@ import {
   createPlayerVisibility,
   createInitialWorldState,
   findPathForUnit,
-  getFootprintTiles,
+  getUnitFootprintTiles,
   getBuildTimeTicks,
   getPlayerPopulationState,
   getTileVisibility,
@@ -2161,7 +2161,7 @@ test("imjinrok K01 reinforcement preserves its static-proven requested coordinat
     "local-player-test-beacon",
     "local-player",
     "beacon",
-    { x: 12, y: 12 },
+    { x: 12, y: 13 },
   );
   appendConstructionCompletedEvent(state, state.units["local-player-test-beacon"]!);
 
@@ -4494,18 +4494,8 @@ function assertValidStartingPlacements(
   label = state.scenario.id,
 ): void {
   const occupiedTiles = new Map<string, string>();
-  const hasExactSourceOpeningPolicy = state.sourceRuntimeProfile?.profileId === "k01:source-runtime";
-
   for (const unit of iterateUnitsOrdered(state)) {
     const definition = unitDefinitions[unit.kind];
-
-    // K01 exact opening uses the source logical footprint for admission. The
-    // current product town-center footprint is intentionally wider and may
-    // overlap a source 1x1 control record; that adaptation is tested by the
-    // exact-placement suite rather than treated as a source collision fact.
-    if (hasExactSourceOpeningPolicy && unit.id.includes("-source-")) {
-      continue;
-    }
 
     if (definition.category === "building") {
       delete state.units[unit.id];
@@ -4514,12 +4504,12 @@ function assertValidStartingPlacements(
 
       assert.equal(placement.ok, true, `${label}: ${unit.id} starts on invalid building placement`);
     } else {
-      for (const tile of getFootprintTiles(unit.position, definition.footprint)) {
+      for (const tile of getUnitFootprintTiles(state, unit.kind, unit.position)) {
         assert.equal(isTilePassableForUnit(state, unit, tile), true, `${label}: ${unit.id} starts on an impassable tile`);
       }
     }
 
-    for (const tile of getFootprintTiles(unit.position, definition.footprint)) {
+    for (const tile of getUnitFootprintTiles(state, unit.kind, unit.position)) {
       const key = `${tile.x},${tile.y}`;
       const occupiedBy = occupiedTiles.get(key);
 

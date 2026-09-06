@@ -3,6 +3,7 @@
   "sourceSha256": "25a95d568082478ce0f50c89c9bbb9536ef33eb6904afa62903e9d63b7a5d03e",
   "vectors": [
     {"id":"class49-3x3-centered","operation":"write","input":{"mapWidth":8,"mapHeight":8,"slot":9,"x":5,"y":4,"width":3,"height":3},"expectedSha256":"bcf230e4998e4bda3cc4dcddecab90f821489a58f1765d69c8ef876ad5ef4c72"},
+    {"id":"class52-3x3-centered","operation":"write","input":{"mapWidth":8,"mapHeight":8,"slot":10,"x":3,"y":5,"width":3,"height":3},"expectedSha256":"f64db47f336a04c78077aa7535d3bd3a206192d342dd5cbce969a6ef89bdcbc3"},
     {"id":"class7-1x1-control","operation":"write","input":{"mapWidth":8,"mapHeight":8,"slot":9,"x":7,"y":6,"width":1,"height":1},"expectedSha256":"736d5abc09e923995aac26373c1ec702834b44991031ad08ced3edab7a4f8389"},
     {"id":"even-2x2-floor-half","operation":"write","input":{"mapWidth":8,"mapHeight":8,"slot":9,"x":2,"y":2,"width":2,"height":2},"expectedSha256":"523d8c0f781019b033c7f3b83bb77cfcf917791ac574427c40b368fcd2e11be6"},
     {"id":"mixed-3x2-floor-half","operation":"write","input":{"mapWidth":8,"mapHeight":8,"slot":9,"x":2,"y":2,"width":3,"height":2},"expectedSha256":"e2abd755f4c332ecf50eafc6f8f5ad9ba65cbb8f1eed0f7d1d391b63546efc36"},

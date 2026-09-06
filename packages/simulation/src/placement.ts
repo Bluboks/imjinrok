@@ -2,13 +2,15 @@ import {
   getTileAt,
   unitDefinitions,
   type BuildingDefinitionId,
-  type FootprintDefinition,
   type GridPoint,
   type TerrainType,
 } from "../../shared/src/index.js";
 import { resourceBlocksBuilding } from "./resources.js";
+import { getFootprintTiles, getUnitFootprintTiles, resolveEffectiveFootprint } from "./footprints.js";
 import type { WorldState } from "./types.js";
 import { iterateUnitsOrdered } from "./units.js";
+
+export { getFootprintTiles } from "./footprints.js";
 
 export type BuildingPlacementValidationResult =
   | { ok: true; tiles: GridPoint[] }
@@ -26,7 +28,8 @@ export function validateBuildingPlacement(
     return { ok: false, reason: "unit is not placeable" };
   }
 
-  const footprintTiles = getFootprintTiles(target, definition.footprint);
+  const { footprint, anchor } = resolveEffectiveFootprint(state, building);
+  const footprintTiles = getFootprintTiles(target, footprint, anchor);
   const allowedTerrain: readonly TerrainType[] = placement.allowedTerrain;
 
   if (footprintTiles.length === 0) {
@@ -58,38 +61,17 @@ export function validateBuildingPlacement(
   return { ok: true, tiles: footprintTiles };
 }
 
-export function getFootprintTiles(center: GridPoint, footprint: FootprintDefinition): GridPoint[] {
-  const width = Math.floor(footprint.width);
-  const height = Math.floor(footprint.height);
-
-  if (width <= 0 || height <= 0 || !Number.isFinite(center.x) || !Number.isFinite(center.y)) {
-    return [];
-  }
-
-  const originX = Math.round(center.x - (width - 1) / 2);
-  const originY = Math.round(center.y - (height - 1) / 2);
-  const tiles: GridPoint[] = [];
-
-  for (let y = 0; y < height; y += 1) {
-    for (let x = 0; x < width; x += 1) {
-      tiles.push({ x: originX + x, y: originY + y });
-    }
-  }
-
-  return tiles;
-}
-
 function getBlockingTileSet(state: WorldState): Set<string> {
   const occupiedTiles = new Set<string>();
 
   for (const unit of iterateUnitsOrdered(state)) {
-    const footprint = unitDefinitions[unit.kind].footprint;
+    const footprint = resolveEffectiveFootprint(state, unit.kind).footprint;
 
     if (!footprint.blocksMovement) {
       continue;
     }
 
-    for (const tile of getFootprintTiles(unit.position, footprint)) {
+    for (const tile of getUnitFootprintTiles(state, unit.kind, unit.position)) {
       occupiedTiles.add(toTileKey(tile));
     }
   }

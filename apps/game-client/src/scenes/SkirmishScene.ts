@@ -67,7 +67,8 @@ import {
   getResourceNodeState,
   resourceBlocksBuilding,
   resourceBlocksMovement,
-  getFootprintTiles,
+  getUnitFootprintTiles,
+  resolveEffectiveFootprint,
   getTileVisibility,
   isoToCart,
   SIM_TICKS_PER_SECOND,
@@ -6427,7 +6428,7 @@ export class SkirmishScene extends Phaser.Scene {
     const viewport = this.cameras.main.worldView;
     for (const unit of Object.values(this.worldState.units)) {
       const definition = unitDefinitions[unit.kind];
-      const tiles = getFootprintTiles(unit.position, definition.footprint);
+      const tiles = getUnitFootprintTiles(this.worldState, unit.kind, unit.position);
       const polygon = tiles.map((tile) => this.getGridGroundContactWorldPoint(tile));
       if (polygon.length === 0 || !polygon.some((point) => viewport.contains(point.x, point.y))) continue;
       const footprintPoints = this.getFootprintOutlinePoints(tiles);
@@ -7410,24 +7411,7 @@ export class SkirmishScene extends Phaser.Scene {
   }
 
   private getBuildingFootprintTiles(target: GridPoint, building: BuildingDefinitionId): GridPoint[] {
-    const definition = unitDefinitions[building];
-    const width = Math.floor(definition.footprint.width);
-    const height = Math.floor(definition.footprint.height);
-    const originX = Math.round(target.x - (width - 1) / 2);
-    const originY = Math.round(target.y - (height - 1) / 2);
-    const tiles: GridPoint[] = [];
-
-    if (width <= 0 || height <= 0) {
-      return tiles;
-    }
-
-    for (let dy = 0; dy < height; dy += 1) {
-      for (let dx = 0; dx < width; dx += 1) {
-        tiles.push({ x: originX + dx, y: originY + dy });
-      }
-    }
-
-    return tiles;
+    return getUnitFootprintTiles(this.worldState, building, target);
   }
 
   private collectResourceTargets(): { id: string; point: GridPoint }[] {
@@ -7544,9 +7528,11 @@ export class SkirmishScene extends Phaser.Scene {
       throw new Error(`Source building geometry requested for non-source building ${unit.kind}`);
     }
 
+    const { footprint, anchor } = resolveEffectiveFootprint(this.worldState, unit.kind);
     return resolveBuildingPlacementGeometry({
       position: unit.position,
-      footprint: unitDefinitions[unit.kind].footprint,
+      footprint,
+      anchor,
       mapOrigin: this.mapOrigin,
       map: this.map,
     });

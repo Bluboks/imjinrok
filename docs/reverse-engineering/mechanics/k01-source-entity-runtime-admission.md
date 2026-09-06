@@ -16,6 +16,15 @@
 명시해야 한다. T01 policy는 이 adapter를 accepted-update event cursor와 함께 호출하며, 이는
 원본 trigger timing을 주장하지 않는 명시적 프로젝트 adaptation이다.
 
+class 52는 initializer에서 정적으로 확인된 `3×3` source footprint를 사용한다. construction admission
+직전에는 새 record의 source-center 3×3 요청 cell을 한 번만 현재 semantic collision view로 검사한다.
+현재 semantic blocker는 그대로 거부하며, source owner slot이 unknown이거나 semantic unit이 사라졌거나
+현재 effective footprint가 해당 cell을 덮는 경우에도 owner를 지운 것으로 추정하지 않는다. active raw
+record와 현재 semantic unit이 존재하고 현재 footprint가 cell을 더 이상 덮지 않을 때만 copied owner grid의
+해당 cell을 비운 뒤 strict admission을 시도한다. admission 실패 시 이 copied state를 commit하지
+않는다. 이는 source movement lifecycle을 동기화하는 구현이 아니라 construction-time intentional
+adaptation이다.
+
 ## semantic unit removal integration
 
 `removeUnitFromWorld`는 semantic unit과 참조를 지우기 전에 선택된 source profile의 순수
@@ -101,3 +110,11 @@ global writes는 이 구현 범위에 없다.
 K01의 legacy `k01-reinforcement-wave` scripted event는 K01 source profile에서만 consumed/no-op으로
 처리하여 duplicate spawn을 막는다. generic worlds와 profile-absent scenarios는 이 policy 및
 namespace를 생성하지 않는다.
+
+### legacy save boundary
+
+이전 v3 save에 이미 저장된 completed beacon은 당시의 `1×1` `project-adaptation` raw record와 owner
+history를 그대로 보존할 수 있다. 현재 resolver는 해당 semantic beacon의 derived gameplay footprint를
+`3×3`으로 계산하지만, 과거 movement/overwrite/lifecycle history를 안전하게 재구성할 수 없으므로
+serialized record를 일괄 migration하지 않는다. 새 construction admission과 새 save는 static-confirmed
+class-52 `3×3` record를 사용한다.

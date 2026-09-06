@@ -22,7 +22,8 @@ import { createUnitState } from "./entities.js";
 import { arePlayersAllied } from "./diplomacy.js";
 import { createCurrentVisibilityResolver, getAttackTargetAuthorityPolicy, isAttackTargetAuthorized } from "./attackTargetAuthorityPolicy.js";
 import { applyNavigationRoute, clearNavigationRoute, findNavigationRouteForUnit, findPathForUnit } from "./navigation.js";
-import { getFootprintTiles, validateBuildingPlacement } from "./placement.js";
+import { getUnitFootprintTiles, resolveEffectiveFootprint } from "./footprints.js";
+import { validateBuildingPlacement } from "./placement.js";
 import { canAdmitPlayerCapacity } from "./capacity.js";
 import { isResearchCompleted, isResearchPending } from "./research.js";
 import { findHarvestableResourceTile, findResourceNode, getResourceDefinition } from "./resources.js";
@@ -181,7 +182,7 @@ export function validateCommand(state: WorldState, envelope: CommandEnvelope): C
       }
 
       if (
-        !isWithinFootprintRange(actor.unit.position, targetValidation.unit, 1) &&
+        !isWithinFootprintRange(state, actor.unit.position, targetValidation.unit, 1) &&
         !findBuildWorkPath(state, actor.unit, targetValidation.unit.kind as BuildingDefinitionId, targetValidation.unit.position)
       ) {
         return { ok: false, reason: "no path to repair target" };
@@ -649,7 +650,7 @@ export function applyCommand(state: WorldState, envelope: CommandEnvelope): void
         return;
       }
 
-      const path = isWithinFootprintRange(unit.position, target, 1)
+      const path = isWithinFootprintRange(state, unit.position, target, 1)
         ? []
         : findBuildWorkPath(state, unit, target.kind as BuildingDefinitionId, target.position);
 
@@ -1039,14 +1040,14 @@ function canReachCombatTarget(
   target: UnitState,
   combat: NonNullable<UnitDefinition["combat"]>,
 ): boolean {
-  return isWithinCombatRange(unit, target, combat.range) || findPathForUnit(state, unit, target.position) !== null;
+  return isWithinCombatRange(state, unit, target, combat.range) || findPathForUnit(state, unit, target.position) !== null;
 }
 
-function isWithinCombatRange(unit: UnitState, target: UnitState, range: number): boolean {
+function isWithinCombatRange(state: WorldState, unit: UnitState, target: UnitState, range: number): boolean {
   const rangeSq = range * range;
 
-  for (const sourceTile of getFootprintTiles(unit.position, unitDefinitions[unit.kind].footprint)) {
-    for (const targetTile of getFootprintTiles(target.position, unitDefinitions[target.kind].footprint)) {
+  for (const sourceTile of getUnitFootprintTiles(state, unit.kind, unit.position)) {
+    for (const targetTile of getUnitFootprintTiles(state, target.kind, target.position)) {
       const deltaX = sourceTile.x - targetTile.x;
       const deltaY = sourceTile.y - targetTile.y;
 
@@ -1131,11 +1132,10 @@ function refundConstructionResources(state: WorldState, playerId: string, buildi
   }
 }
 
-function isWithinFootprintRange(position: GridPoint, target: UnitState, range: number): boolean {
-  const footprint = unitDefinitions[target.kind].footprint;
+function isWithinFootprintRange(state: WorldState, position: GridPoint, target: UnitState, range: number): boolean {
   const roundedPosition = { x: Math.round(position.x), y: Math.round(position.y) };
 
-  return getFootprintTiles(target.position, footprint).some((tile) =>
+  return getUnitFootprintTiles(state, target.kind, target.position).some((tile) =>
     Math.max(Math.abs(roundedPosition.x - tile.x), Math.abs(roundedPosition.y - tile.y)) <= range,
   );
 }
@@ -1149,7 +1149,7 @@ function getDistanceSquared(a: GridPoint, b: GridPoint): number {
 
 export function findUnitSpawnPoint(state: WorldState, building: UnitState, unitKind: UnitDefinitionId): GridPoint | null {
   const occupied = getOccupiedTiles(state);
-  const footprint = unitDefinitions[building.kind].footprint;
+  const footprint = resolveEffectiveFootprint(state, building.kind).footprint;
   const radius = Math.max(2, footprint.width, footprint.height);
 
   for (let distance = 1; distance <= radius + 4; distance += 1) {
@@ -1176,8 +1176,7 @@ export function findBuildWorkPath(
   building: UnitDefinitionId,
   target: GridPoint,
 ): GridPoint[] | null {
-  const definition = unitDefinitions[building];
-  const footprintTiles = getFootprintTiles(clampMapPoint(state.map, target), definition.footprint);
+  const footprintTiles = getUnitFootprintTiles(state, building, clampMapPoint(state.map, target));
   const footprintKeys = new Set(footprintTiles.map(toTileKey));
   const candidates = getBuildWorkCandidates(state.map, footprintTiles, footprintKeys);
 
@@ -1271,13 +1270,13 @@ function getOccupiedTiles(state: WorldState): Set<string> {
   const occupied = new Set<string>();
 
   for (const unit of iterateUnitsOrdered(state)) {
-    const footprint = unitDefinitions[unit.kind].footprint;
+    const footprint = resolveEffectiveFootprint(state, unit.kind).footprint;
 
     if (!footprint.blocksMovement) {
       continue;
     }
 
-    for (const tile of getFootprintTiles(unit.position, footprint)) {
+    for (const tile of getUnitFootprintTiles(state, unit.kind, unit.position)) {
       occupied.add(toTileKey(tile));
     }
   }

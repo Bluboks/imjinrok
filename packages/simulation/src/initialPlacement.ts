@@ -10,6 +10,7 @@ import {
   type TerrainType,
 } from "../../shared/src/index.js";
 import { resourceBlocksBuilding, resourceBlocksMovement } from "./resources.js";
+import { getFootprintTiles, getUnitFootprintTiles, K01_SOURCE_RUNTIME_FOOTPRINT_CONTEXT } from "./footprints.js";
 import type { UnitState } from "./types.js";
 
 export interface InitialPlacementPlayerRequest {
@@ -197,17 +198,7 @@ function resolveRecordFootprint(
 }
 
 function deriveSourceFootprintTiles(center: GridPoint, footprint: K01SourceFootprint): GridPoint[] {
-  const tiles: GridPoint[] = [];
-  const originX = center.x - Math.floor(footprint.width / 2);
-  const originY = center.y - Math.floor(footprint.height / 2);
-
-  for (let row = 0; row < footprint.height; row += 1) {
-    for (let column = 0; column < footprint.width; column += 1) {
-      tiles.push({ x: originX + column, y: originY + row });
-    }
-  }
-
-  return tiles;
+  return getFootprintTiles(center, { width: footprint.width, height: footprint.height, blocksMovement: true }, "source-center");
 }
 
 function validateFootprintAdmission(
@@ -220,6 +211,10 @@ function validateFootprintAdmission(
 ): void {
   const unitDefinition = unitDefinitions[definition.kind];
   const placement = "placement" in unitDefinition ? unitDefinition.placement : undefined;
+
+  if (footprintTiles.length === 0) {
+    throw placementFailure(identity, recordIndex, "source footprint produced no valid tiles");
+  }
 
   for (const tile of footprintTiles) {
     if (!isPointInMap(map, tile)) {
@@ -263,11 +258,10 @@ function createOccupiedTileOwners(units: Readonly<Record<string, UnitState>>): M
       continue;
     }
 
-    const footprint = deriveSourceFootprintTiles(unit.position, {
-      width: Math.max(1, Math.floor(definition.footprint.width)),
-      height: Math.max(1, Math.floor(definition.footprint.height)),
-      evidence: "project-adaptation",
-    });
+    const footprint = getUnitFootprintTiles(K01_SOURCE_RUNTIME_FOOTPRINT_CONTEXT, unit.kind, unit.position);
+    if (footprint.length === 0) {
+      throw placementFailure(unit.id, -1, "existing unit source footprint produced no valid tiles");
+    }
     for (const tile of footprint) {
       occupied.set(toTileKey(tile), unit.id);
     }

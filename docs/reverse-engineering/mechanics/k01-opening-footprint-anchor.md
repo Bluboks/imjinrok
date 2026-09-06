@@ -15,7 +15,9 @@ column = 0 .. width-1, row = 0 .. height-1
 따라서 class 49 조선 본영 `(5,4)`의 `3×3` 점유는 `x=4..6, y=3..5`의 9 cells다. `(7,6)`의
 class 7 조선 농부는 `1×1`이므로 `(7,6)` 하나만 점유하며 본영의 `3×3`에 포함되지 않는다.
 class 7은 footprint rounding/충돌 여부를 제어하는 source-created 1×1 비교 벡터이지 opening
-building class가 아니다.
+building class가 아니다. 클래스 52 조선 봉화대도 같은 type initializer의 argument 8/9에서
+`3×3` logical footprint가 정적으로 확인되지만 K01 map opening record가 아니며, 동적 건설
+경로의 source class로 별도 분류한다.
 
 짝수 extent에서는 half-cell을 만들지 않는다. `2×2` anchor `(2,2)`는 `x=1..2, y=1..2`이고,
 `3×2` anchor `(2,2)`는 `x=1..3, y=1..2`다. 모든 cell은 map bounds를 따로 검사해 OOB면
@@ -27,9 +29,17 @@ skip하고, 유효 cell에는 **mask WORD OR 후 owner-grid WORD store** 순서�
 
 - 분석 상태: `정적 확정` — canonical EXE, generated seed/function/reference, K01 map과 type catalog를
   함께 hash-bound하고, type arguments→runtime fields→map loader→action-1 writer call chain을 닫았다.
-- 재현 상태: `재현 완료` — 8개 fixture vector가 odd/even/mixed extent, map edge/OOB, existing-owner
+- 재현 상태: `재현 완료` — 9개 fixture vector가 odd/even/mixed extent, map edge/OOB, existing-owner
   overwrite, active gate, footprint-copy 이전 경계를 검사한다.
-- 구현 상태: `analysis-only-no-production-change` — production package/app은 수정하지 않았다.
+- 구현 상태: `bounded-source-footprint-integration` — K01 source profile이 확인된 building class의
+  logical extent와 source-center anchor를 shared resolver로 선택하며, placement·collision·range·build
+  work·client geometry가 이 bounded 계약을 소비한다. 원본 raw owner overwrite/lifecycle semantics와
+  미확정 native occupancy 정책은 이 통합에서 바꾸지 않는다.
+- 동적 class 52 건설 완료 admission은 `3×3` source footprint를 쓰기 전에 semantic unit의 현재
+  effective occupancy와 source owner cell을 대조한다. 현재 semantic blocker와 미확정/unknown owner는
+  그대로 admission을 거부하고, live semantic unit이 현재 cell을 더 이상 점유하지 않는 것으로 확인된
+  stale owner만 복사본에서 제거한다. 이는 의도적인 construction-time adaptation이며 전체 source
+  movement lifecycle 동기화를 주장하지 않는다.
 
 재현 entry point는 `tools/imjinrok/extract-k01-opening-footprint-anchor.mjs`, fixture는
 `analysis/fixtures/k01-opening-footprint-anchor-vectors.json`, test는
@@ -85,7 +95,8 @@ map raw owner/player word가 아니라 runtime `+0x1b6` slot을 저장한다. ru
 
 따라서 기존 opening-building identity 문서의 11 records에 포함되지 않던 class 50, 57, 62도
 이 footprint packet에서는 source map에 실제 존재하는 세 class(및 class 57 두 records)를 포함한다.
-class 48/49/50/51/58/60/62는 3×3, class 57은 3×2, class 63은 2×2다.
+class 48/49/50/51/52/58/60/62는 3×3, class 57은 3×2, class 63은 2×2다. class 52는
+opening records 표에는 포함하지 않고 동적 건설 source class로만 추출한다.
 
 ## 생성 순서와 경계
 

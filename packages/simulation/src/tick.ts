@@ -16,7 +16,7 @@ import {
   reserveUnitPositionForState,
   type MovementReservation,
 } from "./collision.js";
-import { getFootprintTiles } from "./placement.js";
+import { getUnitFootprintTiles } from "./footprints.js";
 import { canCompleteQueuedPlayerCapacity } from "./capacity.js";
 import { applyCompletedResearchToUnit, completeResearch } from "./research.js";
 import { findHarvestableResourceTile, findResourceNode, findResourceTile, getResourceDefinition, harvestResource, isResourceHarvestable, updateResourceRegrowth } from "./resources.js";
@@ -816,7 +816,7 @@ function advanceUnitResourceDropoff(state: WorldState, unit: UnitState): void {
     return;
   }
 
-  if (!isWithinDropoffRange(unit.position, dropoff)) {
+  if (!isWithinDropoffRange(state, unit.position, dropoff)) {
     moveUnitToDropoff(state, unit, dropoff);
     return;
   }
@@ -837,7 +837,7 @@ function advanceOpportunisticResourceDropoff(state: WorldState, unit: UnitState)
 
   const dropoff = findNearestResourceDropoff(state, unit, carriedResource.kind);
 
-  if (!dropoff || !isWithinDropoffRange(unit.position, dropoff)) {
+  if (!dropoff || !isWithinDropoffRange(state, unit.position, dropoff)) {
     return;
   }
 
@@ -980,11 +980,11 @@ function findNearestResourceDropoff(state: WorldState, unit: UnitState, resource
       continue;
     }
 
-    if (!isWithinDropoffRange(unit.position, candidate) && !findPathForUnit(state, unit, candidate.position)) {
+    if (!isWithinDropoffRange(state, unit.position, candidate) && !findPathForUnit(state, unit, candidate.position)) {
       continue;
     }
 
-    const distance = getDistanceToFootprint(unit.position, candidate);
+    const distance = getDistanceToFootprint(state, unit.position, candidate);
 
     if (distance < nearestDistance) {
       nearestDropoff = candidate;
@@ -995,16 +995,15 @@ function findNearestResourceDropoff(state: WorldState, unit: UnitState, resource
   return nearestDropoff;
 }
 
-function isWithinDropoffRange(position: GridPoint, dropoff: UnitState): boolean {
-  return getDistanceToFootprint(position, dropoff) <= 1;
+function isWithinDropoffRange(state: WorldState, position: GridPoint, dropoff: UnitState): boolean {
+  return getDistanceToFootprint(state, position, dropoff) <= 1;
 }
 
-function getDistanceToFootprint(position: GridPoint, unit: UnitState): number {
-  const footprint = unitDefinitions[unit.kind].footprint;
+function getDistanceToFootprint(state: WorldState, position: GridPoint, unit: UnitState): number {
   const roundedPosition = { x: Math.round(position.x), y: Math.round(position.y) };
   let nearestDistance = Number.POSITIVE_INFINITY;
 
-  for (const tile of getFootprintTiles(unit.position, footprint)) {
+  for (const tile of getUnitFootprintTiles(state, unit.kind, unit.position)) {
     nearestDistance = Math.min(
       nearestDistance,
       Math.max(Math.abs(roundedPosition.x - tile.x), Math.abs(roundedPosition.y - tile.y)),
@@ -1034,7 +1033,7 @@ function advanceUnitConstruction(state: WorldState, unit: UnitState): void {
     return;
   }
 
-  if (!isWithinBuildRange(unit.position, building)) {
+  if (!isWithinBuildRange(state, unit.position, building)) {
     moveUnitToBuildRange(state, unit, building);
     return;
   }
@@ -1058,8 +1057,8 @@ function advanceUnitConstruction(state: WorldState, unit: UnitState): void {
   clearUnitOrder(unit);
 }
 
-function isWithinBuildRange(position: GridPoint, building: UnitState): boolean {
-  return getDistanceToFootprint(position, building) <= 1;
+function isWithinBuildRange(state: WorldState, position: GridPoint, building: UnitState): boolean {
+  return getDistanceToFootprint(state, position, building) <= 1;
 }
 
 function moveUnitToBuildRange(state: WorldState, unit: UnitState, building: UnitState): void {
@@ -1116,7 +1115,7 @@ function advanceUnitRepair(state: WorldState, unit: UnitState): void {
     return;
   }
 
-  if (!isWithinRepairRange(unit.position, target)) {
+  if (!isWithinRepairRange(state, unit.position, target)) {
     moveUnitToRepairRange(state, unit, target);
     return;
   }
@@ -1153,8 +1152,8 @@ function advanceAssistedConstruction(state: WorldState, worker: UnitState, build
   clearUnitOrder(worker);
 }
 
-function isWithinRepairRange(position: GridPoint, target: UnitState): boolean {
-  return getDistanceToFootprint(position, target) <= 1;
+function isWithinRepairRange(state: WorldState, position: GridPoint, target: UnitState): boolean {
+  return getDistanceToFootprint(state, position, target) <= 1;
 }
 
 function moveUnitToRepairRange(state: WorldState, unit: UnitState, target: UnitState): void {
@@ -1264,7 +1263,7 @@ function advanceUnitCombat(state: WorldState, projectileRegistry: ProjectileRegi
       unit.currentOrder = { type: "attack-unit", targetUnitId: target.id };
     }
 
-    const distance = getUnitDistance(unit, target);
+    const distance = getUnitDistance(state, unit, target);
     if (shouldMoveTowardCombatTarget(unit, combat, distance)) {
       if (!moveUnitTowardCombatTarget(state, unit, target)) {
         if (unit.currentOrder?.type === "attack-unit" && !canReachAttackTargetPastMobileBlockers(state, unit, target)) {
@@ -1475,7 +1474,7 @@ function findNearestEnemyInRange(
       continue;
     }
 
-    const distanceSq = getUnitDistanceSq(unit, candidate);
+    const distanceSq = getUnitDistanceSq(state, unit, candidate);
     if (distanceSq <= nearestDistanceSq && canEngageCombatTarget(state, unit, candidate, combat, distanceSq)) {
       nearestEnemy = candidate;
       nearestDistanceSq = distanceSq;
@@ -1497,7 +1496,7 @@ function canEngageCombatTarget(
   unit: UnitState,
   target: UnitState,
   combat: NonNullable<UnitDefinition["combat"]>,
-  distanceSq = getUnitDistanceSq(unit, target),
+  distanceSq = getUnitDistanceSq(state, unit, target),
 ): boolean {
   return (
     distanceSq <= combat.range * combat.range ||
@@ -1505,15 +1504,15 @@ function canEngageCombatTarget(
   );
 }
 
-function getUnitDistance(unit: UnitState, target: UnitState): number {
-  return Math.sqrt(getUnitDistanceSq(unit, target));
+function getUnitDistance(state: WorldState, unit: UnitState, target: UnitState): number {
+  return Math.sqrt(getUnitDistanceSq(state, unit, target));
 }
 
-function getUnitDistanceSq(unit: UnitState, target: UnitState): number {
+function getUnitDistanceSq(state: WorldState, unit: UnitState, target: UnitState): number {
   let nearestDistanceSq = Number.POSITIVE_INFINITY;
 
-  for (const sourceTile of getCombatFootprintTiles(unit)) {
-    for (const targetTile of getCombatFootprintTiles(target)) {
+  for (const sourceTile of getCombatFootprintTiles(state, unit)) {
+    for (const targetTile of getCombatFootprintTiles(state, target)) {
       const deltaX = sourceTile.x - targetTile.x;
       const deltaY = sourceTile.y - targetTile.y;
 
@@ -1524,8 +1523,6 @@ function getUnitDistanceSq(unit: UnitState, target: UnitState): number {
   return nearestDistanceSq;
 }
 
-function getCombatFootprintTiles(unit: UnitState): GridPoint[] {
-  const footprint = unitDefinitions[unit.kind].footprint;
-
-  return getFootprintTiles(unit.position, footprint);
+function getCombatFootprintTiles(state: WorldState, unit: UnitState): GridPoint[] {
+  return getUnitFootprintTiles(state, unit.kind, unit.position);
 }

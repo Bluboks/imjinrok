@@ -6,10 +6,11 @@ import { resolveBuildingPlacementGeometry } from "./buildingPlacementGeometry.js
 const mapOrigin = { x: 640, y: 160 };
 const map = createBlankMap({ width: 16, height: 16, tileWidth: 64, tileHeight: 32 });
 
-function geometry(width: number, height: number, position = { x: 5, y: 4 }) {
+function geometry(width: number, height: number, position = { x: 5, y: 4 }, anchor?: "project-center" | "source-center") {
   return resolveBuildingPlacementGeometry({
     position,
     footprint: { width, height, blocksMovement: true },
+    anchor,
     mapOrigin,
     map,
   });
@@ -60,6 +61,24 @@ test("projects the far contact and polygon through sampled map elevation", () =>
   assert.equal(result.footprintPolygon.length, 4);
   const flat = geometry(2, 2, { x: 1, y: 1 });
   assert.notDeepEqual(result.footprintPolygon, flat.footprintPolygon);
+});
+
+test("uses source-center geometry for odd and even source extents", () => {
+  const sourceOdd = geometry(3, 3, { x: 5, y: 4 }, "source-center");
+  assert.deepEqual(sourceOdd.actualTiles, [
+    { x: 4, y: 3 }, { x: 5, y: 3 }, { x: 6, y: 3 },
+    { x: 4, y: 4 }, { x: 5, y: 4 }, { x: 6, y: 4 },
+    { x: 4, y: 5 }, { x: 5, y: 5 }, { x: 6, y: 5 },
+  ]);
+  assert.deepEqual(sourceOdd.farCell, { x: 6, y: 5 });
+  assert.deepEqual(sourceOdd.localSpriteOffset, { x: 0, y: 32 });
+
+  const sourceEven = geometry(2, 2, { x: 2, y: 2 }, "source-center");
+  assert.deepEqual(sourceEven.actualTiles, [
+    { x: 1, y: 1 }, { x: 2, y: 1 }, { x: 1, y: 2 }, { x: 2, y: 2 },
+  ]);
+  assert.deepEqual(sourceEven.farCell, { x: 2, y: 2 });
+  assert.deepEqual(sourceEven.localSpriteOffset, { x: 0, y: 0 });
 });
 
 test("rejects an invalid footprint instead of inventing a placement", () => {

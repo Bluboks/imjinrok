@@ -11,7 +11,7 @@ import {
 } from "../../shared/src/index.js";
 import { createUnitState } from "./entities.js";
 import { createInitialEnvironmentState } from "./environment.js";
-import { getFootprintTiles } from "./placement.js";
+import { getUnitFootprintTiles } from "./footprints.js";
 import { resolveMovementCollisionProfileId } from "./movementCollisionPolicy.js";
 import { resolvePathfindingProfileId } from "./navigation.js";
 import { createProjectileSystemState } from "./projectiles.js";
@@ -110,7 +110,14 @@ export {
   type RegisterMovementCollisionPolicyOptions,
 } from "./movementCollisionPolicy.js";
 export { getBlockingGroupAtTile } from "./collision.js";
-export { getFootprintTiles, validateBuildingPlacement, type BuildingPlacementValidationResult } from "./placement.js";
+export {
+  getFootprintTiles,
+  getUnitFootprintTiles,
+  resolveEffectiveFootprint,
+  type EffectiveFootprint,
+  type FootprintAnchor,
+} from "./footprints.js";
+export { validateBuildingPlacement, type BuildingPlacementValidationResult } from "./placement.js";
 export {
   canAdmitPlayerCapacity,
   canCompleteQueuedPlayerCapacity,
@@ -416,7 +423,8 @@ function isStartingPlacementValid(
       return false;
     }
 
-    for (const tile of getFootprintTiles(point, definition.footprint)) {
+    // Exact K01 source starts bypass this fallback through the initial-placement policy.
+    for (const tile of getUnitFootprintTiles(undefined, unit.kind, point)) {
       if (!isPointInMap(map, tile) || occupiedTiles.has(toTileKey(tile))) {
         return false;
       }
@@ -433,7 +441,7 @@ function isStartingPlacementValid(
     return true;
   }
 
-  for (const footprintTile of getFootprintTiles(point, definition.footprint)) {
+  for (const footprintTile of getUnitFootprintTiles(undefined, unit.kind, point)) {
     if (!isPointInMap(map, footprintTile) || occupiedTiles.has(toTileKey(footprintTile))) {
       return false;
     }
@@ -458,7 +466,7 @@ function getOccupiedStartingTiles(units: Readonly<Record<string, UnitState>>): S
       continue;
     }
 
-    for (const tile of getFootprintTiles(unit.position, footprint)) {
+    for (const tile of getUnitFootprintTiles(undefined, unit.kind, unit.position)) {
       occupiedTiles.add(toTileKey(tile));
     }
   }

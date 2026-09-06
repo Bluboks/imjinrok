@@ -3,11 +3,11 @@ import test from "node:test";
 import {
   createMapDefinitionFromId,
   imjinrokK01Scenario,
-  unitDefinitions,
 } from "@shared";
 import {
-  getFootprintTiles,
+  getUnitFootprintTiles,
   k01SourceExactOpeningPlacementPolicy,
+  resolveEffectiveFootprint,
   toWorldSnapshot,
   type WorldSnapshot,
   type WorldState,
@@ -128,14 +128,8 @@ function assertOpeningPlacementSafety(snapshot: Pick<WorldState, "map" | "units"
     assert.equal(Number.isInteger(unit.position.x), true, `${unit.id} has an integral x coordinate`);
     assert.equal(Number.isInteger(unit.position.y), true, `${unit.id} has an integral y coordinate`);
 
-    const footprint = unitDefinitions[unit.kind].footprint;
-    // Product footprints intentionally retain the town-center adaptation, so
-    // they are not a collision oracle for source records after the central
-    // source-policy assertion above has validated their logical footprints.
-    if (snapshot.sourceRuntimeProfile?.profileId === "k01:source-runtime" && unit.id.includes("-source-")) {
-      continue;
-    }
-    for (const tile of getFootprintTiles(unit.position, footprint)) {
+    const footprint = resolveEffectiveFootprint(snapshot, unit.kind).footprint;
+    for (const tile of getUnitFootprintTiles(snapshot, unit.kind, unit.position)) {
       assert.equal(tile.x >= 0 && tile.x < snapshot.map.width, true, `${unit.id} footprint is within map x bounds`);
       assert.equal(tile.y >= 0 && tile.y < snapshot.map.height, true, `${unit.id} footprint is within map y bounds`);
 

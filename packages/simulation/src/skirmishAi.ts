@@ -15,6 +15,7 @@ import { findBuildWorkPath, findUnitSpawnPoint, issueCommand as issueWorldComman
 import { arePlayersEnemies } from "./diplomacy.js";
 import { createUnitState } from "./entities.js";
 import { findNavigationRouteForUnit, findPathForUnit } from "./navigation.js";
+import { resolveEffectiveFootprint } from "./footprints.js";
 import { validateBuildingPlacement } from "./placement.js";
 import { getPlayerPopulationState } from "./population.js";
 import { isResearchCompleted, isResearchPending } from "./research.js";
@@ -1039,7 +1040,7 @@ function findBuildTargetNear(
   building: BuildingDefinitionId,
   searchRadius = 10,
 ): GridPoint | null {
-  const footprint = unitDefinitions[building].footprint;
+  const footprint = resolveEffectiveFootprint(state, building).footprint;
   const origin = { x: Math.round(anchor.x), y: Math.round(anchor.y) };
   const startDistance = Math.max(2, footprint.width, footprint.height);
 

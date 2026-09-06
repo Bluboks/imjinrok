@@ -1,7 +1,7 @@
 # 프로젝트 상태
 
 기준일: 2026-09-06
-기준 커밋: `fd5daf5` (`fix: correct K01 terrain placement lookup arithmetic`)
+기준 커밋: `0021479` (`fix: correct source fog and building placement geometry`)
 
 ## 요약
 
@@ -32,13 +32,17 @@
   source profile을 소비하며 복잡한 overlay와 미확정 gameplay 의미는 별도 범위다.
 - [원본 building placement evidence](reverse-engineering/mechanics/source-building-placement.md)는
   native signed center/footprint far-cell formula와 SPR slot pixel-dimension source를 분리해 고정한다.
-  product building renderer는 실제 interaction footprint의 elevation-aware far contact와 polygon을
-  semantic-center container에 적용하며, native cell-cache producer/lifetime과 native footprint extents는
-  아직 product parity 범위가 아니다.
+  source runtime profile은 정적으로 확인된 10개 building class(48/49/50/51/52/57/58/60/62/63)의
+  source-center logical extent를 shared resolver로 placement·collision·range·build work·client geometry에
+  연결한다. product building renderer는 실제 interaction footprint의 elevation-aware far contact와
+  polygon을 semantic-center container에 적용한다. native cell-cache producer/lifetime과 full source
+  movement ownership은 아직 product parity 범위가 아니다.
 - [K01 source entity runtime·admission](reverse-engineering/mechanics/k01-source-entity-runtime-admission.md)은
   v3 source runtime의 slot·generation·occupancy 상태를 정의한다. K01 opening seed와 완성
-  봉화대의 명시적 construction adapter, K0120 native reinforcement admission이 production
-  경로에 연결되어 있다.
+  봉화대 class-52 3×3의 명시적 construction adapter, K0120 native reinforcement admission이
+  production 경로에 연결되어 있다. construction adapter는 현재 semantic blocker를 보존하고,
+  live semantic owner가 이동해 남긴 stale owner만 admission-time 복사본에서 제한적으로 제거한다.
+  기존 v3 save의 1×1 serialized beacon record는 이력 보존을 위해 migration하지 않는다.
 - [K01 봉화대 완성·K0120 native trigger](reverse-engineering/mechanics/k01-beacon-k0120-trigger.md)와
   `packages/simulation/src/k01BeaconPolicy.ts`는 source admission에서 native 증원까지의
   좁은 정책을 연결한다. 원본 전체 scheduler·movement·death/release·result 수명주기는 아직
@@ -119,45 +123,50 @@ raw owner `1`→`cpu-1`, objective trigger와 attack-move도 프로젝트 적응
 result transition/identity policy mapping도 없어 승패 수명주기는 runtime에 연결하지 않았다.
 K01 opening building footprint는 별도 [K01 opening footprint anchor](reverse-engineering/mechanics/k01-opening-footprint-anchor.md)에서
 class 48/49/50/51/57/58/60/62/63의 15개 source record, type `+0x14/+0x16` width/height,
-centered anchor와 mask→slot-owner write/OOB 순서를 정적 확정·8개 vector로 재현했다. 이는 sprite
-pixel dimensions, pivot, raw owner/player 의미 또는 project coordinate adapter를 확정하지 않는다.
-K01 source runtime opening seed가 source-confirmed footprint를 제한적으로 소비하는 것과 일반
-product occupancy·movement lifecycle은 별도 경계다.
+centered anchor와 mask→slot-owner write/OOB 순서를 정적 확정·9개 vector로 재현했다. class 52는
+opening record가 아니라 동적 건설 source class로 별도 추출했다. source runtime resolver가 이
+10개 class의 source-confirmed extent와 anchor를 placement·collision·range·build work·client
+geometry에 연결했지만 sprite pixel dimensions, pivot, raw owner/player 의미, native cell-cache와
+full movement lifecycle은 별도 경계다.
 
 ## 현재 workspace 상태
 
-workspace audit 기준으로 현재 `dev`의 기준 커밋은 `fd5daf5`이며, 기존 17개 Codex 작업 브랜치의
+workspace audit 기준으로 현재 `dev`의 기준 커밋은 `0021479`이며, 기존 17개 Codex 작업 브랜치의
 변경은 `dev`에 통합된 상태다. 별도 sprite 작업 브랜치의 15개 5월 커밋은 통합하지 않고 보존한다.
 이는 2026-08-01의 명시적 `sprite는 그냥 둘게` 선택을 따른다. `master`는 `dev`보다 뒤처져 있고,
 작업 디렉터리 정리나 sprite 브랜치 삭제는 이 상태 기록의 범위가 아니다.
 
-`fd5daf5`에 포함된 placement correction의 기준 검증은 `pnpm test` `1,430/1,430` 통과·fail/skip 0,
+이전 `fd5daf5`에 포함된 placement correction의 기준 검증은 `pnpm test` `1,430/1,430` 통과·fail/skip 0,
 `pnpm typecheck` exit 0, `pnpm imjinrok:verify-static-analysis` exit 0으로 확인했다. building placement
 작업 이전의 historical fog-only draft는 source fog dispatch evidence와 bounded client fog rendering
 correction만 포함했으며, 그 게이트 결과는 아래 current combined workspace 수치와 구분한다.
 안정화된 fog draft 전체 게이트는 `pnpm test` `1,435/1,435` 통과·fail/cancelled/skipped 0,
 duration `68,227ms`, `pnpm typecheck` exit 0, `pnpm imjinrok:verify-static-analysis` exit 0으로 확인했다.
-이후 building placement/source-anchor와 sprite-audit provenance를 포함한 현재 combined workspace draft는
+이후 building placement/source-anchor와 sprite-audit provenance를 포함한 `0021479` 기준 workspace는
 `pnpm test` `1,442/1,442` 통과·fail/cancelled/skipped 0, duration `71,842ms`,
-`pnpm typecheck` exit 0, `pnpm imjinrok:verify-static-analysis` exit 0으로 확인했다. 앞의
-`1,435/1,435` 수치는 fog-only draft의 historical gate로 유지한다.
+`pnpm typecheck` exit 0, `pnpm imjinrok:verify-static-analysis` exit 0으로 확인했다.
+현재 uncommitted source-footprint integration draft는 `pnpm test` `1,452/1,452` 통과·fail/cancelled/skipped 0,
+`pnpm typecheck` exit 0, `pnpm imjinrok:verify-static-analysis` exit 0으로 검증했다. 앞의
+`1,442/1,442`와 `1,435/1,435` 수치는 각각 committed baseline과 fog-only draft의 historical gate로 유지한다.
 
-현재 draft의 제한된 browser pass는 controlled visibility injection에서 edge-only visible chunk의 state-8
+`0021479` 기준 draft의 제한된 fog browser pass는 controlled visibility injection에서 edge-only visible chunk의 state-8
 selector 3, 이웃 dirty halo의 이전 edge 제거, opaque terrain 위 fog-0 depth, derived texture cleanup
 `32/32`와 fresh browser error 부재를 확인했고 server 응답은 `200`이었다. 이 pass는 bounded client
 rendering evidence이며 full K01 scenario 또는 native renderer parity를 뜻하지 않는다.
 
-building placement의 별도 bounded browser pass는 source-profile building만 native far-cell 원칙을
+`0021479` 기준 building placement의 이전 bounded browser pass는 source-profile building만 native far-cell 원칙을
 product actual footprint에 적용해 HQ/house/barracks의 local offset `(0,64)/(0,32)/(0,32)`와
 semantic center 보존, body·enemy target·box selection hit, zoom 뒤 bounds를 확인했다. HQ는
 controlled probe에서 source frames `0/8`을 명시적으로 preload한 뒤 healthy `7`, damaged `8`,
 construction `0`의 서로 다른 texture가 모두 bottom `368`과 stable pick을 유지했다. 이 frame preload는
 probe 조건이며 raw startup의 frame-7-only loading과 native asset lifecycle을 검증한 주장이 아니다.
+현재 source-footprint integration의 client geometry 결과와 제한된 선택 QA는 [source building placement mechanics](reverse-engineering/mechanics/source-building-placement.md)에
+기록한다.
 
 커밋된 K01 work에는 source-profile removal hook과 source trigger→`build-beacon` objective projection adapter가
 포함되어 있다. focused source-removal `43/43`·scenario-policy `142/142`와
 독립 blocked/remove/rebuild/save sequence는 통과했다. 이 기록은 committed prior work의 provenance이며,
-placement correction의 `1,430/1,430` gate는 `fd5daf5`에 귀속된다.
+placement correction의 `1,430/1,430` gate는 `fd5daf5`에 귀속되며, current committed baseline은 `0021479`다.
 
 ### K01 accepted-update 재개 상태
 

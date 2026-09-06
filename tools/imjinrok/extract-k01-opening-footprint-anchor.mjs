@@ -43,8 +43,9 @@ const TYPE_TABLE_ADDRESS = 0x00882e10;
 const TYPE_RECORD_STRIDE = 0x014c;
 const TYPE_ARGUMENT_COUNT = 51;
 const OPENING_BUILDING_CLASSES = [48, 49, 50, 51, 57, 58, 60, 62, 63];
+const DYNAMIC_BUILDING_CLASSES = [52];
 const CONTROL_CLASSES = [7];
-const RELEVANT_CLASSES = [...new Set([...OPENING_BUILDING_CLASSES, ...CONTROL_CLASSES])];
+const RELEVANT_CLASSES = [...new Set([...OPENING_BUILDING_CLASSES, ...DYNAMIC_BUILDING_CLASSES, ...CONTROL_CLASSES])];
 
 const FUNCTIONS = [
   [0x0045bd00, "0x0045bd00-0x0045bef8", 103, "6561fe98f630ac5f7f0765426c257c4bc3900aae6d2964afa649447cb5030e8a"],
@@ -201,7 +202,8 @@ export function extractK01OpeningFootprintAnchor(options = {}) {
     question: "K01 opening building footprint width/height, anchor, map-edge handling, and occupancy write ordering",
     analysisStatus: "static-confirmed-opening-footprint-anchor",
     reproductionStatus: "reproduction-complete",
-    implementationStatus: "analysis-only-no-production-change",
+    implementationStatus: "k01-building-extents-and-anchor-integrated",
+    implementationBoundary: "shared source-center resolver is integrated; collision admission, native owner writes, and full source movement remain separate",
     source: {
       executablePath: CANONICAL_PATHS.executablePath,
       executableSha256: sourceSha256,
@@ -225,6 +227,7 @@ export function extractK01OpeningFootprintAnchor(options = {}) {
     callEdges,
     anchorRule: { formula: "cellX = x - floor(width/2) + column; cellY = y - floor(height/2) + row", rounding: "integer floor/truncation of positive BYTE extent; even extents bias toward negative side", ownerWriteOrder: ["mask WORD OR", "owner-grid WORD store"], oob: "each footprint cell outside map dimensions is skipped; in-bounds cells still write" },
     openingClasses: OPENING_BUILDING_CLASSES,
+    dynamicClasses: DYNAMIC_BUILDING_CLASSES,
     footprints,
     openingRecords,
     transition: ["map loader scans source entity index 0..799", "loader rejects non-active/out-of-bounds centers then pushes raw owner, constants, y, x, source index, type", "wrapper increments generation and creator zeroes 0x558-byte record", "creator copies type footprint to runtime +0x1e3/+0x1e4", "creator enters dispatcher with action +0x1b0=1", "action 1 clears predecessor, runs helper, then footprint writer", "writer skips OOB cells, ORs mask, stores slot owner, and sets +0x40c"],

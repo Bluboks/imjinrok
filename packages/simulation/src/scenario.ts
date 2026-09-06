@@ -11,7 +11,8 @@ import { isUnitUnderConstruction } from "./construction.js";
 import { arePlayersAllied, arePlayersEnemies } from "./diplomacy.js";
 import { createUnitState } from "./entities.js";
 import { applyNavigationRoute, findNavigationRouteForUnit } from "./navigation.js";
-import { getFootprintTiles, validateBuildingPlacement } from "./placement.js";
+import { getUnitFootprintTiles, resolveEffectiveFootprint } from "./footprints.js";
+import { validateBuildingPlacement } from "./placement.js";
 import { applyCompletedResearchToUnit } from "./research.js";
 import { resolveK01SourceObjectiveCompletion } from "./k01ScenarioPolicy.js";
 import { isTilePassableForUnit } from "./terrain.js";
@@ -548,7 +549,7 @@ function isSpawnPointValid(
     return validateBuildingPlacement(state, unit.kind as BuildingDefinitionId, point).ok;
   }
 
-  return getFootprintTiles(point, definition.footprint).every((tile) =>
+  return getUnitFootprintTiles(state, unit.kind, point).every((tile) =>
     isTilePassableForUnit(state, unit, tile) && !occupied.has(toTileKey(tile)),
   );
 }
@@ -557,13 +558,13 @@ function getOccupiedTiles(state: WorldState): Set<string> {
   const occupied = new Set<string>();
 
   for (const unit of iterateUnitsOrdered(state)) {
-    const footprint = unitDefinitions[unit.kind].footprint;
+    const footprint = resolveEffectiveFootprint(state, unit.kind).footprint;
 
     if (!footprint.blocksMovement) {
       continue;
     }
 
-    for (const tile of getFootprintTiles(unit.position, footprint)) {
+    for (const tile of getUnitFootprintTiles(state, unit.kind, unit.position)) {
       occupied.add(toTileKey(tile));
     }
   }

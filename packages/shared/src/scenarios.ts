@@ -507,6 +507,7 @@ export const k01SourceFootprintByOriginalClass: Readonly<Record<number, K01Sourc
   49: { width: 3, height: 3, evidence: "static-confirmed" },
   50: { width: 3, height: 3, evidence: "static-confirmed" },
   51: { width: 3, height: 3, evidence: "static-confirmed" },
+  52: { width: 3, height: 3, evidence: "static-confirmed" },
   57: { width: 3, height: 2, evidence: "static-confirmed" },
   58: { width: 3, height: 3, evidence: "static-confirmed" },
   60: { width: 3, height: 3, evidence: "static-confirmed" },

@@ -24,15 +24,29 @@ test("recovers source footprint extents, all 15 K01 opening building records, an
   const report = extractK01OpeningFootprintAnchor(paths);
   assert.equal(report.analysisStatus, "static-confirmed-opening-footprint-anchor");
   assert.equal(report.reproductionStatus, "reproduction-complete");
-  assert.equal(report.implementationStatus, "analysis-only-no-production-change");
+  assert.equal(report.implementationStatus, "k01-building-extents-and-anchor-integrated");
+  assert.equal(
+    report.implementationBoundary,
+    "shared source-center resolver is integrated; collision admission, native owner writes, and full source movement remain separate",
+  );
   assert.equal(report.functionEvidence.length, 7);
   assert.equal(report.byteAnchors.length, 9);
   assert.equal(report.callEdges.length, 6);
   assert.equal(report.openingRecords.length, 15);
   assert.deepEqual(
     report.footprints.map(({ internalClass, width, height }) => [internalClass, width, height]),
-    [[48, 3, 3], [49, 3, 3], [50, 3, 3], [51, 3, 3], [57, 3, 2], [58, 3, 3], [60, 3, 3], [62, 3, 3], [63, 2, 2], [7, 1, 1]],
+    [[48, 3, 3], [49, 3, 3], [50, 3, 3], [51, 3, 3], [57, 3, 2], [58, 3, 3], [60, 3, 3], [62, 3, 3], [63, 2, 2], [52, 3, 3], [7, 1, 1]],
   );
+  assert.deepEqual(report.dynamicClasses, [52]);
+  assert.deepEqual(report.footprints.find(({ internalClass }) => internalClass === 52), {
+    internalClass: 52,
+    originalGameplayName: "조선 봉화대",
+    typeRecordAddress: "0x00887180",
+    initializerCallAddress: "0x0045e826",
+    width: 3,
+    height: 3,
+    source: "type-writer-arguments-8/9",
+  });
   assert.deepEqual(
     report.openingRecords.map(({ sourceEntityIndex, internalClass, width, height }) => [sourceEntityIndex, internalClass, width, height]),
     [[9, 49, 3, 3], [10, 58, 3, 3], [11, 58, 3, 3], [12, 48, 3, 3], [13, 50, 3, 3], [14, 60, 3, 3], [15, 62, 3, 3], [16, 57, 3, 2], [17, 57, 3, 2], [18, 60, 3, 3], [26, 51, 3, 3], [39, 63, 2, 2], [40, 63, 2, 2], [42, 63, 2, 2], [43, 63, 2, 2]],
@@ -45,7 +59,12 @@ test("recovers source footprint extents, all 15 K01 opening building records, an
   ]);
   const class7 = replayOpeningFootprint({ operation: "write", input: { mapWidth: 60, mapHeight: 60, slot: 9, x: 7, y: 6, width: 1, height: 1 } });
   assert.deepEqual(class7.writes.map(({ x, y }) => [x, y]), [[7, 6]]);
-  assert.equal(report.vectors.length, 8);
+  const class52 = report.vectors.find(({ id }) => id === "class52-3x3-centered");
+  assert.ok(class52);
+  assert.deepEqual(class52.result.writes.map(({ x, y }) => [x, y]), [
+    [2, 4], [3, 4], [4, 4], [2, 5], [3, 5], [4, 5], [2, 6], [3, 6], [4, 6],
+  ]);
+  assert.equal(report.vectors.length, 9);
 });
 
 test("pins even and mixed extents, edge skips, overwrite order, and initialization gates", () => {

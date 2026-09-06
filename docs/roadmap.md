@@ -41,8 +41,10 @@ VM에서 원본 게임을 플레이하며 화면 변화를 따라가는 방식�
   blocker·trigger flag·K0120 busy/loader/start·native descriptor effect·post-state 반환을 한
   accepted update 경계에서 연결하고, [K01 scenario policy adapter](development/k01-scenario-policy-adapter.md)는
   source trigger를 `build-beacon` objective에 투영하며 legacy scripted spawn을 소비 처리한다.
-  원본 source scheduler·movement·death/release·result parity와 종단 K01 scenario는 아직 완료하지
-  않았다.
+  opening 15 records와 동적 class 52를 포함한 10개 source building class의 source-center extent가
+  placement·collision·range·build work·client geometry에 통합되며, completed beacon은 stale owner를
+  제한적으로 정리하는 intentional-adaptation bridge를 사용한다. 원본 source scheduler·full movement·
+  death/release·result parity와 종단 K01 scenario는 아직 완료하지 않았다.
 - 4단계: 부분 진행. K01 영웅의 대상 검색·사거리, 공격 phase·피해·투사체와 signed-health
   사망·slot/reference 정리는 정적 확정·재현했다. 원본 identity·좌표·accepted update 단위의
   프로젝트 변환과 실제 opt-in 연결은 미확정이다.
@@ -54,14 +56,26 @@ blocker·destroyed·rebuild·save 경계를 K01 scenario policy에 연결한다.
 integration이며, 그 뒤 브리핑부터 승패까지의 K01 종단 적합성 시나리오를 검증한다. 이 단계들은
 K01 MVP 완료 판정과 별개로 남아 있다.
 
+### K01 source footprint integration checkpoint
+
+정적으로 확인된 class 48/49/50/51/52/57/58/60/62/63의 logical extent와 source-center anchor를
+shared resolver가 simulation과 client의 실제 interaction 경계에 전달한다. 이 checkpoint는 source
+cell-cache producer/lifetime, native owner overwrite의 전체 소비, source mobile movement sync를
+닫지 않는다. 새 건설은 class 52의 3×3 source record를 저장하지만, 기존 v3 save의 1×1
+`project-adaptation` beacon record는 owner/lifecycle history를 안전하게 복원할 수 없어 migration하지
+않는다. 기존 save도 derived gameplay footprint는 3×3을 사용하므로 serialized raw record와 gameplay
+resolver 사이의 legacy 경계를 문서화한다.
+
 ### K01 placement correction checkpoint
 
-이번 재개 기준 커밋은 `ad327a5`이며, 현재 uncommitted draft는 [K01 tile placement boundary]
+이번 checkpoint의 기준 커밋은 `0021479`이며, [K01 tile placement boundary]
 (reverse-engineering/mechanics/k01-tile-placement-elevation-boundary.md)의 corrected lookup
-산술과 hash-bound placement/projection/fog/compositor/terrain diagnostic을 반영한다. 원본 입력
-hash와 corrected stream 근거는 해당 canonical mechanics 문서에 둔다. 최신 전체 게이트는
-[project status의 workspace 상태](project-status.md)에서 관리하며, 이 checkpoint는 K01 MVP
-완료나 browser/original full parity를 의미하지 않는다.
+산술과 hash-bound placement/projection/fog/compositor/terrain diagnostic을 포함한다. 원본 입력
+hash와 corrected stream 근거는 해당 canonical mechanics 문서에 둔다. 현재 uncommitted source-footprint
+범위는 [source building placement mechanics](reverse-engineering/mechanics/source-building-placement.md)와
+[K01 opening footprint anchor](reverse-engineering/mechanics/k01-opening-footprint-anchor.md)에 기록한다.
+최신 전체 게이트는 [project status의 workspace 상태](project-status.md)에서 관리하며, 이 checkpoint는
+K01 MVP 완료나 browser/original full parity를 의미하지 않는다.
 
 ### K01 accepted-update 재개 게이트
 

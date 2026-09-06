@@ -64,5 +64,5 @@ export function reserveUnitPositionForState(
   unit: UnitState,
   position: GridPoint,
 ): boolean {
-  return getMovementCollisionPolicy(state).reserveUnitPosition(reservation, unit, position);
+  return getMovementCollisionPolicy(state).reserveUnitPosition(reservation, unit, position, state);
 }

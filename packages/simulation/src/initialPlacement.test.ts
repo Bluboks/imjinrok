@@ -12,7 +12,7 @@ import {
 } from "../../shared/src/index.js";
 import {
   createInitialWorldState,
-  getFootprintTiles,
+  getUnitFootprintTiles,
   k01SourceExactOpeningPlacementPolicy,
   toWorldSnapshot,
 } from "./index.js";
@@ -84,7 +84,7 @@ test("K01 exact opening creates every source record at its semantic coordinate i
   assert.deepEqual(toWorldSnapshot(first), toWorldSnapshot(second));
 });
 
-test("K01 exact opening keeps source coordinates despite product footprint overlap and remains operable", () => {
+test("K01 exact opening uses the source 3x3 town-center footprint and remains operable", () => {
   const map = createImjinrokMapScaffold("imjinrok-k01");
   assert.ok(map);
   const state = createInitialWorldState(map, ["local-player", "cpu-1"], imjinrokK01Scenario);
@@ -94,12 +94,13 @@ test("K01 exact opening keeps source coordinates despite product footprint overl
   assert.ok(villager);
   assert.deepEqual(townCenter.position, { x: 5, y: 4 });
   assert.deepEqual(villager.position, { x: 7, y: 6 });
-  assert.equal(
-    getFootprintTiles(townCenter.position, unitDefinitions["town-center"].footprint)
-      .some((tile) => tile.x === villager.position.x && tile.y === villager.position.y),
-    true,
-    "the product 4x4 footprint overlap is an intentional adaptation residual",
-  );
+  assert.deepEqual(getUnitFootprintTiles(state, townCenter.kind, townCenter.position), [
+    { x: 4, y: 3 }, { x: 5, y: 3 }, { x: 6, y: 3 },
+    { x: 4, y: 4 }, { x: 5, y: 4 }, { x: 6, y: 4 },
+    { x: 4, y: 5 }, { x: 5, y: 5 }, { x: 6, y: 5 },
+  ]);
+  assert.equal(getUnitFootprintTiles(state, townCenter.kind, townCenter.position).some((tile) =>
+    tile.x === villager.position.x && tile.y === villager.position.y), false);
 
   const tickBefore = state.tick;
   advanceWorldTick(state);
@@ -126,6 +127,14 @@ test("K01 exact opening fails closed for occupied, OOB, invalid identity, and un
   assert.throws(
     () => createInitialWorldState(createBlankMap({ id: "imjinrok-k01", width: 5, height: 5 }), ["local-player"], imjinrokK01Scenario),
     /outside map/,
+  );
+
+  assert.throws(
+    () => k01SourceExactOpeningPlacementPolicy.resolveStartingPositions({
+      map,
+      players: [{ playerId: "local-player", spawn: { x: 32768, y: 32768 }, startingUnits: [townCenter] }],
+    }),
+    /source footprint produced no valid tiles/,
   );
 
   const invalidKindScenario = structuredClone(imjinrokK01Scenario) as ScenarioDefinition;

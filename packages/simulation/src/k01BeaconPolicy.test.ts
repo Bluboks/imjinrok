@@ -37,6 +37,14 @@ function removeOpeningHostileBuildings(state: ReturnType<typeof createK01World>)
   }
 }
 
+function moveOpeningMobileUnitsAway(state: ReturnType<typeof createK01World>): void {
+  for (const [index, unit] of Object.values(state.units).entries()) {
+    if (unit.movementSpeed > 0) {
+      unit.position = { x: 25 + index, y: 25 };
+    }
+  }
+}
+
 test("K01 beacon policy consumes a completion at the accepted update boundary and emits nine native successes", () => {
   const state = createK01World();
   appendBeaconCompletion(state, "local-player-test-beacon", { x: 20, y: 20 });
@@ -61,6 +69,102 @@ test("K01 beacon policy consumes a completion at the accepted update boundary an
   assert.equal(source.policies.beacon.trace.some((entry) => entry.type === "reinforcement-success"), true);
 });
 
+test("completed beacon uses the proven class-52 3x3 source footprint and release clears all owner cells", () => {
+  const state = createK01World();
+  const beaconId = "local-player-footprint-beacon";
+  const center = { x: 20, y: 20 };
+  appendBeaconCompletion(state, beaconId, center);
+  removeOpeningHostileBuildings(state);
+
+  assert.equal(advanceK01BeaconPolicy(state).matchedBeaconCount, 1);
+  const source = state.sourceRuntimeProfile?.state as K01SourceRuntimeState;
+  const record = source.entityRuntime.entities.find((entity) => entity.semanticUnitId === beaconId && entity.active);
+  assert.ok(record);
+  assert.deepEqual(record.footprint, { width: 3, height: 3, evidence: "static-confirmed" });
+  for (let y = center.y - 1; y <= center.y + 1; y += 1) {
+    for (let x = center.x - 1; x <= center.x + 1; x += 1) {
+      assert.equal(source.occupancy.ownerSlots[y * source.occupancy.width + x], record.slot);
+    }
+  }
+
+  assert.equal(removeUnitFromWorld(state, beaconId), true);
+  const afterRelease = state.sourceRuntimeProfile?.state as K01SourceRuntimeState;
+  for (let y = center.y - 1; y <= center.y + 1; y += 1) {
+    for (let x = center.x - 1; x <= center.x + 1; x += 1) {
+      assert.equal(afterRelease.occupancy.ownerSlots[y * afterRelease.occupancy.width + x], 0);
+    }
+  }
+});
+
+test("completed beacon clears stale source owners only when semantic occupancy moved away", () => {
+  const state = createK01World();
+  const source = state.sourceRuntimeProfile?.state as K01SourceRuntimeState;
+  moveOpeningMobileUnitsAway(state);
+  removeOpeningHostileBuildings(state);
+  const before = JSON.parse(JSON.stringify(source.occupancy.ownerSlots)) as number[];
+
+  appendBeaconCompletion(state, "local-player-stale-owner-bridge-beacon", { x: 8, y: 5 });
+  const result = advanceK01BeaconPolicy(state);
+  assert.equal(result.matchedBeaconCount, 1);
+  assert.equal(result.nativeSuccessCount, 9);
+  const after = state.sourceRuntimeProfile?.state as K01SourceRuntimeState;
+  const beacon = after.entityRuntime.entities.find((record) => record.semanticUnitId === "local-player-stale-owner-bridge-beacon" && record.active);
+  assert.ok(beacon);
+  assert.equal(before[6 * source.occupancy.width + 7], 1191);
+  assert.equal(before[6 * source.occupancy.width + 8], 1190);
+  for (let y = 4; y <= 6; y += 1) {
+    for (let x = 7; x <= 9; x += 1) {
+      assert.equal(after.occupancy.ownerSlots[y * after.occupancy.width + x], beacon.slot);
+    }
+  }
+});
+
+test("completed beacon preserves current and unknown source owners on failed 3x3 admission", () => {
+  const currentOccupant = createK01World();
+  removeOpeningHostileBuildings(currentOccupant);
+  const staleOwner = currentOccupant.units["local-player-source-0x07-7-6"];
+  const replacementOwner = currentOccupant.units["local-player-source-0x07-8-6"];
+  assert.ok(staleOwner);
+  assert.ok(replacementOwner);
+  staleOwner.position = { x: 25, y: 25 };
+  replacementOwner.position = { x: 7, y: 6 };
+  appendBeaconCompletion(currentOccupant, "local-player-current-owner-beacon", { x: 8, y: 5 });
+  const currentBefore = currentOccupant.sourceRuntimeProfile?.state as K01SourceRuntimeState;
+  const currentEntityRuntime = JSON.parse(JSON.stringify(currentBefore.entityRuntime));
+  const currentOccupancy = JSON.parse(JSON.stringify(currentBefore.occupancy));
+  const currentResult = advanceK01BeaconPolicy(currentOccupant);
+  assert.equal(currentResult.matchedBeaconCount, 0);
+  assert.equal(currentResult.nativeSuccessCount, 0);
+  const currentAfter = currentOccupant.sourceRuntimeProfile?.state as K01SourceRuntimeState;
+  assert.deepEqual(currentAfter.entityRuntime, currentEntityRuntime);
+  assert.deepEqual(currentAfter.occupancy, currentOccupancy);
+
+  const unknownOwner = createK01World();
+  removeOpeningHostileBuildings(unknownOwner);
+  moveOpeningMobileUnitsAway(unknownOwner);
+  const unknownBefore = unknownOwner.sourceRuntimeProfile?.state as K01SourceRuntimeState;
+  unknownOwner.sourceRuntimeProfile = {
+    ...unknownOwner.sourceRuntimeProfile!,
+    state: {
+      ...unknownBefore,
+      occupancy: {
+        ...unknownBefore.occupancy,
+        ownerSlots: unknownBefore.occupancy.ownerSlots.map((owner, index) =>
+          index === 6 * unknownBefore.occupancy.width + 7 ? 777 : owner),
+      },
+    },
+  };
+  const unknownEntityRuntime = JSON.parse(JSON.stringify(unknownBefore.entityRuntime));
+  const unknownOccupancy = JSON.parse(JSON.stringify((unknownOwner.sourceRuntimeProfile?.state as K01SourceRuntimeState).occupancy));
+  appendBeaconCompletion(unknownOwner, "local-player-unknown-owner-beacon", { x: 8, y: 6 });
+  const unknownResult = advanceK01BeaconPolicy(unknownOwner);
+  assert.equal(unknownResult.matchedBeaconCount, 0);
+  assert.equal(unknownResult.nativeSuccessCount, 0);
+  const unknownAfter = unknownOwner.sourceRuntimeProfile?.state as K01SourceRuntimeState;
+  assert.deepEqual(unknownAfter.entityRuntime, unknownEntityRuntime);
+  assert.deepEqual(unknownAfter.occupancy, unknownOccupancy);
+});
+
 test("accepted update cadence advances the policy once per world tick", () => {
   const state = createK01World();
   appendBeaconCompletion(state, "local-player-cadence-beacon", { x: 20, y: 20 });
@@ -76,7 +180,7 @@ test("accepted update cadence advances the policy once per world tick", () => {
 
 test("K01 policy is one-shot, consumes non-beacon events, and does not duplicate after save/load", () => {
   const state = createK01World();
-  const house = createUnitState("local-player-house", "local-player", "house", { x: 20, y: 20 });
+  const house = createUnitState("local-player-house", "local-player", "house", { x: 16, y: 20 });
   state.units[house.id] = house;
   appendConstructionCompletedEvent(state, house);
   appendBeaconCompletion(state, "local-player-test-beacon", { x: 20, y: 20 });
