@@ -1,5 +1,6 @@
 import Phaser from "phaser";
 import { defaultMap, getRandomSkirmishMapSeed, type ActionDefinitionId, type GridPoint, type MapDefinition } from "@shared";
+import { resolveGameClientAssetUrl } from "../assetUrl.js";
 import {
   ACTION_TRIGGERED_EVENT,
   BATTLEFIELD_SUMMARY_ACTION_EVENT,
@@ -180,17 +181,17 @@ export class UIScene extends Phaser.Scene {
     if (!this.textures.exists(OBJECTIVE_MODAL_FRAME_TEXTURE_KEY)) {
       this.load.image(
         OBJECTIVE_MODAL_FRAME_TEXTURE_KEY,
-        ORIGINAL_OBJECTIVE_PANEL_FRAME_ASSET,
+        resolveGameClientAssetUrl(ORIGINAL_OBJECTIVE_PANEL_FRAME_ASSET),
       );
     }
     for (const asset of ORIGINAL_COMMAND_ICON_ASSETS) {
       if (!this.textures.exists(asset.textureKey)) {
-        this.load.image(asset.textureKey, asset.assetPath);
+        this.load.image(asset.textureKey, resolveGameClientAssetUrl(asset.assetPath));
       }
     }
     for (const asset of ORIGINAL_SOURCE_CLOCK_FRAME_ASSETS) {
       if (!this.textures.exists(asset.textureKey)) {
-        this.load.image(asset.textureKey, asset.assetPath);
+        this.load.image(asset.textureKey, resolveGameClientAssetUrl(asset.assetPath));
       }
     }
   }

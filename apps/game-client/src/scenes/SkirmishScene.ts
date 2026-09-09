@@ -1,4 +1,5 @@
 import Phaser from "phaser";
+import { resolveGameClientAssetUrl } from "../assetUrl.js";
 import {
   defaultMap,
   defaultTheme,
@@ -790,55 +791,55 @@ export class SkirmishScene extends Phaser.Scene {
 
     for (const cue of GAMEPLAY_AUDIO_CUES) {
       if (!this.cache.audio.exists(cue.key)) {
-        this.load.audio(cue.key, cue.url);
+        this.load.audio(cue.key, resolveGameClientAssetUrl(cue.url));
       }
     }
 
     for (const cue of MISSION_VOICE_AUDIO_CUES) {
       if (!this.cache.audio.exists(cue.key)) {
-        this.load.audio(cue.key, cue.url);
+        this.load.audio(cue.key, resolveGameClientAssetUrl(cue.url));
       }
     }
 
     for (const cue of MISSION_PORTRAIT_IMAGE_CUES) {
       if (!this.textures.exists(cue.key)) {
-        this.load.image(cue.key, cue.url);
+        this.load.image(cue.key, resolveGameClientAssetUrl(cue.url));
       }
     }
 
     for (const logo of Object.values(MISSION_RESULT_LOGO_BY_STATUS)) {
       for (const frame of logo.frames) {
         if (!this.textures.exists(frame.key)) {
-          this.load.image(frame.key, frame.url);
+          this.load.image(frame.key, resolveGameClientAssetUrl(frame.url));
         }
       }
     }
 
     if (!this.textures.exists(MISSION_RESULT_BACKDROP_IMAGE_KEY)) {
-      this.load.image(MISSION_RESULT_BACKDROP_IMAGE_KEY, MISSION_RESULT_BACKDROP_URL);
+      this.load.image(MISSION_RESULT_BACKDROP_IMAGE_KEY, resolveGameClientAssetUrl(MISSION_RESULT_BACKDROP_URL));
     }
 
     for (const asset of SOURCE_FOG_COMPOSITE_ASSETS) {
       if (!this.textures.exists(asset.textureKey)) {
-        this.load.image(asset.textureKey, asset.assetPath);
+        this.load.image(asset.textureKey, resolveGameClientAssetUrl(asset.assetPath));
       }
     }
 
     for (const descriptor of getRegisteredResourceVisualPreloadDescriptors(CONTENT_REGISTRY)) {
       if (!this.textures.exists(descriptor.textureKey)) {
-        this.load.image(descriptor.textureKey, descriptor.url);
+        this.load.image(descriptor.textureKey, resolveGameClientAssetUrl(descriptor.url));
       }
     }
 
     for (const descriptor of getRegisteredExplicitTileVisualPreloadDescriptors(CONTENT_REGISTRY)) {
       if (!this.textures.exists(descriptor.textureKey)) {
-        this.load.image(descriptor.textureKey, descriptor.url);
+        this.load.image(descriptor.textureKey, resolveGameClientAssetUrl(descriptor.url));
       }
     }
 
     for (const descriptor of getRegisteredEnvironmentPalettePreloadDescriptors(CONTENT_REGISTRY)) {
       if (!this.cache.json.exists(descriptor.cacheKey)) {
-        this.load.json(descriptor.cacheKey, descriptor.url);
+        this.load.json(descriptor.cacheKey, resolveGameClientAssetUrl(descriptor.url));
       }
     }
   }
@@ -8815,7 +8816,7 @@ export class SkirmishScene extends Phaser.Scene {
     });
 
     for (const request of textureRequests) {
-      this.load.image(request.frame.textureKey, request.url);
+      this.load.image(request.frame.textureKey, resolveGameClientAssetUrl(request.url));
     }
   }
 
@@ -8870,7 +8871,7 @@ export class SkirmishScene extends Phaser.Scene {
 
     try {
       for (const request of batch) {
-        this.load.image(request.frame.textureKey, request.url);
+        this.load.image(request.frame.textureKey, resolveGameClientAssetUrl(request.url));
       }
       this.load.start();
     } catch (error) {

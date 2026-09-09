@@ -1,3 +1,5 @@
+import { resolveGameClientAssetUrl } from "./assetUrl.js";
+
 export const MAIN_MENU_BACKGROUND_MUSIC_AUDIO_CUE_KEY = "audio:menu:background-music";
 export const MAIN_MENU_BUTTON_AUDIO_CUE_KEY = "audio:menu:button";
 export const MAIN_MENU_COUNTRY_SELECT_AUDIO_CUE_KEY = "audio:menu:country-select";
@@ -71,7 +73,7 @@ export function queueMainMenuAudio(scene: MainMenuAudioSceneContract): boolean {
     }
 
     try {
-      scene.load.audio(cue.key, cue.url);
+      scene.load.audio(cue.key, resolveGameClientAssetUrl(cue.url));
       queuedAny = true;
     } catch (error) {
       console.warn("Failed to queue main menu audio cue", { cueKey: cue.key, error });

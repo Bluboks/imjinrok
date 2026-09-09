@@ -1,4 +1,5 @@
 import Phaser from "phaser";
+import { resolveGameClientAssetUrl } from "../assetUrl.js";
 import { INITIAL_LANDING_RESOURCE_POLICY } from "../mainMenuDeferredLoad.js";
 
 export class BootScene extends Phaser.Scene {
@@ -9,7 +10,7 @@ export class BootScene extends Phaser.Scene {
   preload(): void {
     for (const asset of INITIAL_LANDING_RESOURCE_POLICY.boot.images) {
       if (!this.textures.exists(asset.key)) {
-        this.load.image(asset.key, asset.url);
+        this.load.image(asset.key, resolveGameClientAssetUrl(asset.url));
       }
     }
   }

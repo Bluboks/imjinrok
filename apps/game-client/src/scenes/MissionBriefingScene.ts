@@ -1,4 +1,5 @@
 import Phaser from "phaser";
+import { resolveGameClientAssetUrl } from "../assetUrl.js";
 import {
   type OriginalSpeechSlot,
   type ScenarioBriefingDefinition,
@@ -101,7 +102,7 @@ export class MissionBriefingScene extends Phaser.Scene {
   preload(): void {
     for (const cue of MISSION_PORTRAIT_IMAGE_CUES) {
       if (!this.textures.exists(cue.key)) {
-        this.load.image(cue.key, cue.url);
+        this.load.image(cue.key, resolveGameClientAssetUrl(cue.url));
       }
     }
 
@@ -110,19 +111,19 @@ export class MissionBriefingScene extends Phaser.Scene {
       this.context?.scenario?.briefing?.timing?.presentationPolicy,
     )) {
       if (!this.textures.exists(frame.key)) {
-        this.load.image(frame.key, frame.url);
+        this.load.image(frame.key, resolveGameClientAssetUrl(frame.url));
       }
     }
 
     for (const cue of collectVoiceCues(this.context?.scenario?.briefing)) {
       if (!this.cache.audio.exists(cue.key)) {
-        this.load.audio(cue.key, cue.url);
+        this.load.audio(cue.key, resolveGameClientAssetUrl(cue.url));
       }
     }
 
     const musicCue = GAMEPLAY_AUDIO_CUE_BY_KEY.get(this.getMusicCueKey());
     if (musicCue && !this.cache.audio.exists(musicCue.key)) {
-      this.load.audio(musicCue.key, musicCue.url);
+      this.load.audio(musicCue.key, resolveGameClientAssetUrl(musicCue.url));
     }
   }
 

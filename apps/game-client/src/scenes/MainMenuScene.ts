@@ -15,6 +15,7 @@ import {
   type ScenarioDefinition,
 } from "@shared";
 import type { SkirmishAiDifficulty } from "@simulation";
+import { resolveGameClientAssetUrl } from "../assetUrl.js";
 import {
   createCampaignMissionLaunchContext,
   deserializePlayerVisibilityState,
@@ -205,7 +206,7 @@ export class MainMenuScene extends Phaser.Scene {
   preload(): void {
     for (const asset of MAIN_MENU_RESOURCE_PLAN.critical.images) {
       if (!this.textures.exists(asset.key)) {
-        this.load.image(asset.key, asset.url);
+        this.load.image(asset.key, resolveGameClientAssetUrl(asset.url));
       }
     }
   }
@@ -256,7 +257,7 @@ export class MainMenuScene extends Phaser.Scene {
         continue;
       }
       try {
-        this.load.image(asset.key, asset.url);
+        this.load.image(asset.key, resolveGameClientAssetUrl(asset.url));
         queuedAny = true;
       } catch (error) {
         console.warn("Failed to queue deferred main menu image", {
